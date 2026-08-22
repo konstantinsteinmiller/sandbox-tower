@@ -14,7 +14,11 @@ export default {
     'wave': 'Golf', 'enemies': 'Vijanden', 'callWave': 'Golf oproepen', 'callBoss': 'Boss oproepen',
     'speed': 'Snelheid {n}×',
     'speedOffer': 'Dubbele snelheid voor een ad',
-    'speedFor': '{n} min', 'recenter': 'Beeld centreren'
+    'speedFor': '{n} min', 'recenter': 'Beeld centreren',
+    'rotateLeft': 'Naar links draaien',
+    'rotateRight': 'Naar rechts draaien',
+    'arrowRain': 'Pijlenregen',
+    'arrowRainAim': 'Tik op het slagveld om het salvo te roepen'
   },
 
   'warnings': {
@@ -40,7 +44,8 @@ export default {
     'spend': 'Je hebt munten over. Rangen in de techboom zijn permanent en gaan mee in elke run.',
     'branches': 'Drie losse bomen: de toren, de haven en de werkplaats. Geen ervan heeft de andere nodig.',
     'shape': 'Muren voor, geschut erachter. Een blok dat nooit geraakt wordt, bouw je nooit opnieuw.',
-    'gold': 'Goud koopt blokupgrades — tik op een blok. Schatkisten slaan er elke golf meer.'
+    'gold': 'Goud koopt blokupgrades — tik op een blok. Schatkisten slaan er elke golf meer.',
+    'siegeReach': 'Trebuchets staan verder weg dan een boogschutter, kanon of bombarde reikt. Antwoord met een Mortier — of een Oorlogsgalei uit de haven.'
   },
   'blocks': {
     'fortify': 'Stekels',
@@ -104,7 +109,9 @@ export default {
       'mint': 'Produceert munten aan het einde van elke doorstane golf.',
       'spikes': 'Aanvallers verwonden zichzelf er bij elke klap aan.',
       'bombard': 'Schiet een granaat recht omhoog. Kleine knal, alleen doelen op de grond.'
-    }
+    },
+    'repair': 'Repareren',
+    'repairCooldown': '{n} s'
   },
 
   'enemies': {
@@ -215,7 +222,7 @@ export default {
       'rallyCry': 'Versterkingsblokken zijn +{n}% sterker.',
       'stockpiles': 'Elk economieblok levert +{n}% meer op.',
       'unlockMerge': 'Twee gelijke blokken naast elkaar versmelten, tot drie diep.',
-      'forgeWelds': 'Samengevoegde blokken doen +{n}% schade.',
+      'forgeWelds': 'Samengevoegde blokken leveren +{n} % meer per rang: schade, stekels en opbrengst.',
       'harbour': 'Meer schepen af op het water. Alleen zij raken duikers.',
       'dockWorks': 'Meer {n} vak verder af per rang.',
       'unlockLongship': 'Een geschilde romp met een zware harpoen.',
@@ -223,13 +230,13 @@ export default {
       'navalGunnery': 'Scheepswapens doen +{n}% schade.',
       'unlockGalley': 'Bronzen ram, dekbombarde en gevechtskasteel.',
       'admiralty': 'Scheepswapens doen nog eens +{n}% schade.',
-      'foundations': 'Elk blok begint met +{n} % HP.',
-      'sharpBolts': 'Alle wapens doen +{n} % schade per rang.',
+      'foundations': 'Elk torenblok begint met +{n} % HP.',
+      'sharpBolts': 'Torenwapens doen +{n} % schade per rang.',
       'unlockBrace': 'Ontgrendelt de verstevigde kist: twee keer de HP van hout.',
       'lumberStock': 'Start elk beleg met +{n} hout per rang.',
       'longSight': 'Alle wapens reiken +{n} % verder per rang.',
       'rapidFire': 'Alle wapens vuren {n} % sneller per rang.',
-      'reinforced': 'Elk blok krijgt +{n} % HP per rang.',
+      'reinforced': 'Elk torenblok krijgt +{n} % HP per rang.',
       'unlockSawmill': 'Ontgrendelt de zagerij: levert elke golf hout op.',
       'quarryStock': 'Start elk beleg met +{n} steen per rang.',
       'unlockMortar': 'Ontgrendelt de mortier: gebiedsschade op lange afstand.',
@@ -239,7 +246,7 @@ export default {
       'unlockQuarry': 'Ontgrendelt de steengroeve: levert elke golf steen op.',
       'richHauls': 'Golfbeloningen +{n} % per rang.',
       'wideFoundation': 'Bouw {n} kolommen breder per rang.',
-      'siegeShells': 'Alle wapens doen +{n} % schade per rang.',
+      'siegeShells': 'Torenwapens doen +{n} % schade per rang.',
       'unlockFrost': 'Ontgrendelt de vorstspits: vertraagt hele groepen.',
       'forkedBolts': 'Bliksem springt naar {n} extra vijand per rang.',
       'ironPlating': 'Elk blok krijgt +{n} pantser per rang.',
@@ -247,7 +254,7 @@ export default {
       'unlockMint': 'Ontgrendelt de goudmijn: levert elke golf munten op.',
       'looting': 'Vijanden laten +{n} % meer munten vallen per rang.',
       'overcharge': 'Alle wapens vuren {n} % sneller per rang.',
-      'masterwork': 'Alle wapens doen +{n} % schade per rang.',
+      'masterwork': 'Torenwapens doen +{n} % schade per rang.',
       'fieldRepairs': 'Elk blok herstelt {n} % van zijn max. HP per doorstane golf, per rang.',
       'greatFoundation': 'Bouw nog eens {n} kolommen breder per rang.',
       'warChest': 'Golfbeloningen +{n} % per rang.',

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import IconGold from '@/components/icons/IconGold.vue'
+import IconStone from '@/components/icons/IconStone.vue'
+import IconWood from '@/components/icons/IconWood.vue'
 
 /**
  * Top-centre resource readout: wood, stone and the run's gold (reference
@@ -18,6 +20,11 @@ import IconGold from '@/components/icons/IconGold.vue'
  * The icons are drawn large on purpose. This bar is the only readout of the
  * three numbers the whole build phase is spent spending, and at the size it
  * started it lost to the wave banner beside it.
+ *
+ * All three glyphs are SHARED components rather than markup inlined here. Wood
+ * and stone were inline, so the grace-continue button — the only other place
+ * that names those two resources — had to approximate them with coloured dots,
+ * and the two readouts of the same thing did not look like the same thing.
  */
 
 interface Props {
@@ -49,51 +56,11 @@ watch(() => props.coins, (n, o) => { if (n > o) pop(coinPop) })
     span.resource-bar__shadow(aria-hidden="true")
     div.resource-bar__body
       div.resource-bar__item
-        //- ── Wood ──
-        //- A stacked cord seen end-on: two logs under one, with growth rings
-        //- and bark. A single log read as a brown pill at this size; the
-        //- stack and the rings are what make it unmistakably timber.
-        svg.resource-bar__icon(viewBox="0 0 24 24" aria-hidden="true")
-          //- Back log, a tone down so the pile has depth.
-          g
-            rect(x="4" y="13.4" width="12" height="7.2" rx="1" fill="#8a5a2b")
-            ellipse(cx="16" cy="17" rx="3.1" ry="3.6" fill="#a9682f" stroke="#5e3a17" stroke-width="1")
-            ellipse(cx="16" cy="17" rx="1.7" ry="2" fill="none" stroke="#7a4a20" stroke-width="0.9")
-            ellipse(cx="16" cy="17" rx="0.5" ry="0.7" fill="#7a4a20")
-          //- Second log of the bottom course, tucked left.
-          g
-            rect(x="2" y="13.8" width="7" height="6.6" rx="1" fill="#7d5127")
-            ellipse(cx="9" cy="17.1" rx="2.7" ry="3.2" fill="#9a5f2b" stroke="#5e3a17" stroke-width="0.9")
-            ellipse(cx="9" cy="17.1" rx="1.4" ry="1.7" fill="none" stroke="#6e4219" stroke-width="0.8")
-          //- Top log, lit: the brightest thing in the glyph.
-          g
-            rect(x="5.5" y="5.6" width="11" height="7" rx="1" fill="#c2853f")
-            path(d="M5.5 6.6 h11" stroke="#e2ab63" stroke-width="1.1" stroke-linecap="round")
-            path(d="M6.4 11.4 h9.5" stroke="#8a5a2b" stroke-width="0.9" stroke-linecap="round")
-            ellipse(cx="16.5" cy="9.1" rx="3.3" ry="3.8" fill="#d99a53" stroke="#5e3a17" stroke-width="1.1")
-            ellipse(cx="16.5" cy="9.1" rx="2" ry="2.4" fill="none" stroke="#a06a2c" stroke-width="1")
-            ellipse(cx="16.5" cy="9.1" rx="0.9" ry="1.1" fill="none" stroke="#a06a2c" stroke-width="0.9")
-            ellipse(cx="16.5" cy="9.1" rx="0.35" ry="0.45" fill="#8a5a2b")
+        IconWood.resource-bar__icon
         span.resource-bar__value(:class="{ pop: woodPop }") {{ wood }}
 
       div.resource-bar__item
-        //- ── Stone ──
-        //- Two faceted blocks, each cut into a lit top plane and a shadowed
-        //- face. One flat pentagon read as a grey smudge; the plane break is
-        //- what makes it read as cut rock.
-        svg.resource-bar__icon(viewBox="0 0 24 24" aria-hidden="true")
-          //- Back block.
-          g(stroke="#39404a" stroke-width="1" stroke-linejoin="round")
-            path(d="M2.6 12.4 L7 9.6 L12.4 11.4 L11.6 17.6 L4.4 18.6 Z" fill="#6a727d")
-            path(d="M2.6 12.4 L7 9.6 L12.4 11.4 L7.6 13.4 Z" fill="#8d97a3")
-          //- Front block, larger and a step lighter — the one the eye lands on.
-          g(stroke="#39404a" stroke-width="1.2" stroke-linejoin="round")
-            path(d="M9.4 13 L15.2 8.8 L21.4 11.8 L20.4 19.4 L11.4 20.4 Z" fill="#78818d")
-            path(d="M9.4 13 L15.2 8.8 L21.4 11.8 L15.6 14.6 Z" fill="#a7b2bf")
-            path(d="M15.6 14.6 L21.4 11.8 L20.4 19.4 Z" fill="#5f6772")
-          //- Two chips of quartz catching the light.
-          path(d="M13.2 11.4 L15 10.6 L14.4 12 Z" fill="#dfe7f0")
-          path(d="M4.8 12.2 L6.4 11.4 L5.9 12.7 Z" fill="#c9d3de")
+        IconStone.resource-bar__icon
         span.resource-bar__value(:class="{ pop: stonePop }") {{ stone }}
 
       div.resource-bar__item.resource-bar__item--coins

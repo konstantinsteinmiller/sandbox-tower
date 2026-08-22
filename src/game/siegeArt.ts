@@ -1,5 +1,5 @@
 import {
-  rough, hard, fillShape, ink, stroke, tones, noise2, trace,
+  rough, hard, fillShape, ink, shrink, stroke, tones, noise2, trace,
   type Pt, type CelTones
 } from '@/game/inkArt'
 import { INK, LINE, paint, groundShadow } from '@/game/monsterKit'
@@ -500,59 +500,189 @@ const drawBallista = (
   rivets(ctx, [-0.5 * S, -0.14 * S], [-0.28 * S, -0.14 * S], 3, 0.017 * S, 87)
 }
 
-/** Onager: one arm, one skein, one job. */
-const drawCatapult = (
-  ctx: CanvasRenderingContext2D, S: number, m: SiegeParts,
-  spin: number, aiming: boolean, t: number
-): void => {
-  // The arm's cycle, in the order the crew actually work it: a long slow winch
-  // down against the skein, a beat held loaded, then a snap up into the buffer.
-  // The old version ran the sweep backwards and spent three quarters of its
-  // time mid-throw, which read as an arm waving rather than a shot being taken.
-  const cycle = (t / 1900) % 1
-  const COCKED = 0.4
-  const STOP = -0.62
-  const arm = aiming
-    ? (cycle < 0.72
-      ? STOP + (COCKED - STOP) * (cycle / 0.72)
-      : cycle < 0.8
-        ? COCKED
-        : COCKED - (COCKED - STOP) * ((cycle - 0.8) / 0.2))
-    // Travelling pose. It used to rest at +0.3, which tucks the bowl and its
-    // stone down INSIDE the frame — so at play scale the only prominent thing
-    // left was the buffer, which sits forward and tall, and the machine read as
-    // leaning away from the tower rather than aimed at it. Carrying the arm a
-    // little high puts the loaded stone out front where it says which way this
-    // thing throws.
-    : -0.2
+// ─── Catapult ───────────────────────────────────────────────────────────────
+//
+// An onager, authored facing +X like everything else, and re-authored because
+// the old one pointed the wrong way in the only sense that matters: the arm
+// never left the front of the machine. It sat forward of the pivot at rest,
+// dipped about a radian, and flapped back up — so whichever way the chassis was
+// mirrored, the throw read as happening in FRONT of the engine rather than as
+// something swept through it, and the machine looked like it was leaning away
+// from the wall it was breaking.
+//
+// The real mechanism is the fix. An onager is winched DOWN AND BACK until the
+// bowl is low over its own tail, then the skein snaps the arm up, over and
+// FORWARD into a padded buffer at the front, which stops the arm dead and lets
+// the stone go toward the target. That is a 165° sweep that passes straight
+// through the vertical, and a machine doing it cannot be mistaken about which
+// way it is pointed: cocked, the bowl is unmistakably behind it; loosed, the
+// arm is unmistakably over the tower.
 
+/** Skein centre — the pivot the arm is sprung out of. Low, and at the BACK. */
+const CAT_PIVOT: Pt = [-0.22, 0.04]
+/** Throwing arm, pivot to bowl. */
+const CAT_ARM = 0.72
+
+// Arm angle from +x, canvas convention (y DOWN):
+//   0 forward · π/2 straight down · π backward · 3π/2 (or -π/2) straight up.
+/** Winched back, bowl held out low over the tail. */
+const CAT_COCKED = 2.95
+/**
+ * Hard against the buffer, arm up and forward. This is where the stone goes.
+ *
+ * Expressed as `-0.33 + 2π` rather than as `-0.33`, and that is load-bearing:
+ * the number decides which WAY round the arm travels. Sweeping from 2.95 down
+ * to -0.33 passes through π/2 — straight down — and drags the bowl through the
+ * earth on every shot. Sweeping UP from 2.95 to 5.95 passes through 3π/2 —
+ * straight up — which is the arc an onager actually makes: out of the tail, up
+ * over the frame, and down onto the buffer at the front.
+ */
+const CAT_STOP = 5.95
+
+// Cycle landmarks. `cycle` is 0 the instant the stone leaves and 1 at the next
+// shot, so the throw lives at the END of the window and the release lands on
+// the frame the simulation spawns the boulder.
+const CAT_RECOIL_END = 0.14
+const CAT_HOLD_START = 0.82
+const CAT_THROW_START = 0.93
+
+/** Arm angle at a point in the shot cycle. */
+const catapultArm = (c: number): number => {
+  if (c < CAT_RECOIL_END) {
+    // Slammed into the buffer and shuddering there. A stop this hard is the
+    // whole reason an onager is built like a box, so it is drawn ringing.
+    const u = c / CAT_RECOIL_END
+    return CAT_STOP - Math.exp(-u * 4) * Math.sin(u * 15) * 0.16
+  }
+  if (c < CAT_HOLD_START) {
+    // The crew on the windlass, hauling the arm back down against the skein.
+    // Deliberately the long phase: winching an onager is most of its life, and
+    // an engine that spends its time between shots visibly reloading is one the
+    // player can time a sortie against.
+    const u = (c - CAT_RECOIL_END) / (CAT_HOLD_START - CAT_RECOIL_END)
+    return CAT_STOP + (CAT_COCKED - CAT_STOP) * (u * u * (3 - 2 * u))
+  }
+  if (c < CAT_THROW_START) {
+    // Loaded, held on the trigger, creaking against the torsion.
+    return CAT_COCKED + Math.sin(c * 90) * 0.006
+  }
+  // The release. Ease-OUT, not the trebuchet's ease-in-out: a torsion engine is
+  // at maximum force the instant the sear lets go and decelerates into the
+  // buffer, which is the opposite of a counterweight falling.
+  const u = (c - CAT_THROW_START) / (1 - CAT_THROW_START)
+  return CAT_COCKED + (CAT_STOP - CAT_COCKED) * (1 - Math.pow(1 - u, 2.2))
+}
+
+/**
+ * The parts of the catapult that never move.
+ *
+ * Split out because this is what gets baked into the shared sprite cache — see
+ * the note on `drawTrebuchetFrame`. The arm is drawn live on top, per machine,
+ * so each engine animates against its OWN reload instead of every catapult on
+ * the field flapping in unison on a wall clock unrelated to when they fire.
+ */
+const drawCatapultFrame = (
+  ctx: CanvasRenderingContext2D, S: number, m: SiegeParts, spin: number
+): void => {
   cartWheel(ctx, S, -0.34 * S, GROUND * S - 0.14 * S, 0.14 * S, spin, m.woodBack, 100)
   cartWheel(ctx, S, 0.32 * S, GROUND * S - 0.14 * S, 0.14 * S, spin, m.woodBack, 101)
 
   // ── Frame ──
   //
   // A box, not a lattice. An onager's whole job is to survive its own recoil,
-  // so it is built as two heavy side sills with raking knees between them and
-  // a crossbeam across the top — and the previous version's thin diagonals
-  // read as scaffolding rather than as a machine under tension.
+  // so it is built as two heavy side sills with raking knees between them —
+  // thin diagonals read as scaffolding rather than as a machine under tension.
   timber(ctx, S, [-0.56 * S, 0.34 * S], [0.52 * S, 0.34 * S], 0.13 * S, m.wood, 102, 3)
-  timber(ctx, S, [-0.36 * S, 0.3 * S], [-0.18 * S, -0.12 * S], 0.095 * S, m.woodBack, 103, 2)
-  timber(ctx, S, [0.4 * S, 0.3 * S], [0.16 * S, -0.24 * S], 0.095 * S, m.wood, 104, 2)
+  timber(ctx, S, [-0.44 * S, 0.3 * S], [-0.24 * S, -0.04 * S], 0.095 * S, m.woodBack, 103, 2)
+  timber(ctx, S, [0.44 * S, 0.3 * S], [0.2 * S, -0.3 * S], 0.095 * S, m.wood, 104, 2)
   // Collar tie between the knees — the joint that stops the frame splaying.
-  timber(ctx, S, [-0.2 * S, -0.06 * S], [0.2 * S, -0.16 * S], 0.075 * S, m.woodBack, 105, 2)
+  timber(ctx, S, [-0.24 * S, -0.02 * S], [0.2 * S, -0.16 * S], 0.075 * S, m.woodBack, 105, 2)
 
   // ── The skein ──
   //
-  // Low and at the BACK, which is where an onager's torsion bundle actually
-  // sits: the arm is sprung out of it and swings up and over. Drawn before the
-  // arm so the arm reads as emerging from it.
-  skein(ctx, S, -0.2 * S, 0.1 * S, 0.16 * S, m.accent, 112)
+  // The bundle of twisted sinew the arm is sprung out of, low and at the back.
+  // Drawn before the arm so the arm reads as emerging from it.
+  skein(ctx, S, CAT_PIVOT[0] * S, CAT_PIVOT[1] * S, 0.16 * S, m.accent, 112)
 
-  // ── Throwing arm ──
+  // ── Buffer ──
+  //
+  // The padded crossbeam the arm slams into. It is what stops the arm and it is
+  // what converts the stop into a throw, so it is drawn heavy and lashed — and
+  // it sits FORWARD, over the tower, because that is where the arm ends up.
+  //
+  // Placed against the arm's stop pose rather than by eye: at `CAT_STOP` the
+  // beam runs from the skein out to (0.46, -0.20), so the buffer's underside
+  // has to lie along that line or the arm visibly stops in mid-air short of the
+  // thing that is supposed to be stopping it.
+  timber(ctx, S, [0.13 * S, -0.17 * S], [0.42 * S, -0.27 * S], 0.09 * S, m.woodBack, 114, 2)
+  paint(ctx, S, rough([
+    [0.12 * S, -0.24 * S], [0.41 * S, -0.34 * S],
+    [0.44 * S, -0.23 * S], [0.15 * S, -0.13 * S]
+  ], 0.016 * S, 116), tones('#6d5a45', 1.0), 117, { line: LINE.fine, amp: 0.18 })
+  for (const k of [0.2, 0.34]) {
+    rope(ctx, [[k * S, -0.34 * S], [(k + 0.03) * S, -0.1 * S]], 0.016 * S, 118)
+  }
+
+  // ── Windlass drum at the tail ──
+  //
+  // How the arm gets hauled back down between shots. A machine with no visible
+  // way to be reloaded reads as a prop.
+  paint(ctx, S, slab([
+    [-0.56 * S, 0.06 * S], [-0.36 * S, 0.06 * S],
+    [-0.36 * S, 0.24 * S], [-0.56 * S, 0.24 * S]
+  ], 0.009 * S, 120), m.woodBack, 121, { line: LINE.fine, amp: 0.05 })
+
+  // ── Ammunition ──
+  //
+  // Stones stacked on the sill: the detail that makes the engine read as
+  // CREWED — something people load, not a stone dispenser.
+  for (const [sx, sy, sr] of [[-0.02, 0.24, 0.06], [0.1, 0.25, 0.05], [0.04, 0.15, 0.052]] as const) {
+    paint(ctx, S, rough(
+      blobStone(sx * S, sy * S, sr * S), 0.01 * S, 124 + sx * 100
+    ), tones('#8a867e', 1.15), 125, { line: LINE.fine, amp: 0.16 })
+  }
+}
+
+/**
+ * The throwing assembly: arm, bowl, stone, and the rope hauling it down.
+ *
+ * Drawn live rather than baked, because this is the part that has to agree with
+ * the simulation. `cycle` is the machine's own progress toward its next shot —
+ * 0 the frame the boulder leaves, 1 the frame the next one does.
+ *
+ * `flaming` is the late-game round: past the wave where catapults switch to
+ * incendiaries, the thing in the bowl is already alight while the crew are
+ * still winching, which is the only warning the player gets.
+ */
+const drawCatapultArm = (
+  ctx: CanvasRenderingContext2D, S: number, m: SiegeParts,
+  engaged: boolean, cycle: number, flaming: boolean
+): void => {
+  // A machine still rolling up carries the arm winched down and lashed, which
+  // is also the only pose that is safe to travel in.
+  const c = engaged ? Math.min(0.999, Math.max(0, cycle)) : 0.86
+  const phi = catapultArm(c)
+  const cs = Math.cos(phi)
+  const sn = Math.sin(phi)
+  const px = CAT_PIVOT[0] * S
+  const py = CAT_PIVOT[1] * S
+
+  // The winch rope, from the drum to wherever the arm currently is. Slack once
+  // the shot has gone, taut through the whole haul.
+  const armMid: Pt = [px + cs * CAT_ARM * 0.55 * S, py + sn * CAT_ARM * 0.55 * S]
+  const hauling = c >= CAT_RECOIL_END && c < CAT_THROW_START
+  rope(ctx, [
+    [-0.46 * S, 0.14 * S],
+    [(-0.46 * S + armMid[0]) / 2, (0.14 * S + armMid[1]) / 2 + (hauling ? 0.01 : 0.09) * S],
+    armMid
+  ], 0.015 * S, 123)
+
   ctx.save()
-  ctx.translate(-0.2 * S, 0.1 * S)
-  ctx.rotate(arm)
-  timber(ctx, S, [0, 0], [0.74 * S, 0], 0.085 * S, m.wood, 106, 3)
+  ctx.translate(px, py)
+  ctx.rotate(phi)
+
+  // ── Arm ──
+  timber(ctx, S, [0, 0], [CAT_ARM * S, 0], 0.085 * S, m.wood, 106, 3)
   // Iron reinforcing bands where the arm takes the most strain.
   for (const k of [0.22, 0.46]) {
     paint(ctx, S, slab([
@@ -560,54 +690,47 @@ const drawCatapult = (
       [(k + 0.02) * S, 0.055 * S], [(k - 0.02) * S, 0.055 * S]
     ], 0.005 * S, 107), IRON, 107, { line: LINE.hair, amp: 0.04 })
   }
-  // Bowl and the stone sitting in it.
+
+  // ── Bowl ──
+  //
+  // Cupped on the side the stone rides, so it reads as holding something rather
+  // than as a lump on the end of a stick.
   paint(ctx, S, slab([
-    [0.6 * S, -0.05 * S], [0.84 * S, -0.05 * S],
-    [0.79 * S, 0.13 * S], [0.65 * S, 0.13 * S]
+    [(CAT_ARM - 0.13) * S, -0.05 * S], [(CAT_ARM + 0.11) * S, -0.05 * S],
+    [(CAT_ARM + 0.06) * S, 0.13 * S], [(CAT_ARM - 0.08) * S, 0.13 * S]
   ], 0.012 * S, 108), m.woodBack, 109, { line: LINE.fine, amp: 0.08 })
-  paint(ctx, S, rough([
-    [0.66 * S, -0.14 * S], [0.78 * S, -0.12 * S],
-    [0.8 * S, -0.02 * S], [0.65 * S, -0.03 * S]
-  ], 0.014 * S, 110), tones('#8a867e', 1.15), 111, { line: LINE.fine, amp: 0.16 })
   ctx.restore()
 
-  // ── Buffer ──
+  // ── The boulder ──
   //
-  // The padded crossbeam the arm slams into. It is what stops the arm and it
-  // is what converts the stop into a throw, so it is drawn heavy and lashed.
-  timber(ctx, S, [0.16 * S, -0.3 * S], [0.44 * S, -0.24 * S], 0.09 * S, m.woodBack, 114, 2)
-  paint(ctx, S, rough([
-    [0.14 * S, -0.4 * S], [0.42 * S, -0.33 * S],
-    [0.45 * S, -0.21 * S], [0.16 * S, -0.27 * S]
-  ], 0.016 * S, 116), tones('#6d5a45', 1.0), 117, { line: LINE.fine, amp: 0.18 })
-  for (const k of [0.24, 0.36]) {
-    rope(ctx, [[k * S, -0.42 * S], [(k + 0.02) * S, -0.2 * S]], 0.016 * S, 118)
+  // In the bowl from the moment the crew load it until the frame it is thrown,
+  // and NOT one frame longer: after release the stone the player should be
+  // watching is the round the simulation just spawned, arcing away. Two stones
+  // on screen — one flying, one still sitting in the bowl — is the single
+  // clearest way to make a throw unreadable.
+  //
+  // Drawn OUTSIDE the arm's rotation so the flame stands up rather than lying
+  // along the beam: fire does not care which way the arm is pointing.
+  const loaded = engaged ? c >= CAT_HOLD_START - 0.06 : true
+  if (!loaded) return
+  const bx = px + cs * (CAT_ARM + 0.02) * S - sn * 0.04 * S
+  const by = py + sn * (CAT_ARM + 0.02) * S + cs * 0.04 * S
+  if (flaming) {
+    // Pitch-soaked and already alight. Three cuts of one fan, the same shape
+    // the guns and the molotov use, so burning fuel looks like burning fuel
+    // wherever it appears.
+    const fan: Pt[] = [
+      [bx - 0.085 * S, by], [bx - 0.05 * S, by - 0.2 * S],
+      [bx - 0.005 * S, by - 0.1 * S], [bx + 0.04 * S, by - 0.26 * S],
+      [bx + 0.07 * S, by - 0.08 * S], [bx + 0.09 * S, by]
+    ]
+    fillShape(ctx, fan, '#7a2408')
+    fillShape(ctx, shrink(fan, 0.66), '#e0621c')
+    fillShape(ctx, shrink(fan, 0.34), '#ffc24a')
   }
-
-  // ── Windlass and ratchet at the tail ──
-  //
-  // How the arm is winched back down against the skein between shots. A
-  // machine with no visible way to be reloaded reads as a prop.
-  const crank = aiming ? -t / 320 : 0
-  paint(ctx, S, slab([
-    [-0.54 * S, 0.06 * S], [-0.34 * S, 0.06 * S],
-    [-0.34 * S, 0.24 * S], [-0.54 * S, 0.24 * S]
-  ], 0.009 * S, 120), m.woodBack, 121, { line: LINE.fine, amp: 0.05 })
-  stroke(ctx, [
-    [-0.44 * S, 0.15 * S],
-    [-0.44 * S + Math.cos(crank) * 0.13 * S, 0.15 * S + Math.sin(crank) * 0.13 * S]
-  ], 0.03 * S, 0.022 * S, IRON.base, 122)
-  rope(ctx, [[-0.42 * S, 0.1 * S], [-0.28 * S, 0.04 * S], [-0.2 * S, 0.02 * S]], 0.016 * S, 123)
-
-  // ── Ammunition ──
-  //
-  // A few stones stacked on the sill. Cheap, and it is the detail that makes
-  // the engine read as CREWED — something a person loads, not a stone dispenser.
-  for (const [sx, sy, sr] of [[-0.02, 0.24, 0.06], [0.1, 0.25, 0.05], [0.04, 0.15, 0.052]] as const) {
-    paint(ctx, S, rough(
-      blobStone(sx * S, sy * S, sr * S), 0.01 * S, 124 + sx * 100
-    ), tones('#8a867e', 1.15), 125, { line: LINE.fine, amp: 0.16 })
-  }
+  paint(ctx, S, rough(
+    blobStone(bx, by, 0.085 * S), 0.012 * S, 110
+  ), tones(flaming ? '#6f5a4a' : '#8a867e', 1.15), 111, { line: LINE.fine, amp: 0.16 })
 }
 
 /** Roofed ram shed: hide over a pent roof, log slung on ropes. */
@@ -798,91 +921,385 @@ const drawSiegeTower = (
   }
 }
 
-/** Counterweight machine: the biggest silhouette on the field. */
-const drawTrebuchet = (
-  ctx: CanvasRenderingContext2D, S: number, m: SiegeParts,
-  aiming: boolean, t: number
+// ─── Trebuchet ──────────────────────────────────────────────────────────────
+//
+// Authored facing +X like every other machine, and NOT mirrored by the caller.
+//
+// It used to be drawn with the counterweight and the sling on the wrong sides
+// and then flipped with a `scale(-1, 1)` to compensate. That hid the real
+// problem, which was the swing itself: the arm rocked through about a radian on
+// the target side and never swept over the frame at all, so nothing about the
+// pose said "this threw something". Re-authored, the geometry is the animation:
+// the long arm winches DOWN and BACK, away from the target, which lifts the
+// counterweight over the target side; the weight then falls and drives the long
+// arm up and over through nearly half a turn, and the stone leaves at the top.
+//
+// Proportions are a real counterweight engine's: the long arm is a bit over
+// three times the counterweight arm, and the sling is a little under half the
+// long arm.
+//
+// Only the FRAME has to respect the sprite box (`SIEGE_BOX` = 2.4 × scale, so
+// nothing baked may pass ±1.2 S from the origin). The throwing assembly is not
+// baked — it is drawn straight onto the battlefield — so it is free to sweep
+// out past that, and it does: at the top of the throw the pouch is about 1.34 S
+// from the origin. What it does have to stay inside is the tint scratch layer a
+// slowed or flashing unit is composited through, which is padded to 2.8 S.
+
+/** Pivot height above the machine's origin. */
+const TREB_PIVOT = -0.34
+/** Counterweight (short) arm. */
+const TREB_SHORT = 0.23
+/** Sling (long) arm. */
+const TREB_LONG = 0.74
+/** Sling cord, tip to pouch. */
+const TREB_SLING = 0.31
+
+// Long-arm angle from +x, canvas convention (y DOWN):
+//   π/2 straight down · π pointing back · 3π/2 straight up · 0 forward.
+/** Winched down and back, counterweight raised over the target side. */
+const PHI_COCKED = 2.5
+/** Top of the sweep, up and forward — where the sling lets go. */
+const PHI_RELEASE = 5.55
+/** Where the arm rocks to a stop afterwards. */
+const PHI_SPENT = 5.86
+
+// Cycle landmarks. `cycle` is 0 the instant the stone leaves and 1 at the next
+// shot, so the throw lives at the END of the window and the release lands
+// exactly on the frame the simulation spawns the projectile.
+const TREB_FOLLOW_END = 0.16
+const TREB_HOLD_START = 0.78
+const TREB_THROW_START = 0.9
+
+/** Long-arm angle at a point in the shot cycle. */
+const trebPhi = (c: number): number => {
+  if (c < TREB_FOLLOW_END) {
+    // Coasting to the stop, rocking once against the buffer.
+    const u = c / TREB_FOLLOW_END
+    return PHI_SPENT + (PHI_RELEASE - PHI_SPENT) * Math.exp(-u * 3.4) * Math.cos(u * 7)
+  }
+  if (c < TREB_HOLD_START) {
+    // The crew on the windlass, hauling the long arm back down. Steady, with
+    // soft ends — a winch starts and stops against a ratchet, it does not snap.
+    const u = (c - TREB_FOLLOW_END) / (TREB_HOLD_START - TREB_FOLLOW_END)
+    return PHI_SPENT + (PHI_COCKED - PHI_SPENT) * (u * u * (3 - 2 * u))
+  }
+  if (c < TREB_THROW_START) return PHI_COCKED
+  // The throw. Sine ease-in-out, which is the shape that matters: the arm
+  // ACCELERATES under the falling weight and then slows at the top as the
+  // energy goes into the sling — and it is that deceleration that whips the
+  // pouch forward past the arm. An ease that is still accelerating at release
+  // leaves the pouch trailing behind, which reads as a drop rather than a shot.
+  const u = (c - TREB_THROW_START) / (1 - TREB_THROW_START)
+  return PHI_COCKED + (PHI_RELEASE - PHI_COCKED) * (0.5 - 0.5 * Math.cos(Math.PI * u))
+}
+
+/** Angular velocity, per unit cycle. Differenced rather than derived so the
+ *  easing above can be retuned without a second formula falling out of step. */
+const trebOmega = (c: number): number => {
+  const h = 0.004
+  return (trebPhi(Math.min(1, c + h)) - trebPhi(Math.max(0, c - h))) / (2 * h)
+}
+
+/**
+ * Where the pouch hangs, and how tight the cords are.
+ *
+ * The sling is not bolted to the arm — it is a pouch on two cords, and every
+ * frame it is doing one of two things: hanging under gravity, or trailing
+ * behind a tip that is moving faster than it is. Blending those two by how fast
+ * the tip is actually going gives all of the behaviour the machine needs from
+ * one expression: it hangs straight down when the arm is parked, drags along
+ * the ground as the arm is winched back, streams out behind through the
+ * accelerating half of the throw, and swings forward past the arm as the top of
+ * the sweep slows down.
+ */
+const trebPouch = (
+  S: number, phi: number, omega: number, c: number
+): { tip: Pt; pouch: Pt; taut: number } => {
+  const tip: Pt = [
+    Math.cos(phi) * TREB_LONG * S,
+    TREB_PIVOT * S + Math.sin(phi) * TREB_LONG * S
+  ]
+  // Tip velocity, in canvas axes.
+  const vx = -Math.sin(phi) * omega * TREB_LONG
+  const vy = Math.cos(phi) * omega * TREB_LONG
+  // Gravity pulls the pouch down (+y); the tip running away from it pulls the
+  // cord the other way. 0.09 is the weight that makes the trailing term win
+  // through the throw and lose everywhere else.
+  const wx0 = -vx * 0.09
+  let wy = 1 - vy * 0.09
+  let wx = wx0
+  // The empty sling swinging itself out after the stone has gone. The physical
+  // blend alone settles too cleanly — a cord that has just thrown a boulder
+  // rings, and this is the part the eye reads as "that just happened".
+  if (c < 0.42) {
+    wx += Math.exp(-c * 7) * Math.sin(c * 46) * 0.5
+  }
+  const len = Math.hypot(wx, wy) || 1
+  let theta = Math.atan2(wy / len, wx / len)
+
+  // ── The whip ──
+  //
+  // The balance above has no INERTIA: it can only ever put the pouch where
+  // gravity and the tip's motion agree it should hang, so as the arm slows at
+  // the top of the sweep the trailing term dies and the pouch drops straight
+  // down — the one pose a trebuchet never makes at the moment it lets go.
+  //
+  // What really happens is that the pouch keeps the speed the arm just gave it,
+  // swings THROUGH the beam's line and releases ahead of it. That overshoot is
+  // the throw, so it is modelled outright rather than hoped for: over the back
+  // half of the sweep the cord is carried from wherever it is trailing round to
+  // the beam's own heading, arriving in line exactly at the shot.
+  let whip = 0
+  if (c >= TREB_THROW_START) {
+    const u = (c - TREB_THROW_START) / (1 - TREB_THROW_START)
+    const k = Math.min(1, Math.max(0, (u - 0.45) / 0.55))
+    whip = k * k * (3 - 2 * k)
+  } else if (c < 0.12) {
+    // Just released: the cords are still streaming out along the beam and fall
+    // slack over the next fraction of a second rather than snapping down.
+    whip = Math.exp(-c / 0.035)
+  }
+  if (whip > 0) {
+    let d = (phi - theta) % (Math.PI * 2)
+    if (d > Math.PI) d -= Math.PI * 2
+    if (d < -Math.PI) d += Math.PI * 2
+    theta += d * whip * 0.95
+  }
+
+  const pouch: Pt = [
+    tip[0] + Math.cos(theta) * TREB_SLING * S,
+    tip[1] + Math.sin(theta) * TREB_SLING * S
+  ]
+  // The pouch cannot go through the earth. Letting it rest instead is not a
+  // fudge: a cocked trebuchet's sling genuinely lies on the ground under the
+  // beam, which is where the crew load it from.
+  const floor = (GROUND - 0.02) * S
+  if (pouch[1] > floor) pouch[1] = floor
+
+  // How taut the cords are, for the sag on the draw. A fast tip means straight
+  // cords, and so does the whip — at release they are carrying the whole shot
+  // and are dead straight. A parked machine means two loops of slack rope.
+  const taut = Math.min(1, Math.max(Math.abs(omega) * TREB_LONG * 0.06, whip))
+  return { tip, pouch, taut }
+}
+
+/**
+ * The parts of the trebuchet that never move: frame, wheels, ammunition.
+ *
+ * Split out because this is what gets baked into the shared sprite cache. The
+ * arm is drawn live on top of it, per machine, so each trebuchet can animate
+ * against its OWN reload instead of every trebuchet on the field miming the
+ * same throw on a wall clock that has nothing to do with when they fire.
+ */
+const drawTrebuchetFrame = (
+  ctx: CanvasRenderingContext2D, S: number, m: SiegeParts, spin: number
 ): void => {
-  const cycle = (t / 2600) % 1
-  const arm = aiming
-    ? (cycle < 0.8 ? 0.6 - cycle * 0.9 : 0.6 - 0.72 + (cycle - 0.8) * 5.4)
-    : 0.4
+  // ── Wheels ──
+  //
+  // It had none, and slid. A trebuchet of this size is moved on a wheeled
+  // carriage exactly like the catapult beside it, and the wheels are also the
+  // signal that carries the most information at play scale: they turn while it
+  // is closing and stop dead the moment it sets up to shoot.
+  cartWheel(ctx, S, -0.34 * S, GROUND * S - 0.13 * S, 0.13 * S, spin, m.woodBack, 250)
+  cartWheel(ctx, S, 0.34 * S, GROUND * S - 0.13 * S, 0.13 * S, spin, m.woodBack, 251)
 
-  // Ground sill and the two A-frame legs.
-  timber(ctx, S, [-0.5 * S, 0.5 * S], [0.5 * S, 0.5 * S], 0.1 * S, m.wood, 230, 3)
-  timber(ctx, S, [-0.44 * S, 0.48 * S], [-0.03 * S, -0.5 * S], 0.085 * S, m.woodBack, 231, 3)
-  timber(ctx, S, [0.44 * S, 0.48 * S], [0.03 * S, -0.5 * S], 0.085 * S, m.wood, 232, 3)
-  // Collar tie across the legs — the joint that stops the frame splaying.
-  timber(ctx, S, [-0.24 * S, 0.0 * S], [0.24 * S, 0.0 * S], 0.06 * S, m.woodBack, 233, 2)
+  // Ground sill, riding on the axles.
+  timber(ctx, S, [-0.54 * S, 0.3 * S], [0.54 * S, 0.3 * S], 0.11 * S, m.wood, 230, 3)
+  // A-frame legs up to the pivot.
+  timber(ctx, S, [-0.42 * S, 0.28 * S], [-0.02 * S, TREB_PIVOT * S], 0.085 * S, m.woodBack, 231, 3)
+  timber(ctx, S, [0.42 * S, 0.28 * S], [0.02 * S, TREB_PIVOT * S], 0.085 * S, m.wood, 232, 3)
+  // Collar tie — the joint that stops the frame splaying under the throw.
+  timber(ctx, S, [-0.24 * S, -0.02 * S], [0.24 * S, -0.02 * S], 0.055 * S, m.woodBack, 233, 2)
+  // Raking braces to the sill. A machine that survives its own recoil is
+  // triangulated, and without these the A-frame reads as a stepladder.
+  timber(ctx, S, [-0.5 * S, 0.26 * S], [-0.16 * S, -0.06 * S], 0.05 * S, m.woodBack, 244, 2)
+  timber(ctx, S, [0.5 * S, 0.26 * S], [0.16 * S, -0.06 * S], 0.05 * S, m.woodBack, 245, 2)
 
-  // Throwing beam.
-  ctx.save()
-  ctx.translate(0, -0.5 * S)
-  ctx.rotate(arm)
-  timber(ctx, S, [-0.55 * S, 0], [1.05 * S, 0], 0.085 * S, m.wood, 234, 4)
-  // Counterweight: a banded crate, hanging from its own pivot so it stays
-  // upright as the arm swings — which is what a real one does.
-  ctx.save()
-  ctx.translate(-0.52 * S, 0.02 * S)
-  ctx.rotate(-arm)
+  // ── Windlass at the tail ──
+  //
+  // How the long arm gets hauled back down between shots. Static because it is
+  // the drum, not the crank: a machine with no visible way to be reloaded reads
+  // as a prop.
+  paint(ctx, S, slab([
+    [-0.5 * S, 0.06 * S], [-0.3 * S, 0.06 * S],
+    [-0.3 * S, 0.22 * S], [-0.5 * S, 0.22 * S]
+  ], 0.009 * S, 246), m.woodBack, 247, { line: LINE.fine, amp: 0.05 })
+  rivets(ctx, [-0.48 * S, 0.14 * S], [-0.32 * S, 0.14 * S], 2, 0.016 * S, 248)
+
+  // ── Ammunition ──
+  //
+  // Stones stacked on the sill: the detail that makes the engine read as
+  // CREWED — something people load, not a stone dispenser.
+  for (const [sx, sy, sr] of [[0.06, 0.2, 0.062], [0.19, 0.22, 0.05], [0.13, 0.12, 0.05]] as const) {
+    paint(ctx, S, rough(
+      blobStone(sx * S, sy * S, sr * S), 0.01 * S, 252 + sx * 100
+    ), tones('#8a867e', 1.15), 253, { line: LINE.fine, amp: 0.16 })
+  }
+}
+
+/**
+ * The throwing assembly: beam, counterweight, sling, stone.
+ *
+ * Drawn live rather than baked, because this is the part that has to agree with
+ * the simulation. `cycle` is the machine's own progress toward its next shot —
+ * 0 the frame the stone leaves, 1 the frame the next one does.
+ */
+const drawTrebuchetArm = (
+  ctx: CanvasRenderingContext2D, S: number, m: SiegeParts,
+  engaged: boolean, cycle: number
+): void => {
+  // A machine still rolling up carries the arm winched down and lashed, which
+  // is also the only pose that is safe to travel in.
+  const c = engaged ? Math.min(0.999, Math.max(0, cycle)) : 0.84
+  const phi = trebPhi(c)
+  const omega = engaged ? trebOmega(c) : 0
+  const cs = Math.cos(phi)
+  const sn = Math.sin(phi)
+  const px = 0
+  const py = TREB_PIVOT * S
+
+  // ── Counterweight ──
+  //
+  // Hangs from the SHORT arm on its own pin, so it stays upright however far
+  // the beam has swung — which is what a real one does, and what makes the fall
+  // read as a weight dropping rather than a block welded to a stick.
+  const wx = px - cs * TREB_SHORT * S
+  const wy = py - sn * TREB_SHORT * S
+  rope(ctx, [[wx, wy], [wx, wy + 0.04 * S]], 0.015 * S, 254)
+  // 0.32 deep, not 0.36. The weight passes its lowest point mid-throw, with the
+  // short arm straight down, and at 0.36 the bottom of the crate reached 0.250
+  // — five thousandths INTO the top face of the sill it is swinging over.
   const box = slab([
-    [-0.14 * S, 0], [0.14 * S, 0], [0.13 * S, 0.3 * S], [-0.13 * S, 0.3 * S]
+    [wx - 0.15 * S, wy + 0.03 * S], [wx + 0.15 * S, wy + 0.03 * S],
+    [wx + 0.14 * S, wy + 0.32 * S], [wx - 0.14 * S, wy + 0.32 * S]
   ], 0.012 * S, 235)
   paint(ctx, S, box, m.woodBack, 236, { line: LINE.mid, amp: 0.05 })
-  rivets(ctx, [-0.12 * S, 0.08 * S], [0.12 * S, 0.08 * S], 3, 0.017 * S, 237)
-  rivets(ctx, [-0.12 * S, 0.22 * S], [0.12 * S, 0.22 * S], 3, 0.017 * S, 238)
-  ctx.restore()
-  // Sling trailing off the long end, with its stone.
-  rope(ctx, [[1.0 * S, 0], [1.12 * S, 0.2 * S], [0.94 * S, 0.32 * S]], 0.018 * S, 239)
-  paint(ctx, S, slab([
-    [0.86 * S, 0.26 * S], [0.99 * S, 0.28 * S],
-    [1.0 * S, 0.4 * S], [0.87 * S, 0.38 * S]
-  ], 0.014 * S, 240), tones('#8a867e', 1.15), 241, { line: LINE.fine, amp: 0.14 })
-  ctx.restore()
+  rivets(ctx, [wx - 0.13 * S, wy + 0.11 * S], [wx + 0.13 * S, wy + 0.11 * S], 3, 0.017 * S, 237)
+  rivets(ctx, [wx - 0.13 * S, wy + 0.25 * S], [wx + 0.13 * S, wy + 0.25 * S], 3, 0.017 * S, 238)
 
-  // Iron pivot pin.
+  // ── The beam ──
+  timber(ctx, S,
+    [px - cs * TREB_SHORT * S, py - sn * TREB_SHORT * S],
+    [px + cs * TREB_LONG * S, py + sn * TREB_LONG * S],
+    0.075 * S, m.wood, 234, 4)
+  // Iron straps where the beam takes the most strain, either side of the pin.
+  for (const k of [-0.14, 0.16]) {
+    const bx = px + cs * k * S
+    const by = py + sn * k * S
+    paint(ctx, S, slab([
+      [bx - 0.035 * S, by - 0.05 * S], [bx + 0.035 * S, by - 0.05 * S],
+      [bx + 0.035 * S, by + 0.05 * S], [bx - 0.035 * S, by + 0.05 * S]
+    ], 0.005 * S, 255), IRON, 256, { line: LINE.hair, amp: 0.04 })
+  }
+
+  // ── Sling ──
+  const { tip, pouch, taut } = trebPouch(S, phi, omega, c)
+  // Two cords, not one. A sling is a pouch slung between a fixed cord and a
+  // release cord on a hook, and drawing both is what separates it from a rope
+  // with a rock tied to the end — especially after the throw, when they hang
+  // open and empty.
+  const sag = (1 - taut) * TREB_SLING * 0.26 * S
+  for (const off of [-0.035, 0.035]) {
+    const ox = off * S
+    rope(ctx, [
+      [tip[0] + ox * 0.4, tip[1]],
+      [(tip[0] + pouch[0]) / 2 + ox, (tip[1] + pouch[1]) / 2 + sag],
+      [pouch[0] + ox * 0.6, pouch[1]]
+    ], 0.014 * S, 239)
+  }
+  // The pouch itself: a scrap of hide, drawn cupped while it is carrying and
+  // slack once it is not.
+  const loaded = engaged ? c >= TREB_HOLD_START - 0.02 : false
+  const cup = loaded ? 1 : 0.45
   paint(ctx, S, slab([
-    [-0.07 * S, -0.57 * S], [0.07 * S, -0.57 * S],
-    [0.07 * S, -0.43 * S], [-0.07 * S, -0.43 * S]
+    [pouch[0] - 0.1 * S, pouch[1] - 0.05 * S],
+    [pouch[0] + 0.1 * S, pouch[1] - 0.05 * S],
+    [pouch[0] + 0.07 * S * cup, pouch[1] + 0.09 * S * cup],
+    [pouch[0] - 0.07 * S * cup, pouch[1] + 0.09 * S * cup]
+  ], 0.012 * S, 257), tones('#6d5a45', 1.05), 258, { line: LINE.fine, amp: 0.14 })
+
+  // ── The stone ──
+  //
+  // In the pouch from the moment the crew load it until the frame it is thrown,
+  // and NOT one frame longer: after release the stone the player should be
+  // watching is the projectile the simulation just spawned, arcing away. Two
+  // stones on screen — one flying, one still sitting in the sling — was the
+  // whole reason the throw never read.
+  if (loaded) {
+    paint(ctx, S, rough(
+      blobStone(pouch[0], pouch[1] - 0.01 * S, 0.075 * S), 0.012 * S, 240
+    ), tones('#8a867e', 1.15), 241, { line: LINE.fine, amp: 0.16 })
+  }
+
+  // ── Iron pivot pin ──
+  //
+  // Last, so it caps the beam rather than hiding under it.
+  paint(ctx, S, slab([
+    [px - 0.065 * S, py - 0.07 * S], [px + 0.065 * S, py - 0.07 * S],
+    [px + 0.065 * S, py + 0.07 * S], [px - 0.065 * S, py + 0.07 * S]
   ], 0.008 * S, 242), IRON, 243, { line: LINE.fine, amp: 0.05 })
 }
 
 /**
  * Draw one siege engine.
  *
- * `rolling` drives the wheels; `engaged` is "has a target" — the flag that
+ * `spin` drives the wheels; `engaged` is "has a target" — the flag that
  * switches every engine from travelling to working.
+ *
+ * `layer` exists for the trebuchet, whose throwing assembly is drawn live while
+ * the rest of it comes from the shared sprite cache:
+ *   · `static` — everything cacheable (the default for a baked sprite)
+ *   · `moving` — only the parts that must agree with this machine's own clock
+ *   · `all`    — both, for the uncached fallback path
+ * Every other engine draws itself entirely in the `static` pass, exactly as
+ * before, and ignores `cycle`.
+ *
+ * `cycle` is progress toward this machine's next shot: 0 the frame its round
+ * leaves, 1 the frame the next one does.
  */
 export const drawSiegeMachine = (
   ctx: CanvasRenderingContext2D, id: string, S: number, p: Palette,
-  opts: { spin: number; engaged: boolean; t: number }
+  opts: {
+    spin: number
+    engaged: boolean
+    t: number
+    cycle?: number
+    layer?: 'all' | 'static' | 'moving'
+    /** Late-game catapults load incendiaries; the bowl is alight before the
+     *  shot, which is the only warning the player gets. */
+    flaming?: boolean
+  }
 ): void => {
   const m = siegeParts(p)
-  groundShadow(ctx, S, 0.62, GROUND + 0.03, 0.32)
+  const layer = opts.layer ?? 'all'
+  const wantStatic = layer !== 'moving'
+  const wantMoving = layer !== 'static'
+
+  // The shadow belongs to the baked pass. Re-stamping it in the live pass would
+  // double its opacity every frame the two are composited together.
+  if (wantStatic) groundShadow(ctx, S, 0.62, GROUND + 0.03, 0.32)
+
+  // The two throwing engines are split into a baked frame and a live arm, so
+  // each machine animates against its OWN reload rather than every catapult on
+  // the field flapping in unison on a wall clock unrelated to when they fire.
+  if (id === 'trebuchet') {
+    if (wantStatic) drawTrebuchetFrame(ctx, S, m, opts.spin)
+    if (wantMoving) drawTrebuchetArm(ctx, S, m, opts.engaged, opts.cycle ?? 0)
+    return
+  }
+  if (id === 'catapult') {
+    if (wantStatic) drawCatapultFrame(ctx, S, m, opts.spin)
+    if (wantMoving) {
+      drawCatapultArm(ctx, S, m, opts.engaged, opts.cycle ?? 0, opts.flaming === true)
+    }
+    return
+  }
+
+  if (!wantStatic) return
   switch (id) {
     case 'ram': drawRam(ctx, S, m, opts.spin, opts.engaged, opts.t); break
     case 'ironRam': drawIronRam(ctx, S, m, opts.spin, opts.engaged, opts.t); break
     case 'ballista': drawBallista(ctx, S, m, opts.spin, opts.engaged, opts.t); break
-    case 'catapult': drawCatapult(ctx, S, m, opts.spin, opts.engaged, opts.t); break
     case 'siegeTower': drawSiegeTower(ctx, S, m, opts.spin, opts.engaged, opts.t); break
-    case 'trebuchet': {
-      // Authored with the counterweight on the +x side, which is backwards.
-      //
-      // A counterweight trebuchet loads by winching the LONG arm down on the
-      // side AWAY from the target — that is what raises the counterweight over
-      // the target side — and fires by letting the weight fall, sweeping the
-      // sling up and over the frame and releasing forward. Drawn as authored it
-      // did the opposite: weight raised at the back, sling hanging on the tower
-      // side, so its whole swing would have thrown the stone over its own tail.
-      //
-      // Mirrored rather than re-authored because the machine is an A-frame:
-      // flipping it swaps exactly the two things that are on the wrong sides
-      // and leaves everything else where it was.
-      ctx.save()
-      ctx.scale(-1, 1)
-      drawTrebuchet(ctx, S, m, opts.engaged, opts.t)
-      ctx.restore()
-      break
-    }
   }
 }

@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BlockTile from '@/components/game/BlockTile.vue'
+import IconGold from '@/components/icons/IconGold.vue'
+import IconStone from '@/components/icons/IconStone.vue'
+import IconWood from '@/components/icons/IconWood.vue'
 import {
   blockDef, GATE_ID, sellRefund, ENHANCED_DAMAGE_MUL, ROOF_TOP_DEFENSE_DIV,
   FORTIFY_TARGET, canFortifyType, fortifyCost,
@@ -11,9 +14,12 @@ import {
 import {
   damageMul, fireRateMul, rangeMul, splashMul, thornsMul, armorBonus,
   buffPowerMul, economyMul, availableBlocks,
-  mergeDamageMul
+  mergeDamageMul, navalDamageMul
 } from '@/use/useTowerProgress'
-import { runCoins, towerVersion, canFortifyBlock } from '@/use/useTowerGame'
+import {
+  runCoins, towerVersion, canFortifyBlock,
+  repairCostAt, repairWaitAt, canRepairBlock
+} from '@/use/useTowerGame'
 import type { Block } from '@/game/types'
 
 /**
@@ -39,9 +45,22 @@ const emit = defineEmits<{
   (e: 'close'): void
   (e: 'upgrade'): void
   (e: 'fortify'): void
+  (e: 'repair'): void
 }>()
 
 const { t } = useI18n()
+
+/**
+ * Ticks the repair lockout down.
+ *
+ * Four times a second is enough for a countdown printed in whole seconds, and
+ * it runs for the lifetime of the card rather than being started and stopped
+ * per block — the card only exists while something is selected, and one 250 ms
+ * timer is cheaper than the bookkeeping to avoid it.
+ */
+const repairTick = ref(0)
+const repairTimer = window.setInterval(() => { repairTick.value++ }, 250)
+onBeforeUnmount(() => window.clearInterval(repairTimer))
 
 const def = computed(() => (props.block ? blockDef(props.block.typeId) : null))
 const isGate = computed(() => props.block?.typeId === GATE_ID)
@@ -116,7 +135,11 @@ const stats = computed<Row[]>(() => {
   if (b.roof) rows.push({ key: 'topDefense', value: `×${ROOF_TOP_DEFENSE_DIV}`, boosted: true })
 
   if (d.weapon) {
-    const dmg = d.weapon.damage * damageMul.value * enh * power * b.buffMul
+    // A hull is scaled by the HARBOUR's gunnery line, never the tower's damage
+    // tech — `stepTurrets` picks between them on `waterOnly`, and this card has
+    // to quote the same branch or a ship advertises damage it will never deal.
+    const dmgMul = d.waterOnly ? navalDamageMul.value : damageMul.value
+    const dmg = d.weapon.damage * dmgMul * enh * power * b.buffMul
     rows.push({ key: 'dmg', value: `${Math.round(dmg)}`, boosted: dmg > d.weapon.damage + 0.5 })
     // Cooldown shrinks as fire rate grows, so present it already divided.
     rows.push({
@@ -210,6 +233,32 @@ const fortify = computed(() => {
   }
 })
 
+/**
+ * Patching this block back to full.
+ *
+ * Offered only on a WOUNDED block: a Repair button on something at full health
+ * is a button that can only take money. While the block is cooling down it
+ * stays visible with the wait on it rather than vanishing, because a control
+ * that disappears the moment you use it reads as broken.
+ *
+ * `towerVersion` is touched so this recomputes when the simulation mutates the
+ * block in place — the inspector holds a plain, non-reactive `Block`.
+ */
+const repair = computed(() => {
+  const b = props.block
+  const l = live.value
+  // The lockout is wall-clock, not structural, so `towerVersion` alone would
+  // leave the countdown frozen on whatever second it was opened at.
+  void repairTick.value
+  if (!b || !l || l.hp >= l.maxHp) return null
+  const wait = repairWaitAt(b.c, b.r)
+  return {
+    cost: repairCostAt(b.c, b.r),
+    wait: Math.ceil(wait / 1000),
+    can: canRepairBlock(b.c, b.r)
+  }
+})
+
 const refund = computed(() =>
   live.value
     ? sellRefund(live.value.typeId, live.value.w * live.value.h, live.value.level)
@@ -254,6 +303,25 @@ const refund = computed(() =>
             dt {{ t(`blocks.stats.${row.key}`) }}
             dd(:class="{ 'is-boosted': row.boosted }") {{ row.value }}
 
+        //- First aid, above Upgrade because it is the urgent one: a rank is a
+        //- plan and a patch is a wall that is about to go. Only ever rendered
+        //- on a wounded block.
+        button.inspector__repair(
+          v-if="repair"
+          type="button"
+          :class="{ 'is-cooling': repair.wait > 0 }"
+          :disabled="!repair.can"
+          @click="emit('repair')"
+        )
+          svg.inspector__repair-icon(viewBox="0 0 24 24" fill="currentColor" aria-hidden="true")
+            path(d="M14.5 2a5.5 5.5 0 0 0-5 7.8L2.8 16.5a2 2 0 0 0 0 2.8l1.9 1.9a2 2 0 0 0 2.8 0l6.7-6.7A5.5 5.5 0 1 0 14.5 2z")
+          span {{ t('blocks.repair') }}
+          span.inspector__repair-cost(v-if="repair.wait > 0")
+            | {{ t('blocks.repairCooldown', { n: repair.wait }) }}
+          span.inspector__repair-cost(v-else)
+            IconGold.inspector__res-icon
+            | {{ repair.cost }}
+
         //- Spend the run's gold on the tower you already have. Sits above
         //- Sell because it is the constructive half of the pair.
         button.inspector__upgrade(
@@ -269,7 +337,7 @@ const refund = computed(() =>
               path(d="M12 3 21 12h-5v8h-8v-8H3z")
             span {{ t('blocks.upgrade') }}
             span.inspector__upgrade-cost
-              i.inspector__dot.is-gold
+              IconGold.inspector__res-icon
               | {{ upgradeCost }}
 
         //- Turn a plain wall into a spiked one without waiting for the deck to
@@ -285,13 +353,13 @@ const refund = computed(() =>
           span.inspector__fortify-cost
             template(v-if="fortify.cost.wood > 0")
               span {{ fortify.cost.wood }}
-              i.inspector__dot.is-wood
+              IconWood.inspector__res-icon
             template(v-if="fortify.cost.stone > 0")
               span {{ fortify.cost.stone }}
-              i.inspector__dot.is-stone
+              IconStone.inspector__res-icon
             template(v-if="fortify.cost.coins > 0")
               span {{ fortify.cost.coins }}
-              i.inspector__dot.is-gold
+              IconGold.inspector__res-icon
 
         //- Rank pips, so "how much more is there" is answerable without maths.
         div.inspector__pips(v-if="!isMaxLevel || level > 0" :aria-hidden="true")
@@ -310,11 +378,11 @@ const refund = computed(() =>
           span {{ t('blocks.sell') }}
           span.inspector__sell-refund
             span(v-if="refund.wood > 0") +{{ refund.wood }}
-            i.inspector__dot(v-if="refund.wood > 0" class="is-wood")
+            IconWood.inspector__res-icon(v-if="refund.wood > 0")
             span(v-if="refund.stone > 0") +{{ refund.stone }}
-            i.inspector__dot(v-if="refund.stone > 0" class="is-stone")
+            IconStone.inspector__res-icon(v-if="refund.stone > 0")
             span(v-if="refund.coins > 0") +{{ refund.coins }}
-            i.inspector__dot(v-if="refund.coins > 0" class="is-gold")
+            IconGold.inspector__res-icon(v-if="refund.coins > 0")
 </template>
 
 <style scoped lang="sass">
@@ -558,6 +626,55 @@ const refund = computed(() =>
   gap: 0.15em 0.3em
   font-variant-numeric: tabular-nums
 
+// Field repair. Green, because it is the only button on this card that gives
+// hit points back — Upgrade is gold, Sell is red, and a player reaching for
+// "stop this from dying" should not have to read three labels to find it.
+.inspector__repair
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  justify-content: center
+  gap: 0.2em 0.4em
+  min-height: 1.9rem
+  margin-top: 0.35rem
+  padding: 0.2rem 0.5rem
+  border: 2px solid #0f1a30
+  border-radius: 0.5rem
+  background-image: linear-gradient(to bottom, #67d68c, #248a4c)
+  color: #fff
+  font-weight: 900
+  text-transform: uppercase
+  font-size: clamp(0.5rem, 2.3vw, 0.7rem)
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6)
+  cursor: pointer
+  -webkit-tap-highlight-color: transparent
+
+  &:active:not(:disabled)
+    translate: 0 2px
+    scale: 0.97
+
+  &:disabled
+    background-image: linear-gradient(to bottom, #4a5a72, #2b3548)
+    cursor: not-allowed
+    opacity: 0.85
+
+  // Cooling down is not the same as unaffordable: it says "not yet", so it
+  // keeps a hint of its own colour rather than going fully dead.
+  &.is-cooling:disabled
+    background-image: linear-gradient(to bottom, #4c6b58, #2b3f34)
+    opacity: 0.9
+
+.inspector__repair-icon
+  width: 1.1em
+  height: 1.1em
+  flex: 0 0 auto
+
+.inspector__repair-cost
+  display: inline-flex
+  align-items: center
+  gap: 0.15em 0.3em
+  font-variant-numeric: tabular-nums
+
 .inspector__sell
   display: flex
   flex-wrap: wrap
@@ -587,18 +704,14 @@ const refund = computed(() =>
   align-items: center
   gap: 0.15em
 
-.inspector__dot
-  display: inline-block
-  width: 0.5em
-  height: 0.5em
-  border-radius: 999px
-
-  &.is-wood
-    background-color: #a9682f
-  &.is-stone
-    background-color: #cbd3dd
-  &.is-gold
-    background-color: #ffd93c
+// The same wood, stone and gold the top resource bar draws. Every number on
+// this card is a price or a payout the player will go and check against that
+// bar, so the two have to be reading from one set of glyphs.
+.inspector__res-icon
+  flex: 0 0 auto
+  width: 1.35em
+  height: 1.35em
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45))
 
 .inspector-enter-active, .inspector-leave-active
   transition: opacity 160ms ease-out, translate 160ms ease-out

@@ -6,12 +6,13 @@ import {
   MAX_MERGE_TIER, tierOf, mergePowerMul, mergeHpMul, canMergeBlocks,
   FORTIFY_TARGET, canFortifyType, fortifyCost
 } from '@/game/blocks'
-import { ENEMY_DEFS, enemyDef } from '@/game/enemies'
+import { ENEMY_DEFS, enemyDef, isImmuneTo, resistOf } from '@/game/enemies'
 import { monsterGore } from '@/game/monsters'
 import { pickMonster } from '@/game/monsterSprites'
 import { ALLY_DEFS, allyDef, CAVALRY_SQUAD } from '@/game/allies'
 import {
-  OFFER_SLOTS, shapeDef, shapeCost, rollOffer, rollOffers, SHAPE_BY_ID,
+  OFFER_SLOTS, shapeCost, rollOffer, rollOffers, SHAPE_BY_ID, rotatedShape,
+  upgradeCrateShape, crateBaseId,
   WEAPON_SLOT, pickAffordableWeapon
 } from '@/game/shapes'
 import { SEA_SWIM_Y, SEA_STRIKE_Y } from '@/game/world'
@@ -743,10 +744,13 @@ export const canPlaceAt = (c: number, r: number, typeId?: string): boolean => {
  * individually supported would make L-bends and overhangs — the entire reason
  * shapes are interesting — impossible to place.
  */
-export const canPlaceShapeAt = (shapeId: string, c: number, r: number): boolean => {
-  const def = SHAPE_BY_ID[shapeId]
-  if (!def) return false
+export const canPlaceShapeAt = (
+  shapeId: string, c: number, r: number, rot = 0
+): boolean => {
+  const base = SHAPE_BY_ID[shapeId]
+  if (!base) return false
   if (phase.value === 'defeat') return false
+  const def = rotatedShape(shapeId, rot)
 
   // A naval piece is a single hull in a berth. It shares none of the tower's
   // placement rules, so it is answered here rather than threaded through them.
@@ -756,7 +760,7 @@ export const canPlaceShapeAt = (shapeId: string, c: number, r: number): boolean 
 
   const own = new Set<string>()
   for (const [dx, dy] of def.cells) own.add(key(c + dx, r + dy))
-  const roofs = new Set(def.roofs ?? [])
+  const roofs = new Set(def.roofs)
 
   let supported = false
   for (let i = 0; i < def.cells.length; i++) {
@@ -792,19 +796,23 @@ export const canAffordShape = (shapeId: string): boolean => {
  * `(c, r)`. Charges the whole shape, then rerolls that slot so the hand is
  * always four live choices.
  */
-export const placeShape = (slotIndex: number, c: number, r: number): boolean => {
+export const placeShape = (
+  slotIndex: number, c: number, r: number, rot = 0
+): boolean => {
   const shapeId = offers.value[slotIndex]
   if (!shapeId) return false
-  if (!canPlaceShapeAt(shapeId, c, r) || !canAffordShape(shapeId)) return false
+  if (!canPlaceShapeAt(shapeId, c, r, rot) || !canAffordShape(shapeId)) return false
 
-  const def = shapeDef(shapeId)
+  // Rotation moves cells; it never changes WHICH blocks the piece is made of,
+  // so the price is the unrotated one by construction.
+  const def = rotatedShape(shapeId, rot)
   const cost = shapeCost(shapeId)
   wood.value -= cost.wood
   stone.value -= cost.stone
   runCoins.value -= cost.coins
 
   const enhanced = offerEnhanced.value[slotIndex] === true
-  const roofs = new Set(def.roofs ?? [])
+  const roofs = new Set(def.roofs)
   def.cells.forEach(([dx, dy, typeId], i) => {
     spawnBlock(typeId, c + dx, r + dy, roofs.has(i), undefined, enhanced)
   })
@@ -871,6 +879,18 @@ const ensureAffordableWeapon = (): void => {
   runCoins.value = Math.max(runCoins.value, cost.coins ?? 0)
 }
 
+/**
+ * Re-cut a freshly rolled piece into the best crate the player owns and can pay
+ * for. A no-op for anything that is not a pure crate shape.
+ *
+ * Applied at every point a piece ENTERS the hand and nowhere else: a shape that
+ * is already sitting on the table is a decision the player is in the middle of
+ * making, and silently promoting it under them the moment a wave payout lands
+ * would change the price of the thing they were about to tap.
+ */
+const dealt = (id: string): string =>
+  upgradeCrateShape(id, availableBlocks.value, canAffordShape)
+
 /** Reroll one offer slot, avoiding duplicates with the other three. */
 export const rerollOffer = (slotIndex: number): void => {
   const next = offers.value.slice()
@@ -879,14 +899,16 @@ export const rerollOffer = (slotIndex: number): void => {
   // The outgoing piece is excluded BY ID and, through `avoid`, by what it is —
   // otherwise a weapon reroll could hand back the same gun on a different
   // plinth, which is the button appearing not to work.
-  next[slotIndex] = rollOffer(
+  next[slotIndex] = dealt(rollOffer(
     slotIndex,
     wave.value,
     availableBlocks.value,
-    outgoing ? [...others, outgoing] : others,
+    // Compared by BASE geometry, so a reroll cannot hand back the same L in a
+    // different crate and read as the button doing nothing.
+    (outgoing ? [...others, outgoing] : others).map(crateBaseId),
     Math.random,
-    outgoing
-  )
+    outgoing ? crateBaseId(outgoing) : undefined
+  ))
   offers.value = next
   // A rerolled slot loses its enhanced status — the reinforcement came with the
   // specific piece the ad dealt, not with the slot.
@@ -918,14 +940,14 @@ export const manualReroll = (slotIndex: number): boolean => {
 
 /** Replace the whole hand with four ENHANCED shapes (the rewarded-ad payout). */
 export const dealEnhancedOffers = (): void => {
-  offers.value = rollOffers(wave.value, availableBlocks.value)
+  offers.value = rollOffers(wave.value, availableBlocks.value).map(dealt)
   offerEnhanced.value = [true, true, true, true]
   ensureAffordableWeapon()
 }
 
 /** Deal a fresh hand of four. */
 const dealOffers = (): void => {
-  offers.value = rollOffers(wave.value, availableBlocks.value)
+  offers.value = rollOffers(wave.value, availableBlocks.value).map(dealt)
   offerEnhanced.value = [false, false, false, false]
   ensureAffordableWeapon()
 }
@@ -1256,6 +1278,190 @@ export const upgradeBlock = (c: number, r: number): boolean => {
   return true
 }
 
+// ─── Arrow Rain ─────────────────────────────────────────────────────────────
+//
+// The tower's one PLAYER-aimed attack.
+//
+// Everything else the player owns is a building that decides for itself what to
+// shoot. That leaves two threats with no answer the player can actually reach
+// for in the moment: a bomber cruising above every turret's arc, and a siege
+// engine parked outside every turret's range. Cavalry answers the second for
+// meta coins; nothing answered the first.
+//
+// It is deliberately not free of consequence. The volley comes down through
+// whatever is underneath it, and the tower is underneath it, so calling it on
+// enemies standing over your own wall costs you a tenth of that wall. Aiming it
+// is the skill.
+
+/** Half-width of the beaten zone, in cells. */
+export const ARROW_RAIN_RADIUS = 4
+/** What one volley does to a ground or naval enemy caught in it. */
+export const ARROW_RAIN_DAMAGE = 150
+/** Fraction of its OWN ceiling every tower block under the zone loses. */
+export const ARROW_RAIN_SELF_PCT = 0.1
+/** Cleared waves needed to refill an empty charge. */
+export const ARROW_RAIN_WAVES = 3
+
+/**
+ * Cleared waves banked toward the next volley, 0..`ARROW_RAIN_WAVES`.
+ *
+ * Counted in WHOLE WAVES rather than as a 0..1 fraction, and that is not a
+ * style choice: adding a third three times lands on 0.9999999999999999, so a
+ * fractional charge leaves the player who has cleared exactly three waves
+ * looking at a button that is still dark. The fraction the HUD draws is derived
+ * from the count, never accumulated into.
+ *
+ * Starts FULL. A skill whose first use is three waves away is a skill the
+ * player meets as a greyed-out button and never forms a habit around.
+ */
+export const arrowRainStock = ref(ARROW_RAIN_WAVES)
+/** Readiness as 0..1, for the button's fill. */
+export const arrowRainCharge = computed(() => arrowRainStock.value / ARROW_RAIN_WAVES)
+export const arrowRainReady = computed(() => arrowRainStock.value >= ARROW_RAIN_WAVES)
+/** Whole waves still owed before the next volley. */
+export const arrowRainWavesLeft = computed(
+  () => Math.max(0, ARROW_RAIN_WAVES - arrowRainStock.value)
+)
+
+/**
+ * Call the volley down on the column centred at `x`.
+ *
+ * One arrow's life, and the whole design in three steps:
+ *
+ *   1. it falls through everything in the OPEN, wounding all of it. Enemies do
+ *      not stop an arrow, so a bomber dying at cruise altitude still leaves the
+ *      shaft to reach the siege engine parked underneath it;
+ *   2. it stops at the first SOLID thing — the topmost block of the column it
+ *      is falling down;
+ *   3. and it goes no further, so everything sheltering under that block is
+ *      untouched.
+ *
+ * Air enemies die outright — that is what the skill is for — while everything
+ * else takes a flat wound. A trebuchet does not die to one volley, and should
+ * not: the point is to reach it at all.
+ */
+export const callArrowRain = (x: number): boolean => {
+  if (!arrowRainReady.value) return false
+  if (phase.value === 'defeat') return false
+  arrowRainStock.value = 0
+
+  // 1. Everything in the open, at every height. An arrow PENETRATES what it
+  //    hits: a bomber dying at cruise altitude does not stop the shaft that
+  //    killed it, so the same volley reaches the siege engine standing under
+  //    it. Order against the tower below is therefore immaterial — nothing
+  //    here can consume an arrow — but it is resolved first because that is
+  //    the order the volley physically arrives in.
+  for (const e of [...enemies]) {
+    if (e.dying > 0) continue
+    if (Math.abs(e.x - x) > ARROW_RAIN_RADIUS) continue
+    if (enemyDef(e.typeId).movement === 'air') killEnemy(e)
+    else damageEnemy(e, ARROW_RAIN_DAMAGE, x, 'bolt')
+  }
+
+  // 2. The tower stops the volley. Solid is where an arrow ends, so each
+  //    column gives up exactly ONE block — the topmost — and everything
+  //    sheltering under it is untouched.
+  //
+  //    That is the whole cost model. Firing over your own crown is a tenth of
+  //    the crown, not a tenth of the tower, so a tall wall is a roof for what
+  //    it stands on and the price of a volley is something the player can read
+  //    off the silhouette before they spend it.
+  const spent = new Set<number>()
+  const from = Math.ceil(x - ARROW_RAIN_RADIUS)
+  const to = Math.floor(x + ARROW_RAIN_RADIUS)
+  for (let c = from; c <= to; c++) {
+    let top: Block | undefined
+    for (const b of towerBlocks()) {
+      if (c < b.c || c > b.c + spanW(b) - 1) continue
+      if (!top || b.r + spanH(b) > top.r + spanH(top)) top = b
+    }
+    // A wide or merged block spanning several columns catches several arrows
+    // and still pays once: the rule is a tenth per BLOCK, not per arrow.
+    if (!top || spent.has(top.uid)) continue
+    spent.add(top.uid)
+    // Straight off the ceiling, bypassing `damageBlock`: armour is a shield
+    // against things shooting AT the tower, and these are the tower's own
+    // arrows falling on it. A stone wall shrugging off its own volley while a
+    // crate is gutted would make the cost unreadable.
+    top.hp = Math.max(1, top.hp - top.maxHp * ARROW_RAIN_SELF_PCT)
+    top.flash = 1
+  }
+
+  syncTowerStats()
+  pushFx({ kind: 'arrowRain', x, y: 0, radius: ARROW_RAIN_RADIUS })
+  if (phase.value === 'build') saveRunSnapshot()
+  return true
+}
+
+// ─── Field repair ───────────────────────────────────────────────────────────
+
+/** Hit points one gold buys when patching a block. */
+export const REPAIR_HP_PER_GOLD = 20
+/** How long the same block must wait before it can be patched again, ms. */
+export const REPAIR_COOLDOWN_MS = 20_000
+
+/**
+ * Gold price of patching the block at `(c, r)` back to full.
+ *
+ * Priced off the block's CEILING, not its wounds, and it always heals all the
+ * way. That is what makes it a decision rather than a slider: topping up a
+ * scratch is terrible value and hauling something back from the brink is
+ * excellent, so the question the button asks is "is this one nearly dead", not
+ * "can I afford another point".
+ *
+ * The ceiling is the LIVE one — ranks, reinforcement, merge tier and the
+ * banners currently touching it are all already in `maxHp` — so a block that is
+ * expensive to repair is expensive precisely because it is worth repairing.
+ *
+ * Before this the only ways to heal were a Repair Bay (a whole cell, and only
+ * between waves) or a rank (gold priced for a permanent upgrade, not for first
+ * aid). Neither is something a player can do to the one wall that is about to
+ * go, in the ten seconds they have left.
+ */
+export const repairCostAt = (c: number, r: number): number => {
+  const b = blockAt(c, r)
+  if (!b) return Infinity
+  return Math.max(1, Math.ceil(b.maxHp / REPAIR_HP_PER_GOLD))
+}
+
+/** Milliseconds until this block may be patched again. 0 = ready now. */
+export const repairWaitAt = (c: number, r: number): number => {
+  const b = blockAt(c, r)
+  if (!b || b.repairedAt === undefined) return 0
+  return Math.max(0, REPAIR_COOLDOWN_MS - (clock - b.repairedAt))
+}
+
+/** Is this block damaged, off cooldown, and affordable right now? */
+export const canRepairBlock = (c: number, r: number): boolean => {
+  const b = blockAt(c, r)
+  if (!b || b.hp >= b.maxHp) return false
+  if (repairWaitAt(c, r) > 0) return false
+  return runCoins.value >= repairCostAt(c, r)
+}
+
+/** Spend run gold to patch one block back to full. */
+export const repairBlock = (c: number, r: number): boolean => {
+  if (!canRepairBlock(c, r)) return false
+  const b = blockAt(c, r)!
+  runCoins.value -= repairCostAt(c, r)
+  // Measured BEFORE the heal lands, or the ledger below books nothing.
+  const healed = b.maxHp - b.hp
+  b.hp = b.maxHp
+  b.repairedAt = clock
+  // Healing is not building: what a repair puts back must not be re-counted as
+  // tower strength the director then prices the next wave against. This is the
+  // same ledger the Repair Bay and Field Repairs pay into.
+  repairedSinceMeasure += healed
+  b.flash = 0
+  // Gold just left the purse, which can put the offered gun out of reach.
+  ensureAffordableWeapon()
+  // The inspector holds a plain, non-reactive block — tell it the numbers moved.
+  towerVersion.value++
+  pushFx({ kind: 'repair', x: centreX(b), y: centreY(b) })
+  if (phase.value === 'build') saveRunSnapshot()
+  return true
+}
+
 // ─── Fortifying ─────────────────────────────────────────────────────────────
 
 /**
@@ -1491,15 +1697,20 @@ const damageEnemy = (e: Enemy, amount: number, fromX: number, source?: Projectil
   if (e.dying > 0) return
   const def = enemyDef(e.typeId)
 
-  // Absolute immunity, checked before armour: the round hits, and does nothing.
-  // It is drawn as a deflect rather than silently swallowed, because a player
+  // Plating, checked before armour: this is the round glancing off the hull
+  // rather than the hull soaking it.
+  //
+  // Drawn as a deflect whenever most of the shot is turned aside — not only
+  // when all of it is — because the lesson is the same either way and a player
   // who cannot see WHY their damage stopped just thinks the game is broken.
-  if (source && def.immuneTo?.includes(source)) {
+  // A total resist still ends here; anything less lands for what is left.
+  const resist = source ? resistOf(e.typeId, source) : 0
+  if (resist > 0) {
     pushFx({ kind: 'deflect', x: e.x, y: e.y })
-    return
+    if (resist >= 1) return
   }
 
-  let dealt = amount
+  let dealt = amount * (1 - resist)
   // Frontal armour: only the side the enemy is facing (its travel direction)
   // is protected, so flanking fire — or simply out-ranging it — bypasses this.
   if (def.frontArmorPct && Math.sign(fromX - e.x) === e.dir) {
@@ -1726,6 +1937,80 @@ const dropOrdnance = (e: Enemy, def: EnemyDef, target: Block): void => {
   pushFx({ kind: 'bombDrop', x: e.x, y: e.y, fire: run.ordnance === 'fire' })
 }
 
+/**
+ * Throw one stone from a standoff engine at the block it is bombarding.
+ *
+ * The counterpart to `dropOrdnance`, and deliberately the same machinery: a
+ * hostile ballistic round that the tower cannot intercept, detonating on the
+ * first thing it touches. What it replaces was a blast that simply appeared on
+ * the target the frame the cooldown expired — twelve cells of nothing crossed,
+ * and a trebuchet arm miming a throw on a clock unrelated to the shot.
+ *
+ * Launched from the ARM TIP rather than the machine's centre. At release a
+ * trebuchet's sling is at the top of its sweep, roughly a body-height above the
+ * frame, and a stone that appears at the axle looks dropped rather than thrown.
+ *
+ * The arc is lofted with distance so the stone clears the tower's own crown on
+ * the way in: a flat line from twelve cells out would clip the outer wall every
+ * time and the shot would never read as a lob.
+ */
+/**
+ * The wave from which stone-throwing engines switch to incendiaries.
+ *
+ * Late enough that a player meets plain shot for a dozen waves first and learns
+ * what a catapult does before it changes — a threat that arrives already at its
+ * final form teaches nothing.
+ */
+export const PITCH_WAVE = 30
+/** How long a pitch round leaves a block alight, ms. */
+export const SIEGE_BURN_MS = 4600
+/** Damage per second while it burns. */
+export const SIEGE_BURN_DPS = 8
+
+/** Is this engine, on this wave, throwing fire rather than rock? */
+export const isFlamingSiege = (def: EnemyDef, atWave: number): boolean =>
+  def.siege?.lobbed === true && def.id === 'catapult' && atWave >= PITCH_WAVE
+
+const lobSiegeStone = (e: Enemy, def: EnemyDef, target: Block): void => {
+  const sx = e.x + e.dir * def.scale * 0.3
+  const sy = e.y + def.scale * 0.62
+  const dx = centreX(target) - sx
+  const dy = centreY(target) - sy
+  // Long enough to read as a lob at every standoff, short enough that the
+  // player is never watching a stone hang while the wave has gone quiet.
+  const flight = Math.max(1.1, Math.min(2.3, Math.abs(dx) / 8 + 0.85))
+
+  // Past `PITCH_WAVE` the crews are loading pitch-soaked shot, and a catapult
+  // stops being a chunk of damage and starts being a fire that keeps burning
+  // after the block it hit has already been paid for. Announced by the bowl
+  // being visibly alight through the whole reload — see `drawCatapultArm` —
+  // because a round that changes what it does has to change how it looks.
+  const flaming = isFlamingSiege(def, wave.value)
+
+  const stone = acquireProjectile()
+  stone.uid = uidCounter++
+  stone.kind = flaming ? 'fire' : 'ball'
+  stone.x = sx
+  stone.y = sy
+  stone.vx = dx / flight
+  stone.vy = dy / flight + 0.5 * GRAVITY * flight
+  stone.damage = def.damage
+  stone.splash = def.siege?.splash ?? 0
+  stone.ballistic = true
+  stone.targetUid = -1
+  // A generous margin over the computed flight: the round is allowed to fall
+  // short or long and still land, but never to leak if it somehow misses both
+  // the tower and the ground.
+  stone.life = flight * 1000 + 2500
+  stone.slowPct = 0
+  stone.slowMs = 0
+  stone.sourceUid = -1
+  stone.hostile = true
+  stone.burnMs = flaming ? SIEGE_BURN_MS : undefined
+  stone.burnDps = flaming ? SIEGE_BURN_DPS : undefined
+  projectiles.push(stone)
+}
+
 const stepEnemies = (dt: number): void => {
   const dtSec = dt / 1000
 
@@ -1881,7 +2166,12 @@ const stepEnemies = (dt: number): void => {
       if (e.cd <= 0) {
         e.cd = def.attackCooldownMs
         const splash = def.siege.splash ?? 0
-        if (splash > 0) {
+        // A LOBBED engine throws a round that has to travel; everything else
+        // still resolves where it stands. The distinction is per-engine on
+        // purpose — a ballista's bolt is direct fire and has no arc to draw.
+        if (def.siege.lobbed) {
+          lobSiegeStone(e, def, target)
+        } else if (splash > 0) {
           pushFx({ kind: 'explosion', x: centreX(target), y: centreY(target), radius: splash })
           damageBlocksInRadius(centreX(target), centreY(target), splash, def.damage)
         } else {
@@ -2183,7 +2473,10 @@ const pickTarget = (
     // Never lock onto something this weapon cannot hurt. Without this an
     // Archery block would happily empty its quiver into an ironclad ram while
     // the rest of the wave walked past it.
-    if (kind && def.immuneTo?.includes(kind)) continue
+    // Only an ABSOLUTE resist is worth retargeting away from. A round that
+    // still lands for a quarter is a bad trade, not a wasted shot, and a turret
+    // that refuses to take it leaves the player watching an idle tower.
+    if (kind && isImmuneTo(def.id, kind)) continue
     // A submerged sea creature is under the water and cannot be shot. It only
     // becomes a target once it has broken the surface to strike.
     // Submerged sea creatures are under the water and cannot be shot — unless
@@ -2781,6 +3074,68 @@ export const debugSpawn = (typeIds: string[]): void => {
   enemiesLeft.value = enemies.reduce((n, e) => n + (e.dying > 0 ? 0 : 1), 0)
 }
 
+/**
+ * Jump the siege to wave `n` and hand the player a build phase to meet it in.
+ *
+ * DEV ONLY. Reaching wave 22 by hand to look at a trebuchet — or to check that
+ * a boss wave still composes — is not a reasonable ask of anyone testing this,
+ * and it is the reason the difficulty curve past wave 15 was historically the
+ * least-exercised code in the project.
+ *
+ * What it does NOT do is fake a tower. `wave` is the only thing that moves: the
+ * blocks, the purse and the tech are left exactly as they are, so what the
+ * jump produces is an honest "wave 20 arrives against THIS defence" rather than
+ * a simulated twenty waves of play. Pair it with the resource cheat to build
+ * something worth testing against first.
+ *
+ * The field is cleared on the way through. Jumping mid-battle would otherwise
+ * leave the old wave's horde walking into a director that has moved on without
+ * them, and their kill drops would pay out against the new wave's economy.
+ */
+export const debugSetWave = (n: number): void => {
+  const target = Math.max(1, Math.floor(n))
+
+  enemies.length = 0
+  enemiesByUid.clear()
+  projectiles.length = 0
+  debris.length = 0
+  allies.length = 0
+  allyCount.value = 0
+  enemiesLeft.value = 0
+  enemiesTotal.value = 0
+  spawnCursor = 0
+  waveClock = 0
+  plan = { wave: 0, orders: [], total: 0, boss: false }
+
+  // `wave` holds the wave already SURVIVED, so the next call raises it to the
+  // target — which is what makes the HUD, the incoming-threat warnings and the
+  // boss banner all agree about what is about to arrive.
+  wave.value = target - 1
+  waveVersion.value++
+
+  // A jump is not a clear: no reward, no flawless credit, and the streak is
+  // reset rather than carried, because a run that teleported past twelve waves
+  // has not earned whatever multiplier it was sitting on.
+  flawless.reset()
+  flawlessProgress.value = 0
+  lostBlockThisWave = false
+  repairedSinceMeasure = 0
+  lastWaveReward.value = null
+  pendingBonus = 1
+
+  phase.value = 'build'
+  buildTimeLeft.value = buildTimeMs(target)
+  buildDeadline = buildTimeLeft.value
+  // The deck is wave-gated, so a jump has to re-deal or the player meets wave
+  // 20 holding wave 1's hand.
+  dealOffers()
+  rerollTimers.fill(0)
+  rerollReadyIn.value = new Array(OFFER_SLOTS).fill(0)
+  syncTowerStats()
+  syncGateRefs()
+  saveRunSnapshot()
+}
+
 const completeWave = (): void => {
   const base = waveReward(wave.value)
   const mul = waveRewardMul.value * pendingBonus
@@ -2839,6 +3194,10 @@ const completeWave = (): void => {
       repairedSinceMeasure += b.hp - before
     }
   }
+
+  // One wave of the three per wave cleared. Capped rather than allowed to run
+  // over: this is an emergency button, not a resource to hoard.
+  arrowRainStock.value = Math.min(ARROW_RAIN_WAVES, arrowRainStock.value + 1)
 
   runCoins.value += gainedGold
   runCoinsEarned.value += gainedGold
@@ -2910,11 +3269,29 @@ export const graceAvailable = ref(false)
  * Restores from the same snapshot the resume path uses, so it recovers the
  * exact layout, resources and wave — not an approximation of them.
  */
+/**
+ * Materials granted with a grace continue.
+ *
+ * Restoring the tower exactly as it stood is not, on its own, a continue: it
+ * hands the player back the same wall that just failed, with the same empty
+ * purse, against the same wave. The run ended because the defence was already
+ * out-scaled, so without something to build WITH, the second attempt is the
+ * first one replayed. A hundred of each is roughly two solid pieces plus a gun
+ * — enough to answer the thing that broke through, not enough to skip a tier.
+ */
+export const CONTINUE_WOOD = 100
+export const CONTINUE_STONE = 100
+
 export const continueRun = (): boolean => {
   if (!graceSnapshot || graceUsed) return false
   setState(RUN_KEY, graceSnapshot)
   const ok = resumeRun()
   if (!ok) return false
+  wood.value += CONTINUE_WOOD
+  stone.value += CONTINUE_STONE
+  // The purse just changed, so the hand may have become payable — and the very
+  // next thing this player does is try to buy a gun with it.
+  ensureAffordableWeapon()
   graceUsed = true
   graceAvailable.value = false
   graceSnapshot = null
@@ -2961,6 +3338,8 @@ export const saveRunSnapshot = (): void => {
     ),
     // Persisted so a reload can't be used to reroll a hand the player dislikes.
     offers: offers.value.slice(),
+    // Same reason: without it, a reload is a free volley.
+    arrowRain: arrowRainStock.value,
     startedAt: Date.now()
   }
   setState(RUN_KEY, snapshot)
@@ -3020,6 +3399,8 @@ export const startRun = (): void => {
   difficultyMul.value = 1
   lostBlockThisWave = false
   lastWaveReward.value = null
+  // A fresh siege starts with the volley in hand.
+  arrowRainStock.value = ARROW_RAIN_WAVES
   cacheTechMultipliers()
   spawnGate()
   syncTowerStats()
@@ -3081,6 +3462,13 @@ export const resumeRun = (): boolean => {
   accumulator = 0
   clearWorld()
   cacheTechMultipliers()
+
+  // A snapshot written before Arrow Rain existed has no charge on it; those
+  // resume READY rather than empty, which is the forgiving direction and the
+  // one that cannot strand a returning player without their emergency button.
+  arrowRainStock.value = typeof snap.arrowRain === 'number'
+    ? Math.min(ARROW_RAIN_WAVES, Math.max(0, Math.round(snap.arrowRain)))
+    : ARROW_RAIN_WAVES
 
   wave.value = Math.max(0, Math.floor(snap.wave) || 0)
   wood.value = Math.max(0, Math.floor(snap.wood) || 0)
@@ -3152,7 +3540,7 @@ export const resumeRun = (): boolean => {
   // one: honour it and top it up.
   const saved = Array.isArray(snap.offers) ? snap.offers : []
   const kept = saved.filter((id) => typeof id === 'string' && SHAPE_BY_ID[id]).slice(0, OFFER_SLOTS)
-  const fresh = rollOffers(wave.value, availableBlocks.value)
+  const fresh = rollOffers(wave.value, availableBlocks.value).map(dealt)
   offers.value = Array.from({ length: OFFER_SLOTS }, (_, i) => kept[i] ?? fresh[i]!)
   ensureAffordableWeapon()
 

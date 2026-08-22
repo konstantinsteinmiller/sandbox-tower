@@ -58,9 +58,16 @@ export const SHAPE_DEFS: ReadonlyArray<ShapeDef> = [
   { id: 'wRoof3', lane: 'structure', weight: 5, cells: row(3, 'wood'), roofs: [0, 1, 2], minWave: 2 },
 
   // ── Structure: braced (tech-gated by the blocks it contains) ─────────────
-  { id: 'b2h', lane: 'structure', weight: 8, cells: row(2, 'brace') },
-  { id: 'bL', lane: 'structure', weight: 6, cells: [[0, 0, 'brace'], [0, 1, 'brace'], [1, 1, 'brace']] },
-  { id: 'bO', lane: 'structure', weight: 5, cells: [[0, 0, 'brace'], [1, 0, 'brace'], [0, 1, 'brace'], [1, 1, 'brace']] },
+  // NOTE: there are no hand-authored braced or spiked crate shapes. There used
+  // to be exactly three — a domino, an L and a 2x2 — and they were the only
+  // braced geometry in the game, which meant unlocking the Braced Crate turned
+  // ten wood shapes into thirteen shapes rather than into ten better ones.
+  //
+  // The crate LADDER replaces them (see `upgradeCrateShape`): every wood shape
+  // in this list is dealt in the best crate the player has unlocked and can
+  // pay for, so the L-bends, the T, the S and Z and the gables all arrive in
+  // braced and spiked too. Keeping the three authored ones alongside that would
+  // have double-weighted precisely those three silhouettes.
 
   // ── Structure: stone ─────────────────────────────────────────────────────
   { id: 's1', lane: 'structure', weight: 9, cells: [[0, 0, 'stone']] },
@@ -136,9 +143,105 @@ export const SHAPE_DEFS: ReadonlyArray<ShapeDef> = [
   { id: 'galley1', lane: 'naval', weight: 6, cells: [[0, 0, 'galley']] }
 ]
 
+// ─── The crate ladder ───────────────────────────────────────────────────────
+//
+// A wall is a wall is a wall: the crate the player builds out of should be the
+// best one they own, not a lucky draw between three tiers of the same idea.
+//
+// Before this, unlocking the Braced Crate ADDED braced pieces to a deck that
+// still dealt plain wood, and unlocking the Spiked Wall added a third. Two
+// thirds of the structure lane was then pieces the player had already outgrown
+// — and the game's own rule about that is written into the tech tree: nobody
+// should ever be offered a strictly worse version of something they own.
+//
+// So the tiers are a LADDER, applied when a piece is dealt. The geometry is
+// rolled first (an L is an L), then it is built out of the best crate the
+// player has unlocked AND can currently pay for.
+//
+// The affordability step is not a nicety. A spiked crate costs stone, which no
+// wood shape ever did, so a blanket upgrade would hand a stone-poor player a
+// hand of walls they cannot place — the exact dead hand `ensureAffordableWeapon`
+// exists to prevent on the weapon slot. Falling back down the ladder means the
+// deck always offers the best wall the player can actually build.
+//
+// Stone crates are deliberately NOT on the ladder. They are not a deeper rank
+// of a wooden crate — they are the other material, bought in the other
+// currency, and they have their own shapes.
+
+/** Cheapest to best. The index IS the tier. */
+export const CRATE_LADDER = ['wood', 'brace', 'spikes'] as const
+
+const crateTier = (typeId: string): number =>
+  (CRATE_LADDER as ReadonlyArray<string>).indexOf(typeId)
+
+/** A shape built entirely out of one crate on the ladder. */
+const isCrateShape = (s: ShapeDef): boolean =>
+  s.cells.length > 0 && s.cells.every(([, , t]) => crateTier(t) >= 0)
+
+/** `wL` in spiked crates is `wL~spikes`. The base tier keeps the bare id. */
+const crateVariantId = (baseId: string, tier: number): string =>
+  `${baseId}~${CRATE_LADDER[tier]}`
+
+/**
+ * Every crate shape re-cut in every tier above its own.
+ *
+ * Registered in `SHAPE_BY_ID` but deliberately NOT added to `SHAPE_DEFS`: they
+ * must never be ROLLED, only projected onto by `upgradeCrateShape`. A variant
+ * in the draw pool would put the same silhouette in the hat three times.
+ */
+const CRATE_VARIANTS: ShapeDef[] = SHAPE_DEFS.flatMap((s) => {
+  if (!isCrateShape(s)) return []
+  const base = crateTier(s.cells[0]![2])
+  const out: ShapeDef[] = []
+  for (let tier = base + 1; tier < CRATE_LADDER.length; tier++) {
+    out.push({
+      ...s,
+      id: crateVariantId(s.id, tier),
+      cells: s.cells.map(([dx, dy]) => [dx, dy, CRATE_LADDER[tier]!] as [number, number, string]),
+      roofs: s.roofs ? [...s.roofs] : undefined
+    })
+  }
+  return out
+})
+
 export const SHAPE_BY_ID: Record<string, ShapeDef> = Object.fromEntries(
-  SHAPE_DEFS.map((s) => [s.id, s])
+  [...SHAPE_DEFS, ...CRATE_VARIANTS].map((s) => [s.id, s])
 )
+
+/**
+ * The tier of `id` this player should actually be handed.
+ *
+ * Walks the ladder DOWN from the best crate they have unlocked and returns the
+ * first one they can pay for. If they can afford none of it — including the
+ * plain wood they started with — they get the cheapest anyway, because a hand
+ * has to show them what the cheapest thing costs.
+ *
+ * Anything that is not a pure crate shape (a cannon on its stone plinth, a
+ * banner, a hull) is returned untouched.
+ */
+export const upgradeCrateShape = (
+  id: string,
+  unlockedBlocks: Set<string>,
+  canAfford: (shapeId: string) => boolean
+): string => {
+  const base = SHAPE_BY_ID[id]
+  if (!base || !isCrateShape(base)) return id
+  const baseTier = crateTier(base.cells[0]![2])
+
+  for (let tier = CRATE_LADDER.length - 1; tier > baseTier; tier--) {
+    const mat = CRATE_LADDER[tier]!
+    if (!unlockedBlocks.has(mat)) continue
+    const vid = crateVariantId(id, tier)
+    if (SHAPE_BY_ID[vid] && canAfford(vid)) return vid
+  }
+  return id
+}
+
+/** The base shape an upgraded crate piece was cut from — `wL~spikes` → `wL`. */
+export const crateBaseId = (id: string): string => {
+  const cut = id.indexOf('~')
+  return cut === -1 ? id : id.slice(0, cut)
+}
 
 export const shapeDef = (id: string): ShapeDef => SHAPE_BY_ID[id] ?? SHAPE_DEFS[0]!
 
@@ -179,6 +282,81 @@ export const shapeBlockTypes = (id: string): string[] => {
   const seen: string[] = []
   for (const [, , typeId] of def.cells) if (!seen.includes(typeId)) seen.push(typeId)
   return seen
+}
+
+// ─── Rotation ───────────────────────────────────────────────────────────────
+//
+// Placement is a spatial puzzle, and a puzzle you cannot turn the piece in is
+// not a puzzle — it is a draw. Being handed an L that only ever opens one way
+// makes the deck feel like the thing playing, so every piece with more than one
+// cell can be turned in ninety-degree steps.
+//
+// A single cell is excluded because rotating it is a no-op that still costs the
+// player a keypress and a moment wondering whether the game heard them.
+
+/** How many distinct orientations a shape has: 1 (never rotates) or 4. */
+export const shapeRotations = (id: string): number =>
+  (SHAPE_BY_ID[id]?.cells.length ?? 0) > 1 ? 4 : 1
+
+/** Can this shape be turned at all? */
+export const canRotateShape = (id: string): boolean => shapeRotations(id) > 1
+
+/** Normalise a rotation index into 0..3. */
+export const normRot = (rot: number): number => ((rot % 4) + 4) % 4
+
+/**
+ * The cells of `id` turned `rot` quarter-turns clockwise on screen, re-anchored
+ * so the lowest-left cell is again at (0, 0).
+ *
+ * `dy` grows UPWARD (world space, not screen space), so a clockwise turn as the
+ * player sees it is `(x, y) → (y, -x)`.
+ *
+ * ROOFS are re-derived rather than carried. A gable is not a decoration bolted
+ * to a particular cell — it is the statement "this column ends here", so after
+ * a turn it belongs on whichever cells have open sky within the piece. Carrying
+ * the authored indices instead would rotate a horizontal roofed run into a
+ * vertical one whose BOTTOM cell is sealed, making the piece illegal against
+ * its own second cell — a shape that can never be placed in any orientation.
+ */
+export const rotatedShape = (
+  id: string, rot: number
+): { cells: Array<[number, number, string]>; roofs: number[] } => {
+  const def = SHAPE_BY_ID[id]
+  if (!def) return { cells: [], roofs: [] }
+  const r = canRotateShape(id) ? normRot(rot) : 0
+  if (r === 0) return { cells: def.cells.map((c) => [...c] as [number, number, string]), roofs: [...(def.roofs ?? [])] }
+
+  // Turn first, then re-anchor. Cell ORDER is preserved throughout so anything
+  // holding an index into `cells` still means the same physical cell.
+  const turned = def.cells.map(([dx, dy, typeId]) => {
+    let x = dx
+    let y = dy
+    for (let i = 0; i < r; i++) {
+      const nx = y
+      const ny = -x
+      x = nx
+      y = ny
+    }
+    return [x, y, typeId] as [number, number, string]
+  })
+  let minX = Infinity
+  let minY = Infinity
+  for (const [x, y] of turned) {
+    if (x < minX) minX = x
+    if (y < minY) minY = y
+  }
+  const cells = turned.map(([x, y, typeId]) => [x - minX, y - minY, typeId] as [number, number, string])
+
+  // Only a shape that was authored with gables keeps any: rotation must not
+  // invent a roof on a piece that never had one.
+  const roofs: number[] = []
+  if ((def.roofs?.length ?? 0) > 0) {
+    const occupied = new Set(cells.map(([x, y]) => `${x},${y}`))
+    cells.forEach(([x, y], i) => {
+      if (!occupied.has(`${x},${y + 1}`)) roofs.push(i)
+    })
+  }
+  return { cells, roofs }
 }
 
 export const shapeHasRoof = (id: string): boolean => (SHAPE_BY_ID[id]?.roofs?.length ?? 0) > 0

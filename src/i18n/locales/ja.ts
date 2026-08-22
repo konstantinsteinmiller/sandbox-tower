@@ -14,7 +14,11 @@ export default {
     'wave': 'ウェーブ', 'enemies': '敵', 'callWave': 'ウェーブを呼ぶ', 'callBoss': 'ボスを呼ぶ',
     'speed': '速度 {n}×',
     'speedOffer': '広告で2倍速',
-    'speedFor': '{n}分', 'recenter': '視点を戻す'
+    'speedFor': '{n}分', 'recenter': '視点を戻す',
+    'rotateLeft': '左に回転',
+    'rotateRight': '右に回転',
+    'arrowRain': '矢の雨',
+    'arrowRainAim': '戦場をタップして一斉射を呼びます'
   },
 
   'warnings': {
@@ -40,7 +44,8 @@ export default {
     'spend': 'コインが余っています。ツリーのランクは永続で、以降すべてのプレイに残ります。',
     'branches': '独立した3つのツリー：塔・港・工房。どれも他を必要としません。',
     'shape': '壁は前、砲は後ろ。当たらないブロックは建て直す必要もありません。',
-    'gold': '金はブロック強化に使えます。ブロックをタップ。金庫が毎ウェーブ鋳造します。'
+    'gold': '金はブロック強化に使えます。ブロックをタップ。金庫が毎ウェーブ鋳造します。',
+    'siegeReach': 'トレビュシェットは弓兵・大砲・ボンバードのどれも届かない距離に構えます。答えは臼砲、あるいは港の戦闘ガレー船です。'
   },
   'blocks': {
     'fortify': '棘を付ける',
@@ -104,7 +109,9 @@ export default {
       'mint': 'ウェーブを守り切るたびにコインを産出。',
       'spikes': '殴った敵は毎回そのダメージを自分で受けます。',
       'bombard': '砲弾を真上に打ち上げます。爆発は小さく、地上の敵のみ。'
-    }
+    },
+    'repair': '修理',
+    'repairCooldown': '{n}秒'
   },
 
   'enemies': {
@@ -215,7 +222,7 @@ export default {
       'rallyCry': '強化ブロックの効果 +{n}%。',
       'stockpiles': '経済ブロックの産出量 +{n}%。',
       'unlockMerge': '隣り合う同じブロック同士が合体します。最大3段階。',
-      'forgeWelds': '合成ブロックのダメージ+{n}%。',
+      'forgeWelds': '合成ブロックの出力がランクごとに +{n}%（ダメージ・棘・産出）。',
       'harbour': '水上に艦を係留。潜行中の敵を撃てるのは艦だけ。',
       'dockWorks': 'ランクごとに係留域が{n}マス広がる。',
       'unlockLongship': '盾を並べた船体に重銛を搭載。',
@@ -223,13 +230,13 @@ export default {
       'navalGunnery': '艦載兵器のダメージ+{n}%。',
       'unlockGalley': '青銅の衝角、甲板砲、戦闘楼。',
       'admiralty': '艦載兵器のダメージがさらに+{n}%。',
-      'foundations': 'すべてのブロックのHPが +{n}% で始まります。',
-      'sharpBolts': '全兵器のダメージがランクごとに +{n}%。',
+      'foundations': '塔のすべてのブロックのHPが +{n}% で始まります。',
+      'sharpBolts': '塔の兵器のダメージがランクごとに +{n}%。',
       'unlockBrace': '補強木箱を解放——木材の2倍のHP。',
       'lumberStock': '包囲戦開始時の木材がランクごとに +{n}。',
       'longSight': '全兵器の射程がランクごとに +{n}%。',
       'rapidFire': '全兵器の攻撃速度がランクごとに +{n}%。',
-      'reinforced': '全ブロックのHPがランクごとに +{n}%。',
+      'reinforced': '塔の全ブロックのHPがランクごとに +{n}%。',
       'unlockSawmill': '製材所を解放——毎ウェーブ木材を産出。',
       'quarryStock': '包囲戦開始時の石材がランクごとに +{n}。',
       'unlockMortar': '迫撃砲を解放——長射程の範囲ダメージ。',
@@ -239,7 +246,7 @@ export default {
       'unlockQuarry': '採石場を解放——毎ウェーブ石材を産出。',
       'richHauls': 'ウェーブ報酬がランクごとに +{n}%。',
       'wideFoundation': '建設可能幅がランクごとに {n} 列拡大。',
-      'siegeShells': '全兵器のダメージがランクごとに +{n}%。',
+      'siegeShells': '塔の兵器のダメージがランクごとに +{n}%。',
       'unlockFrost': '氷塔を解放——集団をまとめて減速。',
       'forkedBolts': '稲妻の跳ね先がランクごとに {n} 体増加。',
       'ironPlating': '全ブロックの装甲がランクごとに +{n}。',
@@ -247,7 +254,7 @@ export default {
       'unlockMint': '金鉱を解放——毎ウェーブコインを産出。',
       'looting': '敵のコイン落とし量がランクごとに +{n}%。',
       'overcharge': '全兵器の攻撃速度がランクごとに +{n}%。',
-      'masterwork': '全兵器のダメージがランクごとに +{n}%。',
+      'masterwork': '塔の兵器のダメージがランクごとに +{n}%。',
       'fieldRepairs': '防衛したウェーブごとに、各ブロックが最大HPの{n}%をランクごとに回復。',
       'greatFoundation': '建設可能幅がさらにランクごとに {n} 列拡大。',
       'warChest': 'ウェーブ報酬がランクごとに +{n}%。',

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { ENEMY_DEFS, isImmuneTo } from '@/game/enemies'
+import { ENEMY_DEFS, isImmuneTo, resistOf } from '@/game/enemies'
 import { BLOCK_DEFS } from '@/game/blocks'
 import { bombShare, countBombers, planWave } from '@/game/waves'
 
@@ -20,33 +20,46 @@ beforeEach(() => {
   localStorage.clear()
 })
 
-describe('projectile immunity', () => {
-  it('makes the ironclad ram immune to arrows and nothing else', () => {
-    expect(isImmuneTo('ironRam', 'bolt')).toBe(true)
-    expect(isImmuneTo('ironRam', 'ball')).toBe(false)
-    expect(isImmuneTo('ironRam', 'shell')).toBe(false)
-    expect(isImmuneTo('ironRam', 'zap')).toBe(false)
-  })
-
-  it('leaves every other enemy hittable by everything', () => {
-    for (const d of Object.values(ENEMY_DEFS)) {
-      if (d.id === 'ironRam') continue
-      expect(d.immuneTo, d.id).toBeUndefined()
+describe('arrow resistance', () => {
+  it('turns three quarters of an arrow aside on both rams, and nothing else', () => {
+    for (const id of ['ram', 'ironRam'] as const) {
+      expect(resistOf(id, 'bolt'), id).toBeCloseTo(0.75, 5)
+      expect(resistOf(id, 'ball'), id).toBe(0)
+      expect(resistOf(id, 'shell'), id).toBe(0)
+      expect(resistOf(id, 'zap'), id).toBe(0)
     }
   })
 
-  it('is answered by at least one starting weapon', () => {
-    // An immunity that no reachable block can bypass is not a puzzle, it is a
-    // wall. The Cannon is unlocked from the first run, so the answer always
+  it('stops short of immunity, so nothing invalidates a weapon outright', () => {
+    // Graded, not binary. An absolute immunity makes every archer in the tower
+    // stop firing and makes an AREA attack aimed at the thing do literally
+    // nothing — which reads as a bug rather than as a rule.
+    for (const d of Object.values(ENEMY_DEFS)) {
+      for (const kind of ['bolt', 'ball', 'shell', 'zap', 'frost'] as const) {
+        expect(isImmuneTo(d.id, kind), `${d.id}/${kind}`).toBe(false)
+      }
+    }
+  })
+
+  it('leaves every enemy but the rams taking full damage from everything', () => {
+    for (const d of Object.values(ENEMY_DEFS)) {
+      if (d.id === 'ram' || d.id === 'ironRam') continue
+      expect(d.resist, d.id).toBeUndefined()
+    }
+  })
+
+  it('is answered better by at least one starting weapon', () => {
+    // A resist that no reachable block can beat is not a puzzle, it is a wall.
+    // The Cannon is unlocked from the first run, so the better answer always
     // exists even if the player never touched the tech tree.
     const answers = Object.values(BLOCK_DEFS).filter(
-      (b) => b.weapon && !isImmuneTo('ironRam', b.weapon.projectile)
+      (b) => b.weapon && resistOf('ironRam', b.weapon.projectile) === 0
     )
     expect(answers.length).toBeGreaterThan(0)
     expect(answers.some((b) => !b.unlockNode)).toBe(true)
   })
 
-  it('does not spend arrows on a target it cannot hurt', async () => {
+  it('still lets archers shoot a ram — for a quarter of their worth', async () => {
     const g = await loadGame()
     g.startRun()
     g.wood.value = 999
@@ -54,20 +67,35 @@ describe('projectile immunity', () => {
     expect(g.placeBlock('archer', 1, 0)).toBe(true)
     g.callWave()
 
+    const def = ENEMY_DEFS.ironRam!
     const enemies = g.getEnemies()
     enemies.length = 0
-    const def = ENEMY_DEFS.ironRam!
-    enemies.push({
-      uid: 90_001, typeId: 'ironRam', x: -4, y: def.scale / 2,
-      hp: def.hp, maxHp: def.hp, dir: 1, cd: 999_999, targetUid: -1,
-      slowMs: 0, slowPct: 0, flash: 0, phase: 0, dying: 0
-    })
+    // Spawned through the real path, not hand-pushed into the array: a homing
+    // round resolves its target through `enemiesByUid`, so an enemy that was
+    // never registered there is one every arrow flies straight past.
+    g.debugSpawn(['ironRam'])
+    const ram = enemies.find((e) => e.typeId === 'ironRam')!
+    ram.x = -4
+    ram.cd = 999_999
+
+    // Its ceiling is the SPAWNED one — the wave's difficulty scaling is already
+    // on it, so the printed `def.hp` is not what is standing there.
+    const full = ram.maxHp
+    expect(full).toBeGreaterThan(0)
 
     advance(g, 3000)
 
-    // The Archery block has no legal target, so it must not have fired at all.
-    expect(g.getProjectiles()).toHaveLength(0)
-    expect(enemies[0]!.hp).toBe(def.hp)
+    // It IS a legal target now — a bad trade is still a trade, and a turret
+    // that refuses to take it leaves the player watching an idle tower.
+    expect(ram.hp).toBeLessThan(full)
+    // But a bad one. A fresh run has no damage tech, no ranks and no banners,
+    // so an arrow is worth exactly its printed damage — and what landed here
+    // must divide into whole arrows each worth a QUARTER of that.
+    const dealt = full - ram.hp
+    const quarterArrow = BLOCK_DEFS.archer!.weapon!.damage * 0.25
+    const arrows = dealt / quarterArrow
+    expect(arrows).toBeCloseTo(Math.round(arrows), 4)
+    expect(Math.round(arrows)).toBeGreaterThan(0)
   })
 })
 

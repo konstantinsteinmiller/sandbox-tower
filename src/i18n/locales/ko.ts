@@ -14,7 +14,11 @@ export default {
     'wave': '웨이브', 'enemies': '적', 'callWave': '웨이브 호출', 'callBoss': '보스 호출',
     'speed': '속도 {n}×',
     'speedOffer': '광고 보고 2배속',
-    'speedFor': '{n}분', 'recenter': '화면 중앙 정렬'
+    'speedFor': '{n}분', 'recenter': '화면 중앙 정렬',
+    'rotateLeft': '왼쪽으로 회전',
+    'rotateRight': '오른쪽으로 회전',
+    'arrowRain': '화살비',
+    'arrowRainAim': '전장을 탭해 일제 사격을 부르세요'
   },
 
   'warnings': {
@@ -40,7 +44,8 @@ export default {
     'spend': '쓸 코인이 남았습니다. 트리 등급은 영구적이며 이후 모든 판에 이어집니다.',
     'branches': '독립된 세 트리: 탑, 항구, 공방. 서로를 필요로 하지 않습니다.',
     'shape': '벽은 앞, 포는 뒤. 맞지 않는 블록은 다시 지을 일도 없습니다.',
-    'gold': '골드로 블록을 강화합니다 — 블록을 누르세요. 금고가 매 웨이브 더 만듭니다.'
+    'gold': '골드로 블록을 강화합니다 — 블록을 누르세요. 금고가 매 웨이브 더 만듭니다.',
+    'siegeReach': '트레뷰셋은 궁수, 대포, 봄바드 어느 것도 닿지 않는 거리에 자리 잡습니다. 답은 박격포 — 또는 항구의 전투 갤리선입니다.'
   },
   'blocks': {
     'fortify': '가시 설치',
@@ -104,7 +109,9 @@ export default {
       'mint': '웨이브를 막을 때마다 코인을 생산합니다.',
       'spikes': '때리는 적은 매번 그 피해를 그대로 되돌려 받습니다.',
       'bombard': '포탄을 수직으로 쏘아 올립니다. 폭발은 작고 지상 목표만 타격.'
-    }
+    },
+    'repair': '수리',
+    'repairCooldown': '{n}초'
   },
 
   'enemies': {
@@ -215,7 +222,7 @@ export default {
       'rallyCry': '강화 블록이 +{n}% 강해집니다.',
       'stockpiles': '경제 블록 산출량 +{n}%.',
       'unlockMerge': '나란한 같은 블록끼리 합쳐집니다. 최대 3단계.',
-      'forgeWelds': '합성 블록 피해 +{n}%.',
+      'forgeWelds': '합성 블록의 산출이 등급당 +{n}% — 피해, 가시, 생산.',
       'harbour': '물 위에 함선을 정박. 잠수한 적은 함선만 공격합니다.',
       'dockWorks': '등급마다 정박지가 {n}칸 넓어집니다.',
       'unlockLongship': '방패를 두른 선체에 중작살을 얹었습니다.',
@@ -223,13 +230,13 @@ export default {
       'navalGunnery': '함선 무기 피해 +{n}%.',
       'unlockGalley': '청동 충각, 갑판 포, 전투 누각.',
       'admiralty': '함선 무기 피해가 추가로 +{n}%.',
-      'foundations': '모든 블록이 체력 +{n}%로 시작합니다.',
-      'sharpBolts': '모든 무기의 피해가 등급당 +{n}%.',
+      'foundations': '탑의 모든 블록이 체력 +{n}%로 시작합니다.',
+      'sharpBolts': '탑 무기의 피해가 등급당 +{n}%.',
       'unlockBrace': '보강 상자 해금 — 목재의 두 배 체력.',
       'lumberStock': '공성전 시작 목재가 등급당 +{n}.',
       'longSight': '모든 무기의 사거리가 등급당 +{n}%.',
       'rapidFire': '모든 무기의 공격 속도가 등급당 +{n}%.',
-      'reinforced': '모든 블록의 체력이 등급당 +{n}%.',
+      'reinforced': '탑의 모든 블록의 체력이 등급당 +{n}%.',
       'unlockSawmill': '제재소 해금 — 매 웨이브 목재 생산.',
       'quarryStock': '공성전 시작 석재가 등급당 +{n}.',
       'unlockMortar': '박격포 해금 — 장거리 범위 피해.',
@@ -239,7 +246,7 @@ export default {
       'unlockQuarry': '채석장 해금 — 매 웨이브 석재 생산.',
       'richHauls': '웨이브 보상이 등급당 +{n}%.',
       'wideFoundation': '건설 가능 폭이 등급당 {n}칸 확장.',
-      'siegeShells': '모든 무기의 피해가 등급당 +{n}%.',
+      'siegeShells': '탑 무기의 피해가 등급당 +{n}%.',
       'unlockFrost': '서리 첨탑 해금 — 무리 전체를 둔화.',
       'forkedBolts': '번개가 등급당 적 {n}명에게 더 튑니다.',
       'ironPlating': '모든 블록의 방어가 등급당 +{n}.',
@@ -247,7 +254,7 @@ export default {
       'unlockMint': '금광 해금 — 매 웨이브 코인 생산.',
       'looting': '적의 코인 드롭이 등급당 +{n}%.',
       'overcharge': '모든 무기의 공격 속도가 등급당 +{n}%.',
-      'masterwork': '모든 무기의 피해가 등급당 +{n}%.',
+      'masterwork': '탑 무기의 피해가 등급당 +{n}%.',
       'fieldRepairs': '방어한 웨이브마다 각 블록이 최대 체력의 {n}%를 등급당 회복.',
       'greatFoundation': '건설 가능 폭이 등급당 {n}칸 더 확장.',
       'warChest': '웨이브 보상이 등급당 +{n}%.',

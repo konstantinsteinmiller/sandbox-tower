@@ -199,6 +199,16 @@ export interface Block {
   burnDps?: number
   /** Placement animation clock in ms; drives the squash-stretch pop-in. */
   bornAt: number
+  /**
+   * Sim clock at which this block was last patched from the inspector, for the
+   * per-block repair cooldown.
+   *
+   * Deliberately NOT in the run snapshot. It is a twenty-second lockout on one
+   * block, and persisting it would mean a reload could hand back a cooldown
+   * that has no wave left to matter in — while carrying it across the clock
+   * reset a resume performs would be worse than not carrying it at all.
+   */
+  repairedAt?: number
   /** Recoil offset for weapons, in cells along the aim direction. Decays. */
   recoil: number
   /** Last aim angle in radians, kept so idle turrets don't snap back to 0. */
@@ -243,15 +253,23 @@ export interface EnemyDef {
   /** Fraction of incoming damage ignored when hit from the front. */
   frontArmorPct?: number
   /**
-   * Projectile kinds this enemy simply shrugs off.
+   * Fraction of a projectile's damage this enemy's plating turns aside, by
+   * round type. `0.75` means arrows land for a quarter of their worth.
    *
-   * Distinct from armour, which only scales damage: an immunity is absolute, so
-   * it invalidates a whole weapon rather than making it worse. Weapons retarget
-   * away from anything they cannot hurt (see `pickTarget`) so a tower of
-   * archers does not stand there plinking uselessly — and the shot that does
-   * land plays a deflect, which is how the player learns the rule.
+   * Graded rather than binary, and that distinction is the whole design. A
+   * blanket immunity invalidates a weapon outright: the tower retargets away
+   * (see `pickTarget`), every archer the player owns becomes dead weight for
+   * the duration, and any AREA attack aimed at the thing simply does nothing —
+   * which reads as a bug, not as a rule. A heavy resist says the same thing
+   * without lying: arrows still hit, they still chip, they are just a bad
+   * answer, and the player is being pushed toward a better one rather than
+   * locked out of acting.
+   *
+   * `1` is still available and still means absolute — `isImmuneTo` is defined
+   * as exactly that — so the old behaviour is expressible where a unit really
+   * should invalidate a weapon.
    */
-  immuneTo?: ProjectileKind[]
+  resist?: Partial<Record<ProjectileKind, number>>
   /**
    * Air bombardment.
    *
@@ -291,6 +309,18 @@ export interface EnemyDef {
     ladderHeight?: number
     /** Splash radius of its shot, in cells. */
     splash?: number
+    /**
+     * Throws a REAL round instead of applying its damage where it stands.
+     *
+     * A standoff engine used to hit by fiat: the blast bloomed on the target
+     * the instant the cooldown elapsed, with nothing crossing the twelve cells
+     * in between. The machine mimed a throw on its own unrelated clock and no
+     * stone ever left it. Lobbed engines spawn a hostile ballistic round —
+     * the same integrator the bombers already drop through — so the shot is a
+     * thing that flies, arcs, and lands, and the arm that threw it is animated
+     * from the same cooldown that spawned it.
+     */
+    lobbed?: boolean
   }
   /** True for the every-10th-wave boss (drives the boss banner + music). */
   boss?: boolean
@@ -458,6 +488,10 @@ export interface RunSnapshot {
   /** The four shape ids currently on offer. Persisted so a reload cannot be
    *  used to reroll a hand the player doesn't like. */
   offers: string[]
+  /** Cleared waves banked toward the next Arrow Rain, as a whole count.
+   *  Optional so older snapshots still load — they restore to a full charge,
+   *  which is the forgiving direction. */
+  arrowRain?: number
   startedAt: number
 }
 

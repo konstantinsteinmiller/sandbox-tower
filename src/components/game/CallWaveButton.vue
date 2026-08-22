@@ -107,7 +107,9 @@ const offerDisabled = computed(
         span.call-wave__label {{ bossIncoming ? t('hud.callBoss') : t('hud.callWave') }}
         span.call-wave__meta
           span.call-wave__clock {{ clock }}
-          span.call-wave__bonus(v-if="bonusPct > 0") +{{ bonusPct }}%
+          span.call-wave__bonus(v-if="bonusPct > 0")
+            | +{{ bonusPct }}%
+            IconCoin.call-wave__bonus-icon
 
     //- BATTLE, buff not owned: the OFFER. Says what it gives and what it costs.
     button.call-wave__btn.is-speed.is-offer(
@@ -219,6 +221,13 @@ const offerDisabled = computed(
   // White on a deeper green: the dark-on-light version was the odd one out in a
   // HUD where every other number is white with a hard shadow, and it was the
   // first thing to become unreadable at a small size.
+  //
+  // The coin trails the number for the same reason it does on the speed offer:
+  // "+15%" alone does not say WHAT is 15 % better, and the bonus is paid in the
+  // one currency the HUD already draws in the badge above it.
+  display: inline-flex
+  align-items: center
+  gap: 0.2em
   color: #fff
   background-color: #1f9d4d
   border: 1px solid rgba(8, 40, 20, 0.7)
@@ -227,6 +236,11 @@ const offerDisabled = computed(
   font-weight: 900
   font-size: clamp(0.5rem, 2.2vw, 0.68rem)
   text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.65)
+
+.call-wave__bonus-icon
+  width: 1.15em
+  height: 1.15em
+  flex-shrink: 0
 
 .call-wave__speed-icon
   width: clamp(0.8rem, 3.4vw, 1.1rem)

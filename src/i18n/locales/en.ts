@@ -23,7 +23,11 @@ export default {
     'speed': 'Speed {n}×',
     'speedOffer': 'Double speed for an ad',
     'speedFor': '{n} min',
-    'recenter': 'Recentre the view'
+    'recenter': 'Recentre the view',
+    'rotateLeft': 'Rotate left',
+    'rotateRight': 'Rotate right',
+    'arrowRain': 'Arrow Rain',
+    'arrowRainAim': 'Tap the battlefield to call the volley'
   },
 
   // ─── Control hints ────────────────────────────────────────────────────────
@@ -67,11 +71,14 @@ export default {
     'spend': 'You have coins to spend. Tech-tree ranks are permanent — they carry into every future run.',
     'branches': 'Three separate trees: the tower, the harbour, and the works. None of them needs the others.',
     'shape': 'Walls in front, guns behind. A block that never gets hit is a block you never rebuild.',
-    'gold': 'Gold buys block upgrades — tap any block to spend it. Coffers mint more every wave.'
+    'gold': 'Gold buys block upgrades — tap any block to spend it. Coffers mint more every wave.',
+    'siegeReach': 'Trebuchets stand off further than an archer, cannon or bombard can reach. Answer them with a Mortar — or a War Galley from the harbour.'
   },
   'blocks': {
     'fortify': 'Add spikes',
     'mergeTier': 'Merged {n}×',
+    'repair': 'Repair',
+    'repairCooldown': '{n}s',
     'sell': 'Sell',
     'upgrade': 'Upgrade',
     'upgradeMax': 'Fully upgraded',
@@ -290,7 +297,7 @@ export default {
     },
     'descriptions': {
       'unlockMerge': 'Two matching blocks side by side fuse into one, up to three deep.',
-      'forgeWelds': 'Merged blocks deal +{n}% damage',
+      'forgeWelds': 'Merged blocks produce +{n}% more per rank — damage, thorns and yield.',
       'logistics': 'Unlocks the Stone Pit — a cheap producer you can afford in the run it matters.',
       'unlockCoffer': 'Unlocks the Coffer, the only block that mints run gold.',
       'yields': 'Every economy block yields +{n}% more.',
@@ -304,13 +311,13 @@ export default {
       'navalGunnery': 'Ship weapons deal +{n}% damage.',
       'unlockGalley': 'Bronze ram, deck bombard and a fighting castle.',
       'admiralty': 'Ship weapons deal a further +{n}% damage.',
-      'foundations': 'Every block starts with +{n}% HP.',
-      'sharpBolts': 'All weapons deal +{n}% damage per rank.',
+      'foundations': 'Every tower block starts with +{n}% HP.',
+      'sharpBolts': 'Tower weapons deal +{n}% damage per rank.',
       'unlockBrace': 'Unlocks the Braced Crate — twice the HP of plain wood.',
       'lumberStock': 'Start each siege with +{n} wood per rank.',
       'longSight': 'All weapons reach +{n}% further per rank.',
       'rapidFire': 'All weapons fire {n}% faster per rank.',
-      'reinforced': 'Every block gains +{n}% HP per rank.',
+      'reinforced': 'Every tower block gains +{n}% HP per rank.',
       'unlockSawmill': 'Unlocks the Sawmill — produces wood each wave.',
       'quarryStock': 'Start each siege with +{n} stone per rank.',
       'unlockMortar': 'Unlocks the Mortar — long-range arcing splash.',
@@ -320,7 +327,7 @@ export default {
       'unlockQuarry': 'Unlocks the Quarry — produces stone each wave.',
       'richHauls': 'Wave rewards +{n}% per rank.',
       'wideFoundation': 'Build {n} columns wider per rank.',
-      'siegeShells': 'All weapons deal +{n}% damage per rank.',
+      'siegeShells': 'Tower weapons deal +{n}% damage per rank.',
       'unlockFrost': 'Unlocks the Frost Spire — slows whole clusters.',
       'forkedBolts': 'Lightning forks to {n} extra enemy per rank.',
       'ironPlating': 'Every block gains +{n} armour per rank.',
@@ -328,7 +335,7 @@ export default {
       'unlockMint': 'Unlocks the Gold Mine — produces coins each wave.',
       'looting': 'Enemies drop +{n}% more coins per rank.',
       'overcharge': 'All weapons fire {n}% faster per rank.',
-      'masterwork': 'All weapons deal +{n}% damage per rank.',
+      'masterwork': 'Tower weapons deal +{n}% damage per rank.',
       'fieldRepairs': 'Every block heals {n}% of its max HP per cleared wave, per rank.',
       'greatFoundation': 'Build {n} more columns wider per rank.',
       'warChest': 'Wave rewards +{n}% per rank.',

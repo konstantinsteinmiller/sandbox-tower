@@ -14,7 +14,11 @@ export default {
     'wave': 'Gelombang', 'enemies': 'Musuh', 'callWave': 'Panggil gelombang', 'callBoss': 'Panggil bos',
     'speed': 'Kecepatan {n}×',
     'speedOffer': 'Kecepatan ganda dengan satu iklan',
-    'speedFor': '{n} mnt', 'recenter': 'Pusatkan tampilan'
+    'speedFor': '{n} mnt', 'recenter': 'Pusatkan tampilan',
+    'rotateLeft': 'Putar ke kiri',
+    'rotateRight': 'Putar ke kanan',
+    'arrowRain': 'Hujan Panah',
+    'arrowRainAim': 'Ketuk medan perang untuk memanggil tembakan'
   },
 
   'warnings': {
@@ -40,7 +44,8 @@ export default {
     'spend': 'Koinmu masih ada. Peringkat di pohon bersifat permanen dan terbawa ke setiap ronde.',
     'branches': 'Tiga pohon terpisah: menara, pelabuhan, dan bengkel. Tidak ada yang saling membutuhkan.',
     'shape': 'Dinding di depan, senjata di belakang. Blok yang tak pernah kena tak pernah perlu dibangun ulang.',
-    'gold': 'Emas membeli peningkatan blok — ketuk blok mana pun. Peti harta mencetaknya tiap gelombang.'
+    'gold': 'Emas membeli peningkatan blok — ketuk blok mana pun. Peti harta mencetaknya tiap gelombang.',
+    'siegeReach': 'Trebuchet berdiri lebih jauh dari jangkauan pemanah, meriam, atau bombard. Jawab dengan Mortar — atau Galai perang dari pelabuhan.'
   },
   'blocks': {
     'fortify': 'Tambah duri',
@@ -104,7 +109,9 @@ export default {
       'mint': 'Menghasilkan koin di akhir setiap gelombang yang bertahan.',
       'spikes': 'Penyerang melukai diri sendiri setiap kali memukulnya.',
       'bombard': 'Melontarkan peluru lurus ke atas. Ledakan kecil, hanya target darat.'
-    }
+    },
+    'repair': 'Perbaiki',
+    'repairCooldown': '{n} d'
   },
 
   'enemies': {
@@ -215,7 +222,7 @@ export default {
       'rallyCry': 'Blok penguat +{n}% lebih kuat.',
       'stockpiles': 'Setiap blok ekonomi menghasilkan +{n}% lebih banyak.',
       'unlockMerge': 'Dua blok sama berdampingan menyatu, hingga tiga tingkat.',
-      'forgeWelds': 'Blok yang digabung memberi +{n}% kerusakan.',
+      'forgeWelds': 'Blok yang digabung menghasilkan +{n}% lebih per peringkat: kerusakan, duri, dan hasil.',
       'harbour': 'Tambatkan kapal di air. Hanya kapal yang mengenai musuh menyelam.',
       'dockWorks': 'Dermaga {n} petak lebih lebar per peringkat.',
       'unlockLongship': 'Lambung berperisai dengan harpun berat.',
@@ -223,13 +230,13 @@ export default {
       'navalGunnery': 'Senjata kapal memberi +{n}% kerusakan.',
       'unlockGalley': 'Pendobrak perunggu, bombarde, dan menara tempur.',
       'admiralty': 'Senjata kapal memberi +{n}% kerusakan lagi.',
-      'foundations': 'Setiap blok mulai dengan +{n}% HP.',
-      'sharpBolts': 'Semua senjata memberi +{n}% kerusakan per peringkat.',
+      'foundations': 'Setiap blok menara mulai dengan +{n}% HP.',
+      'sharpBolts': 'Senjata menara memberi +{n}% kerusakan per peringkat.',
       'unlockBrace': 'Membuka Peti Diperkuat — dua kali HP kayu.',
       'lumberStock': 'Mulai tiap pengepungan dengan +{n} kayu per peringkat.',
       'longSight': 'Jangkauan semua senjata +{n}% per peringkat.',
       'rapidFire': 'Semua senjata menembak {n}% lebih cepat per peringkat.',
-      'reinforced': 'Setiap blok mendapat +{n}% HP per peringkat.',
+      'reinforced': 'Setiap blok menara mendapat +{n}% HP per peringkat.',
       'unlockSawmill': 'Membuka Penggergajian — menghasilkan kayu tiap gelombang.',
       'quarryStock': 'Mulai tiap pengepungan dengan +{n} batu per peringkat.',
       'unlockMortar': 'Membuka Mortir — kerusakan area jarak jauh.',
@@ -239,7 +246,7 @@ export default {
       'unlockQuarry': 'Membuka Tambang Batu — menghasilkan batu tiap gelombang.',
       'richHauls': 'Hadiah gelombang +{n}% per peringkat.',
       'wideFoundation': 'Bangun {n} kolom lebih lebar per peringkat.',
-      'siegeShells': 'Semua senjata memberi +{n}% kerusakan per peringkat.',
+      'siegeShells': 'Senjata menara memberi +{n}% kerusakan per peringkat.',
       'unlockFrost': 'Membuka Menara Es — memperlambat seluruh kelompok.',
       'forkedBolts': 'Petir melompat ke {n} musuh tambahan per peringkat.',
       'ironPlating': 'Setiap blok mendapat +{n} armor per peringkat.',
@@ -247,7 +254,7 @@ export default {
       'unlockMint': 'Membuka Tambang Emas — menghasilkan koin tiap gelombang.',
       'looting': 'Musuh menjatuhkan +{n}% lebih banyak koin per peringkat.',
       'overcharge': 'Semua senjata menembak {n}% lebih cepat per peringkat.',
-      'masterwork': 'Semua senjata memberi +{n}% kerusakan per peringkat.',
+      'masterwork': 'Senjata menara memberi +{n}% kerusakan per peringkat.',
       'fieldRepairs': 'Setiap blok memulihkan {n}% HP maks. per gelombang yang ditahan, per peringkat.',
       'greatFoundation': 'Bangun {n} kolom lagi lebih lebar per peringkat.',
       'warChest': 'Hadiah gelombang +{n}% per peringkat.',

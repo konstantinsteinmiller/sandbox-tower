@@ -1,6 +1,6 @@
 # Tower Siege
 
-A mobile-first 2D build-and-defend game. Stack blocks into a tower, bolt cannons
+A 2D build-and-defend a tower game. Stack blocks into a tower, bolt cannons
 and lightning coils onto it, and hold off waves of enemies marching in from both
 sides. Every block has HP. When one breaks, anything it was holding up
 **collapses**. The run ends when the Gate falls — then you spend what you earned

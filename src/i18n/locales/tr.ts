@@ -14,7 +14,11 @@ export default {
     'wave': 'Dalga', 'enemies': 'Düşmanlar', 'callWave': 'Dalgayı çağır', 'callBoss': 'Boss’u çağır',
     'speed': 'Hız {n}×',
     'speedOffer': 'Bir reklamla çift hız',
-    'speedFor': '{n} dk', 'recenter': 'Görünümü ortala'
+    'speedFor': '{n} dk', 'recenter': 'Görünümü ortala',
+    'rotateLeft': 'Sola döndür',
+    'rotateRight': 'Sağa döndür',
+    'arrowRain': 'Ok Yağmuru',
+    'arrowRainAim': 'Yaylım ateşi için savaş alanına dokun'
   },
 
   'warnings': {
@@ -40,7 +44,8 @@ export default {
     'spend': 'Harcanacak paran var. Ağaç rütbeleri kalıcıdır, sonraki her tura taşınır.',
     'branches': 'Üç ayrı ağaç: kule, liman ve atölye. Hiçbiri diğerine ihtiyaç duymaz.',
     'shape': 'Duvarlar önde, silahlar arkada. Hiç vurulmayan blok, hiç yeniden yapılmayan bloktur.',
-    'gold': 'Altın blok yükseltmesi alır — bir bloğa dokun. Kasalar her dalga daha fazlasını basar.'
+    'gold': 'Altın blok yükseltmesi alır — bir bloğa dokun. Kasalar her dalga daha fazlasını basar.',
+    'siegeReach': 'Mancınıklar okçu, top ya da bombardanın erişemeyeceği kadar uzakta durur. Cevabı bir Havan — ya da limandan bir Savaş Kadırgası.'
   },
   'blocks': {
     'fortify': 'Diken ekle',
@@ -104,7 +109,9 @@ export default {
       'mint': 'Atlatılan her dalganın sonunda altın üretir.',
       'spikes': 'Saldıranlar her vuruşta kendilerini yaralar.',
       'bombard': 'Mermiyi dik yukarı fırlatır. Küçük patlama, sadece kara hedefleri.'
-    }
+    },
+    'repair': 'Onar',
+    'repairCooldown': '{n} sn'
   },
 
   'enemies': {
@@ -215,7 +222,7 @@ export default {
       'rallyCry': 'Güçlendirme blokları +%{n} daha güçlü.',
       'stockpiles': 'Her ekonomi bloğu +%{n} daha fazla verir.',
       'unlockMerge': 'Yan yana iki aynı blok birleşir, üç kademeye kadar.',
-      'forgeWelds': 'Birleşik bloklar +%{n} hasar verir.',
+      'forgeWelds': 'Birleşik bloklar kademe başına +%{n} daha fazla üretir: hasar, diken ve verim.',
       'harbour': 'Gemileri suya demirle. Batıklara yalnızca onlar vurur.',
       'dockWorks': 'Her rütbede rıhtım {n} kare genişler.',
       'unlockLongship': 'Ağır zıpkınlı, kalkanlı bir gövde.',
@@ -223,13 +230,13 @@ export default {
       'navalGunnery': 'Gemi silahları +%{n} hasar verir.',
       'unlockGalley': 'Bronz mahmuz, bombarda ve savaş kulesi.',
       'admiralty': 'Gemi silahları +%{n} daha fazla hasar verir.',
-      'foundations': 'Her blok +%{n} CP ile başlar.',
-      'sharpBolts': 'Tüm silahlar kademe başına +%{n} hasar verir.',
+      'foundations': 'Her kule bloğu +%{n} CP ile başlar.',
+      'sharpBolts': 'Kule silahları kademe başına +%{n} hasar verir.',
       'unlockBrace': 'Takviyeli sandığı açar — ahşabın iki katı CP.',
       'lumberStock': 'Her kuşatmaya kademe başına +{n} odunla başla.',
       'longSight': 'Tüm silahlar kademe başına +%{n} daha uzağa erişir.',
       'rapidFire': 'Tüm silahlar kademe başına %{n} daha hızlı ateş eder.',
-      'reinforced': 'Her blok kademe başına +%{n} CP kazanır.',
+      'reinforced': 'Her kule bloğu kademe başına +%{n} CP kazanır.',
       'unlockSawmill': 'Kereste fabrikasını açar — her dalgada odun üretir.',
       'quarryStock': 'Her kuşatmaya kademe başına +{n} taşla başla.',
       'unlockMortar': 'Havanı açar — uzun menzilli alan hasarı.',
@@ -239,7 +246,7 @@ export default {
       'unlockQuarry': 'Taş ocağını açar — her dalgada taş üretir.',
       'richHauls': 'Dalga ödülleri kademe başına +%{n}.',
       'wideFoundation': 'Kademe başına {n} sütun daha geniş inşa et.',
-      'siegeShells': 'Tüm silahlar kademe başına +%{n} hasar verir.',
+      'siegeShells': 'Kule silahları kademe başına +%{n} hasar verir.',
       'unlockFrost': 'Buz kulesini açar — tüm grupları yavaşlatır.',
       'forkedBolts': 'Yıldırım kademe başına {n} düşmana daha sıçrar.',
       'ironPlating': 'Her blok kademe başına +{n} zırh kazanır.',
@@ -247,7 +254,7 @@ export default {
       'unlockMint': 'Altın madenini açar — her dalgada altın üretir.',
       'looting': 'Düşmanlar kademe başına +%{n} daha fazla altın düşürür.',
       'overcharge': 'Tüm silahlar kademe başına %{n} daha hızlı ateş eder.',
-      'masterwork': 'Tüm silahlar kademe başına +%{n} hasar verir.',
+      'masterwork': 'Kule silahları kademe başına +%{n} hasar verir.',
       'fieldRepairs': 'Her blok, durdurulan dalga ve kademe başına maks. CP’sinin %{n}’sını yeniler.',
       'greatFoundation': 'Kademe başına {n} sütun daha geniş inşa et.',
       'warChest': 'Dalga ödülleri kademe başına +%{n}.',

@@ -38,6 +38,15 @@ export type FxEvent =
   | { kind: 'waveClear'; x: number; y: number; wave: number }
   | { kind: 'coinPayout'; x: number; y: number; amount: number }
   | { kind: 'thorns'; x: number; y: number }
+  /** A block patched back to full from the inspector. */
+  | { kind: 'repair'; x: number; y: number }
+  /**
+   * A paid arrow volley falling on a stretch of the field.
+   *
+   * `x` is the centre of the beaten zone and `radius` its half-width; the
+   * renderer owns everything about how it looks.
+   */
+  | { kind: 'arrowRain'; x: number; y: number; radius: number }
   /** A round bounced off something immune to it — the "arrows do nothing" tell. */
   | { kind: 'deflect'; x: number; y: number }
   /** Orphaned rubble hit something. `impact` is 0..1 of a lethal fall. */

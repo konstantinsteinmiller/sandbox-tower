@@ -59,9 +59,11 @@ const useCheats = () => {
 
   const { addCoins } = useTowerEconomy()
 
-  // Dev shortcuts, retargeted to Tower Siege. Waves are simulated rather than
-  // jumped to (there is no "set wave" that produces a sensible tower), so the
-  // useful cheats are resource / coin injection and wave + speed control.
+  // Dev shortcuts, retargeted to Tower Siege: resource / coin injection, wave
+  // and speed control, and a jump straight to a wave number.
+  //
+  // The jump does not fake a tower to go with it — see `debugSetWave` — so the
+  // usual pairing is resources first, build something, then jump.
   //
   // The simulation is reached through a DYNAMIC import, never a static one.
   // `useCheats` is called from `App.vue`, which is on the eager boot path — a
@@ -94,6 +96,40 @@ const useCheats = () => {
     })
   }
   publishDebugHandle()
+
+  // ── Jump to a wave ──
+  //
+  // `ctrl+shift+alt+<digit>`, typed as many digits as the wave needs: 1 then 5
+  // is wave 15, 2 then 0 is wave 20, a lone 7 is wave 7. The digits accumulate
+  // into a buffer that commits on its own a beat after the last keypress, so
+  // there is nothing to confirm and no mode to leave.
+  //
+  // A window rather than an Enter key because the whole point is to get to wave
+  // 20 without ceremony, and because a single digit has to work too — which it
+  // cannot if the sequence needs terminating.
+  const JUMP_WINDOW_MS = 800
+  let jumpBuffer = ''
+  let jumpTimer: ReturnType<typeof setTimeout> | null = null
+
+  const commitWaveJump = (): void => {
+    const target = Number(jumpBuffer)
+    jumpBuffer = ''
+    jumpTimer = null
+    if (!Number.isFinite(target) || target < 1) return
+    withGame((game) => {
+      game.debugSetWave(target)
+      console.warn(`[CHEAT] Jumped to wave ${target}. Build phase is open.`)
+    })
+  }
+
+  const pushWaveDigit = (digit: string): void => {
+    // Four digits is past anything the curve does anything interesting at, and
+    // capping stops a stuck key turning into a nonsense wave number.
+    jumpBuffer = (jumpBuffer + digit).slice(-4)
+    if (jumpTimer !== null) clearTimeout(jumpTimer)
+    jumpTimer = setTimeout(commitWaveJump, JUMP_WINDOW_MS)
+    console.warn(`[CHEAT] Wave ${jumpBuffer}…`)
+  }
 
   const cheatsMap: Record<string, () => void> = {
     'ctrl+shift+alt+k': () => {
@@ -144,6 +180,20 @@ const useCheats = () => {
   const handleKeyDown = (e: KeyboardEvent) => {
     const key = normalizeKey(e)
     if (key) heldKeys.add(key)
+
+    // Digits are handled before the shortcut table, because they are the only
+    // binding that composes: each one extends a number rather than firing an
+    // action, and routing them through `cheatsMap` would need ten entries that
+    // all did the same thing.
+    if (e.ctrlKey || e.metaKey) {
+      const digit = e.code.match(/^(?:Digit|Numpad)(\d)$/)
+      if (digit && e.shiftKey && e.altKey) {
+        e.preventDefault()
+        pushWaveDigit(digit[1]!)
+        return
+      }
+    }
+
     const shortcut = buildShortcut(e)
     if (cheatsMap[shortcut]) {
       e.preventDefault()
@@ -167,6 +217,7 @@ const useCheats = () => {
   })
 
   onUnmounted(() => {
+    if (jumpTimer !== null) clearTimeout(jumpTimer)
     window.removeEventListener('keydown', handleKeyDown)
     window.removeEventListener('keyup', handleKeyUp)
     window.removeEventListener('blur', handleBlur)

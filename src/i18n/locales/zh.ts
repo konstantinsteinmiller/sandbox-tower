@@ -14,7 +14,11 @@ export default {
     'wave': '波次', 'enemies': '敌人', 'callWave': '召唤波次', 'callBoss': '召唤首领',
     'speed': '速度 {n}×',
     'speedOffer': '看广告获得双倍速度',
-    'speedFor': '{n} 分钟', 'recenter': '视角复位'
+    'speedFor': '{n} 分钟', 'recenter': '视角复位',
+    'rotateLeft': '向左旋转',
+    'rotateRight': '向右旋转',
+    'arrowRain': '箭雨',
+    'arrowRainAim': '点击战场召唤齐射'
   },
 
   'warnings': {
@@ -40,7 +44,8 @@ export default {
     'spend': '你还有金币没花。科技树等级是永久的，会带入之后每一局。',
     'branches': '三棵独立的树：高塔、港口和工坊。彼此互不依赖。',
     'shape': '墙在前，炮在后。挨不到打的方块，永远不用重建。',
-    'gold': '金用来升级方块——点一下任意方块。金匣每波都会产出更多。'
+    'gold': '金用来升级方块——点一下任意方块。金匣每波都会产出更多。',
+    'siegeReach': '投石机停在弓箭手、火炮和臼炮都够不到的地方。用迫击炮回敬它——或者港口的战斗桨帆船。'
   },
   'blocks': {
     'fortify': '加装尖刺',
@@ -104,7 +109,9 @@ export default {
       'mint': '每守住一波结束时产出金币。',
       'spikes': '近战攻击它的敌人每次都会被反伤。',
       'bombard': '垂直抛射炮弹。爆炸范围很小，只能打地面目标。'
-    }
+    },
+    'repair': '修理',
+    'repairCooldown': '{n}秒'
   },
 
   'enemies': {
@@ -215,7 +222,7 @@ export default {
       'rallyCry': '增益方块强度 +{n}%。',
       'stockpiles': '所有经济方块产出 +{n}%。',
       'unlockMerge': '相邻的两个同种方块会合成一个，最多三级。',
-      'forgeWelds': '合成方块伤害 +{n}%。',
+      'forgeWelds': '合成方块每级产出 +{n}%：伤害、尖刺与产量。',
       'harbour': '在水面停泊战船。只有它们能打到潜行的敌人。',
       'dockWorks': '每级停泊区加宽 {n} 格。',
       'unlockLongship': '挂盾船体，配重型鱼叉。',
@@ -223,13 +230,13 @@ export default {
       'navalGunnery': '舰载武器伤害 +{n}%。',
       'unlockGalley': '青铜撞角、甲板臼炮与战斗楼。',
       'admiralty': '舰载武器伤害再 +{n}%。',
-      'foundations': '每个方块初始生命值 +{n}%。',
-      'sharpBolts': '所有武器每级伤害 +{n}%。',
+      'foundations': '塔上每个方块初始生命值 +{n}%。',
+      'sharpBolts': '塔上武器每级伤害 +{n}%。',
       'unlockBrace': '解锁加固木箱——生命值是木材的两倍。',
       'lumberStock': '每级围攻开局多 {n} 木材。',
       'longSight': '所有武器每级射程 +{n}%。',
       'rapidFire': '所有武器每级射速 +{n}%。',
-      'reinforced': '每个方块每级生命值 +{n}%。',
+      'reinforced': '塔上每个方块每级生命值 +{n}%。',
       'unlockSawmill': '解锁锯木厂——每波产出木材。',
       'quarryStock': '每级围攻开局多 {n} 石材。',
       'unlockMortar': '解锁迫击炮——远程范围伤害。',
@@ -239,7 +246,7 @@ export default {
       'unlockQuarry': '解锁采石场——每波产出石材。',
       'richHauls': '波次奖励每级 +{n}%。',
       'wideFoundation': '每级可多建造 {n} 列宽度。',
-      'siegeShells': '所有武器每级伤害 +{n}%。',
+      'siegeShells': '塔上武器每级伤害 +{n}%。',
       'unlockFrost': '解锁寒霜尖塔——减速整群敌人。',
       'forkedBolts': '闪电每级多跳跃 {n} 个敌人。',
       'ironPlating': '每个方块每级护甲 +{n}。',
@@ -247,7 +254,7 @@ export default {
       'unlockMint': '解锁金矿——每波产出金币。',
       'looting': '敌人每级多掉落 {n}% 金币。',
       'overcharge': '所有武器每级射速 +{n}%。',
-      'masterwork': '所有武器每级伤害 +{n}%。',
+      'masterwork': '塔上武器每级伤害 +{n}%。',
       'fieldRepairs': '每守住一波，每个方块按每级恢复 {n}% 最大生命值。',
       'greatFoundation': '每级再多建造 {n} 列宽度。',
       'warChest': '波次奖励每级 +{n}%。',

@@ -14,7 +14,11 @@ export default {
     'wave': 'To‘lqin', 'enemies': 'Dushmanlar', 'callWave': 'To‘lqinni chaqirish', 'callBoss': 'Bossni chaqirish',
     'speed': 'Tezlik {n}×',
     'speedOffer': 'Reklama uchun ikki barobar tezlik',
-    'speedFor': '{n} daq', 'recenter': 'Ko‘rinishni markazlash'
+    'speedFor': '{n} daq', 'recenter': 'Ko‘rinishni markazlash',
+    'rotateLeft': 'Chapga burish',
+    'rotateRight': 'O‘ngga burish',
+    'arrowRain': 'Kamon yomg‘iri',
+    'arrowRainAim': 'Zalpni chaqirish uchun jang maydoniga bosing'
   },
 
   'warnings': {
@@ -40,7 +44,8 @@ export default {
     'spend': 'Sizda tanga bor. Daraxt darajalari doimiy — har bir keyingi yurishga o‘tadi.',
     'branches': 'Uchta alohida daraxt: minora, port va ustaxona. Hech biri boshqasini talab qilmaydi.',
     'shape': 'Devor oldinda, qurol orqada. Tegmaydigan blokni qayta qurish shart emas.',
-    'gold': 'Oltin blok yaxshilashlarini sotib oladi — blokka bosing. Sandiqlar uni har to‘lqinda zarb qiladi.'
+    'gold': 'Oltin blok yaxshilashlarini sotib oladi — blokka bosing. Sandiqlar uni har to‘lqinda zarb qiladi.',
+    'siegeReach': 'Trebushetlar kamonchi, to‘p va bombarda yetmaydigan masofada turadi. Javob — mortira yoki bandargohdagi jangovar galera.'
   },
   'blocks': {
     'fortify': 'Tikanlar',
@@ -104,7 +109,9 @@ export default {
       'mint': 'Har bir qaytarilgan to‘lqin oxirida tanga beradi.',
       'spikes': 'Hujumchilar har zarbada undan jarohat oladi.',
       'bombard': 'Snaryadni tik yuqoriga otadi. Kichik portlash, faqat yerdagi nishonlar.'
-    }
+    },
+    'repair': 'Ta’mirlash',
+    'repairCooldown': '{n} s'
   },
 
   'enemies': {
@@ -215,7 +222,7 @@ export default {
       'rallyCry': 'Kuchaytirish bloklari +{n}% kuchliroq.',
       'stockpiles': 'Har bir iqtisodiy blok +{n}% ko‘proq beradi.',
       'unlockMerge': 'Yonma-yon turgan bir xil ikki blok birlashadi, uch darajagacha.',
-      'forgeWelds': 'Birlashgan bloklar +{n}% zarar yetkazadi.',
+      'forgeWelds': 'Birlashgan bloklar daraja boshiga +{n} % ko‘proq beradi: zarar, tikan va hosil.',
       'harbour': 'Kemalarni suvga qoʻying. Faqat ular suv ostidagilarga tegadi.',
       'dockWorks': 'Har daraja uchun bandargoh {n} katak kengroq.',
       'unlockLongship': 'Ogʻir garpunli qalqonli korpus.',
@@ -223,13 +230,13 @@ export default {
       'navalGunnery': 'Kema qurollari +{n}% zarar yetkazadi.',
       'unlockGalley': 'Bronza qoʻchqor, bombarda va jang qalʼasi.',
       'admiralty': 'Kema qurollari yana +{n}% zarar yetkazadi.',
-      'foundations': 'Har bir blok +{n} % JS bilan boshlanadi.',
-      'sharpBolts': 'Barcha qurollar daraja boshiga +{n} % zarar yetkazadi.',
+      'foundations': 'Minoraning har bir bloki +{n} % JS bilan boshlanadi.',
+      'sharpBolts': 'Minora qurollari daraja boshiga +{n} % zarar yetkazadi.',
       'unlockBrace': 'Mustahkam qutini ochadi — yog‘ochdan ikki barobar ko‘p JS.',
       'lumberStock': 'Har qamalni daraja boshiga +{n} yog‘och bilan boshlang.',
       'longSight': 'Barcha qurollar daraja boshiga +{n} % uzoqroq uradi.',
       'rapidFire': 'Barcha qurollar daraja boshiga {n} % tezroq otadi.',
-      'reinforced': 'Har bir blok daraja boshiga +{n} % JS oladi.',
+      'reinforced': 'Minoraning har bir bloki daraja boshiga +{n} % JS oladi.',
       'unlockSawmill': 'Arrachilikni ochadi — har to‘lqinda yog‘och beradi.',
       'quarryStock': 'Har qamalni daraja boshiga +{n} tosh bilan boshlang.',
       'unlockMortar': 'Minomyotni ochadi — uzoq masofadagi hududiy zarar.',
@@ -239,7 +246,7 @@ export default {
       'unlockQuarry': 'Tosh konini ochadi — har to‘lqinda tosh beradi.',
       'richHauls': 'To‘lqin mukofotlari daraja boshiga +{n} %.',
       'wideFoundation': 'Daraja boshiga {n} ustun kengroq quring.',
-      'siegeShells': 'Barcha qurollar daraja boshiga +{n} % zarar yetkazadi.',
+      'siegeShells': 'Minora qurollari daraja boshiga +{n} % zarar yetkazadi.',
       'unlockFrost': 'Sovuq minorani ochadi — butun guruhni sekinlashtiradi.',
       'forkedBolts': 'Chaqmoq daraja boshiga yana {n} dushmanga sakraydi.',
       'ironPlating': 'Har bir blok daraja boshiga +{n} zirh oladi.',
@@ -247,7 +254,7 @@ export default {
       'unlockMint': 'Oltin konini ochadi — har to‘lqinda tanga beradi.',
       'looting': 'Dushmanlar daraja boshiga +{n} % ko‘proq tanga tashlaydi.',
       'overcharge': 'Barcha qurollar daraja boshiga {n} % tezroq otadi.',
-      'masterwork': 'Barcha qurollar daraja boshiga +{n} % zarar yetkazadi.',
+      'masterwork': 'Minora qurollari daraja boshiga +{n} % zarar yetkazadi.',
       'fieldRepairs': 'Har qaytarilgan to‘lqinda har bir blok daraja boshiga maks. JS ning {n} % ini tiklaydi.',
       'greatFoundation': 'Daraja boshiga yana {n} ustun kengroq quring.',
       'warChest': 'To‘lqin mukofotlari daraja boshiga +{n} %.',

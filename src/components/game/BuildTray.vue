@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import IconGold from '@/components/icons/IconGold.vue'
+import IconStone from '@/components/icons/IconStone.vue'
+import IconWood from '@/components/icons/IconWood.vue'
 import ShapeTile from '@/components/game/ShapeTile.vue'
 import { shapeDef, shapeCost, shapeBlockTypes, shapeHasRoof, shapeBounds } from '@/game/shapes'
 import {
@@ -255,13 +258,13 @@ const infoEntry = computed(() => {
             span.build-tray__part-desc(v-if="part.desc") {{ part.desc }}
         div.build-tray__info-cost
           span.build-tray__cost-item(v-if="infoEntry.wood > 0" :class="{ 'is-short': wood < infoEntry.wood }")
-            i.build-tray__dot.is-wood
+            IconWood.build-tray__cost-icon
             | {{ infoEntry.wood }} {{ t('resources.wood') }}
           span.build-tray__cost-item(v-if="infoEntry.stone > 0" :class="{ 'is-short': stone < infoEntry.stone }")
-            i.build-tray__dot.is-stone
+            IconStone.build-tray__cost-icon
             | {{ infoEntry.stone }} {{ t('resources.stone') }}
           span.build-tray__cost-item(v-if="infoEntry.coins > 0" :class="{ 'is-short': coins < infoEntry.coins }")
-            i.build-tray__dot.is-gold
+            IconGold.build-tray__cost-icon
             | {{ infoEntry.coins }} {{ t('resources.gold') }}
         div.build-tray__roof-note(v-if="infoEntry.roof") {{ t('blocks.roofNote') }}
         div.build-tray__enhanced-note(v-if="infoEntry.enhanced")
@@ -566,6 +569,23 @@ const infoEntry = computed(() => {
   &.is-short
     color: #ff8f8f
 
+// The card spells the cost out in words and has the room for real glyphs, so it
+// uses the SAME wood, stone and gold the top resource bar does — the player
+// reads a price here and checks their balance there, and two drawings of one
+// resource make that a comparison rather than a confirmation.
+.build-tray__cost-icon
+  flex: 0 0 auto
+  width: 1.5em
+  height: 1.5em
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45))
+
+// The TILE chips keep the coloured dot, and deliberately.
+//
+// They render at 0.5em of a 0.5-0.7rem type ramp — about five pixels, and four
+// on a 320 px screen. A stacked cord of logs with growth rings is mush at that
+// size, where a flat colour still reads instantly; and the three-chip row is
+// budgeted to the pixel against the tile's 44 px tap-target floor, which a
+// glyph three times the width would blow straight through.
 .build-tray__dot
   display: inline-block
   width: 0.5em

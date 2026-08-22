@@ -11,7 +11,9 @@ import useTowerGame, {
   blockCount,
   getBlocks, getTowerBlocks, spanW, spanH, offers,
   offerEnhanced, rerollReadyIn, allyCount,
-  startRun, resumeRun, placeShape, sellBlock, upgradeBlock, canPlaceShapeAt,
+  CONTINUE_WOOD, CONTINUE_STONE,
+  arrowRainCharge, arrowRainReady, arrowRainWavesLeft, callArrowRain, ARROW_RAIN_RADIUS,
+  startRun, resumeRun, placeShape, sellBlock, upgradeBlock, repairBlock, canPlaceShapeAt,
   canAffordShape, callWave, toggleSpeed, step, runSummary, saveRunSnapshot,
   manualReroll, canManualReroll, dealEnhancedOffers, summonCavalry, cavalryCost,
   halfWidthAt, UPPER_HALF_WIDTH, WATER_ROW, speedBuffLeft, grantSpeedBuff, graceAvailable,
@@ -26,7 +28,7 @@ import { drawScene, resetDrawnFx, setBuildOverlay } from '@/use/useTowerArt'
 import { resetVfx } from '@/use/useTowerVfx'
 import { warmAudio } from '@/use/useTowerAudio'
 import { warmSpriteProbes } from '@/game/art'
-import useTowerProgress, { bestWave, mergeUnlocked } from '@/use/useTowerProgress'
+import useTowerProgress, { bestWave, mergeUnlocked, rangeMul } from '@/use/useTowerProgress'
 import {
   reportRun, rankFor, boardSize, playerTotal, leaderboardEnabled,
   leaderboardPending, OUTSIDE_BOARD
@@ -36,7 +38,7 @@ import useMissions, { beginMissionRun } from '@/use/useMissions'
 import useAchievements from '@/use/useAchievements'
 import useBattlePass from '@/use/useBattlePass'
 import { BUILDABLE_BLOCKS, GATE_ID, isShip, blockDef } from '@/game/blocks'
-import { OFFER_SLOTS, SHAPE_BY_ID } from '@/game/shapes'
+import { OFFER_SLOTS, canRotateShape, normRot, rotatedShape } from '@/game/shapes'
 import { ENEMY_DEFS } from '@/game/enemies'
 import { earlyCallBonus, countSiege, countAir, countSea, countBlast } from '@/game/waves'
 import { SEA_LEVEL } from '@/game/world'
@@ -88,6 +90,8 @@ import MissionsModal from '@/components/organisms/MissionsModal.vue'
 import OptionsModal from '@/components/organisms/OptionsModal.vue'
 import TechTreeModal from '@/components/organisms/TechTreeModal.vue'
 import IconCoin from '@/components/icons/IconCoin.vue'
+import IconStone from '@/components/icons/IconStone.vue'
+import IconWood from '@/components/icons/IconWood.vue'
 import IconGold from '@/components/icons/IconGold.vue'
 import IconMovie from '@/components/icons/IconMovie.vue'
 
@@ -239,6 +243,49 @@ const selectedShape = computed<string | null>(() =>
 )
 
 /**
+ * Quarter-turns applied to the armed piece.
+ *
+ * Deliberately NOT remembered per slot. The hand rerolls under the player
+ * constantly, so a stored angle would keep re-applying itself to whatever piece
+ * happened to land in that slot next — the piece would arrive already turned,
+ * for a reason the player has no way to see. Arming a slot always starts from
+ * the orientation drawn on the tile.
+ */
+const selectedRot = ref(0)
+
+/**
+ * Is the player aiming an Arrow Rain?
+ *
+ * Declared up here with the other build-mode state rather than down beside its
+ * handlers: the overlay watch below reads it, and that watch runs long before
+ * the skill's own section.
+ */
+const arrowRainArmed = ref(false)
+
+/** Can the armed piece be turned at all? Single cells cannot. */
+const canRotate = computed(() =>
+  !!selectedShape.value && canRotateShape(selectedShape.value)
+)
+
+/** Anticlockwise: the left-hand and downward keys, plus Q. */
+const ROTATE_LEFT_KEYS = new Set([
+  'KeyQ', 'KeyA', 'ArrowLeft', 'KeyS', 'ArrowDown'
+])
+/** Clockwise: the right-hand and upward keys, plus E. */
+const ROTATE_RIGHT_KEYS = new Set([
+  'KeyE', 'KeyD', 'ArrowRight', 'KeyW', 'ArrowUp'
+])
+
+const rotateBy = (step: number): void => {
+  if (!canRotate.value) return
+  selectedRot.value = normRot(selectedRot.value + step)
+  playSound('button-click', 0.03)
+}
+
+// A new piece is a new puzzle: it starts the way the tray drew it.
+watch(selectedShape, () => { selectedRot.value = 0 })
+
+/**
  * Every legal ANCHOR cell for the armed shape.
  *
  * Recomputed only when the tower's occupancy or the armed shape changes, never
@@ -250,8 +297,8 @@ const legalSlots = computed<Array<[number, number]>>(() => {
   const shapeId = selectedShape.value
   if (!shapeId) return []
   void towerVersion.value
-  const def = SHAPE_BY_ID[shapeId]
-  if (!def) return []
+  const def = rotatedShape(shapeId, selectedRot.value)
+  if (def.cells.length === 0) return []
 
   let shapeW = 1
   let shapeH = 1
@@ -288,7 +335,7 @@ const legalSlots = computed<Array<[number, number]>>(() => {
   const out: Array<[number, number]> = []
   for (let c = -halfW; c <= halfW - shapeW + 1; c++) {
     for (let r = rowFrom; r <= rowTo; r++) {
-      if (canPlaceShapeAt(shapeId, c, r)) out.push([c, r])
+      if (canPlaceShapeAt(shapeId, c, r, selectedRot.value)) out.push([c, r])
     }
   }
   void shapeH
@@ -297,20 +344,24 @@ const legalSlots = computed<Array<[number, number]>>(() => {
 
 // Publish the build overlay to the renderer whenever any input changes.
 watch(
-  [selectedShape, hoverCell, legalSlots, inspected],
+  [selectedShape, selectedRot, hoverCell, legalSlots, inspected, arrowRainArmed],
   () => {
     const hover = hoverCell.value
     const shapeId = selectedShape.value
     const valid = !!(shapeId && hover
-      && canPlaceShapeAt(shapeId, hover.c, hover.r) && canAffordShape(shapeId))
+      && canPlaceShapeAt(shapeId, hover.c, hover.r, selectedRot.value)
+      && canAffordShape(shapeId))
     setBuildOverlay({
       selectedShape: shapeId,
+      selectedRot: selectedRot.value,
       hoverC: hover?.c ?? null,
       hoverR: hover?.r ?? null,
       hoverValid: valid,
       slots: legalSlots.value,
       inspectC: inspected.value?.c ?? null,
-      inspectR: inspected.value?.r ?? null
+      inspectR: inspected.value?.r ?? null,
+      aimX: arrowRainArmed.value ? (hover?.c ?? 0) : null,
+      aimRadius: ARROW_RAIN_RADIUS
     })
   },
   { immediate: true, deep: false }
@@ -384,8 +435,9 @@ const onPointerDown = (e: PointerEvent): void => {
 
 const onPointerMove = (e: PointerEvent): void => {
   if (!pointers.has(e.pointerId)) {
-    // Mouse hover with no button held: preview the placement cell.
-    if (e.pointerType === 'mouse' && selectedShape.value) {
+    // Mouse hover with no button held: preview the placement cell, or the
+    // strip an armed volley would come down on.
+    if (e.pointerType === 'mouse' && (selectedShape.value || arrowRainArmed.value)) {
       hoverCell.value = screenToCell(e.clientX, e.clientY)
     }
     return
@@ -414,7 +466,9 @@ const onPointerMove = (e: PointerEvent): void => {
   }
   lastX = e.clientX
   lastY = e.clientY
-  if (selectedShape.value) hoverCell.value = screenToCell(e.clientX, e.clientY)
+  if (selectedShape.value || arrowRainArmed.value) {
+    hoverCell.value = screenToCell(e.clientX, e.clientY)
+  }
 }
 
 const onPointerUp = (e: PointerEvent): void => {
@@ -426,6 +480,13 @@ const onPointerUp = (e: PointerEvent): void => {
   if (!wasSingle || moved || longPressFired) { panning = false; return }
 
   const cell = screenToCell(e.clientX, e.clientY)
+
+  // Aiming the volley outranks everything: it is a mode the player entered on
+  // purpose and the next tap is the whole interaction.
+  if (arrowRainArmed.value) {
+    fireArrowRain(cell.c)
+    return
+  }
 
   if (selectedSlot.value != null) {
     tryPlace(cell.c, cell.r)
@@ -446,13 +507,13 @@ const tryPlace = (c: number, r: number): void => {
   const shapeId = selectedShape.value
   if (slot == null || !shapeId) return
 
-  if (!canPlaceShapeAt(shapeId, c, r) || !canAffordShape(shapeId)) {
+  if (!canPlaceShapeAt(shapeId, c, r, selectedRot.value) || !canAffordShape(shapeId)) {
     // A short negative click is better feedback than silence — it confirms the
     // tap registered and the placement was rejected, not missed.
     playSound('obstacle-hit', 0.03)
     return
   }
-  if (!placeShape(slot, c, r)) return
+  if (!placeShape(slot, c, r, selectedRot.value)) return
 
   markHintDone('placeBlock')
   completeTutorialStep('place')
@@ -623,6 +684,30 @@ const pickDeathTip = (): string | null => {
   const merged = blocks.some((b) => (b.tier ?? 1) > 1)
 
   const eligible: string[] = []
+
+  // ── Reaching a trebuchet ──
+  //
+  // The one threat whose answer is not "build more" but "build a DIFFERENT
+  // thing". A trebuchet parks at its standoff and shells the tower from beyond
+  // every cheap gun in the game — archer 7.5, cannon 8.5, bombard 9 — so a
+  // player whose whole answer to everything so far has been another Archery
+  // block simply watches it work, and nothing on screen explains why.
+  //
+  // Offered only to a player who has actually MET one and owns nothing that
+  // reaches, so it never fires as trivia. Reach is measured through `rangeMul`
+  // rather than off the printed range: enough ranks of Long Sight genuinely do
+  // walk a bombard out to a trebuchet, and telling that player they cannot
+  // reach would be the tip lying to them.
+  const treb = ENEMY_DEFS.trebuchet
+  const standoff = treb?.siege?.standoff
+  if (standoff !== undefined && wave.value >= (treb?.minWave ?? Infinity)) {
+    const reaches = blocks.some((b) => {
+      const w = blockDef(b.typeId).weapon
+      return !!w && w.range * rangeMul.value > standoff
+    })
+    if (!reaches) eligible.push('siegeReach')
+  }
+
   if (!kinds.has('economy')) eligible.push('eco')
   if (!kinds.has('buff')) eligible.push('buff')
   if (!mergeUnlocked.value) eligible.push('mergeLocked')
@@ -1077,6 +1162,24 @@ const onUpgradeInspected = (): void => {
 }
 
 /** Convert a standing wall into a spiked one. */
+/**
+ * Patch the inspected block back to full for run gold.
+ *
+ * Cheap, instant and on a per-block lockout — the answer to "this wall dies to
+ * the next hit and I have ten seconds", which upgrading (priced as a permanent
+ * rank) and the Repair Bay (a whole cell, and only between waves) both refuse
+ * to be.
+ */
+const onRepairInspected = (): void => {
+  const b = inspected.value
+  if (!b) return
+  if (!repairBlock(b.c, b.r)) {
+    playSound('obstacle-hit', 0.03)
+    return
+  }
+  playSound('level-up', 0.045)
+}
+
 const onFortifyInspected = (): void => {
   const b = inspected.value
   if (!b) return
@@ -1168,6 +1271,47 @@ const onContinueRun = async (): Promise<void> => {
 const enhancedHandOffered = computed(() =>
   phase.value === 'build' && !offerEnhanced.value.some(Boolean)
 )
+
+// ─── Arrow Rain ─────────────────────────────────────────────────────────────
+//
+// The one attack the player aims themselves, so unlike every other button on
+// the HUD it does not fire on the tap — it ARMS, and the next tap on the
+// battlefield decides where the volley lands. A skill that hit the moment it
+// was pressed would have to guess, and the whole reason it exists is to let the
+// player answer something their turrets cannot reach.
+
+const onArrowRain = (): void => {
+  if (!arrowRainReady.value) {
+    playSound('obstacle-hit', 0.03)
+    return
+  }
+  // Arming is a mode, and two modes at once is how a player ends up placing a
+  // wall where they meant to call a volley.
+  arrowRainArmed.value = !arrowRainArmed.value
+  if (arrowRainArmed.value) {
+    selectedSlot.value = null
+    inspected.value = null
+    // Touch has no hover, so without a seed the band would not appear until
+    // the tap that already fired it. Over the Gate is the honest default.
+    hoverCell.value = { c: 0, r: 0 }
+  }
+  playSound('button-click', 0.04)
+}
+
+const fireArrowRain = (x: number): void => {
+  arrowRainArmed.value = false
+  if (!callArrowRain(x)) {
+    playSound('obstacle-hit', 0.03)
+    return
+  }
+  playSound('barricade', 0.06)
+}
+
+// The skill going on cooldown under them must not leave the player holding a
+// targeting cursor that no longer does anything.
+watch([arrowRainReady, phase], () => {
+  if (!arrowRainReady.value || phase.value === 'defeat') arrowRainArmed.value = false
+})
 
 // ─── Cavalry ────────────────────────────────────────────────────────────────
 
@@ -1288,6 +1432,7 @@ const onKey = (e: KeyboardEvent): void => {
   if (e.code === 'Escape') {
     selectedSlot.value = null
     inspected.value = null
+    arrowRainArmed.value = false
     return
   }
   if (e.repeat) return
@@ -1300,6 +1445,19 @@ const onKey = (e: KeyboardEvent): void => {
   if (e.code === 'KeyF' && phase.value === 'battle') {
     toggleSpeed()
     return
+  }
+
+  // ── Turning the armed piece ──
+  //
+  // Read as a dial rather than as a direction pad: anything pointing left or
+  // down turns it anticlockwise, anything pointing right or up turns it
+  // clockwise. That way WASD, the arrow keys and Q/E all agree with each other
+  // instead of each meaning something slightly different, and a player who
+  // reaches for whichever one their hand is already on gets the turn they
+  // expected. Q and E are the pair the on-screen buttons advertise.
+  if (canRotate.value) {
+    if (ROTATE_LEFT_KEYS.has(e.code)) { e.preventDefault(); rotateBy(-1); return }
+    if (ROTATE_RIGHT_KEYS.has(e.code)) { e.preventDefault(); rotateBy(1); return }
   }
   // 1-4 arm the matching offer slot — the desktop speed-build path.
   const digit = Number(e.key)
@@ -1501,6 +1659,7 @@ onUnmounted(() => {
           @sell="onSellInspected"
           @upgrade="onUpgradeInspected"
           @fortify="onFortifyInspected"
+          @repair="onRepairInspected"
           @close="inspected = null"
         )
 
@@ -1554,6 +1713,33 @@ onUnmounted(() => {
                 | {{ cavalryPrice }}
               FHudBadge(v-if="allyCount > 0" tone="green") {{ allyCount }}
 
+          //- Turn the armed piece. Only rendered while something turnable is
+          //- armed — a rotate control with nothing to rotate is a control the
+          //- player has to learn to ignore. Sits directly over the tray so the
+          //- piece it acts on is in view, and each half carries its keyboard
+          //- shortcut so the desktop binding is discoverable without a manual.
+          div.scene__rotate(v-if="canRotate")
+            button.scene__rotate-btn(
+              type="button"
+              :aria-label="t('hud.rotateLeft')"
+              :title="`${t('hud.rotateLeft')} (Q)`"
+              @click="rotateBy(-1)"
+            )
+              svg.scene__rotate-icon(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round")
+                path(d="M9 4 4 9l5 5")
+                path(d="M4 9h8a7 7 0 1 1-7 7")
+              span.scene__rotate-key Q
+            button.scene__rotate-btn(
+              type="button"
+              :aria-label="t('hud.rotateRight')"
+              :title="`${t('hud.rotateRight')} (E)`"
+              @click="rotateBy(1)"
+            )
+              svg.scene__rotate-icon(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round")
+                path(d="M15 4l5 5-5 5")
+                path(d="M20 9h-8a7 7 0 1 0 7 7")
+              span.scene__rotate-key E
+
           BuildTray(
             :selected="selectedSlot"
             :offers="offers"
@@ -1569,6 +1755,30 @@ onUnmounted(() => {
         //- Tech tree, themes, and the wave control.
         div.scene__right
           div.scene__right-buttons
+            //- Arrow Rain, left of the tech tree. Both are "spend something to
+            //- change the fight", but this one spends a charge and resolves in
+            //- the next second, so it sits first along the thumb's path.
+            button.scene__rain(
+              type="button"
+              :class="{ 'is-ready': arrowRainReady, 'is-armed': arrowRainArmed }"
+              :aria-label="t('hud.arrowRain')"
+              :title="t('hud.arrowRain')"
+              @click="onArrowRain"
+            )
+              svg.scene__rain-icon(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round")
+                path(d="M5 3v10")
+                path(d="M2.6 10.2 5 13.4l2.4-3.2")
+                path(d="M12 5v11")
+                path(d="M9.6 13.2 12 16.4l2.4-3.2")
+                path(d="M19 3v10")
+                path(d="M16.6 10.2 19 13.4l2.4-3.2")
+                path(d="M3 20.5h18" stroke-width="2.6")
+              //- The charge, as a ring that fills rather than a number: "two
+              //- thirds of the way there" is the question being asked, and a
+              //- number answers it in a unit nobody thinks in.
+              span.scene__rain-fill(:style="{ height: `${Math.round(arrowRainCharge * 100)}%` }")
+              FHudBadge(v-if="!arrowRainReady" tone="red") {{ arrowRainWavesLeft }}
+
             div.scene__tech-wrap
               span.scene__spotlight(v-if="showTechSpotlight") {{ t('tech.spotlight') }}
               FHudButton(
@@ -1585,6 +1795,11 @@ onUnmounted(() => {
                   path(d="M12 6 L5 11 M12 6 L19 11 M5 15 L12 18 M19 15 L12 18")
                 template(#badge)
                   FHudBadge(v-if="progress.affordableCount.value > 0" tone="red") {{ progress.affordableCount.value }}
+
+          //- What the armed volley is waiting for. Sits with the warnings
+          //- because it occupies the same slot in the player's attention: a
+          //- short line above the wave control saying what happens next.
+          div.scene__aim-hint(v-if="arrowRainArmed") {{ t('hud.arrowRainAim') }}
 
           //- What the next wave brings that the player may have no answer to.
           //- Sits directly above Call Wave because that is the button the
@@ -1694,6 +1909,18 @@ onUnmounted(() => {
             :label="t('result.continueRun')"
             @click="onContinueRun"
           )
+            //- What the video actually buys, in the only notation that needs no
+            //- translation. The tower coming back is worth nothing on its own —
+            //- it is the same wall that just failed — so the materials are the
+            //- offer, and they have to be ON the button rather than discovered
+            //- after the ad has already played.
+            span.result__continue
+              span {{ t('result.continueRun') }}
+              span.result__continue-bonus
+                span +{{ CONTINUE_WOOD }}
+                IconWood.result__res-icon
+                span +{{ CONTINUE_STONE }}
+                IconStone.result__res-icon
 
           //- The two CTAs from reference image 2.
           div.result__actions
@@ -1876,6 +2103,66 @@ onUnmounted(() => {
   min-width: 0
   pointer-events: auto
 
+// Rotation, pinned to the right EDGE of the tray rather than above it.
+//
+// Above is already taken by the perk row, and the two would collide exactly
+// when both are showing — which is most of a build phase. On the edge they are
+// also where a thumb already is on a phone held in one hand, and out of flow
+// they cost the bottom bar no height.
+.scene__rotate
+  position: absolute
+  right: 0
+  bottom: calc(100% + 0.25rem)
+  display: flex
+  align-items: center
+  gap: clamp(0.15rem, 0.9vw, 0.3rem)
+  pointer-events: auto
+
+.scene__rotate-btn
+  position: relative
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  width: clamp(1.75rem, 8vw, 2.3rem)
+  height: clamp(1.75rem, 8vw, 2.3rem)
+  padding: 0
+  border: 2px solid #0f1a30
+  border-radius: 0.5rem
+  background-image: linear-gradient(to bottom, #7fa8c8, #3d6a92)
+  color: #fff
+  cursor: pointer
+  touch-action: manipulation
+  -webkit-tap-highlight-color: transparent
+
+  &:active
+    translate: 0 2px
+    scale: 0.96
+
+.scene__rotate-icon
+  width: 62%
+  height: 62%
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.6))
+
+// The keyboard shortcut, as a keycap on the button it belongs to. Hidden where
+// there is no keyboard to press it with.
+.scene__rotate-key
+  position: absolute
+  right: -0.15rem
+  bottom: -0.2rem
+  min-width: 0.95em
+  padding: 0 0.18em
+  border-radius: 0.25rem
+  background-color: rgba(10, 18, 34, 0.92)
+  color: #cfe4ff
+  font-size: clamp(0.42rem, 1.9vw, 0.58rem)
+  font-weight: 900
+  line-height: 1.35
+  text-align: center
+
+@media (pointer: coarse)
+  .scene__rotate-key
+    display: none
+
 // Floated ABOVE the tray rather than stacked on top of it. In flow these two
 // controls added ~46 px to a bottom bar that already owns a third of a phone
 // screen; out of flow they cost nothing and still sit right next to the hand
@@ -2045,6 +2332,91 @@ onUnmounted(() => {
     opacity: 0.72
   50%
     opacity: 1
+
+.scene__aim-hint
+  align-self: flex-end
+  max-width: 12rem
+  padding: 0.2rem 0.5rem
+  border: 2px solid #7a5a00
+  border-radius: 0.5rem
+  background-color: rgba(24, 18, 4, 0.88)
+  color: #ffe08a
+  font-weight: 900
+  font-size: clamp(0.5rem, 2.2vw, 0.68rem)
+  line-height: 1.25
+  text-align: right
+  text-shadow: 1px 1px 0 #000
+
+// ── Arrow Rain ──
+//
+// Sized to match FHudButton so the row reads as one set of controls rather than
+// as a bespoke thing bolted onto the side of the tech tree.
+.scene__rain
+  position: relative
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  flex: 0 0 auto
+  // Deliberately the same figures as `FHudButton`, not similar ones: this sits
+  // shoulder to shoulder with the tech-tree chip and the row only reads as one
+  // set of controls if they are the same size at every breakpoint.
+  min-width: 2.5rem
+  min-height: 2.5rem
+  width: clamp(2.5rem, 11vw, 3.4rem)
+  height: clamp(2.5rem, 11vw, 3.4rem)
+  padding: 0
+  overflow: hidden
+  border: 2px solid #0f1a30
+  border-radius: clamp(0.45rem, 2vw, 0.7rem)
+  background-image: linear-gradient(to bottom, #4a5a72, #2b3548)
+  color: #8fa3bd
+  cursor: pointer
+  touch-action: manipulation
+  -webkit-tap-highlight-color: transparent
+  transition: filter 90ms ease-out
+
+  &:active
+    translate: 0 2px
+    scale: 0.96
+
+  // Ready: it lights up. This is the only state where pressing it does
+  // anything, so it is the only state that looks like a live control.
+  &.is-ready
+    background-image: linear-gradient(to bottom, #ffcd00, #f7a000)
+    color: #3a2b00
+
+  // Armed: the next tap on the field is the shot. Pulsed, because the player is
+  // now in a mode and a mode you cannot see is a mode you fire by accident.
+  &.is-armed
+    animation: rain-armed 0.7s ease-in-out infinite
+
+.scene__rain-icon
+  position: relative
+  z-index: 1
+  // 62% is `FHudButton`'s glyph fraction — a row of mixed icons only reads as
+  // one set if they fill their chips identically.
+  width: 62%
+  height: 62%
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.45))
+
+// Fills from the bottom as the charge comes back.
+.scene__rain-fill
+  position: absolute
+  left: 0
+  right: 0
+  bottom: 0
+  background-image: linear-gradient(to top, rgba(255, 205, 0, 0.55), rgba(255, 205, 0, 0.12))
+  pointer-events: none
+  transition: height 260ms ease-out
+
+.scene__rain.is-ready .scene__rain-fill
+  opacity: 0
+
+@keyframes rain-armed
+  0%, 100%
+    box-shadow: 0 0 0 0 rgba(255, 224, 120, 0)
+  50%
+    box-shadow: 0 0 0 5px rgba(255, 224, 120, 0.6)
 
 .scene__tech-wrap
   position: relative
@@ -2319,6 +2691,35 @@ onUnmounted(() => {
   height: 1.25em
   aspect-ratio: 1
   object-fit: contain
+
+// The default slot REPLACES `label`, so the label is restated here rather than
+// passed — the chips have to sit with it, not instead of it.
+.result__continue
+  display: inline-flex
+  align-items: center
+  flex-wrap: wrap
+  justify-content: center
+  gap: 0.15em 0.5em
+
+// The materials a grace continue pays out, riding beside the button's label.
+//
+// The SAME glyphs the resource bar uses, not a colour-coded stand-in. This
+// button and that bar are the only two places wood and stone are named, so a
+// player reads the promise here and checks it there — and two drawings of one
+// resource make that a comparison rather than a confirmation.
+.result__continue-bonus
+  display: inline-flex
+  align-items: center
+  gap: 0.3em
+  font-weight: 900
+  font-variant-numeric: tabular-nums
+  white-space: nowrap
+
+.result__res-icon
+  flex: 0 0 auto
+  width: 1.35em
+  height: 1.35em
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45))
 
 .result__actions
   display: flex

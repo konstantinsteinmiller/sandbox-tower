@@ -14,7 +14,11 @@ export default {
     'wave': 'Vague', 'enemies': 'Ennemis', 'callWave': 'Appeler la vague', 'callBoss': 'Appeler le boss',
     'speed': 'Vitesse {n}×',
     'speedOffer': 'Vitesse ×2 contre une pub',
-    'speedFor': '{n} min', 'recenter': 'Recentrer la vue'
+    'speedFor': '{n} min', 'recenter': 'Recentrer la vue',
+    'rotateLeft': 'Pivoter à gauche',
+    'rotateRight': 'Pivoter à droite',
+    'arrowRain': 'Pluie de flèches',
+    'arrowRainAim': 'Touchez le champ de bataille pour lancer la volée'
   },
 
   'warnings': {
@@ -40,7 +44,8 @@ export default {
     'spend': 'Il vous reste des pièces. Les rangs de l’arbre sont permanents : ils suivent chaque partie.',
     'branches': 'Trois arbres distincts : la tour, le port et l’atelier. Aucun ne dépend des autres.',
     'shape': 'Les murs devant, les canons derrière. Un bloc jamais touché est un bloc jamais reconstruit.',
-    'gold': 'L’or paie les améliorations de bloc — touchez un bloc. Les coffres en frappent à chaque vague.'
+    'gold': 'L’or paie les améliorations de bloc — touchez un bloc. Les coffres en frappent à chaque vague.',
+    'siegeReach': 'Les trébuchets se postent hors de portée des archers, canons et bombardes. Répondez avec un Mortier — ou une Galère de guerre du port.'
   },
   'blocks': {
     'fortify': 'Ajouter des pointes',
@@ -104,7 +109,9 @@ export default {
       'mint': 'Produit des pièces à la fin de chaque vague repoussée.',
       'spikes': 'Les assaillants se blessent dessus à chaque coup.',
       'bombard': 'Envoie un obus à la verticale. Petite explosion, cibles au sol uniquement.'
-    }
+    },
+    'repair': 'Réparer',
+    'repairCooldown': '{n} s'
   },
 
   'enemies': {
@@ -215,7 +222,7 @@ export default {
       'rallyCry': 'Les blocs de renfort sont +{n} % plus forts.',
       'stockpiles': 'Chaque bloc d’économie rapporte +{n} % de plus.',
       'unlockMerge': 'Deux blocs identiques côte à côte fusionnent, jusqu’à trois niveaux.',
-      'forgeWelds': 'Les blocs fusionnés infligent +{n} % de dégâts.',
+      'forgeWelds': 'Les blocs fusionnés produisent +{n} % de plus par rang : dégâts, épines et rendement.',
       'harbour': 'Amarrez des navires. Eux seuls touchent les ennemis immergés.',
       'dockWorks': 'Amarrez {n} case plus loin par rang.',
       'unlockLongship': 'Une coque bardée avec un harpon lourd.',
@@ -223,13 +230,13 @@ export default {
       'navalGunnery': 'Les armes navales infligent +{n} % de dégâts.',
       'unlockGalley': 'Éperon de bronze, bombarde et château de combat.',
       'admiralty': 'Les armes navales infligent +{n} % de dégâts en plus.',
-      'foundations': 'Chaque bloc démarre avec +{n} % de PV.',
-      'sharpBolts': 'Toutes les armes infligent +{n} % de dégâts par rang.',
+      'foundations': 'Chaque bloc de la tour démarre avec +{n} % de PV.',
+      'sharpBolts': 'Les armes de la tour infligent +{n} % de dégâts par rang.',
       'unlockBrace': 'Débloque la caisse renforcée : deux fois les PV du bois.',
       'lumberStock': 'Commencez chaque siège avec +{n} de bois par rang.',
       'longSight': 'Toutes les armes portent +{n} % plus loin par rang.',
       'rapidFire': 'Toutes les armes tirent {n} % plus vite par rang.',
-      'reinforced': 'Chaque bloc gagne +{n} % de PV par rang.',
+      'reinforced': 'Chaque bloc de la tour gagne +{n} % de PV par rang.',
       'unlockSawmill': 'Débloque la scierie : produit du bois à chaque vague.',
       'quarryStock': 'Commencez chaque siège avec +{n} de pierre par rang.',
       'unlockMortar': 'Débloque le mortier : dégâts de zone à longue portée.',
@@ -239,7 +246,7 @@ export default {
       'unlockQuarry': 'Débloque la carrière : produit de la pierre à chaque vague.',
       'richHauls': 'Récompenses de vague +{n} % par rang.',
       'wideFoundation': 'Construisez {n} colonnes plus large par rang.',
-      'siegeShells': 'Toutes les armes infligent +{n} % de dégâts par rang.',
+      'siegeShells': 'Les armes de la tour infligent +{n} % de dégâts par rang.',
       'unlockFrost': 'Débloque la flèche de givre : ralentit des groupes entiers.',
       'forkedBolts': 'L’éclair rebondit sur {n} ennemi de plus par rang.',
       'ironPlating': 'Chaque bloc gagne +{n} d’armure par rang.',
@@ -247,7 +254,7 @@ export default {
       'unlockMint': 'Débloque la mine d’or : produit des pièces à chaque vague.',
       'looting': 'Les ennemis lâchent +{n} % de pièces en plus par rang.',
       'overcharge': 'Toutes les armes tirent {n} % plus vite par rang.',
-      'masterwork': 'Toutes les armes infligent +{n} % de dégâts par rang.',
+      'masterwork': 'Les armes de la tour infligent +{n} % de dégâts par rang.',
       'fieldRepairs': 'Chaque bloc récupère {n} % de ses PV max par vague repoussée et par rang.',
       'greatFoundation': 'Construisez {n} colonnes de plus par rang.',
       'warChest': 'Récompenses de vague +{n} % par rang.',

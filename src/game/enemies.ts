@@ -320,6 +320,11 @@ export const ENEMY_DEFS: Record<string, EnemyDef> = {
     // single block this hard, and a thin centre still lets it reach the Gate
     // directly, because the Gate is then the nearest thing in its path.
     siege: {},
+    // A ram is a roofed shed with a tree slung under it — the crew are covered
+    // and the frame is timber-and-hide, which is precisely the thing arrows are
+    // worst against. Same quarter-worth as its ironclad cousin: the two read as
+    // the same silhouette, so they had better answer the same way.
+    resist: { bolt: 0.75 },
     scale: 1.15,
     palette: 'ram'
   },
@@ -366,7 +371,10 @@ export const ENEMY_DEFS: Record<string, EnemyDef> = {
     // and at wave 17 a player who has bought neither reach node simply watches
     // it work. An engine should ask for a purchase, not for a purchase the
     // player may not know exists.
-    siege: { standoff: 9, splash: 1.6 },
+    // Lobbed like the trebuchet: a boulder that actually crosses the nine
+    // cells rather than a blast that appears on the wall the frame the
+    // cooldown elapses. Past `PITCH_WAVE` the same throw arrives alight.
+    siege: { standoff: 9, splash: 1.6, lobbed: true },
     scale: 1.45,
     palette: 'catapult'
   },
@@ -410,7 +418,7 @@ export const ENEMY_DEFS: Record<string, EnemyDef> = {
     // a mortar on the very edge of the tower facing the right way. At 12 a
     // mortar or a war galley covers it with room to spare, and nothing cheaper
     // does — which is the tension the unit was designed around.
-    siege: { standoff: 12, splash: 2.2 },
+    siege: { standoff: 12, splash: 2.2, lobbed: true },
     scale: 1.7,
     palette: 'trebuchet'
   },
@@ -425,10 +433,16 @@ export const ENEMY_DEFS: Record<string, EnemyDef> = {
     coins: 26,
     cost: 135,
     minWave: 24,
-    // Iron-plated and roofed: arrows glance straight off it. A tower that
-    // answered every previous threat with cheap Archery towers has nothing at
-    // all for this, and has to actually own a cannon, a coil or some cavalry.
-    immuneTo: ['bolt'],
+    // Iron-plated and roofed: arrows glance off it for a quarter of their
+    // worth. A tower that answered every previous threat with cheap Archery
+    // towers is not locked out — it is simply four times too slow, and has to
+    // actually own a cannon, a coil or some cavalry to kill this on time.
+    //
+    // 0.75 rather than the outright immunity this used to carry. Absolute is
+    // the wrong tool: it made every archer in the tower stop firing, and it
+    // made an AREA attack aimed at a ram do literally nothing, which reads as
+    // the game being broken rather than as a rule being taught.
+    resist: { bolt: 0.75 },
     // Same as the plain ram: it breaks the wall in front of it rather than
     // driving through it. See the note there.
     siege: {},
@@ -469,6 +483,14 @@ export const siegePool = (wave: number): EnemyDef[] =>
 
 export const isSiege = (id: string): boolean => !!ENEMY_DEFS[id]?.siege
 
-/** Does this enemy shrug off a given projectile entirely? */
+/** Fraction of `kind`'s damage this enemy turns aside, 0..1. */
+export const resistOf = (id: string, kind: ProjectileKind): number => {
+  const r = ENEMY_DEFS[id]?.resist?.[kind]
+  return typeof r === 'number' ? Math.min(1, Math.max(0, r)) : 0
+}
+
+/** Does this enemy shrug off a given projectile ENTIRELY? A full resist is the
+ *  only thing weapons refuse to fire at — anything less is merely a bad trade,
+ *  and the player is allowed to make it. */
 export const isImmuneTo = (id: string, kind: ProjectileKind): boolean =>
-  ENEMY_DEFS[id]?.immuneTo?.includes(kind) === true
+  resistOf(id, kind) >= 1

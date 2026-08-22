@@ -14,7 +14,11 @@ export default {
     'wave': 'Oleada', 'enemies': 'Enemigos', 'callWave': 'Llamar oleada', 'callBoss': 'Llamar jefe',
     'speed': 'Velocidad {n}×',
     'speedOffer': 'Doble velocidad por un anuncio',
-    'speedFor': '{n} min', 'recenter': 'Centrar la vista'
+    'speedFor': '{n} min', 'recenter': 'Centrar la vista',
+    'rotateLeft': 'Girar a la izquierda',
+    'rotateRight': 'Girar a la derecha',
+    'arrowRain': 'Lluvia de flechas',
+    'arrowRainAim': 'Toca el campo de batalla para lanzar la descarga'
   },
 
   'warnings': {
@@ -40,7 +44,8 @@ export default {
     'spend': 'Te sobran monedas. Los rangos del árbol son permanentes: valen en todas tus partidas.',
     'branches': 'Tres árboles separados: la torre, el puerto y el taller. Ninguno depende de otro.',
     'shape': 'Muros delante, armas detrás. Un bloque al que nunca golpean es un bloque que nunca reconstruyes.',
-    'gold': 'El oro compra mejoras de bloque: toca un bloque para gastarlo. Los cofres acuñan más cada oleada.'
+    'gold': 'El oro compra mejoras de bloque: toca un bloque para gastarlo. Los cofres acuñan más cada oleada.',
+    'siegeReach': 'Los trabuquetes se sitúan más lejos de lo que alcanzan arqueros, cañones o bombardas. Respóndeles con un Mortero, o con una Galera de guerra del puerto.'
   },
   'blocks': {
     'fortify': 'Añadir púas',
@@ -104,7 +109,9 @@ export default {
       'mint': 'Produce monedas al final de cada oleada superada.',
       'spikes': 'Los atacantes se hieren con él en cada golpe.',
       'bombard': 'Lanza un proyectil casi vertical. Explosión pequeña, solo objetivos terrestres.'
-    }
+    },
+    'repair': 'Reparar',
+    'repairCooldown': '{n} s'
   },
 
   'enemies': {
@@ -215,7 +222,7 @@ export default {
       'rallyCry': 'Los bloques de mejora son un +{n} % más fuertes.',
       'stockpiles': 'Cada bloque de economía rinde un +{n} % más.',
       'unlockMerge': 'Dos bloques iguales contiguos se fusionan, hasta tres niveles.',
-      'forgeWelds': 'Los bloques fusionados causan +{n} % de daño.',
+      'forgeWelds': 'Los bloques fusionados rinden +{n} % más por rango: daño, púas y producción.',
       'harbour': 'Amarra barcos en el agua. Solo ellos alcanzan a los sumergidos.',
       'dockWorks': 'Amarra barcos {n} casilla más lejos por rango.',
       'unlockLongship': 'Un casco blindado con un arpón pesado.',
@@ -223,13 +230,13 @@ export default {
       'navalGunnery': 'Las armas navales causan +{n} % de daño.',
       'unlockGalley': 'Espolón de bronce, bombarda y castillo de combate.',
       'admiralty': 'Las armas navales causan +{n} % de daño adicional.',
-      'foundations': 'Cada bloque empieza con +{n} % de PV.',
-      'sharpBolts': 'Todas las armas hacen +{n} % de daño por rango.',
+      'foundations': 'Cada bloque de la torre empieza con +{n} % de PV.',
+      'sharpBolts': 'Las armas de la torre hacen +{n} % de daño por rango.',
       'unlockBrace': 'Desbloquea la caja reforzada: el doble de PV que la madera.',
       'lumberStock': 'Empieza cada asedio con +{n} de madera por rango.',
       'longSight': 'Todas las armas alcanzan un +{n} % más por rango.',
       'rapidFire': 'Todas las armas disparan un {n} % más rápido por rango.',
-      'reinforced': 'Cada bloque gana +{n} % de PV por rango.',
+      'reinforced': 'Cada bloque de la torre gana +{n} % de PV por rango.',
       'unlockSawmill': 'Desbloquea el aserradero: produce madera cada oleada.',
       'quarryStock': 'Empieza cada asedio con +{n} de piedra por rango.',
       'unlockMortar': 'Desbloquea el mortero: daño en área a larga distancia.',
@@ -239,7 +246,7 @@ export default {
       'unlockQuarry': 'Desbloquea la cantera: produce piedra cada oleada.',
       'richHauls': 'Recompensas de oleada +{n} % por rango.',
       'wideFoundation': 'Construye {n} columnas más anchas por rango.',
-      'siegeShells': 'Todas las armas hacen +{n} % de daño por rango.',
+      'siegeShells': 'Las armas de la torre hacen +{n} % de daño por rango.',
       'unlockFrost': 'Desbloquea la aguja de escarcha: ralentiza grupos enteros.',
       'forkedBolts': 'El rayo salta a {n} enemigo más por rango.',
       'ironPlating': 'Cada bloque gana +{n} de armadura por rango.',
@@ -247,7 +254,7 @@ export default {
       'unlockMint': 'Desbloquea la mina de oro: produce monedas cada oleada.',
       'looting': 'Los enemigos sueltan un +{n} % más de monedas por rango.',
       'overcharge': 'Todas las armas disparan un {n} % más rápido por rango.',
-      'masterwork': 'Todas las armas hacen +{n} % de daño por rango.',
+      'masterwork': 'Las armas de la torre hacen +{n} % de daño por rango.',
       'fieldRepairs': 'Cada bloque cura un {n} % de sus PV máximos por oleada resistida y rango.',
       'greatFoundation': 'Construye {n} columnas más anchas por rango.',
       'warChest': 'Recompensas de oleada +{n} % por rango.',

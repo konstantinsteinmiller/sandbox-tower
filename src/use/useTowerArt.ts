@@ -7,7 +7,7 @@ import {
   allMonsterIds, SPRITE_FOOT, SPRITE_HEIGHT
 } from '@/game/monsterSprites'
 import { blob, fillShape, ink, noise2, shrink, stroke as inkStroke, type Pt } from '@/game/inkArt'
-import { SHAPE_BY_ID } from '@/game/shapes'
+import { rotatedShape } from '@/game/shapes'
 import { drawSiegeMachine } from '@/game/siegeArt'
 import { drawShip } from '@/game/shipArt'
 import { drawCavalry } from '@/game/cavalryArt'
@@ -16,7 +16,7 @@ import { GRASS_DEPTH, SEA_LEVEL } from '@/game/world'
 import type { Ally, Block, Enemy, EnemyDef, Projectile } from '@/game/types'
 import {
   getBlocks, getTowerBlocks, getEnemies, getProjectiles, getAllies, getDebris, nowMs, phase,
-  wave, gameSpeed, spanW, spanH, centreX, centreY
+  wave, gameSpeed, spanW, spanH, centreX, centreY, isFlamingSiege
 } from '@/use/useTowerGame'
 import {
   worldToScreenX, worldToScreenY, getZoom, viewRect, updateCamera
@@ -27,6 +27,7 @@ import {
 } from '@/use/useTowerVfx'
 import { useScreenshake } from '@/use/useScreenshake'
 import { playFx } from '@/use/useTowerAudio'
+import { rangeMul } from '@/use/useTowerProgress'
 
 /**
  * ─── Renderer ───────────────────────────────────────────────────────────────
@@ -1356,7 +1357,11 @@ const getSiegeSprite = (
   drawSiegeMachine(g, id, scale, themedPalette(enemyDef(id).palette), {
     spin: engaged ? 0 : (spinQ / SIEGE_SPIN_STEPS) * TAU,
     engaged,
-    t: phase * SIEGE_PHASE_MS
+    t: phase * SIEGE_PHASE_MS,
+    // Only what is safe to share. A trebuchet's throwing assembly is keyed to
+    // its OWN reload and is painted live over this by the caller; every other
+    // engine draws itself completely here, as it always has.
+    layer: 'static'
   })
   g.restore()
   e.phase = phase
@@ -1420,14 +1425,34 @@ const drawEnemy = (target: CanvasRenderingContext2D, e: Enemy, t: number): void 
     // Wheels turn with distance travelled, not with time, so a halted engine's
     // wheels stop — the clearest signal that it has set up to fire.
     const engaged = e.targetUid >= 0
+    // This machine's own progress toward its next shot: 0 the frame its round
+    // left, 1 the frame the next one does. Read from `e.cd`, the same counter
+    // the simulation fires on, so the arm cannot drift out of step with the
+    // stone. The old art ran every engine of a type off one wall clock at a
+    // period unrelated to `attackCooldownMs` — which is why a trebuchet mimed
+    // a throw roughly twice per shot and never at the moment it shot.
+    const cycle = def.attackCooldownMs > 0
+      ? Math.min(1, Math.max(0, 1 - e.cd / def.attackCooldownMs))
+      : 0
+    // Read from the same predicate the simulation loads the round with, so the
+    // bowl cannot be burning while a plain rock leaves it.
+    const flaming = isFlamingSiege(def, wave.value)
     const machine = getSiegeSprite(def.id, s, engaged, engaged ? 0 : e.x * 1.6, t)
     if (machine) {
       // The caller's `scale(facing, 1)` is still in force, so the one
       // right-facing sprite serves both directions.
       const box = s * SIEGE_BOX
       ctx.drawImage(machine.cv, -box / 2, -box / 2, box, box)
+      // Anything that has to agree with this machine's clock, painted live on
+      // top of the shared frame. A no-op for every engine but the two that
+      // throw.
+      drawSiegeMachine(ctx, def.id, s, p, {
+        spin: engaged ? 0 : e.x * 1.6, engaged, t, cycle, flaming, layer: 'moving'
+      })
     } else {
-      drawSiegeMachine(ctx, def.id, s, p, { spin: engaged ? 0 : e.x * 1.6, engaged, t })
+      drawSiegeMachine(ctx, def.id, s, p, {
+        spin: engaged ? 0 : e.x * 1.6, engaged, t, cycle, flaming
+      })
     }
     ctx.restore()
     stamp()
@@ -3450,6 +3475,47 @@ const consumeFx = (ev: FxEvent): void => {
       playFx('hit')
       break
     }
+    case 'arrowRain': {
+      // The volley itself is drawn (see `drawArrowVolley`); the particle work
+      // here is the WEATHER around it — dust kicked off the ground the flight
+      // buries itself in, and a scorch over the beaten zone so the strip the
+      // player aimed at stays readable for the second it matters.
+      spawnArrowVolley(ev.x, ev.radius, density)
+      for (let i = 0; i < Math.round(30 * density); i++) {
+        const px = ev.x + (Math.random() * 2 - 1) * ev.radius
+        emit({
+          x: px, y: 0.1,
+          vx: (Math.random() - 0.5) * 2.2, vy: 1.4 + Math.random() * 2.6,
+          life: 620 + Math.random() * 420, size: 0.22 + Math.random() * 0.2,
+          color: [188, 176, 148], alpha: 0.5, gravity: 3.2, drag: 1.9
+        })
+      }
+      emitDecal(ev.x, 0.05, ev.radius * 0.85, 0.35)
+      triggerShake('small')
+      playFx('throw')
+      break
+    }
+    case 'repair': {
+      // A patch, not a heal spell. Green motes rising off the block plus a
+      // hammer-tap spark, so it reads as work done to the wall rather than as
+      // something cast on it — the game has no magic anywhere else.
+      for (let i = 0; i < Math.round(14 * density); i++) {
+        const a = Math.random() * Math.PI * 2
+        emit({
+          x: ev.x + Math.cos(a) * 0.4, y: ev.y + Math.sin(a) * 0.4,
+          vx: Math.cos(a) * 0.7, vy: 1.4 + Math.random() * 1.6,
+          life: 480 + Math.random() * 260, size: 0.13 + Math.random() * 0.08,
+          color: i % 3 === 0 ? [214, 255, 220] : [110, 226, 140],
+          gravity: -1.2, drag: 1.6, additive: true
+        })
+      }
+      emitText({
+        x: ev.x, y: ev.y + 0.5, vy: 1.7, life: 700,
+        text: '+HP', color: '#7ce09a', size: 0.32, crit: false
+      })
+      playFx('place')
+      break
+    }
     case 'deflect': {
       // A hard, metallic spark fan plus a "NO" readout. This is the only
       // teaching moment the immunity gets, so it is loud on purpose — a player
@@ -3663,6 +3729,173 @@ const consumeFx = (ev: FxEvent): void => {
   }
 }
 
+/**
+ * ONE arrow, drawn in local space: nock at the origin's left, head to the right.
+ *
+ * An arrow is a drawn object, not a lit one — a tapered shaft, a flat steel head
+ * with a single bright facet, and fletching that reads even at eight pixels
+ * because it is the only warm note on the round.
+ *
+ * Shared by the Archery block's round and by Arrow Rain, and that sharing is
+ * the point. The volley used to be drawn with bare `ctx.stroke()` lines: flat,
+ * even-width, unlit, with none of the ink kit the rest of the field is built
+ * from — a hundred of them at once made the one moment the skill is on screen
+ * the ugliest thing in the game. There is exactly one arrow in this project now.
+ *
+ * `u` is the unit (an arrow is ~4.2u long) and `rich` gates the inked outline,
+ * which is the expensive pass and the first thing to drop when a volley puts
+ * seventy of these on screen at once.
+ */
+const drawArrowShape = (
+  ctx: CanvasRenderingContext2D, u: number, seed: number, rich: boolean
+): void => {
+  // Shaft — swelling toward the head, the way a nib leaves a line.
+  inkStroke(ctx, [[-u * 1.7, 0], [u * 0.4, 0], [u * 1.5, 0]], u * 0.16, u * 0.34, '#c39a5e', seed)
+  inkStroke(ctx, [[-u * 1.7, u * 0.1], [u * 1.5, u * 0.1]], u * 0.07, u * 0.13, '#6d4a24', seed + 3)
+
+  // Head: two flat tones and a hard inked edge.
+  const head: Pt[] = [[u * 2.5, 0], [u * 1.35, -u * 0.5], [u * 1.6, 0], [u * 1.35, u * 0.5]]
+  fillShape(ctx, head, '#8e9aa8')
+  fillShape(ctx, [[u * 2.4, -u * 0.04], [u * 1.4, -u * 0.42], [u * 1.62, -u * 0.05]], '#e8eef6')
+  if (rich) ink(ctx, head, { width: u * 0.14, color: '#171c22', breakUp: 0.3, seed: seed + 7 })
+
+  // Fletching.
+  ctx.fillStyle = '#2f7d5a'
+  for (const f of [-1, 1]) {
+    ctx.beginPath()
+    ctx.moveTo(-u * 1.75, 0)
+    ctx.lineTo(-u * 1.1, f * u * 0.55)
+    ctx.lineTo(-u * 0.55, f * u * 0.12)
+    ctx.closePath()
+    ctx.fill()
+  }
+}
+
+/**
+ * Build a volley for the beaten zone at `x`.
+ *
+ * Two things make this read as a VOLLEY rather than as confetti:
+ *
+ *  · every arrow is loosed on a stagger, densest in the middle of the window,
+ *    so the sheet arrives, peaks and thins out the way a loosed flight does
+ *    rather than switching on and off;
+ *  · they all lean the SAME way, by the same small angle plus a hair of
+ *    scatter. Arrows fanning in every direction read as a explosion; arrows
+ *    raked together read as something that was aimed.
+ *
+ * Each one lands on whatever is under it — the tower's crown where there is
+ * tower, the ground where there is not — so the flight stops at the silhouette
+ * instead of sinking through it.
+ */
+const spawnArrowVolley = (x: number, radius: number, density: number): void => {
+  // Trimmed from 110. Every arrow is now the full inked object rather than two
+  // flat strokes, so the budget buys fewer of them — and a raked flight of
+  // seventy reads denser than a hundred and ten scattered ones did.
+  const count = Math.max(22, Math.round(70 * density))
+  const arrows: RainArrow[] = []
+  // One shared rake for the whole flight, so they arrive as a formation.
+  const rake = 0.12 + Math.random() * 0.1
+  for (let i = 0; i < count; i++) {
+    const ax = x + (Math.random() * 2 - 1) * radius
+    // Where the ground or the tower's crown stops it.
+    let floor = 0.12
+    for (const b of getTowerBlocks().values()) {
+      const l = b.c - 0.5
+      const r = b.c + spanW(b) - 0.5
+      if (ax < l || ax > r) continue
+      const top = b.r + spanH(b) - 0.5
+      if (top > floor) floor = top
+    }
+    // Triangular stagger: two uniform draws averaged, which bunches the loose
+    // around the middle of the window without any curve fitting.
+    const delay = (Math.random() + Math.random()) * 0.5 * 420
+    arrows.push({
+      x: ax,
+      y0: 13 + Math.random() * 5,
+      yEnd: floor,
+      vy: 26 + Math.random() * 12,
+      delay,
+      lean: rake + (Math.random() - 0.5) * 0.07,
+      stick: 900 + Math.random() * 900,
+      seed: Math.floor(Math.random() * 4096)
+    })
+  }
+  arrowVolleys.push({ x, radius, arrows, age: 0, life: 2200 })
+}
+
+/**
+ * Draw one volley.
+ *
+ * Every arrow is the SAME drawn arrow the Archery block looses (`drawArrowShape`)
+ * — that is the whole fix. What changes between an arrow in the air and one in
+ * the dirt is what is drawn AROUND it:
+ *
+ *  · in flight it trails a motion streak along its own line, because at 30
+ *    cells a second the eye resolves a smear with an arrowhead on the end of
+ *    it, not a crisp object;
+ *  · landed, it stands in whatever stopped it with its head buried, rocks once
+ *    on impact, and fades.
+ *
+ * The inked outline is dropped below the top quality tier: it is the expensive
+ * pass, and seventy arrows carrying it is the one thing here that can cost a
+ * frame.
+ */
+const drawArrowVolley = (ctx: CanvasRenderingContext2D, v: ArrowVolley): void => {
+  const zoom = getZoom()
+  // Smaller than a fired bolt on purpose. These arrive seventy at a time, and a
+  // volley of full-size arrows reads as a fence rather than as a flight.
+  const u = zoom * 0.075
+  const rich = quality.value === 'high'
+  if (u < 0.6) return
+
+  for (const a of v.arrows) {
+    const t = v.age - a.delay
+    if (t <= 0) continue
+    const fallen = (t / 1000) * a.vy
+    const y = a.y0 - fallen
+    // Screen angle. World y grows UP and screen y grows down, so a falling
+    // arrow points along +y on screen: that is +π/2, leaned by the rake.
+    const ang = Math.PI / 2 - a.lean
+
+    if (y > a.yEnd) {
+      const sx = worldToScreenX(a.x)
+      const sy = worldToScreenY(y)
+      ctx.save()
+      ctx.translate(sx, sy)
+      ctx.rotate(ang)
+      // The smear, behind the nock and along the shaft. Tapered from nothing so
+      // it reads as speed rather than as a stick glued to the tail.
+      const streak = a.vy * 0.05 * zoom
+      inkStroke(ctx, [[-u * 1.7 - streak, 0], [-u * 1.7, 0]],
+        u * 0.02, u * 0.2, 'rgba(232,220,190,0.5)', a.seed + 11)
+      drawArrowShape(ctx, u, a.seed, rich)
+      ctx.restore()
+      continue
+    }
+
+    // Landed. Time since impact drives the fade and a short settle wobble.
+    const since = ((a.y0 - a.yEnd) / a.vy) * 1000
+    const held = t - since
+    if (held > a.stick) continue
+    const fade = 1 - Math.max(0, held - a.stick * 0.6) / (a.stick * 0.4)
+    const wob = Math.exp(-held / 90) * 0.07 * Math.sin(held / 22)
+    const la = ang + wob
+    const hx = worldToScreenX(a.x)
+    const hy = worldToScreenY(a.yEnd)
+
+    ctx.save()
+    ctx.globalAlpha = Math.max(0, Math.min(1, fade))
+    // Anchored by the HEAD, pushed a touch past the surface so it reads as
+    // buried in the thing it hit rather than balanced on top of it.
+    const bury = u * 2.2
+    ctx.translate(hx - Math.cos(la) * bury, hy - Math.sin(la) * bury)
+    ctx.rotate(la)
+    drawArrowShape(ctx, u, a.seed, rich)
+    ctx.restore()
+    ctx.globalAlpha = 1
+  }
+}
+
 const hexToRgb = (hex: string): [number, number, number] => {
   const p = parseInt(hex.slice(1), 16)
   return [(p >> 16) & 255, (p >> 8) & 255, p & 255]
@@ -3672,6 +3905,40 @@ const hexToRgb = (hex: string): [number, number, number] => {
 
 interface Bolt { points: number[]; life: number; maxLife: number }
 const lightningBolts: Bolt[] = []
+
+/**
+ * One arrow in a called volley.
+ *
+ * The whole effect is a hundred of these, so an arrow is four numbers and no
+ * object graph: where it started, how fast it falls, when it was loosed and
+ * where it stops. Everything else is derived at draw time.
+ */
+interface RainArrow {
+  x: number
+  /** World y it was loosed from — well above the crown, off the top of frame. */
+  y0: number
+  /** World y it buries itself at. */
+  yEnd: number
+  /** Fall speed, cells/second. */
+  vy: number
+  /** Ms before this one is loosed, so the volley arrives as a sheet. */
+  delay: number
+  /** Slight lean, radians from vertical. */
+  lean: number
+  /** How long it stays stuck once it lands, ms. */
+  stick: number
+  /** Per-arrow ink seed, so seventy arrows are seventy hand-drawn arrows
+   *  rather than one arrow stamped seventy times. */
+  seed: number
+}
+interface ArrowVolley {
+  x: number
+  radius: number
+  arrows: RainArrow[]
+  age: number
+  life: number
+}
+const arrowVolleys: ArrowVolley[] = []
 /** 0..1 full-screen white flash, decays every frame. */
 let screenFlash = 0
 
@@ -4443,35 +4710,11 @@ const drawProjectile = (ctx: CanvasRenderingContext2D, p: Projectile): void => {
 
   switch (p.kind) {
     case 'bolt': {
-      // An arrow is a drawn object, not a lit one: a tapered shaft, a flat
-      // steel head with one bright facet, and fletching that reads even at
-      // eight pixels because it is the only warm note on the round.
       const ang = Math.atan2(-p.vy, p.vx)
-      const u = zoom * 0.1
       ctx.save()
       ctx.translate(x, y)
       ctx.rotate(ang)
-
-      // Shaft — swelling toward the head, the way a nib leaves a line.
-      inkStroke(ctx, [[-u * 1.7, 0], [u * 0.4, 0], [u * 1.5, 0]], u * 0.16, u * 0.34, '#c39a5e', seed)
-      inkStroke(ctx, [[-u * 1.7, u * 0.1], [u * 1.5, u * 0.1]], u * 0.07, u * 0.13, '#6d4a24', seed + 3)
-
-      // Head: two flat tones and a hard inked edge.
-      const head: Pt[] = [[u * 2.5, 0], [u * 1.35, -u * 0.5], [u * 1.6, 0], [u * 1.35, u * 0.5]]
-      fillShape(ctx, head, '#8e9aa8')
-      fillShape(ctx, [[u * 2.4, -u * 0.04], [u * 1.4, -u * 0.42], [u * 1.62, -u * 0.05]], '#e8eef6')
-      if (rich) ink(ctx, head, { width: u * 0.14, color: '#171c22', breakUp: 0.3, seed: seed + 7 })
-
-      // Fletching.
-      ctx.fillStyle = '#2f7d5a'
-      for (const f of [-1, 1]) {
-        ctx.beginPath()
-        ctx.moveTo(-u * 1.75, 0)
-        ctx.lineTo(-u * 1.1, f * u * 0.55)
-        ctx.lineTo(-u * 0.55, f * u * 0.12)
-        ctx.closePath()
-        ctx.fill()
-      }
+      drawArrowShape(ctx, zoom * 0.1, seed, rich)
       ctx.restore()
       break
     }
@@ -4645,16 +4888,22 @@ export interface BuildOverlay {
   hoverR: number | null
   /** Whether the hovered anchor is a legal, affordable placement. */
   hoverValid: boolean
+  /** Quarter-turns the player has applied to the armed shape. */
+  selectedRot: number
   /** Anchor cells where the armed shape would fit — drawn as faint sockets. */
   slots: Array<[number, number]>
   /** Block whose inspector is open (draws its range circle). */
   inspectC: number | null
   inspectR: number | null
+  /** Centre column of an armed Arrow Rain, or null when not aiming. */
+  aimX: number | null
+  /** Half-width of that beaten zone, in cells. */
+  aimRadius: number
 }
 
 let overlay: BuildOverlay = {
-  selectedShape: null, hoverC: null, hoverR: null, hoverValid: false,
-  slots: [], inspectC: null, inspectR: null
+  selectedShape: null, selectedRot: 0, hoverC: null, hoverR: null, hoverValid: false,
+  slots: [], inspectC: null, inspectR: null, aimX: null, aimRadius: 4
 }
 
 export const setBuildOverlay = (next: Partial<BuildOverlay>): void => {
@@ -4700,7 +4949,12 @@ const drawSealMark = (
 const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
   const zoom = getZoom()
   const pulse = 0.5 + 0.5 * Math.sin(t / 420)
-  const shape = overlay.selectedShape ? SHAPE_BY_ID[overlay.selectedShape] : null
+  // Rotated here rather than at the call site so the ghost, the footprint
+  // outline and the seal markers all read the SAME cells the placement check
+  // will run against.
+  const shape = overlay.selectedShape
+    ? rotatedShape(overlay.selectedShape, overlay.selectedRot)
+    : null
 
   // Legal anchor sockets.
   //
@@ -4791,6 +5045,37 @@ const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
     })
   }
 
+  // ── Arrow Rain's beaten zone ──
+  //
+  // Drawn as a shaft of light standing on the strip it will hit, because the
+  // volley comes from ABOVE and a flat footprint on the ground would say
+  // nothing about that. The edges are hard: the difference between a block
+  // being inside and outside this band is a tenth of its hit points, so a soft
+  // gradient here would be lying about where the line is.
+  if (overlay.aimX != null) {
+    const l = worldToScreenX(overlay.aimX - overlay.aimRadius)
+    const rgt = worldToScreenX(overlay.aimX + overlay.aimRadius)
+    const ground = worldToScreenY(0)
+    const top = worldToScreenY(16)
+    const g = ctx.createLinearGradient(0, top, 0, ground)
+    g.addColorStop(0, 'rgba(255,224,120,0.02)')
+    g.addColorStop(1, `rgba(255,224,120,${0.16 + pulse * 0.1})`)
+    ctx.fillStyle = g
+    ctx.fillRect(l, top, rgt - l, ground - top)
+    ctx.strokeStyle = `rgba(255,236,160,${0.5 + pulse * 0.3})`
+    ctx.lineWidth = Math.max(2, zoom * 0.04)
+    ctx.setLineDash([zoom * 0.3, zoom * 0.2])
+    ctx.beginPath()
+    ctx.moveTo(l, top); ctx.lineTo(l, ground)
+    ctx.moveTo(rgt, top); ctx.lineTo(rgt, ground)
+    ctx.stroke()
+    ctx.setLineDash([])
+    // The ground line it lands on, solid — this is the part that is about to
+    // be underneath a hundred arrows.
+    ctx.strokeStyle = '#ffec9f'
+    ctx.beginPath(); ctx.moveTo(l, ground); ctx.lineTo(rgt, ground); ctx.stroke()
+  }
+
   // Range circle for the inspected turret — the clearest way to teach reach.
   if (overlay.inspectC != null && overlay.inspectR != null) {
     const b = getBlocks().get(`${overlay.inspectC},${overlay.inspectR}`)
@@ -4798,7 +5083,13 @@ const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
     if (b && w) {
       const cx = worldToScreenX(centreX(b))
       const cy = worldToScreenY(centreY(b))
-      const rr = w.range * zoom
+      // `rangeMul` — Long Sight / Artillery Doctrine — must be in here. The
+      // turret has always FIRED at `w.range * mRange` (see `stepTurrets`), but
+      // this circle drew the unmodified base reach, so the one thing in the
+      // game that teaches reach was the one thing the range tech did not move.
+      // Read live rather than from the wave-start cache so a rank bought with
+      // the inspector open redraws immediately, matching `BlockInspector`.
+      const rr = w.range * rangeMul.value * zoom
       ctx.strokeStyle = `rgba(120,220,255,${0.35 + pulse * 0.25})`
       ctx.lineWidth = Math.max(1.5, zoom * 0.035)
       ctx.setLineDash([zoom * 0.22, zoom * 0.16])
@@ -5228,6 +5519,11 @@ export const drawScene = (
   stepParticles(dtMs)
   stepTexts(dtMs)
   stepDecals(dtMs)
+  for (let i = arrowVolleys.length - 1; i >= 0; i--) {
+    const v = arrowVolleys[i]!
+    v.age += dtMs
+    if (v.age >= v.life) arrowVolleys.splice(i, 1)
+  }
   for (let i = lightningBolts.length - 1; i >= 0; i--) {
     lightningBolts[i]!.life -= dtMs
     if (lightningBolts[i]!.life <= 0) lightningBolts.splice(i, 1)
@@ -5315,6 +5611,11 @@ export const drawScene = (
   // 8b. Drawn impact blasts — over the monster that was hit, under the embers.
   for (const b of blasts) drawBlast(ctx, b)
 
+  // 8c. A called arrow volley, over everything it is falling onto — it comes
+  // from above the frame, so anything it drew UNDER would be standing on top of
+  // arrows that had not reached it yet.
+  for (const v of arrowVolleys) drawArrowVolley(ctx, v)
+
   // 9. Particles.
   drawParticles(ctx, worldToScreenX, worldToScreenY, zoom)
 
@@ -5376,6 +5677,7 @@ export const resetDrawnFx = (): void => {
   muzzles.length = 0
   blasts.length = 0
   lightningBolts.length = 0
+  arrowVolleys.length = 0
   screenFlash = 0
 }
 

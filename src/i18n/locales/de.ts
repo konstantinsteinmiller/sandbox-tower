@@ -14,7 +14,11 @@ export default {
     'wave': 'Welle', 'enemies': 'Gegner', 'callWave': 'Welle rufen', 'callBoss': 'Boss rufen',
     'speed': 'Tempo {n}×',
     'speedOffer': 'Doppeltempo für einen Ad',
-    'speedFor': '{n} Min.', 'recenter': 'Ansicht zentrieren'
+    'speedFor': '{n} Min.', 'recenter': 'Ansicht zentrieren',
+    'rotateLeft': 'Nach links drehen',
+    'rotateRight': 'Nach rechts drehen',
+    'arrowRain': 'Pfeilregen',
+    'arrowRainAim': 'Tippe das Schlachtfeld an, um die Salve zu rufen'
   },
 
   'warnings': {
@@ -40,7 +44,8 @@ export default {
     'spend': 'Du hast Münzen übrig. Techbaum-Ränge sind dauerhaft und gelten in jedem weiteren Lauf.',
     'branches': 'Drei getrennte Bäume: Turm, Hafen und Werk. Keiner braucht die anderen.',
     'shape': 'Mauern vorn, Geschütze dahinter. Ein Block, der nie getroffen wird, muss nie ersetzt werden.',
-    'gold': 'Gold kauft Block-Upgrades – tippe einen Block an. Schatztruhen prägen jede Welle mehr.'
+    'gold': 'Gold kauft Block-Upgrades – tippe einen Block an. Schatztruhen prägen jede Welle mehr.',
+    'siegeReach': 'Tribok-Katapulte stehen weiter entfernt, als Bogen, Kanone oder Bombarde reichen. Antworte mit einem Mörser – oder einer Kriegsgaleere aus dem Hafen.'
   },
   'blocks': {
     'fortify': 'Stacheln',
@@ -104,7 +109,9 @@ export default {
       'mint': 'Produziert am Ende jeder Welle Münzen.',
       'spikes': 'Angreifer verletzen sich bei jedem Schlag daran selbst.',
       'bombard': 'Schleudert eine Granate steil nach oben. Kleine Explosion, nur Bodenziele.'
-    }
+    },
+    'repair': 'Reparieren',
+    'repairCooldown': '{n} s'
   },
 
   'enemies': {
@@ -215,7 +222,7 @@ export default {
       'rallyCry': 'Verstärkungsblöcke sind +{n} % stärker.',
       'stockpiles': 'Jeder Wirtschaftsblock liefert +{n} % mehr.',
       'unlockMerge': 'Zwei gleiche Blöcke nebeneinander verschmelzen, bis zu dreifach.',
-      'forgeWelds': 'Verschmolzene Blöcke verursachen +{n} % Schaden.',
+      'forgeWelds': 'Verschmolzene Blöcke leisten +{n} % mehr pro Rang – Schaden, Dornen und Ertrag.',
       'harbour': 'Verankere Schiffe im Wasser. Nur sie treffen getauchte Gegner.',
       'dockWorks': 'Liegeplätze pro Rang {n} Feld breiter.',
       'unlockLongship': 'Ein beschildeter Rumpf mit schwerer Harpune.',
@@ -223,13 +230,13 @@ export default {
       'navalGunnery': 'Schiffswaffen verursachen +{n} % Schaden.',
       'unlockGalley': 'Bronzeramme, Deckbombarde und Kampfkastell.',
       'admiralty': 'Schiffswaffen verursachen weitere +{n} % Schaden.',
-      'foundations': 'Jeder Block startet mit +{n} % TP.',
-      'sharpBolts': 'Alle Waffen verursachen +{n} % Schaden pro Rang.',
+      'foundations': 'Jeder Turmblock startet mit +{n} % TP.',
+      'sharpBolts': 'Turmwaffen verursachen +{n} % Schaden pro Rang.',
       'unlockBrace': 'Schaltet die verstärkte Kiste frei – doppelte TP von Holz.',
       'lumberStock': 'Starte jede Belagerung mit +{n} Holz pro Rang.',
       'longSight': 'Alle Waffen reichen +{n} % weiter pro Rang.',
       'rapidFire': 'Alle Waffen feuern {n} % schneller pro Rang.',
-      'reinforced': 'Jeder Block erhält +{n} % TP pro Rang.',
+      'reinforced': 'Jeder Turmblock erhält +{n} % TP pro Rang.',
       'unlockSawmill': 'Schaltet das Sägewerk frei – produziert jede Welle Holz.',
       'quarryStock': 'Starte jede Belagerung mit +{n} Stein pro Rang.',
       'unlockMortar': 'Schaltet den Mörser frei – weitreichender Flächenschaden.',
@@ -239,7 +246,7 @@ export default {
       'unlockQuarry': 'Schaltet den Steinbruch frei – produziert jede Welle Stein.',
       'richHauls': 'Wellenbelohnungen +{n} % pro Rang.',
       'wideFoundation': 'Baue {n} Spalten breiter pro Rang.',
-      'siegeShells': 'Alle Waffen verursachen +{n} % Schaden pro Rang.',
+      'siegeShells': 'Turmwaffen verursachen +{n} % Schaden pro Rang.',
       'unlockFrost': 'Schaltet die Frostspitze frei – verlangsamt ganze Gruppen.',
       'forkedBolts': 'Blitze springen auf {n} zusätzlichen Gegner pro Rang.',
       'ironPlating': 'Jeder Block erhält +{n} Panzerung pro Rang.',
@@ -247,7 +254,7 @@ export default {
       'unlockMint': 'Schaltet die Goldmine frei – produziert jede Welle Münzen.',
       'looting': 'Gegner lassen +{n} % mehr Münzen fallen pro Rang.',
       'overcharge': 'Alle Waffen feuern {n} % schneller pro Rang.',
-      'masterwork': 'Alle Waffen verursachen +{n} % Schaden pro Rang.',
+      'masterwork': 'Turmwaffen verursachen +{n} % Schaden pro Rang.',
       'fieldRepairs': 'Jeder Block heilt {n} % seiner max. TP pro gehaltener Welle und Rang.',
       'greatFoundation': 'Baue {n} weitere Spalten breiter pro Rang.',
       'warChest': 'Wellenbelohnungen +{n} % pro Rang.',

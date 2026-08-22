@@ -14,7 +14,11 @@ export default {
     'wave': 'Fala', 'enemies': 'Wrogowie', 'callWave': 'Wezwij falę', 'callBoss': 'Wezwij bossa',
     'speed': 'Prędkość {n}×',
     'speedOffer': 'Podwójna prędkość za reklamę',
-    'speedFor': '{n} min', 'recenter': 'Wyśrodkuj widok'
+    'speedFor': '{n} min', 'recenter': 'Wyśrodkuj widok',
+    'rotateLeft': 'Obróć w lewo',
+    'rotateRight': 'Obróć w prawo',
+    'arrowRain': 'Deszcz strzał',
+    'arrowRainAim': 'Dotknij pola bitwy, aby wezwać salwę'
   },
 
   'warnings': {
@@ -40,7 +44,8 @@ export default {
     'spend': 'Zostały ci monety. Rangi w drzewku są trwałe — działają w każdej kolejnej rozgrywce.',
     'branches': 'Trzy osobne drzewka: wieża, port i warsztat. Żadne nie wymaga pozostałych.',
     'shape': 'Mury z przodu, działa z tyłu. Blok, którego nic nie trafia, to blok, którego nie odbudowujesz.',
-    'gold': 'Złoto kupuje ulepszenia bloków — dotknij bloku. Skrzynie biją go co falę.'
+    'gold': 'Złoto kupuje ulepszenia bloków — dotknij bloku. Skrzynie biją go co falę.',
+    'siegeReach': 'Trebusze stają dalej, niż sięgają łucznicy, działa czy bombardy. Odpowiedz Moździerzem — albo Galerą bojową z portu.'
   },
   'blocks': {
     'fortify': 'Dodaj kolce',
@@ -104,7 +109,9 @@ export default {
       'mint': 'Produkuje monety po każdej odpartej fali.',
       'spikes': 'Napastnicy ranią się na niej przy każdym ciosie.',
       'bombard': 'Wystrzeliwuje pocisk stromo w górę. Mały wybuch, tylko cele naziemne.'
-    }
+    },
+    'repair': 'Napraw',
+    'repairCooldown': '{n} s'
   },
 
   'enemies': {
@@ -215,7 +222,7 @@ export default {
       'rallyCry': 'Bloki wzmacniające są +{n}% silniejsze.',
       'stockpiles': 'Każdy blok ekonomiczny daje +{n}% więcej.',
       'unlockMerge': 'Dwa takie same bloki obok siebie łączą się, do trzech poziomów.',
-      'forgeWelds': 'Scalone bloki zadają +{n}% obrażeń.',
+      'forgeWelds': 'Scalone bloki dają +{n} % więcej na rangę: obrażenia, kolce i wydajność.',
       'harbour': 'Cumuj statki na wodzie. Tylko one trafiają zanurzonych.',
       'dockWorks': 'Cumuj {n} pole dalej na rangę.',
       'unlockLongship': 'Osłonięty kadłub z ciężkim harpunem.',
@@ -223,13 +230,13 @@ export default {
       'navalGunnery': 'Broń okrętowa zadaje +{n}% obrażeń.',
       'unlockGalley': 'Brązowy taran, bombarda i kasztel bojowy.',
       'admiralty': 'Broń okrętowa zadaje kolejne +{n}% obrażeń.',
-      'foundations': 'Każdy blok zaczyna z +{n} % PŻ.',
-      'sharpBolts': 'Wszystkie bronie zadają +{n} % obrażeń na rangę.',
+      'foundations': 'Każdy blok wieży zaczyna z +{n} % PŻ.',
+      'sharpBolts': 'Bronie wieży zadają +{n} % obrażeń na rangę.',
       'unlockBrace': 'Odblokowuje wzmocnioną skrzynię — dwukrotność PŻ drewna.',
       'lumberStock': 'Zaczynaj każde oblężenie z +{n} drewna na rangę.',
       'longSight': 'Wszystkie bronie sięgają +{n} % dalej na rangę.',
       'rapidFire': 'Wszystkie bronie strzelają {n} % szybciej na rangę.',
-      'reinforced': 'Każdy blok zyskuje +{n} % PŻ na rangę.',
+      'reinforced': 'Każdy blok wieży zyskuje +{n} % PŻ na rangę.',
       'unlockSawmill': 'Odblokowuje tartak — produkuje drewno co falę.',
       'quarryStock': 'Zaczynaj każde oblężenie z +{n} kamienia na rangę.',
       'unlockMortar': 'Odblokowuje moździerz — obrażenia obszarowe z dużego dystansu.',
@@ -239,7 +246,7 @@ export default {
       'unlockQuarry': 'Odblokowuje kamieniołom — produkuje kamień co falę.',
       'richHauls': 'Nagrody za falę +{n} % na rangę.',
       'wideFoundation': 'Buduj o {n} kolumny szerzej na rangę.',
-      'siegeShells': 'Wszystkie bronie zadają +{n} % obrażeń na rangę.',
+      'siegeShells': 'Bronie wieży zadają +{n} % obrażeń na rangę.',
       'unlockFrost': 'Odblokowuje iglicę mrozu — spowalnia całe grupy.',
       'forkedBolts': 'Błyskawica przeskakuje na {n} wroga więcej na rangę.',
       'ironPlating': 'Każdy blok zyskuje +{n} pancerza na rangę.',
@@ -247,7 +254,7 @@ export default {
       'unlockMint': 'Odblokowuje kopalnię złota — produkuje monety co falę.',
       'looting': 'Wrogowie upuszczają +{n} % więcej monet na rangę.',
       'overcharge': 'Wszystkie bronie strzelają {n} % szybciej na rangę.',
-      'masterwork': 'Wszystkie bronie zadają +{n} % obrażeń na rangę.',
+      'masterwork': 'Bronie wieży zadają +{n} % obrażeń na rangę.',
       'fieldRepairs': 'Każdy blok odzyskuje {n} % maks. PŻ za odpartą falę, na rangę.',
       'greatFoundation': 'Buduj o kolejne {n} kolumny szerzej na rangę.',
       'warChest': 'Nagrody za falę +{n} % na rangę.',

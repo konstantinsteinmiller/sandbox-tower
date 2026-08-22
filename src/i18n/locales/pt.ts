@@ -14,7 +14,11 @@ export default {
     'wave': 'Onda', 'enemies': 'Inimigos', 'callWave': 'Chamar onda', 'callBoss': 'Chamar chefe',
     'speed': 'Velocidade {n}×',
     'speedOffer': 'Velocidade dupla por um anúncio',
-    'speedFor': '{n} min', 'recenter': 'Centralizar a vista'
+    'speedFor': '{n} min', 'recenter': 'Centralizar a vista',
+    'rotateLeft': 'Girar à esquerda',
+    'rotateRight': 'Girar à direita',
+    'arrowRain': 'Chuva de flechas',
+    'arrowRainAim': 'Toque no campo de batalha para chamar a salva'
   },
 
   'warnings': {
@@ -40,7 +44,8 @@ export default {
     'spend': 'Tens moedas por gastar. Os níveis da árvore são permanentes e valem em todas as partidas.',
     'branches': 'Três árvores separadas: a torre, o porto e a oficina. Nenhuma precisa das outras.',
     'shape': 'Muros à frente, armas atrás. Um bloco que nunca é atingido é um bloco que nunca reconstróis.',
-    'gold': 'O ouro compra melhorias de bloco — toca num bloco. Os cofres cunham mais a cada vaga.'
+    'gold': 'O ouro compra melhorias de bloco — toca num bloco. Os cofres cunham mais a cada vaga.',
+    'siegeReach': 'Os trebuchetes ficam além do alcance de arqueiros, canhões ou bombardas. Responda com um Morteiro — ou uma Galé de guerra do porto.'
   },
   'blocks': {
     'fortify': 'Adicionar espinhos',
@@ -104,7 +109,9 @@ export default {
       'mint': 'Produz moedas ao fim de cada onda vencida.',
       'spikes': 'Os atacantes se ferem nele a cada golpe.',
       'bombard': 'Lança uma granada quase na vertical. Explosão pequena, só alvos terrestres.'
-    }
+    },
+    'repair': 'Reparar',
+    'repairCooldown': '{n} s'
   },
 
   'enemies': {
@@ -215,7 +222,7 @@ export default {
       'rallyCry': 'Os blocos de reforço são +{n}% mais fortes.',
       'stockpiles': 'Cada bloco de economia rende +{n}% mais.',
       'unlockMerge': 'Dois blocos iguais lado a lado fundem-se, até três níveis.',
-      'forgeWelds': 'Blocos fundidos causam +{n}% de dano.',
+      'forgeWelds': 'Blocos fundidos rendem +{n} % mais por nível: dano, espinhos e produção.',
       'harbour': 'Ancore navios na água. Só eles atingem inimigos submersos.',
       'dockWorks': 'Ancore {n} casa mais longe por nível.',
       'unlockLongship': 'Um casco escudado com um arpão pesado.',
@@ -223,13 +230,13 @@ export default {
       'navalGunnery': 'Armas navais causam +{n}% de dano.',
       'unlockGalley': 'Aríete de bronze, bombarda e castelo de combate.',
       'admiralty': 'Armas navais causam mais +{n}% de dano.',
-      'foundations': 'Cada bloco começa com +{n} % de PV.',
-      'sharpBolts': 'Todas as armas causam +{n}% de dano por nível.',
+      'foundations': 'Cada bloco da torre começa com +{n} % de PV.',
+      'sharpBolts': 'As armas da torre causam +{n} % de dano por nível.',
       'unlockBrace': 'Desbloqueia a caixa reforçada: o dobro dos PV da madeira.',
       'lumberStock': 'Comece cada cerco com +{n} de madeira por nível.',
       'longSight': 'Todas as armas alcançam +{n} % mais longe por nível.',
       'rapidFire': 'Todas as armas atiram {n} % mais rápido por nível.',
-      'reinforced': 'Cada bloco ganha +{n} % de PV por nível.',
+      'reinforced': 'Cada bloco da torre ganha +{n} % de PV por nível.',
       'unlockSawmill': 'Desbloqueia a serraria: produz madeira a cada onda.',
       'quarryStock': 'Comece cada cerco com +{n} de pedra por nível.',
       'unlockMortar': 'Desbloqueia o morteiro: dano em área a longa distância.',
@@ -239,7 +246,7 @@ export default {
       'unlockQuarry': 'Desbloqueia a pedreira: produz pedra a cada onda.',
       'richHauls': 'Recompensas de onda +{n} % por nível.',
       'wideFoundation': 'Construa {n} colunas mais largas por nível.',
-      'siegeShells': 'Todas as armas causam +{n} % de dano por nível.',
+      'siegeShells': 'As armas da torre causam +{n} % de dano por nível.',
       'unlockFrost': 'Desbloqueia a agulha de gelo: retarda grupos inteiros.',
       'forkedBolts': 'O raio salta para {n} inimigo a mais por nível.',
       'ironPlating': 'Cada bloco ganha +{n} de armadura por nível.',
@@ -247,7 +254,7 @@ export default {
       'unlockMint': 'Desbloqueia a mina de ouro: produz moedas a cada onda.',
       'looting': 'Inimigos soltam +{n} % mais moedas por nível.',
       'overcharge': 'Todas as armas atiram {n} % mais rápido por nível.',
-      'masterwork': 'Todas as armas causam +{n} % de dano por nível.',
+      'masterwork': 'As armas da torre causam +{n} % de dano por nível.',
       'fieldRepairs': 'Cada bloco recupera {n} % dos PV máximos por onda contida e por nível.',
       'greatFoundation': 'Construa mais {n} colunas de largura por nível.',
       'warChest': 'Recompensas de onda +{n} % por nível.',

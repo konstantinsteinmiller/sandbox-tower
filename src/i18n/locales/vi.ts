@@ -14,7 +14,11 @@ export default {
     'wave': 'Đợt', 'enemies': 'Kẻ địch', 'callWave': 'Gọi đợt', 'callBoss': 'Gọi trùm',
     'speed': 'Tốc độ {n}×',
     'speedOffer': 'Tốc độ gấp đôi khi xem quảng cáo',
-    'speedFor': '{n} phút', 'recenter': 'Căn giữa khung nhìn'
+    'speedFor': '{n} phút', 'recenter': 'Căn giữa khung nhìn',
+    'rotateLeft': 'Xoay trái',
+    'rotateRight': 'Xoay phải',
+    'arrowRain': 'Mưa Tên',
+    'arrowRainAim': 'Chạm vào chiến trường để gọi loạt bắn'
   },
 
   'warnings': {
@@ -40,7 +44,8 @@ export default {
     'spend': 'Bạn còn xu chưa tiêu. Cấp trong cây là vĩnh viễn, theo bạn sang mọi ván sau.',
     'branches': 'Ba cây riêng biệt: tòa tháp, bến cảng và xưởng. Không cây nào cần cây nào.',
     'shape': 'Tường phía trước, súng phía sau. Khối không bị đánh là khối không phải xây lại.',
-    'gold': 'Vàng mua nâng cấp khối — chạm vào một khối. Rương vàng đúc thêm mỗi đợt.'
+    'gold': 'Vàng mua nâng cấp khối — chạm vào một khối. Rương vàng đúc thêm mỗi đợt.',
+    'siegeReach': 'Máy bắn đá đứng xa hơn tầm của cung thủ, đại bác hay pháo công thành. Hãy đáp trả bằng Súng cối — hoặc Chiến thuyền galley từ bến cảng.'
   },
   'blocks': {
     'fortify': 'Gắn chông',
@@ -104,7 +109,9 @@ export default {
       'mint': 'Sản xuất xu sau mỗi đợt chặn thành công.',
       'spikes': 'Kẻ tấn công tự làm mình bị thương sau mỗi đòn đánh.',
       'bombard': 'Bắn đạn thẳng lên cao. Vụ nổ nhỏ, chỉ nhắm mục tiêu mặt đất.'
-    }
+    },
+    'repair': 'Sửa chữa',
+    'repairCooldown': '{n} giây'
   },
 
   'enemies': {
@@ -215,7 +222,7 @@ export default {
       'rallyCry': 'Khối tăng cường mạnh thêm +{n}%.',
       'stockpiles': 'Mỗi khối kinh tế cho thêm +{n}%.',
       'unlockMerge': 'Hai khối giống nhau cạnh nhau hợp lại, tối đa ba cấp.',
-      'forgeWelds': 'Khối hợp nhất gây +{n}% sát thương.',
+      'forgeWelds': 'Khối hợp nhất tạo ra nhiều hơn +{n}% mỗi bậc: sát thương, gai và sản lượng.',
       'harbour': 'Neo tàu trên nước. Chỉ chúng bắn được kẻ địch chìm.',
       'dockWorks': 'Bến rộng thêm {n} ô mỗi cấp.',
       'unlockLongship': 'Thân tàu có khiên với lao nặng.',
@@ -223,13 +230,13 @@ export default {
       'navalGunnery': 'Vũ khí tàu gây +{n}% sát thương.',
       'unlockGalley': 'Mũi húc đồng, pháo boong và tháp chiến.',
       'admiralty': 'Vũ khí tàu gây thêm +{n}% sát thương.',
-      'foundations': 'Mọi khối khởi đầu với +{n}% HP.',
-      'sharpBolts': 'Mọi vũ khí gây +{n}% sát thương mỗi bậc.',
+      'foundations': 'Mọi khối trên tháp khởi đầu với +{n}% HP.',
+      'sharpBolts': 'Vũ khí trên tháp gây +{n}% sát thương mỗi bậc.',
       'unlockBrace': 'Mở khóa Thùng gia cố — HP gấp đôi gỗ thường.',
       'lumberStock': 'Bắt đầu mỗi cuộc vây hãm với +{n} gỗ mỗi bậc.',
       'longSight': 'Tầm bắn mọi vũ khí +{n}% mỗi bậc.',
       'rapidFire': 'Mọi vũ khí bắn nhanh hơn {n}% mỗi bậc.',
-      'reinforced': 'Mọi khối nhận +{n}% HP mỗi bậc.',
+      'reinforced': 'Mọi khối trên tháp nhận +{n}% HP mỗi bậc.',
       'unlockSawmill': 'Mở khóa Xưởng cưa — sản xuất gỗ mỗi đợt.',
       'quarryStock': 'Bắt đầu mỗi cuộc vây hãm với +{n} đá mỗi bậc.',
       'unlockMortar': 'Mở khóa Súng cối — sát thương diện rộng tầm xa.',
@@ -239,7 +246,7 @@ export default {
       'unlockQuarry': 'Mở khóa Mỏ đá — sản xuất đá mỗi đợt.',
       'richHauls': 'Phần thưởng đợt +{n}% mỗi bậc.',
       'wideFoundation': 'Xây rộng thêm {n} cột mỗi bậc.',
-      'siegeShells': 'Mọi vũ khí gây +{n}% sát thương mỗi bậc.',
+      'siegeShells': 'Vũ khí trên tháp gây +{n}% sát thương mỗi bậc.',
       'unlockFrost': 'Mở khóa Tháp băng — làm chậm cả nhóm.',
       'forkedBolts': 'Sét nhảy thêm {n} kẻ địch mỗi bậc.',
       'ironPlating': 'Mọi khối nhận +{n} giáp mỗi bậc.',
@@ -247,7 +254,7 @@ export default {
       'unlockMint': 'Mở khóa Mỏ vàng — sản xuất xu mỗi đợt.',
       'looting': 'Kẻ địch rơi thêm {n}% xu mỗi bậc.',
       'overcharge': 'Mọi vũ khí bắn nhanh hơn {n}% mỗi bậc.',
-      'masterwork': 'Mọi vũ khí gây +{n}% sát thương mỗi bậc.',
+      'masterwork': 'Vũ khí trên tháp gây +{n}% sát thương mỗi bậc.',
       'fieldRepairs': 'Mỗi đợt chặn được, mỗi khối hồi {n}% HP tối đa cho mỗi bậc.',
       'greatFoundation': 'Xây rộng thêm {n} cột nữa mỗi bậc.',
       'warChest': 'Phần thưởng đợt +{n}% mỗi bậc.',

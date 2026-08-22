@@ -14,7 +14,11 @@ export default {
     'wave': 'Ondata', 'enemies': 'Nemici', 'callWave': 'Chiama ondata', 'callBoss': 'Chiama boss',
     'speed': 'Velocità {n}×',
     'speedOffer': 'Velocità doppia per un annuncio',
-    'speedFor': '{n} min', 'recenter': 'Ricentra la vista'
+    'speedFor': '{n} min', 'recenter': 'Ricentra la vista',
+    'rotateLeft': 'Ruota a sinistra',
+    'rotateRight': 'Ruota a destra',
+    'arrowRain': 'Pioggia di frecce',
+    'arrowRainAim': 'Tocca il campo di battaglia per chiamare la salva'
   },
 
   'warnings': {
@@ -40,7 +44,8 @@ export default {
     'spend': 'Ti avanzano monete. I gradi dell’albero sono permanenti: valgono in ogni partita futura.',
     'branches': 'Tre alberi separati: torre, porto e officina. Nessuno dipende dagli altri.',
     'shape': 'Muri davanti, armi dietro. Un blocco mai colpito è un blocco mai ricostruito.',
-    'gold': 'L’oro compra i potenziamenti dei blocchi: tocca un blocco. I forzieri ne coniano a ogni ondata.'
+    'gold': 'L’oro compra i potenziamenti dei blocchi: tocca un blocco. I forzieri ne coniano a ogni ondata.',
+    'siegeReach': 'I trabucchi si piazzano oltre la portata di arcieri, cannoni e bombarde. Rispondi con un Mortaio, o con una Galea da guerra del porto.'
   },
   'blocks': {
     'fortify': 'Aggiungi punte',
@@ -104,7 +109,9 @@ export default {
       'mint': 'Produce monete alla fine di ogni ondata superata.',
       'spikes': 'Gli assalitori si feriscono a ogni colpo.',
       'bombard': 'Lancia una granata quasi verticale. Piccola esplosione, solo bersagli a terra.'
-    }
+    },
+    'repair': 'Riparare',
+    'repairCooldown': '{n} s'
   },
 
   'enemies': {
@@ -215,7 +222,7 @@ export default {
       'rallyCry': 'I blocchi di potenziamento sono +{n}% più forti.',
       'stockpiles': 'Ogni blocco economico rende +{n}% in più.',
       'unlockMerge': 'Due blocchi uguali affiancati si fondono, fino a tre livelli.',
-      'forgeWelds': 'I blocchi fusi infliggono +{n}% di danni.',
+      'forgeWelds': 'I blocchi fusi rendono +{n} % in più per grado: danni, spuntoni e produzione.',
       'harbour': 'Ormeggia navi sull’acqua. Solo loro colpiscono i sommersi.',
       'dockWorks': 'Ormeggia {n} casella più al largo per grado.',
       'unlockLongship': 'Uno scafo scudato con un arpione pesante.',
@@ -223,13 +230,13 @@ export default {
       'navalGunnery': 'Le armi navali infliggono +{n}% di danni.',
       'unlockGalley': 'Rostro di bronzo, bombarda e castello di combattimento.',
       'admiralty': 'Le armi navali infliggono un ulteriore +{n}% di danni.',
-      'foundations': 'Ogni blocco parte con +{n} % di PS.',
-      'sharpBolts': 'Tutte le armi infliggono +{n} % di danno per grado.',
+      'foundations': 'Ogni blocco della torre parte con +{n} % di PS.',
+      'sharpBolts': 'Le armi della torre infliggono +{n} % di danno per grado.',
       'unlockBrace': 'Sblocca la cassa rinforzata: il doppio dei PS del legno.',
       'lumberStock': 'Inizia ogni assedio con +{n} legno per grado.',
       'longSight': 'Tutte le armi arrivano +{n} % più lontano per grado.',
       'rapidFire': 'Tutte le armi sparano l’{n} % più veloce per grado.',
-      'reinforced': 'Ogni blocco guadagna +{n} % di PS per grado.',
+      'reinforced': 'Ogni blocco della torre guadagna +{n} % di PS per grado.',
       'unlockSawmill': 'Sblocca la segheria: produce legno a ogni ondata.',
       'quarryStock': 'Inizia ogni assedio con +{n} pietra per grado.',
       'unlockMortar': 'Sblocca il mortaio: danno ad area a lunga gittata.',
@@ -239,7 +246,7 @@ export default {
       'unlockQuarry': 'Sblocca la cava: produce pietra a ogni ondata.',
       'richHauls': 'Ricompense d’ondata +{n} % per grado.',
       'wideFoundation': 'Costruisci {n} colonne più larghe per grado.',
-      'siegeShells': 'Tutte le armi infliggono +{n} % di danno per grado.',
+      'siegeShells': 'Le armi della torre infliggono +{n} % di danno per grado.',
       'unlockFrost': 'Sblocca la guglia di gelo: rallenta interi gruppi.',
       'forkedBolts': 'Il fulmine rimbalza su {n} nemico in più per grado.',
       'ironPlating': 'Ogni blocco guadagna +{n} di armatura per grado.',
@@ -247,7 +254,7 @@ export default {
       'unlockMint': 'Sblocca la miniera d’oro: produce monete a ogni ondata.',
       'looting': 'I nemici lasciano +{n} % di monete in più per grado.',
       'overcharge': 'Tutte le armi sparano il {n} % più veloce per grado.',
-      'masterwork': 'Tutte le armi infliggono +{n} % di danno per grado.',
+      'masterwork': 'Le armi della torre infliggono +{n} % di danno per grado.',
       'fieldRepairs': 'Ogni blocco recupera il {n} % dei PS max per ondata respinta e per grado.',
       'greatFoundation': 'Costruisci altre {n} colonne più larghe per grado.',
       'warChest': 'Ricompense d’ondata +{n} % per grado.',
