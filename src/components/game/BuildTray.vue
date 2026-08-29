@@ -72,23 +72,53 @@ const enhancedDmgPct = Math.round((ENHANCED_DAMAGE_MUL - 1) * 100)
  *
  * Measured rather than estimated, because the meta cluster beside it wraps and
  * changes width as buttons appear.
+ *
+ * The measured element is the tray's ROOT, which stretches to its grid track —
+ * not the scroller, which shrink-wraps its tiles. That distinction is the whole
+ * point. While the track was `auto` the two were the same number, so this
+ * measured the width the hand had TAKEN rather than the width it was ALLOWED,
+ * and no amount of arithmetic on a self-referential input can decide whether
+ * the hand fits. (It is also why `chrome` below used to have to under-count
+ * deliberately: over-count a circular estimate and it walks itself down to the
+ * minimum.) `GameScene` now gives the track a share of the viewport that the
+ * hand does not influence, so this reads the real budget.
  */
-const scrollEl = ref<HTMLElement | null>(null)
+const rootEl = ref<HTMLElement | null>(null)
 const trackW = ref(0)
 let ro: ResizeObserver | null = null
 
 onMounted(() => {
-  if (!scrollEl.value || typeof ResizeObserver === 'undefined') return
+  if (!rootEl.value || typeof ResizeObserver === 'undefined') return
   ro = new ResizeObserver(([entry]) => {
     trackW.value = entry?.contentRect.width ?? 0
   })
-  ro.observe(scrollEl.value)
+  ro.observe(rootEl.value)
 })
 
 onUnmounted(() => {
   ro?.disconnect()
   ro = null
 })
+
+/** One CSS `clamp(<min>rem, <n>vw, <max>rem)` in pixels, at viewport width `w`.
+ *  Assumes a 16px root, which is the browser default and what this app ships. */
+const clampPx = (minRem: number, vw: number, maxRem: number, w: number): number =>
+  Math.min(maxRem * 16, Math.max(minRem * 16, (vw / 100) * w))
+
+/**
+ * Every pixel of the tray that is NOT thumbnail, for `slots` tiles.
+ *
+ * Mirrors the stylesheet below — the scroller's border and padding, the gap
+ * between slots, and each tile body's own border and padding. Kept honest
+ * rather than approximate: now that `trackW` is a real budget instead of a
+ * self-referential one, over-counting only costs a pixel or two of thumbnail,
+ * while under-counting overflows the scroller and hides the last offer.
+ */
+const trayChrome = (w: number, slots: number): number =>
+  4                                                   // .build-tray__scroll border
+  + 2 * clampPx(0.12, 0.7, 0.28, w)                   // .build-tray__scroll padding
+  + Math.max(0, slots - 1) * clampPx(0.12, 0.8, 0.28, w) // gap between slots
+  + slots * (4 + 2 * clampPx(0.04, 0.3, 0.1, w))      // .build-tray__body border + padding
 
 const tileSize = computed(() => {
   // A 44 px floor is the tap-target minimum; below that the tile stops being
@@ -98,24 +128,13 @@ const tileSize = computed(() => {
   // phone: there the short axis is the scarce one, and a hand sized off the
   // width alone would eat a third of it.
   const viewportCap = Math.min(72, windowWidth.value * 0.135, windowHeight.value * 0.14)
+  const slots = Math.max(1, props.offers.length)
   if (trackW.value <= 0) return Math.round(Math.max(44, viewportCap))
 
-  // `chrome` MUST under-count the tray's real padding + gaps, and that is not a
-  // rounding convenience — it is what makes this converge.
-  //
-  // The tray column is content-sized, so `trackW` is a function of `tileSize`,
-  // which is a function of `trackW`. Substituting gives
-  // `next = tile + (actualChrome - chrome) / slots`: the tile creeps UP to the
-  // viewport cap only while this estimate is the smaller of the two, sits still
-  // if they match (a fixed point at whatever size it happens to hold), and
-  // walks down to the 44 px tap floor if the estimate is larger. Over-counting
-  // here is what silently collapsed the hand to its minimum.
-  //
-  // Where the tray is genuinely squeezed — a narrow phone, where the grid
-  // clamps the column below its content width — `trackW` stops tracking the
-  // tiles and this correctly sizes them down to fit.
-  const chrome = 2 * 5 + 3 * 5
-  const perSlot = (trackW.value - chrome) / props.offers.length
+  // Straight division now that `trackW` is the room available rather than the
+  // room taken: whatever is left after the tray's own furniture, split between
+  // the offers, and never above what the viewport can carry.
+  const perSlot = (trackW.value - trayChrome(windowWidth.value, slots)) / slots
   return Math.round(Math.max(44, Math.min(viewportCap, perSlot)))
 })
 
@@ -239,7 +258,7 @@ const infoEntry = computed(() => {
 </script>
 
 <template lang="pug">
-  div.build-tray
+  div.build-tray(ref="rootEl")
     //- ── Info box ────────────────────────────────────────────────────────
     Transition(name="info")
       div.build-tray__info(v-if="infoEntry")
@@ -270,7 +289,7 @@ const infoEntry = computed(() => {
         div.build-tray__enhanced-note(v-if="infoEntry.enhanced")
           | {{ t('blocks.enhancedNote', { hp: enhancedHpPct, dmg: enhancedDmgPct }) }}
 
-    div.build-tray__scroll(ref="scrollEl")
+    div.build-tray__scroll
       div.build-tray__slot(v-for="e in entries" :key="e.slot")
         button.build-tray__tile(
           type="button"
@@ -333,6 +352,12 @@ const infoEntry = computed(() => {
 .build-tray
   position: relative
   pointer-events: auto
+  // Stretch to the grid track rather than shrink-wrap the tiles. This element
+  // is what `tileSize` measures, and it has to report the room AVAILABLE — see
+  // the note beside the ResizeObserver. The scroller inside still shrink-wraps
+  // and centres, so a track wider than the hand needs (any desktop) looks
+  // exactly as before.
+  width: 100%
   max-width: 100%
 
 // Deliberately tight.
@@ -345,6 +370,11 @@ const infoEntry = computed(() => {
   display: flex
   flex-direction: row
   align-items: flex-end
+  // Shrink-wrapped and centred inside the (stretched) root, so the panel hugs
+  // the offers instead of spanning a track that may be much wider than them.
+  width: max-content
+  max-width: 100%
+  margin-inline: auto
   gap: clamp(0.12rem, 0.8vw, 0.28rem)
   padding: clamp(0.12rem, 0.7vw, 0.28rem)
   border: 2px solid #0f1a30

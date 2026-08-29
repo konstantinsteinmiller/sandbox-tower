@@ -3,6 +3,7 @@ import useUser, { MUSIC_TRACK_FILES } from '@/use/useUser'
 import { getAudioContext, loadAudioBuffer, resourceCache, registerHtmlAudio, unregisterHtmlAudio, isAudioSuspended, registerOneShotSource } from '@/use/useAssets'
 import { isGamePaused } from '@/use/useGamePause'
 import { isMobileAudioMuted } from '@/use/useMobileAudioMute'
+import { isPlatformAudioMuted } from '@/use/useGamePauseAudio'
 
 import { ref, onMounted, watch, onUnmounted } from 'vue'
 
@@ -159,6 +160,16 @@ export const useMusic = () => {
           playWithFade()
         }
       })
+
+      // And the same re-fire when the PORTAL unmutes. Without it a player who
+      // arrived at a muted portal, then unmuted it, would get a permanently
+      // silent game: `startBattleMusic()` had already set `shouldPlay=true`,
+      // so nothing would ever call `playWithFade` again.
+      watch(isPlatformAudioMuted, (muted) => {
+        if (!muted && shouldPlay.value && bgMusic.value && bgMusic.value.paused) {
+          playWithFade()
+        }
+      })
     })
     onUnmounted(() => {
       if (bgMusic.value) unregisterHtmlAudio(bgMusic.value)
@@ -213,6 +224,19 @@ export const useMusic = () => {
     // true so the `isMobileAudioMuted`-drop watcher in `initMusic` re-fires this
     // the moment they unmute (if a battle is still running).
     if (isMobileAudioMuted.value) return
+
+    // Platform mute: the portal's own speaker toggle says silent. This is a
+    // MUTE, not a pause, so `isGamePaused` above does not cover it — the game
+    // keeps running and only the audio stops.
+    //
+    // The guard has to be here rather than relying on `suspendAllAudio()`
+    // alone, because the suspend can only pause elements that already exist.
+    // Playgama reports `isAudioEnabled` during boot, before this element is
+    // created, and QA's finding was exactly that: "after the reload the game
+    // plays sound although the platform is still muted". `shouldPlay` stays
+    // true, so the `isPlatformAudioMuted`-drop watcher in `initMusic` starts
+    // the track the moment the portal unmutes.
+    if (isPlatformAudioMuted.value) return
 
     // Browsers block autoplay until user interaction
     bgMusic.value.play().then(() => {

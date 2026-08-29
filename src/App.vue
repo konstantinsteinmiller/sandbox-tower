@@ -188,4 +188,49 @@ const plattformText = computed(() => getPlattformText())
 
 img
   pointer-events: none
+
+// ─── Non-Latin scripts ─────────────────────────────────────────────────────
+//
+// 'Angry' is a Latin-only display face. Every non-Latin locale this game ships
+// — zh, ja, ko, ar, th, hi — therefore falls through to whatever `sans-serif`
+// happens to resolve to, which varies by device and is the usual cause of a
+// "the content did not display in <language>" ticket. Naming the platform's
+// real face for each script first makes the result predictable, and costs
+// nothing to download: these are all system fonts. Never inline a CJK webfont
+// — 3-8 MB blows a portal's bundle budget on its own.
+//
+// Keyed off the `lang` attribute that `applyDocumentLocale` stamps on <html>,
+// so a mid-session portal language switch re-picks the stack with no reload.
+// One attribute selector out-specifies the bare `*` above.
+
+html[lang="zh"] *
+  font-family: 'Angry', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif
+
+html[lang="ja"] *
+  font-family: 'Angry', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, 'Noto Sans CJK JP', sans-serif
+
+html[lang="ko"] *
+  font-family: 'Angry', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans CJK KR', sans-serif
+
+html[lang="ar"] *
+  font-family: 'Angry', 'Geeza Pro', 'Segoe UI', Tahoma, 'Noto Naskh Arabic', sans-serif
+
+html[lang="th"] *
+  font-family: 'Angry', Thonburi, 'Leelawadee UI', 'Noto Sans Thai', sans-serif
+
+html[lang="hi"] *
+  font-family: 'Angry', 'Kohinoor Devanagari', 'Nirmala UI', 'Noto Sans Devanagari', sans-serif
+
+// Letter-spacing is a Latin idiom. Arabic is CURSIVE JOINED, so ANY tracking —
+// positive or negative — pulls the letters apart at the joins and renders words
+// as disconnected glyphs; Han and Kana have no need for it either, and the
+// negative values shear them. The overrides are per-component (`.class[data-v]`
+// out-specifies a plain attribute selector), so this needs `!important` to
+// reach them. That is the point: it is a script-level correction, not a style
+// preference.
+html[dir="rtl"] *,
+html[lang="zh"] *,
+html[lang="ja"] *,
+html[lang="ko"] *
+  letter-spacing: normal !important
 </style>

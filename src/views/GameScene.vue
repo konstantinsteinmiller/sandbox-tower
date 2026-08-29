@@ -637,17 +637,54 @@ const wait = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms)
 /**
  * Show an interstitial, if one is due.
  *
- * Two gates: the provider must actually have inventory, and at least 120 s must
- * have passed since the last one. Every interstitial in the game goes through
- * here — the end of a wave and the defeat screen — so the pacing rule lives in
+ * Two gates: the provider must actually have inventory, and at least 121 s must
+ * have passed since the last midgame ad — session start counts as one, so the
+ * opening two minutes are never interrupted. Both in-run placements go through
+ * here (the end of a wave and the defeat screen) so the pacing rule lives in
  * one place instead of each call site guessing.
+ *
+ * `firstIsExempt` lets the DEFEAT placement take the session's opening break
+ * without waiting out the floor — see `useInterstitialPacing`. The wave-clear
+ * placement deliberately does not pass it: a fast first wave would otherwise
+ * spend that break 40 seconds in, on a player who has not finished a run yet.
+ *
+ * The clock is stamped up front, not after the ad. `showMidgameAd` stamps it
+ * too, but only once the audio kill has run; claiming the slot before the
+ * `RESULT_INTERSTITIAL_DELAY_MS` wait closes the window where a wave clear and
+ * a defeat land inside the same second and both pass the gate.
  */
-const maybeShowInterstitial = async (): Promise<void> => {
+const maybeShowInterstitial = async (
+  opts: { firstIsExempt?: boolean } = {}
+): Promise<void> => {
   if (!isInterstitialReady.value) return
-  if (!canShowInterstitial()) return
+  if (!canShowInterstitial(opts)) return
   markInterstitialShown()
   await wait(RESULT_INTERSTITIAL_DELAY_MS)
   await showMidgameAd()
+}
+
+/**
+ * Block until no ad is on screen.
+ *
+ * `maybeShowInterstitial` covers the ad THIS call decided to show. It does not
+ * cover an ad that was already running — the wave-clear break spends
+ * `RESULT_INTERSTITIAL_DELAY_MS` waiting before it even requests, so a gate that
+ * falls inside that window finds the pacing slot already claimed, skips its own
+ * request, and reveals the death screen straight into an interstitial that is
+ * about to open.
+ *
+ * So the reveal waits on the gate itself rather than on any one request. Capped,
+ * because a stuck gate must never be able to strand the player on a dead
+ * battlefield with no way forward.
+ */
+const AD_GATE_SETTLE_TIMEOUT_MS = 30_000
+
+const waitForAdGateClear = async (): Promise<void> => {
+  if (!isAdShowing.value) return
+  const deadline = Date.now() + AD_GATE_SETTLE_TIMEOUT_MS
+  while (isAdShowing.value && Date.now() < deadline) {
+    await wait(100)
+  }
 }
 
 /**
@@ -758,7 +795,14 @@ const presentDefeat = async (): Promise<void> => {
   void reportRun(progress.bestScore.value, Math.max(s.wave, 1))
   firstRunBonusActive.value = getState<string>(DAILY_BONUS_DAY_KEY, '') !== todayKey()
 
-  await maybeShowInterstitial()
+  // The session's FIRST break belongs here, on the first death screen, however
+  // early it arrives — the 121 s floor is there to stop breaks stacking, and
+  // before the first one there is nothing to stack against.
+  await maybeShowInterstitial({ firstIsExempt: true })
+  // The ordering QA grades: the break plays BEFORE the death screen, never over
+  // the top of it. `maybeShowInterstitial` only awaits an ad it started itself,
+  // so this catches one that was already in flight.
+  await waitForAdGateClear()
 
   showResult.value = true
   void grantRunCoins()
@@ -2077,7 +2121,35 @@ onUnmounted(() => {
   // drifted off-centre and, at some sizes, ended up hard against the right edge
   // over the battlefield. Sizing the tray to its content and letting the two
   // side columns split whatever is left pins it to the middle of the SCREEN.
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr)
+  //
+  // Two changes from `minmax(0, 1fr) auto minmax(0, 1fr)`, and they only work
+  // together.
+  //
+  // `min-content` — NOT 0 — as the side minimum. At 0 the two side tracks were
+  // squeezed to nothing while the content-sized tray track kept its full
+  // max-content width, and a track narrower than its contents does not clip
+  // them: the wave control overflowed LEFT (it is `justify-self: end`) and
+  // painted straight through the hand, while the meta cluster wrapped into a
+  // vertical stack of single buttons. Both were visible on a ~700x640 embed.
+  //
+  // And the middle track is a SHARE of the viewport, not `auto`. `auto` meant
+  // the track was sized to the hand and the hand was sized to the track, so
+  // `BuildTray` could measure its own width but never learn how much room it
+  // actually had — the whole reason its `chrome` term had to under-count to
+  // converge. A share the tray does not influence breaks that loop: the tiles
+  // now shrink to whatever is left over, which is what makes the hand able to
+  // give way at all.
+  //
+  // 46vw is measured, not chosen: at 700px the meta cluster needs 162px to stay
+  // on ONE row and the wave control 163px at its widest shipped label (Spanish
+  // "LLAMAR OLEADA"; German "WELLE RUFEN" is close behind). Those plus the gaps
+  // and this bar's padding leave the hand ~331px. Give it more and the meta
+  // cluster wraps into a vertical stack, which is taller and reads as broken
+  // even when nothing overlaps.
+  //
+  // On a wide screen the track is simply roomier than the hand needs — the
+  // scroller inside shrink-wraps and centres, so nothing looks stretched.
+  grid-template-columns: minmax(min-content, 1fr) minmax(0, 46vw) minmax(min-content, 1fr)
   grid-template-areas: 'meta tray right'
   align-items: end
   gap: clamp(0.25rem, 1.6vw, 0.7rem)
@@ -2087,7 +2159,16 @@ onUnmounted(() => {
   grid-area: meta
   justify-self: start
   display: flex
-  flex-wrap: wrap
+  // `nowrap` is load-bearing for the BAR, not just for this cluster.
+  //
+  // A wrapping flex container's min-content is its widest single CHILD, so the
+  // grid track beside the hand was told this cluster could live in ~54px. It
+  // duly handed the rest to the hand and let the cluster wrap into a vertical
+  // stack of single buttons — taller, and it reads as broken. Refusing to wrap
+  // makes min-content the width of the whole row, which the track then has to
+  // reserve, and the hand is what gives instead. No overflow guard is needed
+  // here: `BuildTray` shrinks its tiles to whatever is left.
+  flex-wrap: nowrap
   align-items: flex-end
   gap: clamp(0.15rem, 1vw, 0.35rem)
   max-width: 40vw
@@ -2254,6 +2335,14 @@ onUnmounted(() => {
 //
 // Restricted to PORTRAIT because a landscape phone turns the tray into a
 // vertical rail, where a full-width row would eat the short axis instead.
+//
+// Deliberately NOT widened past 37rem. Three columns stop fitting five
+// tap-sized tiles at about 41rem — below that the hand scrolls by a tile's
+// width — but buying those pixels with a second row costs far more than it
+// returns: measured on a 640x629 embed the bar goes from ~145px to 243px, 39%
+// of the screen, and the battlefield is what pays. A hand whose last tile is
+// two-thirds visible still reads as scrollable; a bottom bar that eats the
+// board does not read as anything but broken.
 @media (max-width: 37rem) and (orientation: portrait)
   .scene__bottom
     grid-template-columns: minmax(0, 1fr) auto
@@ -2423,10 +2512,19 @@ onUnmounted(() => {
   display: flex
   align-items: center
 
+// Sits ABOVE the tech chip, not beside it. `right: 100%` put the pill in the
+// space the Arrow Rain button occupies, so the coach mark covered the very
+// control the player is most likely to want mid-build. Above the row there is
+// nothing but battlefield, and the pill is right-aligned to the chip it is
+// pointing at so the association still reads.
 .scene__spotlight
   position: absolute
-  right: 100%
-  margin-right: 0.4rem
+  right: 0
+  bottom: 100%
+  margin-bottom: 0.35rem
+  // Never a tap target: it is a label on a button, and swallowing the tap that
+  // was aimed at the button underneath it is worse than not showing it at all.
+  pointer-events: none
   padding: 0.15em 0.5em
   border: 2px solid #0f1a30
   border-radius: 0.5rem

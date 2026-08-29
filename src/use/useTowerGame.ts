@@ -181,7 +181,9 @@ const acquireProjectile = (): Projectile => {
   const p = projectilePool.pop()
   if (!p) {
     return {
-      uid: 0, kind: 'arrow', x: 0, y: 0, vx: 0, vy: 0, damage: 0, splash: 0,
+      // Placeholder only — every caller overwrites `kind` before the round is
+      // live. `'arrow'` is not a `ProjectileKind`; `'bolt'` is the arrow one.
+      uid: 0, kind: 'bolt', x: 0, y: 0, vx: 0, vy: 0, damage: 0, splash: 0,
       ballistic: false, targetUid: -1, life: 0, slowPct: 0, slowMs: 0,
       sourceUid: -1, hostile: false, burnMs: undefined, burnDps: undefined, trail: []
     }

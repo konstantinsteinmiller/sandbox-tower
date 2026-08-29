@@ -13,6 +13,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const loadGate = async (opts: {
   crazy?: boolean; fullRelease?: boolean; rewardedReady?: boolean
+  /** Any other portal build whose ad SDK can serve a rewarded video. */
+  playgama?: boolean
   /** Starting wallet balance, for the coin-priced (ungated) path. */
   wallet?: number
 } = {}) => {
@@ -22,7 +24,14 @@ const loadGate = async (opts: {
   // `addCoins(0)` is a deliberate no-op, so a zero-balance case would inherit
   // whatever another test file left in this worker's storage.
   localStorage.setItem('tower_state', JSON.stringify({ ts_coins: opts.wallet ?? 1000 }))
-  vi.doMock('@/use/useUser', () => ({ isCrazyWeb: opts.crazy ?? false }))
+  vi.doMock('@/use/useUser', () => ({
+    isCrazyWeb: opts.crazy ?? false,
+    isGameDistribution: false,
+    isPlaygama: opts.playgama ?? false,
+    isGamepix: false,
+    isGameMonetize: false,
+    isYandex: false
+  }))
   vi.doMock('@/use/useMatch', () => ({ isCrazyGamesFullRelease: opts.fullRelease ?? false }))
   const showRewardedAd = vi.fn(async () => true)
   vi.doMock('@/use/useAds', async () => {
@@ -70,6 +79,18 @@ describe('reward gating', () => {
     expect(grant).toHaveBeenCalledTimes(1)
     expect(gate.showRewardedAd).not.toHaveBeenCalled()
     expect(gate.wallet.value).toBe(100 - gate.REWARD_COIN_COST)
+  })
+
+  it('plays a rewarded video on a portal build that has one — not a coin price', async () => {
+    // The bug this pins: every portal added after CrazyGames inherited the
+    // "no ad inventory" arm and priced its perks in wallet gold, so Playgama's
+    // QA tool saw a coin cost sitting in front of a live rewarded unit.
+    const gate = await loadGate({ playgama: true, wallet: 100 })
+    const grant = vi.fn()
+    expect(gate.isRewardGated).toBe(true)
+    await expect(gate.claimReward(grant)).resolves.toBe(true)
+    expect(gate.showRewardedAd).toHaveBeenCalledTimes(1)
+    expect(gate.wallet.value).toBe(100)
   })
 
   it('refuses, and grants nothing, when the coins are not there', async () => {
@@ -150,24 +171,89 @@ describe('reward gating', () => {
 })
 
 describe('interstitial pacing', () => {
-  it('never fires on the first opportunity of a session', async () => {
+  it('never fires in the opening seconds of a session', async () => {
     const gate = await loadGate()
     gate.__resetInterstitialClock()
-    // The opening minute is when a player decides whether the game is worth
-    // their time; an ad there is the most reliable way to lose them.
+    // The opening minutes are when a player decides whether the game is worth
+    // their time; an ad there is the most reliable way to lose them. Session
+    // start IS the previous break, so no special first-call case is needed.
     expect(gate.canShowInterstitial()).toBe(false)
   })
 
-  it('holds the break for a full two minutes', async () => {
+  it('lets the death screen take the opening break without waiting it out', async () => {
+    const gate = await loadGate()
+    gate.__resetInterstitialClock()
+    // The floor exists to stop breaks STACKING. Before the first one there is
+    // nothing to stack against, and the end of a first run is the moment a
+    // player is least likely to resent one.
+    expect(gate.canShowInterstitial({ firstIsExempt: true })).toBe(true)
+  })
+
+  it('spends the opening exemption on the first break from ANY placement', async () => {
     vi.useFakeTimers()
     const gate = await loadGate()
     gate.__resetInterstitialClock()
-    gate.canShowInterstitial() // starts the clock
 
-    vi.advanceTimersByTime(119_000)
+    // A wave-clear break lands once the floor has elapsed...
+    vi.advanceTimersByTime(121_000)
+    expect(gate.canShowInterstitial()).toBe(true)
+    gate.markInterstitialShown()
+
+    // ...and the player dies ten seconds later. "The first one is free" must
+    // not mean two ads inside the same minute.
+    vi.advanceTimersByTime(10_000)
+    expect(gate.canShowInterstitial({ firstIsExempt: true })).toBe(false)
+  })
+
+  it('puts the death screen back on the clock after its own first break', async () => {
+    vi.useFakeTimers()
+    const gate = await loadGate()
+    gate.__resetInterstitialClock()
+
+    expect(gate.canShowInterstitial({ firstIsExempt: true })).toBe(true)
+    gate.markInterstitialShown()
+
+    // Second run, ended quickly: no second break so soon after the first.
+    vi.advanceTimersByTime(30_000)
+    expect(gate.canShowInterstitial({ firstIsExempt: true })).toBe(false)
+
+    vi.advanceTimersByTime(91_000)
+    expect(gate.canShowInterstitial({ firstIsExempt: true })).toBe(true)
+  })
+
+  it('keeps the wave-clear break behind the floor even as the first of a session', async () => {
+    vi.useFakeTimers()
+    const gate = await loadGate()
+    gate.__resetInterstitialClock()
+
+    // Without this, a fast first wave spends the opening break 40 seconds in,
+    // on a player who has not finished a run yet.
+    vi.advanceTimersByTime(40_000)
+    expect(gate.canShowInterstitial()).toBe(false)
+  })
+
+  it('holds the break for a full 121 seconds', async () => {
+    vi.useFakeTimers()
+    const gate = await loadGate()
+    gate.__resetInterstitialClock()
+
+    vi.advanceTimersByTime(120_000)
+    // 120 s exactly is the Playgama bridge's own floor — asking there is a
+    // coin toss between "shown" and "refused for pacing", so we don't ask.
     expect(gate.canShowInterstitial()).toBe(false)
 
-    vi.advanceTimersByTime(2_000)
+    vi.advanceTimersByTime(1_000)
+    expect(gate.canShowInterstitial()).toBe(true)
+  })
+
+  it('lets the FIRST opportunity through once the gap has elapsed', async () => {
+    vi.useFakeTimers()
+    const gate = await loadGate()
+    gate.__resetInterstitialClock()
+
+    // The clock used to start lazily on the first call, so a player who
+    // reached their first wave clear late got an ad-free run for free.
+    vi.advanceTimersByTime(121_000)
     expect(gate.canShowInterstitial()).toBe(true)
   })
 
@@ -175,7 +261,6 @@ describe('interstitial pacing', () => {
     vi.useFakeTimers()
     const gate = await loadGate()
     gate.__resetInterstitialClock()
-    gate.canShowInterstitial()
 
     vi.advanceTimersByTime(121_000)
     expect(gate.canShowInterstitial()).toBe(true)
@@ -184,7 +269,7 @@ describe('interstitial pacing', () => {
     // Immediately after a break, the next one is a full gap away again — this
     // is what stops a fast run from stacking two breaks in a row.
     expect(gate.canShowInterstitial()).toBe(false)
-    expect(gate.interstitialCooldownLeft()).toBeGreaterThan(119)
+    expect(gate.interstitialCooldownLeft()).toBeGreaterThan(120)
 
     vi.advanceTimersByTime(121_000)
     expect(gate.canShowInterstitial()).toBe(true)

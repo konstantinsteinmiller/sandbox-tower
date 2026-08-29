@@ -14,14 +14,16 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { suspendSpy, resumeSpy } = vi.hoisted(() => ({
+const { suspendSpy, resumeSpy, killOneShotSpy } = vi.hoisted(() => ({
   suspendSpy: vi.fn(),
-  resumeSpy: vi.fn()
+  resumeSpy: vi.fn(),
+  killOneShotSpy: vi.fn()
 }))
 
 vi.mock('@/use/useAssets', () => ({
   suspendAllAudio: suspendSpy,
-  resumeAllAudio: resumeSpy
+  resumeAllAudio: resumeSpy,
+  killOneShotSfx: killOneShotSpy
 }))
 
 import {

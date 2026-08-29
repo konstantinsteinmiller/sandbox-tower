@@ -4,6 +4,7 @@ import '@/assets/css/tailwind.css'
 import '@/assets/css/index.sass'
 import { createI18n } from 'vue-i18n'
 import {
+  applyDocumentLocale,
   loadLocaleMessages,
   resolveInitialLocale,
   setI18nLocale,
@@ -14,8 +15,8 @@ import { initAds } from '@/use/useAds'
 import { installGamePauseAudio } from '@/use/useGamePauseAudio'
 import useUser, { isCrazyWeb, isWaveDash, isItch, isGlitch, isGameDistribution, isPlaygama, isGamepix, isGameMonetize, isYandex } from '@/use/useUser'
 import { isDebug } from '@/use/useMatch.ts'
-import { hasState, reloadTowerState } from '@/use/useTowerState'
-import { LANGUAGE_KEY } from '@/keys'
+import { reloadTowerState } from '@/use/useTowerState'
+import { portalLocale, resolveActiveLocale } from '@/use/usePortalLocale'
 import { SaveManager } from '@/utils/save/SaveManager'
 import { resolveSaveStrategy } from '@/platforms/resolveSaveStrategy'
 import { installSaveStatus } from '@/use/useSaveStatus'
@@ -111,6 +112,7 @@ const bootstrap = async () => {
   // re-import useCrazyGames.
   let cgLocale: string | null = null
   let yaLocale: string | null = null
+  let pgLocale: string | null = null
   if (isCrazyWeb) {
     const cg = await import('@/use/useCrazyGames')
     await cg.initCrazyGames()
@@ -146,6 +148,28 @@ const bootstrap = async () => {
     const { gamepixPlugin, gamePixGameLoadingStart } = await import('@/utils/gamepixPlugin')
     await gamepixPlugin()
     gamePixGameLoadingStart()
+  } else if (isPlaygama) {
+    // **Awaited** init, like GamePix / Yandex / CrazyGames — NOT the
+    // fire-and-forget parallel pattern GameDistribution uses. Two things
+    // depend on the bridge being up before this line returns:
+    //
+    //   • `PlaygamaStrategy.hydrate()` reads `bridge.storage` for the cloud
+    //     snapshot, and the Bridge's `storage` getter THROWS
+    //     ("Before using the SDK you must initialize it") until
+    //     `initialize()` resolves. A hydrate that races init reads nothing,
+    //     the player boots at defaults, and the next flush publishes those
+    //     defaults over their real save.
+    //   • `bridge.platform.language` sits behind the same init guard, and the
+    //     i18n instance is created a few dozen lines below. The save ticket
+    //     and the localisation ticket have the same root fix.
+    //
+    // Cost is bounded: the plugin's own 15 s INIT_TIMEOUT_MS caps it, and the
+    // localhost MOCK adapter resolves in well under 50 ms.
+    const { playgamaPlugin, playgamaLoadingStart, playgamaLocale } =
+      await import('@/utils/playgamaPlugin')
+    await playgamaPlugin()
+    playgamaLoadingStart()
+    pgLocale = playgamaLocale.value
   } else if (isYandex) {
     // **Awaited** init — must finish BEFORE `saveManager.init()` runs hydrate.
     // YandexStrategy's `hydrate()` reads `player.getData()` for the
@@ -294,18 +318,7 @@ const bootstrap = async () => {
     })
   }
 
-  // Playgama: same parallel-init pattern as GD. The plugin internally
-  // caches its init promise, so the AdProvider + SaveStrategy both join
-  // this same `bridge.initialize()` call instead of issuing duplicates.
-  // Loading messages are sent immediately after init resolves; the
-  // `game_ready` edge is fired later from App.vue's asset-loaded watcher.
-  if (import.meta.env.VITE_APP_PLAYGAMA === 'true') {
-    void import('@/utils/playgamaPlugin').then(({ playgamaPlugin, playgamaLoadingStart }) => {
-      void playgamaPlugin().then(() => playgamaLoadingStart())
-    })
-  }
-
-  // GameMonetize: same parallel-init pattern as GD / Playgama. The plugin sets
+  // GameMonetize: same parallel-init pattern as GD. The plugin sets
   // `window.SDK_OPTIONS`, lazily injects the SDK script
   // (api.gamemonetize.com/sdk.js), and resolves on SDK_READY. The AdProvider's
   // init() (post-mount via initAds) joins the same cached promise. There's no
@@ -316,20 +329,28 @@ const bootstrap = async () => {
     })
   }
 
-  // GamePix init already ran (awaited) earlier — see the `else if
-  // (isGamepix)` branch above. This block intentionally has no GamePix
-  // arm: the SDK must be ready before hydrate, so the parallel-init
-  // pattern used by Playgama / GD doesn't fit here.
+  // GamePix and Playgama init already ran (awaited) earlier — see their
+  // branches above. This block intentionally has no arm for either: both SDKs
+  // must be ready before hydrate reads their cloud store, so GD's parallel-init
+  // pattern does not fit them.
 
-  // CG QA: NO locally-saved data on CG builds — we no longer mirror the
-  // CrazyGames-reported locale into sessionStorage. The portal locale is
-  // passed straight into resolveInitialLocale below so it influences the
-  // first-paint i18n bundle without touching any storage surface.
-  // `cgLocale` / `yaLocale` were captured up in their init arms; null on
-  // other builds. Yandex returns ISO-639-1 (`en`, `ru`, `tr`, etc.);
-  // anything we don't ship maps to the resolver's fallback chain.
-  const portalLocaleHint = cgLocale ?? yaLocale
-  const portalLocale = portalLocaleHint && LANGUAGES.includes(portalLocaleHint) ? portalLocaleHint : null
+  // The portal's reported display language, for the FIRST PAINT only — it goes
+  // straight into `resolveInitialLocale` so the right locale chunk is the one
+  // we fetch, and touches no storage surface on the way (CG QA: NO
+  // locally-saved data on CG builds).
+  //
+  // `cgLocale` / `yaLocale` / `pgLocale` were captured in their init arms and
+  // are null on every other build. Yandex reports ISO-639-1; CrazyGames and the
+  // Playgama Bridge can report anything the host portal passes through, so
+  // Playgama normalises inside its plugin and anything still unshipped falls
+  // through to the resolver's own chain.
+  //
+  // Only the boot value is read here. Playgama keeps polling `platform.language`
+  // for the rest of the session and republishes into the shared `portalLocale`
+  // ref, which the watcher further down reacts to.
+  const portalLocaleHint = cgLocale ?? yaLocale ?? pgLocale
+  const portalLocaleAtBoot =
+    portalLocaleHint && LANGUAGES.includes(portalLocaleHint) ? portalLocaleHint : null
 
   const { default: App } = await import('@/App.vue')
 
@@ -337,7 +358,11 @@ const bootstrap = async () => {
   // i18n instance. The English fallback is loaded in parallel so missing
   // keys are never undefined while the active locale's chunk is still
   // in flight. If the initial locale IS English we only fetch once.
-  const initial = resolveInitialLocale(portalLocale)
+  const initial = resolveInitialLocale(portalLocaleAtBoot)
+  // `lang` + `dir` before the first paint, so an Arabic boot lays out
+  // right-to-left from the very first frame rather than flipping once the
+  // post-hydrate watcher runs. `setI18nLocale` re-stamps on every later switch.
+  applyDocumentLocale(initial)
   const needsFallback = initial !== 'en'
   const [initialMsgs, fallbackMsgs] = await Promise.all([
     loadLocaleMessages(initial).catch(() => ({})),
@@ -354,44 +379,55 @@ const bootstrap = async () => {
     fallbackWarn: false
   })
 
-  // Apply the player's saved language once hydrate finishes. The portal
-  // locale (CG / Yandex) is used ONLY to seed first-time players — it
-  // never overrides an explicit OptionsModal choice. After hydrate has
-  // populated localStorage from cloud, a null value at
-  // `ts_user_language` means "this player has never picked a
-  // language on any device" and we can safely seed the portal locale.
-  // useUser.ts deliberately does NOT seed a language default, so the
-  // null/non-null probe here is a reliable signal.
+  // ─── Display language ────────────────────────────────────────────────
+  //
+  // One resolver (`resolveActiveLocale`), consulted from one watcher, so a late
+  // cloud hydrate, a late bridge handshake and a mid-session portal switch all
+  // land the same way instead of each needing its own path.
+  //
+  // What this block deliberately no longer does is `setSettingValue('language',
+  // portalSeed)`. Seeding the portal's answer into the PLAYER-CHOICE key made
+  // "the portal said so" indistinguishable from "the player chose this" — and
+  // on a build with a cloud save, that row syncs to every device and outranks
+  // the portal forever. The portal answer stays in a ref; only the Options
+  // modal writes the key, and it stamps a provenance flag when it does. See
+  // `usePortalLocale`.
   {
-    const { userLanguage: storedLang, setSettingValue } = useUser()
+    const { userLanguage: storedLang } = useUser()
     const { isDbInitialized: dbReady } = await import('@/use/useMatch')
+
+    const applyActiveLocale = (): void => {
+      // Defensive reload — `main.ts` already calls `reloadTowerState()` right
+      // after `saveManager.init()` so first-paint reads see the hydrated blob.
+      // This covers a hydrate that resolves a cloud value AFTER that early
+      // reload (Glitch's HTTP strategy resolves out-of-band in some flows).
+      // Idempotent.
+      reloadTowerState()
+      const next = resolveActiveLocale(storedLang.value, initial)
+      if (isSupportedLocale(next)) void setI18nLocale(i18n, next)
+    }
+
     let stopLangSync: (() => void) | null = null
     stopLangSync = watch(
       dbReady,
       (ready) => {
         if (!ready) return
         stopLangSync?.()
-        // Defensive reload — `main.ts` already calls `reloadTowerState()`
-        // right after `saveManager.init()` so first-paint reads see the
-        // hydrated blob. This second call covers the case where hydrate
-        // resolves a cloud value AFTER the early reload (Glitch's HTTP
-        // strategy resolves out-of-band in some flows, etc.). Idempotent.
-        reloadTowerState()
-        const hasStoredLanguage = hasState(LANGUAGE_KEY)
-        const portalSeed = cgLocale ?? yaLocale
-        if (!hasStoredLanguage && portalSeed && LANGUAGES.includes(portalSeed)) {
-          setSettingValue('language', portalSeed)
-        }
-        // Apply whichever language is now authoritative — the stored
-        // value (cloud-hydrated or just-seeded). Never the portal locale
-        // unconditionally, because that's what was overwriting an
-        // explicit Spanish choice on every English-portal refresh.
-        if (isSupportedLocale(storedLang.value)) {
-          setI18nLocale(i18n, storedLang.value)
-        }
+        applyActiveLocale()
       },
       { immediate: true }
     )
+
+    // Portals do not emit a language-change event, so the Playgama plugin polls
+    // `platform.language` and republishes here. Watching the ref rather than
+    // reading it once is what makes Playgama's guided language switch — which
+    // happens mid-session, without a reload — actually change what is on
+    // screen. `resolveActiveLocale` treats a CHANGED portal value as
+    // outranking a stored choice, which is the behaviour QA grades.
+    watch(portalLocale, () => {
+      if (!dbReady.value) return
+      applyActiveLocale()
+    })
   }
 
   // Expose the instance globally so composables / skills that want to

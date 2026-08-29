@@ -23,6 +23,7 @@ import { isCrazyWeb, isWaveDash, isItch, isGlitch, isGameDistribution, isPlaygam
 import type { AdProvider } from './ads/types'
 import { resolveAdProvider } from '@/platforms/resolveAdProvider'
 import { isRewardedThrottled, recordRewardedGranted } from '@/use/useRewardedThrottle'
+import { markInterstitialShown } from '@/use/useInterstitialPacing'
 import { isAdShowing, isGamePaused, acquireAppPause } from '@/use/useGamePause'
 import { installGamePauseAudio } from '@/use/useGamePauseAudio'
 import { __audioDebugSnapshot, killOneShotSfx } from '@/use/useAssets'
@@ -172,6 +173,14 @@ export const showRewardedAd = async (): Promise<boolean> => {
 const AUDIO_DRAIN_MS = 200
 
 export const showMidgameAd = async (): Promise<void> => {
+  // Stamp the pacing clock for EVERY interstitial request, wherever it came
+  // from — the wave-clear break, the one in front of the defeat screen, or the
+  // boot-time first-play placement that never consults `canShowInterstitial`
+  // at all. Doing it here rather than at each call site is what makes "at
+  // least 121 s since the last midgame ad" a property of the game instead of a
+  // convention three call sites have to remember. Stamped BEFORE the request,
+  // so a slow or unfilled ad can't let a second one through behind it.
+  markInterstitialShown()
   // The audio kill: hard-stop the music, cut every in-flight one-shot SFX so
   // nothing tails into the ad, and flip the pause gate (`isAdShowing` →
   // `isGamePaused`, which `useGamePauseAudio` watches with `flush: 'sync'` to

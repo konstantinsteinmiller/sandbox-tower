@@ -35,6 +35,13 @@ export const getAudioContext = (): AudioContext | null => {
   } catch {
     return null
   }
+  // Created while something is holding the audio down — a portal that reported
+  // itself muted at boot, an ad already on screen. A fresh context on a page
+  // that has already seen a user gesture starts 'running', so without this it
+  // would come up audible underneath a mute that was applied before it existed.
+  if (suspendDepth > 0 && sharedAudioCtx.state === 'running') {
+    void sharedAudioCtx.suspend()
+  }
   armResumeOnGesture()
   return sharedAudioCtx
 }

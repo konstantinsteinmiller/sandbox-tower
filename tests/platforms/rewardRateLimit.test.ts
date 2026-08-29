@@ -11,7 +11,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const loadGate = async (opts: { crazy?: boolean; fullRelease?: boolean; granted?: boolean } = {}) => {
   vi.resetModules()
   localStorage.clear()
-  vi.doMock('@/use/useUser', () => ({ isCrazyWeb: opts.crazy ?? true }))
+  vi.doMock('@/use/useUser', () => ({
+    isCrazyWeb: opts.crazy ?? true,
+    isGameDistribution: false,
+    isPlaygama: false,
+    isGamepix: false,
+    isGameMonetize: false,
+    isYandex: false
+  }))
   vi.doMock('@/use/useMatch', () => ({ isCrazyGamesFullRelease: opts.fullRelease ?? true }))
   const showRewardedAd = vi.fn(async () => opts.granted ?? true)
   vi.doMock('@/use/useAds', async () => {

@@ -111,6 +111,13 @@ export const HINTS_SEEN_KEY = 'ts_hints_seen'
 export const SOUND_KEY = 'ts_user_sound_volume'
 export const MUSIC_KEY = 'ts_user_music_volume'
 export const LANGUAGE_KEY = 'ts_user_language'
+/** Provenance for LANGUAGE_KEY: `true` only when the PLAYER picked a language
+ *  in the Options modal. Portals re-report their language on every load, so a
+ *  value with no flag beside it is assumed to be a portal seed written by an
+ *  older build and loses to the live portal answer. Without this, one poisoned
+ *  cloud row outranks the portal forever — the localisation ticket that keeps
+ *  coming back. See `usePortalLocale`. */
+export const LANGUAGE_EXPLICIT_KEY = 'ts_user_language_explicit'
 export const DIFFICULTY_KEY = 'ts_user_difficulty'
 export const MUSIC_TRACK_KEY = 'ts_user_music_track'
 /** Mobile-only hard audio mute (boolean). On phones the OS volume rocker owns

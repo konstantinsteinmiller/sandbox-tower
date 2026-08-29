@@ -1,5 +1,7 @@
 import { ref, computed } from 'vue'
-import { isCrazyWeb } from '@/use/useUser'
+import {
+  isCrazyWeb, isGameDistribution, isPlaygama, isGamepix, isGameMonetize, isYandex
+} from '@/use/useUser'
 import { isCrazyGamesFullRelease } from '@/use/useMatch'
 import { isRewardedReady, showRewardedAd } from '@/use/useAds'
 import useTowerEconomy, { coins } from '@/use/useTowerEconomy'
@@ -8,15 +10,34 @@ import useTowerEconomy, { coins } from '@/use/useTowerEconomy'
  * ─── Reward gating ──────────────────────────────────────────────────────────
  *
  * Some perks (double coins, rebuild-and-continue, a reinforced hand of blocks)
- * are paid for with a rewarded video — but ONLY on the CrazyGames full release.
+ * are paid for with a rewarded video — but only on a build where a rewarded
+ * video actually EXISTS.
  *
- * Everywhere else they are simply free. That covers local dev, every non-CG
- * portal, and the CG pre-release build used for QA: on those, a gate would
- * either be untestable (no ad inventory) or would degrade a build the player
- * never agreed to watch ads on. One predicate, checked in one place, so a
- * perk can never accidentally ship gated on a build that has no ads.
+ * The rule has always been "gate where there is inventory, charge coins where
+ * there is none". It was written when CrazyGames was the only portal with an
+ * ad SDK, so it read `isCrazyWeb && isCrazyGamesFullRelease` — and every portal
+ * added since (Playgama, GamePix, GameMonetize, GameDistribution, Yandex)
+ * silently inherited the no-inventory arm and priced its perks in wallet gold.
+ * Playgama's QA tool showed a gold price on placements that had a live rewarded
+ * unit sitting behind them, which is both a lost impression and the wrong
+ * promise to the player: the button says "spend coins" and the correct answer
+ * is "watch a video".
+ *
+ * So the predicate is the list of builds whose `AdProvider` can serve a
+ * rewarded video. CrazyGames stays split by release stage — the pre-release QA
+ * build genuinely has no fill — while every other portal build is gated the
+ * moment its flag is set.
+ *
+ * One predicate, checked in one place, so a perk can never accidentally ship
+ * gated on a build that has no ads, or coin-priced on a build that has them.
  */
-export const isRewardGated = isCrazyWeb && isCrazyGamesFullRelease
+export const isRewardGated =
+  (isCrazyWeb && isCrazyGamesFullRelease)
+  || isGameDistribution
+  || isPlaygama
+  || isGamepix
+  || isGameMonetize
+  || isYandex
 
 // ─── The price where there is no video ──────────────────────────────────────
 //
@@ -152,35 +173,16 @@ export const canOfferReward = computed(
 )
 
 // ─── Interstitial pacing ────────────────────────────────────────────────────
+//
+// The clock itself lives in `useInterstitialPacing` — a zero-dependency leaf
+// module, so `useAds` can stamp it on every interstitial request without an
+// import cycle back through this file. Re-exported here because every existing
+// caller reaches for the pacing helpers through the ad gate.
 
-/** Minimum gap between interstitials, ms. */
-const INTERSTITIAL_MIN_GAP_MS = 120_000
-
-let lastInterstitialAt = 0
-
-/**
- * True when enough time has passed to show another interstitial.
- *
- * The first call of a session returns false: an interstitial in the opening
- * seconds — before the player has seen the game work — is the single most
- * reliable way to lose them.
- */
-export const canShowInterstitial = (): boolean => {
-  if (lastInterstitialAt === 0) {
-    lastInterstitialAt = Date.now()
-    return false
-  }
-  return Date.now() - lastInterstitialAt >= INTERSTITIAL_MIN_GAP_MS
-}
-
-/** Record that an interstitial was just shown, restarting the 120 s clock. */
-export const markInterstitialShown = (): void => {
-  lastInterstitialAt = Date.now()
-}
-
-/** Seconds until the next interstitial is allowed — debug/telemetry only. */
-export const interstitialCooldownLeft = (): number =>
-  Math.max(0, INTERSTITIAL_MIN_GAP_MS - (Date.now() - lastInterstitialAt)) / 1000
-
-/** Test seam: reset the pacing clock. */
-export const __resetInterstitialClock = (): void => { lastInterstitialAt = 0 }
+export {
+  INTERSTITIAL_MIN_GAP_MS,
+  canShowInterstitial,
+  markInterstitialShown,
+  interstitialCooldownLeft,
+  __resetInterstitialClock
+} from '@/use/useInterstitialPacing'

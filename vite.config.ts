@@ -132,10 +132,46 @@ import { viteSingleFile } from 'vite-plugin-singlefile'
 import { buildCsp } from './src/platforms/csp'
 
 // https://vite.dev/config/
+/**
+ * Exactly one of these may be true in any single build.
+ *
+ * Vite MERGES `.env` into `.env.<mode>`, so a platform flag left set in the
+ * base `.env` stays true for every mode that does not explicitly clear it. Both
+ * `resolveSaveStrategy` and `resolveAdProvider` take the FIRST matching arm, so
+ * an inherited flag silently hijacks the build: the wrong save strategy, the
+ * wrong ad provider, and — on CrazyGames, which runs cloud-only with
+ * `persistToRaw=false` — local state scrubbed on every boot. Nothing in the
+ * build output hints at it, which is why this is a hard failure rather than a
+ * warning.
+ */
+const PLATFORM_FLAGS = [
+  'VITE_APP_CRAZY_WEB',
+  'VITE_APP_WAVEDASH',
+  'VITE_APP_ITCH',
+  'VITE_APP_GLITCH',
+  'VITE_APP_GAME_DISTRIBUTION',
+  'VITE_APP_PLAYGAMA',
+  'VITE_APP_GAMEPIX',
+  'VITE_APP_GAME_MONETIZE',
+  'VITE_APP_YANDEX'
+] as const
+
 export default defineConfig(({ mode, command }) => {
   // Load env file based on `mode` in the current working directory.
   // The third parameter '' loads all env vars regardless of VITE_ prefix.
   const env = loadEnv(mode, process.cwd(), '')
+
+  const activePlatformFlags = PLATFORM_FLAGS.filter((f) => env[f] === 'true')
+  if (activePlatformFlags.length > 1) {
+    throw new Error(
+      `[build] ${activePlatformFlags.join(', ')} are all "true" in mode "${mode}". `
+      + 'Exactly one platform flag may be set per build — check the base `.env`, '
+      + 'which Vite merges into every mode.'
+    )
+  }
+  if (command === 'build' && activePlatformFlags.length === 1) {
+    console.log(`--- 🎯 Platform build: ${activePlatformFlags[0]} (mode "${mode}") ---`)
+  }
 
   // Only obfuscate during a real production build — never during dev,
   // where the obfuscator rewrites dynamic import strings into lookups
@@ -411,7 +447,21 @@ export default defineConfig(({ mode, command }) => {
         (this as any).emitFile({
           type: 'asset',
           fileName: 'playgama-bridge-config.json',
+          // `allowAnonymousCloudSave` is what makes `platform_internal`
+          // storage reachable at all: the bridge gates
+          // `isStorageAvailable('platform_internal')` on
+          // `allowAnonymousCloudSave === true || player.isAuthorized`, and
+          // guests — most portal traffic, and the reviewer's first run — are
+          // not authorized. Without it every cloud write silently degrades to
+          // the bridge's local adapter and nothing ever reaches the Playgama
+          // remote. It looks like it works, because localStorage still holds
+          // everything. The same values are passed inline to
+          // `bridge.initialize()` (see `BRIDGE_INIT_OPTIONS` in
+          // `playgamaPlugin.ts`) because the bridge only falls back to those
+          // when this file fails to fetch or parse — which is common behind a
+          // QA wrapper or a CDN that will not serve it.
           source: JSON.stringify({
+            storage: { allowAnonymousCloudSave: true },
             advertisement: { minimumDelayBetweenInterstitial: 120 }
           }, null, 2)
         })

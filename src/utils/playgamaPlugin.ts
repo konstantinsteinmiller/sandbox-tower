@@ -21,6 +21,9 @@ import { ref } from 'vue'
 import { isPlaygama } from '@/use/useUser'
 import { isDebug } from '@/use/useMatch'
 import { pauseGame, resumeGame } from '@/use/useGamePause'
+import { setPlatformAudioMuted } from '@/use/useGamePauseAudio'
+import { portalLocale } from '@/use/usePortalLocale'
+import { LANGUAGES } from '@/utils/enums'
 import type { SaveStrategy } from '@/utils/save/types'
 // Static import — the obfuscator's `stringArray` mangles dynamic-import
 // literals, which on the Playgama QA Tool surfaced as
@@ -37,6 +40,62 @@ const SDK_SRC = 'https://bridge.playgama.com/v1/stable/playgama-bridge.js'
 // for the rest of the session. Localhost MOCK resolves in <50 ms either way.
 const INIT_TIMEOUT_MS = 15_000
 
+// Options handed to `bridge.initialize()`.
+//
+// The bridge resolves its config as `ConfigLoader.load(configFilePath, options)`
+// — it fetches `./playgama-bridge-config.json` first and only falls back to
+// this object when that fetch or parse FAILS. QA wrappers and CDNs that don't
+// serve the JSON are common, so the same values ship in both places (see the
+// `emit-playgama-bridge-config` plugin in `vite.config.ts`).
+//
+// `allowAnonymousCloudSave` is the one that matters. The bridge gates
+// `isStorageAvailable('platform_internal')` on
+// `allowAnonymousCloudSave === true || player.isAuthorized`, and guests — most
+// portal traffic, and the QA reviewer's first run — are not authorized. Without
+// the flag every cloud write silently degrades to the bridge's local adapter
+// and nothing ever reaches the Playgama remote. It looks like it works, because
+// localStorage is still there.
+const BRIDGE_INIT_OPTIONS = {
+  storage: { allowAnonymousCloudSave: true },
+  advertisement: { minimumDelayBetweenInterstitial: 120 }
+} as const
+
+// How often to re-read `bridge.platform.language`.
+//
+// The bridge emits NO language-change event (confirmed against the full
+// platform API reference), but Playgama's guided testing tools flip the
+// language mid-session — the QA tool re-sends its INITIALIZE message, which
+// re-assigns the cached `_platformLanguage`. A single read at init passes
+// nothing; a cheap getter read plus a string compare every 2 s does.
+const LANGUAGE_POLL_MS = 2_000
+
+// Adapters with no portal behind them. Their `platform.language` is just
+// `navigator.language`, so honouring it boots the game in the tester's browser
+// language and earns the "default language must be English" ticket. `qa_tool`
+// is deliberately NOT in this set — it has its own language selector and
+// exercising it is the entire point of the localization check.
+const NO_PORTAL_LANGUAGE = new Set(['mock', 'standalone'])
+
+/**
+ * How long to wait for an ad request to show ANY sign of life before deciding
+ * it was never filled.
+ *
+ * This governs the ad-before-the-result-screen contract, so it is not a free
+ * parameter. `presentDefeat` awaits the interstitial and only then reveals the
+ * death screen; if this wrapper resolves while the ad is still on its way, the
+ * screen is revealed underneath it and the ad lands ON TOP a moment later —
+ * which is exactly what "the interstitial appeared after the death screen"
+ * looks like from the outside.
+ *
+ * It was 800 ms, measured from the moment `showInterstitial()` resolved — and
+ * that promise resolves when the request is DISPATCHED, not when the ad opens.
+ * An ad waterfall that takes a second and a half to render (normal) beat the
+ * timer every time. 4 s is longer than any fill takes to at least report
+ * `loading`, and it is only ever paid when the bridge says nothing at all:
+ * a genuine no-fill emits `failed` and settles immediately.
+ */
+const AD_OPEN_GRACE_MS = 4_000
+
 declare global {
   interface Window {
     bridge?: any
@@ -49,10 +108,21 @@ export const isPlaygamaSdkActive = ref(false)
 /** Reactive: true when the bridge failed to come up or the script was
  *  blocked. Wired into `AdProvider.isAdsBlocked` via `PlaygamaProvider`. */
 export const isPlaygamaAdsBlocked = ref(false)
-/** Two-letter locale derived from `bridge.platform.language`. Used by the
- *  i18n boot path the same way `crazyLocale` is. `null` until the bridge
- *  reports one. */
-export const playgamaLocale = ref<string | null>(null)
+/**
+ * Two-letter locale derived from `bridge.platform.language`, normalised to a
+ * language this game actually ships. `null` whenever the portal asked for
+ * nothing we can honour — never a bare code we don't have a bundle for, and
+ * never a guess, because a value here outranks the player's own choice when it
+ * CHANGES (see `usePortalLocale`).
+ *
+ * Deliberately an ALIAS of the shared `portalLocale` ref rather than a second
+ * ref that something has to copy across. The poll below keeps writing to it for
+ * the whole session — Playgama's guided testing switches language mid-session
+ * without reloading the frame — and a copy that only ran at boot would make the
+ * poll invisible to the i18n watcher, which is the exact bug the poll exists to
+ * fix.
+ */
+export const playgamaLocale = portalLocale
 /** Auto-detected platform id reported by the bridge after init — useful for
  *  debugging which portal protocol the bridge picked. */
 export const playgamaDetectedId = ref<string | null>(null)
@@ -76,11 +146,103 @@ const setPaused = (paused: boolean): void => {
   else resumeGame()
 }
 
+/**
+ * Portal audio toggle → engine mute.
+ *
+ * Read-only signal: the Bridge exposes `isAudioEnabled` but no setter, the
+ * portal chrome owns it. `setPlatformAudioMuted` is edge-triggered and holds
+ * its own slot in the shared ref-counted suspend stack, so a duplicated
+ * `enabled=false` cannot strand the game silent and this can safely overlap an
+ * ad's own pause.
+ *
+ * `undefined` (the property missing on an older bridge / adapter) is treated as
+ * "audio enabled", never as a mute: a mute we invented and can never be told to
+ * lift is a permanently silent game.
+ */
+const applyPortalAudioState = (enabled: unknown): void => {
+  setPlatformAudioMuted(enabled === false)
+}
+
+/**
+ * Read `bridge.platform.isAudioEnabled` and apply it.
+ *
+ * The property is a getter behind the same init guard as `bridge.storage` and
+ * `platform.language` — it throws before `initialize()` resolves, and some
+ * adapters throw again during an ad takeover. Wrapped so a throwing getter
+ * cannot abort the rest of the init wiring (the pause subscription lives a few
+ * lines below it).
+ */
+const readAndApplyPortalAudio = (): void => {
+  const bridge = getBridge()
+  try {
+    applyPortalAudioState(bridge?.platform?.isAudioEnabled)
+  } catch (e) {
+    if (isDebug.value) console.warn('[playgama] isAudioEnabled read threw', e)
+  }
+}
+
 const getBridge = (): any =>
   typeof window === 'undefined' ? null : (window.bridge ?? window.playgamaBridge ?? null)
 
 /** Public accessor — `PlaygamaStrategy` reads `bridge.storage` through this. */
 export const getPlaygamaBridge = (): any => getBridge()
+
+// ─── Portal language ──────────────────────────────────────────────────────
+
+/**
+ * Collapse whatever the host portal reported into a language code we ship.
+ *
+ * The Bridge passes the host's value straight through from 28+ portals, so the
+ * ISO 639-1 the docs promise is only one of the shapes that arrive: `zh-CN`,
+ * `zh-Hant`, `pt-BR` and 3-letter ISO 639-2 (`deu`, `ara`, `zho`) all show up.
+ * Anything we can't map returns `null` rather than a bare code — an unsupported
+ * portal language must not be able to knock a player out of their own choice.
+ */
+const normalizePortalLanguage = (raw: unknown): string | null => {
+  if (typeof raw !== 'string' || raw.length === 0) return null
+  const base = raw.toLowerCase().split(/[-_]/)[0] ?? ''
+  if (LANGUAGES.includes(base)) return base
+  // ISO 639-2/T and /B for the languages we ship. Cheaper and more predictable
+  // than pulling in an Intl.Locale-based mapper for a handful of portals.
+  const THREE_LETTER: Record<string, string> = {
+    eng: 'en', ara: 'ar', zho: 'zh', chi: 'zh', deu: 'de', ger: 'de',
+    nld: 'nl', dut: 'nl', spa: 'es', fra: 'fr', fre: 'fr', hin: 'hi',
+    ind: 'id', ita: 'it', jpn: 'ja', kor: 'ko', kaz: 'kk', pol: 'pl',
+    por: 'pt', rus: 'ru', tha: 'th', tur: 'tr', ukr: 'uk', uzb: 'uz',
+    vie: 'vi'
+  }
+  return THREE_LETTER[base] ?? null
+}
+
+/** Read the portal language through the init guard. The getter throws
+ *  `Before using the SDK you must initialize it` pre-init and can throw again
+ *  during ad takeover, so every read is wrapped. */
+const readPortalLanguage = (): string | null => {
+  const bridge = getBridge()
+  try {
+    if (NO_PORTAL_LANGUAGE.has(String(bridge?.platform?.id ?? ''))) return null
+    return normalizePortalLanguage(bridge?.platform?.language)
+  } catch {
+    return null
+  }
+}
+
+let languagePollTimer: ReturnType<typeof setInterval> | null = null
+
+/** Poll `platform.language` for the life of the session. Change-only logging —
+ *  a 2 s timer that narrates every tick floods the QA console it is meant to
+ *  be legible in. Skipped while the document is hidden. */
+const startLanguagePoll = (): void => {
+  if (languagePollTimer != null) return
+  if (typeof window === 'undefined') return
+  languagePollTimer = setInterval(() => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return
+    const next = readPortalLanguage()
+    if (next === null || next === playgamaLocale.value) return
+    console.info('[playgama] portal language changed →', next)
+    playgamaLocale.value = next
+  }, LANGUAGE_POLL_MS)
+}
 
 // ─── SDK script injection (defensive — build-time tag is primary) ─────────
 
@@ -140,7 +302,11 @@ export const playgamaPlugin = (): Promise<void> => {
     }
     try {
       await Promise.race([
-        bridge.initialize(),
+        // Options are the FALLBACK the bridge uses when
+        // `playgama-bridge-config.json` fails to fetch or parse — a QA wrapper
+        // or CDN that does not serve the file is common. The same values ship
+        // in both places; see `BRIDGE_INIT_OPTIONS`.
+        bridge.initialize(BRIDGE_INIT_OPTIONS),
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('initialize() timeout')), INIT_TIMEOUT_MS)
         )
@@ -149,30 +315,46 @@ export const playgamaPlugin = (): Promise<void> => {
       playgamaDetectedId.value = bridge?.platform?.id ?? null
       console.info('[playgama] initialized — platform.id:', playgamaDetectedId.value)
 
-      const lang = bridge?.platform?.language
-      if (typeof lang === 'string' && lang.length > 0) {
-        playgamaLocale.value = lang.toLowerCase().split(/[-_]/)[0] ?? null
-      }
+      // Language: read once now, then poll. There is no change event, and
+      // Playgama's guided testing tools switch the language mid-session.
+      playgamaLocale.value = readPortalLanguage()
+      startLanguagePoll()
 
       const ev = bridge?.EVENT_NAME ?? {}
       const pauseEventName = ev.PAUSE_STATE_CHANGED ?? 'pause_state_changed'
       const audioEventName = ev.AUDIO_STATE_CHANGED ?? 'audio_state_changed'
-      const visibilityEventName = ev.VISIBILITY_STATE_CHANGED ?? 'visibility_state_changed'
       const interstitialEventName = ev.INTERSTITIAL_STATE_CHANGED ?? 'interstitial_state_changed'
       const rewardedEventName = ev.REWARDED_STATE_CHANGED ?? 'rewarded_state_changed'
 
-      // Aggregated pause from the bridge already includes interstitial /
-      // visibility / platform pauses — DO NOT also subscribe to
-      // INTERSTITIAL_STATE_CHANGED for pause; that double-counts the
-      // suspend stack and the engine ends up permanently muted.
+      // ── Pause ──
+      //
+      // `PAUSE_STATE_CHANGED` is the bridge's AGGREGATED signal: it already
+      // folds in visibility, ads and portal chrome. It is therefore the ONLY
+      // subscriber allowed to move the pause gate.
+      //
+      // A `VISIBILITY_STATE_CHANGED` subscriber used to sit here too, calling
+      // `setPaused(false)` on 'visible'. Both wrote the same `heldPause`
+      // boolean, so a visibility event arriving while an interstitial was open
+      // resumed the game and its music UNDERNEATH the ad. `useGamePause`
+      // already tracks `document.visibilityState` itself, so dropping the
+      // bridge's copy loses nothing.
       bridge.platform?.on?.(pauseEventName, (p: boolean) => setPaused(!!p))
+
+      // ── Audio ──
+      //
+      // Muting is NOT pausing. Routing this into `setPaused` (what it did
+      // before) freezes the game when the player touches the portal's speaker
+      // icon, stopping the run they are in the middle of.
+      // `setPlatformAudioMuted` drives the same ref-counted suspend stack the
+      // ad gate uses, so it silences music AND SFX without touching gameplay,
+      // and without writing anything into the player's saved volumes.
+      //
+      // The INITIAL read is the half that gets missed: the event only fires on
+      // SUBSEQUENT changes, so a player arriving at an already-muted portal is
+      // handled by this line and nothing else.
+      readAndApplyPortalAudio()
       bridge.platform?.on?.(audioEventName, (enabled: boolean) => {
-        if (enabled === false) setPaused(true)
-        else if (heldPause) setPaused(false)
-      })
-      bridge.platform?.on?.(visibilityEventName, (state: string) => {
-        if (state === 'hidden') setPaused(true)
-        else setPaused(false)
+        applyPortalAudioState(enabled)
       })
       // Per-format flags drive only the ad-show promise resolution edges —
       // never pause. (Pause is the aggregated `PAUSE_STATE_CHANGED`.)
@@ -188,6 +370,13 @@ export const playgamaPlugin = (): Promise<void> => {
     } catch (e) {
       console.warn('[playgama] initialize() failed', e)
       isPlaygamaAdsBlocked.value = true
+      // A failed handshake costs us ads and cloud saves, but the bridge still
+      // exposes its documented browser-language fallback — localisation should
+      // not die with the SDK. Read it through the same normaliser (which
+      // returns null on the mock / standalone adapters, so a dev boot is
+      // unaffected) and keep polling in case the QA tool recovers.
+      playgamaLocale.value = readPortalLanguage()
+      startLanguagePoll()
     }
   })()
   return initPromise
@@ -255,7 +444,10 @@ export const showInterstitialPG = async (): Promise<void> => {
       resolve()
     }
     const off = bridge.advertisement?.on?.(evName, (state: string) => {
-      if (state === 'loading' || state === 'opened') { opened = true; return }
+      // ANY state at all means the bridge's own state machine is alive and will
+      // tell us when this is over. The grace timer below is only for a bridge
+      // that says nothing — never a reason to give up on one that is talking.
+      opened = true
       if (state === 'closed' || state === 'failed') finish()
     })
     try {
@@ -264,12 +456,14 @@ export const showInterstitialPG = async (): Promise<void> => {
         // DO NOT settle when the show() promise resolves: Playgama resolves it
         // the instant the request is DISPATCHED, before the ad opens. Settling
         // there dropped the pause gate immediately, so music + gameplay resumed
-        // UNDERNEATH the still-open ad. The lifecycle is driven by
-        // INTERSTITIAL_STATE_CHANGED ('opened' → 'closed'/'failed'). The promise
-        // is only used to (a) catch a hard dispatch failure, and (b) detect a
-        // no-fill where the ad never opened (short grace, then finish).
+        // UNDERNEATH the still-open ad — and, because `presentDefeat` awaits
+        // this call before revealing the death screen, it also let the screen
+        // appear first and the ad land on top of it. The lifecycle is driven by
+        // INTERSTITIAL_STATE_CHANGED ('loading' → 'opened' → 'closed'/'failed').
+        // The promise is only used to (a) catch a hard dispatch failure, and
+        // (b) detect a bridge that never answers at all.
         maybe.then(
-          () => { setTimeout(() => { if (!opened) finish() }, 800) },
+          () => { setTimeout(() => { if (!opened) finish() }, AD_OPEN_GRACE_MS) },
           () => finish()
         )
       }
@@ -302,8 +496,13 @@ export const showRewardedPG = async (): Promise<boolean> => {
       resolve(rewarded)
     }
     const off = bridge.advertisement?.on?.(evName, (state: string) => {
-      if (state === 'loading' || state === 'opened') { opened = true; return }
+      // Same rule as the interstitial: any state means the bridge is talking,
+      // so the silence timer below must not fire.
+      opened = true
       if (state === 'rewarded') {
+        // The grant edge. Playgama's docs note `rewarded` can arrive BEFORE
+        // `closed`, so this is the one that pays out — never `closed` alone,
+        // which a fast close-out would also produce.
         rewarded = true
         return
       }
@@ -321,7 +520,7 @@ export const showRewardedPG = async (): Promise<boolean> => {
         // 'closed'/'failed'). The promise is only used to (a) catch a hard
         // dispatch failure, and (b) detect a no-fill where the ad never opened.
         maybe.then(
-          () => { setTimeout(() => { if (!opened) finish() }, 800) },
+          () => { setTimeout(() => { if (!opened) finish() }, AD_OPEN_GRACE_MS) },
           () => finish()
         )
       }

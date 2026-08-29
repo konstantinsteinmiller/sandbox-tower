@@ -31,11 +31,16 @@ export const createPlaygamaProvider = (): AdProvider => {
       try {
         const m = await loadPlugin()
         await m.playgamaPlugin()
+        // Readiness is "the bridge is up AND its ad rail is not blocked".
+        // `isRewardedReady` feeds `canOfferReward`, which is what hides every
+        // rewarded button — a build that offers one and then cannot serve it
+        // reads to the player as broken, and to a reviewer as a rejection.
         watch(m.isPlaygamaSdkActive, (v) => {
-          isReady.value = v
+          isReady.value = v && !m.isPlaygamaAdsBlocked.value
         }, { immediate: true })
         watch(m.isPlaygamaAdsBlocked, (v) => {
           isAdsBlocked.value = v
+          if (v) isReady.value = false
         }, { immediate: true })
       } catch (e) {
         console.warn('[ads/playgama] plugin init failed', e)

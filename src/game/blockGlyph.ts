@@ -334,7 +334,11 @@ const KIND_FALLBACK: Record<BlockKind, GlyphFn> = {
   weapon: BLOCK_GLYPHS.cannon!,
   economy: BLOCK_GLYPHS.mint!,
   utility: BLOCK_GLYPHS.repair!,
-  ship: BLOCK_GLYPHS.skiff!
+  ship: BLOCK_GLYPHS.skiff!,
+  // Buff blocks both have bespoke glyphs today, so this arm only fires for a
+  // future support block — but its absence was a type error, and the fallback
+  // it silently took was the wood plank, which reads as a structure block.
+  buff: BLOCK_GLYPHS.banner!
 }
 
 export const blockGlyph = (typeId: string, kind: BlockKind): GlyphFn =>

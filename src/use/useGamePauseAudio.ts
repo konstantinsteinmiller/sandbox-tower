@@ -33,8 +33,9 @@
 // inside that same call stack — there is no microtask window where music
 // plays under the ad.
 
+import { ref } from 'vue'
 import { isGamePaused, getActivePauseReasons, onPauseChange } from '@/use/useGamePause'
-import { suspendAllAudio, resumeAllAudio } from '@/use/useAssets'
+import { suspendAllAudio, resumeAllAudio, killOneShotSfx } from '@/use/useAssets'
 import { isDebug } from '@/use/useMatch'
 
 const TAG = '[pause]'
@@ -114,21 +115,42 @@ export const uninstallGamePauseAudio = (): void => {
 // audio authority — no second driver, no counter drift. Edge-triggered so a
 // duplicated `soundOff` from the SDK can't double-suspend and strand the game
 // muted.
-let platformAudioMuted = false
+/**
+ * Reactive so the audio layer can GATE on it, not just react to the edge.
+ *
+ * A plain boolean was not enough, and Playgama QA caught exactly why:
+ * *"After the reload the game plays sound although the platform is still
+ * muted."* `suspendAllAudio()` pauses the HTMLAudio elements that exist at the
+ * moment it runs — it cannot stop `bgMusic.play()` from being called a second
+ * later. The portal mute is applied during boot, BEFORE the music element is
+ * even created, so there was nothing to pause and nothing to stop the music
+ * starting behind it.
+ *
+ * `useSound.playWithFade` now early-returns while this is true, and re-fires on
+ * the false edge — the same shape as the `isMobileAudioMuted` guard beside it.
+ */
+export const isPlatformAudioMuted = ref(false)
 
-/** Mute / unmute engine audio in response to a portal sound-toggle callback.
- *  Holds its own ref-counted suspend slot, independent of the pause-gate
- *  slot — so an ad that fires BOTH a pause and a soundOff still resumes
- *  correctly once both clear. Idempotent per edge. */
+/** Mute / unmute engine audio in response to a portal sound-toggle callback
+ *  (`bridge.platform.isAudioEnabled`, GamePix `soundOff` / `soundOn`).
+ *
+ *  Holds its own ref-counted suspend slot, independent of the pause-gate slot —
+ *  so an ad that fires BOTH a pause and a soundOff still resumes correctly once
+ *  both clear. Idempotent per edge, so a duplicated SDK emission can never
+ *  strand the game silent. */
 export const setPlatformAudioMuted = (muted: boolean): void => {
-  if (muted === platformAudioMuted) return
-  platformAudioMuted = muted
+  if (muted === isPlatformAudioMuted.value) return
+  isPlatformAudioMuted.value = muted
   if (muted) {
     suspendAllAudio()
-    dlog(`${TAG} 🔇 platform soundOff → audio suspended`)
+    // Hard-stop in-flight one-shots. Suspending the context only FREEZES a
+    // Web Audio source; on unmute it would thaw and tail audibly, seconds
+    // after the sound that spawned it.
+    killOneShotSfx()
+    dlog(`${TAG} 🔇 platform mute → audio suspended`)
   } else {
     resumeAllAudio()
-    dlog(`${TAG} 🔊 platform soundOn → audio resumed`)
+    dlog(`${TAG} 🔊 platform unmute → audio resumed`)
   }
 }
 
@@ -137,4 +159,4 @@ export const setPlatformAudioMuted = (muted: boolean): void => {
 export const __isAudioSlotHeld = (): boolean => slotHeld
 
 /** Test-only introspection: is the platform sound-toggle mute active? */
-export const __isPlatformAudioMuted = (): boolean => platformAudioMuted
+export const __isPlatformAudioMuted = (): boolean => isPlatformAudioMuted.value

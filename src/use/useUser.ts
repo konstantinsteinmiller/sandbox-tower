@@ -8,6 +8,7 @@ import { getState, setState, hasState } from '@/use/useTowerState'
 import {
   SOUND_KEY, MUSIC_KEY, LANGUAGE_KEY, DIFFICULTY_KEY, MUSIC_TRACK_KEY
 } from '@/keys'
+import { markLanguageChosenByPlayer } from '@/use/usePortalLocale'
 
 export const windowWidth = ref(window.innerWidth)
 export const windowHeight = ref(window.innerHeight)
@@ -197,6 +198,12 @@ const useUser = () => {
       case 'language':
         userLanguage.value = value as string
         setState(LANGUAGE_KEY, userLanguage.value)
+        // Provenance. This setter is reached from exactly one place — the
+        // Options-modal dropdown — so a value written through it IS the
+        // player's own choice, and only a flagged value gets to outrank a
+        // portal's language on the next load. Nothing else may stamp this;
+        // the boot path deliberately no longer seeds the portal locale here.
+        markLanguageChosenByPlayer()
         break
       case 'difficulty':
         userDifficulty.value = value as Difficulties
