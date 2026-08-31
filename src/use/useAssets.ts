@@ -152,19 +152,24 @@ export const killOneShotSfx = (): void => {
 // `useGamePauseAudio` suspends/resumes audio off that gate for ALL builds —
 // so there is one suspend driver instead of two overlapping ones.
 
-// ⚠️ TEMP TEST HARNESS (remove before commit) — exposes the live audio state
-// so the Chrome MCP can assert "no sound during the fake interstitial". Reads
-// the module-private AudioContext + tracked-element registry that aren't
-// otherwise observable from the page. Paired with `window.__testInterstitial`
-// / `window.__audioDebug` in `useAds.ts`.
-export const __audioDebugSnapshot = () => ({
-  audioCtxState: sharedAudioCtx ? sharedAudioCtx.state : 'none',
-  suspendDepth,
-  trackedAudioCount: trackedAudioElements.size,
-  trackedAudioPaused: [...trackedAudioElements].map((e) => e.paused),
-  anyTrackedAudioPlaying: [...trackedAudioElements].some((e) => !e.paused),
-  activeOneShotSfx: activeOneShotSources.size
-})
+// Dev-only audio introspection. Exposes the module-private AudioContext and
+// the tracked-element registry — state that isn't otherwise observable from
+// the page — so the Chrome MCP can assert "no sound during the interstitial".
+// Paired with `window.__testInterstitial` / `window.__audioDebug` in
+// `useAds.ts`. The DEV ternary keeps the real body out of production bundles
+// even if a non-DEV caller ever picks this up: `import.meta.env.DEV` folds to
+// `false` at build time and the branch is dropped, so the export can't leak
+// internal audio state no matter who imports it.
+export const __audioDebugSnapshot = import.meta.env.DEV
+  ? () => ({
+      audioCtxState: sharedAudioCtx ? sharedAudioCtx.state : 'none',
+      suspendDepth,
+      trackedAudioCount: trackedAudioElements.size,
+      trackedAudioPaused: [...trackedAudioElements].map((e) => e.paused),
+      anyTrackedAudioPlaying: [...trackedAudioElements].some((e) => !e.paused),
+      activeOneShotSfx: activeOneShotSources.size
+    })
+  : () => ({})
 
 export const getCachedImage = (src: string): HTMLImageElement => {
   // Route every bitmap src through `prependBaseUrl` so the URL matches

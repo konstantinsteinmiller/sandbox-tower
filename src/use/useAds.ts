@@ -227,7 +227,7 @@ export const showMidgameAd = async (): Promise<void> => {
   }
 }
 
-// ⚠️ TEMP TEST HARNESS (remove before commit) ──────────────────────────────
+// Dev-only ad-gate harness.
 // Deterministic verification of the universal pause+mute gate WITHOUT a live
 // ad SDK. From the browser console / Chrome DevTools MCP, with a battle
 // running and music playing:
