@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import {
-  isCrazyWeb, isGameDistribution, isPlaygama, isGamepix, isGameMonetize, isYandex
+  isCrazyWeb, isGameDistribution, isPlaygama, isGamepix, isGameMonetize, isYandex, isPoki
 } from '@/use/useUser'
 import { isCrazyGamesFullRelease } from '@/use/useMatch'
 import { isRewardedReady, showRewardedAd } from '@/use/useAds'
@@ -30,6 +30,17 @@ import useTowerEconomy, { coins } from '@/use/useTowerEconomy'
  *
  * One predicate, checked in one place, so a perk can never accidentally ship
  * gated on a build that has no ads, or coin-priced on a build that has them.
+ *
+ * ⚠️ THIS LIST IS A REQUIRED STEP WHEN ADDING A PORTAL, and it is easy to miss
+ * because it does not live under `src/platforms/` and is not named `resolve*`.
+ * Poki was added and omitted here (2026-09-01), which reproduced the exact
+ * failure this comment already describes: `claimReward()` took the ungated arm,
+ * so every perk was granted instantly with NO video, `canOfferReward` skipped
+ * the `isRewardedReady` check entirely, and the buttons showed a coin price
+ * where a live rewarded unit was sitting behind them. Symptom as reported:
+ * "the rewarded ads don't show, it just grants the reward". If a new portal
+ * ever looks like it is auto-granting, check THIS predicate first — the SDK is
+ * usually innocent.
  */
 export const isRewardGated =
   (isCrazyWeb && isCrazyGamesFullRelease)
@@ -38,6 +49,7 @@ export const isRewardGated =
   || isGamepix
   || isGameMonetize
   || isYandex
+  || isPoki
 
 // ─── The price where there is no video ──────────────────────────────────────
 //

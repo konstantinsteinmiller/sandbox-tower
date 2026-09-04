@@ -18,7 +18,8 @@ export default {
     'rotateLeft': 'Sola döndür',
     'rotateRight': 'Sağa döndür',
     'arrowRain': 'Ok Yağmuru',
-    'arrowRainAim': 'Yaylım ateşi için savaş alanına dokun'
+    'arrowRainAim': 'Yaylım ateşi için savaş alanına dokun',
+    'extendRange': '+%{n} menzil'
   },
 
   'warnings': {
@@ -26,7 +27,8 @@ export default {
     'air': 'Hava ×{n}',
     'sea': 'Deniz ×{n}',
     'bombers': 'Patlayıcı ×{n}',
-    'siege': 'Kuşatma ×{n}'
+    'siege': 'Kuşatma ×{n}',
+    'outOfReach': 'Menzil dışı ×{n} — {m} menzil gerek'
   },
   'hints': {
     'selectBlock': { 'touch': 'Seçmek için aşağıdaki bir bloğa dokun', 'desktop': 'Seçmek için aşağıdaki bir bloğa tıkla' },
@@ -150,7 +152,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': 'Süvari'
+    'cavalry': 'Süvari',
+    'cavalryFree': 'Ücretsiz süvari çıkışı',
+    'free': 'Ücretsiz',
+    'outOfReachHint': 'Menzil dışı — süvari gönder ya da menzilini artır'
   },
 
   'result': {

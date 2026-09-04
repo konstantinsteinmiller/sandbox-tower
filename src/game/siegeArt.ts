@@ -357,13 +357,39 @@ const stuckArrows = (
  * mirrored exactly: depth by value, the same trick the four-legged monsters use
  * for their far pair.
  */
-const drawBallista = (
-  ctx: CanvasRenderingContext2D, S: number, m: SiegeParts,
-  spin: number, aiming: boolean, t: number
+/**
+ * How far the bowstring is back, and how hard the machine is still kicking.
+ *
+ * `cycle` is this ballista's OWN reload: 0 the frame the bolt left, 1 the frame
+ * the next one does. That matters — the arms used to run off a wall clock at a
+ * period of 1500 ms while the engine actually shot every 2000 ms, so the loose
+ * almost never coincided with the shot and the machine mimed at the tower.
+ *
+ * The shape of the curve is the snap:
+ *
+ *   0.00–0.10  RECOIL. String forward, bolt gone, whole engine kicked back.
+ *   0.10–0.70  the crew wind it back.
+ *   0.70–1.00  HELD at full draw, loaded and still.
+ *
+ * Holding the last third is what makes the release read as sudden: the eye has
+ * time to settle on a tense, motionless machine, and then it is simply gone.
+ * A string that creeps back over the whole cycle never looks like it snapped.
+ */
+const ballistaAction = (engaged: boolean, cycle: number): { draw: number; recoil: number } => {
+  if (!engaged) return { draw: 0.15, recoil: 0 }
+  const c = ((cycle % 1) + 1) % 1
+  if (c < 0.1) return { draw: 0, recoil: 1 - c / 0.1 }
+  if (c < 0.7) {
+    const k = (c - 0.1) / 0.6
+    // Ease out: the first turns of the windlass move the string furthest.
+    return { draw: 1 - (1 - k) * (1 - k), recoil: 0 }
+  }
+  return { draw: 1, recoil: 0 }
+}
+
+const drawBallistaFrame = (
+  ctx: CanvasRenderingContext2D, S: number, m: SiegeParts, spin: number
 ): void => {
-  // Draw progresses over the reload cycle: string comes back, then looses.
-  const cycle = (t / 1500) % 1
-  const draw = aiming ? (cycle < 0.82 ? cycle / 0.82 : 0) : 0.15
 
   // Two wheels under a real carriage. One wheel is a wheelbarrow; the mass of
   // this machine has to be visibly carried.
@@ -387,6 +413,26 @@ const drawBallista = (
   // ── Upright frame carrying the skeins ──
   timber(ctx, S, [0.14 * S, -0.4 * S], [0.18 * S, 0.16 * S], 0.09 * S, m.wood, 68, 2)
   timber(ctx, S, [0.1 * S, -0.36 * S], [0.44 * S, -0.28 * S], 0.075 * S, m.wood, 69, 2)
+
+  drawBallistaRest(ctx, S, m)
+}
+
+/**
+ * The parts that move: skeins, arms, string and the bolt in the groove.
+ *
+ * Painted LIVE over the cached frame, so every ballista on the field animates
+ * against its own reload rather than in unison.
+ */
+const drawBallistaArm = (
+  ctx: CanvasRenderingContext2D, S: number, m: SiegeParts,
+  engaged: boolean, cycle: number
+): void => {
+  const { draw, recoil } = ballistaAction(engaged, cycle)
+
+  ctx.save()
+  // The whole assembly rides back on the shot and settles. The trail beam in
+  // the frame is what it is bracing against, so the kick has somewhere to go.
+  ctx.translate(-recoil * 0.05 * S, 0)
 
   // FAR skein and arm, a tone down and set back.
   skein(ctx, S, 0.17 * S, -0.2 * S, 0.13 * S, m.accent, 70)
@@ -413,7 +459,29 @@ const drawBallista = (
   const nockX = (0.34 - draw * 0.55) * S
   rope(ctx, [farTip, [nockX, -0.05 * S], armTip], 0.022 * S, 80)
 
+  // ── Windlass at the tail: the crank that draws that string ──
+  //
+  // It turns only through the WINDING phase. A crank still spinning while the
+  // machine sits at full draw says the crew are working when the shot is
+  // already loaded, and it is the small motion that gives the pause away.
+  const winding = engaged && draw > 0.01 && draw < 0.995
+  const crank = winding ? -draw * 26 : 0
+  paint(ctx, S, slab([
+    [-0.5 * S, -0.14 * S], [-0.28 * S, -0.14 * S],
+    [-0.28 * S, 0.06 * S], [-0.5 * S, 0.06 * S]
+  ], 0.01 * S, 84), m.woodBack, 85, { line: LINE.fine, amp: 0.05 })
+  stroke(ctx, [
+    [-0.39 * S, -0.04 * S],
+    [-0.39 * S + Math.cos(crank) * 0.15 * S, -0.04 * S + Math.sin(crank) * 0.15 * S]
+  ], 0.032 * S, 0.024 * S, IRON.base, 86)
+  rivets(ctx, [-0.5 * S, -0.14 * S], [-0.28 * S, -0.14 * S], 3, 0.017 * S, 87)
+
   // ── The bolt in the groove ──
+  //
+  // Absent through the recoil: it is in the air. A ballista that still has its
+  // bolt the instant after loosing is the clearest possible tell that nothing
+  // was actually fired.
+  if (recoil > 0.02) { ctx.restore(); return }
   const boltX = nockX
   stroke(ctx, [[boltX, -0.05 * S], [boltX + 0.62 * S, -0.05 * S]],
     0.038 * S, 0.03 * S, '#d8cdb0', 82)
@@ -436,6 +504,13 @@ const drawBallista = (
     ], m.accent2)
   }
 
+  ctx.restore()
+}
+
+/** Frame parts drawn AFTER the arms: pavise, spare bolts, elevation quadrant. */
+const drawBallistaRest = (
+  ctx: CanvasRenderingContext2D, S: number, m: SiegeParts
+): void => {
   // ── Pavise ──
   //
   // The shield board the crew stand behind, bolted across the front of the
@@ -487,17 +562,6 @@ const drawBallista = (
     ], 0.012 * S, 0.01 * S, m.wood.deep!, 97 + i)
   }
 
-  // ── Windlass at the tail: the crank that draws that string ──
-  const crank = aiming ? -t / 260 : 0
-  paint(ctx, S, slab([
-    [-0.5 * S, -0.14 * S], [-0.28 * S, -0.14 * S],
-    [-0.28 * S, 0.06 * S], [-0.5 * S, 0.06 * S]
-  ], 0.01 * S, 84), m.woodBack, 85, { line: LINE.fine, amp: 0.05 })
-  stroke(ctx, [
-    [-0.39 * S, -0.04 * S],
-    [-0.39 * S + Math.cos(crank) * 0.15 * S, -0.04 * S + Math.sin(crank) * 0.15 * S]
-  ], 0.032 * S, 0.024 * S, IRON.base, 86)
-  rivets(ctx, [-0.5 * S, -0.14 * S], [-0.28 * S, -0.14 * S], 3, 0.017 * S, 87)
 }
 
 // ─── Catapult ───────────────────────────────────────────────────────────────
@@ -1287,6 +1351,11 @@ export const drawSiegeMachine = (
     if (wantMoving) drawTrebuchetArm(ctx, S, m, opts.engaged, opts.cycle ?? 0)
     return
   }
+  if (id === 'ballista') {
+    if (wantStatic) drawBallistaFrame(ctx, S, m, opts.spin)
+    if (wantMoving) drawBallistaArm(ctx, S, m, opts.engaged, opts.cycle ?? 0)
+    return
+  }
   if (id === 'catapult') {
     if (wantStatic) drawCatapultFrame(ctx, S, m, opts.spin)
     if (wantMoving) {
@@ -1299,7 +1368,6 @@ export const drawSiegeMachine = (
   switch (id) {
     case 'ram': drawRam(ctx, S, m, opts.spin, opts.engaged, opts.t); break
     case 'ironRam': drawIronRam(ctx, S, m, opts.spin, opts.engaged, opts.t); break
-    case 'ballista': drawBallista(ctx, S, m, opts.spin, opts.engaged, opts.t); break
     case 'siegeTower': drawSiegeTower(ctx, S, m, opts.spin, opts.engaged, opts.t); break
   }
 }

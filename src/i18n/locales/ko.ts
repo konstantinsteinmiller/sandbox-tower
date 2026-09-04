@@ -18,7 +18,8 @@ export default {
     'rotateLeft': '왼쪽으로 회전',
     'rotateRight': '오른쪽으로 회전',
     'arrowRain': '화살비',
-    'arrowRainAim': '전장을 탭해 일제 사격을 부르세요'
+    'arrowRainAim': '전장을 탭해 일제 사격을 부르세요',
+    'extendRange': '사거리 +{n}%'
   },
 
   'warnings': {
@@ -26,7 +27,8 @@ export default {
     'air': '공중 ×{n}',
     'sea': '해상 ×{n}',
     'bombers': '폭발 ×{n}',
-    'siege': '공성 ×{n}'
+    'siege': '공성 ×{n}',
+    'outOfReach': '사거리 밖 ×{n} — 사거리 {m} 필요'
   },
   'hints': {
     'selectBlock': { 'touch': '아래 블록을 탭해 선택하세요', 'desktop': '아래 블록을 클릭해 선택하세요' },
@@ -150,7 +152,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': '기병'
+    'cavalry': '기병',
+    'cavalryFree': '무료 기병 출격',
+    'free': '무료',
+    'outOfReachHint': '사거리 밖 — 기병을 보내거나 사거리를 늘리세요'
   },
 
   'result': {

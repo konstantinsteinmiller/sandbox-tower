@@ -321,6 +321,14 @@ export interface EnemyDef {
      * from the same cooldown that spawned it.
      */
     lobbed?: boolean
+    /**
+     * Fires a flat, fast bolt that has to cross the gap.
+     *
+     * The alternative is damage resolving where the engine stands, which is
+     * what the ballista did — and eight cells of nothing crossed reads as the
+     * machine not shooting at all.
+     */
+    direct?: boolean
   }
   /** True for the every-10th-wave boss (drives the boss banner + music). */
   boss?: boolean

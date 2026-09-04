@@ -18,7 +18,8 @@ export default {
     'rotateLeft': '左に回転',
     'rotateRight': '右に回転',
     'arrowRain': '矢の雨',
-    'arrowRainAim': '戦場をタップして一斉射を呼びます'
+    'arrowRainAim': '戦場をタップして一斉射を呼びます',
+    'extendRange': '射程 +{n}%'
   },
 
   'warnings': {
@@ -26,7 +27,8 @@ export default {
     'air': '空 ×{n}',
     'sea': '海 ×{n}',
     'bombers': '爆発 ×{n}',
-    'siege': '攻城 ×{n}'
+    'siege': '攻城 ×{n}',
+    'outOfReach': '射程外 ×{n} — 射程{m}が必要'
   },
   'hints': {
     'selectBlock': { 'touch': '下のブロックをタップして選択', 'desktop': '下のブロックをクリックして選択' },
@@ -150,7 +152,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': '騎兵'
+    'cavalry': '騎兵',
+    'cavalryFree': '無料の騎兵出撃',
+    'free': '無料',
+    'outOfReachHint': '射程外 — 騎兵を出すか射程を伸ばそう'
   },
 
   'result': {

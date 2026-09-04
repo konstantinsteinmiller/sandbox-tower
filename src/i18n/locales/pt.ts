@@ -18,7 +18,8 @@ export default {
     'rotateLeft': 'Girar à esquerda',
     'rotateRight': 'Girar à direita',
     'arrowRain': 'Chuva de flechas',
-    'arrowRainAim': 'Toque no campo de batalha para chamar a salva'
+    'arrowRainAim': 'Toque no campo de batalha para chamar a salva',
+    'extendRange': '+{n}% de alcance'
   },
 
   'warnings': {
@@ -26,7 +27,8 @@ export default {
     'air': 'Ar ×{n}',
     'sea': 'Mar ×{n}',
     'bombers': 'Explosivos ×{n}',
-    'siege': 'Cerco ×{n}'
+    'siege': 'Cerco ×{n}',
+    'outOfReach': 'Fora de alcance ×{n} — precisa de {m} de alcance'
   },
   'hints': {
     'selectBlock': { 'touch': 'Toque num bloco abaixo para escolhê-lo', 'desktop': 'Clique num bloco abaixo para escolhê-lo' },
@@ -150,7 +152,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': 'Cavalaria'
+    'cavalry': 'Cavalaria',
+    'cavalryFree': 'Investida de cavalaria grátis',
+    'free': 'Grátis',
+    'outOfReachHint': 'Fora de alcance — saia a cavalo ou aumente seu alcance'
   },
 
   'result': {

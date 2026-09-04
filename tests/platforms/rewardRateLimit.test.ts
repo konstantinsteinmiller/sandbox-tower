@@ -17,7 +17,8 @@ const loadGate = async (opts: { crazy?: boolean; fullRelease?: boolean; granted?
     isPlaygama: false,
     isGamepix: false,
     isGameMonetize: false,
-    isYandex: false
+    isYandex: false,
+    isPoki: false
   }))
   vi.doMock('@/use/useMatch', () => ({ isCrazyGamesFullRelease: opts.fullRelease ?? true }))
   const showRewardedAd = vi.fn(async () => opts.granted ?? true)

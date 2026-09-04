@@ -344,7 +344,7 @@ export const ENEMY_DEFS: Record<string, EnemyDef> = {
     // arrives at wave 16, long before a longer gun is realistically owned.
     // Inside cannon range it is still a hard counter to an archer-only tower,
     // which is the lesson it exists to teach.
-    siege: { standoff: 8 },
+    siege: { standoff: 8, direct: true },
     // The standoff family sits a step above the contact engines (ram 1.15,
     // iron ram 1.35, tower 1.05): they are the ones you must ride out to, so
     // they read as the biggest, most valuable targets on the field.

@@ -18,7 +18,8 @@ export default {
     'rotateLeft': 'Naar links draaien',
     'rotateRight': 'Naar rechts draaien',
     'arrowRain': 'Pijlenregen',
-    'arrowRainAim': 'Tik op het slagveld om het salvo te roepen'
+    'arrowRainAim': 'Tik op het slagveld om het salvo te roepen',
+    'extendRange': '+{n}% bereik'
   },
 
   'warnings': {
@@ -26,7 +27,8 @@ export default {
     'air': 'Lucht ×{n}',
     'sea': 'Zee ×{n}',
     'bombers': 'Explosief ×{n}',
-    'siege': 'Beleg ×{n}'
+    'siege': 'Beleg ×{n}',
+    'outOfReach': 'Buiten bereik ×{n} — {m} bereik nodig'
   },
   'hints': {
     'selectBlock': { 'touch': 'Tik hieronder op een blok om het te kiezen', 'desktop': 'Klik hieronder op een blok om het te kiezen' },
@@ -150,7 +152,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': 'Cavalerie'
+    'cavalry': 'Cavalerie',
+    'cavalryFree': 'Gratis cavalerie-uitval',
+    'free': 'Gratis',
+    'outOfReachHint': 'Buiten bereik — val uit of vergroot je bereik'
   },
 
   'result': {

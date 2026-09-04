@@ -1,4 +1,5 @@
 import { syncGameplayLifecycle as syncCrazyGameplay } from '@/use/useCrazyGames'
+import { pokiGameplayStart, pokiGameplayStop } from '@/utils/pokiPlugin'
 
 /**
  * ─── "Is the player actually playing?" ──────────────────────────────────────
@@ -35,5 +36,25 @@ export const syncGameplayLifecycle = (live: boolean): void => {
       if (live) playgamaGameplayStart()
       else playgamaGameplayStop()
     }).catch(() => { /* bridge missing — nothing to report to */ })
+  }
+
+  if (import.meta.env.VITE_APP_POKI === 'true') {
+    // STATIC import (see the top of this file), unlike the Playgama branch
+    // above. `pokiPlugin` is small and side-effect-free at module scope, and a
+    // static import cannot be mangled by the obfuscator's `stringArray` pass
+    // the way a dynamic-import path literal can — and this file is NOT in the
+    // obfuscator's exclude list. The env-literal `if` still lets esbuild fold
+    // the branch and Rollup drop the import on every other build (verified by the
+    // non-Poki bundle grep in the release checklist).
+    //
+    // Both calls are idempotent AND rate-guarded. That second property is
+    // load-bearing here: `isLiveGameplay` is a computed over four reactive
+    // inputs, so a modal closing in the same tick an ad opens can produce a
+    // stop-then-start pair only microseconds apart. Poki's SDK scores any
+    // start within 50 ms of a stop as a 'bad event', and at ten of them it
+    // silently disables gameplayStart, gameplayStop AND commercialBreak for
+    // the rest of the session. The plugin defers such a start past the window.
+    if (live) pokiGameplayStart()
+    else pokiGameplayStop()
   }
 }

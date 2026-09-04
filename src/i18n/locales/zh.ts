@@ -18,7 +18,8 @@ export default {
     'rotateLeft': '向左旋转',
     'rotateRight': '向右旋转',
     'arrowRain': '箭雨',
-    'arrowRainAim': '点击战场召唤齐射'
+    'arrowRainAim': '点击战场召唤齐射',
+    'extendRange': '射程 +{n}%'
   },
 
   'warnings': {
@@ -26,7 +27,8 @@ export default {
     'air': '空中 ×{n}',
     'sea': '海上 ×{n}',
     'bombers': '爆破 ×{n}',
-    'siege': '攻城 ×{n}'
+    'siege': '攻城 ×{n}',
+    'outOfReach': '超出射程 ×{n} — 需要 {m} 射程'
   },
   'hints': {
     'selectBlock': { 'touch': '点击下方的方块来选择', 'desktop': '单击下方的方块来选择' },
@@ -150,7 +152,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': '骑兵'
+    'cavalry': '骑兵',
+    'cavalryFree': '免费骑兵出击',
+    'free': '免费',
+    'outOfReachHint': '超出射程 — 派出骑兵或提升射程'
   },
 
   'result': {

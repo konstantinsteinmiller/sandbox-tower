@@ -402,11 +402,62 @@ export interface CelTones {
  * shader: a painter decides where the shadow reads best, and it lands on a hard
  * edge that follows the drawing rather than the geometry.
  */
+/**
+ * Cross-hatching in the core shadow.
+ *
+ * Lives HERE, not in `monsterKit.paint`, and that is the whole point. It was
+ * tried in `paint` first and never executed once: the big forms — a head, a
+ * torso, a trunk — call `cel` DIRECTLY so they can hand-author their deep
+ * region, and the parts that do go through `paint` are the small ones, which
+ * mostly pass `deep: false`. `cel` is the one place every form passes through.
+ *
+ * Sized from the form's own bounding box rather than from a character scale, so
+ * a stroke count is constant no matter how big the part or how big the bake:
+ * roughly eleven lines across any shadow, which reads as texture at a bench and
+ * as tone when it is downsampled to a 40 px enemy.
+ */
+const HATCH_ANGLE = -0.62
+const HATCH_SPACING = 0.085
+const HATCH_WIDTH = 0.02
+const HATCH_ALPHA = 0.22
+/** Below this, in px, hatching is dirt rather than shading. */
+const HATCH_MIN_PX = 22
+
+/**
+ * Hatching is OFF unless something is being baked.
+ *
+ * `hatch` opens a clip per form, and `cel` runs live every frame for the ships,
+ * the cavalry and a siege engine's moving layer. `drawBlock` already carries a
+ * hard-won note about this: a clip is a rasteriser-level mask, it does not show
+ * up in a JS profile, and a few hundred of them per frame is where the frame
+ * budget quietly goes.
+ *
+ * Everything worth hatching — the whole monster cast, the siege chassis — is
+ * baked into a sprite once and blitted thereafter, so the texture costs nothing
+ * at run time as long as it only happens inside the bake.
+ */
+let hatchEnabled = false
+
+/** Wrap a bake in this so the art inside it gets its pen texture. */
+export const withHatching = <T>(fn: () => T): T => {
+  const prev = hatchEnabled
+  hatchEnabled = true
+  try { return fn() } finally { hatchEnabled = prev }
+}
+
+export interface CelOptions {
+  /** `false` leaves the core shadow unhatched — glass, glow, metal. */
+  hatch?: false
+  /** Overrides the hatch ink; defaults to a warm dark brown. */
+  inkColor?: string
+}
+
 export const cel = (
   ctx: CanvasRenderingContext2D,
   shape: Pt[],
   tones: CelTones,
-  parts?: { shade?: Pt[]; deep?: Pt[]; lit?: Pt[] }
+  parts?: { shade?: Pt[]; deep?: Pt[]; lit?: Pt[] },
+  opts?: CelOptions
 ): void => {
   ctx.save()
   ctx.beginPath()
@@ -416,6 +467,25 @@ export const cel = (
   if (parts?.shade) fillShape(ctx, parts.shade, tones.shade)
   if (parts?.deep && tones.deep) fillShape(ctx, parts.deep, tones.deep)
   if (parts?.lit && tones.lit) fillShape(ctx, parts.lit, tones.lit)
+
+  if (hatchEnabled && parts?.deep && tones.deep && opts?.hatch !== false) {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+    for (const [x, y] of shape) {
+      if (x < minX) minX = x
+      if (x > maxX) maxX = x
+      if (y < minY) minY = y
+      if (y > maxY) maxY = y
+    }
+    const span = Math.max(maxX - minX, maxY - minY)
+    if (span >= HATCH_MIN_PX) {
+      // The clip to `shape` is still in force, so the strokes cannot leave the
+      // form even though `deep` is a half-plane running well past it.
+      ctx.globalAlpha = HATCH_ALPHA
+      hatch(ctx, parts.deep, HATCH_ANGLE, span * HATCH_SPACING, span * HATCH_WIDTH,
+        opts?.inkColor ?? '#3b2a21', Math.round(minX * 0.7 + minY * 1.3))
+      ctx.globalAlpha = 1
+    }
+  }
   ctx.restore()
 }
 
@@ -534,9 +604,24 @@ export const tones = (base: string, contrast = 1): Required<CelTones> => {
   const [h, s, l] = toHsl(base)
   return {
     base,
-    shade: fromHsl(towardHue(h, 268, 10), Math.min(1, s + 0.05), Math.max(0.02, l - 0.13 * contrast)),
-    deep: fromHsl(towardHue(h, 268, 20), Math.min(1, s + 0.09), Math.max(0.01, l - 0.23 * contrast)),
-    lit: fromHsl(towardHue(h, 46, 9), Math.max(0, s - 0.07), Math.min(0.97, l + 0.12 * contrast))
+    // WARM shadows, not cool ones.
+    //
+    // These used to lean toward 268 — blue-violet — which is the cool-shadow
+    // convention of flat vector art and reads as clean, modern and a little
+    // synthetic. Storybook watercolour does the opposite: shadow is where the
+    // warm ground of the paper shows through, so the ramp leans toward 28.
+    // That one hue change does more for "hand-painted" than any amount of
+    // texture, and it costs nothing at runtime.
+    //
+    // The LIGHTNESS steps are untouched on purpose. Muting the palette by
+    // lifting shadows was tried on the block palette and produced flat mud —
+    // the cel model needs its value separation to read as form. Only the hue
+    // and the saturation move.
+    shade: fromHsl(towardHue(h, 28, 10), Math.max(0, s - 0.02), Math.max(0.02, l - 0.13 * contrast)),
+    deep: fromHsl(towardHue(h, 24, 20), Math.max(0, s - 0.01), Math.max(0.01, l - 0.23 * contrast)),
+    // A softer, chalkier lift. The old highlight was bright and saturated
+    // enough to read as a specular hit on plastic; watercolour has no gloss.
+    lit: fromHsl(towardHue(h, 46, 9), Math.max(0, s - 0.12), Math.min(0.97, l + 0.085 * contrast))
   }
 }
 
@@ -584,19 +669,56 @@ export const hatch = (
 // ─── Paper ──────────────────────────────────────────────────────────────────
 
 /** Speckled grain over the whole card, so flat fills read as printed ink. */
+/**
+ * Paper tooth, as a cached tile.
+ *
+ * This used to walk every third pixel of the target and emit a `fillRect` per
+ * cell. Over a 900x700 background that is seventy THOUSAND fills plus seventy
+ * thousand template strings, and the background rebuilds whenever the camera
+ * moves — which is most of a wave. It was a visible stutter.
+ *
+ * The texture is noise, so it only has to exist once: bake a tile, register it
+ * as a pattern, and the whole frame becomes ONE fill. The tile is memoised per
+ * (amount, seed), and 128 px is large enough that the repeat does not read as a
+ * grid at the alphas this is used at.
+ */
+const GRAIN_TILE = 128
+const grainTiles = new Map<string, CanvasPattern | null>()
+
+const grainPattern = (
+  ctx: CanvasRenderingContext2D, amount: number, seed: number
+): CanvasPattern | null => {
+  const key = `${amount}|${seed}`
+  const hit = grainTiles.get(key)
+  if (hit !== undefined) return hit
+
+  const cv = document.createElement('canvas')
+  cv.width = GRAIN_TILE
+  cv.height = GRAIN_TILE
+  const c = cv.getContext('2d')
+  if (!c) { grainTiles.set(key, null); return null }
+  const step = 3
+  for (let y = 0; y < GRAIN_TILE; y += step) {
+    for (let x = 0; x < GRAIN_TILE; x += step) {
+      const v = noise2(x * 0.21, y * 0.21, seed)
+      if (v > 0.62) continue
+      c.fillStyle = `rgba(90,70,60,${(0.62 - v) * amount})`
+      c.fillRect(x, y, step, step)
+    }
+  }
+  const pat = ctx.createPattern(cv, 'repeat')
+  grainTiles.set(key, pat)
+  return pat
+}
+
 export const grain = (
   ctx: CanvasRenderingContext2D, w: number, h: number, amount = 0.05, seed = 11
 ): void => {
+  const pat = grainPattern(ctx, amount, seed)
+  if (!pat) return
   ctx.save()
   ctx.globalCompositeOperation = 'multiply'
-  const step = 3
-  for (let y = 0; y < h; y += step) {
-    for (let x = 0; x < w; x += step) {
-      const v = noise2(x * 0.21, y * 0.21, seed)
-      if (v > 0.62) continue
-      ctx.fillStyle = `rgba(90,70,60,${(0.62 - v) * amount})`
-      ctx.fillRect(x, y, step, step)
-    }
-  }
+  ctx.fillStyle = pat
+  ctx.fillRect(0, 0, w, h)
   ctx.restore()
 }

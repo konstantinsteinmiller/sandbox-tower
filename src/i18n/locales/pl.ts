@@ -18,7 +18,8 @@ export default {
     'rotateLeft': 'Obróć w lewo',
     'rotateRight': 'Obróć w prawo',
     'arrowRain': 'Deszcz strzał',
-    'arrowRainAim': 'Dotknij pola bitwy, aby wezwać salwę'
+    'arrowRainAim': 'Dotknij pola bitwy, aby wezwać salwę',
+    'extendRange': '+{n}% zasięgu'
   },
 
   'warnings': {
@@ -26,7 +27,8 @@ export default {
     'air': 'Powietrze ×{n}',
     'sea': 'Morze ×{n}',
     'bombers': 'Ładunki ×{n}',
-    'siege': 'Oblężenie ×{n}'
+    'siege': 'Oblężenie ×{n}',
+    'outOfReach': 'Poza zasięgiem ×{n} — potrzeba {m} zasięgu'
   },
   'hints': {
     'selectBlock': { 'touch': 'Dotknij bloku na dole, aby go wybrać', 'desktop': 'Kliknij blok na dole, aby go wybrać' },
@@ -150,7 +152,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': 'Kawaleria'
+    'cavalry': 'Kawaleria',
+    'cavalryFree': 'Darmowy wypad kawalerii',
+    'free': 'Za darmo',
+    'outOfReachHint': 'Poza zasięgiem — wyślij kawalerię lub zwiększ zasięg'
   },
 
   'result': {

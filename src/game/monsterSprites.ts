@@ -1,4 +1,7 @@
 import { MONSTERS, type MonsterDef } from '@/game/monsters'
+import { withHatching } from '@/game/inkArt'
+import { stripFrame } from '@/game/spriteStrip'
+import { spriteFor } from '@/game/art'
 
 /**
  * ─── Baked monster frames ───────────────────────────────────────────────────
@@ -75,6 +78,35 @@ export const SPRITE_FOOT = FRAME_H / 2 + SPRITE_S
 /** Total character height inside a frame, in px. */
 export const SPRITE_HEIGHT = 2.05 * SPRITE_S
 
+/**
+ * The two numbers above, as FRACTIONS of the frame rather than pixel counts.
+ *
+ * A painted strip is the bake's frame box at a different resolution — the sheet
+ * the painter works on is the same box scaled up, and the slicer cuts it on the
+ * same grid without trimming. So the feet line and the character height are the
+ * same proportions of the frame whatever size it arrives at, and every caller
+ * measures off the frame it was handed instead of off the bake's constants.
+ * For a baked frame these are algebraically what the old code computed.
+ */
+export const SPRITE_FOOT_R = SPRITE_FOOT / FRAME_H
+export const SPRITE_HEIGHT_R = SPRITE_HEIGHT / FRAME_H
+
+// ─── Painted strips ─────────────────────────────────────────────────────────
+//
+// A drop-in `images/monsters/<design>.webp` is one horizontal strip covering
+// the same single locomotion cycle the bake covers, in the same frame
+// proportions. Slicing and frame counting live in `spriteStrip`, shared with
+// the siege engines, which run the identical trick on a square frame box.
+//
+// The export ships eight panels: every extra frame is another chance for a
+// painter to drift a jerkin, a snout or a limb length, and eight is the
+// shortest strip that still reads as a walk rather than a stutter.
+
+/** The frame box's width:height. A painted panel is this box, scaled up. */
+export const MONSTER_FRAME_ASPECT = PX / FRAME_H
+
+
+
 const CACHE = new Map<string, HTMLCanvasElement[]>()
 const DEFS = new Map<string, MonsterDef>(MONSTERS.map((m) => [m.id, m]))
 
@@ -89,6 +121,11 @@ let scheduled = false
  */
 export const primeMonsterSprites = (ids: readonly string[]): void => {
   for (const id of ids) {
+    // Start the painted strip decoding on the same signal. It rides the
+    // opportunistic path rather than the splash: a wave is composed well before
+    // anything walks on, and a design whose strip has not arrived simply keeps
+    // playing the procedural bake instead of holding the game up for it.
+    if (DEFS.has(id)) spriteFor('monster', id)
     if (CACHE.has(id) || queue.includes(id) || building?.id === id) continue
     if (DEFS.has(id)) queue.push(id)
   }
@@ -102,9 +139,33 @@ const bakeFrame = (def: MonsterDef, i: number): HTMLCanvasElement => {
   const ctx = c.getContext('2d')
   if (ctx) {
     ctx.translate(PX / 2, FRAME_H / 2)
-    def.draw(ctx, SPRITE_S, (i / FRAMES) * def.cycleMs)
+    // The one place the cast is drawn that is NOT per frame, so the pen
+    // hatching in `cel` is free here and ruinous anywhere else.
+    withHatching(() => def.draw(ctx, SPRITE_S, (i / FRAMES) * def.cycleMs))
   }
   return c
+}
+
+/**
+ * Draw one frame of a design into a `w x h` panel at the context's origin.
+ *
+ * Exists so the art bench can export the reference sheet through the SAME
+ * transform `bakeFrame` uses. The panel is the bake's frame box scaled up, so a
+ * strip painted over this reference drops straight back in — get this out of
+ * step with the bake and every painted character stands at the wrong height.
+ *
+ * Not used at run time.
+ */
+export const paintMonsterFrame = (
+  ctx: CanvasRenderingContext2D,
+  id: string, i: number, frames: number, w: number, h: number
+): void => {
+  const def = DEFS.get(id)
+  if (!def) return
+  ctx.save()
+  ctx.translate(w / 2, h / 2)
+  withHatching(() => def.draw(ctx, SPRITE_S * (h / FRAME_H), (i / frames) * def.cycleMs))
+  ctx.restore()
 }
 
 /**
@@ -150,10 +211,16 @@ const schedule = (): void => {
  * not been baked yet.
  */
 export const monsterFrame = (id: string, cycle01: number): HTMLCanvasElement | null => {
+  const c01 = ((cycle01 % 1) + 1) % 1
+  // Paint wins when it is there. Both strips cover exactly one cycle, so the
+  // same normalised position indexes either of them and a design can swap from
+  // the bake to the painting mid-stride without a pop.
+  const paint = stripFrame('monster', id, MONSTER_FRAME_ASPECT, c01)
+  if (paint) return paint
+
   const frames = CACHE.get(id)
   if (!frames) return null
-  const i = Math.floor((((cycle01 % 1) + 1) % 1) * FRAMES) % FRAMES
-  return frames[i] ?? null
+  return frames[Math.floor(c01 * FRAMES) % FRAMES] ?? null
 }
 
 /** Which way a design is drawn, for the battlefield's mirroring. */

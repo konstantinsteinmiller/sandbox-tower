@@ -40,7 +40,31 @@ const DAILY_CAP = 300
 
 const STORAGE_KEY = CHEST_KEY
 
-const todayKey = (): string => new Date().toISOString().slice(0, 10)
+/**
+ * The calendar day the cap is measured in, in the PLAYER's timezone.
+ *
+ * This was `toISOString().slice(0, 10)` — UTC. A player in Berlin therefore had
+ * their allowance reset at 02:00, and one in Los Angeles at 17:00 the afternoon
+ * before, neither of which is a boundary anyone recognises as a new day. It also
+ * has to agree with `msUntilReset`, or the chest counts down to a moment when
+ * nothing happens.
+ *
+ * An old UTC key simply reads as "not today" and zeroes the ledger, which is
+ * generous rather than harmful, so no migration is needed.
+ */
+const todayKey = (): string => {
+  const d = new Date()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${mm}-${dd}`
+}
+
+/** Milliseconds from `now` to the next local midnight, when the cap rolls over. */
+const msUntilReset = (now: number): number => {
+  const d = new Date(now)
+  d.setHours(24, 0, 0, 0)
+  return Math.max(0, d.getTime() - now)
+}
 
 interface DayLedger { day: string; coins: number }
 
@@ -82,9 +106,22 @@ const currentReward = computed(() =>
   Math.min(dailyLeft.value, phase.value === 'big' ? BIG_REWARD : SMALL_REWARD)
 )
 
+/**
+ * The day's allowance is gone: the chest still fills, but it cannot pay.
+ *
+ * This is the state that made the chest look broken. `currentReward` floors at
+ * the daily cap, so once 300 coins were claimed the chest went un-clickable —
+ * while `remainingMs` returned 0 for the big phase, pinning the label to a dead
+ * `00:00` for the rest of the day. A timer at zero next to a button that does
+ * nothing reads as a bug, not as a limit.
+ */
+const isSpent = computed(() => dailyLeft.value === 0)
+
 const isReady = computed(() => phase.value !== 'cooldown' && currentReward.value > 0)
 
 const remainingMs = computed(() => {
+  // Spent: what the player is waiting on is midnight, not the next fill.
+  if (isSpent.value) return msUntilReset(tickNow.value)
   if (phase.value === 'cooldown') return SMALL_READY_AT_MS - elapsedMs.value
   if (phase.value === 'small') return BIG_READY_AT_MS - elapsedMs.value
   return 0
@@ -92,12 +129,18 @@ const remainingMs = computed(() => {
 
 const timeDisplay = computed(() => {
   const totalSec = Math.ceil(remainingMs.value / 1000)
-  const m = Math.floor(totalSec / 60)
-  const s = totalSec % 60
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  const h = Math.floor(totalSec / 3600)
+  const mm = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0')
+  const ss = String(totalSec % 60).padStart(2, '0')
+  // Hours only ever show on the wait for midnight — a fill is under ten
+  // minutes, so the common case keeps its compact MM:SS.
+  return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`
 })
 
 const cooldownRingPct = computed(() => {
+  // A spent chest stays fully shuttered, so it reads as closed rather than as a
+  // ready chest that refuses to open.
+  if (isSpent.value) return 1
   if (phase.value !== 'cooldown') return 0
   return remainingMs.value / SMALL_READY_AT_MS
 })
@@ -134,9 +177,9 @@ onUnmounted(() => {
 </script>
 
 <template lang="pug">
-  div.treasure-chest.pointer-events-auto.cursor-pointer.relative(
+  div.treasure-chest.pointer-events-auto.relative(
     ref="rootEl"
-    :class="{ 'is-ready': isReady, 'is-big': phase === 'big' }"
+    :class="{ 'is-ready': isReady, 'is-big': phase === 'big' && !isSpent, 'is-spent': isSpent, 'cursor-pointer': isReady }"
     @click="onClick"
   )
     //- Programmatic chest art (SVG). The cooldown overlay sits inside the
@@ -168,7 +211,7 @@ onUnmounted(() => {
       //- via `chestClip`. The rect drains from the top down — at start it
       //- covers the whole chest, at full cooldown it's gone.
       rect(
-        v-if="phase === 'cooldown'"
+        v-if="isSpent || phase === 'cooldown'"
         x="0"
         :y="64 * (1 - cooldownRingPct)"
         width="64"
@@ -212,6 +255,12 @@ onUnmounted(() => {
 
 .is-big .chest-svg
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 8px rgba(255, 160, 0, 0.8))
+
+// Spent for the day — drained of colour so the chest reads as put away, and the
+// countdown underneath is to midnight rather than to a fill that cannot pay.
+.is-spent .chest-svg
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) grayscale(0.6)
+  opacity: 0.7
 
 // ─── Status label ───────────────────────────────────────────────────────────
 //

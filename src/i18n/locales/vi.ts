@@ -18,7 +18,8 @@ export default {
     'rotateLeft': 'Xoay trái',
     'rotateRight': 'Xoay phải',
     'arrowRain': 'Mưa Tên',
-    'arrowRainAim': 'Chạm vào chiến trường để gọi loạt bắn'
+    'arrowRainAim': 'Chạm vào chiến trường để gọi loạt bắn',
+    'extendRange': '+{n}% tầm bắn'
   },
 
   'warnings': {
@@ -26,7 +27,8 @@ export default {
     'air': 'Đường không ×{n}',
     'sea': 'Đường biển ×{n}',
     'bombers': 'Bộc phá ×{n}',
-    'siege': 'Công thành ×{n}'
+    'siege': 'Công thành ×{n}',
+    'outOfReach': 'Ngoài tầm bắn ×{n} — cần tầm {m}'
   },
   'hints': {
     'selectBlock': { 'touch': 'Chạm vào một khối bên dưới để chọn', 'desktop': 'Nhấp vào một khối bên dưới để chọn' },
@@ -150,7 +152,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': 'Kỵ binh'
+    'cavalry': 'Kỵ binh',
+    'cavalryFree': 'Xuất kích kỵ binh miễn phí',
+    'free': 'Miễn phí',
+    'outOfReachHint': 'Ngoài tầm bắn — xuất kích kỵ binh hoặc tăng tầm bắn'
   },
 
   'result': {

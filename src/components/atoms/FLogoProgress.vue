@@ -178,6 +178,25 @@ const signalGameReadyToYandex = () => {
   })
 }
 
+// Poki's `gameLoadingFinished()` is the ONLY strictly-required call in its
+// SDK, and it is what Poki's dashboards use to compute loading conversion.
+// Fire it on the same splash-resolved edge as CG / Playgama / GamePix /
+// Yandex. The plugin guards it internally so re-triggering is harmless.
+// (`gameLoadingStart()` / `gameLoadingProgress()` are both `() => {}` in the
+// shipped v2 core — there is no loading bracket to open, only this close.)
+// Same `import.meta.env` literal pattern as the branches above so non-Poki
+// builds DCE the dynamic import entirely.
+let pokiLoadSignaled = false
+const signalGameReadyToPoki = () => {
+  if (pokiLoadSignaled) return
+  if (import.meta.env.VITE_APP_POKI !== 'true') return
+  pokiLoadSignaled = true
+  void import('@/utils/pokiPlugin').then(({ pokiGameLoadingFinished }) => {
+    try { pokiGameLoadingFinished() }
+    catch (e) { console.warn('[FLogoProgress] Poki gameLoadingFinished failed', e) }
+  })
+}
+
 watch(done, (isDone) => {
   if (isDone) {
     setTimeout(() => {
@@ -186,6 +205,7 @@ watch(done, (isDone) => {
       signalGameReadyToPlaygama()
       signalGameReadyToGamepix()
       signalGameReadyToYandex()
+      signalGameReadyToPoki()
       // Triggers the GamePix first-load interstitial (no-op on other builds
       // — the orchestrator was never armed). GD / GameMonetize used to share
       // this fire but were removed above; their first-load ad is gone, the

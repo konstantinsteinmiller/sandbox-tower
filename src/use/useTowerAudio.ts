@@ -27,7 +27,7 @@ import useSounds from '@/use/useSound'
 export type FxSound =
   | 'place' | 'sell' | 'shoot' | 'impact' | 'frost' | 'zap' | 'explosion'
   | 'shatter' | 'collapse' | 'hit' | 'throw' | 'enemyDie' | 'bossDie'
-  | 'waveStart' | 'bossHorn' | 'waveClear' | 'gateFell'
+  | 'waveStart' | 'bossHorn' | 'waveClear' | 'gateFell' | 'uiTap'
 
 // ─── Throttling ─────────────────────────────────────────────────────────────
 //
@@ -46,7 +46,10 @@ const THROTTLES: Partial<Record<FxSound, Throttle>> = {
   shatter: { minGapMs: 55, maxPerWindow: 5, windowMs: 300 },
   explosion: { minGapMs: 70, maxPerWindow: 4, windowMs: 350 },
   frost: { minGapMs: 80, maxPerWindow: 4, windowMs: 300 },
-  zap: { minGapMs: 70, maxPerWindow: 4, windowMs: 300 }
+  zap: { minGapMs: 70, maxPerWindow: 4, windowMs: 300 },
+  // A held rotate key auto-repeats at ~30 Hz. Without a floor the tap turns
+  // into a buzz, so one click per 40 ms and no more than eight per burst.
+  uiTap: { minGapMs: 40, maxPerWindow: 8, windowMs: 400 }
 }
 
 const lastAt: Partial<Record<FxSound, number>> = {}
@@ -187,6 +190,15 @@ const synth = (ctx: AudioContext, id: FxSound): void => {
       // Woody knock: a short low thud plus a click transient.
       tone(ctx, { freq: 190 + r * 40, toFreq: 90, duration: 0.11, gain: vol(0.16), type: 'triangle' })
       noiseBurst(ctx, { duration: 0.055, gain: vol(0.09), filterFrom: 2600, filterTo: 500 })
+      break
+
+    case 'uiTap':
+      // Dry UI click. Deliberately synthesised rather than sampled: this fires
+      // on every rotate and every tutorial step, and a cue that short reads as
+      // a transient, not as a recording — a shipped .ogg would cost bytes and a
+      // decode to sound no better.
+      tone(ctx, { freq: 880 + r * 120, toFreq: 440, duration: 0.035, gain: vol(0.05), type: 'triangle' })
+      noiseBurst(ctx, { duration: 0.028, gain: vol(0.035), filterFrom: 5200, filterTo: 1800, type: 'bandpass', q: 1.4 })
       break
 
     case 'shoot':

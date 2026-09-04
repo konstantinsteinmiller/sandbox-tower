@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { blockDef } from '@/game/blocks'
-import { themedPalette, spriteFor } from '@/game/art'
+import { themedPalette, spriteFor, onArtChanged } from '@/game/art'
 import { blockGlyph } from '@/game/blockGlyph'
 
 /**
@@ -35,12 +35,10 @@ const paint = (): void => {
   if (!ctx) return
   ctx.clearRect(0, 0, px, px)
 
+  // Drop-in art replaces the BODY, never the pictogram. Blocks share a base
+  // bitmap now, so the glyph is the only thing telling an archery post from a
+  // sawmill in the tray — returning early here left them indistinguishable.
   const override = spriteFor('block', props.typeId)
-  if (override) {
-    ctx.drawImage(override, 0, 0, px, px)
-    return
-  }
-
   const def = blockDef(props.typeId)
   const p = themedPalette(def.palette)
   const inset = px * 0.05
@@ -57,17 +55,21 @@ const paint = (): void => {
     ctx.closePath()
   }
 
-  // Body with the same upper-left light direction as the world renderer.
-  round(inset, inset, w, w, r)
-  const g = ctx.createLinearGradient(inset, inset, inset + w * 0.4, inset + w)
-  g.addColorStop(0, p.light)
-  g.addColorStop(0.5, p.mid)
-  g.addColorStop(1, p.dark)
-  ctx.fillStyle = g
-  ctx.fill()
-  ctx.strokeStyle = p.accent
-  ctx.lineWidth = Math.max(1, px * 0.05)
-  ctx.stroke()
+  if (override) {
+    ctx.drawImage(override, 0, 0, px, px)
+  } else {
+    // Body with the same upper-left light direction as the world renderer.
+    round(inset, inset, w, w, r)
+    const g = ctx.createLinearGradient(inset, inset, inset + w * 0.4, inset + w)
+    g.addColorStop(0, p.light)
+    g.addColorStop(0.5, p.mid)
+    g.addColorStop(1, p.dark)
+    ctx.fillStyle = g
+    ctx.fill()
+    ctx.strokeStyle = p.accent
+    ctx.lineWidth = Math.max(1, px * 0.05)
+    ctx.stroke()
+  }
 
   // One bold pictogram, on a dark backing disc.
   //
@@ -88,7 +90,15 @@ const paint = (): void => {
   ctx.restore()
 }
 
-onMounted(paint)
+// Drop-in art decodes asynchronously, so the first paint usually happens
+// before the bitmap exists. Without this the tile keeps the procedural look
+// until something else happens to repaint it — which is why the tray only
+// picked up the new art after the first block was placed.
+onMounted(() => {
+  paint()
+  const stop = onArtChanged(paint)
+  onUnmounted(stop)
+})
 watch(() => [props.typeId, props.size], paint)
 </script>
 

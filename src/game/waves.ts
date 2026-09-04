@@ -467,6 +467,30 @@ export const countSea = (plan: WavePlan): number =>
 export const countSiege = (plan: WavePlan): number =>
   plan.orders.filter((o) => !!enemyDef(o.typeId).siege).length
 
+/**
+ * How many of a planned wave park BEYOND `reach` cells, where they cannot be
+ * shot at all.
+ *
+ * The build-phase escalation of `countSiege`: a ram is a wall problem, but an
+ * engine standing off past every gun the player owns is a different problem
+ * with a different answer, and lumping the two into one "Siege ×n" chip hides
+ * the only one that needs a purchase to solve.
+ *
+ * Compared against the standoff distance rather than exact turret geometry —
+ * the tower the warning describes does not exist yet, because the player is
+ * still building it.
+ */
+export const countOutranged = (plan: WavePlan, reach: number): number =>
+  plan.orders.filter((o) => {
+    const standoff = enemyDef(o.typeId).siege?.standoff
+    return standoff !== undefined && standoff > reach
+  }).length
+
+/** The deepest standoff in a planned wave, 0 when it carries no siege — the
+ *  reach the player would have to buy to answer everything in it. */
+export const deepestStandoff = (plan: WavePlan): number =>
+  plan.orders.reduce((max, o) => Math.max(max, enemyDef(o.typeId).siege?.standoff ?? 0), 0)
+
 /** How many bombers a wave carries — the cue that the CROWN needs cover. */
 export const countBombers = (plan: WavePlan): number =>
   plan.orders.filter((o) => !!enemyDef(o.typeId).bombRun).length

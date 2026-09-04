@@ -4,9 +4,148 @@ import { themedPalette, spriteFor, withAlpha, mixHex, type Palette } from '@/gam
 import { isBossWave } from '@/game/waves'
 import {
   monsterFrame, monsterFaces, monsterAnchor, pickMonster, primeMonsterSprites,
-  allMonsterIds, SPRITE_FOOT, SPRITE_HEIGHT
+  allMonsterIds, SPRITE_FOOT_R, SPRITE_HEIGHT_R
 } from '@/game/monsterSprites'
-import { blob, fillShape, ink, noise2, shrink, stroke as inkStroke, type Pt } from '@/game/inkArt'
+import { stripFrame } from '@/game/spriteStrip'
+import {
+  blob, fillShape, grain, ink, noise2, shrink, stroke as inkStroke, withHatching,
+  type Pt
+} from '@/game/inkArt'
+
+/**
+ * ─── Drawn scenery ──────────────────────────────────────────────────────────
+ *
+ * The cast is inked; the landscape was not. Mountains were a vertical gradient
+ * with a hairline stroke, the tree line a flat polygon, the lake a flat wash —
+ * competent, and unmistakably generated. A reviewer who sees hand-drawn
+ * characters standing in front of gradient scenery reads the whole screen as
+ * machine-made, which is precisely the note this game came back with.
+ *
+ * All of it goes into `bgCanvas`, which is cached and only re-rendered when the
+ * camera moves far enough to matter, so contours and paper tooth here cost
+ * nothing per frame.
+ */
+/**
+ * Painted scenery, when there is any.
+ *
+ * The blocks proved the point: a hand-painted bitmap reads as hand-painted, and
+ * no amount of tuning shared drawing constants gets procedural code there. The
+ * scenery is the larger half of the screen and almost none of it animates, so
+ * it takes bitmaps far more comfortably than the cast does.
+ *
+ * Every one of these is OPTIONAL. A missing file leaves the procedural drawing
+ * exactly as it was, so the landscape can be adopted one piece at a time.
+ */
+const bgSprite = (id: string): HTMLImageElement | null => spriteFor('bg', id)
+
+/**
+ * The opaque bounds of a drop-in bitmap, in its own pixels.
+ *
+ * A painted tree arrives with transparent margin around it — the conifer has 26
+ * px of empty space under its trunk out of 512. Blitting the whole frame with
+ * its bottom on the ground line therefore stands the tree 5% of its height in
+ * the air, which is exactly what "the trees are floating" looks like.
+ *
+ * Measured once per image and cached: the scan is a full `getImageData`, and
+ * the answer cannot change for a decoded bitmap.
+ */
+const spriteBoxes = new WeakMap<HTMLImageElement, { x: number; y: number; w: number; h: number }>()
+
+const spriteBox = (img: HTMLImageElement): { x: number; y: number; w: number; h: number } => {
+  const hit = spriteBoxes.get(img)
+  if (hit) return hit
+  const W = img.naturalWidth
+  const H = img.naturalHeight
+  let box = { x: 0, y: 0, w: W, h: H }
+  const cv = document.createElement('canvas')
+  cv.width = W
+  cv.height = H
+  const c = cv.getContext('2d')
+  if (c) {
+    c.drawImage(img, 0, 0)
+    const d = c.getImageData(0, 0, W, H).data
+    let x0 = W, y0 = H, x1 = -1, y1 = -1
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        if (d[(y * W + x) * 4 + 3]! < 8) continue
+        if (x < x0) x0 = x
+        if (x > x1) x1 = x
+        if (y < y0) y0 = y
+        if (y > y1) y1 = y
+      }
+    }
+    if (x1 >= 0) box = { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 }
+  }
+  spriteBoxes.set(img, box)
+  return box
+}
+
+/**
+ * Blit a painted tree standing ON `baseY`, at `hgt` from root to crown.
+ *
+ * Sized and placed from the artwork's own bounds rather than the frame's, so
+ * the trunk meets the ground whatever margin the painter left.
+ */
+const paintedTree = (
+  c: CanvasRenderingContext2D, img: HTMLImageElement,
+  x: number, baseY: number, hgt: number
+): void => {
+  const b = spriteBox(img)
+  const w = hgt * (b.w / b.h)
+  c.drawImage(img, b.x, b.y, b.w, b.h, x - w / 2, baseY - hgt, w, hgt)
+}
+
+/**
+ * Blit a horizontally tileable band, scrolled by its own parallax.
+ *
+ * The ridges and the ground bands are generated from noise across an infinite
+ * world, so their replacement cannot be one image pinned to the frame — it has
+ * to repeat, and it has to slide at the same rate the procedural version did or
+ * the depth cue breaks.
+ */
+const tileBand = (
+  c: CanvasRenderingContext2D, img: HTMLImageElement,
+  x0: number, y: number, w: number, h: number, offset: number
+): void => {
+  const scale = h / img.naturalHeight
+  const tw = Math.max(1, img.naturalWidth * scale)
+
+  // MIRROR every other tile.
+  //
+  // The prompt asks for a seamless left-to-right join and the painter does not
+  // reliably deliver one — the lake shipped with a hard vertical line every
+  // tile width, which is the most obvious possible tell that the background is
+  // a repeated image.
+  //
+  // Flipping alternate copies makes the join continuous by CONSTRUCTION: tile
+  // N's right-hand column and the mirrored tile N+1's left-hand column are the
+  // same pixels, so there is nothing to match up and nothing to get wrong. The
+  // cost is a mirrored repeat, which on water, grass and rock reads as nothing
+  // at all — and a period of two tiles rather than one actually makes the
+  // repetition harder to spot.
+  const period = tw * 2
+  const start = x0 - (((offset % period) + period) % period)
+  for (let i = 0; start + i * tw < x0 + w; i++) {
+    const sx = start + i * tw
+    if (sx + tw <= x0 - tw) continue
+    // One pixel of overlap. `tw` is fractional, so abutting tiles land on
+    // sub-pixel boundaries and leave a hairline of whatever is behind showing
+    // through — which on a lake reads as a scratch down the water.
+    const over = tw + 1
+    if (i % 2 === 0) {
+      c.drawImage(img, sx, y, over, h)
+    } else {
+      c.save()
+      c.translate(sx + tw, y)
+      c.scale(-1, 1)
+      c.drawImage(img, -1, 0, over, h)
+      c.restore()
+    }
+  }
+}
+
+const SCENERY_INK = 'rgba(59,42,33,0.55)'
+const SCENERY_INK_SOFT = 'rgba(59,42,33,0.32)'
 import { rotatedShape } from '@/game/shapes'
 import { drawSiegeMachine } from '@/game/siegeArt'
 import { drawShip } from '@/game/shipArt'
@@ -16,7 +155,7 @@ import { GRASS_DEPTH, SEA_LEVEL } from '@/game/world'
 import type { Ally, Block, Enemy, EnemyDef, Projectile } from '@/game/types'
 import {
   getBlocks, getTowerBlocks, getEnemies, getProjectiles, getAllies, getDebris, nowMs, phase,
-  wave, gameSpeed, spanW, spanH, centreX, centreY, isFlamingSiege
+  wave, gameSpeed, spanW, spanH, centreX, centreY, isFlamingSiege, effectiveRangeMul
 } from '@/use/useTowerGame'
 import {
   worldToScreenX, worldToScreenY, getZoom, viewRect, updateCamera
@@ -27,7 +166,6 @@ import {
 } from '@/use/useTowerVfx'
 import { useScreenshake } from '@/use/useScreenshake'
 import { playFx } from '@/use/useTowerAudio'
-import { rangeMul } from '@/use/useTowerProgress'
 
 /**
  * ─── Renderer ───────────────────────────────────────────────────────────────
@@ -123,6 +261,22 @@ const getBlockSprite = (typeId: string, stage: 0 | 1 | 2, sizePx: number): HTMLC
   }
   return canvas
 }
+
+/**
+ * The image to blit for one block face.
+ *
+ * Drop-in art if a bitmap has decoded for this block, the procedural bake
+ * otherwise. EVERY path that paints a block body goes through here.
+ *
+ * It exists because the override check used to be inlined in `drawBlock` alone,
+ * and two other places paint block bodies: the build-mode ghost preview and the
+ * mirrored tower in the water. Both kept drawing the procedural body after real
+ * art had loaded, so the piece under the pointer did not match the piece it
+ * became, and the tower's own reflection disagreed with the tower.
+ */
+const blockFace = (
+  typeId: string, stage: 0 | 1 | 2, sizePx: number
+): CanvasImageSource => spriteFor('block', typeId) ?? getBlockSprite(typeId, stage, sizePx)
 
 // ─── Block body drawing ─────────────────────────────────────────────────────
 
@@ -528,6 +682,23 @@ const drawRoof = (ctx: CanvasRenderingContext2D, cx: number, cy: number, size: n
   const halfW = size * 0.62
   const peak = size * 0.42
   const baseY = cy - size * 0.5
+
+  // A painted gable, when there is one.
+  //
+  // The roof is stacked on TOP of whatever the block bitmap is, so a flat red
+  // vector gable over a hand-painted crate is the one seam a player cannot
+  // help seeing — the block changed and the thing sitting on it did not.
+  //
+  // Drawn from the artwork's own bounds and overhanging the cell exactly as the
+  // drawn gable does, so a roofed shape keeps the footprint it always had.
+  const painted = bgSprite('roof')
+  if (painted?.naturalWidth) {
+    const b = spriteBox(painted)
+    const rw = halfW * 2
+    const rh = rw * (b.h / b.w)
+    ctx.drawImage(painted, b.x, b.y, b.w, b.h, cx - halfW, baseY + size * 0.1 - rh, rw, rh)
+    return
+  }
 
   ctx.save()
   // Eaves shadow, so the roof reads as sitting ON the block rather than in it.
@@ -1304,6 +1475,19 @@ const endUnitLayer = (
 // serves both directions.
 
 const SIEGE_BOX = 2.4 // sprite box as a multiple of the machine's scale
+
+/**
+ * Which engines a painted chassis may replace.
+ *
+ * Only the three whose ARM is already drawn as a separate live layer. The ram,
+ * the iron ram and the siege tower draw their moving parts inside the static
+ * pass and interleaved in z-order with their own shells — the iron ram's log
+ * runs BEHIND its casemate, the tower's crew stand BEHIND the merlons — so a
+ * painted chassis there would either freeze the motion or float it over the
+ * armour. Splitting those three is a z-order refactor, not a drop-in, and until
+ * it is done they keep drawing themselves completely.
+ */
+const SIEGE_STRIPS = new Set(['ballista', 'catapult', 'trebuchet'])
 const SIEGE_SPIN_STEPS = 16
 const SIEGE_PHASE_MS = 50
 const SIEGE_CACHE_MAX = 96
@@ -1354,7 +1538,9 @@ const getSiegeSprite = (
   g.translate(e.box / 2, e.box / 2)
   // Painted from the QUANTISED spin and clock, so every machine sharing this
   // key agrees about what the image shows.
-  drawSiegeMachine(g, id, scale, themedPalette(enemyDef(id).palette), {
+  // The static chassis is cached, so pen hatching is free here. The moving
+  // layer is NOT wrapped: it is repainted every frame by the caller.
+  withHatching(() => drawSiegeMachine(g, id, scale, themedPalette(enemyDef(id).palette), {
     spin: engaged ? 0 : (spinQ / SIEGE_SPIN_STEPS) * TAU,
     engaged,
     t: phase * SIEGE_PHASE_MS,
@@ -1362,7 +1548,7 @@ const getSiegeSprite = (
     // its OWN reload and is painted live over this by the caller; every other
     // engine draws itself completely here, as it always has.
     layer: 'static'
-  })
+  }))
   g.restore()
   e.phase = phase
   return e
@@ -1437,6 +1623,33 @@ const drawEnemy = (target: CanvasRenderingContext2D, e: Enemy, t: number): void 
     // Read from the same predicate the simulation loads the round with, so the
     // bowl cannot be burning while a plain rock leaves it.
     const flaming = isFlamingSiege(def, wave.value)
+    // A painted chassis, if one has been dropped in for this engine.
+    //
+    // It replaces the STATIC layer only — the wheels, the frame, the hide — and
+    // the arm carries on being drawn live over it. That split already existed
+    // for exactly this reason on the three throwing engines: the arm is keyed
+    // to each machine's own reload, so it can never be baked into a shared
+    // frame. It is the same bargain the blocks struck, with the fixture on top.
+    //
+    // The strip covers ONE wheel revolution, which is what `spin` measures, so
+    // a rolling engine's painted wheels turn at the speed it is travelling.
+    const painted = SIEGE_STRIPS.has(def.id)
+      ? stripFrame('siege', def.id, 1, (engaged ? 0 : e.x * 1.6) / TAU)
+      : null
+    if (painted) {
+      const box = s * SIEGE_BOX
+      ctx.drawImage(painted, -box / 2, -box / 2, box, box)
+      drawSiegeMachine(ctx, def.id, s, p, {
+        spin: engaged ? 0 : e.x * 1.6, engaged, t, cycle, flaming, layer: 'moving'
+      })
+      ctx.restore()
+      stamp()
+      if (e.hp < e.maxHp && e.dying <= 0) {
+        drawHpBar(target, cx, cy - s * 0.92, s * 0.86, Math.max(2, s * 0.085), e.hp / e.maxHp, def.boss)
+      }
+      return
+    }
+
     const machine = getSiegeSprite(def.id, s, engaged, engaged ? 0 : e.x * 1.6, t)
     if (machine) {
       // The caller's `scale(facing, 1)` is still in force, so the one
@@ -1499,7 +1712,10 @@ const drawEnemy = (target: CanvasRenderingContext2D, e: Enemy, t: number): void 
       // Designs drawn facing left need one more flip: the battlefield authors
       // everything facing right and mirrors by travel direction.
       if (monsterFaces(monsterId) === 'left') ctx.scale(-1, 1)
-      const k = (s * 1.3) / SPRITE_HEIGHT
+      // Measured off the frame the strip handed back, not off the bake's own
+      // pixel constants: a painted strip is the same frame box at a bigger
+      // resolution, and hard-coding the bake's size would draw it 1.5x too big.
+      const k = (s * 1.3) / (frame.height * SPRITE_HEIGHT_R)
       const w = frame.width * k
       const h = frame.height * k
       // Line the strip up by the FEET, not by its centre: the designs differ in
@@ -1509,7 +1725,7 @@ const drawEnemy = (target: CanvasRenderingContext2D, e: Enemy, t: number): void 
       // means the same thing wherever a strip is drawn.
       const top = monsterAnchor(monsterId) === 'centre'
         ? -h * 0.5
-        : s * 0.5 - SPRITE_FOOT * k
+        : s * 0.5 - frame.height * SPRITE_FOOT_R * k
       ctx.drawImage(frame, -w * 0.5, top, w, h)
       ctx.restore()
       stamp()
@@ -1952,7 +2168,7 @@ const drawSeaSprite = (
   // Positive means part of the body is ABOVE the water.
   const waterY = (e.y - SEA_LEVEL) * zoom
 
-  const k = (s * 1.5) / SPRITE_HEIGHT
+  const k = (s * 1.5) / (frame.height * SPRITE_HEIGHT_R)
   const w = frame.width * k
   const h = frame.height * k
 
@@ -2428,6 +2644,14 @@ const drawCelestial = (
   c.fillStyle = bloom
   c.fillRect(0, 0, w, Math.max(0, groundY))
 
+  // A painted disc replaces the drawn one outright. The bloom above is kept
+  // either way: it is a wash across the whole sky, not part of the body.
+  const painted = bgSprite(isNight ? 'moon' : 'sun')
+  if (painted?.naturalWidth) {
+    const d = r * 4.6
+    c.drawImage(painted, x - d / 2, y - d / 2, d, d)
+    return
+  }
   const sprite = celestialSprite(isNight, r, tier)
   c.drawImage(sprite, x - sprite.width / 2, y - sprite.height / 2)
 }
@@ -2445,6 +2669,12 @@ const drawConifer = (
   hgt: number,
   seed: number
 ): void => {
+  // Painted tree, planted on `baseY` by its own artwork bounds.
+  const painted = bgSprite('conifer')
+  if (painted?.naturalWidth) {
+    paintedTree(c, painted, x, baseY, hgt)
+    return
+  }
   const halfW = hgt * (0.24 + hash(seed * 1.7) * 0.08)
 
   c.fillStyle = '#3b2a1c'
@@ -2493,6 +2723,12 @@ const drawBroadleaf = (
   hgt: number,
   seed: number
 ): void => {
+  // Painted tree, planted on `baseY` by its own artwork bounds.
+  const painted = bgSprite('broadleaf')
+  if (painted?.naturalWidth) {
+    paintedTree(c, painted, x, baseY, hgt)
+    return
+  }
   const trunkH = hgt * 0.42
   const trunkW = Math.max(1, hgt * 0.07)
 
@@ -2597,6 +2833,20 @@ const renderBackground = (w: number, h: number, dpr: number): void => {
     const left = -10
     const right = w + 10
 
+    // A painted range replaces the whole generated ridge — body, lit faces and
+    // snow caps together, since a painter puts all three in the one image.
+    //
+    // Tiled rather than stretched: these ridges run across an infinite world,
+    // so the art has to repeat, and it has to slide at this range's own
+    // parallax or the two ranges stop reading as different distances.
+    const range = bgSprite(idx === 0 ? 'mountains-far' : 'mountains-near')
+    if (range?.naturalWidth) {
+      const bandH = h * cfg.amp + (groundY - yBase) + h * cfg.amp * 0.2
+      const bandY = yBase - h * cfg.amp
+      tileBand(c, range, left, bandY, right - left, bandH, rect.l * zoom * cfg.par)
+      continue
+    }
+
     /** Ridge height at a screen x, in pixels above `yBase`. */
     const ridgeAt = (sx: number): number => {
       const wx = (sx + rect.l * zoom * cfg.par) / 90
@@ -2637,6 +2887,15 @@ const renderBackground = (w: number, h: number, dpr: number): void => {
     }
     c.stroke()
 
+    // A DRAWN ridge line. `inkStroke` tapers and wobbles the way a nib does, so
+    // the skyline reads as a pen contour rather than as the top edge of a
+    // filled polygon. The nearer range gets the heavier line — that difference
+    // alone does most of the work of separating the two.
+    inkStroke(c, pts,
+      Math.max(1.1, h * (idx === 0 ? 0.0022 : 0.0034)),
+      Math.max(0.6, h * 0.0012),
+      idx === 0 ? SCENERY_INK_SOFT : SCENERY_INK, 40 + idx * 13)
+
     // Snow caps on the tallest peaks only.
     const capLimit = yBase - h * cfg.amp * cfg.snow
     c.fillStyle = 'rgba(238,246,255,0.9)'
@@ -2662,25 +2921,64 @@ const renderBackground = (w: number, h: number, dpr: number): void => {
   // of individually-drawn trees with trunks, tiered canopies and a lit side.
   // The old version was a row of flat triangles, which is exactly what made the
   // horizon look like placeholder art.
-  const farBase = groundY - h * 0.03
+  // Standing ON the ground, not hovering above it.
+  //
+  // The far line used to sit 3% of the frame height clear of the ground so it
+  // read as "further back" — which works for a flat silhouette and fails
+  // completely for a painted tree with a visible trunk, because a trunk that
+  // stops in mid-air is simply a floating tree. Distance is carried by scale,
+  // parallax and haze instead, all of which are already doing it.
+  const farBase = groundY
   const farStep = Math.max(5, w / 150)
-  c.fillStyle = 'rgba(30,58,46,0.72)'
-  c.beginPath()
-  c.moveTo(-10, farBase)
+  // A painted far line, when there is painted art to draw it with.
+  //
+  // The sawtooth polygon below is a silhouette of triangles, and standing it
+  // behind hand-painted trees put two different drawings of "forest" in the
+  // same frame — the flat one reads as placeholder the moment the painted one
+  // arrives next to it. Same bitmap, smaller and hazed back, so the tree line
+  // recedes by ATMOSPHERE rather than by being a cruder shape.
+  const farTree = bgSprite('conifer')
+  if (farTree?.naturalWidth) {
+    const step = Math.max(9, w / 90)
+    c.save()
+    c.globalAlpha = 0.72
+    for (let sx = -step; sx <= w + step; sx += step) {
+      const wx = (sx + rect.l * zoom * 0.26) / 17
+      const seed = Math.floor(wx)
+      const jitter = (hash(seed * 2.9) - 0.5) * step * 0.9
+      const hgt = h * 0.032 * (0.72 + hash(seed * 5.3) * 0.6)
+      paintedTree(c, farTree, sx + jitter, farBase, hgt)
+    }
+    c.restore()
+    // No wash band over the tree line either — same reason. The far trees are
+    // already smaller and drawn at 72% alpha, which is the whole depth cue.
+
+  } else {
+
+  const farPts: Pt[] = []
   for (let sx = -10; sx <= w + 10; sx += farStep) {
     const wx = (sx + rect.l * zoom * 0.26) / 14
     const hgt = (0.35 + hash(Math.floor(wx) * 5.3) * 0.65) * h * 0.05
-    c.lineTo(sx, farBase - hgt)
-    c.lineTo(sx + farStep * 0.5, farBase - hgt * 0.55)
+    farPts.push([sx, farBase - hgt])
+    farPts.push([sx + farStep * 0.5, farBase - hgt * 0.55])
   }
+  c.fillStyle = 'rgba(30,58,46,0.72)'
+  c.beginPath()
+  c.moveTo(-10, farBase)
+  for (const [px, py] of farPts) c.lineTo(px, py)
   c.lineTo(w + 10, farBase)
   c.closePath()
   c.fill()
+  // The far tree line gets a contour too, but a soft one: it is distance, and
+  // a hard pen line at the back of the scene pulls it forward.
+  inkStroke(c, farPts, Math.max(0.8, h * 0.0016), Math.max(0.5, h * 0.0009),
+    SCENERY_INK_SOFT, 77)
+  }
 
   // The near band sits slightly ABOVE the ground line and is smaller than the
   // units that walk in front of it. Matching their scale made the enemy lane
   // look like it ran *through* the forest rather than in front of it.
-  const nearBase = groundY - h * 0.008
+  const nearBase = groundY
   const nearStep = Math.max(11, w / 52)
   for (let sx = -nearStep; sx <= w + nearStep; sx += nearStep) {
     const wx = (sx + rect.l * zoom * 0.34) / 26
@@ -2702,20 +3000,31 @@ const renderBackground = (w: number, h: number, dpr: number): void => {
   // enough to notice (see the key below). Following it per frame would mean
   // re-rendering the ridges and every tree with it, for a wash that runs at 8
   // to 30 percent alpha.
-  const haze = c.createLinearGradient(0, groundY - h * 0.3, 0, groundY)
-  haze.addColorStop(0, withAlpha(mid, 0.3))
-  haze.addColorStop(1, withAlpha(mid, 0.08))
-  c.fillStyle = haze
-  c.fillRect(0, groundY - h * 0.3, w, h * 0.3)
+  //
+  // SKIPPED once the scenery is painted. The wash exists to push generated
+  // ridges back and to knit a flat tree line into a flat sky; over hand-painted
+  // art it is a flat translucent rectangle laid across a watercolour, and it
+  // reads as exactly that — a gradient overlay, the most artificial thing left
+  // on the screen. A painter puts the distance INTO the picture, which is what
+  // `mountains-far` already does by being pale.
+  if (!bgSprite('mountains-far')?.naturalWidth) {
+    const haze = c.createLinearGradient(0, groundY - h * 0.3, 0, groundY)
+    haze.addColorStop(0, withAlpha(mid, 0.3))
+    haze.addColorStop(1, withAlpha(mid, 0.08))
+    c.fillStyle = haze
+    c.fillRect(0, groundY - h * 0.3, w, h * 0.3)
+  }
 
   // Contact shadow along the far edge of the field, so the tree line has
   // something to stand on and the units in front of it read as nearer.
-  const rim = c.createLinearGradient(0, groundY - h * 0.012, 0, groundY + h * 0.022)
-  rim.addColorStop(0, 'rgba(18,34,22,0)')
-  rim.addColorStop(0.45, 'rgba(18,34,22,0.42)')
-  rim.addColorStop(1, 'rgba(18,34,22,0)')
-  c.fillStyle = rim
-  c.fillRect(0, groundY - h * 0.012, w, h * 0.034)
+  if (!bgSprite('grass')?.naturalWidth) {
+    const rim = c.createLinearGradient(0, groundY - h * 0.012, 0, groundY + h * 0.022)
+    rim.addColorStop(0, 'rgba(18,34,22,0)')
+    rim.addColorStop(0.45, 'rgba(18,34,22,0.42)')
+    rim.addColorStop(1, 'rgba(18,34,22,0)')
+    c.fillStyle = rim
+    c.fillRect(0, groundY - h * 0.012, w, h * 0.034)
+  }
 
   // ── Ground ──
   // A narrow strip of land the tower stands on, then the shoreline, then open
@@ -2729,77 +3038,111 @@ const renderBackground = (w: number, h: number, dpr: number): void => {
     // The approach lane is a MEADOW, not a dirt road: a green field the enemies
     // cross, with individually drawn tufts. Grass reads as somewhere worth
     // defending; a brown strip reads as a placeholder.
-    const gr = c.createLinearGradient(0, groundY, 0, seaY)
-    gr.addColorStop(0, '#63a34a')
-    gr.addColorStop(0.3, '#4d8a38')
-    gr.addColorStop(0.72, '#3a6c2a')
-    gr.addColorStop(1, '#2c5220')
-    c.fillStyle = gr
-    c.fillRect(0, groundY, w, landH)
-
-    // Broad soft patches so the field has tonal variation before any blade is
-    // drawn — flat green is what makes a lawn look like a rectangle.
-    for (let i = 0; i < 14; i++) {
-      const px = ((hash(i * 3.1) * 1.6 - 0.3) * w + rect.l * zoom * 0.5) % (w + 200) - 100
-      const py = groundY + hash(i * 5.7) * landH
-      const pr = landH * (0.25 + hash(i * 9.2) * 0.5)
-      const patch = c.createRadialGradient(px, py, 0, px, py, pr)
-      patch.addColorStop(0, hash(i * 11.3) > 0.5 ? 'rgba(126,186,86,0.22)' : 'rgba(38,84,34,0.2)')
-      patch.addColorStop(1, 'rgba(0,0,0,0)')
-      c.fillStyle = patch
-      c.beginPath()
-      c.arc(px, py, pr, 0, Math.PI * 2)
-      c.fill()
+    // A painted meadow replaces the gradient AND everything drawn on it — the
+    // tonal patches, the tufts, the pebbles. A painter puts all of that in the
+    // strip, and leaving the procedural marks on top would double them.
+    const meadow = bgSprite('grass')
+    const paintedGround = !!meadow?.naturalWidth
+    if (paintedGround) {
+      tileBand(c, meadow!, 0, groundY, w, landH, rect.l * zoom)
+    } else {
+      const gr = c.createLinearGradient(0, groundY, 0, seaY)
+      gr.addColorStop(0, '#63a34a')
+      gr.addColorStop(0.3, '#4d8a38')
+      gr.addColorStop(0.72, '#3a6c2a')
+      gr.addColorStop(1, '#2c5220')
+      c.fillStyle = gr
+      c.fillRect(0, groundY, w, landH)
     }
 
-    // Grass tufts. Density is capped by the visible width rather than the zoom
-    // so a wide desktop frame never explodes the loop count, and each tuft is
-    // three blades fanned from one root — one blade per stroke reads as hair.
-    const tuftStep = Math.max(7, Math.min(zoom * 0.3, w / 90))
-    const bladeH = Math.max(2, Math.min(landH * 0.55, zoom * 0.16))
-    c.lineWidth = Math.max(1, zoom * 0.016)
-    c.lineCap = 'round'
-    for (let sx = -tuftStep; sx <= w + tuftStep; sx += tuftStep) {
-      const seed = Math.floor((sx + rect.l * zoom) / 9)
-      const gx = sx + (hash(seed * 2.7) - 0.5) * tuftStep
-      // Tufts nearer the bottom of the strip are nearer the camera: taller,
-      // lighter, and drawn last so they overlap the ones behind them.
-      const depth = hash(seed * 6.1)
-      const gy = groundY + landH * (0.08 + depth * 0.82)
-      const th = bladeH * (0.55 + depth * 0.9)
-      c.strokeStyle = depth > 0.55
-        ? 'rgba(150,214,104,0.75)'
-        : 'rgba(96,158,74,0.62)'
-      c.beginPath()
-      for (let b = -1; b <= 1; b++) {
-        const lean = b * th * 0.42 + (hash(seed * 4.3 + b) - 0.5) * th * 0.3
-        c.moveTo(gx, gy)
-        c.quadraticCurveTo(gx + lean * 0.4, gy - th * 0.62, gx + lean, gy - th)
+    // The horizon, drawn. A hard fill edge between the tree line and the field
+    // is the single most "vector" line on the screen, because it is perfectly
+    // straight for the whole width.
+    {
+      const horizon: Pt[] = []
+      for (let sx = -10; sx <= w + 10; sx += Math.max(11, w / 60)) {
+        const n = hash(Math.floor((sx + rect.l * zoom) / 13) + 3)
+        horizon.push([sx, groundY + (n - 0.5) * Math.max(1.2, zoom * 0.035)])
       }
-      c.stroke()
+      inkStroke(c, horizon, Math.max(1, zoom * 0.03), Math.max(0.6, zoom * 0.014),
+        SCENERY_INK, 63)
     }
 
-    // A few small stones and flower dots to break the green up.
-    for (let i = 0; i < 18; i++) {
-      const sxr = ((hash(i * 7.9) * 1.4 - 0.2) * w + rect.l * zoom * 0.5) % (w + 120) - 60
-      const syr = groundY + landH * (0.2 + hash(i * 12.7) * 0.7)
-      const rr = Math.max(0.6, zoom * 0.012 * (0.6 + hash(i * 2.2)))
-      c.fillStyle = hash(i * 15.1) > 0.62
-        ? 'rgba(226,232,150,0.8)'
-        : 'rgba(120,120,110,0.42)'
-      c.beginPath()
-      c.arc(sxr, syr, rr, 0, Math.PI * 2)
-      c.fill()
+    // Everything below belongs to the DRAWN meadow: tonal patches, tufts and
+    // pebbles. A painted strip already contains all of it, and drawing these on
+    // top would give the field two sets of grass.
+    if (!paintedGround) {
+      // Broad soft patches so the field has tonal variation before any blade is
+      // drawn — flat green is what makes a lawn look like a rectangle.
+      for (let i = 0; i < 14; i++) {
+        const px = ((hash(i * 3.1) * 1.6 - 0.3) * w + rect.l * zoom * 0.5) % (w + 200) - 100
+        const py = groundY + hash(i * 5.7) * landH
+        const pr = landH * (0.25 + hash(i * 9.2) * 0.5)
+        const patch = c.createRadialGradient(px, py, 0, px, py, pr)
+        patch.addColorStop(0, hash(i * 11.3) > 0.5 ? 'rgba(126,186,86,0.22)' : 'rgba(38,84,34,0.2)')
+        patch.addColorStop(1, 'rgba(0,0,0,0)')
+        c.fillStyle = patch
+        c.beginPath()
+        c.arc(px, py, pr, 0, Math.PI * 2)
+        c.fill()
+      }
+
+      // Grass tufts. Density is capped by the visible width rather than the zoom
+      // so a wide desktop frame never explodes the loop count, and each tuft is
+      // three blades fanned from one root — one blade per stroke reads as hair.
+      const tuftStep = Math.max(7, Math.min(zoom * 0.3, w / 90))
+      const bladeH = Math.max(2, Math.min(landH * 0.55, zoom * 0.16))
+      c.lineWidth = Math.max(1, zoom * 0.016)
+      c.lineCap = 'round'
+      for (let sx = -tuftStep; sx <= w + tuftStep; sx += tuftStep) {
+        const seed = Math.floor((sx + rect.l * zoom) / 9)
+        const gx = sx + (hash(seed * 2.7) - 0.5) * tuftStep
+        // Tufts nearer the bottom of the strip are nearer the camera: taller,
+        // lighter, and drawn last so they overlap the ones behind them.
+        const depth = hash(seed * 6.1)
+        const gy = groundY + landH * (0.08 + depth * 0.82)
+        const th = bladeH * (0.55 + depth * 0.9)
+        c.strokeStyle = depth > 0.55
+          ? 'rgba(150,214,104,0.75)'
+          : 'rgba(96,158,74,0.62)'
+        c.beginPath()
+        for (let b = -1; b <= 1; b++) {
+          const lean = b * th * 0.42 + (hash(seed * 4.3 + b) - 0.5) * th * 0.3
+          c.moveTo(gx, gy)
+          c.quadraticCurveTo(gx + lean * 0.4, gy - th * 0.62, gx + lean, gy - th)
+        }
+        c.stroke()
+      }
+
+      // A few small stones and flower dots to break the green up.
+      for (let i = 0; i < 18; i++) {
+        const sxr = ((hash(i * 7.9) * 1.4 - 0.2) * w + rect.l * zoom * 0.5) % (w + 120) - 60
+        const syr = groundY + landH * (0.2 + hash(i * 12.7) * 0.7)
+        const rr = Math.max(0.6, zoom * 0.012 * (0.6 + hash(i * 2.2)))
+        c.fillStyle = hash(i * 15.1) > 0.62
+          ? 'rgba(226,232,150,0.8)'
+          : 'rgba(120,120,110,0.42)'
+        c.beginPath()
+        c.arc(sxr, syr, rr, 0, Math.PI * 2)
+        c.fill()
+      }
     }
 
     // ── Water ──
     if (seaY < h) {
-      const water = c.createLinearGradient(0, seaY, 0, h)
-      water.addColorStop(0, '#3f8fb8')
-      water.addColorStop(0.18, '#2f6f9e')
-      water.addColorStop(1, '#123a63')
-      c.fillStyle = water
-      c.fillRect(0, seaY, w, h - seaY)
+      const lake = bgSprite('water')
+      if (lake?.naturalWidth) {
+        // The lake is still, so it does not scroll with the camera — a moving
+        // water texture under a mirrored tower reads as the tower sliding.
+        tileBand(c, lake, 0, seaY, w, h - seaY, 0)
+      } else {
+        const water = c.createLinearGradient(0, seaY, 0, h)
+        water.addColorStop(0, '#3f8fb8')
+        water.addColorStop(0.18, '#2f6f9e')
+        water.addColorStop(1, '#123a63')
+        c.fillStyle = water
+        c.fillRect(0, seaY, w, h - seaY)
+      }
 
       // Wet sand where land meets water. Drawn as a soft band with a scalloped
       // upper edge rather than a straight gradient — a perfectly level sand
@@ -2809,16 +3152,22 @@ const renderBackground = (w: number, h: number, dpr: number): void => {
       shore.addColorStop(0, 'rgba(134,120,84,0)')
       shore.addColorStop(0.45, 'rgba(158,142,102,0.5)')
       shore.addColorStop(1, 'rgba(96,146,176,0)')
+      const shorePts: Pt[] = []
+      for (let sx = -10; sx <= w + 10; sx += Math.max(9, w / 70)) {
+        const n = hash(Math.floor((sx + rect.l * zoom) / 11))
+        shorePts.push([sx, bandTop + n * zoom * 0.07])
+      }
       c.fillStyle = shore
       c.beginPath()
       c.moveTo(-10, seaY + zoom * 0.12)
-      for (let sx = -10; sx <= w + 10; sx += Math.max(9, w / 70)) {
-        const n = hash(Math.floor((sx + rect.l * zoom) / 11))
-        c.lineTo(sx, bandTop + n * zoom * 0.07)
-      }
+      for (const [px, py] of shorePts) c.lineTo(px, py)
       c.lineTo(w + 10, seaY + zoom * 0.12)
       c.closePath()
       c.fill()
+      // A pen line along the water's edge. The scalloped gradient alone reads
+      // as an airbrushed transition; the contour is what makes it a drawn coast.
+      inkStroke(c, shorePts, Math.max(1, zoom * 0.028), Math.max(0.6, zoom * 0.014),
+        SCENERY_INK_SOFT, 91)
 
       // Foam line breaking on the sand.
       c.strokeStyle = 'rgba(236,250,255,0.42)'
@@ -2849,6 +3198,18 @@ const renderBackground = (w: number, h: number, dpr: number): void => {
       }
     }
   }
+
+  // ── Paper tooth ──
+  //
+  // The last pass, over everything. Watercolour on paper is never perfectly
+  // smooth, and a faint irregular tooth across the whole frame is what stops a
+  // gradient sky from reading as a gradient. It is drawn into the CACHED
+  // canvas, so this costs nothing per frame — it is repainted only when the
+  // camera moves far enough to rebuild the scenery anyway.
+  //
+  // Fixed in screen space on purpose: the paper is the screen, not the world,
+  // so it must not slide around under the scenery.
+  grain(c, w, h, 0.055, 11)
 }
 
 // ─── FX event → presentation ────────────────────────────────────────────────
@@ -4946,6 +5307,53 @@ const drawSealMark = (
   ctx.restore()
 }
 
+/** Stand-in Block for the ghost — the same five fields `drawFixture` reads. */
+const ghostProxy = { typeId: '', aim: 0, recoil: 0, uid: 0, c: 0 } as unknown as Block
+
+/**
+ * One cell of the build ghost: the body, AND the thing bolted on top of it.
+ *
+ * The fixture is the whole reason this exists. Under drop-in art a ballista, a
+ * cannon and a plain crate are the SAME painted wooden box — the shared bases
+ * are deliberate, and the only thing that tells them apart is the bow, barrel or
+ * coil sitting on the lid. The ghost drew the body alone, so every armed piece
+ * previewed as an anonymous crate and the player could not see what they were
+ * about to commit to until after they had committed to it.
+ *
+ * It goes through the same fixture cache the standing tower uses, so a ghost
+ * hovering at the tower's zoom shares its sprite with the blocks already built
+ * rather than re-drawing a gun every frame the pointer moves.
+ */
+const drawGhostCell = (
+  ctx: CanvasRenderingContext2D, typeId: string, cx: number, cy: number, size: number,
+  col: number, t: number
+): void => {
+  // A hull is not a crate with a boat on it — same divergence as `drawBlock`.
+  if (isShip(typeId)) {
+    ctx.save()
+    ctx.translate(cx, cy)
+    drawShip(ctx, typeId, size, themedPalette(blockDef(typeId).palette), { aim: 0, t, seed: 1 })
+    ctx.restore()
+    return
+  }
+
+  ctx.drawImage(blockFace(typeId, 0, size), cx - size / 2, cy - size / 2, size, size)
+
+  // Aim 0 and recoil 0: the ghost is a piece at rest, and a resting gun points
+  // flat along the lane, which is the pose that reads as a weapon in a still.
+  // The column is real, though — a lobbed fixture leans toward the side it will
+  // actually fire from once placed.
+  ghostProxy.typeId = typeId
+  ghostProxy.c = col
+  const sprite = getFixtureSprite(ghostProxy, size, t)
+  if (sprite) {
+    const box = size * FIXTURE_BOX
+    ctx.drawImage(sprite.cv, cx - box / 2, cy - box / 2, box, box)
+  } else {
+    drawFixture(ctx, ghostProxy, cx, cy, size, t)
+  }
+}
+
 const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
   const zoom = getZoom()
   const pulse = 0.5 + 0.5 * Math.sin(t / 420)
@@ -5016,7 +5424,7 @@ const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
       const rr = overlay.hoverR! + dy
       const x = worldToScreenX(cc - 0.5)
       const y = worldToScreenY(rr + 1)
-      ctx.drawImage(getBlockSprite(typeId, 0, zoom), x, y, zoom, zoom)
+      drawGhostCell(ctx, typeId, x + zoom / 2, y + zoom / 2, zoom, cc, t)
       if (roofs.has(i)) drawRoof(ctx, worldToScreenX(cc), worldToScreenY(rr + 0.5), zoom)
     })
     ctx.restore()
@@ -5083,13 +5491,14 @@ const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
     if (b && w) {
       const cx = worldToScreenX(centreX(b))
       const cy = worldToScreenY(centreY(b))
-      // `rangeMul` — Long Sight / Artillery Doctrine — must be in here. The
-      // turret has always FIRED at `w.range * mRange` (see `stepTurrets`), but
-      // this circle drew the unmodified base reach, so the one thing in the
-      // game that teaches reach was the one thing the range tech did not move.
-      // Read live rather than from the wave-start cache so a rank bought with
-      // the inspector open redraws immediately, matching `BlockInspector`.
-      const rr = w.range * rangeMul.value * zoom
+      // `effectiveRangeMul` — Long Sight / Artillery Doctrine, plus any Siege
+      // Spotters buff — must be in here. The turret has always FIRED at
+      // `w.range * mRange` (see `stepTurrets`), but this circle drew the
+      // unmodified base reach, so the one thing in the game that teaches reach
+      // was the one thing the range tech did not move. Read live rather than
+      // from the wave-start cache so a rank bought with the inspector open
+      // redraws immediately, matching `BlockInspector`.
+      const rr = w.range * effectiveRangeMul.value * zoom
       ctx.strokeStyle = `rgba(120,220,255,${0.35 + pulse * 0.25})`
       ctx.lineWidth = Math.max(1.5, zoom * 0.035)
       ctx.setLineDash([zoom * 0.22, zoom * 0.16])
@@ -5214,8 +5623,7 @@ const drawBlock = (ctx: CanvasRenderingContext2D, b: Block, t: number, fallOffse
   //
   // The sprite is baked at the footprint's LONGEST edge so the detail is cut
   // for the size it is actually drawn at, not upscaled from a 1-cell bake.
-  const override = spriteFor('block', b.typeId)
-  const sprite = override ?? getBlockSprite(b.typeId, damageStage(b), Math.max(fw, fh))
+  const sprite = blockFace(b.typeId, damageStage(b), Math.max(fw, fh))
   ctx.drawImage(sprite, -fw / 2, -fh / 2, fw, fh)
 
   // Reinforced blocks: a gold rim plus a shine that sweeps across the face.
@@ -5463,7 +5871,7 @@ const drawReflection = (ctx: CanvasRenderingContext2D, t: number): void => {
     // block above it did not would give the merge away as a trick.
     const fw = size * spanW(b)
     const fh = size * spanH(b)
-    const sprite = getBlockSprite(b.typeId, damageStage(b), Math.max(fw, fh))
+    const sprite = blockFace(b.typeId, damageStage(b), Math.max(fw, fh))
     const cx = worldToScreenX(centreX(b))
     const cy = worldToScreenY(centreY(b))
     ctx.drawImage(sprite, cx - fw / 2, cy - fh / 2, fw, fh)
@@ -5688,3 +6096,117 @@ export const invalidateSprites = (): void => {
   siegeCache.clear()
   bgKey = ''
 }
+
+// ─── Portrait API, for the art-sheet bench ──────────────────────────────────
+//
+// `/art-sheets` bakes the whole cast onto a pixel lattice so it can leave the
+// renderer and be repainted. It needs the same drawing code the battlefield
+// uses — a bench that reimplements the art would be baking a picture of a
+// different game — but it does NOT want the battlefield's context: no camera,
+// no sprite cache bucketing, no live simulation.
+//
+// So these are thin adapters, not new art. Each one takes an explicit size and
+// an explicit position, calls straight into the private painter, and leaves the
+// context exactly as it found it. Nothing below is used at run time.
+
+/** A block's static body, with no fixture and no damage, at an exact size. */
+export const paintBlockBody = (
+  ctx: CanvasRenderingContext2D, typeId: string, size: number, stage: 0 | 1 | 2 = 0
+): void => {
+  drawBlockBody(ctx, typeId, stage, size)
+}
+
+/**
+ * The moving part bolted to a block — barrel, bow, coil, blade, wrench.
+ *
+ * `aim` and `recoil` are the two things the battlefield varies, so they are the
+ * two the bench chooses: a gun frozen at aim 0 points flat along the lane,
+ * which is the pose that reads as a weapon in a still.
+ */
+export const paintBlockFixture = (
+  ctx: CanvasRenderingContext2D, typeId: string,
+  cx: number, cy: number, s: number,
+  opts: { aim?: number; recoil?: number; t?: number; seed?: number } = {}
+): void => {
+  const stand = {
+    uid: opts.seed ?? 1, c: 0, r: 0, typeId,
+    hp: 1, maxHp: 1, cd: 0,
+    aim: opts.aim ?? 0, recoil: opts.recoil ?? 0
+  } as unknown as Block
+  drawFixture(ctx, stand, cx, cy, s, opts.t ?? 0)
+}
+
+/** A whole hull, for the three ship blocks — they bypass the block body path. */
+export const paintShipBlock = (
+  ctx: CanvasRenderingContext2D, typeId: string, s: number,
+  opts: { aim?: number; t?: number; seed?: number } = {}
+): void => {
+  drawShip(ctx, typeId, s, themedPalette(blockDef(typeId).palette),
+    { aim: opts.aim ?? 0, t: opts.t ?? 0, seed: opts.seed ?? 1 })
+}
+
+/** How wide a merged block's gun is drawn, in cells. Doubles per tier. */
+export const fixtureSpanForTier = (tier: number): number => mergeArtSpan(tier)
+
+/** The riveted steel plate that says how deep a weld goes. */
+export const paintTierPlate = (
+  ctx: CanvasRenderingContext2D, tier: number, bx: number, by: number, size: number
+): void => {
+  drawTierPlate(ctx, tier, bx, by, size)
+}
+
+/**
+ * One projectile, centred in a box of `size` px.
+ *
+ * `drawProjectile` measures everything off the camera — the round's size is a
+ * fraction of the live zoom, and its position comes out of `worldToScreen`.
+ * Rather than fake a camera, the transform is inverted: place the round at the
+ * world origin, then translate by whatever the camera maps that origin to and
+ * scale by the ratio between the size we want and the size the zoom gives. The
+ * mapping is affine, so this lands the round dead centre whatever the camera is
+ * currently doing.
+ *
+ * The trail is left EMPTY on purpose. Powder smoke and the ink whisk are VFX
+ * that belong to a shot in flight, not to the round as an asset.
+ */
+export const paintProjectile = (
+  ctx: CanvasRenderingContext2D, kind: Projectile['kind'],
+  cx: number, cy: number, size: number, t = 0
+): void => {
+  const zoom = getZoom()
+  // A round's art spans roughly 0.32 zoom units; fill about 70% of the cell.
+  const k = (size * 0.7) / (zoom * 0.32)
+  const round = {
+    uid: 7, kind, x: 0, y: 0,
+    // A flat rightward velocity: the finned rounds rotate to their heading, and
+    // a horizontal one is the pose that reads in a grid.
+    vx: 1, vy: 0,
+    damage: 1, splash: 0, ballistic: false, targetUid: -1,
+    life: t, slowPct: 0, slowMs: 0, sourceUid: -1, trail: [] as number[]
+  } as unknown as Projectile
+
+  ctx.save()
+  ctx.translate(cx, cy)
+  ctx.scale(k, k)
+  ctx.translate(-worldToScreenX(0), -worldToScreenY(0))
+  drawProjectile(ctx, round)
+  ctx.restore()
+}
+
+/** A background tree, standing on `baseY`. */
+export const paintTree = (
+  ctx: CanvasRenderingContext2D, species: 'conifer' | 'broadleaf',
+  x: number, baseY: number, height: number, seed: number
+): void => {
+  if (species === 'conifer') drawConifer(ctx, x, baseY, height, seed)
+  else drawBroadleaf(ctx, x, baseY, height, seed)
+}
+
+/**
+ * The sun or moon disc with its rays, as a standalone canvas.
+ *
+ * The wide sky bloom that `drawCelestial` paints behind the body is not part of
+ * this — it is a wash across the whole sky and has no meaning inside a cell.
+ */
+export const celestialDisc = (night: boolean, radius: number, tier: number): HTMLCanvasElement =>
+  celestialSprite(night, radius, tier)

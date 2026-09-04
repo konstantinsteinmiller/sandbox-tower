@@ -16,6 +16,8 @@ import useTowerGame, {
   startRun, resumeRun, placeShape, sellBlock, upgradeBlock, repairBlock, canPlaceShapeAt,
   canAffordShape, callWave, toggleSpeed, step, runSummary, saveRunSnapshot,
   manualReroll, canManualReroll, dealEnhancedOffers, summonCavalry, cavalryCost,
+  bestWeaponReach, unreachableSiege, isCavalryFree, isRangeBuffed, grantRangeBuff,
+  RANGE_BUFF_MUL, effectiveRangeMul,
   halfWidthAt, UPPER_HALF_WIDTH, WATER_ROW, speedBuffLeft, grantSpeedBuff, graceAvailable,
   continueRun, isFirstSession, seedScriptedOpening
 } from '@/use/useTowerGame'
@@ -26,9 +28,9 @@ import {
 } from '@/use/useTowerCamera'
 import { drawScene, resetDrawnFx, setBuildOverlay } from '@/use/useTowerArt'
 import { resetVfx } from '@/use/useTowerVfx'
-import { warmAudio } from '@/use/useTowerAudio'
+import { warmAudio, playFx } from '@/use/useTowerAudio'
 import { warmSpriteProbes } from '@/game/art'
-import useTowerProgress, { bestWave, mergeUnlocked, rangeMul } from '@/use/useTowerProgress'
+import useTowerProgress, { bestWave, mergeUnlocked } from '@/use/useTowerProgress'
 import {
   reportRun, rankFor, boardSize, playerTotal, leaderboardEnabled,
   leaderboardPending, OUTSIDE_BOARD
@@ -40,7 +42,9 @@ import useBattlePass from '@/use/useBattlePass'
 import { BUILDABLE_BLOCKS, GATE_ID, isShip, blockDef } from '@/game/blocks'
 import { OFFER_SLOTS, canRotateShape, normRot, rotatedShape } from '@/game/shapes'
 import { ENEMY_DEFS } from '@/game/enemies'
-import { earlyCallBonus, countSiege, countAir, countSea, countBlast } from '@/game/waves'
+import {
+  earlyCallBonus, countSiege, countAir, countSea, countBlast, countOutranged, deepestStandoff
+} from '@/game/waves'
 import { SEA_LEVEL } from '@/game/world'
 import type { Block } from '@/game/types'
 
@@ -279,7 +283,7 @@ const ROTATE_RIGHT_KEYS = new Set([
 const rotateBy = (step: number): void => {
   if (!canRotate.value) return
   selectedRot.value = normRot(selectedRot.value + step)
-  playSound('button-click', 0.03)
+  playFx('uiTap')
 }
 
 // A new piece is a new puzzle: it starts the way the tray drew it.
@@ -731,16 +735,16 @@ const pickDeathTip = (): string | null => {
   // block simply watches it work, and nothing on screen explains why.
   //
   // Offered only to a player who has actually MET one and owns nothing that
-  // reaches, so it never fires as trivia. Reach is measured through `rangeMul`
-  // rather than off the printed range: enough ranks of Long Sight genuinely do
-  // walk a bombard out to a trebuchet, and telling that player they cannot
-  // reach would be the tip lying to them.
+  // reaches, so it never fires as trivia. Reach is measured through the live
+  // range multiplier rather than off the printed range: enough ranks of Long
+  // Sight genuinely do walk a bombard out to a trebuchet, and telling that
+  // player they cannot reach would be the tip lying to them.
   const treb = ENEMY_DEFS.trebuchet
   const standoff = treb?.siege?.standoff
   if (standoff !== undefined && wave.value >= (treb?.minWave ?? Infinity)) {
     const reaches = blocks.some((b) => {
       const w = blockDef(b.typeId).weapon
-      return !!w && w.range * rangeMul.value > standoff
+      return !!w && w.range * effectiveRangeMul.value > standoff
     })
     if (!reaches) eligible.push('siegeReach')
   }
@@ -1339,7 +1343,7 @@ const onArrowRain = (): void => {
     // the tap that already fired it. Over the Gate is the honest default.
     hoverCell.value = { c: 0, r: 0 }
   }
-  playSound('button-click', 0.04)
+  playFx('uiTap')
 }
 
 const fireArrowRain = (x: number): void => {
@@ -1359,7 +1363,15 @@ watch([arrowRainReady, phase], () => {
 
 // ─── Cavalry ────────────────────────────────────────────────────────────────
 
-const cavalryPrice = computed(() => cavalryCost())
+/**
+ * What a sortie costs right now.
+ *
+ * Zero while the field holds an engine no gun on the tower can reach and no
+ * rider is already out — see `isCavalryFree`. Charging for the only move left
+ * on the board is what turns "I was outplayed" into "the game took my coins and
+ * killed me anyway", and it is the moment players quit.
+ */
+const cavalryPrice = computed(() => (isCavalryFree.value ? 0 : cavalryCost()))
 const canAffordCavalry = computed(() => coins.value >= cavalryPrice.value)
 
 const onCavalry = (): void => {
@@ -1367,9 +1379,63 @@ const onCavalry = (): void => {
     playSound('obstacle-hit', 0.03)
     return
   }
-  if (!spendCoins(cavalryPrice.value)) return
+  // A free sortie must not touch the purse at all — `spendCoins(0)` is a no-op
+  // on every economy that guards against it, but going through the wallet for
+  // something priced at nothing invites exactly the rounding bug that would
+  // charge the player for the mercy.
+  if (cavalryPrice.value > 0 && !spendCoins(cavalryPrice.value)) return
   summonCavalry()
   playSound('barricade', 0.05)
+}
+
+// ─── Out of reach ───────────────────────────────────────────────────────────
+//
+// The rage-quit this whole block exists to remove: a trebuchet parks at twelve
+// cells, every gun on the tower fires at nothing, and the player has no way to
+// know why or what to do about it. Three answers, in the order the player meets
+// them — a warning before the wave, a free sortie during it, and a paid reach
+// extension for anyone who would rather not ride out.
+
+/** Reach the tower can currently manage, in cells. */
+const towerReach = computed(() => {
+  void towerVersion.value
+  void effectiveRangeMul.value
+  return bestWeaponReach()
+})
+
+/** Engines in the NEXT wave that would park beyond every gun the tower has. */
+const outrangedNext = computed(() => {
+  if (phase.value !== 'build') return { n: 0, need: 0 }
+  void towerVersion.value
+  void waveVersion.value
+  void effectiveRangeMul.value
+  const plan = previewNextWave()
+  return { n: countOutranged(plan, towerReach.value), need: Math.ceil(deepestStandoff(plan)) }
+})
+
+/** True while the player has no answer on the field but cavalry. */
+const outOfReachNow = computed(() => phase.value === 'battle' && unreachableSiege.value > 0)
+
+/**
+ * Reach extension, bought with a rewarded video.
+ *
+ * Offered ONLY while something is actually out of reach — before the wave when
+ * the plan says so, during it when the battlefield does. A permanent button
+ * would be a range upgrade sold outside the tech tree; this one is an answer to
+ * a specific machine, on the wave that machine arrives.
+ */
+const rangeBoostOffered = computed(() =>
+  !isRangeBuffed.value && (outOfReachNow.value || outrangedNext.value.n > 0)
+)
+
+const rangeBoostPct = Math.round((RANGE_BUFF_MUL - 1) * 100)
+
+const onRangeBoost = async (): Promise<void> => {
+  if (adInFlight.value) return
+  await claimReward(() => {
+    grantRangeBuff()
+    playSound('level-up', 0.07)
+  })
 }
 
 /**
@@ -1408,7 +1474,7 @@ const cavalryOffered = computed(() => phase.value === 'battle' && siegeIncoming.
  * Only while the wave is being ASSEMBLED (build phase) — once the shooting has
  * started the enemies themselves are the warning.
  */
-const waveWarnings = computed<{ id: string; n: number }[]>(() => {
+const waveWarnings = computed<{ id: string; n: number; m?: number }[]>(() => {
   if (phase.value !== 'build') return []
   // The NEXT wave, not the one just fought — `wavePlan()` still holds the
   // finished one during a build phase, and a warning about a wave the player
@@ -1424,13 +1490,21 @@ const waveWarnings = computed<{ id: string; n: number }[]>(() => {
   // says "spend". Shown as the percentage added, which is the number the wave
   // is actually multiplied by.
   const hoard = currentHoardTier()
-  return ([
+  // Siege splits in two. An engine the tower can shoot is a DPS problem the
+  // player already knows how to solve; one parked past every gun is a different
+  // problem with a different answer, and folding both into one "Siege ×n" chip
+  // hid the only one that needs a purchase. The outranged chip carries the
+  // reach it would take, because that number is the whole instruction: it is
+  // what a Mortar, a War Galley or enough Long Sight has to beat.
+  const outranged = outrangedNext.value
+  return [
     { id: 'hoard', n: hoard === 3 ? 100 : hoard === 2 ? 50 : hoard === 1 ? 25 : 0 },
     { id: 'air', n: countAir(plan) },
     { id: 'sea', n: countSea(plan) },
     { id: 'bombers', n: countBlast(plan) },
-    { id: 'siege', n: countSiege(plan) }
-  ] as const).filter((w) => w.n > 0)
+    { id: 'siege', n: countSiege(plan) - outranged.n },
+    { id: 'outOfReach', n: outranged.n, m: outranged.need }
+  ].filter((w) => w.n > 0)
 })
 
 // ─── Manual reroll ──────────────────────────────────────────────────────────
@@ -1734,6 +1808,12 @@ onUnmounted(() => {
           //- Rewarded perks that act on the hand sit directly above it, so the
           //- thing they change is always in view when the player taps them.
           div.scene__tray-perks(ref="trayPerksRef")
+            //- The battle-phase half of the outranged warning. Without it the
+            //- player watches every turret hold fire with no way to learn that
+            //- the engine is simply too far away — which is the moment they
+            //- quit rather than the moment they adapt. It takes a row of its
+            //- own so the two answers sit directly underneath the problem.
+            div.scene__reach-hint(v-if="outOfReachNow") {{ t('allies.outOfReachHint') }}
             FRewardButton(
               v-if="enhancedHandOffered"
               tone="gold"
@@ -1741,18 +1821,29 @@ onUnmounted(() => {
               :label="t('blocks.enhancedHand')"
               @click="onEnhancedHand"
             )
+            //- Reach extension. Offered only on the wave that needs it — see
+            //- `rangeBoostOffered` — so it can never read as a range upgrade
+            //- sold around the tech tree.
+            FRewardButton(
+              v-if="rangeBoostOffered"
+              tone="blue"
+              size="sm"
+              :label="t('hud.extendRange', { n: rangeBoostPct })"
+              @click="onRangeBoost"
+            )
             button.scene__cavalry(
               v-if="cavalryOffered"
               type="button"
-              :class="{ 'is-poor': !canAffordCavalry }"
-              :aria-label="t('allies.cavalry')"
+              :class="{ 'is-poor': !canAffordCavalry, 'is-free': isCavalryFree }"
+              :aria-label="isCavalryFree ? t('allies.cavalryFree') : t('allies.cavalry')"
               @click="onCavalry"
             )
               svg.scene__cavalry-icon(viewBox="0 0 24 24" fill="currentColor")
                 path(d="M6 19l1-6 4-3 2-5 3 2-1 4 4 3-1 5h-2l1-4-3-2-3 3-1 3z")
                 path(d="M15 4l3 1-1 2z")
               span.scene__cavalry-label {{ t('allies.cavalry') }}
-              span.scene__cavalry-cost
+              span.scene__cavalry-free(v-if="isCavalryFree") {{ t('allies.free') }}
+              span.scene__cavalry-cost(v-else)
                 IconCoin(class="scene__cavalry-coin")
                 | {{ cavalryPrice }}
               FHudBadge(v-if="allyCount > 0" tone="green") {{ allyCount }}
@@ -1853,7 +1944,7 @@ onUnmounted(() => {
               v-for="w in waveWarnings"
               :key="w.id"
               :class="`is-${w.id}`"
-            ) {{ t(`warnings.${w.id}`, { n: w.n }) }}
+            ) {{ t(`warnings.${w.id}`, { n: w.n, m: w.m ?? 0 }) }}
 
           CallWaveButton(
             :phase="phase"
@@ -2262,6 +2353,35 @@ onUnmounted(() => {
 
 // ─── Cavalry ────────────────────────────────────────────────────────────────
 
+// The battle-phase "your guns cannot reach that" line. Red rather than the
+// aim-hint's gold: this is not an instruction for something the player already
+// chose to do, it is the game explaining why nothing is shooting.
+//
+// A row of its own inside the perk strip (`flex: 0 0 100%`), so the reach
+// extension and the free sortie wrap underneath it. It used to sit in the
+// bottom-right stack beside the warning chips, which works on a desktop frame
+// and fails at 320 px: that column is a row of HUD buttons during a battle, and
+// a whole sentence landed on top of one of them in every long locale.
+.scene__reach-hint
+  flex: 0 0 100%
+  max-width: 22rem
+  margin: 0 auto 0.15rem
+  padding: 0.2rem 0.6rem
+  border: 2px solid #ff6a5c
+  border-radius: 0.5rem
+  background-color: rgba(122, 25, 20, 0.92)
+  color: #fff
+  font-weight: 900
+  font-size: clamp(0.5rem, 2.2vw, 0.7rem)
+  line-height: 1.25
+  text-align: center
+  text-shadow: 1px 1px 0 #000
+  pointer-events: none
+  animation: scene-warn 900ms ease-in-out infinite
+
+  @media (prefers-reduced-motion: reduce)
+    animation: none
+
 .scene__cavalry
   position: relative
   display: inline-flex
@@ -2284,6 +2404,35 @@ onUnmounted(() => {
 
   &.is-poor
     filter: grayscale(0.75) brightness(0.68)
+
+  // A free sortie is the ONLY move left on the board, so the button stops being
+  // one control among several and starts asking for the tap. Green, because
+  // that is the tray's "this costs you nothing" colour, and a pulse rather than
+  // a hard blink — the player is reading a battlefield behind it.
+  &.is-free
+    background-image: linear-gradient(to bottom, #67e08a, #1f9d4d)
+    animation: scene-cavalry-call 900ms ease-in-out infinite
+
+    // Respect the OS setting: a control that strobes is a real accessibility
+    // problem, and the colour change alone still marks it out.
+    @media (prefers-reduced-motion: reduce)
+      animation: none
+      box-shadow: 0 0 0 3px rgba(140, 255, 170, 0.55)
+
+@keyframes scene-cavalry-call
+  0%, 100%
+    box-shadow: 0 0 0 0 rgba(140, 255, 170, 0)
+    filter: brightness(1)
+  50%
+    box-shadow: 0 0 0 5px rgba(140, 255, 170, 0.45)
+    filter: brightness(1.22)
+
+.scene__cavalry-free
+  font-weight: 900
+  text-transform: uppercase
+  font-size: clamp(0.6rem, 2.6vw, 0.85rem)
+  line-height: 1
+  text-shadow: 2px 2px 0 #000
 
 .scene__cavalry-icon
   width: clamp(1.1rem, 4.4vw, 1.5rem)
@@ -2409,6 +2558,17 @@ onUnmounted(() => {
   &.is-siege
     color: #ff9a92
     border-color: #7d2b24
+  //- The one chip that is not "brace" but "buy something". It carries a reach
+  //- figure and a locale can make that a sentence, so it is the only chip
+  //- allowed to wrap rather than run off a 320 px screen.
+  &.is-outOfReach
+    max-width: min(16rem, 72vw)
+    color: #fff
+    background-color: rgba(122, 25, 20, 0.92)
+    border-color: #ff6a5c
+    white-space: normal
+    text-align: right
+    animation: scene-warn 900ms ease-in-out infinite
   //- Gold, and it does not pulse: the lane chips warn about something arriving,
   //- this one reports a standing state the player chose and can undo.
   &.is-hoard

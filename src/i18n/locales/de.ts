@@ -18,7 +18,8 @@ export default {
     'rotateLeft': 'Nach links drehen',
     'rotateRight': 'Nach rechts drehen',
     'arrowRain': 'Pfeilregen',
-    'arrowRainAim': 'Tippe das Schlachtfeld an, um die Salve zu rufen'
+    'arrowRainAim': 'Tippe das Schlachtfeld an, um die Salve zu rufen',
+    'extendRange': '+{n}% Reichweite'
   },
 
   'warnings': {
@@ -26,7 +27,8 @@ export default {
     'air': 'Luft ×{n}',
     'sea': 'See ×{n}',
     'bombers': 'Sprengung ×{n}',
-    'siege': 'Belagerung ×{n}'
+    'siege': 'Belagerung ×{n}',
+    'outOfReach': 'Außer Reichweite ×{n} — braucht {m} Reichweite'
   },
   'hints': {
     'selectBlock': { 'touch': 'Tippe unten auf einen Block', 'desktop': 'Klicke unten auf einen Block' },
@@ -150,7 +152,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': 'Kavallerie'
+    'cavalry': 'Kavallerie',
+    'cavalryFree': 'Kostenloser Kavallerieangriff',
+    'free': 'Gratis',
+    'outOfReachHint': 'Außer Reichweite — reite aus oder erhöhe deine Reichweite'
   },
 
   'result': {

@@ -12,13 +12,13 @@ import {
   tierOf, mergePowerMul
 } from '@/game/blocks'
 import {
-  damageMul, fireRateMul, rangeMul, splashMul, thornsMul, armorBonus,
+  damageMul, fireRateMul, splashMul, thornsMul, armorBonus,
   buffPowerMul, economyMul, availableBlocks,
   mergeDamageMul, navalDamageMul
 } from '@/use/useTowerProgress'
 import {
   runCoins, towerVersion, canFortifyBlock,
-  repairCostAt, repairWaitAt, canRepairBlock
+  repairCostAt, repairWaitAt, canRepairBlock, effectiveRangeMul
 } from '@/use/useTowerGame'
 import type { Block } from '@/game/types'
 
@@ -147,10 +147,13 @@ const stats = computed<Row[]>(() => {
       value: `${(d.weapon.cooldownMs / fireRateMul.value / 1000).toFixed(1)}s`,
       boosted: fireRateMul.value > 1
     })
+    // Spotters are in here as well as the tech ranks: the whole point of the
+    // buff is that the player can see it reach further, and a card that still
+    // printed the un-buffed number would read as the purchase not working.
     rows.push({
       key: 'range',
-      value: `${(d.weapon.range * rangeMul.value).toFixed(1)}`,
-      boosted: rangeMul.value > 1
+      value: `${(d.weapon.range * effectiveRangeMul.value).toFixed(1)}`,
+      boosted: effectiveRangeMul.value > 1
     })
     if (d.weapon.splash) {
       rows.push({

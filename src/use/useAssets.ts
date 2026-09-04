@@ -1,10 +1,12 @@
 import { ref } from 'vue'
+import { artOverridesEnabled, preloadArtOverrides } from '@/game/art'
 import { prependBaseUrl } from '@/utils/function'
 
 // Tower Siege draws all gameplay art programmatically (Canvas 2D) and uses
-// inline SVG for HUD icons, so the preloader only has to decode two pieces of
-// UI chrome. SFX decode on first play (see `useSound.ts`) and are warmed on an
-// idle slot after first paint; the splash exits as soon as the bundle parses.
+// inline SVG for HUD icons, so the preloader only has to decode the splash
+// logo. SFX decode on first play (see `useSound.ts`) and are warmed on an idle
+// slot after first paint, followed by the background-music track; the splash
+// exits as soon as the bundle parses.
 
 const loadingProgress = ref(100)
 const areAllAssetsLoaded = ref(true)
@@ -220,14 +222,26 @@ export const loadAudioBuffer = async (src: string): Promise<AudioBuffer | null> 
 }
 
 // ─── Critical image preload ────────────────────────────────────────────
-// The only bitmaps on the critical path are UI chrome. Gameplay art is
-// procedural, so there is nothing else to block first paint on.
+// Exactly one bitmap blocks first paint. Gameplay art is procedural, so
+// there is nothing else the first frame can possibly need.
 const CRITICAL_IMAGE_SRCS: ReadonlyArray<string> = [
   // Splash logo — decoded before the splash mounts so FLogoProgress never
-  // paints a blank box on the first frame.
-  '/images/logo/logo_256x256.webp',
-  // Result-screen ribbon. Small, and needed the moment a siege ends.
-  '/images/bg/parchment-ribbon_553x188.webp'
+  // paints a blank box on the first frame. `index.html` also carries a
+  // `<link rel="preload">` for it, so on a cold load the bytes are usually
+  // already in flight before this module has even parsed.
+  '/images/logo/logo_256x256.webp'
+]
+
+// Bitmaps that are certainly needed, but not for minutes. Warmed on the idle
+// slot after first paint (see `runBackgroundWarmup`) so they are decoded long
+// before the player can reach them — without holding the splash open for a
+// round trip the opening frame does not need.
+const DEFERRED_IMAGE_SRCS: ReadonlyArray<string> = [
+  // Result-screen ribbon: only reachable once a siege ends.
+  '/images/bg/parchment-ribbon_553x188.webp',
+  // Coin sprite for the reward burst, and the rewarded-ad film icon.
+  '/images/props/coin_128x128.webp',
+  '/images/icons/movie_128x96.webp'
 ]
 
 /** Block until `img.complete && naturalWidth > 0` (success) or `error`
@@ -259,8 +273,17 @@ let backgroundWarmStarted = false
 const runBackgroundWarmup = (): void => {
   if (backgroundWarmStarted) return
   backgroundWarmStarted = true
+
+  // Bitmaps first: they are three small decodes and they unblock the two
+  // screens the player reaches soonest after the splash.
+  for (const src of DEFERRED_IMAGE_SRCS) void decodeImage(src)
+
   void (async () => {
     try {
+      // SFX next, then — chained inside `preloadGameplaySounds` — the music
+      // track. That ordering is deliberate: sound effects fire within seconds
+      // of the first tap, the music track has until the first wave starts, and
+      // neither may compete with the critical path above.
       const sp = await import('@/use/useSoundPreload')
       await sp.preloadGameplaySounds()
     } catch { /* non-critical — sounds still decode on first play */ }
@@ -270,27 +293,42 @@ const runBackgroundWarmup = (): void => {
 export default () => {
   const preloadAssets = async (): Promise<void> => {
     // ── HOT PATH ──
-    // Tower Siege has NO gameplay bitmaps: blocks, enemies, projectiles and the
-    // whole background are drawn from code. The only critical images are the
-    // splash logo and the result-screen ribbon, and the renderer chunk itself.
+    // With drop-in art OFF, Tower Siege has no gameplay bitmaps at all: blocks,
+    // enemies, projectiles and the whole background are drawn from code, so the
+    // "loading" phase is effectively just the JS parse — which is exactly the
+    // fast-start behaviour portals grade on. That path is unchanged.
     //
-    // So the "loading" phase is effectively just the JS parse, which is exactly
-    // the fast-start behaviour portals grade on. Everything else (SFX decode,
-    // drop-in art probing) defers to `runBackgroundWarmup()` after first paint.
+    // With art ON, the splash must ALSO wait for the override bitmaps. They
+    // decode asynchronously, so without this the game opens on the procedural
+    // drawing and swaps to paint a second later, block by block — which reads
+    // as the scene glitching rather than as loading, and throws away the first
+    // impression the art exists to make.
     loadingProgress.value = 0
     areAllAssetsLoaded.value = false
 
     const tasks = CRITICAL_IMAGE_SRCS.map(decodeImage)
     let done = 0
+    // Art gets the back half of the bar when there is any to fetch, so the
+    // number keeps moving instead of parking at 100% while bitmaps land.
+    const artOn = artOverridesEnabled()
+    const critShare = artOn ? 0.4 : 1
     for (const task of tasks) {
       task.then(() => {
         done += 1
-        loadingProgress.value = Math.round((done / tasks.length) * 100)
+        loadingProgress.value = Math.round((done / tasks.length) * 100 * critShare)
       })
     }
     // `allSettled` swallows individual failures so a 404 on one bitmap can
     // never strand the splash screen.
     await Promise.allSettled(tasks)
+
+    if (artOn) {
+      loadingProgress.value = Math.round(100 * critShare)
+      await preloadArtOverrides((n, total) => {
+        if (total <= 0) return
+        loadingProgress.value = Math.round((critShare + (n / total) * (1 - critShare)) * 100)
+      })
+    }
     loadingProgress.value = 100
     areAllAssetsLoaded.value = true
     scheduleBackgroundWarmup()

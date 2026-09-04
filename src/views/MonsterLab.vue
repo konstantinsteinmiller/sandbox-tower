@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { MONSTERS, type MonsterDef } from '@/game/monsters'
-import { grain } from '@/game/inkArt'
+import { grain, withHatching } from '@/game/inkArt'
 
 /**
  * `/monsters` — the design bench.
@@ -59,7 +59,11 @@ const paint = (canvas: HTMLCanvasElement, def: MonsterDef, t: number): void => {
   // BOTH axes — sizing off `min(w, h)` alone left half the card empty.
   const S = Math.min(w / 2.0, h / 2.5) * zoom.value
   if (!showInk.value) ctx.globalAlpha = 0.999 // no-op hook, kept for parity
-  def.draw(ctx, S, t)
+  // Hatching is gated to the sprite bake, because `cel` runs live for the
+  // ships and the cavalry and a clip per form there is a real cost. This bench
+  // exists to show what the battlefield will show, so it opts in — it draws
+  // seventeen portraits, not a wave.
+  withHatching(() => def.draw(ctx, S, t))
   ctx.restore()
 
   grain(ctx, w, h, 0.05, 3)

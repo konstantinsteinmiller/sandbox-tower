@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { blockDef } from '@/game/blocks'
-import { themedPalette, spriteFor } from '@/game/art'
+import { themedPalette, spriteFor, onArtChanged } from '@/game/art'
 import { shapeDef, shapeBounds } from '@/game/shapes'
 import { blockGlyph } from '@/game/blockGlyph'
 
@@ -76,12 +76,21 @@ const paint = (): void => {
     const x = ox + dx * cell
     const y = oy + (h - 1 - dy) * cell
 
+    // The BODY comes from drop-in art when there is any, and is drawn
+    // procedurally otherwise — but the glyph below is painted either way.
+    //
+    // It used to live inside the `else`, which was harmless while every block
+    // had its own bitmap. Blocks now SHARE a base (`BLOCK_ART_BASE`), so an
+    // archery post, a sawmill and a plain crate are one and the same timber
+    // image, and without the pictogram on top the tray offered five identical
+    // crates with different tooltips.
     const override = spriteFor('block', typeId)
+    const bd = blockDef(typeId)
+    const p = themedPalette(bd.palette)
+
     if (override) {
       ctx.drawImage(override, x, y, cell, cell)
     } else {
-      const bd = blockDef(typeId)
-      const p = themedPalette(bd.palette)
       const inset = cell * 0.045
       const size = cell - inset * 2
       const rad = cell * 0.16
@@ -101,7 +110,9 @@ const paint = (): void => {
       ctx.strokeStyle = 'rgba(10,14,24,0.85)'
       ctx.lineWidth = Math.max(1, cell * 0.07)
       ctx.stroke()
+    }
 
+    {
       // 3 · Glyph, on its own dark disc.
       //
       //     The disc is what makes this legible on every palette: a pale glyph
@@ -154,7 +165,15 @@ const paint = (): void => {
   })
 }
 
-onMounted(paint)
+// Drop-in art decodes asynchronously, so the first paint usually happens
+// before the bitmap exists. Without this the tile keeps the procedural look
+// until something else happens to repaint it — which is why the tray only
+// picked up the new art after the first block was placed.
+onMounted(() => {
+  paint()
+  const stop = onArtChanged(paint)
+  onUnmounted(stop)
+})
 watch(() => [props.shapeId, props.size], paint)
 </script>
 

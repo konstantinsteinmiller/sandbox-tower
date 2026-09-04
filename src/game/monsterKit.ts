@@ -1,5 +1,6 @@
 import {
   blob, shrink, densify, fillShape, ink, stroke, cel, terminator, noise2,
+  trace,
   type Pt, type CelTones
 } from '@/game/inkArt'
 
@@ -23,7 +24,13 @@ import {
  * asymmetries, and which of the shared parts it uses.
  */
 
-export const INK = '#1c1418'
+// A warm dark BROWN, not near-black.
+//
+// #1c1418 was a cool near-black, which is what makes a contour read as printed
+// vector line rather than as a drawn one. Brown ink keeps the same darkness —
+// so the silhouette is just as readable against a busy battlefield — while
+// sitting inside the warm range the rest of the art lives in.
+export const INK = '#3b2a21'
 
 /**
  * The key light, up and to the left, for every character.
@@ -39,6 +46,7 @@ export const SHADOW_DIR = 1.05
  * an interior edge, `hair` a detail line.
  */
 export const LINE = { major: 0.05, mid: 0.034, fine: 0.022, hair: 0.013 } as const
+
 
 /** Where the three tone cuts land, as a fraction of the form's radius. */
 export const SHADE = 0.1
@@ -56,7 +64,10 @@ export interface PaintOpts {
   breakUp?: number
   /** Wobble of the terminator edge. Lower for hard surfaces. */
   amp?: number
+  /** `false` leaves the core shadow unhatched — for glass, glow and metal. */
+  hatch?: false
 }
+
 
 /**
  * Paint one form — base, three tone cuts, outline — in a single call.
@@ -70,21 +81,29 @@ export const paint = (
   t: CelTones, seed: number, o: PaintOpts = {}
 ): void => {
   const amp = o.amp ?? 0.14
+  // Computed once: `cel` fills it, and the hatching rides on the same region so
+  // the marks land exactly where the core shadow is rather than near it.
+  const deep = o.deep === false || !t.deep
+    ? undefined
+    : terminator(shape, SHADOW_DIR, o.deep ?? DEEP, amp * 0.8, seed + 1)
+
   cel(ctx, shape, t, {
     shade: terminator(shape, SHADOW_DIR, o.shade ?? SHADE, amp, seed),
-    deep: o.deep === false || !t.deep
-      ? undefined
-      : terminator(shape, SHADOW_DIR, o.deep ?? DEEP, amp * 0.8, seed + 1),
+    deep,
     lit: o.lit === false || !t.lit
       ? undefined
       : terminator(shape, SHADOW_DIR + Math.PI, o.lit ?? LIT, amp * 0.85, seed + 2)
-  })
+  }, { hatch: o.hatch, inkColor: o.inkColor })
+
   if (o.line !== false) {
     ink(ctx, shape, {
       width: (o.line ?? LINE.mid) * S,
       color: o.inkColor ?? INK,
       seed: seed + 3,
-      breakUp: o.breakUp ?? 0.26
+      // Sketchier by default. `breakUp` is what makes a contour vary in weight
+      // and skip, the way a pen does; at 0.26 the line was clean enough to read
+      // as vector. This is the cheapest "drawn by a person" cue there is.
+      breakUp: o.breakUp ?? 0.42
     })
   }
 }

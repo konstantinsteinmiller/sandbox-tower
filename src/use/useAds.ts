@@ -19,7 +19,7 @@
 // GameDistribution because the SDK script is dynamically injected and we
 // don't want to pay that latency on the boot critical path.
 import { computed, ref } from 'vue'
-import { isCrazyWeb, isWaveDash, isItch, isGlitch, isGameDistribution, isPlaygama, isGamepix, isGameMonetize, isYandex, isNative, showMediatorAds } from '@/use/useUser'
+import { isCrazyWeb, isWaveDash, isItch, isGlitch, isGameDistribution, isPlaygama, isGamepix, isGameMonetize, isYandex, isPoki, isNative, showMediatorAds } from '@/use/useUser'
 import type { AdProvider } from './ads/types'
 import { resolveAdProvider } from '@/platforms/resolveAdProvider'
 import { isRewardedThrottled, recordRewardedGranted } from '@/use/useRewardedThrottle'
@@ -31,7 +31,7 @@ import { isDebug } from '@/use/useMatch'
 import { forceStopMusic } from '@/use/useSound'
 
 const provider: AdProvider = resolveAdProvider({
-  flags: { isCrazyWeb, isWaveDash, isItch, isGlitch, isGameDistribution, isPlaygama, isGamepix, isGameMonetize, isYandex },
+  flags: { isCrazyWeb, isWaveDash, isItch, isGlitch, isGameDistribution, isPlaygama, isGamepix, isGameMonetize, isYandex, isPoki },
   showMediatorAds,
   isNative
 })

@@ -18,7 +18,8 @@ export default {
     'rotateLeft': 'หมุนซ้าย',
     'rotateRight': 'หมุนขวา',
     'arrowRain': 'ห่าธนู',
-    'arrowRainAim': 'แตะสนามรบเพื่อเรียกการระดมยิง'
+    'arrowRainAim': 'แตะสนามรบเพื่อเรียกการระดมยิง',
+    'extendRange': 'ระยะ +{n}%'
   },
 
   'warnings': {
@@ -26,7 +27,8 @@ export default {
     'air': 'ทางอากาศ ×{n}',
     'sea': 'ทางทะเล ×{n}',
     'bombers': 'ระเบิด ×{n}',
-    'siege': 'ล้อมเมือง ×{n}'
+    'siege': 'ล้อมเมือง ×{n}',
+    'outOfReach': 'เกินระยะ ×{n} — ต้องมีระยะ {m}'
   },
   'hints': {
     'selectBlock': { 'touch': 'แตะบล็อกด้านล่างเพื่อเลือก', 'desktop': 'คลิกบล็อกด้านล่างเพื่อเลือก' },
@@ -150,7 +152,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': 'ทหารม้า'
+    'cavalry': 'ทหารม้า',
+    'cavalryFree': 'ส่งทหารม้าฟรี',
+    'free': 'ฟรี',
+    'outOfReachHint': 'เกินระยะ — ส่งทหารม้าหรือเพิ่มระยะยิง'
   },
 
   'result': {

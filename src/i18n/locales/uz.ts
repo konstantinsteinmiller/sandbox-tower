@@ -18,7 +18,8 @@ export default {
     'rotateLeft': 'Chapga burish',
     'rotateRight': 'O‘ngga burish',
     'arrowRain': 'Kamon yomg‘iri',
-    'arrowRainAim': 'Zalpni chaqirish uchun jang maydoniga bosing'
+    'arrowRainAim': 'Zalpni chaqirish uchun jang maydoniga bosing',
+    'extendRange': '+{n}% masofa'
   },
 
   'warnings': {
@@ -26,7 +27,8 @@ export default {
     'air': 'Havo ×{n}',
     'sea': 'Dengiz ×{n}',
     'bombers': 'Portlash ×{n}',
-    'siege': 'Qamal ×{n}'
+    'siege': 'Qamal ×{n}',
+    'outOfReach': 'Masofadan tashqari ×{n} — {m} masofa kerak'
   },
   'hints': {
     'selectBlock': { 'touch': 'Tanlash uchun pastdagi blokni bosing', 'desktop': 'Tanlash uchun pastdagi blokni cherting' },
@@ -150,7 +152,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': 'Otliqlar'
+    'cavalry': 'Otliqlar',
+    'cavalryFree': 'Bepul otliq qoʻshin hujumi',
+    'free': 'Bepul',
+    'outOfReachHint': 'Masofadan tashqari — otliqlarni yuboring yoki masofani oshiring'
   },
 
   'result': {

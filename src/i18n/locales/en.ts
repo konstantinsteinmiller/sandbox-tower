@@ -27,7 +27,8 @@ export default {
     'rotateLeft': 'Rotate left',
     'rotateRight': 'Rotate right',
     'arrowRain': 'Arrow Rain',
-    'arrowRainAim': 'Tap the battlefield to call the volley'
+    'arrowRainAim': 'Tap the battlefield to call the volley',
+    'extendRange': '+{n}% Range'
   },
 
   // ─── Control hints ────────────────────────────────────────────────────────
@@ -37,7 +38,8 @@ export default {
     'air': 'Air ×{n}',
     'sea': 'Sea ×{n}',
     'bombers': 'Blast ×{n}',
-    'siege': 'Siege ×{n}'
+    'siege': 'Siege ×{n}',
+    'outOfReach': 'Outranged ×{n} — needs {m} range'
   },
   'hints': {
     'selectBlock': {
@@ -212,7 +214,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': 'Cavalry'
+    'cavalry': 'Cavalry',
+    'cavalryFree': 'Free cavalry sortie',
+    'free': 'Free',
+    'outOfReachHint': 'Out of reach — ride out or extend your range'
   },
 
   'result': {

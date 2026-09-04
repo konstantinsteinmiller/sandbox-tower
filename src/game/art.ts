@@ -139,29 +139,225 @@ export const themedPalette = (key: string): Palette => paletteFor(key)
 // Flip `VITE_ENABLE_ART_OVERRIDES=true` when there is art in `public/images` to
 // find; until then nothing is requested at all.
 
-const OVERRIDES_ENABLED = import.meta.env.VITE_ENABLE_ART_OVERRIDES === 'true'
+// ─── The feature flag ───────────────────────────────────────────────────────
+//
+// Three layers, most specific first:
+//
+//   1. `?art=on` / `?art=off` in the URL — flips it for this device and is
+//      REMEMBERED, so a reload keeps the answer and the param can be dropped.
+//   2. Whatever was remembered from a previous `?art=`.
+//   3. `VITE_ENABLE_ART_OVERRIDES` — the build's default, and the only layer a
+//      portal ever sees.
+//
+// The build default has to stay the floor because a miss is only free for the
+// GAME. CrazyGames' QA console reports every 404 as `Missing resource detected:
+// …/images/blocks/wood.webp`, one line per block and per enemy, which reads as a
+// broken build to a reviewer. So art is shipped off until it is ready, while a
+// URL param still lets it be switched on and — the point of the flag — straight
+// back OFF, live, with no rebuild, when the new art turns out worse than the
+// drawn version.
+//
+// Read as a plain boolean rather than a `ref`: `spriteFor` runs per drawable per
+// frame, and a reactive read in that loop costs dependency tracking on every
+// block in the tower for a value that changes when a human clicks something.
 
-/** Whether drop-in bitmap art is being looked for. Exposed for diagnostics. */
-export const artOverridesEnabled = OVERRIDES_ENABLED
+const BUILD_DEFAULT = import.meta.env.VITE_ENABLE_ART_OVERRIDES === 'true'
+const STORAGE_KEY = 'artOverrides'
+
+const readStored = (): boolean | null => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw === null ? null : !!JSON.parse(raw)
+  } catch { return null }
+}
+
+const readParam = (): boolean | null => {
+  try {
+    // The router is on hash history, so a param can arrive in either half of
+    // the URL — `?art=on#/` from a typed link, `#/?art=on` from a route push.
+    const url = new URL(window.location.href)
+    const hashQuery = url.hash.includes('?') ? url.hash.slice(url.hash.indexOf('?') + 1) : ''
+    const raw = url.searchParams.get('art') ?? new URLSearchParams(hashQuery).get('art')
+    if (raw === null) return null
+    return ['1', 'on', 'true', 'yes'].includes(raw.toLowerCase())
+  } catch { return null }
+}
+
+let enabled = BUILD_DEFAULT
+/** Bumped on every explicit refresh, to bust the HTTP cache. See `spriteFor`. */
+let probeGeneration = 0
 
 type ProbeState = 'idle' | 'loading' | 'ready' | 'missing'
 
 interface Probe {
   state: ProbeState
   img: HTMLImageElement | null
+  /** Resolves once this probe has decoded or failed. Never rejects. */
+  settled: Promise<void>
 }
 
 const probes = new Map<string, Probe>()
+
+// ─── Repaint notification ───────────────────────────────────────────────────
+//
+// Probing is ASYNC. `spriteFor` returns null while the image is still in
+// flight, so anything that paints once and stops — the build tray, the shape
+// preview — captures the procedural look and keeps it forever. In game that
+// showed as tray tiles that were drawn art only after the first block was
+// placed, because placing one happened to repaint them.
+//
+// A canvas cannot bind to a value, so it has to be told.
+
+const artListeners = new Set<() => void>()
+
+/** Repaint when drop-in art arrives or the flag flips. Returns an unsubscribe. */
+export const onArtChanged = (fn: () => void): (() => void) => {
+  artListeners.add(fn)
+  return () => { artListeners.delete(fn) }
+}
+
+const artChanged = (): void => {
+  for (const fn of artListeners) fn()
+}
+
+/**
+ * Forget every probe result.
+ *
+ * A 404 is remembered FOREVER — that is what stops the renderer re-requesting a
+ * file that is not coming. Which is also exactly wrong the moment new art lands
+ * on disk: without this, dropping in `wood.webp` and flipping the flag would
+ * change nothing, because the miss from boot is still cached.
+ */
+export const refreshArtOverrides = (): void => {
+  probes.clear()
+  probeGeneration++
+  artChanged()
+}
+
+/** Whether drop-in bitmap art is being looked for right now. */
+export const artOverridesEnabled = (): boolean => enabled
+
+/** Where the current answer came from, for diagnostics. */
+export const artOverrideSource = (): 'url' | 'stored' | 'build' =>
+  readParam() !== null ? 'url' : readStored() !== null ? 'stored' : 'build'
+
+/**
+ * Turn drop-in art on or off for this device, live.
+ *
+ * `remember: false` flips it for the session only — useful for an A/B look
+ * without leaving a flag behind on a machine that will later be used to check a
+ * portal build.
+ */
+export const setArtOverrides = (on: boolean, remember = true): boolean => {
+  if (remember) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(on)) } catch { /* harmless */ }
+  }
+  const changed = enabled !== on
+  enabled = on
+  // Always re-probe on an explicit switch-on, even if the flag was already on:
+  // the reason somebody calls this is usually that the files changed.
+  if (on) refreshArtOverrides()
+  else if (changed) probes.clear()
+  console.warn(`[art] Bitmap overrides ${on ? 'ENABLED' : 'DISABLED'}.`)
+  artChanged()
+  return enabled
+}
+
+// Resolve at module load. A `?art=` in the URL is treated as an instruction,
+// so it is persisted immediately and the param becomes optional from then on.
+if (typeof window !== 'undefined') {
+  const fromUrl = readParam()
+  const stored = readStored()
+  if (fromUrl !== null) {
+    enabled = fromUrl
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(fromUrl)) } catch { /* harmless */ }
+  } else if (stored !== null) {
+    enabled = stored
+  }
+
+  // A console handle, so the flag can be worked without a UI. Attached
+  // unconditionally because the whole point is to reach it on a built preview
+  // — it is three closures over a boolean, not a debug surface worth gating.
+  ;(window as unknown as Record<string, unknown>).__art = {
+    on: () => setArtOverrides(true),
+    off: () => setArtOverrides(false),
+    refresh: () => { refreshArtOverrides(); console.warn('[art] probes cleared; art re-reads on next draw.') },
+    status: () => ({ enabled, source: artOverrideSource(), probes: probes.size })
+  }
+}
 
 /** Folder layout the art pipeline should target. */
 export const ART_FOLDERS = {
   block: 'images/blocks',
   enemy: 'images/enemies',
   prop: 'images/props',
-  bg: 'images/bg'
+  bg: 'images/bg',
+  /** UI glyphs that ship as SVG components and can be repainted. */
+  icon: 'images/icons',
+  /**
+   * Painted WALK CYCLES, one horizontal strip per monster design.
+   *
+   * Not the same thing as `enemy`, which is one still per enemy TYPE and stops
+   * the unit animating altogether. A monster is a character with a gait, and a
+   * gait is most of what makes it read as alive — so the strip is keyed on the
+   * DESIGN (the thing that has a walk), sliced back into frames at runtime, and
+   * played from the same clock that drives the procedural bake.
+   */
+  monster: 'images/monsters',
+  /**
+   * Painted siege chassis, one strip per engine covering a wheel revolution.
+   *
+   * Only the STATIC layer: the throwing arm is keyed to each machine's own
+   * reload and stays procedural on top, exactly as a block's fixture does over
+   * its painted body.
+   */
+  siege: 'images/siege'
 } as const
 
 export type ArtKind = keyof typeof ART_FOLDERS
+
+// ─── Shared block bases ─────────────────────────────────────────────────────
+//
+// Twenty block types do NOT need twenty bitmaps.
+//
+// Almost every block is a slab of material with a machine bolted to it, and the
+// machine is drawn live: the bow, the barrel, the coil, the blade and the pick
+// are all `drawFixture` every frame. What the bitmap underneath actually has to
+// say is what the block is MADE OF. An archery post and a sawmill are the same
+// timber crate wearing different hardware, and painting two of them buys
+// variety nobody can see while costing two downloads.
+//
+// So blocks share a base, and the fixture on top carries the identity. Three
+// keep their own art because nothing is drawn over them to tell them apart —
+// the Gate's door, the braced crate's X and the obelisk's glyphs ARE the block.
+//
+// Applied inside `spriteFor` rather than at the call sites. There are five
+// places that paint a block face (world, build ghost, water reflection, tray
+// tile, shape preview) and a mapping applied per-site is a mapping that will
+// eventually be missed at one of them — which is exactly the bug the ghost
+// preview already had.
+
+export const BLOCK_ART_BASE: Record<string, string> = {
+  // Timber — a plank crate. The workhorse.
+  wood: 'timber', archer: 'timber', repair: 'timber',
+  sawmill: 'timber', lumberHut: 'timber', spikes: 'timber',
+  // Masonry — quarried, mortared, heavier than timber.
+  stone: 'masonry', cannon: 'masonry', quarry: 'masonry',
+  stonepit: 'masonry', mint: 'masonry',
+  // Iron — plated and riveted. Everything that runs hot or holds a charge.
+  mortar: 'metal', bombard: 'metal', tesla: 'metal',
+  frost: 'metal', coffer: 'metal',
+  // Their own, because the block IS the picture.
+  brace: 'braced', obelisk: 'arcane', banner: 'heraldry', gate: 'gate'
+}
+
+/** The bitmap a block reads from. Falls back to the block's own id. */
+export const blockArtBase = (typeId: string): string =>
+  BLOCK_ART_BASE[typeId] ?? typeId
+
+/** Every distinct base bitmap, in a stable order. */
+export const BLOCK_ART_BASES: string[] =
+  [...new Set(Object.values(BLOCK_ART_BASE))]
 
 /**
  * Return a decoded override bitmap for `(kind, id)` or null when none exists.
@@ -170,32 +366,99 @@ export type ArtKind = keyof typeof ART_FOLDERS
 export const spriteFor = (kind: ArtKind, id: string): HTMLImageElement | null => {
   // Before the cache, before the `Image` — with the feature off, not one
   // request is made and the renderer simply keeps drawing.
-  if (!OVERRIDES_ENABLED) return null
+  if (!enabled) return null
 
-  const cacheKey = `${kind}/${id}`
+  // A block reads from its SHARED base bitmap; everything else is keyed by its
+  // own id. Resolved here so no call site has to remember.
+  const artId = kind === 'block' ? blockArtBase(id) : id
+  const cacheKey = `${kind}/${artId}`
   let probe = probes.get(cacheKey)
 
   if (!probe) {
-    probe = { state: 'loading', img: null }
+    let done: () => void = () => {}
+    probe = { state: 'loading', img: null, settled: new Promise<void>((r) => { done = r }) }
     probes.set(cacheKey, probe)
     const img = new Image()
     img.decoding = 'async'
     img.addEventListener('load', () => {
       // A zero-size decode is as good as missing.
-      if (img.naturalWidth > 0) { probe!.state = 'ready'; probe!.img = img }
-      else probe!.state = 'missing'
+      if (img.naturalWidth > 0) {
+        probe!.state = 'ready'
+        probe!.img = img
+        // The whole point: whoever painted before this arrived gets to repaint.
+        artChanged()
+      } else probe!.state = 'missing'
+      done()
     }, { once: true })
-    img.addEventListener('error', () => { probe!.state = 'missing' }, { once: true })
-    img.src = prependBaseUrl(`${ART_FOLDERS[kind]}/${id}.webp`)
+    img.addEventListener('error', () => { probe!.state = 'missing'; done() }, { once: true })
+    // The generation suffix only appears AFTER an explicit refresh. A clean
+    // load stays cacheable; a re-probe after dropping new files on disk has to
+    // defeat the browser cache or the old bitmap comes straight back.
+    const bust = probeGeneration > 0 ? `?v=${probeGeneration}` : ''
+    img.src = prependBaseUrl(`${ART_FOLDERS[kind]}/${artId}.webp${bust}`)
   }
 
   return probe.state === 'ready' ? probe.img : null
 }
 
+/**
+ * Every background asset the renderer will ask for.
+ *
+ * Listed here rather than derived, because this module is on the eager boot
+ * path and must not drag the scenery manifest in behind it.
+ */
+const BG_IDS = [
+  'sun', 'moon', 'conifer', 'broadleaf',
+  'mountains-far', 'mountains-near', 'grass', 'water', 'roof'
+] as const
+
+/**
+ * The resource glyphs, which the HUD shows before anything else is on screen.
+ *
+ * They sit in the bar at the top of every single frame of the game, so a
+ * hand-painted tower above three flat vector icons is the one mismatch the eye
+ * cannot avoid.
+ */
+const ICON_IDS = ['wood', 'stone', 'gold'] as const
+
+/**
+ * Wait for every drop-in bitmap to decode, so the splash can hold for them.
+ *
+ * Without this the art POPS IN: the game starts on the procedural drawing and
+ * swaps to paint a second or two later, block by block, which reads as the
+ * scene glitching rather than as loading. The whole point of the painted art is
+ * the first impression, and the first impression was the version without it.
+ *
+ * Only when overrides are actually on — a portal build with the flag off waits
+ * for nothing and requests nothing, exactly as before.
+ *
+ * Never rejects and never blocks forever: a missing file settles as 'missing'
+ * and the procedural path simply keeps drawing.
+ */
+export const preloadArtOverrides = async (
+  onProgress?: (done: number, total: number) => void
+): Promise<void> => {
+  if (!enabled) return
+  const jobs: Promise<void>[] = []
+  const want = (kind: ArtKind, id: string): void => {
+    spriteFor(kind, id)
+    const p = probes.get(`${kind}/${kind === 'block' ? blockArtBase(id) : id}`)
+    if (p) jobs.push(p.settled)
+  }
+  for (const id of BLOCK_ART_BASES) want('block', id)
+  for (const id of BG_IDS) want('bg', id)
+  for (const id of ICON_IDS) want('icon', id)
+
+  let done = 0
+  const total = jobs.length
+  onProgress?.(0, total)
+  await Promise.allSettled(jobs.map((j) => j.then(() => { onProgress?.(++done, total) })))
+}
+
 /** Kick off override probing for everything the scene might draw, on an idle
  *  slot after first paint. Purely opportunistic — nothing waits on it. */
 export const warmSpriteProbes = (blockIds: string[], enemyIds: string[]): void => {
-  if (!OVERRIDES_ENABLED) return
+  if (!enabled) return
   for (const id of blockIds) spriteFor('block', id)
   for (const id of enemyIds) spriteFor('enemy', id)
 }

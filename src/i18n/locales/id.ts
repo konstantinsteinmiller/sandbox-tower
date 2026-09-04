@@ -18,7 +18,8 @@ export default {
     'rotateLeft': 'Putar ke kiri',
     'rotateRight': 'Putar ke kanan',
     'arrowRain': 'Hujan Panah',
-    'arrowRainAim': 'Ketuk medan perang untuk memanggil tembakan'
+    'arrowRainAim': 'Ketuk medan perang untuk memanggil tembakan',
+    'extendRange': '+{n}% jangkauan'
   },
 
   'warnings': {
@@ -26,7 +27,8 @@ export default {
     'air': 'Udara ×{n}',
     'sea': 'Laut ×{n}',
     'bombers': 'Peledak ×{n}',
-    'siege': 'Pengepung ×{n}'
+    'siege': 'Pengepung ×{n}',
+    'outOfReach': 'Di luar jangkauan ×{n} — perlu jangkauan {m}'
   },
   'hints': {
     'selectBlock': { 'touch': 'Ketuk blok di bawah untuk memilihnya', 'desktop': 'Klik blok di bawah untuk memilihnya' },
@@ -150,7 +152,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': 'Kavaleri'
+    'cavalry': 'Kavaleri',
+    'cavalryFree': 'Serbuan kavaleri gratis',
+    'free': 'Gratis',
+    'outOfReachHint': 'Di luar jangkauan — kirim kavaleri atau perluas jangkauanmu'
   },
 
   'result': {

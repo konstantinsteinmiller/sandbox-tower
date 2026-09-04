@@ -18,7 +18,8 @@ export default {
     'rotateLeft': 'تدوير لليسار',
     'rotateRight': 'تدوير لليمين',
     'arrowRain': 'مطر السهام',
-    'arrowRainAim': 'انقر على ساحة المعركة لاستدعاء الوابل'
+    'arrowRainAim': 'انقر على ساحة المعركة لاستدعاء الوابل',
+    'extendRange': '+{n}% مدى'
   },
 
   'warnings': {
@@ -26,7 +27,8 @@ export default {
     'air': 'جو ×{n}',
     'sea': 'بحر ×{n}',
     'bombers': 'متفجرات ×{n}',
-    'siege': 'حصار ×{n}'
+    'siege': 'حصار ×{n}',
+    'outOfReach': 'خارج المدى ×{n} — تحتاج مدى {m}'
   },
   'hints': {
     'selectBlock': { 'touch': 'اضغط على كتلة بالأسفل لاختيارها', 'desktop': 'انقر على كتلة بالأسفل لاختيارها' },
@@ -150,7 +152,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': 'الفرسان'
+    'cavalry': 'الفرسان',
+    'cavalryFree': 'هجوم فرسان مجاني',
+    'free': 'مجاني',
+    'outOfReachHint': 'خارج المدى — أرسل الفرسان أو وسّع مداك'
   },
 
   'result': {

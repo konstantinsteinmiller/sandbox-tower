@@ -5,9 +5,11 @@ import FModal from '@/components/molecules/FModal.vue'
 import FButton from '@/components/atoms/FButton.vue'
 import IconCoin from '@/components/icons/IconCoin.vue'
 import TechIcon from '@/components/game/TechIcon.vue'
+import BlockTile from '@/components/game/BlockTile.vue'
 import { TECH_NODES, TECH_BOUNDS, TECH_BY_ID, isUnlockNode } from '@/game/tech'
 import useTowerProgress from '@/use/useTowerProgress'
 import useSounds from '@/use/useSound'
+import { playFx } from '@/use/useTowerAudio'
 import { coins } from '@/use/useTowerEconomy'
 import { TECH_INTRO_KEY } from '@/keys'
 import { getState, setState } from '@/use/useTowerState'
@@ -63,7 +65,7 @@ const startIntro = (): void => {
 }
 
 const advanceIntro = (): void => {
-  playSound('uiTap')
+  playFx('uiTap')
   if (introStep.value < INTRO_STEPS - 1) { introStep.value++; return }
   introOpen.value = false
   setState(TECH_INTRO_KEY, true)
@@ -82,6 +84,34 @@ const boardH = tiers * CELL_Y + NODE
 
 const nodeX = (col: number): number => (col - TECH_BOUNDS.minCol) * CELL_X + NODE / 2
 const nodeY = (tier: number): number => (tier - TECH_BOUNDS.minTier) * CELL_Y + NODE / 2
+
+// ─── The block a node opens ─────────────────────────────────────────────────
+//
+// Sixteen of the tree's nodes exist only to hand the player a new block, and the
+// board described them with an abstract glyph and a name — so "Bombard" and
+// "Tesla" were words rather than things, and there was no way to see what you
+// were saving for without buying it first.
+//
+// The preview is the block's OWN thumbnail, the same component the build tray
+// and the inspector use, so it inherits the drop-in bitmap when `art=on` and
+// falls back to the procedural bake otherwise without this file knowing which
+// is in play.
+
+/** The block a node opens, or `''` for a node that only moves a number. */
+const blockOf = (id: string): string => {
+  const effect = TECH_BY_ID[id]?.effect
+  return effect?.kind === 'unlock' ? effect.blockId : ''
+}
+
+/**
+ * Backing size, CSS px, for the two preview sizes.
+ *
+ * Both are drawn larger than they are shown and scaled down in CSS. The board
+ * is zoomable to 1.8×, and a canvas sized to its display box goes soft the
+ * moment the player zooms in on a display that is not already HiDPI.
+ */
+const NODE_BLOCK_PX = 48
+const DETAIL_BLOCK_PX = 96
 
 interface Edge { x1: number; y1: number; x2: number; y2: number; active: boolean }
 
@@ -266,6 +296,9 @@ const selected = ref<string>('foundations')
 
 const selectedNode = computed(() => TECH_BY_ID[selected.value] ?? null)
 
+/** The block the selected node opens, for the detail card's preview. */
+const selectedBlock = computed(() => blockOf(selected.value))
+
 const stateOf = (id: string): 'maxed' | 'affordable' | 'available' | 'locked' => {
   const node = TECH_BY_ID[id]
   if (!node) return 'locked'
@@ -413,62 +446,76 @@ const nodeTotal = (id: string, level: number): string | null => {
               //- tick once bought, because "1/1" tells the player nothing.
               span.tech__node-rank(v-if="!isUnlockNode(node.id)") {{ progress.levelOf(node.id) }}
               span.tech__node-check(v-else-if="progress.levelOf(node.id) > 0") ✓
+              //- The block this node opens, pinned to the top-right corner, so
+              //- the board can be read for WHAT it gives and not only for what
+              //- it is called. Nothing announces it to a screen reader — the
+              //- node's own `aria-label` already names the unlock.
+              span.tech__node-block(v-if="blockOf(node.id)" aria-hidden="true")
+                BlockTile(:type-id="blockOf(node.id)" :size="NODE_BLOCK_PX")
 
       //- ── Detail card ──────────────────────────────────────────────────────
       div.tech__detail(v-if="selectedDetail")
-        div.tech__detail-head
-          span.tech__detail-name {{ nodeLabel(selectedDetail.id) }}
+        div.tech__detail-main
+          div.tech__detail-head
+            span.tech__detail-name {{ nodeLabel(selectedDetail.id) }}
+          p.tech__detail-desc {{ nodeDesc(selectedDetail.id) }}
+          //- What the ranks already bought add up to, so buying another one is
+          //- visibly worth something.
+          p.tech__detail-total(v-if="nodeTotal(selectedDetail.id, selectedDetail.level)")
+            | {{ t('tech.atRank', { r: selectedDetail.level, n: nodeTotal(selectedDetail.id, selectedDetail.level) }) }}
+
+          div.tech__detail-foot
+            span.tech__detail-status(v-if="selectedDetail.state === 'maxed'") {{ t('tech.maxed') }}
+            span.tech__detail-status.is-locked(v-else-if="selectedDetail.state === 'locked'")
+              | {{ t('tech.requires', { n: selectedDetail.missing.map(nodeLabel).join(', ') }) }}
+            FButton(
+              v-else
+              size="sm"
+              :type="selectedDetail.state === 'affordable' ? 'primary' : 'secondary'"
+              :is-disabled="selectedDetail.state !== 'affordable'"
+              @click="buy"
+            )
+              span.tech__buy
+                IconCoin(class="tech__buy-icon")
+                | {{ selectedDetail.cost }}
+
+            //- Sell one rank back. Hidden entirely on an unowned node rather than
+            //- shown disabled: a refund button on something never bought is noise.
+            //-
+            //- It is pinned to the LEFT edge of the row (see `order` / `auto`
+            //- margin in the styles) while buying stays on the right. Sitting
+            //- beside the buy button, it slid across into the buy button's exact
+            //- position the moment a node maxed out — so a second tap of a
+            //- double-tap bought the last rank and then sold it straight back.
+            //- Kept after the buy button in the DOM so reading and tab order
+            //- still go buy-then-sell.
+            button.tech__sell(
+              v-if="selectedDetail.level > 0"
+              type="button"
+              :class="{ 'is-disabled': !canSell }"
+              :disabled="!canSell"
+              :title="canSell ? '' : t('tech.sellBlocked', { n: sellBlockedBy.map(nodeLabel).join(', ') })"
+              @click="sell"
+            )
+              span.tech__sell-label {{ t('tech.sell') }}
+              span.tech__sell-value
+                IconCoin(class="tech__buy-icon")
+                | +{{ sellValue }}
+
+          //- Why the refund is refused, spelled out rather than left to a hover.
+          p.tech__detail-note(v-if="selectedDetail.level > 0 && !canSell")
+            | {{ t('tech.sellBlocked', { n: sellBlockedBy.map(nodeLabel).join(', ') }) }}
+
+        //- The corner the rank line used to hold on its own. An unlock node now
+        //- shows the block itself above it, at a size worth looking at; a node
+        //- that only moves a number keeps the bare rank exactly where it was.
+        aside.tech__detail-aside
+          span.tech__detail-block(v-if="selectedBlock" aria-hidden="true")
+            BlockTile(:type-id="selectedBlock" :size="DETAIL_BLOCK_PX")
           //- Repeatable nodes have no ceiling, so showing "3 / 9999" would be
           //- absurd — they report the rank they are at instead.
           span.tech__detail-rank(v-if="!selectedDetail.capped") {{ t('tech.rankOpen', { n: selectedDetail.level }) }}
           span.tech__detail-rank(v-else-if="selectedDetail.level > 0") {{ t('tech.owned') }}
-        p.tech__detail-desc {{ nodeDesc(selectedDetail.id) }}
-        //- What the ranks already bought add up to, so buying another one is
-        //- visibly worth something.
-        p.tech__detail-total(v-if="nodeTotal(selectedDetail.id, selectedDetail.level)")
-          | {{ t('tech.atRank', { r: selectedDetail.level, n: nodeTotal(selectedDetail.id, selectedDetail.level) }) }}
-
-        div.tech__detail-foot
-          span.tech__detail-status(v-if="selectedDetail.state === 'maxed'") {{ t('tech.maxed') }}
-          span.tech__detail-status.is-locked(v-else-if="selectedDetail.state === 'locked'")
-            | {{ t('tech.requires', { n: selectedDetail.missing.map(nodeLabel).join(', ') }) }}
-          FButton(
-            v-else
-            size="sm"
-            :type="selectedDetail.state === 'affordable' ? 'primary' : 'secondary'"
-            :is-disabled="selectedDetail.state !== 'affordable'"
-            @click="buy"
-          )
-            span.tech__buy
-              IconCoin(class="tech__buy-icon")
-              | {{ selectedDetail.cost }}
-
-          //- Sell one rank back. Hidden entirely on an unowned node rather than
-          //- shown disabled: a refund button on something never bought is noise.
-          //-
-          //- It is pinned to the LEFT edge of the row (see `order` / `auto`
-          //- margin in the styles) while buying stays on the right. Sitting
-          //- beside the buy button, it slid across into the buy button's exact
-          //- position the moment a node maxed out — so a second tap of a
-          //- double-tap bought the last rank and then sold it straight back.
-          //- Kept after the buy button in the DOM so reading and tab order
-          //- still go buy-then-sell.
-          button.tech__sell(
-            v-if="selectedDetail.level > 0"
-            type="button"
-            :class="{ 'is-disabled': !canSell }"
-            :disabled="!canSell"
-            :title="canSell ? '' : t('tech.sellBlocked', { n: sellBlockedBy.map(nodeLabel).join(', ') })"
-            @click="sell"
-          )
-            span.tech__sell-label {{ t('tech.sell') }}
-            span.tech__sell-value
-              IconCoin(class="tech__buy-icon")
-              | +{{ sellValue }}
-
-        //- Why the refund is refused, spelled out rather than left to a hover.
-        p.tech__detail-note(v-if="selectedDetail.level > 0 && !canSell")
-          | {{ t('tech.sellBlocked', { n: sellBlockedBy.map(nodeLabel).join(', ') }) }}
 
       //- ── First-death intro ────────────────────────────────────────────────
       //-
@@ -754,6 +801,41 @@ const nodeTotal = (id: string, level: number): string | null => {
   width: 56%
   height: 56%
 
+// ── The block a node opens ──────────────────────────────────────────────────
+//
+// Pinned mostly OFF the node's top-right corner rather than tucked inside it.
+// The centre glyph fills 56% of a 56 px node, so a badge big enough to read as a
+// block cannot also sit inside the frame — at 1.55 rem, fully inside, it read as
+// a second icon rather than as a picture of a thing. Hanging it off the corner
+// buys the size back and costs only a nibble of the glyph. Nodes sit on a 92 ×
+// 96 px grid with a 56 px body, so a 8 px overhang still has ~28 px of clear
+// board around it and never reaches a neighbour or a connector.
+.tech__node-block
+  position: absolute
+  top: -0.5rem
+  right: -0.5rem
+  width: 1.95rem
+  height: 1.95rem
+  border: 2px solid #0f1a30
+  border-radius: 0.4rem
+  overflow: hidden
+  background-color: #0f1a30
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.55)
+
+// The thumbnail is rendered at `NODE_BLOCK_PX` and shown at whatever the badge
+// is, so it still resolves when the board is zoomed to 1.8×. `!important` is
+// what it takes to beat BlockTile's own inline width/height.
+.tech__node-block :deep(canvas)
+  width: 100% !important
+  height: 100% !important
+
+// A block behind a lock reads cooler than one already owned — but only part of
+// the way. The node body already carries `opacity: 0.75`, and a full grayscale
+// on top of that took the block back to the anonymous grey chip this badge
+// exists to replace: the whole point is to see what you are saving for.
+.tech__node.is-locked .tech__node-block
+  filter: grayscale(0.5)
+
 .tech__node-rank, .tech__node-check
   font-weight: 900
   font-size: 0.62rem
@@ -794,15 +876,50 @@ const nodeTotal = (id: string, level: number): string | null => {
     box-shadow: 0 0 12px 2px rgba(255, 210, 60, 0.7)
 
 // ── Detail card ─────────────────────────────────────────────────────────────
+// Two columns: the card's text and buttons on the left, the block it opens and
+// the rank line stacked in the right-hand corner. A real column rather than an
+// absolutely positioned corner, so the buy/sell row can never slide underneath
+// the preview on a short card.
 .tech__detail
   display: flex
-  flex-direction: column
-  gap: 0.2rem
+  align-items: flex-start
+  gap: clamp(0.4rem, 2vw, 0.75rem)
   padding: clamp(0.35rem, 1.8vw, 0.65rem)
   border: 2px solid #24345a
   border-radius: clamp(0.5rem, 2.4vw, 0.9rem)
   background-color: rgba(10, 18, 38, 0.7)
   text-align: left
+
+.tech__detail-main
+  display: flex
+  flex-direction: column
+  gap: 0.2rem
+  flex: 1 1 auto
+  // Without this a long prerequisite line refuses to shrink and shoves the
+  // preview off the right-hand edge of the card.
+  min-width: 0
+
+.tech__detail-aside
+  display: flex
+  flex-direction: column
+  align-items: center
+  gap: 0.2rem
+  flex: 0 0 auto
+
+.tech__detail-block
+  display: block
+  width: clamp(2.4rem, 11vw, 3.4rem)
+  height: clamp(2.4rem, 11vw, 3.4rem)
+  border: 2px solid #24345a
+  border-radius: 0.5rem
+  overflow: hidden
+  background-color: rgba(6, 12, 26, 0.6)
+
+// Same trick as the node badge — drawn big, shown small, and `!important` to
+// beat BlockTile's inline size.
+.tech__detail-block :deep(canvas)
+  width: 100% !important
+  height: 100% !important
 
 .tech__detail-head
   display: flex

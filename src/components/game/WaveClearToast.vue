@@ -6,6 +6,8 @@ import { themedPalette } from '@/game/art'
 import { canOfferReward, adInFlight } from '@/use/useAdGate'
 import FRewardButton from '@/components/atoms/FRewardButton.vue'
 import IconGold from '@/components/icons/IconGold.vue'
+import IconWood from '@/components/icons/IconWood.vue'
+import IconStone from '@/components/icons/IconStone.vue'
 import IconCoin from '@/components/icons/IconCoin.vue'
 
 /**
@@ -153,16 +155,16 @@ const payouts = computed(() => {
               :class="`is-${p.id}`"
               :style="{ animationDelay: `${i * 90}ms` }"
             )
-              //- Same glyphs as the resource bar at the top of the screen —
-              //- the whole point is that the player links the two.
-              svg.wave-toast__icon(v-if="p.id === 'wood'" viewBox="0 0 24 24" aria-hidden="true")
-                ellipse(cx="6" cy="12" rx="3" ry="6" fill="#8a5a2b")
-                rect(x="6" y="6" width="12" height="12" fill="#a9682f")
-                ellipse(cx="18" cy="12" rx="3" ry="6" fill="#d99a53")
-                ellipse(cx="18" cy="12" rx="1.7" ry="3.4" fill="none" stroke="#7a4a20" stroke-width="1")
-              svg.wave-toast__icon(v-else-if="p.id === 'stone'" viewBox="0 0 24 24" aria-hidden="true")
-                path(d="M4 16 L7 7 L17 6 L20 15 L13 19 Z" fill="#767e88" stroke="#4a5058" stroke-width="1.4" stroke-linejoin="round")
-                path(d="M7 7 L13 11 L20 15" fill="none" stroke="#a8b2bd" stroke-width="1.2")
+              //- The SAME components as the resource bar at the top of the
+              //- screen — the whole point is that the player links the two.
+              //-
+              //- These were hand-inlined copies of the bar's old vector glyphs,
+              //- which held while both were drawn by the same hand. The moment
+              //- the bar's icons learned to swap themselves for painted bitmaps,
+              //- the copies stayed vector and the link broke: the toast paid out
+              //- in a different currency from the one the bar counted.
+              IconWood.wave-toast__icon(v-if="p.id === 'wood'")
+              IconStone.wave-toast__icon(v-else-if="p.id === 'stone'")
               //- The RUN currency is an INGOT, not a coin. A round coin here
               //- while the bar at the top of the screen shows a bar taught the
               //- player that the wave paid out the meta wallet, which it does

@@ -116,6 +116,73 @@ const mawCampaignOverridesPlugin = (): Plugin => ({
   }
 })
 
+// ─── Art-sheet export sink ─────────────────────────────────────────────
+// `/art-sheets` (dev only) bakes the whole procedural cast onto a 128 px
+// lattice so it can be handed to an image model and sliced back in. The
+// browser can render the sheets but cannot put them where they belong —
+// a download lands in the user's Downloads folder under whatever name
+// Chrome decides — so the bench POSTs each finished sheet here and this
+// writes it into `art-sheets/` in the repo.
+//
+//   POST /__art/save-sheet  { name, dataUrl }  → writes a binary file
+//   POST /__art/save-sheet  { name, text }     → writes a text file
+//
+// Dev only, and the name is whitelisted rather than sanitised: this is a
+// file-writing endpoint, so it takes a flat basename made of safe
+// characters and nothing else. No separators, no dots leading a segment,
+// no escaping out of the directory.
+const ART_SHEET_DIR = resolve(fileURLToPath(new URL('./art-sheets', import.meta.url)))
+const SAFE_SHEET_NAME = /^[A-Za-z0-9][A-Za-z0-9._@-]{0,79}$/
+
+const artSheetsPlugin = (): Plugin => ({
+  name: 'tower-siege-art-sheets',
+  apply: 'serve',
+  // The sheets land inside the project root, so without this the dev server
+  // watches its own output: the first PNG written triggers a full page reload,
+  // which tears down the bench in the middle of writing the other eighteen.
+  config: () => ({ server: { watch: { ignored: ['**/art-sheets/**'] } } }),
+  configureServer(server) {
+    server.middlewares.use('/__art/save-sheet', async (req, res, next) => {
+      if (req.method !== 'POST') { next(); return }
+      const fail = (code: number, error: string) => {
+        res.statusCode = code
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ error }))
+      }
+      try {
+        const body = JSON.parse(await readBody(req)) as
+          { name?: string; dataUrl?: string; text?: string }
+        const name = body.name ?? ''
+        if (!SAFE_SHEET_NAME.test(name) || name.includes('..')) {
+          fail(400, 'name must be a flat basename of [A-Za-z0-9._@-]')
+          return
+        }
+        mkdirSync(ART_SHEET_DIR, { recursive: true })
+        const file = resolve(ART_SHEET_DIR, name)
+        // Belt and braces: even a name that passed the pattern must land
+        // inside the directory we meant.
+        if (dirname(file) !== ART_SHEET_DIR) { fail(400, 'name escaped the sheet directory'); return }
+
+        if (typeof body.text === 'string') {
+          writeFileSync(file, body.text, 'utf-8')
+        } else if (typeof body.dataUrl === 'string') {
+          const comma = body.dataUrl.indexOf(',')
+          if (comma < 0 || !body.dataUrl.startsWith('data:')) { fail(400, 'dataUrl is not a data URI'); return }
+          writeFileSync(file, Buffer.from(body.dataUrl.slice(comma + 1), 'base64'))
+        } else {
+          fail(400, 'expected { name, dataUrl } or { name, text }')
+          return
+        }
+
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ ok: true, path: `art-sheets/${name}` }))
+      } catch (e) {
+        fail(400, String((e as Error).message))
+      }
+    })
+  }
+})
+
 // Read the package version directly so APP_VERSION resolves regardless of
 // how vite is invoked. `process.env.npm_package_version` is only set when
 // vite runs via `pnpm run <script>` — running `pnpm vite` directly leaves
@@ -153,7 +220,8 @@ const PLATFORM_FLAGS = [
   'VITE_APP_PLAYGAMA',
   'VITE_APP_GAMEPIX',
   'VITE_APP_GAME_MONETIZE',
-  'VITE_APP_YANDEX'
+  'VITE_APP_YANDEX',
+  'VITE_APP_POKI'
 ] as const
 
 export default defineConfig(({ mode, command }) => {
@@ -185,6 +253,10 @@ export default defineConfig(({ mode, command }) => {
   // Campaign-overrides plugin — virtual module + dev write endpoints so
   // editor saves persist to `data/campaign-overrides.json` in the repo.
   plugins.push(mawCampaignOverridesPlugin())
+
+  // Art-sheet export sink — dev only, so it is absent from every portal
+  // build. `apply: 'serve'` makes that structural rather than a promise.
+  plugins.push(artSheetsPlugin())
 
   // Only push the obfuscator if both conditions are met
   if (isProduction && shouldObfuscate) {
@@ -348,7 +420,17 @@ export default defineConfig(({ mode, command }) => {
   // Skipping our meta tag on the GamePix build lets GamePix's environment own
   // the policy — same exception we already make for Yandex.
   const isGamepixBuild = env.VITE_APP_GAMEPIX === 'true'
-  const skipCspMeta = isYandexBuild || isGamepixBuild
+  // POKI: same exception, and the strongest reason of the three. Poki applies
+  // a PER-GAME allowlist server-side (P4D -> Settings -> CSP) and injects its
+  // OWN ad stack into our iframe — Google Publisher Tag, IMA, Amazon TAM and a
+  // prebid waterfall (securepubads.g.doubleclick.net, imasdk.googleapis.com,
+  // prebid.adnxs.com, aax.amazon-adsystem.com, onetag-sys.com, ...). Our meta
+  // tag would block the entire waterfall and NOTHING would surface: the game
+  // runs, commercialBreak() resolves, no ad ever plays, no error is logged.
+  // Whitelisting those hosts is the wrong fix — the list rotates with Poki's
+  // ad partners. Ship no policy of our own and let P4D own it.
+  const isPokiBuild = env.VITE_APP_POKI === 'true'
+  const skipCspMeta = isYandexBuild || isGamepixBuild || isPokiBuild
   const cspValue = buildCsp(env)
 
   plugins.push({
@@ -362,6 +444,22 @@ export default defineConfig(({ mode, command }) => {
       )
     }
   })
+
+  // Strip the Poki SDK <script> tag from index.html for non-Poki builds — it
+  // would otherwise cost every other platform a request to game-cdn.poki.com
+  // (and, on Yandex, put a foreign hostname in the submitted bundle).
+  const isPokiSdkBuild = env.VITE_APP_POKI === 'true'
+  if (!isPokiSdkBuild) {
+    plugins.push({
+      name: 'strip-poki-sdk',
+      transformIndexHtml(html: string) {
+        return html.replace(
+          /<!-- Load the SDK before your game code -->\s*<script[^>]*game-cdn\.poki\.com[^>]*><\/script>\s*/,
+          ''
+        )
+      }
+    })
+  }
 
   // Strip the CrazyGames SDK <script> tag from index.html for non-CrazyGames builds
   // so it doesn't block or error on other platforms (e.g. Wavedash).
@@ -552,6 +650,21 @@ export default defineConfig(({ mode, command }) => {
         ...(env.VITE_APP_GAME_MONETIZE === 'true' ? {} : {
           '@/use/ads/GameMonetizeProvider': fileURLToPath(new URL('./src/use/ads/GameMonetizeProvider.stub.ts', import.meta.url))
         }),
+        ...(env.VITE_APP_POKI === 'true' ? {} : {
+          '@/use/ads/PokiProvider': fileURLToPath(new URL('./src/use/ads/PokiProvider.stub.ts', import.meta.url)),
+          // pokiPlugin is STATICALLY imported by `useGameplayLifecycle.ts`
+          // (the gameplay-bracket fan-out) and re-exported by the
+          // `platforms/poki` barrel, so it lands in every build's graph. The
+          // real module hardcodes the PokiSDK URL
+          // (game-cdn.poki.com/scripts/v2/poki-sdk.js), and the env-literal
+          // `if` around the call site is NOT enough to keep it out: the
+          // obfuscator's stringArray pass hoists literals into its
+          // indirection table BEFORE esbuild folds the env comparison, so the
+          // URL survives DCE. Measured — it turned up in the CrazyGames entry
+          // chunk before this alias existed, which is precisely the string
+          // Yandex moderation rejects as "Service storage URL detected".
+          '@/utils/pokiPlugin': fileURLToPath(new URL('./src/utils/pokiPlugin.stub.ts', import.meta.url))
+        }),
         '@': fileURLToPath(new URL('./src', import.meta.url)),
         '@/': fileURLToPath(new URL('./src/', import.meta.url)),
         '#': fileURLToPath(new URL('./src/assets', import.meta.url))
@@ -560,8 +673,45 @@ export default defineConfig(({ mode, command }) => {
     },
     build: {
       minify: 'esbuild',
-      // Disable source maps in production if you want maximum protection
-      sourcemap: !shouldObfuscate
+
+      // ─── Source maps ────────────────────────────────────────────────────
+      // OFF for every production build, obfuscated or not.
+      //
+      // This used to read `!shouldObfuscate`, on the reasoning that a build we
+      // aren't hiding may as well stay debuggable. That reasoning has one
+      // platform it is wrong about, and it happens to be the one that inlines
+      // everything: GamePix builds with `VITE_ENABLE_OBFUSCATION=false`, so it
+      // shipped `index-*.js.map` — 4.0 MB of complete original TypeScript,
+      // 71% of the whole 5.6 MB build, referenced by a `sourceMappingURL` the
+      // browser fetches the moment anyone opens devtools. It made the zip
+      // several times larger than it needed to be AND handed the entire source
+      // to anyone who looked, on the one build where obfuscation was already
+      // switched off.
+      //
+      // Set `VITE_BUILD_SOURCEMAP=true` in a platform's env file (or on the
+      // command line) when you genuinely need to debug a production bundle.
+      // Nothing sets it by default, and nothing should ship with it set.
+      sourcemap: env.VITE_BUILD_SOURCEMAP === 'true',
+
+      // The obfuscator inflates chunks ~3.4×, so Rollup's stock 500 kB warning
+      // fires on healthy chunks and trains us to ignore it. Raise it to a size
+      // that means something for THIS bundle, and keep the signal.
+      chunkSizeWarningLimit: 900,
+
+      // No emitted asset is small enough to be worth a base64 data URI (the
+      // font is ~50 kB, the bitmaps live in `public/` and are fetched by URL),
+      // and inlining defeats caching. Keep every asset a real file.
+      assetsInlineLimit: 0,
+
+      rollupOptions: {
+        output: {
+          // Vite's default already splits per dynamic import. All this adds is
+          // legible filenames in a portal QA console — a reviewer reporting
+          // "the game hangs loading X" can say which chunk X is.
+          chunkFileNames: 'assets/[name]-[hash].js',
+          entryFileNames: 'assets/[name]-[hash].js'
+        }
+      }
     }
   }
 })

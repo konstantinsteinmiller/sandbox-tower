@@ -1,3 +1,28 @@
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
+import { spriteFor, onArtChanged } from '@/game/art'
+
+/**
+ * Painted glyph when there is one, the drawn SVG otherwise.
+ *
+ * These three sit in the HUD bar on every frame of the game, so leaving them as
+ * flat vector under a hand-painted tower is the one style mismatch a player
+ * cannot look away from.
+ *
+ * The probe is async, so the component subscribes: the first paint happens
+ * before the bitmap decodes, and without the subscription the icon would keep
+ * the vector until something else forced a re-render.
+ */
+const painted = ref<string | null>(null)
+const sync = (): void => { painted.value = spriteFor('icon', 'wood')?.src ?? null }
+
+onMounted(() => {
+  sync()
+  const stop = onArtChanged(sync)
+  onUnmounted(stop)
+})
+</script>
+
 <template lang="pug">
   //- ── Wood ──
   //-
@@ -6,7 +31,8 @@
   //- rings are what make it unmistakably timber.
   //-
   //- Sized by the caller (e.g. `class="w-4 h-4"`), like every other icon here.
-  svg(viewBox="0 0 24 24" aria-hidden="true")
+  img(v-if="painted" :src="painted" alt="" aria-hidden="true" class="res-icon-img")
+  svg(v-else viewBox="0 0 24 24" aria-hidden="true")
     //- Back log, a tone down so the pile has depth.
     g
       rect(x="4" y="13.4" width="12" height="7.2" rx="1" fill="#8a5a2b")
@@ -28,3 +54,13 @@
       ellipse(cx="16.5" cy="9.1" rx="0.9" ry="1.1" fill="none" stroke="#a06a2c" stroke-width="0.9")
       ellipse(cx="16.5" cy="9.1" rx="0.35" ry="0.45" fill="#8a5a2b")
 </template>
+
+<style scoped lang="sass">
+// Matches the SVG arm exactly: the caller sizes these with utility classes and
+// must not have to care which arm it got.
+.res-icon-img
+  display: block
+  width: 100%
+  height: 100%
+  object-fit: contain
+</style>

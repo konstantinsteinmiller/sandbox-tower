@@ -15,6 +15,10 @@ const loadGate = async (opts: {
   crazy?: boolean; fullRelease?: boolean; rewardedReady?: boolean
   /** Any other portal build whose ad SDK can serve a rewarded video. */
   playgama?: boolean
+  poki?: boolean
+  /** What the rewarded video resolves to — false covers no-fill / dismissed /
+   *  blocked, all of which must grant nothing. */
+  granted?: boolean
   /** Starting wallet balance, for the coin-priced (ungated) path. */
   wallet?: number
 } = {}) => {
@@ -30,10 +34,11 @@ const loadGate = async (opts: {
     isPlaygama: opts.playgama ?? false,
     isGamepix: false,
     isGameMonetize: false,
-    isYandex: false
+    isYandex: false,
+    isPoki: opts.poki ?? false
   }))
   vi.doMock('@/use/useMatch', () => ({ isCrazyGamesFullRelease: opts.fullRelease ?? false }))
-  const showRewardedAd = vi.fn(async () => true)
+  const showRewardedAd = vi.fn(async () => opts.granted ?? true)
   vi.doMock('@/use/useAds', async () => {
     const { ref } = await import('vue')
     return { isRewardedReady: ref(opts.rewardedReady ?? true), showRewardedAd }
@@ -90,6 +95,32 @@ describe('reward gating', () => {
     expect(gate.isRewardGated).toBe(true)
     await expect(gate.claimReward(grant)).resolves.toBe(true)
     expect(gate.showRewardedAd).toHaveBeenCalledTimes(1)
+    expect(gate.wallet.value).toBe(100)
+  })
+
+  it('plays a rewarded video on the Poki build, and never grants without one', async () => {
+    // The reported regression (2026-09-01): Poki was missing from
+    // `isRewardGated`, so `claimReward` took the ungated arm and granted every
+    // perk instantly with no video. It reads as an SDK fault — "the rewarded
+    // ads don't show, it just gives me the reward" — but the SDK was innocent;
+    // a real ~11 s Poki house ad plays fine in the Inspector and playground.
+    const gate = await loadGate({ poki: true, wallet: 100 })
+    const grant = vi.fn()
+    expect(gate.isRewardGated).toBe(true)
+    await expect(gate.claimReward(grant)).resolves.toBe(true)
+    expect(gate.showRewardedAd).toHaveBeenCalledTimes(1)
+    // The video is the price — the wallet must not be touched.
+    expect(gate.wallet.value).toBe(100)
+  })
+
+  it('grants nothing on Poki when the rewarded video does not play', async () => {
+    // A no-fill, a dismissed ad or a blocked ad all resolve false. Granting on
+    // any of those is against Poki's terms and the publisher would not pay for
+    // it, so the perk must simply not happen.
+    const gate = await loadGate({ poki: true, granted: false, wallet: 100 })
+    const grant = vi.fn()
+    await expect(gate.claimReward(grant)).resolves.toBe(false)
+    expect(grant).not.toHaveBeenCalled()
     expect(gate.wallet.value).toBe(100)
   })
 

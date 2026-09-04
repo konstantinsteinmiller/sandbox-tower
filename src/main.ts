@@ -13,7 +13,7 @@ import {
 import { LANGUAGES } from '@/utils/enums'
 import { initAds } from '@/use/useAds'
 import { installGamePauseAudio } from '@/use/useGamePauseAudio'
-import useUser, { isCrazyWeb, isWaveDash, isItch, isGlitch, isGameDistribution, isPlaygama, isGamepix, isGameMonetize, isYandex } from '@/use/useUser'
+import useUser, { isCrazyWeb, isWaveDash, isItch, isGlitch, isGameDistribution, isPlaygama, isGamepix, isGameMonetize, isYandex, isPoki } from '@/use/useUser'
 import { isDebug } from '@/use/useMatch.ts'
 import { reloadTowerState } from '@/use/useTowerState'
 import { portalLocale, resolveActiveLocale } from '@/use/usePortalLocale'
@@ -113,6 +113,7 @@ const bootstrap = async () => {
   let cgLocale: string | null = null
   let yaLocale: string | null = null
   let pgLocale: string | null = null
+  let pkLocale: string | null = null
   if (isCrazyWeb) {
     const cg = await import('@/use/useCrazyGames')
     await cg.initCrazyGames()
@@ -184,6 +185,31 @@ const bootstrap = async () => {
     const { yandexPlugin, yandexLocale } = await import('@/utils/yandexPlugin')
     await yandexPlugin()
     yaLocale = yandexLocale.value
+  } else if (isPoki) {
+    // **Parallel** init — deliberately NOT awaited, unlike GamePix / Playgama /
+    // Yandex / CrazyGames. Those four have to await because their save strategy
+    // reads the portal's cloud store inside `hydrate()`. Poki has no cloud-save
+    // API at all (its wrapper mirrors localStorage + IndexedDB itself), so there
+    // is nothing for `PokiStrategy.hydrate()` to wait on.
+    //
+    // And the locale does not need the await either: `getLanguage()` is fully
+    // implemented in PokiSDK's 5.5 KB loader shim, so it answers correctly the
+    // moment the script tag has run — well before the ~325 KB core lands and
+    // `init()` settles. `readPokiLanguage()` reads it synchronously.
+    //
+    // Not awaiting is the point, not an optimisation: Poki measures
+    // conversion-to-play on the FIRST `gameplayStart()`, and the Web Fit Test
+    // gate is 65 %. Blocking first paint on an ad SDK is measured as churn.
+    const { pokiPlugin, readPokiLanguage, pokiCaptureError } =
+      await import('@/utils/pokiPlugin')
+    pkLocale = readPokiLanguage()
+    void pokiPlugin()
+
+    // Feed P4D's 24-hour Error Scanner. Registered here rather than next to
+    // `createApp` so the window-level handlers cover the whole boot path too;
+    // `app.config.errorHandler` is attached further down.
+    window.addEventListener('error', (e) => pokiCaptureError(e.error ?? e.message))
+    window.addEventListener('unhandledrejection', (e) => pokiCaptureError(e.reason))
   }
 
   // Pick the save strategy by build flag. `SaveManager.init()` hydrates
@@ -196,7 +222,7 @@ const bootstrap = async () => {
   // unit-testable in isolation. Adding a platform = add an arm there,
   // not edit this file.
   const strategy = await resolveSaveStrategy({
-    isCrazyWeb, isWaveDash, isItch, isGlitch, isGameDistribution, isPlaygama, isGamepix, isGameMonetize, isYandex
+    isCrazyWeb, isWaveDash, isItch, isGlitch, isGameDistribution, isPlaygama, isGamepix, isGameMonetize, isYandex, isPoki
   })
 
   // CrazyGames cloud-only mode: gameplay state and our save bookkeeping
@@ -348,7 +374,12 @@ const bootstrap = async () => {
   // Only the boot value is read here. Playgama keeps polling `platform.language`
   // for the rest of the session and republishes into the shared `portalLocale`
   // ref, which the watcher further down reacts to.
-  const portalLocaleHint = cgLocale ?? yaLocale ?? pgLocale
+  // Poki joins the hint chain like the others. Same rule as every portal
+  // (see the `portal-platform-signals` skill): this is the PLATFORM's answer,
+  // a hint for a first-time player only — it is never written into
+  // LANGUAGE_KEY, because "the portal said so" must stay distinguishable from
+  // "the player chose this".
+  const portalLocaleHint = cgLocale ?? yaLocale ?? pgLocale ?? pkLocale
   const portalLocaleAtBoot =
     portalLocaleHint && LANGUAGES.includes(portalLocaleHint) ? portalLocaleHint : null
 
@@ -436,6 +467,14 @@ const bootstrap = async () => {
   ;(window as any).__i18n = i18n
 
   const app = createApp(App)
+
+  if (import.meta.env.VITE_APP_POKI === 'true') {
+    // Component-level errors into Poki's Error Scanner. The window-level
+    // handlers were registered in the Poki init arm above; Vue swallows render
+    // / lifecycle errors before they reach `window.onerror`, so both are needed.
+    const { pokiCaptureError } = await import('@/utils/pokiPlugin')
+    app.config.errorHandler = (err) => pokiCaptureError(err)
+  }
 
   app.use(router)
   app.use(i18n)

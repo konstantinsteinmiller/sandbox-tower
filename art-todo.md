@@ -11,12 +11,33 @@ for a bitmap at the paths below on first draw; if the image decodes, the
 renderer blits it instead of drawing. No code change is needed to adopt art —
 drop the file in, set the flag below, and reload.
 
-> **The probe is OFF by default.** Set `VITE_ENABLE_ART_OVERRIDES=true` in `.env`
-> to turn it on. With no override art shipping, every probe missed — and a miss
-> is only free for the game, not for the portal: CrazyGames' QA console reports
-> each one as `Missing resource detected: …/images/blocks/wood.webp`, one line
-> per block and per enemy, which reads as a broken build to a reviewer. Turn it
-> on when there is art in these folders to find.
+> **The probe is OFF by default.** With no override art shipping, every probe
+> missed — and a miss is only free for the game, not for the portal:
+> CrazyGames' QA console reports each one as
+> `Missing resource detected: …/images/blocks/wood.webp`, one line per block and
+> per enemy, which reads as a broken build to a reviewer.
+>
+> Three layers control it, most specific first:
+>
+> | Layer | How | Scope |
+> |---|---|---|
+> | URL | `?art=on` / `?art=off` — remembered, so the param can be dropped | this device |
+> | Console | `__art.on()`, `__art.off()`, `__art.refresh()`, `__art.status()` | live, no reload |
+> | Build | `VITE_ENABLE_ART_OVERRIDES=true` in `.env` | what a portal sees |
+>
+> Set the build flag only when the art is good enough to ship; use the URL param
+> to try it. `__art.refresh()` forgets every cached probe (including remembered
+> 404s) and re-reads from disk with a cache-buster, which is what you want after
+> re-slicing a sheet.
+
+> **There is now a way to SEE all of this at once.** `pnpm dev` →
+> `http://localhost:2050/#/art-sheets` bakes every drawable onto a 128 px
+> lattice and writes contact sheets into `art-sheets/` — 134 frames across six
+> sheets, 46 of which map to a slot in this document. Each sheet ships with a
+> captioned key image and a `sheet-index.json` giving every cell's rect and its
+> target path, so a repainted sheet slices straight back into `public/images/`.
+> See `art-sheets/README.md`. The route and its write endpoint are dev-only and
+> are absent from every portal build.
 
 ---
 

@@ -1,0 +1,3968 @@
+{
+  "generated": "2026-09-04T22:17:23.387Z",
+  "cell": 128,
+  "scales": [
+    1,
+    2
+  ],
+  "note": "Rects are in CLEAN-SHEET pixels (scale 1). For the @2x sheet multiply every x/y/w/h by 2; the key sheet is also 2x. `target` is the path under public/ a repainted slice belongs at — a cell without one has no override hook yet.",
+  "scenery": [
+    {
+      "id": "sun",
+      "file": "bg-sun.png",
+      "width": 512,
+      "height": 512,
+      "tileable": false,
+      "bg": "magenta",
+      "target": "images/bg/sun.webp"
+    },
+    {
+      "id": "moon",
+      "file": "bg-moon.png",
+      "width": 512,
+      "height": 512,
+      "tileable": false,
+      "bg": "magenta",
+      "target": "images/bg/moon.webp"
+    },
+    {
+      "id": "conifer",
+      "file": "bg-conifer.png",
+      "width": 384,
+      "height": 512,
+      "tileable": false,
+      "bg": "magenta",
+      "target": "images/bg/conifer.webp"
+    },
+    {
+      "id": "broadleaf",
+      "file": "bg-broadleaf.png",
+      "width": 384,
+      "height": 512,
+      "tileable": false,
+      "bg": "magenta",
+      "target": "images/bg/broadleaf.webp"
+    },
+    {
+      "id": "mountains-far",
+      "file": "bg-mountains-far.png",
+      "width": 1536,
+      "height": 512,
+      "tileable": true,
+      "bg": "magenta-sky",
+      "target": "images/bg/mountains-far.webp"
+    },
+    {
+      "id": "mountains-near",
+      "file": "bg-mountains-near.png",
+      "width": 1536,
+      "height": 512,
+      "tileable": true,
+      "bg": "magenta-sky",
+      "target": "images/bg/mountains-near.webp"
+    },
+    {
+      "id": "grass",
+      "file": "bg-grass.png",
+      "width": 1024,
+      "height": 128,
+      "tileable": true,
+      "bg": "opaque",
+      "target": "images/bg/grass.webp"
+    },
+    {
+      "id": "water",
+      "file": "bg-water.png",
+      "width": 1024,
+      "height": 512,
+      "tileable": true,
+      "bg": "opaque",
+      "target": "images/bg/water.webp"
+    },
+    {
+      "id": "roof",
+      "file": "bg-roof.png",
+      "width": 512,
+      "height": 384,
+      "tileable": false,
+      "bg": "magenta",
+      "target": "images/bg/roof.webp"
+    },
+    {
+      "id": "icon-wood",
+      "file": "icon-wood.png",
+      "width": 512,
+      "height": 512,
+      "tileable": false,
+      "bg": "magenta",
+      "target": "images/icons/wood.webp"
+    },
+    {
+      "id": "icon-stone",
+      "file": "icon-stone.png",
+      "width": 512,
+      "height": 512,
+      "tileable": false,
+      "bg": "magenta",
+      "target": "images/icons/stone.webp"
+    },
+    {
+      "id": "icon-gold",
+      "file": "icon-gold.png",
+      "width": 512,
+      "height": 512,
+      "tileable": false,
+      "bg": "magenta",
+      "target": "images/icons/gold.webp"
+    }
+  ],
+  "walks": [
+    {
+      "id": "grumpling",
+      "file": "walk-grumpling.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "front",
+      "anchor": "feet",
+      "target": "images/monsters/grumpling.webp"
+    },
+    {
+      "id": "bonecap",
+      "file": "walk-bonecap.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "front",
+      "anchor": "feet",
+      "target": "images/monsters/bonecap.webp"
+    },
+    {
+      "id": "snaggletusk",
+      "file": "walk-snaggletusk.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "left",
+      "anchor": "feet",
+      "target": "images/monsters/snaggletusk.webp"
+    },
+    {
+      "id": "wispling",
+      "file": "walk-wispling.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "front",
+      "anchor": "feet",
+      "target": "images/monsters/wispling.webp"
+    },
+    {
+      "id": "marrowknight",
+      "file": "walk-marrowknight.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "front",
+      "anchor": "feet",
+      "target": "images/monsters/marrowknight.webp"
+    },
+    {
+      "id": "nibbler",
+      "file": "walk-nibbler.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "front",
+      "anchor": "feet",
+      "target": "images/monsters/nibbler.webp"
+    },
+    {
+      "id": "cinderhound",
+      "file": "walk-cinderhound.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "left",
+      "anchor": "feet",
+      "target": "images/monsters/cinderhound.webp"
+    },
+    {
+      "id": "blorp",
+      "file": "walk-blorp.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "front",
+      "anchor": "feet",
+      "target": "images/monsters/blorp.webp"
+    },
+    {
+      "id": "thornwick",
+      "file": "walk-thornwick.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "front",
+      "anchor": "feet",
+      "target": "images/monsters/thornwick.webp"
+    },
+    {
+      "id": "rattlejack",
+      "file": "walk-rattlejack.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "front",
+      "anchor": "feet",
+      "target": "images/monsters/rattlejack.webp"
+    },
+    {
+      "id": "dustmoth",
+      "file": "walk-dustmoth.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "front",
+      "anchor": "feet",
+      "target": "images/monsters/dustmoth.webp"
+    },
+    {
+      "id": "skewer",
+      "file": "walk-skewer.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "left",
+      "anchor": "feet",
+      "target": "images/monsters/skewer.webp"
+    },
+    {
+      "id": "gloomcrow",
+      "file": "walk-gloomcrow.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "front",
+      "anchor": "feet",
+      "target": "images/monsters/gloomcrow.webp"
+    },
+    {
+      "id": "sliverfin",
+      "file": "walk-sliverfin.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "right",
+      "anchor": "centre",
+      "target": "images/monsters/sliverfin.webp"
+    },
+    {
+      "id": "gnashfin",
+      "file": "walk-gnashfin.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "right",
+      "anchor": "centre",
+      "target": "images/monsters/gnashfin.webp"
+    },
+    {
+      "id": "tidewyrm",
+      "file": "walk-tidewyrm.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "right",
+      "anchor": "centre",
+      "target": "images/monsters/tidewyrm.webp"
+    },
+    {
+      "id": "brinemaw",
+      "file": "walk-brinemaw.png",
+      "width": 1280,
+      "height": 720,
+      "cols": 4,
+      "rows": 2,
+      "frames": 8,
+      "panel": {
+        "w": 320,
+        "h": 360
+      },
+      "faces": "right",
+      "anchor": "centre",
+      "target": "images/monsters/brinemaw.webp"
+    }
+  ],
+  "sheets": [
+    {
+      "id": "blocks",
+      "title": "Blocks — assembled, body, glyph",
+      "brief": "Every buildable block in three rows per band: the block as played, the body that is actually the override file, and the tray pictogram. Slice the BODY row.",
+      "files": {
+        "clean": "sheet-blocks.png",
+        "clean2x": "sheet-blocks@2x.png",
+        "key": "sheet-blocks-key.png"
+      },
+      "cols": 8,
+      "rows": 9,
+      "width": 1024,
+      "height": 1152,
+      "cells": [
+        {
+          "id": "block/gate/assembled",
+          "label": "gate",
+          "variant": "assembled",
+          "x": 0,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "This block has no live fixture, so the assembled cell and the body cell are the same drawing."
+        },
+        {
+          "id": "block/gate/body",
+          "label": "gate",
+          "variant": "gate base — SLICE THIS",
+          "x": 0,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/blocks/gate.webp",
+          "note": "The shared gate base. Paint the MATERIAL, not this one block — the fixture on top is what tells them apart."
+        },
+        {
+          "id": "block/gate/icon",
+          "label": "gate",
+          "variant": "tray icon",
+          "x": 0,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/wood/assembled",
+          "label": "wood",
+          "variant": "assembled",
+          "x": 128,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "This block has no live fixture, so the assembled cell and the body cell are the same drawing."
+        },
+        {
+          "id": "block/wood/body",
+          "label": "wood",
+          "variant": "timber base — SLICE THIS",
+          "x": 128,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/blocks/timber.webp",
+          "note": "The shared timber base. Also worn by archer, spikes, repair, sawmill, lumberHut. Paint the MATERIAL, not this one block — the fixture on top is what tells them apart."
+        },
+        {
+          "id": "block/wood/icon",
+          "label": "wood",
+          "variant": "tray icon",
+          "x": 128,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/brace/assembled",
+          "label": "brace",
+          "variant": "assembled",
+          "x": 256,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "This block has no live fixture, so the assembled cell and the body cell are the same drawing."
+        },
+        {
+          "id": "block/brace/body",
+          "label": "brace",
+          "variant": "braced base — SLICE THIS",
+          "x": 256,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/blocks/braced.webp",
+          "note": "The shared braced base. Paint the MATERIAL, not this one block — the fixture on top is what tells them apart."
+        },
+        {
+          "id": "block/brace/icon",
+          "label": "brace",
+          "variant": "tray icon",
+          "x": 256,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/stone/assembled",
+          "label": "stone",
+          "variant": "assembled",
+          "x": 384,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "This block has no live fixture, so the assembled cell and the body cell are the same drawing."
+        },
+        {
+          "id": "block/stone/body",
+          "label": "stone",
+          "variant": "masonry base — SLICE THIS",
+          "x": 384,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/blocks/masonry.webp",
+          "note": "The shared masonry base. Also worn by cannon, quarry, mint, stonepit. Paint the MATERIAL, not this one block — the fixture on top is what tells them apart."
+        },
+        {
+          "id": "block/stone/icon",
+          "label": "stone",
+          "variant": "tray icon",
+          "x": 384,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/archer/assembled",
+          "label": "archer",
+          "variant": "assembled",
+          "x": 512,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/archer/body",
+          "label": "archer",
+          "variant": "uses timber base",
+          "x": 512,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only. Reads from the shared timber base, owned by wood."
+        },
+        {
+          "id": "block/archer/icon",
+          "label": "archer",
+          "variant": "tray icon",
+          "x": 512,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/cannon/assembled",
+          "label": "cannon",
+          "variant": "assembled",
+          "x": 640,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/cannon/body",
+          "label": "cannon",
+          "variant": "uses masonry base",
+          "x": 640,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only. Reads from the shared masonry base, owned by stone."
+        },
+        {
+          "id": "block/cannon/icon",
+          "label": "cannon",
+          "variant": "tray icon",
+          "x": 640,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/mortar/assembled",
+          "label": "mortar",
+          "variant": "assembled",
+          "x": 768,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/mortar/body",
+          "label": "mortar",
+          "variant": "metal base — SLICE THIS",
+          "x": 768,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/blocks/metal.webp",
+          "note": "The shared metal base. Also worn by bombard, tesla, frost, coffer. Paint the MATERIAL, not this one block — the fixture on top is what tells them apart."
+        },
+        {
+          "id": "block/mortar/icon",
+          "label": "mortar",
+          "variant": "tray icon",
+          "x": 768,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/bombard/assembled",
+          "label": "bombard",
+          "variant": "assembled",
+          "x": 896,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/bombard/body",
+          "label": "bombard",
+          "variant": "uses metal base",
+          "x": 896,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only. Reads from the shared metal base, owned by mortar."
+        },
+        {
+          "id": "block/bombard/icon",
+          "label": "bombard",
+          "variant": "tray icon",
+          "x": 896,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/tesla/assembled",
+          "label": "tesla",
+          "variant": "assembled",
+          "x": 0,
+          "y": 384,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/tesla/body",
+          "label": "tesla",
+          "variant": "uses metal base",
+          "x": 0,
+          "y": 512,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only. Reads from the shared metal base, owned by mortar."
+        },
+        {
+          "id": "block/tesla/icon",
+          "label": "tesla",
+          "variant": "tray icon",
+          "x": 0,
+          "y": 640,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/frost/assembled",
+          "label": "frost",
+          "variant": "assembled",
+          "x": 128,
+          "y": 384,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/frost/body",
+          "label": "frost",
+          "variant": "uses metal base",
+          "x": 128,
+          "y": 512,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only. Reads from the shared metal base, owned by mortar."
+        },
+        {
+          "id": "block/frost/icon",
+          "label": "frost",
+          "variant": "tray icon",
+          "x": 128,
+          "y": 640,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/spikes/assembled",
+          "label": "spikes",
+          "variant": "assembled",
+          "x": 256,
+          "y": 384,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/spikes/body",
+          "label": "spikes",
+          "variant": "uses timber base",
+          "x": 256,
+          "y": 512,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only. Reads from the shared timber base, owned by wood."
+        },
+        {
+          "id": "block/spikes/icon",
+          "label": "spikes",
+          "variant": "tray icon",
+          "x": 256,
+          "y": 640,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/repair/assembled",
+          "label": "repair",
+          "variant": "assembled",
+          "x": 384,
+          "y": 384,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/repair/body",
+          "label": "repair",
+          "variant": "uses timber base",
+          "x": 384,
+          "y": 512,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only. Reads from the shared timber base, owned by wood."
+        },
+        {
+          "id": "block/repair/icon",
+          "label": "repair",
+          "variant": "tray icon",
+          "x": 384,
+          "y": 640,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/sawmill/assembled",
+          "label": "sawmill",
+          "variant": "assembled",
+          "x": 512,
+          "y": 384,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/sawmill/body",
+          "label": "sawmill",
+          "variant": "uses timber base",
+          "x": 512,
+          "y": 512,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only. Reads from the shared timber base, owned by wood."
+        },
+        {
+          "id": "block/sawmill/icon",
+          "label": "sawmill",
+          "variant": "tray icon",
+          "x": 512,
+          "y": 640,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/quarry/assembled",
+          "label": "quarry",
+          "variant": "assembled",
+          "x": 640,
+          "y": 384,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/quarry/body",
+          "label": "quarry",
+          "variant": "uses masonry base",
+          "x": 640,
+          "y": 512,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only. Reads from the shared masonry base, owned by stone."
+        },
+        {
+          "id": "block/quarry/icon",
+          "label": "quarry",
+          "variant": "tray icon",
+          "x": 640,
+          "y": 640,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/mint/assembled",
+          "label": "mint",
+          "variant": "assembled",
+          "x": 768,
+          "y": 384,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/mint/body",
+          "label": "mint",
+          "variant": "uses masonry base",
+          "x": 768,
+          "y": 512,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only. Reads from the shared masonry base, owned by stone."
+        },
+        {
+          "id": "block/mint/icon",
+          "label": "mint",
+          "variant": "tray icon",
+          "x": 768,
+          "y": 640,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/banner/assembled",
+          "label": "banner",
+          "variant": "assembled",
+          "x": 896,
+          "y": 384,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/banner/body",
+          "label": "banner",
+          "variant": "heraldry base — SLICE THIS",
+          "x": 896,
+          "y": 512,
+          "w": 128,
+          "h": 128,
+          "target": "images/blocks/heraldry.webp",
+          "note": "The shared heraldry base. Paint the MATERIAL, not this one block — the fixture on top is what tells them apart."
+        },
+        {
+          "id": "block/banner/icon",
+          "label": "banner",
+          "variant": "tray icon",
+          "x": 896,
+          "y": 640,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/obelisk/assembled",
+          "label": "obelisk",
+          "variant": "assembled",
+          "x": 0,
+          "y": 768,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/obelisk/body",
+          "label": "obelisk",
+          "variant": "arcane base — SLICE THIS",
+          "x": 0,
+          "y": 896,
+          "w": 128,
+          "h": 128,
+          "target": "images/blocks/arcane.webp",
+          "note": "The shared arcane base. Paint the MATERIAL, not this one block — the fixture on top is what tells them apart."
+        },
+        {
+          "id": "block/obelisk/icon",
+          "label": "obelisk",
+          "variant": "tray icon",
+          "x": 0,
+          "y": 1024,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/lumberHut/assembled",
+          "label": "lumberHut",
+          "variant": "assembled",
+          "x": 128,
+          "y": 768,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/lumberHut/body",
+          "label": "lumberHut",
+          "variant": "uses timber base",
+          "x": 128,
+          "y": 896,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only. Reads from the shared timber base, owned by wood."
+        },
+        {
+          "id": "block/lumberHut/icon",
+          "label": "lumberHut",
+          "variant": "tray icon",
+          "x": 128,
+          "y": 1024,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/stonepit/assembled",
+          "label": "stonepit",
+          "variant": "assembled",
+          "x": 256,
+          "y": 768,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/stonepit/body",
+          "label": "stonepit",
+          "variant": "uses masonry base",
+          "x": 256,
+          "y": 896,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only. Reads from the shared masonry base, owned by stone."
+        },
+        {
+          "id": "block/stonepit/icon",
+          "label": "stonepit",
+          "variant": "tray icon",
+          "x": 256,
+          "y": 1024,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/coffer/assembled",
+          "label": "coffer",
+          "variant": "assembled",
+          "x": 384,
+          "y": 768,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/coffer/body",
+          "label": "coffer",
+          "variant": "uses metal base",
+          "x": 384,
+          "y": 896,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only. Reads from the shared metal base, owned by mortar."
+        },
+        {
+          "id": "block/coffer/icon",
+          "label": "coffer",
+          "variant": "tray icon",
+          "x": 384,
+          "y": 1024,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/skiff/assembled",
+          "label": "skiff",
+          "variant": "assembled",
+          "x": 512,
+          "y": 768,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/skiff/body",
+          "label": "skiff",
+          "variant": "hull — no slot",
+          "x": 512,
+          "y": 896,
+          "w": 128,
+          "h": 128,
+          "note": "Ships bypass the block-sprite path entirely — the hull is drawn, clipped at the waterline and rolled every frame. Adopting art here needs a probe inside the ship branch."
+        },
+        {
+          "id": "block/skiff/icon",
+          "label": "skiff",
+          "variant": "tray icon",
+          "x": 512,
+          "y": 1024,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/longship/assembled",
+          "label": "longship",
+          "variant": "assembled",
+          "x": 640,
+          "y": 768,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/longship/body",
+          "label": "longship",
+          "variant": "hull — no slot",
+          "x": 640,
+          "y": 896,
+          "w": 128,
+          "h": 128,
+          "note": "Ships bypass the block-sprite path entirely — the hull is drawn, clipped at the waterline and rolled every frame. Adopting art here needs a probe inside the ship branch."
+        },
+        {
+          "id": "block/longship/icon",
+          "label": "longship",
+          "variant": "tray icon",
+          "x": 640,
+          "y": 1024,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        },
+        {
+          "id": "block/galley/assembled",
+          "label": "galley",
+          "variant": "assembled",
+          "x": 768,
+          "y": 768,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the fixture on this cell is composited live every frame. Paint it to understand the block; ship the row below it."
+        },
+        {
+          "id": "block/galley/body",
+          "label": "galley",
+          "variant": "hull — no slot",
+          "x": 768,
+          "y": 896,
+          "w": 128,
+          "h": 128,
+          "note": "Ships bypass the block-sprite path entirely — the hull is drawn, clipped at the waterline and rolled every frame. Adopting art here needs a probe inside the ship branch."
+        },
+        {
+          "id": "block/galley/icon",
+          "label": "galley",
+          "variant": "tray icon",
+          "x": 768,
+          "y": 1024,
+          "w": 128,
+          "h": 128,
+          "note": "The build-tray tile: block body, dark backing disc, near-white pictogram. The disc and the constant ink are what keep the glyph legible on a pale block AND a dark one, so keep both."
+        }
+      ],
+      "singles": [
+        {
+          "id": "block/gate/body",
+          "file": "cell-block-gate-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/gate/body",
+              "label": "gate",
+              "variant": "gate base — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/gate.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/wood/body",
+          "file": "cell-block-wood-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/wood/body",
+              "label": "wood",
+              "variant": "timber base — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/timber.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/brace/body",
+          "file": "cell-block-brace-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/brace/body",
+              "label": "brace",
+              "variant": "braced base — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/braced.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/stone/body",
+          "file": "cell-block-stone-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/stone/body",
+              "label": "stone",
+              "variant": "masonry base — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/masonry.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/mortar/body",
+          "file": "cell-block-mortar-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/mortar/body",
+              "label": "mortar",
+              "variant": "metal base — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/metal.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/banner/body",
+          "file": "cell-block-banner-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/banner/body",
+              "label": "banner",
+              "variant": "heraldry base — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/heraldry.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/obelisk/body",
+          "file": "cell-block-obelisk-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/obelisk/body",
+              "label": "obelisk",
+              "variant": "arcane base — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/arcane.webp"
+            }
+          ]
+        }
+      ],
+      "strips": [
+        {
+          "id": "blocks-r0",
+          "file": "strip-blocks-r0.png",
+          "row": 0,
+          "width": 2048,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "block/gate/assembled",
+              "label": "gate",
+              "variant": "assembled",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/wood/assembled",
+              "label": "wood",
+              "variant": "assembled",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/brace/assembled",
+              "label": "brace",
+              "variant": "assembled",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/stone/assembled",
+              "label": "stone",
+              "variant": "assembled",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/archer/assembled",
+              "label": "archer",
+              "variant": "assembled",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/cannon/assembled",
+              "label": "cannon",
+              "variant": "assembled",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/mortar/assembled",
+              "label": "mortar",
+              "variant": "assembled",
+              "x": 1536,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/bombard/assembled",
+              "label": "bombard",
+              "variant": "assembled",
+              "x": 1792,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            }
+          ]
+        },
+        {
+          "id": "blocks-r1",
+          "file": "strip-blocks-r1.png",
+          "row": 1,
+          "width": 2048,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "block/gate/body",
+              "label": "gate",
+              "variant": "gate base — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/blocks/gate.webp"
+            },
+            {
+              "id": "block/wood/body",
+              "label": "wood",
+              "variant": "timber base — SLICE THIS",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/blocks/timber.webp"
+            },
+            {
+              "id": "block/brace/body",
+              "label": "brace",
+              "variant": "braced base — SLICE THIS",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/blocks/braced.webp"
+            },
+            {
+              "id": "block/stone/body",
+              "label": "stone",
+              "variant": "masonry base — SLICE THIS",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/blocks/masonry.webp"
+            },
+            {
+              "id": "block/archer/body",
+              "label": "archer",
+              "variant": "uses timber base",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/cannon/body",
+              "label": "cannon",
+              "variant": "uses masonry base",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/mortar/body",
+              "label": "mortar",
+              "variant": "metal base — SLICE THIS",
+              "x": 1536,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/blocks/metal.webp"
+            },
+            {
+              "id": "block/bombard/body",
+              "label": "bombard",
+              "variant": "uses metal base",
+              "x": 1792,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            }
+          ]
+        },
+        {
+          "id": "blocks-r2",
+          "file": "strip-blocks-r2.png",
+          "row": 2,
+          "width": 2048,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "block/gate/icon",
+              "label": "gate",
+              "variant": "tray icon",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/wood/icon",
+              "label": "wood",
+              "variant": "tray icon",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/brace/icon",
+              "label": "brace",
+              "variant": "tray icon",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/stone/icon",
+              "label": "stone",
+              "variant": "tray icon",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/archer/icon",
+              "label": "archer",
+              "variant": "tray icon",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/cannon/icon",
+              "label": "cannon",
+              "variant": "tray icon",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/mortar/icon",
+              "label": "mortar",
+              "variant": "tray icon",
+              "x": 1536,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/bombard/icon",
+              "label": "bombard",
+              "variant": "tray icon",
+              "x": 1792,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            }
+          ]
+        },
+        {
+          "id": "blocks-r3",
+          "file": "strip-blocks-r3.png",
+          "row": 3,
+          "width": 2048,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "block/tesla/assembled",
+              "label": "tesla",
+              "variant": "assembled",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/frost/assembled",
+              "label": "frost",
+              "variant": "assembled",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/spikes/assembled",
+              "label": "spikes",
+              "variant": "assembled",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/repair/assembled",
+              "label": "repair",
+              "variant": "assembled",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/sawmill/assembled",
+              "label": "sawmill",
+              "variant": "assembled",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/quarry/assembled",
+              "label": "quarry",
+              "variant": "assembled",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/mint/assembled",
+              "label": "mint",
+              "variant": "assembled",
+              "x": 1536,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/banner/assembled",
+              "label": "banner",
+              "variant": "assembled",
+              "x": 1792,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            }
+          ]
+        },
+        {
+          "id": "blocks-r4",
+          "file": "strip-blocks-r4.png",
+          "row": 4,
+          "width": 2048,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "block/tesla/body",
+              "label": "tesla",
+              "variant": "uses metal base",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/frost/body",
+              "label": "frost",
+              "variant": "uses metal base",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/spikes/body",
+              "label": "spikes",
+              "variant": "uses timber base",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/repair/body",
+              "label": "repair",
+              "variant": "uses timber base",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/sawmill/body",
+              "label": "sawmill",
+              "variant": "uses timber base",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/quarry/body",
+              "label": "quarry",
+              "variant": "uses masonry base",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/mint/body",
+              "label": "mint",
+              "variant": "uses masonry base",
+              "x": 1536,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/banner/body",
+              "label": "banner",
+              "variant": "heraldry base — SLICE THIS",
+              "x": 1792,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/blocks/heraldry.webp"
+            }
+          ]
+        },
+        {
+          "id": "blocks-r5",
+          "file": "strip-blocks-r5.png",
+          "row": 5,
+          "width": 2048,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "block/tesla/icon",
+              "label": "tesla",
+              "variant": "tray icon",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/frost/icon",
+              "label": "frost",
+              "variant": "tray icon",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/spikes/icon",
+              "label": "spikes",
+              "variant": "tray icon",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/repair/icon",
+              "label": "repair",
+              "variant": "tray icon",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/sawmill/icon",
+              "label": "sawmill",
+              "variant": "tray icon",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/quarry/icon",
+              "label": "quarry",
+              "variant": "tray icon",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/mint/icon",
+              "label": "mint",
+              "variant": "tray icon",
+              "x": 1536,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/banner/icon",
+              "label": "banner",
+              "variant": "tray icon",
+              "x": 1792,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            }
+          ]
+        },
+        {
+          "id": "blocks-r6",
+          "file": "strip-blocks-r6.png",
+          "row": 6,
+          "width": 2048,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "block/obelisk/assembled",
+              "label": "obelisk",
+              "variant": "assembled",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/lumberHut/assembled",
+              "label": "lumberHut",
+              "variant": "assembled",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/stonepit/assembled",
+              "label": "stonepit",
+              "variant": "assembled",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/coffer/assembled",
+              "label": "coffer",
+              "variant": "assembled",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/skiff/assembled",
+              "label": "skiff",
+              "variant": "assembled",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/longship/assembled",
+              "label": "longship",
+              "variant": "assembled",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/galley/assembled",
+              "label": "galley",
+              "variant": "assembled",
+              "x": 1536,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            }
+          ]
+        },
+        {
+          "id": "blocks-r7",
+          "file": "strip-blocks-r7.png",
+          "row": 7,
+          "width": 2048,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "block/obelisk/body",
+              "label": "obelisk",
+              "variant": "arcane base — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/blocks/arcane.webp"
+            },
+            {
+              "id": "block/lumberHut/body",
+              "label": "lumberHut",
+              "variant": "uses timber base",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/stonepit/body",
+              "label": "stonepit",
+              "variant": "uses masonry base",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/coffer/body",
+              "label": "coffer",
+              "variant": "uses metal base",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/skiff/body",
+              "label": "skiff",
+              "variant": "hull — no slot",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/longship/body",
+              "label": "longship",
+              "variant": "hull — no slot",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/galley/body",
+              "label": "galley",
+              "variant": "hull — no slot",
+              "x": 1536,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            }
+          ]
+        },
+        {
+          "id": "blocks-r8",
+          "file": "strip-blocks-r8.png",
+          "row": 8,
+          "width": 2048,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "block/obelisk/icon",
+              "label": "obelisk",
+              "variant": "tray icon",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/lumberHut/icon",
+              "label": "lumberHut",
+              "variant": "tray icon",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/stonepit/icon",
+              "label": "stonepit",
+              "variant": "tray icon",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/coffer/icon",
+              "label": "coffer",
+              "variant": "tray icon",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/skiff/icon",
+              "label": "skiff",
+              "variant": "tray icon",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/longship/icon",
+              "label": "longship",
+              "variant": "tray icon",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "block/galley/icon",
+              "label": "galley",
+              "variant": "tray icon",
+              "x": 1536,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "merged",
+      "title": "Merged blocks — tier I / II / III",
+      "brief": "Column per fusable weapon, row per tier. Only armed blocks fuse. Reference only until the renderer keys overrides by tier.",
+      "files": {
+        "clean": "sheet-merged.png",
+        "clean2x": "sheet-merged@2x.png",
+        "key": "sheet-merged-key.png"
+      },
+      "cols": 9,
+      "rows": 3,
+      "width": 1152,
+      "height": 384,
+      "cells": [
+        {
+          "id": "merged/archer/t1",
+          "label": "archer",
+          "variant": "tier I (base)",
+          "x": 0,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "The unfused block, for comparison. Its override slot is on the blocks sheet."
+        },
+        {
+          "id": "merged/archer/t2",
+          "label": "archer",
+          "variant": "tier II",
+          "x": 0,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/archer/t3",
+          "label": "archer",
+          "variant": "tier III",
+          "x": 0,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/cannon/t1",
+          "label": "cannon",
+          "variant": "tier I (base)",
+          "x": 128,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "The unfused block, for comparison. Its override slot is on the blocks sheet."
+        },
+        {
+          "id": "merged/cannon/t2",
+          "label": "cannon",
+          "variant": "tier II",
+          "x": 128,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/cannon/t3",
+          "label": "cannon",
+          "variant": "tier III",
+          "x": 128,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/mortar/t1",
+          "label": "mortar",
+          "variant": "tier I (base)",
+          "x": 256,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "The unfused block, for comparison. Its override slot is on the blocks sheet."
+        },
+        {
+          "id": "merged/mortar/t2",
+          "label": "mortar",
+          "variant": "tier II",
+          "x": 256,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/mortar/t3",
+          "label": "mortar",
+          "variant": "tier III",
+          "x": 256,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/bombard/t1",
+          "label": "bombard",
+          "variant": "tier I (base)",
+          "x": 384,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "The unfused block, for comparison. Its override slot is on the blocks sheet."
+        },
+        {
+          "id": "merged/bombard/t2",
+          "label": "bombard",
+          "variant": "tier II",
+          "x": 384,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/bombard/t3",
+          "label": "bombard",
+          "variant": "tier III",
+          "x": 384,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/tesla/t1",
+          "label": "tesla",
+          "variant": "tier I (base)",
+          "x": 512,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "The unfused block, for comparison. Its override slot is on the blocks sheet."
+        },
+        {
+          "id": "merged/tesla/t2",
+          "label": "tesla",
+          "variant": "tier II",
+          "x": 512,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/tesla/t3",
+          "label": "tesla",
+          "variant": "tier III",
+          "x": 512,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/frost/t1",
+          "label": "frost",
+          "variant": "tier I (base)",
+          "x": 640,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "The unfused block, for comparison. Its override slot is on the blocks sheet."
+        },
+        {
+          "id": "merged/frost/t2",
+          "label": "frost",
+          "variant": "tier II",
+          "x": 640,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/frost/t3",
+          "label": "frost",
+          "variant": "tier III",
+          "x": 640,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/skiff/t1",
+          "label": "skiff",
+          "variant": "tier I (base)",
+          "x": 768,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "The unfused block, for comparison. Its override slot is on the blocks sheet."
+        },
+        {
+          "id": "merged/skiff/t2",
+          "label": "skiff",
+          "variant": "tier II",
+          "x": 768,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/skiff/t3",
+          "label": "skiff",
+          "variant": "tier III",
+          "x": 768,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/longship/t1",
+          "label": "longship",
+          "variant": "tier I (base)",
+          "x": 896,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "The unfused block, for comparison. Its override slot is on the blocks sheet."
+        },
+        {
+          "id": "merged/longship/t2",
+          "label": "longship",
+          "variant": "tier II",
+          "x": 896,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/longship/t3",
+          "label": "longship",
+          "variant": "tier III",
+          "x": 896,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/galley/t1",
+          "label": "galley",
+          "variant": "tier I (base)",
+          "x": 1024,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "The unfused block, for comparison. Its override slot is on the blocks sheet."
+        },
+        {
+          "id": "merged/galley/t2",
+          "label": "galley",
+          "variant": "tier II",
+          "x": 1024,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        },
+        {
+          "id": "merged/galley/t3",
+          "label": "galley",
+          "variant": "tier III",
+          "x": 1024,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+        }
+      ],
+      "singles": [],
+      "strips": [
+        {
+          "id": "merged-r0",
+          "file": "strip-merged-r0.png",
+          "row": 0,
+          "width": 2304,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "merged/archer/t1",
+              "label": "archer",
+              "variant": "tier I (base)",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/cannon/t1",
+              "label": "cannon",
+              "variant": "tier I (base)",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/mortar/t1",
+              "label": "mortar",
+              "variant": "tier I (base)",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/bombard/t1",
+              "label": "bombard",
+              "variant": "tier I (base)",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/tesla/t1",
+              "label": "tesla",
+              "variant": "tier I (base)",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/frost/t1",
+              "label": "frost",
+              "variant": "tier I (base)",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/skiff/t1",
+              "label": "skiff",
+              "variant": "tier I (base)",
+              "x": 1536,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/longship/t1",
+              "label": "longship",
+              "variant": "tier I (base)",
+              "x": 1792,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/galley/t1",
+              "label": "galley",
+              "variant": "tier I (base)",
+              "x": 2048,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            }
+          ]
+        },
+        {
+          "id": "merged-r1",
+          "file": "strip-merged-r1.png",
+          "row": 1,
+          "width": 2304,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "merged/archer/t2",
+              "label": "archer",
+              "variant": "tier II",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/cannon/t2",
+              "label": "cannon",
+              "variant": "tier II",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/mortar/t2",
+              "label": "mortar",
+              "variant": "tier II",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/bombard/t2",
+              "label": "bombard",
+              "variant": "tier II",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/tesla/t2",
+              "label": "tesla",
+              "variant": "tier II",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/frost/t2",
+              "label": "frost",
+              "variant": "tier II",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/skiff/t2",
+              "label": "skiff",
+              "variant": "tier II",
+              "x": 1536,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/longship/t2",
+              "label": "longship",
+              "variant": "tier II",
+              "x": 1792,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/galley/t2",
+              "label": "galley",
+              "variant": "tier II",
+              "x": 2048,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            }
+          ]
+        },
+        {
+          "id": "merged-r2",
+          "file": "strip-merged-r2.png",
+          "row": 2,
+          "width": 2304,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "merged/archer/t3",
+              "label": "archer",
+              "variant": "tier III",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/cannon/t3",
+              "label": "cannon",
+              "variant": "tier III",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/mortar/t3",
+              "label": "mortar",
+              "variant": "tier III",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/bombard/t3",
+              "label": "bombard",
+              "variant": "tier III",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/tesla/t3",
+              "label": "tesla",
+              "variant": "tier III",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/frost/t3",
+              "label": "frost",
+              "variant": "tier III",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/skiff/t3",
+              "label": "skiff",
+              "variant": "tier III",
+              "x": 1536,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/longship/t3",
+              "label": "longship",
+              "variant": "tier III",
+              "x": 1792,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "merged/galley/t3",
+              "label": "galley",
+              "variant": "tier III",
+              "x": 2048,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "enemies",
+      "title": "Enemies — land, air and sea",
+      "brief": "One cell per enemy id, drawn with its bound monster design. Authored facing RIGHT; the battlefield mirrors by travel direction.",
+      "files": {
+        "clean": "sheet-enemies.png",
+        "clean2x": "sheet-enemies@2x.png",
+        "key": "sheet-enemies-key.png"
+      },
+      "cols": 6,
+      "rows": 3,
+      "width": 768,
+      "height": 384,
+      "cells": [
+        {
+          "id": "enemy/grunt",
+          "label": "grunt",
+          "variant": "grumpling · 0.62c",
+          "x": 0,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/grunt.webp",
+          "note": "Fields 2 designs; one bitmap replaces all of them."
+        },
+        {
+          "id": "enemy/runner",
+          "label": "runner",
+          "variant": "cinderhound · 0.55c",
+          "x": 128,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/runner.webp",
+          "note": "An override is a static pose — it replaces the whole walk cycle."
+        },
+        {
+          "id": "enemy/slinger",
+          "label": "slinger",
+          "variant": "bonecap · 0.6c",
+          "x": 256,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/slinger.webp",
+          "note": "An override is a static pose — it replaces the whole walk cycle."
+        },
+        {
+          "id": "enemy/brute",
+          "label": "brute",
+          "variant": "snaggletusk · 0.85c",
+          "x": 384,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/brute.webp",
+          "note": "An override is a static pose — it replaces the whole walk cycle."
+        },
+        {
+          "id": "enemy/bomber",
+          "label": "bomber",
+          "variant": "blorp · 0.66c",
+          "x": 512,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/bomber.webp",
+          "note": "An override is a static pose — it replaces the whole walk cycle."
+        },
+        {
+          "id": "enemy/bat",
+          "label": "bat",
+          "variant": "nibbler · 0.5c",
+          "x": 640,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/bat.webp",
+          "note": "Fields 2 designs; one bitmap replaces all of them."
+        },
+        {
+          "id": "enemy/bulwark",
+          "label": "bulwark",
+          "variant": "marrowknight · 0.78c",
+          "x": 0,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/bulwark.webp",
+          "note": "An override is a static pose — it replaces the whole walk cycle."
+        },
+        {
+          "id": "enemy/wyvern",
+          "label": "wyvern",
+          "variant": "skewer · 0.8c",
+          "x": 128,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/wyvern.webp",
+          "note": "An override is a static pose — it replaces the whole walk cycle."
+        },
+        {
+          "id": "enemy/bombardier",
+          "label": "bombardier",
+          "variant": "gloomcrow · 0.82c",
+          "x": 256,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/bombardier.webp",
+          "note": "An override is a static pose — it replaces the whole walk cycle."
+        },
+        {
+          "id": "enemy/firebug",
+          "label": "firebug",
+          "variant": "dustmoth · 0.9c",
+          "x": 384,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/firebug.webp",
+          "note": "An override is a static pose — it replaces the whole walk cycle."
+        },
+        {
+          "id": "enemy/eel",
+          "label": "eel",
+          "variant": "sliverfin · 0.85c",
+          "x": 512,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/eel.webp",
+          "note": "Sea creature: a fish, not a serpent. Drawn twice per frame and clipped at the waterline, so the tail must trail DOWNWARD."
+        },
+        {
+          "id": "enemy/shark",
+          "label": "shark",
+          "variant": "gnashfin · 1c",
+          "x": 640,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/shark.webp",
+          "note": "Sea creature: a fish, not a serpent. Drawn twice per frame and clipped at the waterline, so the tail must trail DOWNWARD."
+        },
+        {
+          "id": "enemy/kraken",
+          "label": "kraken",
+          "variant": "brinemaw · 1.25c",
+          "x": 0,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/kraken.webp",
+          "note": "Sea creature: a fish, not a serpent. Drawn twice per frame and clipped at the waterline, so the tail must trail DOWNWARD."
+        },
+        {
+          "id": "enemy/seadrake",
+          "label": "seadrake",
+          "variant": "tidewyrm · 1.4c",
+          "x": 128,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/seadrake.webp",
+          "note": "Sea creature: a fish, not a serpent. Drawn twice per frame and clipped at the waterline, so the tail must trail DOWNWARD."
+        },
+        {
+          "id": "enemy/golem",
+          "label": "golem",
+          "variant": "thornwick · 1.45c",
+          "x": 256,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/golem.webp",
+          "note": "An override is a static pose — it replaces the whole walk cycle."
+        },
+        {
+          "id": "enemy/alt/rattlejack",
+          "label": "rattlejack",
+          "variant": "alt of grunt",
+          "x": 384,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "Second body for grunt. No slot of its own — that enemy's bitmap replaces both."
+        },
+        {
+          "id": "enemy/alt/wispling",
+          "label": "wispling",
+          "variant": "alt of bat",
+          "x": 512,
+          "y": 256,
+          "w": 128,
+          "h": 128,
+          "note": "Second body for bat. No slot of its own — that enemy's bitmap replaces both."
+        }
+      ],
+      "singles": [
+        {
+          "id": "enemy/grunt",
+          "file": "cell-enemy-grunt.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "enemy/grunt",
+              "label": "grunt",
+              "variant": "grumpling · 0.62c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/grunt.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemy/runner",
+          "file": "cell-enemy-runner.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "enemy/runner",
+              "label": "runner",
+              "variant": "cinderhound · 0.55c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/runner.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemy/slinger",
+          "file": "cell-enemy-slinger.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "enemy/slinger",
+              "label": "slinger",
+              "variant": "bonecap · 0.6c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/slinger.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemy/brute",
+          "file": "cell-enemy-brute.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "enemy/brute",
+              "label": "brute",
+              "variant": "snaggletusk · 0.85c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/brute.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemy/bomber",
+          "file": "cell-enemy-bomber.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "enemy/bomber",
+              "label": "bomber",
+              "variant": "blorp · 0.66c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/bomber.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemy/bat",
+          "file": "cell-enemy-bat.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "enemy/bat",
+              "label": "bat",
+              "variant": "nibbler · 0.5c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/bat.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemy/bulwark",
+          "file": "cell-enemy-bulwark.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "enemy/bulwark",
+              "label": "bulwark",
+              "variant": "marrowknight · 0.78c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/bulwark.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemy/wyvern",
+          "file": "cell-enemy-wyvern.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "enemy/wyvern",
+              "label": "wyvern",
+              "variant": "skewer · 0.8c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/wyvern.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemy/bombardier",
+          "file": "cell-enemy-bombardier.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "enemy/bombardier",
+              "label": "bombardier",
+              "variant": "gloomcrow · 0.82c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/bombardier.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemy/firebug",
+          "file": "cell-enemy-firebug.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "enemy/firebug",
+              "label": "firebug",
+              "variant": "dustmoth · 0.9c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/firebug.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemy/eel",
+          "file": "cell-enemy-eel.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "enemy/eel",
+              "label": "eel",
+              "variant": "sliverfin · 0.85c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/eel.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemy/shark",
+          "file": "cell-enemy-shark.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "enemy/shark",
+              "label": "shark",
+              "variant": "gnashfin · 1c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/shark.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemy/kraken",
+          "file": "cell-enemy-kraken.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "enemy/kraken",
+              "label": "kraken",
+              "variant": "brinemaw · 1.25c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/kraken.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemy/seadrake",
+          "file": "cell-enemy-seadrake.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "enemy/seadrake",
+              "label": "seadrake",
+              "variant": "tidewyrm · 1.4c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/seadrake.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemy/golem",
+          "file": "cell-enemy-golem.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "enemy/golem",
+              "label": "golem",
+              "variant": "thornwick · 1.45c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/golem.webp"
+            }
+          ]
+        }
+      ],
+      "strips": [
+        {
+          "id": "enemies-r0",
+          "file": "strip-enemies-r0.png",
+          "row": 0,
+          "width": 1536,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "enemy/grunt",
+              "label": "grunt",
+              "variant": "grumpling · 0.62c",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/grunt.webp"
+            },
+            {
+              "id": "enemy/runner",
+              "label": "runner",
+              "variant": "cinderhound · 0.55c",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/runner.webp"
+            },
+            {
+              "id": "enemy/slinger",
+              "label": "slinger",
+              "variant": "bonecap · 0.6c",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/slinger.webp"
+            },
+            {
+              "id": "enemy/brute",
+              "label": "brute",
+              "variant": "snaggletusk · 0.85c",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/brute.webp"
+            },
+            {
+              "id": "enemy/bomber",
+              "label": "bomber",
+              "variant": "blorp · 0.66c",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/bomber.webp"
+            },
+            {
+              "id": "enemy/bat",
+              "label": "bat",
+              "variant": "nibbler · 0.5c",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/bat.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemies-r1",
+          "file": "strip-enemies-r1.png",
+          "row": 1,
+          "width": 1536,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "enemy/bulwark",
+              "label": "bulwark",
+              "variant": "marrowknight · 0.78c",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/bulwark.webp"
+            },
+            {
+              "id": "enemy/wyvern",
+              "label": "wyvern",
+              "variant": "skewer · 0.8c",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/wyvern.webp"
+            },
+            {
+              "id": "enemy/bombardier",
+              "label": "bombardier",
+              "variant": "gloomcrow · 0.82c",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/bombardier.webp"
+            },
+            {
+              "id": "enemy/firebug",
+              "label": "firebug",
+              "variant": "dustmoth · 0.9c",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/firebug.webp"
+            },
+            {
+              "id": "enemy/eel",
+              "label": "eel",
+              "variant": "sliverfin · 0.85c",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/eel.webp"
+            },
+            {
+              "id": "enemy/shark",
+              "label": "shark",
+              "variant": "gnashfin · 1c",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/shark.webp"
+            }
+          ]
+        },
+        {
+          "id": "enemies-r2",
+          "file": "strip-enemies-r2.png",
+          "row": 2,
+          "width": 1536,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "enemy/kraken",
+              "label": "kraken",
+              "variant": "brinemaw · 1.25c",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/kraken.webp"
+            },
+            {
+              "id": "enemy/seadrake",
+              "label": "seadrake",
+              "variant": "tidewyrm · 1.4c",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/seadrake.webp"
+            },
+            {
+              "id": "enemy/golem",
+              "label": "golem",
+              "variant": "thornwick · 1.45c",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/golem.webp"
+            },
+            {
+              "id": "enemy/alt/rattlejack",
+              "label": "rattlejack",
+              "variant": "alt of grunt",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "enemy/alt/wispling",
+              "label": "wispling",
+              "variant": "alt of bat",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "siege",
+      "title": "Siege engines",
+      "brief": "The six wheeled engines, engaged and mid-cycle. The largest silhouettes in the game and the ones that lose most to a static bitmap.",
+      "files": {
+        "clean": "sheet-siege.png",
+        "clean2x": "sheet-siege@2x.png",
+        "key": "sheet-siege-key.png"
+      },
+      "cols": 3,
+      "rows": 2,
+      "width": 384,
+      "height": 256,
+      "cells": [
+        {
+          "id": "siege/ram",
+          "label": "ram",
+          "variant": "1.15c",
+          "x": 0,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/ram.webp",
+          "note": "Chassis only if you can help it: the wheels, arm and ramp animate off the simulation and a static override loses all of it."
+        },
+        {
+          "id": "siege/ballista",
+          "label": "ballista",
+          "variant": "1.2c",
+          "x": 128,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/ballista.webp",
+          "note": "Chassis only if you can help it: the wheels, arm and ramp animate off the simulation and a static override loses all of it."
+        },
+        {
+          "id": "siege/catapult",
+          "label": "catapult",
+          "variant": "1.45c",
+          "x": 256,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/catapult.webp",
+          "note": "Chassis only if you can help it: the wheels, arm and ramp animate off the simulation and a static override loses all of it."
+        },
+        {
+          "id": "siege/siegeTower",
+          "label": "siegeTower",
+          "variant": "1.05c",
+          "x": 0,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/siegeTower.webp",
+          "note": "Chassis only if you can help it: the wheels, arm and ramp animate off the simulation and a static override loses all of it."
+        },
+        {
+          "id": "siege/trebuchet",
+          "label": "trebuchet",
+          "variant": "1.7c",
+          "x": 128,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/trebuchet.webp",
+          "note": "Chassis only if you can help it: the wheels, arm and ramp animate off the simulation and a static override loses all of it."
+        },
+        {
+          "id": "siege/ironRam",
+          "label": "ironRam",
+          "variant": "1.35c",
+          "x": 256,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/enemies/ironRam.webp",
+          "note": "COLD IRON. It is the only enemy immune to arrows, and the riveted plate — with spent arrows lodged in it — is the whole of how the player is told. Never timber."
+        }
+      ],
+      "singles": [
+        {
+          "id": "siege/ram",
+          "file": "cell-siege-ram.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "siege/ram",
+              "label": "ram",
+              "variant": "1.15c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/ram.webp"
+            }
+          ]
+        },
+        {
+          "id": "siege/ballista",
+          "file": "cell-siege-ballista.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "siege/ballista",
+              "label": "ballista",
+              "variant": "1.2c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/ballista.webp"
+            }
+          ]
+        },
+        {
+          "id": "siege/catapult",
+          "file": "cell-siege-catapult.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "siege/catapult",
+              "label": "catapult",
+              "variant": "1.45c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/catapult.webp"
+            }
+          ]
+        },
+        {
+          "id": "siege/siegeTower",
+          "file": "cell-siege-siegeTower.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "siege/siegeTower",
+              "label": "siegeTower",
+              "variant": "1.05c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/siegeTower.webp"
+            }
+          ]
+        },
+        {
+          "id": "siege/trebuchet",
+          "file": "cell-siege-trebuchet.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "siege/trebuchet",
+              "label": "trebuchet",
+              "variant": "1.7c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/trebuchet.webp"
+            }
+          ]
+        },
+        {
+          "id": "siege/ironRam",
+          "file": "cell-siege-ironRam.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "siege/ironRam",
+              "label": "ironRam",
+              "variant": "1.35c",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/enemies/ironRam.webp"
+            }
+          ]
+        }
+      ],
+      "strips": [
+        {
+          "id": "siege-r0",
+          "file": "strip-siege-r0.png",
+          "row": 0,
+          "width": 768,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "siege/ram",
+              "label": "ram",
+              "variant": "1.15c",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/ram.webp"
+            },
+            {
+              "id": "siege/ballista",
+              "label": "ballista",
+              "variant": "1.2c",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/ballista.webp"
+            },
+            {
+              "id": "siege/catapult",
+              "label": "catapult",
+              "variant": "1.45c",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/catapult.webp"
+            }
+          ]
+        },
+        {
+          "id": "siege-r1",
+          "file": "strip-siege-r1.png",
+          "row": 1,
+          "width": 768,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "siege/siegeTower",
+              "label": "siegeTower",
+              "variant": "1.05c",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/siegeTower.webp"
+            },
+            {
+              "id": "siege/trebuchet",
+              "label": "trebuchet",
+              "variant": "1.7c",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/trebuchet.webp"
+            },
+            {
+              "id": "siege/ironRam",
+              "label": "ironRam",
+              "variant": "1.35c",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/enemies/ironRam.webp"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "allies",
+      "title": "Ally and projectiles",
+      "brief": "The cavalry ally plus every projectile kind. Two of the rounds are live effects and cannot be bitmaps.",
+      "files": {
+        "clean": "sheet-allies-rounds.png",
+        "clean2x": "sheet-allies-rounds@2x.png",
+        "key": "sheet-allies-rounds-key.png"
+      },
+      "cols": 8,
+      "rows": 1,
+      "width": 1024,
+      "height": 128,
+      "cells": [
+        {
+          "id": "ally/cavalry",
+          "label": "cavalry",
+          "variant": "0.80c · ally",
+          "x": 0,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "target": "images/allies/cavalry.webp",
+          "note": "Cool blue, gold pennant, facing right. Must stay unmistakable against the warm-toned enemies at a glance."
+        },
+        {
+          "id": "projectile/bolt",
+          "label": "bolt",
+          "variant": "round",
+          "x": 128,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "Arrow. The most-fired round in the game. No override hook today — adding one means a projectile probe keyed by kind."
+        },
+        {
+          "id": "projectile/ball",
+          "label": "ball",
+          "variant": "round",
+          "x": 256,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "Cannonball. No override hook today — adding one means a projectile probe keyed by kind."
+        },
+        {
+          "id": "projectile/shell",
+          "label": "shell",
+          "variant": "round",
+          "x": 384,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "Mortar shell — finned, fuse lit, points along its arc. No override hook today — adding one means a projectile probe keyed by kind."
+        },
+        {
+          "id": "projectile/bomb",
+          "label": "bomb",
+          "variant": "round",
+          "x": 512,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "Enemy ordnance, nose-down along its fall. No override hook today — adding one means a projectile probe keyed by kind."
+        },
+        {
+          "id": "projectile/fire",
+          "label": "fire",
+          "variant": "round",
+          "x": 640,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "Molotov, tumbling. No override hook today — adding one means a projectile probe keyed by kind."
+        },
+        {
+          "id": "projectile/frost",
+          "label": "frost",
+          "variant": "live FX",
+          "x": 768,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "The frost round is a live particle emitter; this is only its core shard."
+        }
+      ],
+      "singles": [
+        {
+          "id": "ally/cavalry",
+          "file": "cell-ally-cavalry.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "ally/cavalry",
+              "label": "cavalry",
+              "variant": "0.80c · ally",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/allies/cavalry.webp"
+            }
+          ]
+        }
+      ],
+      "strips": [
+        {
+          "id": "allies-r0",
+          "file": "strip-allies-r0.png",
+          "row": 0,
+          "width": 2048,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "ally/cavalry",
+              "label": "cavalry",
+              "variant": "0.80c · ally",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/allies/cavalry.webp"
+            },
+            {
+              "id": "projectile/bolt",
+              "label": "bolt",
+              "variant": "round",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "projectile/ball",
+              "label": "ball",
+              "variant": "round",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "projectile/shell",
+              "label": "shell",
+              "variant": "round",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "projectile/bomb",
+              "label": "bomb",
+              "variant": "round",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "projectile/fire",
+              "label": "fire",
+              "variant": "round",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "projectile/frost",
+              "label": "frost",
+              "variant": "live FX",
+              "x": 1536,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "props",
+      "title": "Props, sky bodies and shipped UI",
+      "brief": "The discrete background objects and the four bitmaps that already ship. The tileable parallax bands are deliberately absent — they need a strip, not a grid.",
+      "files": {
+        "clean": "sheet-props-sky.png",
+        "clean2x": "sheet-props-sky@2x.png",
+        "key": "sheet-props-sky-key.png"
+      },
+      "cols": 6,
+      "rows": 2,
+      "width": 768,
+      "height": 256,
+      "cells": [
+        {
+          "id": "prop/conifer",
+          "label": "conifer",
+          "variant": "forest band",
+          "x": 0,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "Stacked canopy tiers with a lit right edge. Reads at 30 px in a parallax band, so silhouette over detail."
+        },
+        {
+          "id": "prop/broadleaf",
+          "label": "broadleaf",
+          "variant": "forest band",
+          "x": 128,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "The other half of the tree line. Must not read as the conifer at distance."
+        },
+        {
+          "id": "sky/sun",
+          "label": "sun",
+          "variant": "day disc",
+          "x": 256,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "Disc plus its ray fan. The wide bloom wash across the sky and the dawn/day/dusk tinting are painted around this, not into it, so they stay procedural."
+        },
+        {
+          "id": "sky/moon",
+          "label": "moon",
+          "variant": "night disc",
+          "x": 384,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "note": "Cratered disc, no rays. Identical at every wave tier — the blood moon is the SKY going red behind it, not the moon itself."
+        },
+        {
+          "id": "ui/coin",
+          "label": "coin",
+          "variant": "shipped bitmap",
+          "x": 512,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "target": "images/props/coin_128x128.webp",
+          "letterboxed": {
+            "w": 128,
+            "h": 128
+          },
+          "note": "Already a bitmap. Letterboxed into the cell here — check its real aspect ratio in the index before overwriting it."
+        },
+        {
+          "id": "ui/movie",
+          "label": "movie",
+          "variant": "rewarded button",
+          "x": 640,
+          "y": 0,
+          "w": 128,
+          "h": 128,
+          "target": "images/icons/movie_128x96.webp",
+          "letterboxed": {
+            "w": 128,
+            "h": 96
+          },
+          "note": "Already a bitmap. Letterboxed into the cell here — check its real aspect ratio in the index before overwriting it."
+        },
+        {
+          "id": "ui/ribbon",
+          "label": "ribbon",
+          "variant": "result screen",
+          "x": 0,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/bg/parchment-ribbon_553x188.webp",
+          "letterboxed": {
+            "w": 553,
+            "h": 188
+          },
+          "note": "Already a bitmap. Letterboxed into the cell here — check its real aspect ratio in the index before overwriting it."
+        },
+        {
+          "id": "ui/logo",
+          "label": "logo",
+          "variant": "splash",
+          "x": 128,
+          "y": 128,
+          "w": 128,
+          "h": 128,
+          "target": "images/logo/logo_256x256.webp",
+          "letterboxed": {
+            "w": 256,
+            "h": 256
+          },
+          "note": "Already a bitmap. Letterboxed into the cell here — check its real aspect ratio in the index before overwriting it."
+        }
+      ],
+      "singles": [
+        {
+          "id": "ui/coin",
+          "file": "cell-ui-coin.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "ui/coin",
+              "label": "coin",
+              "variant": "shipped bitmap",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/props/coin_128x128.webp",
+              "letterboxed": {
+                "w": 128,
+                "h": 128
+              }
+            }
+          ]
+        },
+        {
+          "id": "ui/movie",
+          "file": "cell-ui-movie.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "ui/movie",
+              "label": "movie",
+              "variant": "rewarded button",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/icons/movie_128x96.webp",
+              "letterboxed": {
+                "w": 128,
+                "h": 96
+              }
+            }
+          ]
+        },
+        {
+          "id": "ui/ribbon",
+          "file": "cell-ui-ribbon.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "ui/ribbon",
+              "label": "ribbon",
+              "variant": "result screen",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/bg/parchment-ribbon_553x188.webp",
+              "letterboxed": {
+                "w": 553,
+                "h": 188
+              }
+            }
+          ]
+        },
+        {
+          "id": "ui/logo",
+          "file": "cell-ui-logo.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "ui/logo",
+              "label": "logo",
+              "variant": "splash",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/logo/logo_256x256.webp",
+              "letterboxed": {
+                "w": 256,
+                "h": 256
+              }
+            }
+          ]
+        }
+      ],
+      "strips": [
+        {
+          "id": "props-r0",
+          "file": "strip-props-r0.png",
+          "row": 0,
+          "width": 1536,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "prop/conifer",
+              "label": "conifer",
+              "variant": "forest band",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "prop/broadleaf",
+              "label": "broadleaf",
+              "variant": "forest band",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "sky/sun",
+              "label": "sun",
+              "variant": "day disc",
+              "x": 512,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "sky/moon",
+              "label": "moon",
+              "variant": "night disc",
+              "x": 768,
+              "y": 0,
+              "w": 256,
+              "h": 256
+            },
+            {
+              "id": "ui/coin",
+              "label": "coin",
+              "variant": "shipped bitmap",
+              "x": 1024,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/props/coin_128x128.webp",
+              "letterboxed": {
+                "w": 128,
+                "h": 128
+              }
+            },
+            {
+              "id": "ui/movie",
+              "label": "movie",
+              "variant": "rewarded button",
+              "x": 1280,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/icons/movie_128x96.webp",
+              "letterboxed": {
+                "w": 128,
+                "h": 96
+              }
+            }
+          ]
+        },
+        {
+          "id": "props-r1",
+          "file": "strip-props-r1.png",
+          "row": 1,
+          "width": 1536,
+          "height": 256,
+          "cell": 256,
+          "cells": [
+            {
+              "id": "ui/ribbon",
+              "label": "ribbon",
+              "variant": "result screen",
+              "x": 0,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/bg/parchment-ribbon_553x188.webp",
+              "letterboxed": {
+                "w": 553,
+                "h": 188
+              }
+            },
+            {
+              "id": "ui/logo",
+              "label": "logo",
+              "variant": "splash",
+              "x": 256,
+              "y": 0,
+              "w": 256,
+              "h": 256,
+              "target": "images/logo/logo_256x256.webp",
+              "letterboxed": {
+                "w": 256,
+                "h": 256
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

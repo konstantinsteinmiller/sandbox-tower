@@ -18,7 +18,8 @@ export default {
     'rotateLeft': 'Pivoter à gauche',
     'rotateRight': 'Pivoter à droite',
     'arrowRain': 'Pluie de flèches',
-    'arrowRainAim': 'Touchez le champ de bataille pour lancer la volée'
+    'arrowRainAim': 'Touchez le champ de bataille pour lancer la volée',
+    'extendRange': '+{n} % de portée'
   },
 
   'warnings': {
@@ -26,7 +27,8 @@ export default {
     'air': 'Air ×{n}',
     'sea': 'Mer ×{n}',
     'bombers': 'Explosifs ×{n}',
-    'siege': 'Siège ×{n}'
+    'siege': 'Siège ×{n}',
+    'outOfReach': 'Hors de portée ×{n} — il faut {m} de portée'
   },
   'hints': {
     'selectBlock': { 'touch': 'Touchez un bloc en bas pour le choisir', 'desktop': 'Cliquez sur un bloc en bas pour le choisir' },
@@ -150,7 +152,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': 'Cavalerie'
+    'cavalry': 'Cavalerie',
+    'cavalryFree': 'Sortie de cavalerie gratuite',
+    'free': 'Gratuit',
+    'outOfReachHint': 'Hors de portée — sortez à cheval ou augmentez votre portée'
   },
 
   'result': {

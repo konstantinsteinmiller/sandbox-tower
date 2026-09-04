@@ -337,6 +337,126 @@ const syncRerollClocks = (): void => {
 /** Live cavalry count, for the HUD button's badge. */
 export const allyCount = ref(0)
 
+// ─── Reaching a standoff engine ─────────────────────────────────────────────
+//
+// A trebuchet parks at twelve cells. Archer reaches 7.5, cannon 8.5, bombard 9
+// — so a player who never bought a Mortar, a War Galley or a rank of Long Sight
+// watches one flatten the tower with every gun they own firing at nothing. The
+// design intends that pressure; what it never intended is for the player to
+// have NO readable answer at the moment it happens, which is the rage-quit.
+//
+// So the simulation publishes the fact itself: how far the tower can actually
+// shoot, and how many engines on the field are standing beyond it. The HUD
+// turns that into a warning before the wave, a free sortie during it, and a
+// paid reach extension for the player who would rather not ride out.
+
+/** How far the tower's longest gun reaches right now, in cells. 0 with no gun.
+ *
+ *  Measured through the live range multiplier, not off the printed range: ranks
+ *  of Long Sight genuinely do walk a bombard out to a trebuchet, and telling
+ *  that player they are outranged would be the warning lying to them. */
+export const bestWeaponReach = (): number => {
+  let best = 0
+  for (const b of towerBlocks()) {
+    const w = blockDef(b.typeId).weapon
+    if (!w) continue
+    const r = w.range * mRange
+    if (r > best) best = r
+  }
+  return best
+}
+
+/** Can anything on the tower put a shot on this enemy where it stands?
+ *
+ *  Exact geometry rather than "range vs standoff": a gun on the far shoulder of
+ *  a wide tower is metres further from the engine than the printed numbers
+ *  suggest, and during a battle the honest test is the cheap one. */
+const isReachable = (e: Enemy): boolean => {
+  for (const b of towerBlocks()) {
+    const w = blockDef(b.typeId).weapon
+    if (!w) continue
+    if (!w.hitsAir && enemyDef(e.typeId).movement === 'air') continue
+    const r = w.range * mRange
+    const dx = e.x - centreX(b)
+    const dy = e.y - centreY(b)
+    if (dx * dx + dy * dy <= r * r) return true
+  }
+  return false
+}
+
+/** Standoff engines currently alive that no gun on the tower can answer. */
+export const unreachableSiege = ref(0)
+
+/** Throttle for the scan above — it walks every turret per engine, and the
+ *  answer cannot change meaningfully inside a quarter second. */
+let reachScanIn = 0
+
+const scanUnreachable = (dt: number): void => {
+  reachScanIn -= dt
+  if (reachScanIn > 0) return
+  reachScanIn = 250
+  let n = 0
+  for (const e of enemies) {
+    if (e.dying > 0) continue
+    if (!enemyDef(e.typeId).siege?.standoff) continue
+    if (!isReachable(e)) n++
+  }
+  if (unreachableSiege.value !== n) unreachableSiege.value = n
+}
+
+/**
+ * When a sortie costs nothing.
+ *
+ * The rule is "the player has no answer on the field", not "there is siege" —
+ * so it is true exactly while an engine stands beyond every gun AND no rider is
+ * already out. It cannot be farmed (a second free squad is never granted while
+ * the first lives) and it cannot strand (if the squad dies with the engine
+ * still parked, the next one is free again). Cavalry is the only counter left
+ * in that state, and charging forty coins for the only move on the board is a
+ * tax, not a decision.
+ */
+export const isCavalryFree = computed(
+  () => phase.value === 'battle' && unreachableSiege.value > 0 && allyCount.value === 0
+)
+
+// ─── Siege spotters (rewarded reach extension) ──────────────────────────────
+//
+// The paid answer for a player who would rather keep shooting than ride out.
+// It lasts to the end of the wave rather than for a timer: it is bought in the
+// middle of the emergency it solves, so a countdown would only make the player
+// watch a clock instead of the battle, and it can never carry into a wave that
+// did not need it.
+
+/** What spotters multiply every weapon's range by. 1.8 is chosen against the
+ *  worst honest case: an archer-only tower (7.5) reaching a trebuchet at 12. */
+export const RANGE_BUFF_MUL = 1.8
+
+/** True while spotters are up. */
+export const isRangeBuffed = ref(false)
+
+/** The multiplier turrets and the range rings both read. */
+export const effectiveRangeMul = computed(
+  () => rangeMul.value * (isRangeBuffed.value ? RANGE_BUFF_MUL : 1)
+)
+
+const syncRangeMul = (): void => { mRange = effectiveRangeMul.value }
+
+/** Grant spotters for the rest of the wave. Called after the rewarded video. */
+export const grantRangeBuff = (): void => {
+  isRangeBuffed.value = true
+  syncRangeMul()
+  // The scan is what drives the free-cavalry offer and the HUD hint; leaving it
+  // a quarter second stale would keep an "outranged" warning on screen after
+  // the player just paid to fix it.
+  reachScanIn = 0
+}
+
+const clearRangeBuff = (): void => {
+  if (!isRangeBuffed.value) return
+  isRangeBuffed.value = false
+  syncRangeMul()
+}
+
 /** Wave-clear payload for the toast; null while nothing is pending. */
 export const lastWaveReward = shallowRef<{
   wave: number
@@ -1973,6 +2093,57 @@ export const SIEGE_BURN_DPS = 8
 export const isFlamingSiege = (def: EnemyDef, atWave: number): boolean =>
   def.siege?.lobbed === true && def.id === 'catapult' && atWave >= PITCH_WAVE
 
+/**
+ * Loose one bolt from a direct-fire standoff engine.
+ *
+ * The ballista used to resolve its shot with `damageBlock` the instant the
+ * cooldown expired: eight cells of nothing crossed, damage simply appearing on
+ * the target. The muzzle smoke was the only cue, so from the player's side the
+ * machine did not visibly shoot at all.
+ *
+ * A bolt is NOT a lob. It flies flat and fast — that is the whole difference
+ * between this engine and the catapult next to it, and it is what makes a
+ * ballista read as a sniper rather than as a smaller trebuchet.
+ */
+/**
+ * Cells per second. The player's own archer bolt travels at 17.
+ *
+ * Fast enough to read as direct fire rather than a lob, slow enough to actually
+ * be seen: at 26 it crossed the eight-cell standoff in three tenths of a second
+ * and the shot was over before the eye found it.
+ */
+const SIEGE_BOLT_SPEED = 18
+
+const shootSiegeBolt = (e: Enemy, def: EnemyDef, target: Block): void => {
+  // From the embrasure in the pavise, not the axle.
+  const sx = e.x + e.dir * def.scale * 0.42
+  const sy = e.y + def.scale * 0.5
+  const dx = centreX(target) - sx
+  const dy = centreY(target) - sy
+  const dist = Math.max(0.001, Math.hypot(dx, dy))
+
+  const bolt = acquireProjectile()
+  bolt.uid = uidCounter++
+  bolt.kind = 'bolt'
+  bolt.x = sx
+  bolt.y = sy
+  bolt.vx = (dx / dist) * SIEGE_BOLT_SPEED
+  bolt.vy = (dy / dist) * SIEGE_BOLT_SPEED
+  bolt.damage = def.damage
+  bolt.splash = def.siege?.splash ?? 0
+  // Flat: no arc, so it arrives while the machine is still recoiling.
+  bolt.ballistic = false
+  bolt.targetUid = -1
+  bolt.life = (dist / SIEGE_BOLT_SPEED) * 1000 + 1500
+  bolt.slowPct = 0
+  bolt.slowMs = 0
+  bolt.sourceUid = -1
+  bolt.hostile = true
+  bolt.burnMs = undefined
+  bolt.burnDps = undefined
+  projectiles.push(bolt)
+}
+
 const lobSiegeStone = (e: Enemy, def: EnemyDef, target: Block): void => {
   const sx = e.x + e.dir * def.scale * 0.3
   const sy = e.y + def.scale * 0.62
@@ -2173,6 +2344,8 @@ const stepEnemies = (dt: number): void => {
         // purpose — a ballista's bolt is direct fire and has no arc to draw.
         if (def.siege.lobbed) {
           lobSiegeStone(e, def, target)
+        } else if (def.siege.direct) {
+          shootSiegeBolt(e, def, target)
         } else if (splash > 0) {
           pushFx({ kind: 'explosion', x: centreX(target), y: centreY(target), radius: splash })
           damageBlocksInRadius(centreX(target), centreY(target), splash, def.damage)
@@ -2870,7 +3043,10 @@ const triggerImpactFx = (b: Block, landRow: number, impact: number): void => {
 const cacheTechMultipliers = (): void => {
   mDamage = damageMul.value
   mFireRate = fireRateMul.value
-  mRange = rangeMul.value
+  // Folded, not replaced: a mid-run tech purchase recaches every multiplier,
+  // and reading the bare tech value here would silently cancel a spotter buff
+  // the player just paid for.
+  mRange = effectiveRangeMul.value
   mSplash = splashMul.value
   mChain = chainBonus.value
   mArmor = armorBonus.value
@@ -3103,6 +3279,8 @@ export const debugSetWave = (n: number): void => {
   debris.length = 0
   allies.length = 0
   allyCount.value = 0
+  unreachableSiege.value = 0
+  clearRangeBuff()
   enemiesLeft.value = 0
   enemiesTotal.value = 0
   spawnCursor = 0
@@ -3200,6 +3378,12 @@ const completeWave = (): void => {
   // One wave of the three per wave cleared. Capped rather than allowed to run
   // over: this is an emergency button, not a resource to hoard.
   arrowRainStock.value = Math.min(ARROW_RAIN_WAVES, arrowRainStock.value + 1)
+
+  // Spotters were bought for THIS wave's emergency and end with it. Carrying
+  // them would turn one video into a permanent answer to the whole standoff
+  // family, which is the tech tree's job.
+  clearRangeBuff()
+  unreachableSiege.value = 0
 
   runCoins.value += gainedGold
   runCoinsEarned.value += gainedGold
@@ -3367,6 +3551,8 @@ const clearWorld = (): void => {
   spawnCursor = 0
   waveClock = 0
   plan = { wave: 0, orders: [], total: 0, boss: false }
+  unreachableSiege.value = 0
+  clearRangeBuff()
 }
 
 const spawnGate = (hp?: number, level = 0): void => {
@@ -3612,6 +3798,7 @@ const fixedStep = (dt: number): void => {
   stepDebris(dt)
   stepBurning(dt)
   syncGateRefs()
+  scanUnreachable(dt)
 
   const allSpawned = spawnCursor >= plan.orders.length
   // `enemies.length`, not "every enemy is dying".

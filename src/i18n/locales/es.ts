@@ -18,7 +18,8 @@ export default {
     'rotateLeft': 'Girar a la izquierda',
     'rotateRight': 'Girar a la derecha',
     'arrowRain': 'Lluvia de flechas',
-    'arrowRainAim': 'Toca el campo de batalla para lanzar la descarga'
+    'arrowRainAim': 'Toca el campo de batalla para lanzar la descarga',
+    'extendRange': '+{n}% de alcance'
   },
 
   'warnings': {
@@ -26,7 +27,8 @@ export default {
     'air': 'Aire ×{n}',
     'sea': 'Mar ×{n}',
     'bombers': 'Explosivos ×{n}',
-    'siege': 'Asedio ×{n}'
+    'siege': 'Asedio ×{n}',
+    'outOfReach': 'Fuera de alcance ×{n} — necesitas {m} de alcance'
   },
   'hints': {
     'selectBlock': { 'touch': 'Toca un bloque de abajo para elegirlo', 'desktop': 'Haz clic en un bloque de abajo para elegirlo' },
@@ -150,7 +152,10 @@ export default {
 
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
-    'cavalry': 'Caballería'
+    'cavalry': 'Caballería',
+    'cavalryFree': 'Carga de caballería gratis',
+    'free': 'Gratis',
+    'outOfReachHint': 'Fuera de alcance: sal a caballo o amplía tu alcance'
   },
 
   'result': {

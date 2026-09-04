@@ -27,7 +27,8 @@ const ALL_PLATFORM_ENVS = [
   'VITE_APP_GAME_DISTRIBUTION',
   'VITE_APP_GAME_MONETIZE',
   'VITE_APP_YANDEX',
-  'VITE_APP_GLITCH'
+  'VITE_APP_GLITCH',
+  'VITE_APP_POKI'
 ] as const
 
 const clearEnv = () => {
@@ -126,5 +127,18 @@ describe('resolveSaveStrategy', () => {
       })
       expect(strategy.name).toBe('crazyGames')
     })
+  })
+
+  it('returns the Poki strategy when VITE_APP_POKI env is set', async () => {
+    vi.stubEnv('VITE_APP_POKI', 'true')
+    const resolveSaveStrategy = await loadResolver()
+    const strategy = await resolveSaveStrategy({ ...allOff, isPoki: true })
+    // Local-only by design: Poki has no cloud-save API — its wrapper mirrors
+    // the iframe's localStorage + IndexedDB itself for logged-in players. The
+    // dedicated class exists so `SaveManager.strategyName` reports `poki`,
+    // which is how Poki QA confirms the right strategy from the console.
+    expect(strategy.name).toBe('poki')
+    // No remote can be in a failed state, so the flush guard never engages.
+    expect(strategy.hydrateState).toBe('success-with-data')
   })
 })
