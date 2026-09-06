@@ -32,6 +32,10 @@ const makeCtx = () => {
     }
   }
 
+  // A real CanvasPattern is opaque; the renderer only ever assigns it to
+  // `fillStyle`, so an inert token is a faithful stand-in.
+  const pattern = { __pattern: true } as unknown as CanvasPattern
+
   const gradient = {
     addColorStop: (offset: number) => {
       track('addColorStop', [offset])
@@ -59,7 +63,13 @@ const makeCtx = () => {
     save: () => { track('save'); saveDepth++; maxSaveDepth = Math.max(maxSaveDepth, saveDepth) },
     restore: () => { track('restore'); saveDepth-- },
     createLinearGradient: (...args: number[]) => { track('createLinearGradient', args); return gradient },
-    createRadialGradient: (...args: number[]) => { track('createRadialGradient', args); return gradient }
+    createRadialGradient: (...args: number[]) => { track('createRadialGradient', args); return gradient },
+    // The paper-tooth pass bakes a grain tile and asks the context to repeat it.
+    // Without this the stub throws `createPattern is not a function` out of
+    // `renderBackground`, which fails every case in this file before it has
+    // drawn a single block — an outage of the whole suite dressed up as eight
+    // renderer bugs.
+    createPattern: (...args: unknown[]) => { track('createPattern'); void args; return pattern }
   }
 
   // Style properties are plain assignable fields, like the real thing.

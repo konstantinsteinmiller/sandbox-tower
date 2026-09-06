@@ -51,6 +51,28 @@ import type { Palette } from '@/game/art'
 /** Where the hooves land, in units of S. Ground units sit at `y = scale / 2`. */
 const GROUND = 0.5
 
+/**
+ * One gallop, ms.
+ *
+ * Exported because a painted strip has to be cut across the SAME cycle the
+ * drawing runs on. It was a local until the art bench needed to bake eight
+ * panels of it, and a second copy of the number in the bench is a second
+ * copy that goes stale — which shows up as a rider whose painted hooves
+ * beat at a different rate from the one it was drawn at.
+ */
+export const CAVALRY_CYCLE_MS = 500
+
+/**
+ * Where this rider is in its gallop, 0..1.
+ *
+ * The renderer indexes a painted strip with this and `drawCavalry` steps its
+ * legs with the same call, so the two cannot drift apart: a painted hoof
+ * lands on the beat the drawn one did, at the same per-rider phase offset
+ * that keeps a squad of three out of lockstep.
+ */
+export const cavalryCycle01 = (t: number, phase: number): number =>
+  gait(t, CAVALRY_CYCLE_MS, phase)
+
 const STEEL = tones('#9aa4b0', 1.3)
 const IRON = tones('#5c646f', 1.25)
 const LEATHER = tones('#6b5238', 1.05)
@@ -144,33 +166,20 @@ const leg = (
 }
 
 /**
- * Draw one rider.
+ * The dust a gallop kicks up, thickest at push-off.
  *
- * `phase` is the individual's gait offset so a squad of three never moves in
- * lockstep; `striking` couches the lance and drives the thrust.
+ * Its own function because it is the rider's LIVE layer, the way a deck gun is
+ * a ship's: four pale puffs trailing up to a body-length behind the horse, at
+ * a quarter alpha. That is exactly what a painted strip must not contain —
+ * over the magenta it keys to a pink smudge rather than to nothing, it sits
+ * far enough back to cross into the neighbouring panel of a sheet, and it is
+ * transient in a way a frame of a gait is not. So it is left out of the
+ * reference and drawn under the painted rider instead.
  */
-export const drawCavalry = (
-  ctx: CanvasRenderingContext2D, S: number, p: Palette,
-  opts: { phase: number; striking: boolean; t: number }
+export const drawCavalryDust = (
+  ctx: CanvasRenderingContext2D, S: number, t: number, phase: number
 ): void => {
-  const { phase, striking, t } = opts
-
-  // Livery from the ally palette, so a theme change carries the whole unit.
-  const CLOTH = tones(p.mid, 1.15)
-  const TRIM = p.accent
-
-  // ── The gallop ──
-  const CYCLE = 500
-  const g = gait(t, CYCLE, phase)
-  // Suspension: every hoof clear of the ground, body at its highest.
-  const airborne = Math.max(0, Math.sin(g * Math.PI * 2 + 0.6))
-  const bob = -airborne * 0.07 * S
-  // The spine flexes — the horse gathers under itself, then extends.
-  const gather = Math.cos(g * Math.PI * 2) * 0.028 * S
-
-  groundShadow(ctx, S, 0.5 - airborne * 0.13, GROUND + 0.04, 0.26 - airborne * 0.1)
-
-  // Dust, thickest at push-off. Behind everything, so it never veils the unit.
+  const g = gait(t, CAVALRY_CYCLE_MS, phase)
   const kick = Math.max(0, -Math.sin(g * Math.PI * 2))
   ctx.save()
   ctx.globalAlpha = 0.26
@@ -180,13 +189,42 @@ export const drawCavalry = (
     fillShape(ctx, blob(-d * S, GROUND * S - r * 0.35, r, r * 0.6, 300 + i, 0.24), '#c9bb9c')
   }
   ctx.restore()
+}
+
+/**
+ * Draw one rider.
+ *
+ * `phase` is the individual's gait offset so a squad of three never moves in
+ * lockstep; `striking` couches the lance and drives the thrust.
+ */
+export const drawCavalry = (
+  ctx: CanvasRenderingContext2D, S: number, p: Palette,
+  opts: { phase: number; striking: boolean; t: number; dust?: boolean }
+): void => {
+  const { phase, striking, t } = opts
+
+  // Livery from the ally palette, so a theme change carries the whole unit.
+  const CLOTH = tones(p.mid, 1.15)
+  const TRIM = p.accent
+
+  // ── The gallop ──
+  const g = gait(t, CAVALRY_CYCLE_MS, phase)
+  // Suspension: every hoof clear of the ground, body at its highest.
+  const airborne = Math.max(0, Math.sin(g * Math.PI * 2 + 0.6))
+  const bob = -airborne * 0.07 * S
+  // The spine flexes — the horse gathers under itself, then extends.
+  const gather = Math.cos(g * Math.PI * 2) * 0.028 * S
+
+  groundShadow(ctx, S, 0.5 - airborne * 0.13, GROUND + 0.04, 0.26 - airborne * 0.1)
+
+  if (opts.dust !== false) drawCavalryDust(ctx, S, t, phase)
 
   ctx.save()
   ctx.translate(0, bob)
 
   /** Transverse gallop: near hind, far hind, far fore, near fore. */
   const hoofAt = (offset: number, atX: number, reach: number, lift: number): Pt => {
-    const st = hoofPath(gait(t, CYCLE, phase + offset), reach * S, lift * S)
+    const st = hoofPath(gait(t, CAVALRY_CYCLE_MS, phase + offset), reach * S, lift * S)
     return [atX * S + st[0], GROUND * S + st[1]]
   }
 

@@ -72,3 +72,4 @@ __screenshots__/
 
 # Local agent/editor state — never distribute
 .claude/
+/public/images/assets compressed.zip

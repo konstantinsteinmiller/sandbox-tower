@@ -68,6 +68,20 @@ export const SUBMITTED_SCORE_KEY = 'ts_submitted_score'
  */
 export const RUN_KEY = 'ts_run'
 
+// ─── The mobile-fit game (Drop & Merge) ─────────────────────────────────────
+//
+// Its own run, tree, record and onboarding — a five-column drop board and the
+// desktop's open tower are different games, and a save from one must never be
+// restored into the other. The WALLET (`ts_coins`) and the lifetime counters
+// are deliberately shared: progress follows the player across devices.
+
+export const M2_RUN_KEY = 'ts_m2_run'
+export const M2_TECH_KEY = 'ts_m2_tech'
+export const M2_BEST_WAVE_KEY = 'ts_m2_best_wave'
+export const M2_ONBOARDED_KEY = 'ts_m2_onboarded'
+export const M2_TUTORIAL_KEY = 'ts_m2_tutorial'
+export const M2_TECH_INTRO_KEY = 'ts_m2_tech_intro'
+
 // ─── Retention systems ──────────────────────────────────────────────────────
 
 /** Daily missions: `{ day: 'YYYY-MM-DD', missions: Mission[] }` (regen per day). */

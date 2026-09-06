@@ -10,11 +10,23 @@ export default {
   'tip': '提示',
   'crazyGamesOnly': '本游戏仅在以下平台提供：',
 
+  // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'mobile': {
+    'rotatePortrait': '请竖持手机进行游戏',
+    'columnFull': '此列已满',
+    'repairAll': '全部修理',
+    'volley': '齐射',
+    'swap': '更换',
+    'menu': '菜单',
+    'materials': '材料',
+    'zoom': '缩放'
+  },
+
   'hud': {
     'wave': '波次', 'enemies': '敌人', 'callWave': '召唤波次', 'callBoss': '召唤首领',
     'speed': '速度 {n}×',
-    'speedOffer': '看广告获得双倍速度',
-    'speedFor': '{n} 分钟', 'recenter': '视角复位',
+    'speedOffer': '解锁 {n}× 速度',
+    'speedGroup': '游戏速度', 'recenter': '视角复位',
     'rotateLeft': '向左旋转',
     'rotateRight': '向右旋转',
     'arrowRain': '箭雨',
@@ -31,6 +43,14 @@ export default {
     'outOfReach': '超出射程 ×{n} — 需要 {m} 射程'
   },
   'hints': {
+    'dropBlock': {
+      'touch': '点击一列放下方块',
+      'desktop': '点击一列放下方块'
+    },
+    'mergeBlock': {
+      'touch': '把方块落在相同方块上即可合并',
+      'desktop': '把方块落在相同方块上即可合并'
+    },
     'selectBlock': { 'touch': '点击下方的方块来选择', 'desktop': '单击下方的方块来选择' },
     'placeBlock': { 'touch': '现在点击发光的格子进行建造', 'desktop': '现在单击发光的格子进行建造' },
     'camera': { 'touch': '拖动平移 · 双指缩放', 'desktop': '拖动平移 · 滚轮缩放' },
@@ -83,7 +103,6 @@ export default {
       'gate': '城门', 'wood': '木箱', 'brace': '加固木箱', 'stone': '石块',
       'archer': '弓箭塔', 'cannon': '加农炮', 'mortar': '迫击炮', 'tesla': '闪电线圈',
       'frost': '寒霜尖塔', 'repair': '维修站',
-      'sawmill': '锯木厂', 'quarry': '采石场', 'mint': '金矿',
       'spikes': '尖刺墙',
       'bombard': '臼炮'
     },
@@ -106,9 +125,6 @@ export default {
       'tesla': '在附近敌人之间跳跃的闪电。',
       'frost': '冻结整群敌人并大幅减速。',
       'repair': '在波次之间修复相邻方块。',
-      'sawmill': '每守住一波结束时产出木材。',
-      'quarry': '每守住一波结束时产出石材。',
-      'mint': '每守住一波结束时产出金币。',
       'spikes': '近战攻击它的敌人每次都会被反伤。',
       'bombard': '垂直抛射炮弹。爆炸范围很小，只能打地面目标。'
     },
@@ -138,6 +154,8 @@ export default {
 
   // ─── First-stage tutorial ─────────────────────────────────────────────────
   'tutorial': {
+    'drop': '点击一列放下方块。',
+    'merge': '把相同的方块叠在一起即可合并。',
     'gate': '守住城门，城门倒下即结束。',
     'gateSeeded': '我们为你搭好了初始堡垒。守住城门，城门倒下即结束。',
     'pick': '选择一个方块。',
@@ -177,6 +195,9 @@ export default {
   },
 
   'tech': {
+    'blueprints': {
+      'title': '蓝图'
+    },
     'intro1': '在这里购买的一切都是永久的，会带入之后的每一局。',
     'intro2': '每场攻城战都会给你金币，无论输赢。金币就在这里花。',
     'intro3': '金色节点你现在就买得起，蓝色还差金币，暗色需要先解锁前置节点。',
@@ -192,6 +213,7 @@ export default {
     'requires': '需要 {n}',
     'spotlight': '快花掉！',
     'names': {
+      'm2_lumberHut': '伐木小屋',
       'logistics': '后勤',
       'unlockCoffer': '金匣',
       'yields': '产出',
@@ -205,12 +227,12 @@ export default {
       'admiralty': '海军部',
       'foundations': '地基', 'sharpBolts': '锐利箭矢', 'unlockBrace': '加固木箱',
       'lumberStock': '木材储备', 'longSight': '远视', 'rapidFire': '速射',
-      'reinforced': '加固梁柱', 'unlockSawmill': '锯木厂', 'quarryStock': '石材储备',
+      'reinforced': '加固梁柱', 'unlockSawmill': '富矿脉', 'quarryStock': '石材储备',
       'unlockMortar': '迫击炮', 'heavyOrdnance': '重型火炮', 'unlockTesla': '闪电线圈',
-      'gateArmor': '城门护甲', 'unlockQuarry': '采石场', 'richHauls': '丰厚战利品',
+      'gateArmor': '城门护甲', 'unlockQuarry': '深层坤道', 'richHauls': '丰厚战利品',
       'wideFoundation': '宽阔地基', 'siegeShells': '攻城炮弹', 'unlockFrost': '寒霜尖塔',
       'forkedBolts': '分叉闪电', 'ironPlating': '铁质装甲', 'unlockRepair': '维修站',
-      'unlockMint': '金矿', 'looting': '掠夺', 'overcharge': '过载',
+      'unlockMint': '行会特许', 'looting': '掠夺', 'overcharge': '过载',
       'masterwork': '大师之作', 'fieldRepairs': '战地维修', 'greatFoundation': '宏伟地基',
       'warChest': '军费金库',
       'unlockSpikes': '尖刺墙',
@@ -220,6 +242,7 @@ export default {
       'artilleryDoctrine': '炮兵学说'
     },
     'descriptions': {
+      'm2_lumberHut': '解锁伐木小屋——每波结束后产出木材。',
       'logistics': '解锁采石坑——一种在需要它的那一局里就买得起的廉价产出方块。',
       'unlockCoffer': '解锁金匣，唯一能铸造金币的方块。',
       'yields': '所有经济方块产出 +{n}%。',
@@ -242,13 +265,13 @@ export default {
       'longSight': '所有武器每级射程 +{n}%。',
       'rapidFire': '所有武器每级射速 +{n}%。',
       'reinforced': '塔上每个方块每级生命值 +{n}%。',
-      'unlockSawmill': '解锁锯木厂——每波产出木材。',
+      'unlockSawmill': '每级使所有产出建筑产量 +{n}%。',
       'quarryStock': '每级围攻开局多 {n} 石材。',
       'unlockMortar': '解锁迫击炮——远程范围伤害。',
       'heavyOrdnance': '溅射半径每级 +{n}%。',
       'unlockTesla': '解锁闪电线圈——闪电会在敌人之间跳跃。',
       'gateArmor': '城门每级生命值 +{n}%。',
-      'unlockQuarry': '解锁采石场——每波产出石材。',
+      'unlockQuarry': '每级使所有产出建筑再增 +{n}%。',
       'richHauls': '波次奖励每级 +{n}%。',
       'wideFoundation': '每级可多建造 {n} 列宽度。',
       'siegeShells': '塔上武器每级伤害 +{n}%。',
@@ -256,7 +279,7 @@ export default {
       'forkedBolts': '闪电每级多跳跃 {n} 个敌人。',
       'ironPlating': '每个方块每级护甲 +{n}。',
       'unlockRepair': '解锁维修站——每波治疗相邻方块。',
-      'unlockMint': '解锁金矿——每波产出金币。',
+      'unlockMint': '每级使所有产出建筑再增 +{n}%。',
       'looting': '敌人每级多掉落 {n}% 金币。',
       'overcharge': '所有武器每级射速 +{n}%。',
       'masterwork': '塔上武器每级伤害 +{n}%。',

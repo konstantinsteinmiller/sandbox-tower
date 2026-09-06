@@ -15,7 +15,14 @@ export type BlockKind =
   | 'core' | 'structure' | 'weapon' | 'economy' | 'utility' | 'ship' | 'buff'
 
 /** `bomb` and `fire` are dropped BY enemies onto the tower, not fired at them. */
-export type ProjectileKind = 'bolt' | 'ball' | 'shell' | 'zap' | 'frost' | 'bomb' | 'fire'
+/**
+ * `bolt` is an ARROW — the archer post's and the ships'. `quarrel` is the siege
+ * ballista's: a short, heavy iron-headed shaft off a machine, not off a bow.
+ * They were one kind and therefore one drawing, which made the engine's shot
+ * look like a stray arrow at the exact moment it matters most.
+ */
+export type ProjectileKind =
+  | 'bolt' | 'quarrel' | 'ball' | 'shell' | 'zap' | 'frost' | 'bomb' | 'fire'
 
 export type TargetingMode = 'nearest' | 'strongest' | 'lowest-hp'
 
@@ -48,6 +55,28 @@ export interface WeaponSpec {
    * a harbour.
    */
   hitsSubmerged?: boolean
+  /**
+   * Does height BELOW the muzzle cost this weapon range?
+   *
+   * Reach used to be a plain radius, `dx² + dy² ≤ range²`, for everything.
+   * That makes a tower's own height eat its guns' ground coverage, and the
+   * numbers are brutal: at a mount ten cells up, a Mortar loses 3.4 cells of
+   * horizontal reach and an Archery post, a Cannon and a Bombard cannot reach
+   * the ground AT ALL. So every mount above the third floor was an anti-air
+   * emplacement whether the player wanted one or not, and building upward —
+   * the thing this game is named after — was a straight downgrade.
+   *
+   * A weapon that throws a physical round does not work that way. An arrow, a
+   * cannonball and a shell all fall, so firing DOWN from a height reaches at
+   * least as far as firing flat; the launch solver in `fireShell` already
+   * handles any `dy` it is handed. For these, only horizontal distance counts
+   * against range once the target is at or below the muzzle.
+   *
+   * Left off for the two weapons that throw nothing: the Lightning Coil is a
+   * hitscan bolt and the Frost Spire a chilling burst, and neither has an arc
+   * to fall along. They keep the honest radius.
+   */
+  plunging?: boolean
 }
 
 export interface EconomySpec {
@@ -190,6 +219,12 @@ export interface Block {
     vx: number
     /** Row the block fell FROM, so the landing damage knows the drop height. */
     fromRow?: number
+    /**
+     * A drop or a column-settle rather than a collapse: lands without damage,
+     * without tumbling, and fuses into a twin it comes to rest on where the
+     * active rules say so.
+     */
+    gentle?: boolean
   }
   /** 0..1 — 1 right after taking a hit, decays. Drives the white hit flash. */
   flash: number
@@ -388,8 +423,20 @@ export interface Ally {
   y: number
   hp: number
   maxHp: number
-  /** Travel direction: +1 right, -1 left. */
+  /** The FLANK this rider was sent to: +1 right, -1 left. Never changes.
+   *  It decides which side's enemies the rider is allowed to target, so it
+   *  cannot double as which way the horse is pointed. */
   dir: 1 | -1
+  /**
+   * Which way the rider is POINTED: +1 right, -1 left.
+   *
+   * Separate from `dir` because a rider does not only ride outward. An enemy
+   * that gets past it is now between it and the tower, and the rider turns
+   * round and chases back inward — while `dir` still says which flank it
+   * belongs to. Mirroring the sprite by `dir` drew that retreat as a horse
+   * galloping backwards, tail first, at whatever it was fighting.
+   */
+  facing: 1 | -1
   cd: number
   /** uid of the enemy being engaged, or -1 while riding out. */
   targetUid: number
@@ -500,6 +547,9 @@ export interface RunSnapshot {
    *  Optional so older snapshots still load — they restore to a full charge,
    *  which is the forgiving direction. */
   arrowRain?: number
+  /** Which rule set the run was played under. A snapshot from another mode is
+   *  never restored; absent means the desktop rules. */
+  rules?: string
   startedAt: number
 }
 

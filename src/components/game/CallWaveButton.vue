@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { GAME_SPEEDS } from '@/use/useTowerGame'
 import { useI18n } from 'vue-i18n'
 import { prependBaseUrl } from '@/utils/function'
 import {
@@ -15,8 +16,8 @@ import IconCoin from '@/components/icons/IconCoin.vue'
  * player would bank by calling now — turning "wait or go?" into a legible,
  * priced decision rather than a blind gamble.
  *
- * During BATTLE it becomes the 1× / 2× speed toggle (reference image 3), so the
- * corner never holds a dead control.
+ * During BATTLE it becomes the fast-forward switch, so the corner never holds a
+ * dead control.
  */
 
 interface Props {
@@ -27,15 +28,22 @@ interface Props {
   bonusPct: number
   speed: number
   bossIncoming: boolean
-  /** Milliseconds of 2x buff remaining. 0 = not bought. */
+  /** Milliseconds of fast-forward left. 0 = not bought. */
   speedBuffLeft?: number
+  /** The rungs on offer, slowest first. A mode with no 3× simply omits it. */
+  speeds?: ReadonlyArray<number>
 }
 
-const props = withDefaults(defineProps<Props>(), { speedBuffLeft: 0 })
+const props = withDefaults(defineProps<Props>(), {
+  speedBuffLeft: 0,
+  speeds: () => GAME_SPEEDS
+})
 const emit = defineEmits<{
   (e: 'call'): void
-  (e: 'toggle-speed'): void
-  (e: 'buy-speed'): void
+  /** Move to an already-unlocked rung. */
+  (e: 'set-speed', n: number): void
+  /** Buy fast-forward, landing on this rung. */
+  (e: 'buy-speed', n: number): void
 }>()
 
 const { t } = useI18n()
@@ -51,38 +59,37 @@ const clock = computed(() => {
  *  surprise mid-placement. */
 const urgent = computed(() => props.phase === 'build' && props.timeLeft <= 10_000)
 
-// ─── 2x speed ───────────────────────────────────────────────────────────────
+// ─── Fast-forward switch ────────────────────────────────────────────────────
 //
-// Two distinct states, deliberately drawn as two different controls:
+// A segmented 1× / 2× / 3× switch, not a button that changes meaning.
 //
-//   NOT OWNED — an OFFER. Movie icon, the word "2x", and the reward-button
-//               colour, so it reads as "watch an ad, get double speed" and not
-//               as a toggle that mysteriously does nothing.
-//   OWNED     — a toggle with the time left on it, because once it is paid for
-//               the player must be able to drop back to 1x without burning the
-//               remaining minutes.
+// The old control was two different buttons wearing the same slot: an OFFER
+// while unpaid, and a 1×/2× toggle once paid. That made the corner unreadable
+// at a glance — the same place said "buy" one moment and "you are at 2×" the
+// next — and it topped out at 2×, which is not enough for the case the control
+// exists for. A tower that died at wave 20 has to replay twenty solved waves.
 //
-// The previous control was a bare "1x / 2x" toggle that silently opened a video
-// on tap. That is the single most complained-about pattern in portal QA.
+// A switch fixes both. Every rung is visible and labelled at all times, so the
+// player can see where they are AND where they could be, and the third rung
+// costs nothing extra: one purchase unlocks fast-forward, and how fast is then
+// a preference rather than a second transaction.
+//
+// The video badge rides on the rungs it actually gates. It must never be an
+// invisible cost — a control that silently opens a video on tap is the single
+// most complained-about pattern in portal QA — so 2× and 3× carry the badge
+// until they are paid for, and 1× never does because 1× is never charged for.
 const movieSrc = prependBaseUrl('images/icons/movie_128x96.webp')
 
+/** True once fast-forward is paid for, whatever rung is selected. */
 const buffOwned = computed(() => props.speedBuffLeft > 0)
 
-/** m:ss remaining on the buff. */
-const buffClock = computed(() => {
-  const total = Math.max(0, Math.ceil(props.speedBuffLeft / 1000))
-  const m = Math.floor(total / 60)
-  const sec = total % 60
-  return `${m}:${String(sec).padStart(2, '0')}`
-})
-
-/** Show the movie badge only when tapping really will play a video. */
+/** Show the film badge only where tapping really will play a video. */
 const showMovie = computed(() => isRewardGated && !buffOwned.value)
 
 /**
  * Where no video plays, the buff is priced in wallet coins like every other
- * perk — so the badge becomes a coin and a number rather than disappearing and
- * leaving an unlimited free button.
+ * perk — so the badge becomes a coin rather than disappearing and leaving an
+ * unlimited free button.
  */
 const showPrice = computed(() => !isRewardGated && !buffOwned.value)
 const tooPoor = computed(() => showPrice.value && walletCoins.value < REWARD_COIN_COST)
@@ -91,6 +98,23 @@ const tooPoor = computed(() => showPrice.value && walletCoins.value < REWARD_COI
 const offerDisabled = computed(
   () => adInFlight.value || tooPoor.value || !canOfferReward.value
 )
+
+/**
+ * A rung is locked when it needs paying for and the purchase cannot be made
+ * right now. 1× is never locked: the player must always be able to slow down.
+ */
+const isLocked = (n: number): boolean => n > 1 && !buffOwned.value && offerDisabled.value
+
+const onSpeed = (n: number): void => {
+  if (n === props.speed) return
+  // Already paid for, or free: just move.
+  if (n === 1 || buffOwned.value) { emit('set-speed', n); return }
+  if (offerDisabled.value) return
+  // Unpaid: the tap is a purchase, and it carries the rung that was asked for
+  // so the video lands the player where they pressed.
+  emit('buy-speed', n)
+}
+
 </script>
 
 <template lang="pug">
@@ -111,44 +135,30 @@ const offerDisabled = computed(
             | +{{ bonusPct }}%
             IconCoin.call-wave__bonus-icon
 
-    //- BATTLE, buff not owned: the OFFER. Says what it gives and what it costs.
-    button.call-wave__btn.is-speed.is-offer(
-      v-else-if="phase === 'battle' && !buffOwned"
-      type="button"
-      :class="{ 'is-disabled': offerDisabled }"
-      :disabled="offerDisabled"
-      :aria-label="t('hud.speedOffer')"
-      @click="!offerDisabled && emit('buy-speed')"
-    )
-      span.call-wave__shadow(aria-hidden="true")
-      span.call-wave__body
-        img.call-wave__movie(v-if="showMovie" :src="movieSrc" alt="" draggable="false")
-        svg.call-wave__speed-icon(viewBox="0 0 24 24" fill="currentColor" aria-hidden="true")
-          path(d="M4 5 L13 12 L4 19 Z")
-          path(d="M12 5 L21 12 L12 19 Z")
-        span.call-wave__stack
-          span.call-wave__label 2×
-          span.call-wave__sub {{ t('hud.speedFor', { n: 5 }) }}
-        span.call-wave__price(v-if="showPrice")
-          IconCoin.call-wave__price-icon
-          | {{ REWARD_COIN_COST }}
+    //- BATTLE: the fast-forward switch. Every rung visible and labelled, with
+    //- the video badge on the ones that still have to be paid for.
+    div.speed-switch(v-else-if="phase === 'battle'" role="group" :aria-label="t('hud.speedGroup')")
+      span.speed-switch__shadow(aria-hidden="true")
+      div.speed-switch__body
+        button.speed-switch__seg(
+          v-for="n in speeds"
+          :key="n"
+          type="button"
+          :class="{ 'is-active': speed === n, 'is-locked': isLocked(n) }"
+          :aria-pressed="speed === n"
+          :aria-label="n > 1 && !buffOwned ? t('hud.speedOffer', { n }) : t('hud.speed', { n })"
+          @click="onSpeed(n)"
+        )
+          span.speed-switch__x {{ n }}×
+          //- Only on the rungs it gates, and only until they are paid for.
+          img.speed-switch__movie(
+            v-if="n > 1 && showMovie"
+            :src="movieSrc"
+            alt=""
+            draggable="false"
+          )
+          IconCoin.speed-switch__coin(v-else-if="n > 1 && showPrice")
 
-    //- BATTLE, buff owned: a plain toggle with the time left on it.
-    button.call-wave__btn.is-speed(
-      v-else-if="phase === 'battle'"
-      type="button"
-      :class="{ 'is-fast': speed > 1 }"
-      :aria-label="t('hud.speed', { n: speed })"
-      @click="emit('toggle-speed')"
-    )
-      span.call-wave__shadow(aria-hidden="true")
-      span.call-wave__body
-        svg.call-wave__speed-icon(viewBox="0 0 24 24" fill="currentColor" aria-hidden="true")
-          path(d="M4 5 L13 12 L4 19 Z")
-          path(v-if="speed > 1" d="M12 5 L21 12 L12 19 Z")
-        span.call-wave__stack
-          span.call-wave__label {{ speed }}×
-          span.call-wave__sub.is-timer {{ buffClock }}
 </template>
 
 <style scoped lang="sass">
@@ -242,84 +252,102 @@ const offerDisabled = computed(
   height: 1.15em
   flex-shrink: 0
 
-.call-wave__speed-icon
-  width: clamp(0.8rem, 3.4vw, 1.1rem)
-  height: clamp(0.8rem, 3.4vw, 1.1rem)
-  color: #fff
-  flex: 0 0 auto
+// ─── Fast-forward switch ────────────────────────────────────────────────────
+//
+// One raised pill holding three segments, so it reads as a single control with
+// a position rather than as three buttons that happen to be adjacent. The
+// selected rung is gold — the HUD's "this is live" colour — and the rest sit
+// dark, which is what makes the current speed readable in peripheral vision
+// while the player is watching the battle rather than the button.
 
-.call-wave__movie
+.speed-switch
+  position: relative
+  display: inline-flex
+  pointer-events: auto
+
+.speed-switch__shadow
+  position: absolute
+  inset: 0
+  transform: translateY(4px)
+  border-radius: 999px
+  background-color: #1c2436
+
+.speed-switch__body
+  position: relative
+  display: flex
+  align-items: stretch
+  gap: 2px
+  padding: 3px
+  border: 2px solid #0f1a30
+  border-radius: 999px
+  background-image: linear-gradient(to bottom, #46536f, #2a3348)
+
+.speed-switch__seg
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  gap: 0.22em
+  // Tap-target floor. Three segments in one pill is the tightest row in the
+  // HUD, so this is the number that decides whether the control is usable on a
+  // phone at all.
+  min-width: 2.4rem
+  // 2.25rem is this project's thumb floor (the cavalry button carries the same
+  // note). Three segments in one pill is the tightest row in the HUD, so it is
+  // the first place a floor gets quietly undercut.
+  min-height: 2.25rem
+  padding: 0.1rem clamp(0.28rem, 1.6vw, 0.5rem)
+  border: 0
+  border-radius: 999px
+  background-color: rgba(12, 18, 32, 0.45)
+  color: #c8d4ea
+  cursor: pointer
+  touch-action: manipulation
+  -webkit-tap-highlight-color: transparent
+  transition: background-color 110ms ease-out, color 110ms ease-out, transform 90ms ease-out
+
+  &:hover:not(.is-active)
+    background-color: rgba(12, 18, 32, 0.22)
+
+  &:active
+    transform: translateY(1px) scale(0.97)
+
+  // The live rung. Gold body, dark text: the one place in the HUD that inverts,
+  // because "which speed am I on" has to survive a glance mid-battle.
+  &.is-active
+    background-image: linear-gradient(to bottom, #ffd93c, #f0a500)
+    color: #21160a
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35)
+
+  // Cannot be honoured right now (no fill, or an empty wallet off-portal). Dim
+  // rather than hidden: the rung still has to be visible, or the player cannot
+  // see that a faster speed exists at all.
+  &.is-locked
+    opacity: 0.45
+    cursor: not-allowed
+
+.speed-switch__x
+  font-weight: 900
+  font-variant-numeric: tabular-nums
+  line-height: 1
+  font-size: clamp(0.72rem, 3.1vw, 1rem)
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5)
+
+.speed-switch__seg.is-active .speed-switch__x
+  // Dark text on gold wants a light lift, not a black shadow.
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4)
+
+.speed-switch__movie
   flex: 0 0 auto
-  width: clamp(1rem, 4.2vw, 1.45rem)
+  width: clamp(0.85rem, 3.6vw, 1.15rem)
   height: auto
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6))
   pointer-events: none
 
-.call-wave__stack
-  display: flex
-  flex-direction: column
-  align-items: center
-  line-height: 1
-
-// The price sits AFTER the label, reading "2× for five minutes — 30 coins".
-.call-wave__price
-  display: inline-flex
-  align-items: center
-  gap: 0.15em
-  color: #ffe066
-  font-weight: 900
-  font-variant-numeric: tabular-nums
-  font-size: clamp(0.62rem, 2.6vw, 0.85rem)
-  text-shadow: 2px 2px 0 #000
-
-.call-wave__price-icon
-  width: 1.05em
-  height: 1.05em
-  flex-shrink: 0
-
-.call-wave__sub
-  color: #ffeec0
-  font-weight: 900
-  font-size: clamp(0.42rem, 1.9vw, 0.6rem)
-  letter-spacing: 0.02em
-  white-space: nowrap
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.7)
-
-  &.is-timer
-    color: #cfe4ff
-    font-variant-numeric: tabular-nums
-
-// The offer: gold, like every other rewarded affordance in the game.
-.call-wave__btn.is-speed.is-offer
-  min-width: 5rem
-
-  .call-wave__body
-    background-image: linear-gradient(to bottom, #ffcd00, #f7a000)
-
-  .call-wave__shadow
-    background-color: #7a4a00
-
-  &.is-disabled
-    opacity: 0.5
-    filter: grayscale(1)
-    cursor: not-allowed
-
-.call-wave__btn.is-speed
-  min-width: 3.5rem
-
-  .call-wave__body
-    flex-direction: row
-    gap: 0.3em
-    background-image: linear-gradient(to bottom, #7b8aa8, #3a4560)
-
-  .call-wave__shadow
-    background-color: #1c2436
-
-  &.is-fast .call-wave__body
-    background-image: linear-gradient(to bottom, #ffb03a, #e06a10)
-
-  &.is-fast .call-wave__shadow
-    background-color: #7a3200
+.speed-switch__coin
+  flex: 0 0 auto
+  width: clamp(0.75rem, 3.2vw, 1rem)
+  height: clamp(0.75rem, 3.2vw, 1rem)
+  pointer-events: none
 
 // The wave is about to start on its own.
 .call-wave__btn.is-urgent .call-wave__body
@@ -352,5 +380,12 @@ const offerDisabled = computed(
   .call-wave__body
     padding-inline: 0.45rem
     padding-block: 0.24rem
+
+  // Three segments in one pill is the tightest thing in the row, so the
+  // per-segment floor comes down with everything else. It stays above the
+  // 44 px tap target once the pill's own padding and border are counted.
+  .speed-switch__seg
+    min-width: 2rem
+    padding-inline: 0.22rem
 
 </style>

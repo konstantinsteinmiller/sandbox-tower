@@ -1,0 +1,134 @@
+{
+  "P0-pocket-build-idle-6x-dpr2": {
+    "frames": 201,
+    "mean": 34.9,
+    "p50": 33.3,
+    "p95": 51.8,
+    "p99": 67.3,
+    "max": 83.2,
+    "over33ms": 91,
+    "over50ms": 28,
+    "pctOver33": 45,
+    "longTasks": 17,
+    "enemies": 0,
+    "projectiles": 0,
+    "blocks": 42,
+    "phase": "build",
+    "wave": 8,
+    "dpr": 2,
+    "canvas": [
+      780,
+      1688
+    ]
+  },
+  "P1-pocket-wave9-4x-dpr2": {
+    "frames": 213,
+    "mean": 32.9,
+    "p50": 33.3,
+    "p95": 50.6,
+    "p99": 100.3,
+    "max": 134.4,
+    "over33ms": 86,
+    "over50ms": 19,
+    "pctOver33": 40,
+    "longTasks": 13,
+    "enemies": 12,
+    "projectiles": 3,
+    "blocks": 42,
+    "phase": "battle",
+    "wave": 9,
+    "dpr": 2,
+    "canvas": [
+      780,
+      1688
+    ]
+  },
+  "P2-pocket-wave9-6x-dpr2": {
+    "frames": 126,
+    "mean": 55.8,
+    "p50": 50.6,
+    "p95": 99.8,
+    "p99": 100.5,
+    "max": 133.5,
+    "over33ms": 102,
+    "over50ms": 69,
+    "pctOver33": 81,
+    "longTasks": 63,
+    "enemies": 12,
+    "projectiles": 4,
+    "blocks": 42,
+    "phase": "battle",
+    "wave": 9,
+    "dpr": 2,
+    "canvas": [
+      780,
+      1688
+    ]
+  },
+  "P3-pocket-wave9-4x-dpr1.5": {
+    "frames": 248,
+    "mean": 28.4,
+    "p50": 33.2,
+    "p95": 50,
+    "p99": 50.5,
+    "max": 116.7,
+    "over33ms": 63,
+    "over50ms": 10,
+    "pctOver33": 25,
+    "longTasks": 4,
+    "enemies": 14,
+    "projectiles": 5,
+    "blocks": 42,
+    "phase": "battle",
+    "wave": 9,
+    "dpr": 1.5,
+    "canvas": [
+      585,
+      1266
+    ]
+  },
+  "P4-pocket-wave9-6x-dpr1.5": {
+    "frames": 117,
+    "mean": 60.3,
+    "p50": 50.4,
+    "p95": 116.2,
+    "p99": 132.6,
+    "max": 135.7,
+    "over33ms": 97,
+    "over50ms": 71,
+    "pctOver33": 83,
+    "longTasks": 67,
+    "enemies": 15,
+    "projectiles": 3,
+    "blocks": 41,
+    "phase": "battle",
+    "wave": 9,
+    "dpr": 1.5,
+    "canvas": [
+      585,
+      1266
+    ]
+  },
+  "P5-pocket-wave16-4x-dpr2": {
+    "frames": 207,
+    "mean": 33.9,
+    "p50": 33.4,
+    "p95": 64.9,
+    "p99": 83.2,
+    "max": 149.5,
+    "over33ms": 105,
+    "over50ms": 25,
+    "pctOver33": 51,
+    "longTasks": 14,
+    "enemies": 20,
+    "projectiles": 4,
+    "blocks": 39,
+    "phase": "battle",
+    "wave": 16,
+    "dpr": 2,
+    "canvas": [
+      780,
+      1688
+    ]
+  }
+}

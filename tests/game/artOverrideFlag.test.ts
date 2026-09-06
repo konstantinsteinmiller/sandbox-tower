@@ -44,10 +44,12 @@ describe('art overrides, off', () => {
     const requested = trackImages()
     const art = await loadArt(false)
 
-    expect(art.artOverridesEnabled).toBe(false)
+    expect(art.artOverridesEnabled()).toBe(false)
     expect(art.spriteFor('block', 'wood')).toBeNull()
     expect(art.spriteFor('enemy', 'grunt')).toBeNull()
-    art.warmSpriteProbes(['wood', 'stone', 'cannon'], ['grunt', 'bat'])
+    for (const id of ['wood', 'stone', 'cannon']) art.spriteFor('block', id)
+    for (const id of ['grunt', 'bat']) art.spriteFor('enemy', id)
+    await art.preloadArtOverrides([['block', 'wood'], ['bg', 'sun']])
 
     // The exact CG QA complaint: not one of these may be asked for.
     expect(requested).toEqual([])
@@ -59,11 +61,13 @@ describe('art overrides, on', () => {
     const requested = trackImages()
     const art = await loadArt(true)
 
-    expect(art.artOverridesEnabled).toBe(true)
+    expect(art.artOverridesEnabled()).toBe(true)
     art.spriteFor('block', 'wood')
     art.spriteFor('enemy', 'grunt')
 
-    expect(requested.some((u) => u.endsWith('images/blocks/wood.webp'))).toBe(true)
+    // A block reads from its SHARED base: wood is a timber crate, and so is the
+    // archer post. The documented path for 'wood' is therefore timber.webp.
+    expect(requested.some((u) => u.endsWith('images/blocks/timber.webp'))).toBe(true)
     expect(requested.some((u) => u.endsWith('images/enemies/grunt.webp'))).toBe(true)
   })
 

@@ -10,11 +10,23 @@ export default {
   'tip': 'Maslahat',
   'crazyGamesOnly': 'Bu o‘yin faqat quyidagi joyda mavjud:',
 
+  // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'mobile': {
+    'rotatePortrait': 'O‘ynash uchun telefonni tik tuting',
+    'columnFull': 'Ustun to‘la',
+    'repairAll': 'Hammasini ta’mirlash',
+    'volley': 'Yoppasiga otish',
+    'swap': 'Almashtirish',
+    'menu': 'Menyu',
+    'materials': 'materiallar',
+    'zoom': 'Masshtab'
+  },
+
   'hud': {
     'wave': 'To‘lqin', 'enemies': 'Dushmanlar', 'callWave': 'To‘lqinni chaqirish', 'callBoss': 'Bossni chaqirish',
     'speed': 'Tezlik {n}×',
-    'speedOffer': 'Reklama uchun ikki barobar tezlik',
-    'speedFor': '{n} daq', 'recenter': 'Ko‘rinishni markazlash',
+    'speedOffer': '{n}× tezlikni ochish',
+    'speedGroup': 'Oʻyin tezligi', 'recenter': 'Ko‘rinishni markazlash',
     'rotateLeft': 'Chapga burish',
     'rotateRight': 'O‘ngga burish',
     'arrowRain': 'Kamon yomg‘iri',
@@ -31,6 +43,14 @@ export default {
     'outOfReach': 'Masofadan tashqari ×{n} — {m} masofa kerak'
   },
   'hints': {
+    'dropBlock': {
+      'touch': 'Bo‘lakni tashlash uchun ustunga bosing',
+      'desktop': 'Bo‘lakni tashlash uchun ustunga bosing'
+    },
+    'mergeBlock': {
+      'touch': 'Birlashtirish uchun bo‘lakni egizagi ustiga tashlang',
+      'desktop': 'Birlashtirish uchun bo‘lakni egizagi ustiga tashlang'
+    },
     'selectBlock': { 'touch': 'Tanlash uchun pastdagi blokni bosing', 'desktop': 'Tanlash uchun pastdagi blokni cherting' },
     'placeBlock': { 'touch': 'Endi qurish uchun yorqin katakni bosing', 'desktop': 'Endi qurish uchun yorqin katakni cherting' },
     'camera': { 'touch': 'Surish uchun torting · Kattalashtirish uchun chimdib torting', 'desktop': 'Surish uchun torting · Kattalashtirish uchun aylantiring' },
@@ -83,7 +103,6 @@ export default {
       'gate': 'Darvoza', 'wood': 'Yog‘och quti', 'brace': 'Mustahkamlangan quti', 'stone': 'Tosh blok',
       'archer': 'Kamonchi minorasi', 'cannon': 'To‘p', 'mortar': 'Minomyot', 'tesla': 'Chaqmoq g‘altagi',
       'frost': 'Sovuq minora', 'repair': 'Ta’mirxona',
-      'sawmill': 'Arrachilik', 'quarry': 'Tosh koni', 'mint': 'Oltin koni',
       'spikes': 'Tikanli devor',
       'bombard': 'Bombarda'
     },
@@ -106,9 +125,6 @@ export default {
       'tesla': 'Yaqin dushmanlar orasida sakraydigan chaqmoq.',
       'frost': 'Butun guruhni muzlatib, kuchli sekinlashtiradi.',
       'repair': 'To‘lqinlar orasida qo‘shni bloklarni ta’mirlaydi.',
-      'sawmill': 'Har bir qaytarilgan to‘lqin oxirida yog‘och beradi.',
-      'quarry': 'Har bir qaytarilgan to‘lqin oxirida tosh beradi.',
-      'mint': 'Har bir qaytarilgan to‘lqin oxirida tanga beradi.',
       'spikes': 'Hujumchilar har zarbada undan jarohat oladi.',
       'bombard': 'Snaryadni tik yuqoriga otadi. Kichik portlash, faqat yerdagi nishonlar.'
     },
@@ -138,6 +154,8 @@ export default {
 
   // ─── First-stage tutorial ─────────────────────────────────────────────────
   'tutorial': {
+    'drop': 'Bo‘lakni tashlash uchun ustunga bosing.',
+    'merge': 'Birlashtirish uchun egizakni egizak ustiga tashlang.',
     'gate': 'Darvozani himoya qil. Qulasa, o‘yin tugaydi.',
     'gateSeeded': 'Senga boshlang‘ich qal‘a qurib berdik. Darvozani himoya qil — qulasa, o‘yin tugaydi.',
     'pick': 'Bo‘lak tanla.',
@@ -177,6 +195,9 @@ export default {
   },
 
   'tech': {
+    'blueprints': {
+      'title': 'Chizmalar'
+    },
     'intro1': 'Bu yerda sotib olganingizning hammasi doimiy — har bir keyingi yurishga o‘tadi.',
     'intro2': 'Tangalar har qamaldan tushadi: yutasizmi yoki yutqazasizmi. Ularni shu yerda sarflaysiz.',
     'intro3': 'Oltin tugunlarga hozir kuchingiz yetadi. Ko‘klarga ko‘proq tanga, xiralarga oldingi tugun kerak.',
@@ -192,6 +213,7 @@ export default {
     'requires': 'Kerak: {n}',
     'spotlight': 'Sarflang!',
     'names': {
+      'm2_lumberHut': 'Yog‘och kulbasi',
       'logistics': 'Logistika',
       'unlockCoffer': 'Sandiqlar',
       'yields': 'Hosildorlik',
@@ -205,12 +227,12 @@ export default {
       'admiralty': 'Admiralteystvo',
       'foundations': 'Poydevor', 'sharpBolts': 'O‘tkir o‘qlar', 'unlockBrace': 'Mustahkam qutilar',
       'lumberStock': 'Yog‘och zaxirasi', 'longSight': 'Uzoqni ko‘rish', 'rapidFire': 'Tez otish',
-      'reinforced': 'Mustahkam to‘sinlar', 'unlockSawmill': 'Arrachilik', 'quarryStock': 'Tosh zaxirasi',
+      'reinforced': 'Mustahkam to‘sinlar', 'unlockSawmill': 'Boy tomirlar', 'quarryStock': 'Tosh zaxirasi',
       'unlockMortar': 'Minomyot', 'heavyOrdnance': 'Og‘ir artilleriya', 'unlockTesla': 'Chaqmoq g‘altagi',
-      'gateArmor': 'Darvoza zirhi', 'unlockQuarry': 'Tosh koni', 'richHauls': 'Boy o‘lja',
+      'gateArmor': 'Darvoza zirhi', 'unlockQuarry': 'Chuqur konlar', 'richHauls': 'Boy o‘lja',
       'wideFoundation': 'Keng poydevor', 'siegeShells': 'Qamal snaryadlari', 'unlockFrost': 'Sovuq minora',
       'forkedBolts': 'Tarmoqlangan chaqmoq', 'ironPlating': 'Temir qoplama', 'unlockRepair': 'Ta’mirxona',
-      'unlockMint': 'Oltin koni', 'looting': 'Talon-taroj', 'overcharge': 'Ortiqcha quvvat',
+      'unlockMint': 'Gildiya yorligʻi', 'looting': 'Talon-taroj', 'overcharge': 'Ortiqcha quvvat',
       'masterwork': 'Shoh asar', 'fieldRepairs': 'Dala ta’miri', 'greatFoundation': 'Buyuk poydevor',
       'warChest': 'Urush xazinasi',
       'unlockSpikes': 'Tikanli devor',
@@ -220,6 +242,7 @@ export default {
       'artilleryDoctrine': 'Artilleriya doktrinasi'
     },
     'descriptions': {
+      'm2_lumberHut': 'Yog‘och kulbasini ochadi — har to‘lqindan keyin yog‘och beradi.',
       'logistics': 'Tosh konini ochadi — yurishning o‘zida sotib olsa bo‘ladigan arzon ishlab chiqaruvchi.',
       'unlockCoffer': 'Sandiqni ochadi — oltin zarb qiladigan yagona blok.',
       'yields': 'Har bir iqtisodiy blok +{n}% ko‘proq beradi.',
@@ -242,13 +265,13 @@ export default {
       'longSight': 'Barcha qurollar daraja boshiga +{n} % uzoqroq uradi.',
       'rapidFire': 'Barcha qurollar daraja boshiga {n} % tezroq otadi.',
       'reinforced': 'Minoraning har bir bloki daraja boshiga +{n} % JS oladi.',
-      'unlockSawmill': 'Arrachilikni ochadi — har to‘lqinda yog‘och beradi.',
+      'unlockSawmill': 'Har bir ishlab chiqaruvchi daraja uchun +{n}% koʻproq beradi.',
       'quarryStock': 'Har qamalni daraja boshiga +{n} tosh bilan boshlang.',
       'unlockMortar': 'Minomyotni ochadi — uzoq masofadagi hududiy zarar.',
       'heavyOrdnance': 'Hudud radiusi daraja boshiga +{n} %.',
       'unlockTesla': 'Chaqmoq g‘altagini ochadi — chaqmoq dushmanlar orasida sakraydi.',
       'gateArmor': 'Darvoza daraja boshiga +{n} % JS oladi.',
-      'unlockQuarry': 'Tosh konini ochadi — har to‘lqinda tosh beradi.',
+      'unlockQuarry': 'Har bir ishlab chiqaruvchi daraja uchun yana +{n}% beradi.',
       'richHauls': 'To‘lqin mukofotlari daraja boshiga +{n} %.',
       'wideFoundation': 'Daraja boshiga {n} ustun kengroq quring.',
       'siegeShells': 'Minora qurollari daraja boshiga +{n} % zarar yetkazadi.',
@@ -256,7 +279,7 @@ export default {
       'forkedBolts': 'Chaqmoq daraja boshiga yana {n} dushmanga sakraydi.',
       'ironPlating': 'Har bir blok daraja boshiga +{n} zirh oladi.',
       'unlockRepair': 'Ta’mirxonani ochadi — har to‘lqinda qo‘shnilarni davolaydi.',
-      'unlockMint': 'Oltin konini ochadi — har to‘lqinda tanga beradi.',
+      'unlockMint': 'Har bir ishlab chiqaruvchi daraja uchun yana +{n}% beradi.',
       'looting': 'Dushmanlar daraja boshiga +{n} % ko‘proq tanga tashlaydi.',
       'overcharge': 'Barcha qurollar daraja boshiga {n} % tezroq otadi.',
       'masterwork': 'Minora qurollari daraja boshiga +{n} % zarar yetkazadi.',

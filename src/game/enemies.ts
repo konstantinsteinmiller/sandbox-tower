@@ -473,13 +473,23 @@ export const enemyDef = (id: string): EnemyDef => ENEMY_DEFS[id] ?? ENEMY_DEFS.g
 
 /** Non-boss types available at (or before) a given wave. The director samples
  *  from this pool; the boss is added separately on boss waves. */
-export const enemyPool = (wave: number): EnemyDef[] =>
-  Object.values(ENEMY_DEFS).filter((d) => !d.boss && d.minWave <= wave)
+export const enemyPool = (
+  wave: number,
+  roster: ReadonlySet<string> | null = null,
+  minWaveOverride: Readonly<Record<string, number>> = {}
+): EnemyDef[] =>
+  Object.values(ENEMY_DEFS).filter((d) =>
+    !d.boss
+    && (!roster || roster.has(d.id))
+    && (minWaveOverride[d.id] ?? d.minWave) <= wave
+  )
 
 /** Siege engines available at a wave — the director reserves a share for them
  *  exactly as it does for air and sea. */
-export const siegePool = (wave: number): EnemyDef[] =>
-  Object.values(ENEMY_DEFS).filter((d) => !d.boss && !!d.siege && d.minWave <= wave)
+export const siegePool = (wave: number, roster: ReadonlySet<string> | null = null): EnemyDef[] =>
+  Object.values(ENEMY_DEFS).filter((d) =>
+    !d.boss && !!d.siege && (!roster || roster.has(d.id)) && d.minWave <= wave
+  )
 
 export const isSiege = (id: string): boolean => !!ENEMY_DEFS[id]?.siege
 

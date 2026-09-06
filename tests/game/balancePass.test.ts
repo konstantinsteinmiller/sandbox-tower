@@ -8,7 +8,7 @@ import {
 } from '@/game/difficulty'
 import { BLOCK_DEFS, sellRefund, blockUpgradeCost } from '@/game/blocks'
 import { ENEMY_DEFS } from '@/game/enemies'
-import { TECH_BY_ID } from '@/game/tech'
+import { TECH_BY_ID, TECH_NODES } from '@/game/tech'
 
 /**
  * Contracts from the first-time-player balance pass (see `balancing.md`).
@@ -172,8 +172,45 @@ describe('economy', () => {
         + (d.economy!.gold ?? 0) + (d.economy!.coins ?? 0)
       return cost / per
     }
-    for (const id of ['lumberHut', 'stonepit', 'coffer', 'sawmill', 'quarry']) {
-      expect(payback(id), id).toBeLessThan(12)
+    // Derived, not listed. The hardcoded list went stale the moment the
+    // duplicate producer tier was removed, and a test that names blocks by hand
+    // fails for the wrong reason: it reports a balance regression when what
+    // actually happened is that the catalogue changed under it.
+    const producers = Object.values(BLOCK_DEFS).filter((d) => d.kind === 'economy')
+    expect(producers.length).toBeGreaterThan(0)
+    for (const d of producers) {
+      expect(payback(d.id), d.id).toBeLessThan(12)
+    }
+  })
+
+  it('ships exactly ONE producer per resource', () => {
+    // The whole point of removing the deep tier. Two blocks that share a
+    // palette, a glyph and a description, and differ only by a number the
+    // player cannot see, are not a choice — they are a memory test.
+    const byResource = new Map<string, string[]>()
+    for (const d of Object.values(BLOCK_DEFS)) {
+      if (d.kind !== 'economy' || !d.economy) continue
+      for (const res of ['wood', 'stone', 'gold', 'coins'] as const) {
+        if ((d.economy[res] ?? 0) <= 0) continue
+        byResource.set(res, [...(byResource.get(res) ?? []), d.id])
+      }
+    }
+    for (const [res, ids] of byResource) expect(ids, res).toHaveLength(1)
+    // ...and every resource the bar displays still has one.
+    expect([...byResource.keys()].sort()).toEqual(['gold', 'stone', 'wood'])
+  })
+
+  it('grows producers through tech instead of replacing them', () => {
+    // The nodes that used to unlock the second tier now raise what the first
+    // one yields, and they are RANKED rather than binary — a one-shot unlock
+    // converted to a one-shot buff would have been the same dead end.
+    const lane = TECH_NODES.filter((n) => n.effect.kind === 'economyYield')
+    expect(lane.length).toBeGreaterThanOrEqual(3)
+    for (const n of lane) expect(n.maxLevel, n.id).toBeGreaterThan(1)
+    // Nothing in the tree still points at a block that no longer exists.
+    for (const n of TECH_NODES) {
+      if (n.effect.kind !== 'unlock') continue
+      expect(BLOCK_DEFS[n.effect.blockId], n.id).toBeDefined()
     }
   })
 

@@ -18,11 +18,34 @@ const COIN_HTML =
   `<img src="${prependBaseUrl('images/props/coin_128x128.webp')}" alt="" draggable="false" ` +
   'style="width:20px;height:20px;display:block;user-select:none;" />'
 
+/**
+ * Anything a template ref can hand back and still mean "this thing on screen".
+ *
+ * `ref="x"` on a COMPONENT gives Vue's public instance, not the element — the
+ * two are indistinguishable at the call site and the difference only shows up
+ * as `getBoundingClientRect is not a function`, inside a click handler, after
+ * the reward has already been granted. Every entry point here takes the loose
+ * type and resolves it, so a caller cannot get this wrong.
+ */
+export type CoinExplosionAnchor =
+  | HTMLElement
+  | { $el?: unknown }
+  | null
+  | undefined
+
+/** The DOM element behind a template ref, or null if there isn't one. */
+export const resolveAnchor = (a: CoinExplosionAnchor): HTMLElement | null => {
+  if (!a) return null
+  if (a instanceof HTMLElement) return a
+  const el = (a as { $el?: unknown }).$el
+  return el instanceof HTMLElement ? el : null
+}
+
 export interface CoinExplosionOptions {
   /** Element the coins burst out of. */
-  sourceEl: HTMLElement
+  sourceEl: CoinExplosionAnchor
   /** Element the coins fly toward (e.g. CoinBadge). */
-  targetEl: HTMLElement
+  targetEl: CoinExplosionAnchor
   /** Number of coins to spawn (default 20). */
   count?: number
   /** Max burst radius in px (default 120). */
@@ -30,7 +53,13 @@ export interface CoinExplosionOptions {
 }
 
 export function spawnCoinExplosion(opts: CoinExplosionOptions) {
-  const { sourceEl, targetEl, count = 20, burstRadius = 120 } = opts
+  const { count = 20, burstRadius = 120 } = opts
+  const sourceEl = resolveAnchor(opts.sourceEl)
+  const targetEl = resolveAnchor(opts.targetEl)
+  // Decoration is never worth a thrown exception: the coins have already been
+  // banked by the time this runs, so a missing anchor drops the animation and
+  // leaves the claim intact.
+  if (!sourceEl || !targetEl) return
 
   playSound('happy', 0.08)
 

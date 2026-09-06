@@ -1,0 +1,239 @@
+{
+  "portrait-390x844": {
+    "innerW": 390,
+    "innerH": 844,
+    "dpr": 3,
+    "canvasBacking": [
+      780,
+      1688
+    ],
+    "top": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 120
+    },
+    "bottom": {
+      "x": 0,
+      "y": 705,
+      "w": 390,
+      "h": 140
+    },
+    "tray": {
+      "x": 36,
+      "y": 705,
+      "w": 318,
+      "h": 81
+    },
+    "perks": {
+      "x": 127,
+      "y": 665,
+      "w": 136,
+      "h": 36
+    },
+    "callWave": {
+      "x": 302,
+      "y": 792,
+      "w": 80,
+      "h": 44
+    },
+    "meta": {
+      "x": 8,
+      "y": 793,
+      "w": 127,
+      "h": 43
+    },
+    "inspector": null,
+    "tiles": [
+      [
+        59,
+        69
+      ],
+      [
+        59,
+        69
+      ],
+      [
+        59,
+        69
+      ],
+      [
+        59,
+        69
+      ],
+      [
+        59,
+        69
+      ]
+    ],
+    "freeBand": {
+      "top": 120,
+      "bottom": 665,
+      "h": 545
+    },
+    "autoFitPxPerCell": {
+      "wave1_tower_3wide_2tall": 43.3,
+      "wave8_tower_9wide_5tall": 27.9,
+      "wave15_tower_13wide_8tall": 21.7,
+      "wave20_tower_17wide_11tall": 17.7
+    }
+  },
+  "portrait-360x640": {
+    "innerW": 360,
+    "innerH": 640,
+    "dpr": 2,
+    "canvasBacking": [
+      720,
+      1280
+    ],
+    "top": {
+      "x": 0,
+      "y": 0,
+      "w": 360,
+      "h": 119
+    },
+    "bottom": {
+      "x": 0,
+      "y": 509,
+      "w": 360,
+      "h": 131
+    },
+    "tray": {
+      "x": 37,
+      "y": 509,
+      "w": 285,
+      "h": 74
+    },
+    "perks": {
+      "x": 113,
+      "y": 469,
+      "w": 133,
+      "h": 36
+    },
+    "callWave": {
+      "x": 277,
+      "y": 589,
+      "w": 76,
+      "h": 44
+    },
+    "meta": {
+      "x": 7,
+      "y": 593,
+      "w": 121,
+      "h": 40
+    },
+    "inspector": null,
+    "tiles": [
+      [
+        54,
+        63
+      ],
+      [
+        54,
+        63
+      ],
+      [
+        54,
+        63
+      ],
+      [
+        54,
+        63
+      ],
+      [
+        54,
+        63
+      ]
+    ],
+    "freeBand": {
+      "top": 119,
+      "bottom": 469,
+      "h": 350
+    },
+    "autoFitPxPerCell": {
+      "wave1_tower_3wide_2tall": 40,
+      "wave8_tower_9wide_5tall": 25.7,
+      "wave15_tower_13wide_8tall": 20,
+      "wave20_tower_17wide_11tall": 16.4
+    }
+  },
+  "landscape-844x390": {
+    "innerW": 844,
+    "innerH": 390,
+    "dpr": 3,
+    "canvasBacking": [
+      1688,
+      780
+    ],
+    "top": {
+      "x": 0,
+      "y": 0,
+      "w": 844,
+      "h": 145
+    },
+    "bottom": {
+      "x": 0,
+      "y": 296,
+      "w": 844,
+      "h": 94
+    },
+    "tray": {
+      "x": 222,
+      "y": 296,
+      "w": 342,
+      "h": 90
+    },
+    "perks": {
+      "x": 299,
+      "y": 256,
+      "w": 188,
+      "h": 36
+    },
+    "callWave": {
+      "x": 713,
+      "y": 329,
+      "w": 120,
+      "h": 58
+    },
+    "meta": {
+      "x": 11,
+      "y": 332,
+      "w": 162,
+      "h": 54
+    },
+    "inspector": null,
+    "tiles": [
+      [
+        62,
+        74
+      ],
+      [
+        62,
+        74
+      ],
+      [
+        62,
+        74
+      ],
+      [
+        62,
+        74
+      ],
+      [
+        62,
+        74
+      ]
+    ],
+    "freeBand": {
+      "top": 145,
+      "bottom": 256,
+      "h": 111
+    },
+    "autoFitPxPerCell": {
+      "wave1_tower_3wide_2tall": 14,
+      "wave8_tower_9wide_5tall": 14,
+      "wave15_tower_13wide_8tall": 14,
+      "wave20_tower_17wide_11tall": 14
+    }
+  }
+}

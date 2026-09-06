@@ -10,11 +10,23 @@ export default {
   'tip': 'Tip',
   'crazyGamesOnly': 'Dit spel is alleen beschikbaar op',
 
+  // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'mobile': {
+    'rotatePortrait': 'Houd je telefoon rechtop om te spelen',
+    'columnFull': 'Kolom vol',
+    'repairAll': 'Alles repareren',
+    'volley': 'Salvo',
+    'swap': 'Wisselen',
+    'menu': 'Menu',
+    'materials': 'materialen',
+    'zoom': 'Zoomen'
+  },
+
   'hud': {
     'wave': 'Golf', 'enemies': 'Vijanden', 'callWave': 'Golf oproepen', 'callBoss': 'Boss oproepen',
     'speed': 'Snelheid {n}×',
-    'speedOffer': 'Dubbele snelheid voor een ad',
-    'speedFor': '{n} min', 'recenter': 'Beeld centreren',
+    'speedOffer': '{n}× snelheid ontgrendelen',
+    'speedGroup': 'Spelsnelheid', 'recenter': 'Beeld centreren',
     'rotateLeft': 'Naar links draaien',
     'rotateRight': 'Naar rechts draaien',
     'arrowRain': 'Pijlenregen',
@@ -31,6 +43,14 @@ export default {
     'outOfReach': 'Buiten bereik ×{n} — {m} bereik nodig'
   },
   'hints': {
+    'dropBlock': {
+      'touch': 'Tik op een kolom om het stuk te laten vallen',
+      'desktop': 'Klik op een kolom om het stuk te laten vallen'
+    },
+    'mergeBlock': {
+      'touch': 'Laat een stuk op zijn tweeling landen om ze samen te voegen',
+      'desktop': 'Laat een stuk op zijn tweeling landen om ze samen te voegen'
+    },
     'selectBlock': { 'touch': 'Tik hieronder op een blok om het te kiezen', 'desktop': 'Klik hieronder op een blok om het te kiezen' },
     'placeBlock': { 'touch': 'Tik nu op een oplichtend vak om te bouwen', 'desktop': 'Klik nu op een oplichtend vak om te bouwen' },
     'camera': { 'touch': 'Sleep om te bewegen · Knijp om te zoomen', 'desktop': 'Sleep om te bewegen · Scroll om te zoomen' },
@@ -83,7 +103,6 @@ export default {
       'gate': 'Poort', 'wood': 'Houten kist', 'brace': 'Verstevigde kist', 'stone': 'Stenen blok',
       'archer': 'Boogschuttertoren', 'cannon': 'Kanon', 'mortar': 'Mortier', 'tesla': 'Bliksemspoel',
       'frost': 'Vorstspits', 'repair': 'Werkplaats',
-      'sawmill': 'Zagerij', 'quarry': 'Steengroeve', 'mint': 'Goudmijn',
       'spikes': 'Stekelmuur',
       'bombard': 'Bombarde'
     },
@@ -106,9 +125,6 @@ export default {
       'tesla': 'Bliksem die overspringt naar vijanden in de buurt.',
       'frost': 'Bevriest hele groepen en vertraagt ze enorm.',
       'repair': 'Herstelt alle aangrenzende blokken tussen golven door.',
-      'sawmill': 'Produceert hout aan het einde van elke doorstane golf.',
-      'quarry': 'Produceert steen aan het einde van elke doorstane golf.',
-      'mint': 'Produceert munten aan het einde van elke doorstane golf.',
       'spikes': 'Aanvallers verwonden zichzelf er bij elke klap aan.',
       'bombard': 'Schiet een granaat recht omhoog. Kleine knal, alleen doelen op de grond.'
     },
@@ -138,6 +154,8 @@ export default {
 
   // ─── First-stage tutorial ─────────────────────────────────────────────────
   'tutorial': {
+    'drop': 'Tik op een kolom om het stuk te laten vallen.',
+    'merge': 'Laat een tweeling op een tweeling vallen om ze samen te voegen.',
     'gate': 'Bescherm de Poort. Valt hij, dan is het voorbij.',
     'gateSeeded': 'We bouwden alvast een fort voor je. Bescherm de Poort: valt hij, dan is het voorbij.',
     'pick': 'Kies een stuk.',
@@ -177,6 +195,9 @@ export default {
   },
 
   'tech': {
+    'blueprints': {
+      'title': 'Blauwdrukken'
+    },
     'intro1': 'Alles wat je hier koopt is permanent en gaat mee in elke volgende run.',
     'intro2': 'Munten komen uit elk beleg, of je nu wint of verliest. Hier geef je ze uit.',
     'intro3': 'Gouden knopen kun je nu betalen. Blauwe vragen meer munten, doffe de knoop ervoor.',
@@ -192,6 +213,7 @@ export default {
     'requires': 'Vereist {n}',
     'spotlight': 'Uitgeven!',
     'names': {
+      'm2_lumberHut': 'Houthut',
       'logistics': 'Logistiek',
       'unlockCoffer': 'Schatkisten',
       'yields': 'Opbrengsten',
@@ -205,12 +227,12 @@ export default {
       'admiralty': 'Admiraliteit',
       'foundations': 'Fundering', 'sharpBolts': 'Gescherpte pijlen', 'unlockBrace': 'Verstevigde kisten',
       'lumberStock': 'Houtvoorraad', 'longSight': 'Verrekijker', 'rapidFire': 'Snelvuur',
-      'reinforced': 'Versterkte balken', 'unlockSawmill': 'Zagerij', 'quarryStock': 'Steenvoorraad',
+      'reinforced': 'Versterkte balken', 'unlockSawmill': 'Rijke aders', 'quarryStock': 'Steenvoorraad',
       'unlockMortar': 'Mortier', 'heavyOrdnance': 'Zwaar geschut', 'unlockTesla': 'Bliksemspoel',
-      'gateArmor': 'Poortpantser', 'unlockQuarry': 'Steengroeve', 'richHauls': 'Rijke buit',
+      'gateArmor': 'Poortpantser', 'unlockQuarry': 'Diepe schachten', 'richHauls': 'Rijke buit',
       'wideFoundation': 'Brede fundering', 'siegeShells': 'Belegeringsgranaten', 'unlockFrost': 'Vorstspits',
       'forkedBolts': 'Gevorkte bliksem', 'ironPlating': 'IJzeren platen', 'unlockRepair': 'Werkplaats',
-      'unlockMint': 'Goudmijn', 'looting': 'Plundering', 'overcharge': 'Overlading',
+      'unlockMint': 'Gildebrief', 'looting': 'Plundering', 'overcharge': 'Overlading',
       'masterwork': 'Meesterwerk', 'fieldRepairs': 'Veldreparaties', 'greatFoundation': 'Grote fundering',
       'warChest': 'Oorlogskas',
       'unlockSpikes': 'Stekelmuur',
@@ -220,6 +242,7 @@ export default {
       'artilleryDoctrine': 'Artilleriedoctrine'
     },
     'descriptions': {
+      'm2_lumberHut': 'Ontgrendelt de Houthut — levert hout na elke golf.',
       'logistics': 'Ontgrendelt de steengroeve — een goedkope producent die je in de run zelf kunt betalen.',
       'unlockCoffer': 'Ontgrendelt de schatkist, het enige blok dat goud slaat.',
       'yields': 'Elk economieblok levert +{n}% meer op.',
@@ -242,13 +265,13 @@ export default {
       'longSight': 'Alle wapens reiken +{n} % verder per rang.',
       'rapidFire': 'Alle wapens vuren {n} % sneller per rang.',
       'reinforced': 'Elk torenblok krijgt +{n} % HP per rang.',
-      'unlockSawmill': 'Ontgrendelt de zagerij: levert elke golf hout op.',
+      'unlockSawmill': 'Elke producent levert +{n}% meer per rang.',
       'quarryStock': 'Start elk beleg met +{n} steen per rang.',
       'unlockMortar': 'Ontgrendelt de mortier: gebiedsschade op lange afstand.',
       'heavyOrdnance': 'Gebiedsstraal +{n} % per rang.',
       'unlockTesla': 'Ontgrendelt de bliksemspoel: bliksem springt over.',
       'gateArmor': 'De poort krijgt +{n} % HP per rang.',
-      'unlockQuarry': 'Ontgrendelt de steengroeve: levert elke golf steen op.',
+      'unlockQuarry': 'Elke producent levert nog eens +{n}% per rang.',
       'richHauls': 'Golfbeloningen +{n} % per rang.',
       'wideFoundation': 'Bouw {n} kolommen breder per rang.',
       'siegeShells': 'Torenwapens doen +{n} % schade per rang.',
@@ -256,7 +279,7 @@ export default {
       'forkedBolts': 'Bliksem springt naar {n} extra vijand per rang.',
       'ironPlating': 'Elk blok krijgt +{n} pantser per rang.',
       'unlockRepair': 'Ontgrendelt de werkplaats: heelt buren elke golf.',
-      'unlockMint': 'Ontgrendelt de goudmijn: levert elke golf munten op.',
+      'unlockMint': 'Elke producent levert nog eens +{n}% per rang.',
       'looting': 'Vijanden laten +{n} % meer munten vallen per rang.',
       'overcharge': 'Alle wapens vuren {n} % sneller per rang.',
       'masterwork': 'Torenwapens doen +{n} % schade per rang.',

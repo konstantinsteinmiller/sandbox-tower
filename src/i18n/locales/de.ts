@@ -10,11 +10,23 @@ export default {
   'tip': 'Tipp',
   'crazyGamesOnly': 'Dieses Spiel ist nur verfügbar auf',
 
+  // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'mobile': {
+    'rotatePortrait': 'Halte dein Handy aufrecht, um zu spielen',
+    'columnFull': 'Spalte voll',
+    'repairAll': 'Alles reparieren',
+    'volley': 'Salve',
+    'swap': 'Tauschen',
+    'menu': 'Menü',
+    'materials': 'Material',
+    'zoom': 'Zoom'
+  },
+
   'hud': {
     'wave': 'Welle', 'enemies': 'Gegner', 'callWave': 'Welle rufen', 'callBoss': 'Boss rufen',
     'speed': 'Tempo {n}×',
-    'speedOffer': 'Doppeltempo für einen Ad',
-    'speedFor': '{n} Min.', 'recenter': 'Ansicht zentrieren',
+    'speedOffer': '{n}× Tempo freischalten',
+    'speedGroup': 'Spieltempo', 'recenter': 'Ansicht zentrieren',
     'rotateLeft': 'Nach links drehen',
     'rotateRight': 'Nach rechts drehen',
     'arrowRain': 'Pfeilregen',
@@ -31,6 +43,14 @@ export default {
     'outOfReach': 'Außer Reichweite ×{n} — braucht {m} Reichweite'
   },
   'hints': {
+    'dropBlock': {
+      'touch': 'Tippe auf eine Spalte, um das Teil fallen zu lassen',
+      'desktop': 'Klicke auf eine Spalte, um das Teil fallen zu lassen'
+    },
+    'mergeBlock': {
+      'touch': 'Lande ein Teil auf seinem Zwilling, um sie zu verschmelzen',
+      'desktop': 'Lande ein Teil auf seinem Zwilling, um sie zu verschmelzen'
+    },
     'selectBlock': { 'touch': 'Tippe unten auf einen Block', 'desktop': 'Klicke unten auf einen Block' },
     'placeBlock': { 'touch': 'Tippe jetzt auf einen leuchtenden Platz', 'desktop': 'Klicke jetzt auf einen leuchtenden Platz' },
     'camera': { 'touch': 'Ziehen zum Bewegen · Zoomen mit zwei Fingern', 'desktop': 'Ziehen zum Bewegen · Scrollen zum Zoomen' },
@@ -83,7 +103,6 @@ export default {
       'gate': 'Tor', 'wood': 'Holzkiste', 'brace': 'Verstärkte Kiste', 'stone': 'Steinblock',
       'archer': 'Bogenturm', 'cannon': 'Kanone', 'mortar': 'Mörser', 'tesla': 'Blitzspule',
       'frost': 'Frostspitze', 'repair': 'Werkstatt',
-      'sawmill': 'Sägewerk', 'quarry': 'Steinbruch', 'mint': 'Goldmine',
       'spikes': 'Stachelwand',
       'bombard': 'Bombarde'
     },
@@ -106,9 +125,6 @@ export default {
       'tesla': 'Blitze, die auf nahe Gegner überspringen.',
       'frost': 'Kühlt ganze Gruppen ab und verlangsamt sie stark.',
       'repair': 'Flickt zwischen den Wellen alle angrenzenden Blöcke.',
-      'sawmill': 'Produziert am Ende jeder Welle Holz.',
-      'quarry': 'Produziert am Ende jeder Welle Stein.',
-      'mint': 'Produziert am Ende jeder Welle Münzen.',
       'spikes': 'Angreifer verletzen sich bei jedem Schlag daran selbst.',
       'bombard': 'Schleudert eine Granate steil nach oben. Kleine Explosion, nur Bodenziele.'
     },
@@ -138,6 +154,8 @@ export default {
 
   // ─── First-stage tutorial ─────────────────────────────────────────────────
   'tutorial': {
+    'drop': 'Tippe auf eine Spalte, um das Teil fallen zu lassen.',
+    'merge': 'Lass einen Zwilling auf einen Zwilling fallen, um sie zu verschmelzen.',
     'gate': 'Schütze das Tor. Fällt es, ist der Lauf vorbei.',
     'gateSeeded': 'Wir haben dir eine Startfeste gebaut. Schütze das Tor – fällt es, ist der Lauf vorbei.',
     'pick': 'Wähle ein Teil.',
@@ -177,6 +195,9 @@ export default {
   },
 
   'tech': {
+    'blueprints': {
+      'title': 'Baupläne'
+    },
     'intro1': 'Alles, was du hier kaufst, ist dauerhaft und gilt in jedem weiteren Lauf.',
     'intro2': 'Münzen gibt es nach jeder Belagerung – ob Sieg oder Niederlage. Hier gibst du sie aus.',
     'intro3': 'Goldene Knoten kannst du dir jetzt leisten. Blaue brauchen mehr Münzen, dunkle den Knoten davor.',
@@ -192,6 +213,7 @@ export default {
     'requires': 'Benötigt {n}',
     'spotlight': 'Ausgeben!',
     'names': {
+      'm2_lumberHut': 'Holzhütte',
       'logistics': 'Logistik',
       'unlockCoffer': 'Schatztruhen',
       'yields': 'Erträge',
@@ -205,12 +227,12 @@ export default {
       'admiralty': 'Admiralität',
       'foundations': 'Fundamente', 'sharpBolts': 'Geschärfte Bolzen', 'unlockBrace': 'Verstärkte Kisten',
       'lumberStock': 'Holzvorrat', 'longSight': 'Weitsicht', 'rapidFire': 'Schnellfeuer',
-      'reinforced': 'Verstärkte Balken', 'unlockSawmill': 'Sägewerk', 'quarryStock': 'Steinvorrat',
+      'reinforced': 'Verstärkte Balken', 'unlockSawmill': 'Reiche Adern', 'quarryStock': 'Steinvorrat',
       'unlockMortar': 'Mörser', 'heavyOrdnance': 'Schweres Geschütz', 'unlockTesla': 'Blitzspule',
-      'gateArmor': 'Torpanzerung', 'unlockQuarry': 'Steinbruch', 'richHauls': 'Reiche Beute',
+      'gateArmor': 'Torpanzerung', 'unlockQuarry': 'Tiefe Stollen', 'richHauls': 'Reiche Beute',
       'wideFoundation': 'Breites Fundament', 'siegeShells': 'Belagerungsgranaten', 'unlockFrost': 'Frostspitze',
       'forkedBolts': 'Gegabelte Blitze', 'ironPlating': 'Eisenplatten', 'unlockRepair': 'Werkstatt',
-      'unlockMint': 'Goldmine', 'looting': 'Plünderung', 'overcharge': 'Überladung',
+      'unlockMint': 'Gildenbrief', 'looting': 'Plünderung', 'overcharge': 'Überladung',
       'masterwork': 'Meisterwerk', 'fieldRepairs': 'Feldreparaturen', 'greatFoundation': 'Großes Fundament',
       'warChest': 'Kriegskasse',
       'unlockSpikes': 'Stachelwand',
@@ -220,6 +242,7 @@ export default {
       'artilleryDoctrine': 'Artilleriedoktrin'
     },
     'descriptions': {
+      'm2_lumberHut': 'Schaltet die Holzhütte frei — liefert nach jeder Welle Holz.',
       'logistics': 'Schaltet die Steingrube frei – ein günstiger Produzent, den du dir im Lauf leisten kannst.',
       'unlockCoffer': 'Schaltet die Schatztruhe frei, den einzigen Block, der Gold prägt.',
       'yields': 'Jeder Wirtschaftsblock liefert +{n} % mehr.',
@@ -242,13 +265,13 @@ export default {
       'longSight': 'Alle Waffen reichen +{n} % weiter pro Rang.',
       'rapidFire': 'Alle Waffen feuern {n} % schneller pro Rang.',
       'reinforced': 'Jeder Turmblock erhält +{n} % TP pro Rang.',
-      'unlockSawmill': 'Schaltet das Sägewerk frei – produziert jede Welle Holz.',
+      'unlockSawmill': 'Jeder Produzent liefert +{n}% mehr pro Rang.',
       'quarryStock': 'Starte jede Belagerung mit +{n} Stein pro Rang.',
       'unlockMortar': 'Schaltet den Mörser frei – weitreichender Flächenschaden.',
       'heavyOrdnance': 'Splash-Radius +{n} % pro Rang.',
       'unlockTesla': 'Schaltet die Blitzspule frei – Blitze springen über.',
       'gateArmor': 'Das Tor erhält +{n} % TP pro Rang.',
-      'unlockQuarry': 'Schaltet den Steinbruch frei – produziert jede Welle Stein.',
+      'unlockQuarry': 'Jeder Produzent liefert weitere +{n}% pro Rang.',
       'richHauls': 'Wellenbelohnungen +{n} % pro Rang.',
       'wideFoundation': 'Baue {n} Spalten breiter pro Rang.',
       'siegeShells': 'Turmwaffen verursachen +{n} % Schaden pro Rang.',
@@ -256,7 +279,7 @@ export default {
       'forkedBolts': 'Blitze springen auf {n} zusätzlichen Gegner pro Rang.',
       'ironPlating': 'Jeder Block erhält +{n} Panzerung pro Rang.',
       'unlockRepair': 'Schaltet die Werkstatt frei – heilt jede Welle Nachbarn.',
-      'unlockMint': 'Schaltet die Goldmine frei – produziert jede Welle Münzen.',
+      'unlockMint': 'Jeder Produzent liefert weitere +{n}% pro Rang.',
       'looting': 'Gegner lassen +{n} % mehr Münzen fallen pro Rang.',
       'overcharge': 'Alle Waffen feuern {n} % schneller pro Rang.',
       'masterwork': 'Turmwaffen verursachen +{n} % Schaden pro Rang.',

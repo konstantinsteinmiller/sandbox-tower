@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { artOverridesEnabled, preloadArtOverrides } from '@/game/art'
+import { criticalArtWants, preloadRemainingArt } from '@/game/artPreload'
 import { prependBaseUrl } from '@/utils/function'
 
 // Tower Siege draws all gameplay art programmatically (Canvas 2D) and uses
@@ -278,6 +279,10 @@ const runBackgroundWarmup = (): void => {
   // screens the player reaches soonest after the splash.
   for (const src of DEFERRED_IMAGE_SRCS) void decodeImage(src)
 
+  // Painted art beyond wave 1: the early cast in debut order, then everything
+  // else at low priority on an idle slot. Nothing waits on it.
+  void preloadRemainingArt()
+
   void (async () => {
     try {
       // SFX next, then — chained inside `preloadGameplaySounds` — the music
@@ -324,7 +329,7 @@ export default () => {
 
     if (artOn) {
       loadingProgress.value = Math.round(100 * critShare)
-      await preloadArtOverrides((n, total) => {
+      await preloadArtOverrides(criticalArtWants(), (n, total) => {
         if (total <= 0) return
         loadingProgress.value = Math.round((critShare + (n / total) * (1 - critShare)) * 100)
       })

@@ -2,6 +2,17 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { registerChordTap } from '@/use/useVConsole'
+import BlockTile from '@/components/game/BlockTile.vue'
+import { GATE_ID } from '@/game/blocks'
+
+/**
+ * Backing size for the Gate thumbnail, CSS px.
+ *
+ * Drawn far larger than it is shown and scaled down: the chip is about 15 px
+ * across, and a canvas sized to that has no detail left to lose once the device
+ * pixel ratio is anything other than 1.
+ */
+const GATE_ICON_PX = 48
 
 /**
  * Top-left status ribbon: current wave, enemies remaining, and the Gate's
@@ -60,8 +71,16 @@ const isRecord = computed(() => props.wave > props.bestWave && props.wave > 0)
 
       //- Gate integrity — always visible; this is the lose condition.
       div.wave-hud__gate
-        svg.wave-hud__gate-icon(viewBox="0 0 24 24" fill="currentColor" aria-hidden="true")
-          path(d="M5 21V9a7 7 0 0 1 14 0v12h-4v-8a3 3 0 0 0-6 0v8Z")
+        //- The Gate itself, in miniature — the same thumbnail the tray and the
+        //- inspector use, so it picks up the painted block when art is on and
+        //- falls back to the procedural one otherwise. It replaced a hand-drawn
+        //- arch glyph that no longer looked like the thing it stands for.
+        //-
+        //- No pictogram: the body is a stone arch with a door in it, which is
+        //- already the whole message, and at this size the glyph's backing disc
+        //- would cover it.
+        span.wave-hud__gate-icon
+          BlockTile(:type-id="GATE_ID" :size="GATE_ICON_PX" :glyph="false")
         div.wave-hud__bar
           div.wave-hud__bar-fill(
             :class="gateCritical ? 'is-gate-critical' : 'is-gate'"
@@ -154,11 +173,19 @@ const isRecord = computed(() => props.wave > props.bestWave && props.wave > 0)
   align-items: center
   gap: clamp(0.2rem, 1.2vw, 0.4rem)
 
+// A shade larger than the glyph it replaced: a flat gold silhouette reads at
+// 15 px, a painted block needs a little more room to be recognisable.
 .wave-hud__gate-icon
   flex: 0 0 auto
-  width: clamp(0.7rem, 3vw, 0.95rem)
-  height: clamp(0.7rem, 3vw, 0.95rem)
-  color: #c9a227
+  display: block
+  width: clamp(0.85rem, 3.6vw, 1.15rem)
+  height: clamp(0.85rem, 3.6vw, 1.15rem)
+
+// `!important` is what it takes to beat BlockTile's own inline width/height,
+// which is sized for the backing canvas rather than the box it is shown in.
+.wave-hud__gate-icon :deep(canvas)
+  width: 100% !important
+  height: 100% !important
 
 @keyframes hud-critical
   0%, 100%

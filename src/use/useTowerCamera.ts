@@ -85,6 +85,32 @@ let lastTowerVersion = -1
  */
 export const isManual = ref(false)
 
+/**
+ * A FIXED frame: the mobile-fit board.
+ *
+ * The whole board is always on screen at a cell size the scene chose from the
+ * viewport, so there is no auto-fit to compute and nothing for the player to
+ * pan or pinch — every gesture on the canvas is a game action. The scene calls
+ * `setFixedFrame` once per viewport change; until it does, the camera behaves
+ * exactly as it always has.
+ */
+export const isFixed = ref(false)
+
+export const setFixedFrame = (frame: { cell: number; x: number; y: number }): void => {
+  isFixed.value = true
+  isManual.value = false
+  tx = x = frame.x
+  ty = y = frame.y
+  tzoom = zoom = Math.max(1, frame.cell)
+  publishSpan()
+}
+
+/** Back to the spring-damped auto-fit (tests, and the desktop scene). */
+export const clearFixedFrame = (): void => {
+  isFixed.value = false
+  lastTowerVersion = -1
+}
+
 // ─── Viewport ───────────────────────────────────────────────────────────────
 
 export const setViewport = (w: number, h: number, top = 0, bottom = 0): void => {
@@ -189,6 +215,7 @@ const markManual = (): void => {
 
 /** Pan by a screen-space delta (a one-finger drag / mouse drag). */
 export const panBy = (dxPx: number, dyPx: number): void => {
+  if (isFixed.value) return
   tx -= dxPx / zoom
   ty += dyPx / zoom
   // Snap the smoothed position too, so a drag tracks the finger 1:1 instead of
@@ -203,6 +230,7 @@ export const panBy = (dxPx: number, dyPx: number): void => {
  *  point under the anchor stays put — the behaviour every map app trained
  *  players to expect. */
 export const zoomAt = (factor: number, anchorX: number, anchorY: number): void => {
+  if (isFixed.value) return
   const before = { wx: screenToWorldX(anchorX), wy: screenToWorldY(anchorY) }
   tzoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, tzoom * factor))
   zoom = tzoom
@@ -216,13 +244,14 @@ export const zoomAt = (factor: number, anchorX: number, anchorY: number): void =
 }
 
 export const beginPinch = (distPx: number): void => {
+  if (isFixed.value) return
   pinchStartDist = Math.max(1, distPx)
   pinchStartZoom = tzoom
   markManual()
 }
 
 export const updatePinch = (distPx: number, anchorX: number, anchorY: number): void => {
-  if (pinchStartDist <= 0) return
+  if (isFixed.value || pinchStartDist <= 0) return
   const desired = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchStartZoom * (distPx / pinchStartDist)))
   zoomAt(desired / tzoom, anchorX, anchorY)
 }
@@ -231,6 +260,7 @@ export const endPinch = (): void => { pinchStartDist = 0 }
 
 /** Return to auto-fit immediately (the recenter button). */
 export const recenter = (): void => {
+  if (isFixed.value) return
   isManual.value = false
   lastTowerVersion = towerVersion.value
   computeAutoTarget()
@@ -258,6 +288,8 @@ const clampTarget = (): void => {
 // ─── Per-frame update ───────────────────────────────────────────────────────
 
 export const updateCamera = (dtMs: number): void => {
+  // A fixed frame has nowhere to go; only the spawn span needs publishing.
+  if (isFixed.value) { publishSpan(); return }
   if (!isManual.value) {
     // Recompute only when the tower actually changed — auto-fit is otherwise a
     // stable target and re-deriving it every frame is wasted work.
@@ -298,6 +330,7 @@ const publishSpan = (): void => {
 /** Force the camera to its auto-fit target with no animation. Used on scene
  *  mount so the first painted frame is already correctly framed. */
 export const snapToFit = (): void => {
+  if (isFixed.value) { publishSpan(); return }
   isManual.value = false
   lastTowerVersion = towerVersion.value
   computeAutoTarget()

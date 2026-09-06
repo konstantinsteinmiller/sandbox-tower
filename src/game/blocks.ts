@@ -74,7 +74,8 @@ export const BLOCK_DEFS: Record<string, BlockDef> = {
       projectile: 'bolt',
       speed: 17,
       targeting: 'nearest',
-      hitsAir: true
+      hitsAir: true,
+      plunging: true
     },
     order: 3,
     palette: 'archer'
@@ -92,7 +93,8 @@ export const BLOCK_DEFS: Record<string, BlockDef> = {
       speed: 12,
       splash: 1.2,
       targeting: 'strongest',
-      hitsAir: true
+      hitsAir: true,
+      plunging: true
     },
     order: 4,
     palette: 'cannon'
@@ -112,7 +114,8 @@ export const BLOCK_DEFS: Record<string, BlockDef> = {
       // the Mortar's crowd-clearing shockwave.
       splash: 0.8,
       targeting: 'strongest',
-      hitsAir: false
+      hitsAir: false,
+      plunging: true
     },
     unlockNode: 'unlockBombard',
     order: 6,
@@ -133,7 +136,8 @@ export const BLOCK_DEFS: Record<string, BlockDef> = {
       splash: 2.1,
       targeting: 'strongest',
       // Arcs to a ground impact point, so it simply cannot hit flyers.
-      hitsAir: false
+      hitsAir: false,
+      plunging: true
     },
     unlockNode: 'unlockMortar',
     order: 5,
@@ -205,38 +209,21 @@ export const BLOCK_DEFS: Record<string, BlockDef> = {
     palette: 'repair'
   },
 
-  // ── Economy ──────────────────────────────────────────────────────────────
-  sawmill: {
-    id: 'sawmill',
-    kind: 'economy',
-    cost: { wood: 40 },
-    hp: 60,
-    economy: { wood: 10 },
-    unlockNode: 'unlockSawmill',
-    order: 11,
-    palette: 'sawmill'
-  },
-  quarry: {
-    id: 'quarry',
-    kind: 'economy',
-    cost: { stone: 40 },
-    hp: 70,
-    armor: 1,
-    economy: { stone: 7 },
-    unlockNode: 'unlockQuarry',
-    order: 12,
-    palette: 'quarry'
-  },
-  mint: {
-    id: 'mint',
-    kind: 'economy',
-    cost: { wood: 45, stone: 45, coins: 40 },
-    hp: 70,
-    economy: { coins: 6 },
-    unlockNode: 'unlockMint',
-    order: 13,
-    palette: 'mint'
-  },
+  // ── Economy ──────────────────────────────────────────────────
+  //
+  // ONE producer per resource. There used to be two of each — a cheap early
+  // tier (lumber hut / stone pit / coffer) and a deep tier behind 160-640 coins
+  // of tech (sawmill / quarry / gold mine) — and they shared a palette, a
+  // glyph and a description, so the tray offered the player two blocks that
+  // looked identical, did the same job, and differed only in a number they
+  // could not see. That is not a choice, it is a memory test.
+  //
+  // The deep tier is gone and its tech nodes now raise what the survivors
+  // produce (see `richSeams` and friends in `tech.ts`). The ceiling is the
+  // same or higher; what disappeared is a second building to learn.
+  //
+  // See "Producers" below — the definitions live with the rest of the
+  // support blocks now that there is only one row of them.
 
   // ── Buffs ────────────────────────────────────────────────────────────────
   //
@@ -273,12 +260,10 @@ export const BLOCK_DEFS: Record<string, BlockDef> = {
     palette: 'obelisk'
   },
 
-  // ── Early economy ────────────────────────────────────────────────────────
+  // ── Producers ───────────────────────────────────────────────
   //
-  // The deep economy blocks (sawmill / quarry / mint) sit behind 160-640 coins
-  // of tech, which puts them out of reach for exactly the player whose income
-  // cannot pay for their own attrition. These are the affordable tier: smaller
-  // yields, but buildable in the run where they would matter.
+  // One per resource, and all three buildable in the run where they would
+  // matter rather than behind a tech wall the player's income cannot pay for.
   //
   // Every yield in the game carries a +20 % pass over its first tuning. A
   // producer is a cell that neither shoots nor soaks, so it competes with a gun
@@ -288,7 +273,8 @@ export const BLOCK_DEFS: Record<string, BlockDef> = {
   //
   // Yields are priced against `waveReward` — about a third of a wave's income
   // each, so three of them roughly double it, at the cost of three cells that
-  // neither shoot nor soak.
+  // neither shoot nor soak. The economy tech lane multiplies these numbers; it
+  // no longer replaces the buildings that carry them.
   lumberHut: {
     id: 'lumberHut',
     kind: 'economy',
@@ -350,7 +336,8 @@ export const BLOCK_DEFS: Record<string, BlockDef> = {
       speed: 17,
       targeting: 'nearest',
       hitsAir: false,
-      hitsSubmerged: true
+      hitsSubmerged: true,
+      plunging: true
     },
     unlockNode: 'harbour',
     waterOnly: true,
@@ -372,7 +359,8 @@ export const BLOCK_DEFS: Record<string, BlockDef> = {
       splash: 0.9,
       targeting: 'strongest',
       hitsAir: false,
-      hitsSubmerged: true
+      hitsSubmerged: true,
+      plunging: true
     },
     unlockNode: 'unlockLongship',
     waterOnly: true,
@@ -394,7 +382,8 @@ export const BLOCK_DEFS: Record<string, BlockDef> = {
       splash: 1.8,
       targeting: 'strongest',
       hitsAir: false,
-      hitsSubmerged: true
+      hitsSubmerged: true,
+      plunging: true
     },
     unlockNode: 'unlockGalley',
     waterOnly: true,
@@ -426,9 +415,31 @@ export const isShip = (id: string): boolean => blockDef(id).waterOnly === true
 // Output triples per tier while hit points only double, and that gap is what
 // keeps the bet honest: a merged tower out-damages a flat one long before it
 // out-lasts it.
+//
+// There is NO ceiling on either board any more. The desktop carried one at
+// three for a while, on the grounds that a tier 4 would be an eight-cell slab
+// under a single gun — which turned out to be the good part: the tower gets
+// visibly grander as it concentrates, and the frontage it gives up is already
+// the price. `RuleSet.maxMergeTier` still exists so a mode CAN cap it, and
+// `SAFE_MAX_TIER` still bounds what a corrupt save may claim.
 
-/** Tiers a block can reach. Tier 1 is a plain block. */
-export const MAX_MERGE_TIER = 3
+/**
+ * The ceiling a DESERIALISED tier is clamped to, whatever the rules allow.
+ *
+ * An uncapped board has no natural bound, and the multipliers are exponential:
+ * a corrupt or hand-edited save carrying tier 900 would come back as a block
+ * doing `Infinity` damage, which poisons every number downstream of it. Thirty
+ * is far past anything reachable by play on any board.
+ */
+export const SAFE_MAX_TIER = 30
+
+/**
+ * The widest a restored footprint may claim to be, on either axis.
+ *
+ * Also a corruption guard rather than a rule: a tier-7 weld is a legitimate
+ * 8×8, and sixteen is past anything a board this size can grow into.
+ */
+export const MAX_FOOTPRINT_SPAN = 16
 
 /** A block's tier, treating the absent field as a plain block. */
 export const tierOf = (tier: number | undefined): number => tier ?? 1
@@ -448,8 +459,9 @@ export const canMergeType = (typeId: string): boolean =>
 /**
  * Can these two blocks fuse?
  *
- * WEAPONS ONLY, and only with the same weapon: same type, same tier, below the
- * ceiling, never the Gate.
+ * WEAPONS ONLY, and only with the same weapon: same type, same tier, never the
+ * Gate. `maxTier` comes from the active rules and is uncapped on both boards
+ * today; the parameter stays so a mode can put a ceiling back without a fork.
  *
  * Walls, crates, roofs and producers are excluded on purpose. Merging is a
  * damage bet — trade frontage for one bigger gun — and a wall has no damage to
@@ -461,12 +473,14 @@ export const canMergeType = (typeId: string): boolean =>
  */
 export const canMergeBlocks = (
   a: { typeId: string; tier?: number },
-  b: { typeId: string; tier?: number }
+  b: { typeId: string; tier?: number },
+  types: 'weapons' | 'all' = 'weapons',
+  maxTier: number = Infinity
 ): boolean =>
   a.typeId === b.typeId
-  && canMergeType(a.typeId)
+  && (types === 'all' ? a.typeId !== GATE_ID : canMergeType(a.typeId))
   && tierOf(a.tier) === tierOf(b.tier)
-  && tierOf(a.tier) < MAX_MERGE_TIER
+  && tierOf(a.tier) < maxTier
 
 // ─── Enhanced blocks ────────────────────────────────────────────────────────
 //

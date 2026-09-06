@@ -14,7 +14,7 @@ import useTowerGame, {
   CONTINUE_WOOD, CONTINUE_STONE,
   arrowRainCharge, arrowRainReady, arrowRainWavesLeft, callArrowRain, ARROW_RAIN_RADIUS,
   startRun, resumeRun, placeShape, sellBlock, upgradeBlock, repairBlock, canPlaceShapeAt,
-  canAffordShape, callWave, toggleSpeed, step, runSummary, saveRunSnapshot,
+  canAffordShape, callWave, toggleSpeed, setGameSpeed, step, runSummary, saveRunSnapshot,
   manualReroll, canManualReroll, dealEnhancedOffers, summonCavalry, cavalryCost,
   bestWeaponReach, unreachableSiege, isCavalryFree, isRangeBuffed, grantRangeBuff,
   RANGE_BUFF_MUL, effectiveRangeMul,
@@ -29,7 +29,6 @@ import {
 import { drawScene, resetDrawnFx, setBuildOverlay } from '@/use/useTowerArt'
 import { resetVfx } from '@/use/useTowerVfx'
 import { warmAudio, playFx } from '@/use/useTowerAudio'
-import { warmSpriteProbes } from '@/game/art'
 import useTowerProgress, { bestWave, mergeUnlocked } from '@/use/useTowerProgress'
 import {
   reportRun, rankFor, boardSize, playerTotal, leaderboardEnabled,
@@ -39,11 +38,11 @@ import useTowerEconomy from '@/use/useTowerEconomy'
 import useMissions, { beginMissionRun } from '@/use/useMissions'
 import useAchievements from '@/use/useAchievements'
 import useBattlePass from '@/use/useBattlePass'
-import { BUILDABLE_BLOCKS, GATE_ID, isShip, blockDef } from '@/game/blocks'
+import { isShip, blockDef } from '@/game/blocks'
 import { OFFER_SLOTS, canRotateShape, normRot, rotatedShape } from '@/game/shapes'
 import { ENEMY_DEFS } from '@/game/enemies'
 import {
-  earlyCallBonus, countSiege, countAir, countSea, countBlast, countOutranged, deepestStandoff
+  earlyCallBonus, countSiege, countOutranged, deepestStandoff
 } from '@/game/waves'
 import { SEA_LEVEL } from '@/game/world'
 import type { Block } from '@/game/types'
@@ -59,6 +58,7 @@ import { isMobileLandscape, isCrazyWeb } from '@/use/useUser'
 import { isFullscreen, installFullscreenWatch } from '@/use/useFullscreen'
 import { isCrazyGamesFullRelease } from '@/use/useMatch'
 import { spawnCoinExplosion } from '@/use/useCoinExplosion'
+import { pushResourceFloat, clearResourceFloats } from '@/use/useResourceFloats'
 import { isInterstitialReady, showMidgameAd } from '@/use/useAds'
 import {
   claimReward, canOfferReward, adInFlight, isRewardGated,
@@ -858,6 +858,8 @@ const consumeFirstRunBonus = (): void => {
  */
 const beginRun = (): void => {
   startRun()
+  // Last run's payout must not still be drifting up into a fresh bar.
+  clearResourceFloats()
   if (isFirstSession()) seedScriptedOpening()
 }
 
@@ -950,6 +952,17 @@ watch(lastWaveReward, async (r) => {
   toastHeld.value = true
   await maybeShowInterstitial()
   toastHeld.value = false
+
+  // What the wave paid, announced AT the numbers it paid into.
+  //
+  // After the interstitial, not before: the floats are a second-long animation
+  // and playing them under an ad spends them on a screen nobody is looking at.
+  // Wallet coins are absent on purpose — those already fly to the badge in the
+  // corner via `coinPayout`, and a second readout of the same coins would say
+  // the wave paid twice.
+  pushResourceFloat('wood', r.wood)
+  pushResourceFloat('stone', r.stone)
+  pushResourceFloat('gold', r.gold)
 })
 
 // ─── First-stage tutorial ───────────────────────────────────────────────────
@@ -1259,19 +1272,29 @@ const onTripleWave = async (): Promise<void> => {
 }
 
 /**
- * Buy the 2x speed buff with a rewarded video.
+ * Buy fast-forward with a rewarded video.
  *
  * Five minutes, not one wave: a per-wave charge would have the player watching
  * an ad every ninety seconds, which is the kind of pacing portals reject. It
  * also extends rather than replaces, so a second video mid-buff never costs the
  * player time they already paid for.
+ *
+ * `target` is the rung they tapped. One purchase unlocks the whole ladder, so
+ * the video is charged once and the player lands where they pressed rather
+ * than always at 2x.
  */
-const onBuySpeed = async (): Promise<void> => {
+const onBuySpeed = async (target: number): Promise<void> => {
   if (adInFlight.value) return
   await claimReward(() => {
-    grantSpeedBuff()
+    grantSpeedBuff(target)
     playSound('level-up', 0.07)
   })
+}
+
+/** Move to a rung that is already paid for. */
+const onSetSpeed = (n: number): void => {
+  if (!setGameSpeed(n)) return
+  playSound('barricade', 0.03)
 }
 
 // ─── Reinforced hand (rewarded) ─────────────────────────────────────────────
@@ -1463,47 +1486,34 @@ const siegeIncoming = computed(() => {
 const cavalryOffered = computed(() => phase.value === 'battle' && siegeIncoming.value > 0)
 
 /**
- * The "this wave brings something you may not have an answer to" banner.
+ * The build-phase chip row.
  *
- * `countAir` / `countSea` / `countBombers` have existed in `waves.ts` since the
- * wave director was written, documented as feeding exactly this warning — and
- * were never called. Air arrives at wave 9, bombers at 8, the sea lane at 12,
- * and until now each simply appeared. A player who cannot yet counter a lane
- * at least deserves to know it is coming.
+ * It used to carry a chip per incoming lane — air, sea, bombers, siege, and a
+ * sixth for siege parked past every gun. They were accurate and nobody used
+ * them: five chips that all say "brace" are wallpaper by wave three, and the
+ * wave itself arrives four seconds later and says the same thing louder. Their
+ * counters stay in `waves.ts`, and `outrangedNext` still drives the reach
+ * warning on the Mortar — that was the one lane cue that told the player to
+ * SPEND rather than to worry.
+ *
+ * What is left is the hoard surcharge, which is not a description of the next
+ * wave at all. It is a price on THIS build phase, it is the one number the
+ * player can act on right now, and it is shown as the percentage added because
+ * that is what the wave is actually multiplied by.
  *
  * Only while the wave is being ASSEMBLED (build phase) — once the shooting has
  * started the enemies themselves are the warning.
  */
 const waveWarnings = computed<{ id: string; n: number; m?: number }[]>(() => {
   if (phase.value !== 'build') return []
-  // The NEXT wave, not the one just fought — `wavePlan()` still holds the
-  // finished one during a build phase, and a warning about a wave the player
-  // has already survived is worse than no warning.
   void towerVersion.value
   void waveVersion.value
   void wood.value
   void stone.value
   void runCoins.value
-  const plan = previewNextWave()
-  // The hoard surcharge leads, because unlike the lane warnings it is the one
-  // the player can act on right now — every other chip says "brace", this one
-  // says "spend". Shown as the percentage added, which is the number the wave
-  // is actually multiplied by.
   const hoard = currentHoardTier()
-  // Siege splits in two. An engine the tower can shoot is a DPS problem the
-  // player already knows how to solve; one parked past every gun is a different
-  // problem with a different answer, and folding both into one "Siege ×n" chip
-  // hid the only one that needs a purchase. The outranged chip carries the
-  // reach it would take, because that number is the whole instruction: it is
-  // what a Mortar, a War Galley or enough Long Sight has to beat.
-  const outranged = outrangedNext.value
   return [
-    { id: 'hoard', n: hoard === 3 ? 100 : hoard === 2 ? 50 : hoard === 1 ? 25 : 0 },
-    { id: 'air', n: countAir(plan) },
-    { id: 'sea', n: countSea(plan) },
-    { id: 'bombers', n: countBlast(plan) },
-    { id: 'siege', n: countSiege(plan) - outranged.n },
-    { id: 'outOfReach', n: outranged.n, m: outranged.need }
+    { id: 'hoard', n: hoard === 3 ? 100 : hoard === 2 ? 50 : hoard === 1 ? 25 : 0 }
   ].filter((w) => w.n > 0)
 })
 
@@ -1651,15 +1661,13 @@ onMounted(() => {
   window.addEventListener('keydown', onKey)
   rafId = requestAnimationFrame(loop)
 
-  // Warm the audio synthesis path and probe for drop-in art on an idle slot, so
-  // neither competes with the first frame.
+  // Warm the audio synthesis path on an idle slot, so it does not compete with
+  // the first frame. Drop-in art is no longer probed from here: `artPreload`
+  // stages it, and this used to fire a probe per enemy TYPE at the still path
+  // nothing ships to — twenty-one guaranteed 404s on every start.
   const idle = (window as any).requestIdleCallback as ((cb: () => void, o?: any) => number) | undefined
   const warm = (): void => {
     warmAudio()
-    warmSpriteProbes(
-      BUILDABLE_BLOCKS.map((d) => d.id).concat(GATE_ID),
-      Object.keys(ENEMY_DEFS)
-    )
   }
   if (typeof idle === 'function') idle(warm, { timeout: 2500 })
   else setTimeout(warm, 400)
@@ -1843,9 +1851,12 @@ onUnmounted(() => {
                 path(d="M15 4l3 1-1 2z")
               span.scene__cavalry-label {{ t('allies.cavalry') }}
               span.scene__cavalry-free(v-if="isCavalryFree") {{ t('allies.free') }}
+              //- Amount then glyph, matching `FRewardButton` — the two sit
+              //- side by side in this row, and a coin leading one price while
+              //- trailing the other reads as two different currencies.
               span.scene__cavalry-cost(v-else)
-                IconCoin(class="scene__cavalry-coin")
                 | {{ cavalryPrice }}
+                IconCoin(class="scene__cavalry-coin")
               FHudBadge(v-if="allyCount > 0" tone="green") {{ allyCount }}
 
           //- Turn the armed piece. Only rendered while something turnable is
@@ -1954,7 +1965,7 @@ onUnmounted(() => {
             :boss-incoming="isBossIncoming"
             :speed-buff-left="speedBuffLeft"
             @call="onCallWave"
-            @toggle-speed="toggleSpeed"
+            @set-speed="onSetSpeed"
             @buy-speed="onBuySpeed"
           )
 
@@ -2059,7 +2070,18 @@ onUnmounted(() => {
 
           //- The two CTAs from reference image 2.
           div.result__actions
-            FButton(size="md" :is-disabled="adInFlight" @click="onUpgrade") {{ t('result.upgrade') }}
+            //- Both captions are glyphs now. `result.upgrade` and
+            //- `result.defendAgain` are NOT dead keys: they moved from being
+            //- read on screen to being read aloud, as the accessible name of
+            //- an icon-only control. Do not prune them.
+            FButton(
+              size="md"
+              icon="shop"
+              icon-only
+              :aria-label="t('result.upgrade')"
+              :is-disabled="adInFlight"
+              @click="onUpgrade"
+            )
             //- No movie badge: restarting is the way OUT of a finished run, and
             //- a player who cannot get past it because an ad will not fill is
             //- stuck on the defeat screen. `free` keeps the reward-button
@@ -2068,6 +2090,8 @@ onUnmounted(() => {
             FRewardButton(
               tone="blue"
               free
+              icon="skip-forward"
+              icon-only
               :label="t('result.defendAgain')"
               @click="onRebuild"
             )
@@ -2452,11 +2476,13 @@ onUnmounted(() => {
 .scene__cavalry-cost
   display: inline-flex
   align-items: center
-  gap: 0.15em
+  gap: 0.22em
   font-weight: 900
   font-size: clamp(0.6rem, 2.6vw, 0.85rem)
   line-height: 1
-  text-shadow: 2px 2px 0 #000
+  // Fully outlined, like the reward button's price: the cavalry body is a warm
+  // orange and a single bottom-right shadow leaves the digits swimming in it.
+  text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000
 
 .scene__cavalry-coin
   width: 1em

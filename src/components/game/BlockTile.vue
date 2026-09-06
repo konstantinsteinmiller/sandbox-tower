@@ -18,9 +18,23 @@ interface Props {
   typeId: string
   /** CSS pixel size of the square thumbnail. */
   size?: number
+  /**
+   * Draw the pictogram over the body.
+   *
+   * On by default, and it earns its place in the tray: blocks share a base
+   * bitmap, so the glyph is the only thing telling an archery post from a
+   * sawmill. Turn it off where the PAINTED body already IS the identity and the
+   * space is too small to hold both — the Gate is a stone arch with a door in
+   * it, and at HUD size a backing disc over that is all anyone would see.
+   *
+   * It is ignored when there is no painted body to speak for itself. The
+   * procedural Gate is a purple square with a gold rim: without its glyph the
+   * HUD chip said nothing at all, which is a worse answer than a cluttered one.
+   */
+  glyph?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), { size: 44 })
+const props = withDefaults(defineProps<Props>(), { size: 44, glyph: true })
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 
@@ -71,6 +85,8 @@ const paint = (): void => {
     ctx.stroke()
   }
 
+  if (!props.glyph && override) return
+
   // One bold pictogram, on a dark backing disc.
   //
   // The disc is not decoration: a pale glyph vanishes on a pale block (stone,
@@ -99,7 +115,7 @@ onMounted(() => {
   const stop = onArtChanged(paint)
   onUnmounted(stop)
 })
-watch(() => [props.typeId, props.size], paint)
+watch(() => [props.typeId, props.size, props.glyph], paint)
 </script>
 
 <template lang="pug">

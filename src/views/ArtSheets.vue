@@ -5,7 +5,7 @@ import {
   ALL_STRIPS, STRIP_SCALE, promptFor,
   SINGLES, SINGLE_SIZE, promptForCell,
   SCENERY, promptForScenery,
-  WALKS, WALK_PANEL_W, WALK_PANEL_H, promptForWalk,
+  WALKS, promptForWalk,
   type SheetSpec, type SheetCell, type StripSpec, type SingleSpec, type WalkSpec
 } from '@/game/artSheet'
 import { blockDef, isShip } from '@/game/blocks'
@@ -15,10 +15,13 @@ import { MONSTERS } from '@/game/monsters'
 import { paintMonsterFrame } from '@/game/monsterSprites'
 import { ENEMY_DEFS } from '@/game/enemies'
 import { drawSiegeMachine } from '@/game/siegeArt'
-import { drawCavalry } from '@/game/cavalryArt'
+import { drawCavalry, CAVALRY_CYCLE_MS } from '@/game/cavalryArt'
+import { SHIP_ART, SHIP_DRAFT } from '@/game/shipArt'
 import {
   paintBlockBody, paintBlockFixture, paintShipBlock, fixtureSpanForTier,
-  paintTierPlate, paintProjectile, paintTree, celestialDisc
+  FIXTURE_BOX,
+  paintTierPlate, paintProjectile, paintTree, celestialDisc, SIEGE_ART_BOX,
+  ALLY_ART_BOX
 } from '@/use/useTowerArt'
 import { prependBaseUrl } from '@/utils/function'
 
@@ -398,6 +401,50 @@ const renderSingle = (single: SingleSpec): HTMLCanvasElement => {
  * out of the character. The grid is described in the prompt instead, and the
  * panels are legible without it because each creature is centred in its own.
  */
+/**
+ * Where the reference actually SITS inside its panels, as fractions of one.
+ *
+ * Measured, not declared, because it is the thing a painter is most likely to
+ * change without noticing: every returned siege sheet so far came back with the
+ * machine enlarged to fill the panel and dropped to the bottom — the catapult at
+ * more than double size. A chassis at the wrong scale still looks fine on its
+ * own; what gives it away is the live arm, which is drawn from the geometry and
+ * suddenly belongs to a smaller machine.
+ *
+ * The slicer reads this back and normalises what it gets to match.
+ */
+const walkFits = new Map<string, { h: number; w: number; bottom: number; cx: number }>()
+
+/**
+ * Alpha floor for the fit measurement.
+ *
+ * Deliberately high. The procedural machines cast a soft ground shadow and the
+ * painted returns do not — the background rule forbids one — so measuring at
+ * "any pixel at all" compared a silhouette-plus-shadow against a silhouette,
+ * and aligning those two bottoms sank the siege tower into the grass by the
+ * depth of a shadow nobody painted. At 140 a 32%-opacity shadow is not part of
+ * the object on either side.
+ */
+const FIT_ALPHA = 140
+
+/** Alpha bbox of one rectangle of a canvas, in that rectangle's own pixels. */
+const unionBox = (
+  cv: HTMLCanvasElement, ox: number, oy: number, W: number, H: number
+): { x0: number; y0: number; x1: number; y1: number } | null => {
+  const d = cv.getContext('2d')!.getImageData(ox, oy, W, H).data
+  let x0 = W, y0 = H, x1 = -1, y1 = -1
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      if (d[(y * W + x) * 4 + 3]! <= FIT_ALPHA) continue
+      if (x < x0) x0 = x
+      if (x > x1) x1 = x
+      if (y < y0) y0 = y
+      if (y > y1) y1 = y
+    }
+  }
+  return x1 < 0 ? null : { x0, y0, x1, y1 }
+}
+
 const renderWalk = (walk: WalkSpec): HTMLCanvasElement => {
   const cv = document.createElement('canvas')
   cv.width = walk.w
@@ -408,11 +455,165 @@ const renderWalk = (walk: WalkSpec): HTMLCanvasElement => {
 
   for (let i = 0; i < walk.frames; i++) {
     ctx.save()
-    ctx.translate((i % walk.cols) * WALK_PANEL_W, Math.floor(i / walk.cols) * WALK_PANEL_H)
-    // Straight through the renderer's own frame painter, so the reference is
-    // provably the frame box the game draws rather than a lookalike.
-    paintMonsterFrame(ctx, walk.id, i, walk.frames, WALK_PANEL_W, WALK_PANEL_H)
+    ctx.translate((i % walk.cols) * walk.panelW, Math.floor(i / walk.cols) * walk.panelH)
+    if (walk.kind === 'siege' || walk.kind === 'siegeArm') {
+      // The STATIC layer only, at the same box the renderer blits — so what
+      // comes back drops onto the same rectangle, with the arm still drawn live
+      // over it. Painting the arm into the reference would guarantee two of
+      // them on screen.
+      ctx.save()
+      ctx.translate(walk.panelW / 2, walk.panelH / 2)
+      const def = ENEMY_DEFS[walk.id]
+      if (def) {
+        drawSiegeMachine(ctx, walk.id, walk.panelH / SIEGE_ART_BOX, themedPalette(def.palette), {
+          // One full revolution across the strip: the wheels are the cycle.
+          spin: (i / walk.frames) * Math.PI * 2,
+          // The arm is baked across its RELOAD, which is what `cycle` measures,
+          // and the chassis across its wheels. Two different clocks, and each
+          // sheet only ever shows the layer it is asking to have painted.
+          engaged: walk.kind === 'siegeArm',
+          cycle: i / walk.frames,
+          t: 0,
+          layer: walk.kind === 'siegeArm' ? 'moving' : 'static'
+        })
+      }
+      ctx.restore()
+    } else if (walk.kind === 'fixture') {
+      // The panel is the fixture's own sprite box, and the pose is the one
+      // the runtime turns FROM: clock zero, lane zero, aim zero, no recoil.
+      // Anything else bakes half a swing into the still and the game then
+      // adds the other half on top of it.
+      paintBlockFixture(
+        ctx, walk.id, walk.panelW / 2, walk.panelH / 2,
+        walk.panelW / FIXTURE_BOX,
+        { aim: 0, recoil: 0, t: 0, seed: 0, layer: 'weapon' }
+      )
+    } else if (walk.kind === 'ship') {
+      // The panel IS `SHIP_ART`, the rectangle a painted hull is blitted back
+      // into, so the return needs no fit step. `drawShip` applies its own draft before clipping, so that is
+      // taken back out here — otherwise the waterline lands 0.42 units low
+      // and every painted boat rides that much deeper than the drawn one.
+      const S = walk.panelW / SHIP_ART.w
+      ctx.save()
+      ctx.translate(-SHIP_ART.x * S, -(SHIP_ART.y + SHIP_DRAFT) * S)
+      paintShipBlock(ctx, walk.id, S, { aim: 0, t: POSE_T, seed: 1, layer: 'hull' })
+      ctx.restore()
+    } else if (walk.kind === 'ally') {
+      // The rider goes into a SQUARE box centred on its middle, the way a
+      // siege engine does — `drawCavalry` puts the hooves at +0.5 of its own
+      // scale, so the ground line lands where the renderer expects it.
+      ctx.save()
+      ctx.translate(walk.panelW / 2, walk.panelH / 2)
+      drawCavalry(ctx, walk.panelH / ALLY_ART_BOX, themedPalette('cavalry'), {
+        // Phase 0, and one whole gallop across the strip: the painted frames
+        // then line up with `gait()` at run time, which is what indexes them.
+        phase: 0,
+        striking: false,
+        t: (i / walk.frames) * CAVALRY_CYCLE_MS,
+        // The kicked-up dust is the rider's live layer and is drawn under the
+        // painted strip at run time, so it must not be in the reference.
+        dust: false
+      })
+      ctx.restore()
+    } else {
+      // Straight through the renderer's own frame painter, so the reference is
+      // provably the frame box the game draws rather than a lookalike.
+      paintMonsterFrame(ctx, walk.id, i, walk.frames, walk.panelW, walk.panelH)
+    }
     ctx.restore()
+  }
+
+  // Measure the reference on a TRANSPARENT copy of the same draw — the sheet
+  // itself is flooded with magenta, which has no alpha to measure.
+  const probe = document.createElement('canvas')
+  probe.width = walk.panelW * walk.cols
+  probe.height = walk.panelH * walk.rows
+  const pc = probe.getContext('2d')!
+  for (let i = 0; i < walk.frames; i++) {
+    pc.save()
+    pc.translate((i % walk.cols) * walk.panelW, Math.floor(i / walk.cols) * walk.panelH)
+    if (walk.kind === 'siege' || walk.kind === 'siegeArm') {
+      pc.save()
+      pc.translate(walk.panelW / 2, walk.panelH / 2)
+      const d = ENEMY_DEFS[walk.id]
+      if (d) {
+        drawSiegeMachine(pc, walk.id, walk.panelH / SIEGE_ART_BOX, themedPalette(d.palette), {
+          spin: (i / walk.frames) * Math.PI * 2,
+          engaged: walk.kind === 'siegeArm',
+          cycle: i / walk.frames,
+          t: 0,
+          layer: walk.kind === 'siegeArm' ? 'moving' : 'static'
+        })
+      }
+      pc.restore()
+    } else if (walk.kind === 'fixture') {
+      // The panel is the fixture's own sprite box, and the pose is the one
+      // the runtime turns FROM: clock zero, lane zero, aim zero, no recoil.
+      // Anything else bakes half a swing into the still and the game then
+      // adds the other half on top of it.
+      paintBlockFixture(
+        pc, walk.id, walk.panelW / 2, walk.panelH / 2,
+        walk.panelW / FIXTURE_BOX,
+        { aim: 0, recoil: 0, t: 0, seed: 0, layer: 'weapon' }
+      )
+    } else if (walk.kind === 'ship') {
+      // The panel IS `SHIP_ART`, the rectangle a painted hull is blitted back
+      // into, so the return needs no fit step. `drawShip` applies its own draft before clipping, so that is
+      // taken back out here — otherwise the waterline lands 0.42 units low
+      // and every painted boat rides that much deeper than the drawn one.
+      const S = walk.panelW / SHIP_ART.w
+      pc.save()
+      pc.translate(-SHIP_ART.x * S, -(SHIP_ART.y + SHIP_DRAFT) * S)
+      paintShipBlock(pc, walk.id, S, { aim: 0, t: POSE_T, seed: 1, layer: 'hull' })
+      pc.restore()
+    } else if (walk.kind === 'ally') {
+      // The rider goes into a SQUARE box centred on its middle, the way a
+      // siege engine does — `drawCavalry` puts the hooves at +0.5 of its own
+      // scale, so the ground line lands where the renderer expects it.
+      pc.save()
+      pc.translate(walk.panelW / 2, walk.panelH / 2)
+      drawCavalry(pc, walk.panelH / ALLY_ART_BOX, themedPalette('cavalry'), {
+        // Phase 0, and one whole gallop across the strip: the painted frames
+        // then line up with `gait()` at run time, which is what indexes them.
+        phase: 0,
+        striking: false,
+        t: (i / walk.frames) * CAVALRY_CYCLE_MS,
+        // The kicked-up dust is the rider's live layer and is drawn under the
+        // painted strip at run time, so it must not be in the reference.
+        dust: false
+      })
+      pc.restore()
+    } else {
+      paintMonsterFrame(pc, walk.id, i, walk.frames, walk.panelW, walk.panelH)
+    }
+    pc.restore()
+  }
+  // Folded back into ONE panel: every frame is the same box, so the union of
+  // each frame's own box describes where the character sits in a single panel.
+  const w = walk.panelW, h = walk.panelH
+  let x0 = w, y0 = h, x1 = -1, y1 = -1
+  for (let i = 0; i < walk.frames; i++) {
+    const b = unionBox(probe, (i % walk.cols) * w, Math.floor(i / walk.cols) * h, w, h)
+    if (!b) continue
+    if (b.x0 < x0) x0 = b.x0
+    if (b.y0 < y0) y0 = b.y0
+    if (b.x1 > x1) x1 = b.x1
+    if (b.y1 > y1) y1 = b.y1
+  }
+  if (x1 >= 0) {
+    // Keyed by KIND as well as id: a siege chassis and its arm are two sheets
+    // with the same engine name, and letting them share a slot gave the
+    // chassis the arm's box to be normalised onto.
+    walkFits.set(`${walk.kind}/${walk.id}`, {
+      h: (y1 - y0 + 1) / h,
+      // The WIDTH as well, because height alone does not describe a box. A
+      // painted cannon barrel came back longer and slimmer than the drawn one:
+      // height-matched it was correct by the only number anyone had, and two
+      // cells long on a one-cell block.
+      w: (x1 - x0 + 1) / w,
+      bottom: (y1 + 1) / h,
+      cx: ((x0 + x1) / 2) / w
+    })
   }
   return cv
 }
@@ -516,7 +717,12 @@ const buildIndex = () => ({
     cols: w.cols,
     rows: w.rows,
     frames: w.frames,
-    panel: { w: WALK_PANEL_W, h: WALK_PANEL_H },
+    kind: w.kind,
+    panel: { w: w.panelW, h: w.panelH },
+    // Where the reference sits in a panel. The slicer normalises a returned
+    // sheet onto this, so a machine painted twice its size still lines up
+    // with the arm that is drawn live over it.
+    ...(walkFits.has(`${w.kind}/${w.id}`) ? { fit: walkFits.get(`${w.kind}/${w.id}`) } : {}),
     faces: w.faces,
     anchor: w.anchor,
     target: w.target
@@ -725,9 +931,11 @@ const exportAll = async (): Promise<void> => {
         '',
         'Generated from the manifest — do not hand-edit, re-export instead.',
         '',
-        'Attach `art-sheets/walk-<id>.png` and paste the matching block below.',
-        'The sheet is a grid of panels showing ONE creature through ONE step, and',
-        'the whole job is that it comes back as one creature and not eight.',
+        'Attach the reference named in each block — `walk-<id>.png` for a cycle,',
+        '`siege-<id>.png` and `arm-<id>.png` for an engine, `hull-<id>.png` for a',
+        'ship — and paste the block beside it.',
+        'Most of these are a grid of panels showing ONE subject through ONE cycle,',
+        'and the whole job is that it comes back as one subject and not eight.',
         '',
         'Drop results in `art-sheets/painted/`, keeping the `walk-<id>` in the name,',
         'then run `pnpm slice-sheets`. The slicer cuts the grid by proportion, so an',

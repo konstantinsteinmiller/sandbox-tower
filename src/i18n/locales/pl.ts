@@ -10,11 +10,23 @@ export default {
   'tip': 'Wskazówka',
   'crazyGamesOnly': 'Ta gra jest dostępna tylko na',
 
+  // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'mobile': {
+    'rotatePortrait': 'Trzymaj telefon pionowo, aby grać',
+    'columnFull': 'Kolumna pełna',
+    'repairAll': 'Napraw wszystko',
+    'volley': 'Salwa',
+    'swap': 'Zamień',
+    'menu': 'Menu',
+    'materials': 'materiały',
+    'zoom': 'Powiększenie'
+  },
+
   'hud': {
     'wave': 'Fala', 'enemies': 'Wrogowie', 'callWave': 'Wezwij falę', 'callBoss': 'Wezwij bossa',
     'speed': 'Prędkość {n}×',
-    'speedOffer': 'Podwójna prędkość za reklamę',
-    'speedFor': '{n} min', 'recenter': 'Wyśrodkuj widok',
+    'speedOffer': 'Odblokuj prędkość {n}×',
+    'speedGroup': 'Szybkość gry', 'recenter': 'Wyśrodkuj widok',
     'rotateLeft': 'Obróć w lewo',
     'rotateRight': 'Obróć w prawo',
     'arrowRain': 'Deszcz strzał',
@@ -31,6 +43,14 @@ export default {
     'outOfReach': 'Poza zasięgiem ×{n} — potrzeba {m} zasięgu'
   },
   'hints': {
+    'dropBlock': {
+      'touch': 'Dotknij kolumny, aby upuścić element',
+      'desktop': 'Kliknij kolumnę, aby upuścić element'
+    },
+    'mergeBlock': {
+      'touch': 'Upuść element na jego bliźniaka, aby je połączyć',
+      'desktop': 'Upuść element na jego bliźniaka, aby je połączyć'
+    },
     'selectBlock': { 'touch': 'Dotknij bloku na dole, aby go wybrać', 'desktop': 'Kliknij blok na dole, aby go wybrać' },
     'placeBlock': { 'touch': 'Teraz dotknij świecącego pola, aby zbudować', 'desktop': 'Teraz kliknij świecące pole, aby zbudować' },
     'camera': { 'touch': 'Przeciągaj, aby przesuwać · Szczypnij, aby przybliżyć', 'desktop': 'Przeciągaj, aby przesuwać · Scrolluj, aby przybliżyć' },
@@ -83,7 +103,6 @@ export default {
       'gate': 'Brama', 'wood': 'Drewniana skrzynia', 'brace': 'Wzmocniona skrzynia', 'stone': 'Kamienny blok',
       'archer': 'Wieża łuczników', 'cannon': 'Armata', 'mortar': 'Moździerz', 'tesla': 'Cewka błyskawic',
       'frost': 'Iglica mrozu', 'repair': 'Warsztat',
-      'sawmill': 'Tartak', 'quarry': 'Kamieniołom', 'mint': 'Kopalnia złota',
       'spikes': 'Kolczasta ściana',
       'bombard': 'Bombarda'
     },
@@ -106,9 +125,6 @@ export default {
       'tesla': 'Błyskawice przeskakujące między pobliskimi wrogami.',
       'frost': 'Mrozi całe grupy i mocno je spowalnia.',
       'repair': 'Naprawia sąsiednie bloki między falami.',
-      'sawmill': 'Produkuje drewno po każdej odpartej fali.',
-      'quarry': 'Produkuje kamień po każdej odpartej fali.',
-      'mint': 'Produkuje monety po każdej odpartej fali.',
       'spikes': 'Napastnicy ranią się na niej przy każdym ciosie.',
       'bombard': 'Wystrzeliwuje pocisk stromo w górę. Mały wybuch, tylko cele naziemne.'
     },
@@ -138,6 +154,8 @@ export default {
 
   // ─── First-stage tutorial ─────────────────────────────────────────────────
   'tutorial': {
+    'drop': 'Dotknij kolumny, aby upuścić element.',
+    'merge': 'Upuść bliźniaka na bliźniaka, aby je połączyć.',
     'gate': 'Broń Bramy. Gdy padnie, koniec gry.',
     'gateSeeded': 'Zbudowaliśmy ci fort na start. Broń Bramy — gdy padnie, koniec gry.',
     'pick': 'Wybierz element.',
@@ -177,6 +195,9 @@ export default {
   },
 
   'tech': {
+    'blueprints': {
+      'title': 'Plany'
+    },
     'intro1': 'Wszystko, co tu kupisz, jest trwałe i zostaje na każdą kolejną rozgrywkę.',
     'intro2': 'Monety dostajesz po każdym oblężeniu, wygranym czy przegranym. Tutaj je wydajesz.',
     'intro3': 'Złote węzły już cię stać. Niebieskie wymagają więcej monet, przygaszone — węzła przed nimi.',
@@ -192,6 +213,7 @@ export default {
     'requires': 'Wymaga: {n}',
     'spotlight': 'Wydaj!',
     'names': {
+      'm2_lumberHut': 'Chata drwala',
       'logistics': 'Logistyka',
       'unlockCoffer': 'Skrzynie',
       'yields': 'Wydajność',
@@ -205,12 +227,12 @@ export default {
       'admiralty': 'Admiralicja',
       'foundations': 'Fundamenty', 'sharpBolts': 'Ostre bełty', 'unlockBrace': 'Wzmocnione skrzynie',
       'lumberStock': 'Zapas drewna', 'longSight': 'Dalekowzroczność', 'rapidFire': 'Szybki ogień',
-      'reinforced': 'Wzmocnione belki', 'unlockSawmill': 'Tartak', 'quarryStock': 'Zapas kamienia',
+      'reinforced': 'Wzmocnione belki', 'unlockSawmill': 'Bogate złoża', 'quarryStock': 'Zapas kamienia',
       'unlockMortar': 'Moździerz', 'heavyOrdnance': 'Ciężka artyleria', 'unlockTesla': 'Cewka błyskawic',
-      'gateArmor': 'Pancerz bramy', 'unlockQuarry': 'Kamieniołom', 'richHauls': 'Bogate łupy',
+      'gateArmor': 'Pancerz bramy', 'unlockQuarry': 'Głębokie wyrobiska', 'richHauls': 'Bogate łupy',
       'wideFoundation': 'Szerokie fundamenty', 'siegeShells': 'Pociski oblężnicze', 'unlockFrost': 'Iglica mrozu',
       'forkedBolts': 'Rozwidlone błyskawice', 'ironPlating': 'Żelazne płyty', 'unlockRepair': 'Warsztat',
-      'unlockMint': 'Kopalnia złota', 'looting': 'Grabież', 'overcharge': 'Przeciążenie',
+      'unlockMint': 'Statut gildii', 'looting': 'Grabież', 'overcharge': 'Przeciążenie',
       'masterwork': 'Arcydzieło', 'fieldRepairs': 'Naprawy polowe', 'greatFoundation': 'Wielkie fundamenty',
       'warChest': 'Skarbiec wojenny',
       'unlockSpikes': 'Kolczasta ściana',
@@ -220,6 +242,7 @@ export default {
       'artilleryDoctrine': 'Doktryna artyleryjska'
     },
     'descriptions': {
+      'm2_lumberHut': 'Odblokowuje Chatę drwala — daje drewno po każdej fali.',
       'logistics': 'Odblokowuje kamieniołom — tani producent, na którego stać cię w trakcie rozgrywki.',
       'unlockCoffer': 'Odblokowuje skrzynię, jedyny blok bijący złoto.',
       'yields': 'Każdy blok ekonomiczny daje +{n}% więcej.',
@@ -242,13 +265,13 @@ export default {
       'longSight': 'Wszystkie bronie sięgają +{n} % dalej na rangę.',
       'rapidFire': 'Wszystkie bronie strzelają {n} % szybciej na rangę.',
       'reinforced': 'Każdy blok wieży zyskuje +{n} % PŻ na rangę.',
-      'unlockSawmill': 'Odblokowuje tartak — produkuje drewno co falę.',
+      'unlockSawmill': 'Każdy producent daje +{n}% więcej na poziom.',
       'quarryStock': 'Zaczynaj każde oblężenie z +{n} kamienia na rangę.',
       'unlockMortar': 'Odblokowuje moździerz — obrażenia obszarowe z dużego dystansu.',
       'heavyOrdnance': 'Promień obszaru +{n} % na rangę.',
       'unlockTesla': 'Odblokowuje cewkę błyskawic — pioruny przeskakują.',
       'gateArmor': 'Brama zyskuje +{n} % PŻ na rangę.',
-      'unlockQuarry': 'Odblokowuje kamieniołom — produkuje kamień co falę.',
+      'unlockQuarry': 'Każdy producent daje kolejne +{n}% na poziom.',
       'richHauls': 'Nagrody za falę +{n} % na rangę.',
       'wideFoundation': 'Buduj o {n} kolumny szerzej na rangę.',
       'siegeShells': 'Bronie wieży zadają +{n} % obrażeń na rangę.',
@@ -256,7 +279,7 @@ export default {
       'forkedBolts': 'Błyskawica przeskakuje na {n} wroga więcej na rangę.',
       'ironPlating': 'Każdy blok zyskuje +{n} pancerza na rangę.',
       'unlockRepair': 'Odblokowuje warsztat — leczy sąsiadów co falę.',
-      'unlockMint': 'Odblokowuje kopalnię złota — produkuje monety co falę.',
+      'unlockMint': 'Każdy producent daje kolejne +{n}% na poziom.',
       'looting': 'Wrogowie upuszczają +{n} % więcej monet na rangę.',
       'overcharge': 'Wszystkie bronie strzelają {n} % szybciej na rangę.',
       'masterwork': 'Bronie wieży zadają +{n} % obrażeń na rangę.',

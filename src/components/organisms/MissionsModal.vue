@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, type ComponentPublicInstance } from 'vue'
+import { resolveAnchor } from '@/use/useCoinExplosion'
 import FHudButton from '@/components/atoms/FHudButton.vue'
 import FHudBadge from '@/components/atoms/FHudBadge.vue'
 import { useI18n } from 'vue-i18n'
@@ -29,7 +30,10 @@ const open = (): void => {
   emit('opened')
   isOpen.value = true
 }
-const rootEl = ref<HTMLElement | null>(null)
+// The ref sits on FHudButton — a COMPONENT — so what lands here is Vue's
+// public instance, not an element. `resolveAnchor` unwraps it; typing this as
+// `HTMLElement` (as it was) made the mistake invisible until the claim threw.
+const rootEl = ref<ComponentPublicInstance | HTMLElement | null>(null)
 
 interface MissionView {
   index: number
@@ -65,7 +69,8 @@ const cards = computed<MissionView[]>(() =>
 const onClaim = (index: number): void => {
   if (claim(index)) {
     playSound('reward-continue', 0.06)
-    if (rootEl.value) emit('coins-awarded', rootEl.value)
+    const el = resolveAnchor(rootEl.value)
+    if (el) emit('coins-awarded', el)
   } else {
     playSound('barricade', 0.04)
   }

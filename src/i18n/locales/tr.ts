@@ -10,11 +10,23 @@ export default {
   'tip': 'İpucu',
   'crazyGamesOnly': 'Bu oyun yalnızca şurada mevcut:',
 
+  // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'mobile': {
+    'rotatePortrait': 'Oynamak için telefonunu dik tut',
+    'columnFull': 'Sütun dolu',
+    'repairAll': 'Hepsini onar',
+    'volley': 'Yaylım',
+    'swap': 'Değiştir',
+    'menu': 'Menü',
+    'materials': 'malzeme',
+    'zoom': 'Yakınlaştırma'
+  },
+
   'hud': {
     'wave': 'Dalga', 'enemies': 'Düşmanlar', 'callWave': 'Dalgayı çağır', 'callBoss': 'Boss’u çağır',
     'speed': 'Hız {n}×',
-    'speedOffer': 'Bir reklamla çift hız',
-    'speedFor': '{n} dk', 'recenter': 'Görünümü ortala',
+    'speedOffer': '{n}× hızı aç',
+    'speedGroup': 'Oyun hızı', 'recenter': 'Görünümü ortala',
     'rotateLeft': 'Sola döndür',
     'rotateRight': 'Sağa döndür',
     'arrowRain': 'Ok Yağmuru',
@@ -31,6 +43,14 @@ export default {
     'outOfReach': 'Menzil dışı ×{n} — {m} menzil gerek'
   },
   'hints': {
+    'dropBlock': {
+      'touch': 'Parçayı bırakmak için bir sütuna dokun',
+      'desktop': 'Parçayı bırakmak için bir sütuna tıkla'
+    },
+    'mergeBlock': {
+      'touch': 'Birleştirmek için bir parçayı ikizinin üstüne bırak',
+      'desktop': 'Birleştirmek için bir parçayı ikizinin üstüne bırak'
+    },
     'selectBlock': { 'touch': 'Seçmek için aşağıdaki bir bloğa dokun', 'desktop': 'Seçmek için aşağıdaki bir bloğa tıkla' },
     'placeBlock': { 'touch': 'Şimdi inşa etmek için parlayan bir yuvaya dokun', 'desktop': 'Şimdi inşa etmek için parlayan bir yuvaya tıkla' },
     'camera': { 'touch': 'Kaydırmak için sürükle · Yakınlaştırmak için sıkıştır', 'desktop': 'Kaydırmak için sürükle · Yakınlaştırmak için tekerlek' },
@@ -83,7 +103,6 @@ export default {
       'gate': 'Kapı', 'wood': 'Ahşap Sandık', 'brace': 'Takviyeli Sandık', 'stone': 'Taş Blok',
       'archer': 'Okçu Kulesi', 'cannon': 'Top', 'mortar': 'Havan', 'tesla': 'Yıldırım Bobini',
       'frost': 'Buz Kulesi', 'repair': 'Tamirhane',
-      'sawmill': 'Kereste Fabrikası', 'quarry': 'Taş Ocağı', 'mint': 'Altın Madeni',
       'spikes': 'Dikenli Duvar',
       'bombard': 'Bombarda'
     },
@@ -106,9 +125,6 @@ export default {
       'tesla': 'Yakındaki düşmanlar arasında sıçrayan yıldırımlar.',
       'frost': 'Tüm grubu dondurur ve ağır yavaşlatır.',
       'repair': 'Dalgalar arasında komşu blokları onarır.',
-      'sawmill': 'Atlatılan her dalganın sonunda odun üretir.',
-      'quarry': 'Atlatılan her dalganın sonunda taş üretir.',
-      'mint': 'Atlatılan her dalganın sonunda altın üretir.',
       'spikes': 'Saldıranlar her vuruşta kendilerini yaralar.',
       'bombard': 'Mermiyi dik yukarı fırlatır. Küçük patlama, sadece kara hedefleri.'
     },
@@ -138,6 +154,8 @@ export default {
 
   // ─── First-stage tutorial ─────────────────────────────────────────────────
   'tutorial': {
+    'drop': 'Parçayı bırakmak için bir sütuna dokun.',
+    'merge': 'Birleştirmek için ikizi ikizin üstüne bırak.',
     'gate': 'Kapıyı koru. Düşerse tur biter.',
     'gateSeeded': 'Sana bir başlangıç kalesi kurduk. Kapıyı koru — düşerse tur biter.',
     'pick': 'Bir parça seç.',
@@ -177,6 +195,9 @@ export default {
   },
 
   'tech': {
+    'blueprints': {
+      'title': 'Planlar'
+    },
     'intro1': 'Burada aldığın her şey kalıcıdır ve sonraki tüm turlara taşınır.',
     'intro2': 'Paralar her kuşatmadan gelir, kazan ya da kaybet. Onları burada harcarsın.',
     'intro3': 'Altın düğümleri şimdi alabilirsin. Maviler daha çok para, sönükler önceki düğümü ister.',
@@ -192,6 +213,7 @@ export default {
     'requires': 'Gerekli: {n}',
     'spotlight': 'Harca!',
     'names': {
+      'm2_lumberHut': 'Kereste Kulübesi',
       'logistics': 'Lojistik',
       'unlockCoffer': 'Kasalar',
       'yields': 'Verim',
@@ -205,12 +227,12 @@ export default {
       'admiralty': 'Amirallik',
       'foundations': 'Temeller', 'sharpBolts': 'Keskin Oklar', 'unlockBrace': 'Takviyeli Sandıklar',
       'lumberStock': 'Odun Stoku', 'longSight': 'Uzak Görüş', 'rapidFire': 'Hızlı Atış',
-      'reinforced': 'Güçlendirilmiş Kirişler', 'unlockSawmill': 'Kereste Fabrikası', 'quarryStock': 'Taş Stoku',
+      'reinforced': 'Güçlendirilmiş Kirişler', 'unlockSawmill': 'Zengin damarlar', 'quarryStock': 'Taş Stoku',
       'unlockMortar': 'Havan', 'heavyOrdnance': 'Ağır Topçu', 'unlockTesla': 'Yıldırım Bobini',
-      'gateArmor': 'Kapı Zırhı', 'unlockQuarry': 'Taş Ocağı', 'richHauls': 'Zengin Ganimet',
+      'gateArmor': 'Kapı Zırhı', 'unlockQuarry': 'Derin ocaklar', 'richHauls': 'Zengin Ganimet',
       'wideFoundation': 'Geniş Temel', 'siegeShells': 'Kuşatma Mermileri', 'unlockFrost': 'Buz Kulesi',
       'forkedBolts': 'Çatallı Yıldırımlar', 'ironPlating': 'Demir Plakalar', 'unlockRepair': 'Tamirhane',
-      'unlockMint': 'Altın Madeni', 'looting': 'Yağma', 'overcharge': 'Aşırı Yükleme',
+      'unlockMint': 'Lonca beraatı', 'looting': 'Yağma', 'overcharge': 'Aşırı Yükleme',
       'masterwork': 'Şaheser', 'fieldRepairs': 'Saha Onarımı', 'greatFoundation': 'Büyük Temel',
       'warChest': 'Savaş Sandığı',
       'unlockSpikes': 'Dikenli Duvar',
@@ -220,6 +242,7 @@ export default {
       'artilleryDoctrine': 'Topçu Doktrini'
     },
     'descriptions': {
+      'm2_lumberHut': 'Kereste Kulübesini açar — her dalgadan sonra odun verir.',
       'logistics': 'Taş ocağını açar — tam ihtiyaç duyduğun turda alabileceğin ucuz bir üretici.',
       'unlockCoffer': 'Altın basan tek blok olan kasayı açar.',
       'yields': 'Her ekonomi bloğu +%{n} daha fazla verir.',
@@ -242,13 +265,13 @@ export default {
       'longSight': 'Tüm silahlar kademe başına +%{n} daha uzağa erişir.',
       'rapidFire': 'Tüm silahlar kademe başına %{n} daha hızlı ateş eder.',
       'reinforced': 'Her kule bloğu kademe başına +%{n} CP kazanır.',
-      'unlockSawmill': 'Kereste fabrikasını açar — her dalgada odun üretir.',
+      'unlockSawmill': 'Her üretici rütbe başına +%{n} daha fazla verir.',
       'quarryStock': 'Her kuşatmaya kademe başına +{n} taşla başla.',
       'unlockMortar': 'Havanı açar — uzun menzilli alan hasarı.',
       'heavyOrdnance': 'Alan yarıçapı kademe başına +%{n}.',
       'unlockTesla': 'Yıldırım bobinini açar — yıldırımlar sıçrar.',
       'gateArmor': 'Kapı kademe başına +%{n} CP kazanır.',
-      'unlockQuarry': 'Taş ocağını açar — her dalgada taş üretir.',
+      'unlockQuarry': 'Her üretici rütbe başına +%{n} daha verir.',
       'richHauls': 'Dalga ödülleri kademe başına +%{n}.',
       'wideFoundation': 'Kademe başına {n} sütun daha geniş inşa et.',
       'siegeShells': 'Kule silahları kademe başına +%{n} hasar verir.',
@@ -256,7 +279,7 @@ export default {
       'forkedBolts': 'Yıldırım kademe başına {n} düşmana daha sıçrar.',
       'ironPlating': 'Her blok kademe başına +{n} zırh kazanır.',
       'unlockRepair': 'Tamirhaneyi açar — her dalgada komşuları iyileştirir.',
-      'unlockMint': 'Altın madenini açar — her dalgada altın üretir.',
+      'unlockMint': 'Her üretici rütbe başına +%{n} daha verir.',
       'looting': 'Düşmanlar kademe başına +%{n} daha fazla altın düşürür.',
       'overcharge': 'Tüm silahlar kademe başına %{n} daha hızlı ateş eder.',
       'masterwork': 'Kule silahları kademe başına +%{n} hasar verir.',

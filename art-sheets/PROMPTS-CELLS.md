@@ -129,7 +129,7 @@ AVOID — this is exactly how earlier attempts went wrong:
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: The shared TIMBER base: a square plank crate with a flat top: horizontal plank courses, iron corner brackets and nail heads. ONE bitmap worn by 6 different blocks (wood, archer, spikes, repair, sawmill, lumberHut), so paint the MATERIAL and nothing block-specific — no weapon, no machinery, no tools, no signage. LEAVE THE MIDDLE PLAIN: the game draws a different machine there for each block, and anything painted in the centre ends up buried under it. Material and edge detail only; the centre is a clear wall. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #a9682f, shadows #6b3f1d, highlights #d99a53, accent details #4a2a12.
+WHAT IT IS: The shared TIMBER base: a square plank crate with a flat top: horizontal plank courses, iron corner brackets and nail heads. ONE bitmap worn by 5 different blocks (wood, archer, spikes, repair, lumberHut), so paint the MATERIAL and nothing block-specific — no weapon, no machinery, no tools, no signage. LEAVE THE MIDDLE PLAIN: the game draws a different machine there for each block, and anything painted in the centre ends up buried under it. Material and edge detail only; the centre is a clear wall. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #a9682f, shadows #6b3f1d, highlights #d99a53, accent details #4a2a12.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
 · A square block that FILLS the frame edge to edge and corner to corner. The
@@ -281,7 +281,7 @@ AVOID — this is exactly how earlier attempts went wrong:
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: The shared MASONRY base: a square block of running-bond masonry with a flat top, mortared, chipped and a little mossy. ONE bitmap worn by 5 different blocks (stone, cannon, quarry, mint, stonepit), so paint the MATERIAL and nothing block-specific — no weapon, no machinery, no tools, no signage. LEAVE THE MIDDLE PLAIN: the game draws a different machine there for each block, and anything painted in the centre ends up buried under it. Material and edge detail only; the centre is a clear wall. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #767e88, shadows #4a5058, highlights #a8b2bd, accent details #333940.
+WHAT IT IS: The shared MASONRY base: a square block of running-bond masonry with a flat top, mortared, chipped and a little mossy. ONE bitmap worn by 3 different blocks (stone, cannon, stonepit), so paint the MATERIAL and nothing block-specific — no weapon, no machinery, no tools, no signage. LEAVE THE MIDDLE PLAIN: the game draws a different machine there for each block, and anything painted in the centre ends up buried under it. Material and edge detail only; the centre is a clear wall. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #767e88, shadows #4a5058, highlights #a8b2bd, accent details #333940.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
 · A square block that FILLS the frame edge to edge and corner to corner. The
@@ -1820,7 +1820,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 
 ---
 
-# cavalry — 0.80c · ally  (cell-ally-cavalry.png)
+# arrow — round  (cell-projectile-bolt.png)
 
 Repaint this single game sprite.
 
@@ -1866,7 +1866,68 @@ AVOID — this is exactly how earlier attempts went wrong:
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Cavalry: an armoured rider on a barded warhorse, cool blue livery and a gold pennant, facing RIGHT. The FRIENDLY unit — it must never read as something to shoot at. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #1f6aa8, shadows #123a5e, highlights #42a3e0, accent details #ffd93c.
+WHAT IT IS: arrow: an archer’s arrow in flight, pale ash shaft, feather fletching, a bright leaf-shaped steel broadhead, pointing right. Must stay recognisable at a few pixels across in flight.
+
+Centre the object in the frame with a little clear space around it, and do not crop any part of it.
+
+OUTPUT — read this twice, it is where every previous attempt failed:
+· ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
+  If your tool has an aspect-ratio control, set it to 1:1 / Square. Returns
+  have twice come back at 1024x559, which is the tool default overriding
+  this line — the setting wins, so change the setting.
+· ONE object. Not two, not a comparison, not variants side by side, not a
+  before-and-after pair. A single sprite, alone, filling the frame.
+· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+
+---
+
+# quarrel — round  (cell-projectile-quarrel.png)
+
+Repaint this single game sprite.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+WHAT IT IS: quarrel: a siege ballista’s quarrel: SHORT and heavy, a thick dark oiled timber shaft, a cord binding at the socket, stiff cut-leather vanes and a squat blunt four-sided iron bodkin head. It must not be mistakable for the archer’s arrow, pointing right. Must stay recognisable at a few pixels across in flight.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 

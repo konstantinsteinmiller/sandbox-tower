@@ -110,7 +110,30 @@ src/use/           reactive layer (module-level singletons)
 src/platforms/     platform registry, CSP, capability gates, resolvers
 src/utils/save/    SaveManager, BlobStorage, 8 cloud strategies
 src/components/    F-* design system + game HUD + modals
+
+src/game/rules.ts  the RuleSet seam — board, support, merge, offers, waves…
+                   DESKTOP_RULES reproduces the desktop game exactly
+src/components/icons/
+  iconPaths.ts     44 solid glyphs, one 24×24 viewBox, currentColor
+  iconNames.ts     the closed name union + runtime guard
+  GameIcon.vue     the one icon component
+src/mobile-fit/    Drop & Merge Siege — the portrait phone game, one package
+  rules.ts         DROPMERGE_RULES (5×7 board, column support, landing merge)
+  pieces.ts        single-cell drop pieces registered into the shape dealer
+  tech.ts          ten linear Blueprint cards on their own save key
+  roster.ts        the nine-monster roster and its wave previews
+  GameSceneDrop.vue + components/ (TopStrip, DropTray, WaveBar, …)
 ```
+
+**Mobile (Drop & Merge):** phones and tablets get `src/mobile-fit/` — a
+five-column drop board where a piece lands on its twin and fuses — while the
+desktop keeps the full game. `VITE_USE_MOBILE_FIT_GAME=true` in `.env`
+switches it on; set it to `false` and the package is left out of the bundle and
+every device gets the desktop scene. Runtime overrides: `?fit=desktop` /
+`?fit=dropmerge` forces a scene, `?tier=low|mid|high` forces the render profile.
+Mode resolution and device tier live in `src/use/useMobileFit.ts` and
+`src/use/useDeviceTier.ts`; the design and its status are in
+[`mobile-fit.md`](./mobile-fit.md).
 
 **Performance contract:** the hot collections (`blocks`, `enemies`,
 `projectiles`) are plain non-reactive structures — Vue's proxy overhead on a few
@@ -170,6 +193,9 @@ and emits a per-platform CSP.
 | File | Contents |
 |---|---|
 | [`game-implementation-plan.md`](./game-implementation-plan.md) | Full design + architecture decisions + execution checklist |
+| [`mobile-fit.md`](./mobile-fit.md) | Why the desktop geometry fails on phones (measured), two mobile proposals, shared perf/architecture foundation, recommendation, implementation status (§11) |
+| [`game-implementation-plan-mobile-fit-1.md`](./game-implementation-plan-mobile-fit-1.md) | Pocket Siege — the same game on a fixed 7×6 board, landscape, drag-to-place (plan, not implemented) |
+| [`game-implementation-plan-mobile-fit-2.md`](./game-implementation-plan-mobile-fit-2.md) | Drop & Merge Siege — column-drop + landing-merge re-core, portrait (implemented as `src/mobile-fit/` behind `VITE_USE_MOBILE_FIT_GAME`; checklist + deviations in §13/§16) |
 | [`retention-roadmap.md`](./retention-roadmap.md) | 20 prioritised retention / conversion features |
 | [`art-todo.md`](./art-todo.md) | Drop-in bitmap override manifest |
 | [`sound-todo.md`](./sound-todo.md) | Audio cue map + what's worth commissioning |

@@ -119,13 +119,16 @@ let scheduled = false
  * Ask for designs to be baked. Cheap and idempotent — safe to call every time a
  * wave is composed.
  */
-export const primeMonsterSprites = (ids: readonly string[]): void => {
+export const primeMonsterSprites = (
+  ids: readonly string[], opts: { fetch?: boolean } = {}
+): void => {
   for (const id of ids) {
-    // Start the painted strip decoding on the same signal. It rides the
-    // opportunistic path rather than the splash: a wave is composed well before
-    // anything walks on, and a design whose strip has not arrived simply keeps
-    // playing the procedural bake instead of holding the game up for it.
-    if (DEFS.has(id)) spriteFor('monster', id)
+    // Start the painted strip decoding on the same signal, unless the caller
+    // is only after the bake: the battlefield primes the whole cast's frames
+    // on its first tick, and fetching seventeen strips there is exactly what
+    // `artPreload` exists to stage instead. A design whose strip has not
+    // arrived simply plays the procedural bake rather than holding the game.
+    if (opts.fetch !== false && DEFS.has(id)) spriteFor('monster', id)
     if (CACHE.has(id) || queue.includes(id) || building?.id === id) continue
     if (DEFS.has(id)) queue.push(id)
   }

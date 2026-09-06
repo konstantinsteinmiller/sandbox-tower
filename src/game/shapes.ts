@@ -96,11 +96,10 @@ export const SHAPE_DEFS: ReadonlyArray<ShapeDef> = [
   { id: 'spikes1', lane: 'support', weight: 11, cells: [[0, 0, 'spikes']] },
   { id: 'spikes2v', lane: 'support', weight: 8, cells: [[0, 0, 'spikes'], [0, 1, 'spikes']], minWave: 3 },
   { id: 'spikeWall', lane: 'support', weight: 6, cells: row(2, 'spikes'), minWave: 5 },
-  { id: 'sawmill1', lane: 'support', weight: 10, cells: [[0, 0, 'sawmill']] },
-  { id: 'quarry1', lane: 'support', weight: 10, cells: [[0, 0, 'quarry']] },
-  { id: 'mint1', lane: 'support', weight: 8, cells: [[0, 0, 'mint']] },
   { id: 'repair1', lane: 'support', weight: 8, cells: [[0, 0, 'repair']] },
-  { id: 'sawmillPair', lane: 'support', weight: 4, cells: row(2, 'sawmill'), minWave: 5 },
+  // The deep-tier producer pieces (sawmill / quarry / gold mine) went with the
+  // blocks themselves — one producer per resource now, and their pieces are in
+  // the group below.
 
   // ── Support: buffs + early economy ───────────────────────────────────────
   //
@@ -189,7 +188,7 @@ const crateVariantId = (baseId: string, tier: number): string =>
  * must never be ROLLED, only projected onto by `upgradeCrateShape`. A variant
  * in the draw pool would put the same silhouette in the hat three times.
  */
-const CRATE_VARIANTS: ShapeDef[] = SHAPE_DEFS.flatMap((s) => {
+const crateVariantsOf = (s: ShapeDef): ShapeDef[] => {
   if (!isCrateShape(s)) return []
   const base = crateTier(s.cells[0]![2])
   const out: ShapeDef[] = []
@@ -202,11 +201,28 @@ const CRATE_VARIANTS: ShapeDef[] = SHAPE_DEFS.flatMap((s) => {
     })
   }
   return out
-})
+}
+
+const CRATE_VARIANTS: ShapeDef[] = SHAPE_DEFS.flatMap(crateVariantsOf)
 
 export const SHAPE_BY_ID: Record<string, ShapeDef> = Object.fromEntries(
   [...SHAPE_DEFS, ...CRATE_VARIANTS].map((s) => [s.id, s])
 )
+
+/**
+ * Register a MODE's own pieces.
+ *
+ * They join the id index — and get their crate-ladder variants cut exactly as
+ * the authored shapes do — without ever entering `SHAPE_DEFS`, so the desktop
+ * deck never rolls them. A mode hands its pool to the dealer through
+ * `OfferLaneConfig.pool` instead.
+ */
+export const registerShapeDefs = (defs: ReadonlyArray<ShapeDef>): void => {
+  for (const s of defs) {
+    SHAPE_BY_ID[s.id] = s
+    for (const v of crateVariantsOf(s)) SHAPE_BY_ID[v.id] = v
+  }
+}
 
 /**
  * The tier of `id` this player should actually be handed.
@@ -403,6 +419,27 @@ export const WEAPON_SLOT = 1
 export const SUPPORT_SLOT = 4
 
 /**
+ * How a MODE deals its hand: how many slots, which lane each is locked to,
+ * whether there is a strict works slot at all, and which pieces are in the hat.
+ *
+ * The desktop's configuration is the default on every dealer below, so the
+ * existing call sites read exactly as they did.
+ */
+export interface OfferLaneConfig {
+  slots: number
+  lanes: ReadonlyArray<ShapeDef['lane'] | 'any'>
+  supportSlot: number | null
+  pool: ReadonlyArray<ShapeDef>
+}
+
+export const DEFAULT_LANES: OfferLaneConfig = {
+  slots: OFFER_SLOTS,
+  lanes: SLOT_LANES,
+  supportSlot: SUPPORT_SLOT,
+  pool: SHAPE_DEFS
+}
+
+/**
  * Is every cell of this shape a producer or a buff?
  *
  * Checked per BLOCK, so it cannot drift: a shape that mixes in a single crate
@@ -441,9 +478,10 @@ export const pickAffordableWeapon = (
   wave: number,
   unlockedBlocks: Set<string>,
   canAfford: (shapeId: string) => boolean,
-  rand: () => number = Math.random
+  rand: () => number = Math.random,
+  pool: ReadonlyArray<ShapeDef> = SHAPE_DEFS
 ): string | null => {
-  const guns = eligibleShapes(wave, unlockedBlocks).filter((s) => s.lane === 'weapon')
+  const guns = eligibleShapes(wave, unlockedBlocks, pool).filter((s) => s.lane === 'weapon')
   if (guns.length === 0) return null
   const payable = guns.filter((s) => canAfford(s.id))
   if (payable.length === 0) {
@@ -454,8 +492,10 @@ export const pickAffordableWeapon = (
 
 /** Shapes whose every block type the player has unlocked, and whose `minWave`
  *  has been reached. */
-export const eligibleShapes = (wave: number, unlockedBlocks: Set<string>): ShapeDef[] =>
-  SHAPE_DEFS.filter((s) =>
+export const eligibleShapes = (
+  wave: number, unlockedBlocks: Set<string>, pool: ReadonlyArray<ShapeDef> = SHAPE_DEFS
+): ShapeDef[] =>
+  pool.filter((s) =>
     (s.minWave ?? 0) <= wave &&
     s.cells.every(([, , typeId]) => unlockedBlocks.has(typeId))
   )
@@ -493,12 +533,13 @@ export const rollOffer = (
   unlockedBlocks: Set<string>,
   exclude: ReadonlyArray<string> = [],
   rand: () => number = Math.random,
-  avoid?: string
+  avoid?: string,
+  cfg: OfferLaneConfig = DEFAULT_LANES
 ): string => {
-  const lane = SLOT_LANES[slot % OFFER_SLOTS] ?? 'any'
-  const all = eligibleShapes(wave, unlockedBlocks)
+  const lane = cfg.lanes[slot % cfg.slots] ?? 'any'
+  const all = eligibleShapes(wave, unlockedBlocks, cfg.pool)
 
-  const isWorks = slot % OFFER_SLOTS === SUPPORT_SLOT
+  const isWorks = cfg.supportSlot !== null && slot % cfg.slots === cfg.supportSlot
 
   // Producers and buffs live in the works slot and NOWHERE else.
   //
@@ -508,7 +549,11 @@ export const rollOffer = (
   // skip past a lumber hut that has a permanent home one slot to the right.
   // Utility pieces (spikes, the repair bay) are NOT works and stay in the free
   // lanes, because those genuinely are wall-and-weapon decisions.
-  const catalogue = isWorks ? all.filter(isWorksShape) : all.filter((s) => !isWorksShape(s))
+  // With no works slot at all, producers have nowhere else to be dealt from —
+  // so the free lanes draw from the WHOLE pool rather than excluding them.
+  const catalogue = isWorks
+    ? all.filter(isWorksShape)
+    : cfg.supportSlot === null ? all : all.filter((s) => !isWorksShape(s))
 
   const inLane = isWorks || lane === 'any'
     ? catalogue
@@ -549,11 +594,12 @@ export const rollOffer = (
 export const rollOffers = (
   wave: number,
   unlockedBlocks: Set<string>,
-  rand: () => number = Math.random
+  rand: () => number = Math.random,
+  cfg: OfferLaneConfig = DEFAULT_LANES
 ): string[] => {
   const out: string[] = []
-  for (let i = 0; i < OFFER_SLOTS; i++) {
-    out.push(rollOffer(i, wave, unlockedBlocks, out, rand))
+  for (let i = 0; i < cfg.slots; i++) {
+    out.push(rollOffer(i, wave, unlockedBlocks, out, rand, undefined, cfg))
   }
   return out
 }

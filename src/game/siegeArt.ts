@@ -800,25 +800,36 @@ const drawCatapultArm = (
 /** Roofed ram shed: hide over a pent roof, log slung on ropes. */
 const drawRam = (
   ctx: CanvasRenderingContext2D, S: number, m: SiegeParts,
-  spin: number, striking: boolean, t: number
+  spin: number, striking: boolean, t: number, layer: 'all' | 'static' | 'moving' = 'all'
 ): void => {
   const swing = striking ? Math.sin(t / 220) * 0.15 * S : 0
+  const wantStatic = layer !== 'moving'
+  const wantMoving = layer !== 'static'
 
-  cartWheel(ctx, S, -0.34 * S, GROUND * S - 0.13 * S, 0.13 * S, spin, m.woodBack, 130)
-  cartWheel(ctx, S, 0.3 * S, GROUND * S - 0.13 * S, 0.13 * S, spin, m.woodBack, 131)
-  timber(ctx, S, [-0.54 * S, 0.32 * S], [0.54 * S, 0.32 * S], 0.1 * S, m.wood, 132, 3)
+  if (wantStatic) {
+    cartWheel(ctx, S, -0.34 * S, GROUND * S - 0.13 * S, 0.13 * S, spin, m.woodBack, 130)
+    cartWheel(ctx, S, 0.3 * S, GROUND * S - 0.13 * S, 0.13 * S, spin, m.woodBack, 131)
+    timber(ctx, S, [-0.54 * S, 0.32 * S], [0.54 * S, 0.32 * S], 0.1 * S, m.wood, 132, 3)
 
-  // Corner posts, both BEHIND the log so nothing occludes it.
-  timber(ctx, S, [-0.48 * S, 0.3 * S], [-0.46 * S, -0.26 * S], 0.06 * S, m.woodBack, 133, 2)
-  timber(ctx, S, [0.34 * S, 0.3 * S], [0.32 * S, -0.26 * S], 0.06 * S, m.woodBack, 134, 2)
+    // Corner posts, both BEHIND the log so nothing occludes it.
+    timber(ctx, S, [-0.48 * S, 0.3 * S], [-0.46 * S, -0.26 * S], 0.06 * S, m.woodBack, 133, 2)
+    timber(ctx, S, [0.34 * S, 0.3 * S], [0.32 * S, -0.26 * S], 0.06 * S, m.woodBack, 134, 2)
+  }
+  if (!wantMoving) { drawRamShed(ctx, S, m); return }
 
   // ── The log ──
   //
   // Slung LOW and running well past the shed on the striking side. The thing
   // that does the damage has to be the thing you see: tucked up inside the
   // frame it read as a crossbar and the unit lost its name.
-  rope(ctx, [[-0.22 * S, -0.24 * S], [-0.22 * S + swing, 0.06 * S]], 0.022 * S, 136)
-  rope(ctx, [[0.16 * S, -0.24 * S], [0.16 * S + swing, 0.06 * S]], 0.022 * S, 137)
+  //
+  // The ropes start just BELOW the roof's lower edge rather than up at the
+  // crossbar. Everything above −0.16 was hidden under the hide anyway, and
+  // cutting it is what lets the log ride in the live layer: the roof is baked
+  // and the live pass always lands on top of it, so a rope that reached up
+  // behind the roof would come back painted across it.
+  rope(ctx, [[-0.22 * S, -0.14 * S], [-0.22 * S + swing, 0.06 * S]], 0.022 * S, 136)
+  rope(ctx, [[0.16 * S, -0.14 * S], [0.16 * S + swing, 0.06 * S]], 0.022 * S, 137)
   timber(ctx, S, [-0.42 * S + swing, 0.14 * S], [0.6 * S + swing, 0.12 * S], 0.18 * S, m.wood, 138, 4)
   // Iron bands where the head is lashed on.
   for (const bx of [0.3, 0.44]) {
@@ -844,8 +855,19 @@ const drawRam = (
     ], 0.032 * S, 0.012 * S, IRON.base, 143 + f)
   }
 
-  // Pent roof, hide-covered, sloping toward the tower. Pulled BACK off the
-  // striking end so the head always has clear air in front of it.
+  if (wantStatic) drawRamShed(ctx, S, m)
+}
+
+/**
+ * The ram's pent roof, split out so it can be baked with the chassis.
+ *
+ * It sits entirely ABOVE the log — the hide runs from −0.56 to −0.16 and the log
+ * from +0.02 down — so which of the two is painted first makes no difference to
+ * what you see. That is the whole reason this engine can be split at all.
+ */
+const drawRamShed = (ctx: CanvasRenderingContext2D, S: number, m: SiegeParts): void => {
+  // Hide-covered, sloping toward the tower. Pulled BACK off the striking end so
+  // the head always has clear air in front of it.
   const roof = slab([
     [-0.6 * S, -0.24 * S], [-0.06 * S, -0.56 * S],
     [0.48 * S, -0.24 * S], [0.42 * S, -0.16 * S], [-0.52 * S, -0.16 * S]
@@ -859,18 +881,29 @@ const drawRam = (
 /** The armoured ram: cold grey, riveted, and visibly arrow-proof. */
 const drawIronRam = (
   ctx: CanvasRenderingContext2D, S: number, m: SiegeParts,
-  spin: number, striking: boolean, t: number
+  spin: number, striking: boolean, t: number, layer: 'all' | 'static' | 'moving' = 'all'
 ): void => {
   const hit = striking ? Math.sin(t / 200) * 0.14 * S : 0
   const PLATE = tones(m.wood.base, 1.3)
+  const wantStatic = layer !== 'moving'
+  const wantMoving = layer !== 'static'
 
-  cartWheel(ctx, S, -0.34 * S, GROUND * S - 0.13 * S, 0.13 * S, spin, IRON, 160)
-  cartWheel(ctx, S, 0.32 * S, GROUND * S - 0.13 * S, 0.13 * S, spin, IRON, 161)
-  timber(ctx, S, [-0.56 * S, 0.32 * S], [0.56 * S, 0.32 * S], 0.1 * S, IRON, 162, 2)
+  if (wantStatic) {
+    cartWheel(ctx, S, -0.34 * S, GROUND * S - 0.13 * S, 0.13 * S, spin, IRON, 160)
+    cartWheel(ctx, S, 0.32 * S, GROUND * S - 0.13 * S, 0.13 * S, spin, IRON, 161)
+    timber(ctx, S, [-0.56 * S, 0.32 * S], [0.56 * S, 0.32 * S], 0.1 * S, IRON, 162, 2)
+  }
+  if (!wantMoving) { drawIronRamShell(ctx, S, PLATE); return }
 
   // The log runs well past the casemate, so the part that does the damage is
   // visible rather than tucked away inside the armour.
-  timber(ctx, S, [-0.1 * S + hit, 0.1 * S], [0.62 * S + hit, 0.1 * S], 0.15 * S, IRON, 164, 2)
+  //
+  // It starts AT the casemate's edge rather than deep inside it. Everything left
+  // of 0.56 was behind the armour and never seen; ending it there is what lets
+  // the log ride in the live layer over a baked shell, and it reads better for
+  // it — the log now visibly slides out of its housing and back in, instead of
+  // sliding as one rigid piece behind a wall.
+  timber(ctx, S, [0.55 * S, 0.1 * S], [0.62 * S + hit, 0.1 * S], 0.15 * S, IRON, 164, 2)
   const hx = 0.62 * S + hit
   const head = slab([
     [hx, -0.02 * S], [hx + 0.26 * S, 0.02 * S],
@@ -879,6 +912,20 @@ const drawIronRam = (
   paint(ctx, S, head, STEEL, 166, { line: LINE.major, amp: 0.05 })
   rivets(ctx, [hx + 0.04 * S, 0.02 * S], [hx + 0.04 * S, 0.18 * S], 3, 0.02 * S, 167)
 
+  if (wantStatic) drawIronRamShell(ctx, S, PLATE)
+}
+
+/**
+ * The iron ram's casemate, split out so it can be baked with the chassis.
+ *
+ * The log is drawn live and therefore always lands ON TOP of this — which is
+ * only correct because the log now starts at the shell's own edge. It used to
+ * run back under the armour, and hoisting that into the live layer would have
+ * painted a log straight across the plating.
+ */
+const drawIronRamShell = (
+  ctx: CanvasRenderingContext2D, S: number, PLATE: CelTones
+): void => {
   // Plated casemate: walls all the way to the chassis, shallow sloped lid.
   const shell = slab([
     [-0.56 * S, 0.28 * S], [-0.56 * S, -0.22 * S],
@@ -909,8 +956,12 @@ const drawIronRam = (
 /** Rolling tower: the only engine that puts enemies ON the wall. */
 const drawSiegeTower = (
   ctx: CanvasRenderingContext2D, S: number, m: SiegeParts,
-  spin: number, docked: boolean, t: number
+  spin: number, docked: boolean, t: number, layer: 'all' | 'static' | 'moving' = 'all'
 ): void => {
+  const wantStatic = layer !== 'moving'
+  const wantMoving = layer !== 'static'
+  if (!wantStatic) { drawSiegeTowerTop(ctx, S, m, docked, t); return }
+
   cartWheel(ctx, S, -0.3 * S, GROUND * S - 0.12 * S, 0.12 * S, spin, m.woodBack, 190)
   cartWheel(ctx, S, 0.28 * S, GROUND * S - 0.12 * S, 0.12 * S, spin, m.woodBack, 191)
 
@@ -938,6 +989,21 @@ const drawSiegeTower = (
     [0.38 * S, -0.1 * S], [0.16 * S, -0.1 * S]
   ], 0.012 * S, 204), 205)
 
+  if (wantMoving) drawSiegeTowerTop(ctx, S, m, docked, t)
+}
+
+/**
+ * Everything above the tower's planking: ramp, banner, crew, merlons.
+ *
+ * A clean cut, and the only one of the three whole-static engines that had one
+ * waiting. All four of these were already drawn last and in that order, so
+ * lifting them into the live layer changes no z-order at all — the merlons
+ * still cover the crew to the waist, which is what makes the archers read as
+ * standing INSIDE the fighting top rather than on it.
+ */
+const drawSiegeTowerTop = (
+  ctx: CanvasRenderingContext2D, S: number, m: SiegeParts, docked: boolean, t: number
+): void => {
   // ── Drop ramp ──
   //
   // Hinged at the FRONT of the fighting top and always falling forward, so the
@@ -1364,10 +1430,13 @@ export const drawSiegeMachine = (
     return
   }
 
-  if (!wantStatic) return
+  // The other three were whole-static until a painted chassis needed somewhere
+  // to go. Each now splits at the one place its own z-order allows: the ram's
+  // log rides over its shed, the iron ram's log slides out of its casemate, and
+  // the tower's ramp, banner, crew and merlons lift off its planking.
   switch (id) {
-    case 'ram': drawRam(ctx, S, m, opts.spin, opts.engaged, opts.t); break
-    case 'ironRam': drawIronRam(ctx, S, m, opts.spin, opts.engaged, opts.t); break
-    case 'siegeTower': drawSiegeTower(ctx, S, m, opts.spin, opts.engaged, opts.t); break
+    case 'ram': drawRam(ctx, S, m, opts.spin, opts.engaged, opts.t, layer); break
+    case 'ironRam': drawIronRam(ctx, S, m, opts.spin, opts.engaged, opts.t, layer); break
+    case 'siegeTower': drawSiegeTower(ctx, S, m, opts.spin, opts.engaged, opts.t, layer); break
   }
 }

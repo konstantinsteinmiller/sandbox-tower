@@ -63,6 +63,9 @@ export type FxEvent =
   | { kind: 'allyDown'; x: number; y: number }
   | { kind: 'allyLeave'; x: number; y: number }
   | { kind: 'gateFell'; x: number; y: number }
+  /** A dropped block fused down into its twin (the mobile-fit landing merge).
+   *  `tier` is the tier it became. */
+  | { kind: 'merge'; x: number; y: number; tier: number; palette: string }
 
 // Ring buffer. Events are produced during a tick and consumed the same frame;
 // a generous cap means a catastrophic collapse can't drop the events that
@@ -93,6 +96,20 @@ export type QualityTier = 'high' | 'medium' | 'low'
 export const quality = ref<QualityTier>('high')
 
 const TIER_CAPACITY: Record<QualityTier, number> = { high: 900, medium: 500, low: 220 }
+
+/**
+ * A ceiling the device tier puts UNDER the rolling tier's own.
+ *
+ * The rolling tier only ever sees frame times; a phone that renders at 60 fps
+ * for its first sixty frames would be handed nine hundred particles it cannot
+ * afford the moment a wave lands. The boot-time profile knows better and says
+ * so once (`setRenderProfile`); null leaves the rolling tier in charge.
+ */
+let particleCapOverride: number | null = null
+export const setParticleCap = (cap: number | null): void => { particleCapOverride = cap }
+
+let textCapOverride: number | null = null
+export const setTextCap = (cap: number | null): void => { textCapOverride = cap }
 
 let fpsAccum = 0
 let fpsFrames = 0
@@ -175,7 +192,7 @@ export interface EmitOptions {
  * cuts the tail of whatever came before it.
  */
 export const emit = (o: EmitOptions): void => {
-  const cap = TIER_CAPACITY[quality.value]
+  const cap = Math.min(TIER_CAPACITY[quality.value], particleCapOverride ?? MAX_PARTICLES)
   let i: number
   if (liveCount < cap) {
     i = liveCount++
@@ -359,7 +376,7 @@ const MAX_TEXTS = 60
 const texts: FloatText[] = []
 
 export const emitText = (t: Omit<FloatText, 'maxLife'> & { maxLife?: number }): void => {
-  if (texts.length >= MAX_TEXTS) texts.shift()
+  if (texts.length >= (textCapOverride ?? MAX_TEXTS)) texts.shift()
   texts.push({ ...t, maxLife: t.maxLife ?? t.life })
 }
 

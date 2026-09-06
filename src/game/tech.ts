@@ -177,12 +177,29 @@ export const TECH_NODES: ReadonlyArray<TechNode> = [
     effect: { kind: 'thorns', pct: 20 },
     icon: 'thorns'
   },
+  // ── The economy lane ─────────────────────────────────────────────
+  //
+  // These three used to unlock a SECOND set of producers — a sawmill, a quarry
+  // and a gold mine sitting behind the lumber hut, the stone pit and the
+  // coffer. Same palette, same glyph, same sentence in the inspector, a bigger
+  // number the player could not see: two buildings that looked identical and
+  // did the same job. The lane now raises what the one producer of each
+  // resource yields, which is the same power curve with one fewer thing to
+  // learn, and it starts paying on the blocks the player already owns instead
+  // of on a purchase they have yet to make.
+  //
+  // ⚠️ THE IDS ARE FROZEN. `readTech` reads levels by node id and silently
+  // drops anything it does not recognise, so renaming these would confiscate
+  // up to 1080 coins from every player who had already bought them. A rank of
+  // the old unlock converts straight into a rank of the yield node standing in
+  // its place, which is the honest exchange. The names the player sees live in
+  // i18n and have been updated; only the keys are historical.
   {
     id: 'unlockSawmill',
-    tier: 3, col: 2, maxLevel: 1,
-    costBase: 160, costGrowth: 1,
+    tier: 3, col: 2, maxLevel: UNCAPPED,
+    costBase: 160, costGrowth: 1.3,
     requires: ['quarryStock'],
-    effect: { kind: 'unlock', blockId: 'sawmill' },
+    effect: { kind: 'economyYield', pct: 14 },
     icon: 'sawmill'
   },
   {
@@ -237,10 +254,10 @@ export const TECH_NODES: ReadonlyArray<TechNode> = [
   },
   {
     id: 'unlockQuarry',
-    tier: 4, col: 2, maxLevel: 1,
-    costBase: 280, costGrowth: 1,
+    tier: 4, col: 2, maxLevel: UNCAPPED,
+    costBase: 280, costGrowth: 1.32,
     requires: ['unlockSawmill'],
-    effect: { kind: 'unlock', blockId: 'quarry' },
+    effect: { kind: 'economyYield', pct: 18 },
     icon: 'quarry'
   },
   {
@@ -287,10 +304,10 @@ export const TECH_NODES: ReadonlyArray<TechNode> = [
   },
   {
     id: 'unlockMint',
-    tier: 5, col: 2, maxLevel: 1,
-    costBase: 640, costGrowth: 1,
+    tier: 5, col: 2, maxLevel: UNCAPPED,
+    costBase: 640, costGrowth: 1.34,
     requires: ['unlockQuarry'],
-    effect: { kind: 'unlock', blockId: 'mint' },
+    effect: { kind: 'economyYield', pct: 24 },
     icon: 'mint'
   },
   {
@@ -506,6 +523,16 @@ export const TECH_BY_ID: Record<string, TechNode> = Object.fromEntries(
 )
 
 /**
+ * Look a node up in whichever tree is in play.
+ *
+ * The desktop DAG keeps its index; a mode's own tree (a dozen nodes) is
+ * searched. Every function below takes the tree as a trailing argument that
+ * defaults to the desktop's, so the existing call sites read exactly as before.
+ */
+export const nodeIn = (nodes: ReadonlyArray<TechNode>, id: string): TechNode | undefined =>
+  nodes === TECH_NODES ? TECH_BY_ID[id] : nodes.find((n) => n.id === id)
+
+/**
  * Coin price of the level `lvl → lvl+1`.
  *
  * With no level ceiling the growth curve IS the balance. At `costGrowth` ≈ 1.3
@@ -516,8 +543,10 @@ export const TECH_BY_ID: Record<string, TechNode> = Object.fromEntries(
  * The first rank of a repeatable node is half price so the opening point in any
  * branch is an easy, satisfying commitment.
  */
-export const techCost = (id: string, level: number): number => {
-  const node = TECH_BY_ID[id]
+export const techCost = (
+  id: string, level: number, nodes: ReadonlyArray<TechNode> = TECH_NODES
+): number => {
+  const node = nodeIn(nodes, id)
   if (!node) return Infinity
   if (level >= node.maxLevel) return Infinity
   const raw = node.costBase * Math.pow(node.costGrowth, level)
@@ -529,7 +558,8 @@ export const techCost = (id: string, level: number): number => {
 }
 
 /** True for nodes that are a one-off unlock rather than a repeatable rank. */
-export const isUnlockNode = (id: string): boolean => TECH_BY_ID[id]?.maxLevel === 1
+export const isUnlockNode = (id: string, nodes: ReadonlyArray<TechNode> = TECH_NODES): boolean =>
+  nodeIn(nodes, id)?.maxLevel === 1
 
 /** Grid extents of the authored layout — the tree modal uses these to size and
  *  centre its viewport without hard-coding magic numbers. */
@@ -546,10 +576,11 @@ export const TECH_BOUNDS = TECH_NODES.reduce(
 /** Accumulate every effect of a kind across the player's purchased levels. */
 export const sumEffect = (
   levels: Record<string, number>,
-  kind: TechEffect['kind']
+  kind: TechEffect['kind'],
+  nodes: ReadonlyArray<TechNode> = TECH_NODES
 ): number => {
   let total = 0
-  for (const node of TECH_NODES) {
+  for (const node of nodes) {
     if (node.effect.kind !== kind) continue
     const lvl = levels[node.id] ?? 0
     if (lvl <= 0) continue
@@ -568,14 +599,17 @@ export const sumEffect = (
  */
 export const hasEffect = (
   levels: Record<string, number>,
-  kind: TechEffect['kind']
+  kind: TechEffect['kind'],
+  nodes: ReadonlyArray<TechNode> = TECH_NODES
 ): boolean =>
-  TECH_NODES.some((n) => n.effect.kind === kind && (levels[n.id] ?? 0) > 0)
+  nodes.some((n) => n.effect.kind === kind && (levels[n.id] ?? 0) > 0)
 
 /** Set of block ids unlocked by the player's tech levels. */
-export const unlockedBlocks = (levels: Record<string, number>): Set<string> => {
+export const unlockedBlocks = (
+  levels: Record<string, number>, nodes: ReadonlyArray<TechNode> = TECH_NODES
+): Set<string> => {
   const out = new Set<string>()
-  for (const node of TECH_NODES) {
+  for (const node of nodes) {
     if (node.effect.kind !== 'unlock') continue
     if ((levels[node.id] ?? 0) > 0) out.add(node.effect.blockId)
   }

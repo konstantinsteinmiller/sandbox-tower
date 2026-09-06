@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
-  BLOCK_DEFS, MAX_MERGE_TIER, tierOf, mergePowerMul, mergeHpMul, canMergeBlocks
+  BLOCK_DEFS, tierOf, mergePowerMul, mergeHpMul, canMergeBlocks
 } from '@/game/blocks'
 import { TECH_BY_ID } from '@/game/tech'
 import type { Block } from '@/game/types'
@@ -8,8 +8,12 @@ import type { Block } from '@/game/types'
 /**
  * Merging changes how every block in the tower is placed, so the rules it must
  * NOT break are as important as the ones it adds: it cannot fuse the Gate, it
- * cannot exceed its ceiling, it cannot destroy something the player paid for,
- * and it cannot happen at all until the node is bought.
+ * cannot destroy something the player paid for, and it cannot happen at all
+ * until the node is bought.
+ *
+ * There is no tier ceiling on this board any more; what shapes the curve is
+ * the FOOTPRINT rule — a weld stays inside 2:1, so the tower climbs 2×1, 2×2,
+ * 4×2, 4×4 and each step needs twice the blocks of the last.
  */
 
 const loadGame = async (levels: Record<string, number> = { unlockMerge: 1 }) => {
@@ -58,7 +62,7 @@ describe('the merge curve', () => {
     }
   })
 
-  it('never fuses the Gate, a mismatch, or anything at the ceiling', () => {
+  it('never fuses the Gate or a mismatch, and honours a ceiling if one is set', () => {
     expect(canMergeBlocks({ typeId: 'gate' }, { typeId: 'gate' })).toBe(false)
     // Weapons only. A wall has no damage to bet, and welding masonry the
     // player never asked to weld ate roofs and reinforcement in the process.
@@ -66,11 +70,14 @@ describe('the merge curve', () => {
     expect(canMergeBlocks({ typeId: 'crate' }, { typeId: 'crate' })).toBe(false)
     expect(canMergeBlocks({ typeId: 'cannon' }, { typeId: 'archer' })).toBe(false)
     expect(canMergeBlocks({ typeId: 'cannon', tier: 1 }, { typeId: 'cannon', tier: 2 })).toBe(false)
-    expect(canMergeBlocks(
-      { typeId: 'cannon', tier: MAX_MERGE_TIER },
-      { typeId: 'cannon', tier: MAX_MERGE_TIER }
-    )).toBe(false)
     expect(canMergeBlocks({ typeId: 'cannon' }, { typeId: 'cannon' })).toBe(true)
+    // Uncapped by default, on both boards — but a mode may still cap it.
+    expect(canMergeBlocks(
+      { typeId: 'cannon', tier: 9 }, { typeId: 'cannon', tier: 9 }
+    )).toBe(true)
+    expect(canMergeBlocks(
+      { typeId: 'cannon', tier: 3 }, { typeId: 'cannon', tier: 3 }, 'weapons', 3
+    )).toBe(false)
   })
 })
 
@@ -263,13 +270,29 @@ describe('fusing on the board', () => {
     expect(tierOf(at(g, -1, 0)!.tier)).toBe(1)
   })
 
-  it('stops at the ceiling', async () => {
+  it('climbs past tier three into a 4×2 bastion', async () => {
     const g = await loadGame()
-    // Eight cannons would be a tier 4 if the ceiling did not hold.
-    for (const c of [-4, -3, -2, -1, 1, 2, 3, 4]) g.placeBlock('cannon', c, 0)
-    for (const b of g.getTowerBlocks().values()) {
-      expect(tierOf(b.tier)).toBeLessThanOrEqual(MAX_MERGE_TIER)
-    }
+    // Eight cannons in a 4×2 slab: four pairs fuse to tier 2, each column of
+    // two pairs squares up to a 2×2 tier 3, and the two bastions — which the
+    // old square-only rule would have left standing side by side forever —
+    // now make one 4×2 tier 4.
+    for (const r of [0, 1]) for (const c of [-4, -3, -2, -1]) g.placeBlock('cannon', c, r)
+    expect(count(g, 'cannon')).toBe(1)
+    const fused = at(g, -4, 0)!
+    expect(tierOf(fused.tier)).toBe(4)
+    expect(size(fused)).toEqual([4, 2])
+  })
+
+  it('does not care which way up a bastion grows', async () => {
+    const g = await loadGame()
+    // The same eight cannons stacked rather than spread: two 2×2 bastions on
+    // top of each other are a 2×4, which is a 4×2 stood on end and just as
+    // stocky, so it fuses too. The rule is the proportion, not the axis.
+    for (const r of [0, 1, 2, 3]) for (const c of [-2, -1]) g.placeBlock('cannon', c, r)
+    expect(count(g, 'cannon')).toBe(1)
+    const fused = at(g, -2, 0)!
+    expect(tierOf(fused.tier)).toBe(4)
+    expect(size(fused)).toEqual([2, 4])
   })
 
   it('scales the merged block s max HP by its tier', async () => {
@@ -413,6 +436,34 @@ describe('fusing on the board', () => {
 })
 
 describe('settling merges outside placement', () => {
+  it('folds a tower built under an old tier ceiling the moment the cap lifts', async () => {
+    // The ceiling used to be three, so a tower could end up with four 2×2
+    // bastions sitting shoulder to shoulder doing nothing. `mergeAt` only ever
+    // runs from a placement, so lifting the cap on its own would have left
+    // those exactly where they were — from the player's chair, four identical
+    // blocks touching and refusing to fuse.
+    const g = await loadGame()
+    const { DESKTOP_RULES } = await import('@/game/rules')
+    g.applyRules({ ...DESKTOP_RULES, maxMergeTier: 3 })
+    g.wood.value = 99_000
+    g.stone.value = 99_000
+    g.runCoins.value = 99_000
+    for (const r of [0, 1, 2, 3]) for (const c of [-4, -3, -2, -1]) g.placeBlock('archer', c, r)
+    expect(count(g, 'archer')).toBe(4)
+    for (const b of g.getTowerBlocks().values()) {
+      if (b.typeId !== 'archer') continue
+      expect(tierOf(b.tier)).toBe(3)
+    }
+
+    // Same tower, ceiling gone: `settleMerges` runs off `syncTowerStats`, so
+    // it catches up without the player having to place anything.
+    g.applyRules(DESKTOP_RULES)
+    expect(count(g, 'archer')).toBe(1)
+    const fused = at(g, -4, 0)!
+    expect(tierOf(fused.tier)).toBe(5)
+    expect(size(fused)).toEqual([4, 4])
+  })
+
   it('fuses a pair restored from a save written before Fusion was owned', async () => {
     // The player's actual path: build, die, buy Fusion, resume. `mergeAt` only
     // ever ran from a placement, so every gun already in the tower stayed

@@ -1,5 +1,5 @@
 import { BLOCK_DEFS, blockDef, canMergeType, isShip } from '@/game/blocks'
-import { PALETTES, blockArtBase } from '@/game/art'
+import { PALETTES, paletteFor, blockArtBase } from '@/game/art'
 import { ENEMY_DEFS } from '@/game/enemies'
 import { MONSTERS } from '@/game/monsters'
 import type { ProjectileKind } from '@/game/types'
@@ -123,9 +123,6 @@ const BLOCK_ART: Record<string, BlockArt> = {
   frost: { name: 'Frost Block', base: 'a square rimed stone block with a flat top, frost creeping in from the edges', fixture: 'ice crystals' },
   spikes: { name: 'Spiked Wall', base: 'a square rough timber palisade block with a flat top', fixture: 'iron spikes on all four sides' },
   repair: { name: 'Repair Block', base: 'a square timber block with a flat top, green-painted edge banding and a few tools racked along the very bottom', fixture: 'a turning wrench' },
-  sawmill: { name: 'Sawmill Block', base: 'a square timber mill block with a flat top, sawdust and offcuts along its bottom edge', fixture: 'a spinning blade' },
-  quarry: { name: 'Quarry Block', base: 'a square cut-stone block with a flat top, chisel marks and rubble around its edges', fixture: 'a rocking pick' },
-  mint: { name: 'Gold Mine Block', base: 'a square stone strongroom block with a flat top, iron strapping and gold-painted trim around its edges', fixture: 'a bobbing stack of gold coins' },
   banner: { name: 'Banner Block', base: 'a square block with a flat top, gilt edging over deep rose cloth around its border', fixture: 'a hanging banner' },
   obelisk: { name: 'Obelisk Block', base: 'a square dark arcane block with a flat top, pale blue glyphs inlaid around its border', fixture: 'a floating spire' },
   lumberHut: { name: 'Lumber Hut Block', base: 'a square timber block with a flat top, stacked logs along its bottom edge', fixture: 'a working axe' },
@@ -178,7 +175,8 @@ const SIEGE_ART: Record<string, string> = {
 }
 
 const ROUND_ART: Record<string, string> = {
-  bolt: 'an arrow in flight, fletched, pointing right',
+  bolt: 'an archer’s arrow in flight, pale ash shaft, feather fletching, a bright leaf-shaped steel broadhead, pointing right',
+  quarrel: 'a siege ballista’s quarrel: SHORT and heavy, a thick dark oiled timber shaft, a cord binding at the socket, stiff cut-leather vanes and a squat blunt four-sided iron bodkin head. It must not be mistakable for the archer’s arrow, pointing right',
   ball: 'a solid iron cannonball',
   shell: 'a finned iron mortar shell with a lit fuse, pointing along its arc',
   bomb: 'a finned iron aerial bomb falling nose-down',
@@ -259,7 +257,7 @@ const BLOCK_ORDER: string[] = Object.values(BLOCK_DEFS)
 /** Blocks whose fixture is drawn live, so body is not the same as assembled. */
 const HAS_FIXTURE = new Set([
   'archer', 'cannon', 'bombard', 'mortar', 'tesla', 'frost',
-  'repair', 'sawmill', 'quarry', 'mint', 'spikes',
+  'repair', 'spikes',
   'banner', 'obelisk', 'lumberHut', 'stonepit', 'coffer',
   'skiff', 'longship', 'galley'
 ])
@@ -362,7 +360,7 @@ const blockCells = (): SheetCell[] => {
         : `uses ${base} base`,
       ...(hull || !owns ? {} : { target: `images/blocks/${base}.webp` }),
       note: hull
-        ? 'Ships bypass the block-sprite path entirely — the hull is drawn, clipped at the waterline and rolled every frame. Adopting art here needs a probe inside the ship branch.'
+        ? 'Reference only — a hull is not a square cell of material, so it has its own sheet: paint hull-<id>.png, which is cut to the band the boat is actually visible in. The deck weapon stays drawn live on top of it.'
         : owns
           ? `The shared ${base} base.${shared.length ? ` Also worn by ${shared.join(', ')}.` : ''} Paint the MATERIAL, not this one block — the fixture on top is what tells them apart.`
           : `Reference only. Reads from the shared ${base} base, owned by ${BASE_OWNER[base]}.`,
@@ -525,13 +523,29 @@ const siegeCells = (): SheetCell[] =>
 // it is an invitation for an image model to fill the hole with something the
 // game does not have. It is recorded in the README instead.
 const ROUNDS: { round: ProjectileKind; label: string; slot: boolean; note: string }[] = [
-  { round: 'bolt', label: 'bolt', slot: true, note: 'Arrow. The most-fired round in the game.' },
+  { round: 'bolt', label: 'arrow', slot: true, note: 'The most-fired round in the game — the archer post and both bolt-throwing ships.' },
+  { round: 'quarrel', label: 'quarrel', slot: true, note: 'The siege ballista’s round, and the one shot the player has to see coming and answer.' },
   { round: 'ball', label: 'ball', slot: true, note: 'Cannonball.' },
   { round: 'shell', label: 'shell', slot: true, note: 'Mortar shell — finned, fuse lit, points along its arc.' },
   { round: 'bomb', label: 'bomb', slot: true, note: 'Enemy ordnance, nose-down along its fall.' },
   { round: 'fire', label: 'fire', slot: true, note: 'Molotov, tumbling.' },
   { round: 'frost', label: 'frost', slot: false, note: 'The frost round is a live particle emitter; this is only its core shard.' }
 ]
+
+/**
+ * Rounds that can be replaced by a bitmap.
+ *
+ * The two shafted ones, and only those. They are drawn pointing right and
+ * rotated to their heading, so a single still serves every direction — which a
+ * cannonball (a circle, deliberately not aligned to its velocity) and a frost
+ * shard (a live particle emitter) cannot make use of.
+ *
+ * The shell, the bomb and the molotov are shafted too and could join them, but
+ * each carries something drawn live on top — a fuse spark, a burning rag — and
+ * a target here that the renderer does not actually read is a promise the sheet
+ * cannot keep. They stay reference-only until the hook exists.
+ */
+const ROUND_TARGETS = new Set<ProjectileKind>(['bolt', 'quarrel'])
 
 const allyCells = (): SheetCell[] => {
   const cells: SheetCell[] = [{
@@ -541,8 +555,11 @@ const allyCells = (): SheetCell[] => {
     col: 0, row: 0, cw: 1, ch: 1,
     label: 'cavalry',
     sub: '0.80c · ally',
-    target: 'images/allies/cavalry.webp',
-    note: 'Cool blue, gold pennant, facing right. Must stay unmistakable against the warm-toned enemies at a glance.',
+    // No target: the rider GALLOPS, and the strip on the walk sheet owns
+    // `images/allies/cavalry.webp`. A still sliced to the same path would
+    // win by being sliced last and freeze the unit mid-stride, which is a
+    // worse result than leaving it drawn.
+    note: 'Reference only — the rider is adopted as a GALLOP STRIP from walk-cavalry, not as a still. Cool blue, gold pennant, facing right. Must stay unmistakable against the warm-toned enemies at a glance.',
     art: { kind: 'cavalry' }
   }]
   ROUNDS.forEach((r, i) => {
@@ -552,8 +569,12 @@ const allyCells = (): SheetCell[] => {
       col: (i + 1) % 8, row: Math.floor((i + 1) / 8), cw: 1, ch: 1,
       label: r.label,
       sub: r.slot ? 'round' : 'live FX',
-      note: r.slot
-        ? `${r.note} No override hook today — adding one means a projectile probe keyed by kind.`
+      // Only the shafted rounds can be a bitmap. A cannonball is a circle drawn
+      // at its own radius and a frost shard is a live emitter; both would lose
+      // by being pinned to one still.
+      ...(ROUND_TARGETS.has(r.round) ? { target: `images/rounds/${r.round}.webp` } : {}),
+      note: r.slot && !ROUND_TARGETS.has(r.round)
+        ? `${r.note} No override hook: this one is drawn from its own geometry every frame.`
         : r.note,
       art: { kind: 'projectile', round: r.round }
     })
@@ -762,7 +783,7 @@ export const ALL_STRIPS: StripSpec[] = SHEETS.flatMap(stripsOf)
  * turns a wall of masonry into a wall of museum labels; and it filled a cell
  * that was deliberately empty.
  */
-export const STYLE = [
+const STYLE_HEAD = [
   'STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated',
   'storybook or a hand-painted board game. Match this in every square:',
   '· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly',
@@ -783,12 +804,38 @@ export const STYLE = [
   '  smooth 3D-rendered shading, no bevelled plastic edges.',
   '· NO saturated, candy-bright colour. If it looks vivid, it is wrong.',
   '· NO heavy uniform black outlines and no hard cel-shaded banding.',
-  '· NO cold grey, gritty, weathered-industrial or grimdark look.',
-  '· NO frames, borders, cards, vignettes, matting or paper background inside a',
-  '  square. The object itself fills the square edge to edge, corner to corner.',
+  '· NO cold grey, gritty, weathered-industrial or grimdark look.'
+]
+
+const STYLE_TAIL = [
   '· Do not invent content for a square that is blank. Leave it blank.',
   '· Keep each object the same subject and silhouette it already has. This is a',
   '  restyle, not a redesign.'
+]
+
+export const STYLE = [
+  ...STYLE_HEAD,
+  '· NO frames, borders, cards, vignettes, matting or paper background inside a',
+  '  square. The object itself fills the square edge to edge, corner to corner.',
+  ...STYLE_TAIL
+].join('\n')
+
+/**
+ * The same block for artwork that must NOT fill its frame.
+ *
+ * One bullet differs, and it is the one the panelled prompts then had to argue
+ * with three paragraphs further down: "the object fills the square edge to
+ * edge" is right for a building-block cell and ruinous for a part that has to
+ * keep a bolt-on point, because a model that reads it enlarges the drawing
+ * until the placement it was handed is gone. Correcting it afterwards did not
+ * work — the arm sheet said both things and what came back was the fill — so
+ * the panelled prompts get a block that never says it.
+ */
+export const STYLE_PART = [
+  ...STYLE_HEAD,
+  '· NO frames, borders, cards, vignettes, matting or paper background behind',
+  '  the drawing. Nothing but flat magenta behind it, right up to its outline.',
+  ...STYLE_TAIL
 ].join('\n')
 
 /**
@@ -1094,13 +1141,37 @@ export interface WalkSpec {
    * wide and a siege engine's is square, so the two lay out on different sheets
    * and the runtime counts their panels against different aspects.
    */
-  kind: 'monster' | 'siege'
+  kind: 'monster' | 'siege' | 'siegeArm' | 'ally' | 'ship' | 'fixture'
   /** The DESIGN id — `images/<kind>s/<id>.webp` is where the strip lands. */
   id: string
   file: string
   target: string
   name: string
   tagline: string
+  /**
+   * Panel-by-panel notes on what the reference sheet actually shows.
+   *
+   * Only the arms carry one. A walk cycle is legible from the reference — a
+   * leg is forward or it is back — but a reload is not: the ballista's first
+   * panel is the frame AFTER the shot, with no bolt in it, and read as a
+   * drawing rather than as a moment it just looks like a different machine
+   * with a part missing. Saying which moment each panel is stops the painter
+   * tidying the odd ones out into a smooth, wrong sequence.
+   */
+  panels?: string
+  /**
+   * How big the part is INSIDE its panel, as a fraction a painter can check.
+   *
+   * Measured off the reference sheet rather than guessed. Every prose way of
+   * saying this has now been tried — "small in its panel", "do not re-scale
+   * it", "floats clear of all four edges" — and all three came back at about
+   * double: the catapult arm at 1.98x, the trebuchet at 1.67x, the ballista at
+   * 1.26x. "Small" is a judgement and the painter's judgement is the frame,
+   * not the carriage it has never seen. A percentage of the panel width is not
+   * a judgement, and it is the number that decides whether the beam meets its
+   * pivot or floats a body-length off it.
+   */
+  span?: string
   /** Which way the design is authored. Left-facers are NOT flipped for export:
    *  the strip has to match the bake it replaces, and the battlefield does its
    *  own mirroring by travel direction. */
@@ -1128,13 +1199,14 @@ export interface WalkSpec {
 export const SIEGE_PANEL = 360
 
 /**
- * The engines a painted chassis can replace, and only these three.
- *
- * All six roll, but only the ballista, catapult and trebuchet have their ARM
- * drawn as a separate live layer. The ram, the iron ram and the siege tower
- * draw their moving parts inside the static pass, interleaved in z-order with
- * their own shells, so a painted chassis would freeze them — see the note on
- * `SIEGE_STRIPS` in the renderer.
+ * One siege image, px. Bigger than a panel of the old grid, because it is now
+ * the whole generation rather than an eighth of one.
+ */
+export const SIEGE_SINGLE = 768
+
+/**
+ * All six engines. Every one now has its moving part on its own live layer, so
+ * a painted chassis animates rather than freezing.
  */
 const SIEGE_ENGINES = [
   {
@@ -1155,6 +1227,29 @@ const SIEGE_ENGINES = [
       + 'timbers with a cross axle at the top, ropes and a winch. Draw the FRAME '
       + 'ONLY — no throwing arm, no counterweight, no sling. The arm swings '
       + 'separately in game and must not appear here.'
+  },
+  {
+    id: 'ram', name: 'Battering Ram',
+    blurb: 'A battering ram SHED: two cart wheels, a low timber cart, two corner '
+      + 'posts, and a pitched roof covered in stitched hide sloping down to the '
+      + 'right, with a couple of spent arrows stuck in it. Draw the CART AND ROOF '
+      + 'ONLY — no log, no ropes, no iron head. The log swings separately in game.'
+  },
+  {
+    id: 'ironRam', name: 'Iron Ram',
+    blurb: 'An armoured ram CASEMATE: two iron-shod wheels, an iron chassis beam, '
+      + 'and a riveted steel box over it with a shallow sloped lid, plate seams, '
+      + 'a riveted band along the eaves and a dark vision slit near the top right. '
+      + 'Cold grey armour. Draw the BOX ONLY — no log, no ram head. The log slides '
+      + 'out of it separately in game.'
+  },
+  {
+    id: 'siegeTower', name: 'Siege Tower',
+    blurb: 'A rolling siege tower BODY: two cart wheels under a tall boxy timber '
+      + 'tower, roughly planked in uneven horizontal boards with cross-bracing, '
+      + 'and a stitched hide panel down the right-hand face against fire arrows. '
+      + 'Draw the BODY ONLY — no ramp, no banner, no crew, no battlements on top. '
+      + 'Those are all animated separately in game.'
   }
 ] as const
 
@@ -1176,16 +1271,173 @@ const monsterWalks: WalkSpec[] = MONSTERS.map((m) => ({
   h: WALK_ROWS * WALK_PANEL_H
 }))
 
+/**
+ * A siege chassis is ONE image, not a cycle.
+ *
+ * It shipped as an eight-panel roll first, on the reasoning that the wheels turn
+ * and a turning wheel is a cycle. Both halves of that were wrong. In game the
+ * engines are small, always moving across the screen and usually shooting at
+ * something, so nobody has ever seen a spoke go round — and asking a painter for
+ * eight views of one machine got eight machines: the catapult came back at a
+ * different three-quarter angle in every panel, the trebuchet likewise. A frame
+ * count of one has no perspective to lose and no grid to drift.
+ *
+ * Nothing downstream had to change for it. The frame count is read off the
+ * strip's own shape, so a single square image simply IS a one-frame strip.
+ */
 const siegeWalks: WalkSpec[] = SIEGE_ENGINES.map((e) => ({
   kind: 'siege',
   id: e.id,
-  file: `roll-${e.id}`,
+  file: `siege-${e.id}`,
   target: `images/siege/${e.id}.webp`,
   name: e.name,
   tagline: e.blurb,
   // Machines are authored facing +X and the battlefield mirrors by travel
   // direction, exactly as the cast is.
   faces: 'right',
+  anchor: 'feet',
+  cols: 1,
+  rows: 1,
+  frames: 1,
+  panelW: SIEGE_SINGLE,
+  panelH: SIEGE_SINGLE,
+  w: SIEGE_SINGLE,
+  h: SIEGE_SINGLE
+}))
+
+/**
+ * The throwing arms — the one part of a siege engine that IS a cycle.
+ *
+ * Only the three throwing engines. Their arm is drawn from `cycle`, which runs
+ * 0 the frame a round leaves to 1 the frame the next one does, so eight panels
+ * across it is a genuine loop keyed to the machine's own reload. The ram, the
+ * iron ram and the tower move on a wall clock instead and stay procedural.
+ *
+ * This is the half of an engine that a painted chassis leaves behind: a big,
+ * moving share of the silhouette still drawn in the old hand.
+ */
+const ARM_ENGINES = [
+  {
+    id: 'ballista', name: 'Bolt Thrower arm',
+    // The word "wheeled" used to be in this sentence, describing the machine
+    // the part comes off. It came back with wheels. Nothing in a blurb is read
+    // as background: every noun in it is read as a thing to draw.
+    blurb: 'The bow assembly of a bolt thrower, lifted off its carriage and seen '
+      + 'from the side: two upright torsion skeins — short ribbed drums of bound '
+      + 'sinew — with one stiff timber arm sweeping out of each, the far arm a '
+      + 'tone darker and set back behind the near one; the bowstring strung '
+      + 'between the two arm tips; a heavy bolt lying dead level in front of the '
+      + 'string, steel head to the RIGHT and cut-leather fletching at its tail; '
+      + 'and away to the LEFT, clear of the rest, the windlass that draws it — a '
+      + 'small dark timber block with an iron crank handle. NOTHING else: no '
+      + 'wheels, no carriage, no bed, no stock, no upright frame, no ground. '
+      + 'The two arms are separate straight timbers and the string is two '
+      + 'straight runs meeting at the nock: do NOT draw one curved bow limb '
+      + 'from tip to tip, and do not outline the assembly with a bow shape.',
+    panels: 'Panel 1 is the instant AFTER the loose — the bolt is gone, the '
+      + 'string has been thrown forward and the two arms are sprung wide apart, '
+      + 'one up and one down. Panels 2 to 6 are the crew winding it back: a '
+      + 'fresh bolt lies ready, the string comes further back in each panel and '
+      + 'the arms close towards each other. Panels 7 and 8 are held at full '
+      + 'draw, loaded and dead still, both arms nearly level and pointing right '
+      + '— those two are all but identical. Every panel except the first has '
+      + 'the bolt in it.',
+    span: 'the assembly spans a little over half the panel’s width — about '
+      + '55%, and never more than two thirds even in panel 2 where the bolt is '
+      + 'at full stretch — and about two fifths of its height.'
+  },
+  {
+    id: 'catapult', name: 'Catapult arm',
+    blurb: 'The throwing arm of a catapult, lifted off its carriage and seen '
+      + 'from the side: ONE squared baulk of heavy dark timber — a single beam, '
+      + 'not a bundle of canes, poles or reeds and not a rolled mat — bound '
+      + 'with two iron straps, a shallow bowl at its outer end, and the winch '
+      + 'rope trailing from it. NOTHING else: no wheels, no carriage, no frame, '
+      + 'no buffer, no ground.',
+    panels: 'Panel 1 is the instant after the throw — the beam has slammed up '
+      + 'and forward against its stop, bowl empty and over to the RIGHT. Panels '
+      + '2 to 6 are the crew winching it back down: the beam swings up through '
+      + 'the vertical (panel 4 is near-upright) and on over to the rear. Panels '
+      + '7 and 8 are cocked and still, the beam lying back and low with the bowl '
+      + 'over the tail at the LEFT, and only the last panel has a stone in it.',
+    span: 'the beam spans about two fifths of the panel’s width — 43% at its '
+      + 'longest, in panel 1 — and never more than half. It never covers more '
+      + 'than about a third of the panel’s height.'
+  },
+  {
+    id: 'trebuchet', name: 'Trebuchet arm',
+    blurb: 'The throwing assembly of a trebuchet, lifted off its frame and seen '
+      + 'from the side: one long timber beam pivoting nearer one end, a heavy '
+      + 'boxed counterweight hanging off the short end on its own pin so it '
+      + 'stays upright however far the beam has swung, and a two-cord sling '
+      + 'trailing from the long end. NOTHING else: no wheels, no carriage, no '
+      + 'A-frame, no ground.',
+    panels: 'Panel 1 is the instant after the release — the long end is thrown '
+      + 'up to the RIGHT with the empty sling streaming out past it and the '
+      + 'counterweight box down at the LEFT. Panels 2 to 4 wind it back: the '
+      + 'long end rises to straight up (panel 4) while the box comes up under '
+      + 'the pivot. Panels 5 and 6 carry it on over, and panels 7 and 8 are '
+      + 'cocked and still — counterweight raised at the RIGHT, long end down at '
+      + 'the LEFT with the sling hanging slack below it, and the stone loaded '
+      + 'in the pouch in the last panel only.',
+    span: 'beam, counterweight and sling together span about half the panel’s '
+      + 'width — 52% at most — and a little over half its height in the '
+      + 'tallest panel.'
+  }
+] as const
+
+/**
+ * The cavalry sheet: the one ALLY with a gait.
+ *
+ * Square panels, not the monsters' tall ones. A monster is blitted into a
+ * portrait frame box; the rider is blitted into a square one, the same way a
+ * siege engine is, because a galloping horse is as long as it is tall and the
+ * lance reaches past its nose. The panel IS the box the renderer draws into,
+ * so the shape is not a layout choice.
+ */
+const ALLY_PANEL = 360
+
+const allyWalks: WalkSpec[] = [{
+  kind: 'ally',
+  id: 'cavalry',
+  file: 'walk-cavalry',
+  target: 'images/allies/cavalry.webp',
+  name: 'Cavalry',
+  tagline: 'An armoured knight at full gallop on a barded warhorse — cool blue '
+    + 'livery with gold trim, a caparison with a scalloped hem, a couched lance '
+    + 'behind a vamplate, a heater shield and a plumed great helm. This is the '
+    + 'player’s OWN unit and the only friendly body on the field: the blue has '
+    + 'to say “mine” across the battlefield before any detail resolves, and it '
+    + 'must never read as something to shoot at.',
+  panels: 'One full gallop, four beats and a suspension. Panel 1 is the moment '
+    + 'of suspension with every hoof clear of the ground and the body at its '
+    + 'highest; the panels after it land near hind, far hind, far fore, near '
+    + 'fore in that order, gathering under the horse and then extending. The '
+    + 'lance, the shield and the rider’s seat stay put — it is the legs, the '
+    + 'tail, the pennon and the plume that move.',
+  faces: 'right',
+  anchor: 'feet',
+  cols: WALK_COLS,
+  rows: WALK_ROWS,
+  frames: WALK_FRAMES,
+  panelW: ALLY_PANEL,
+  panelH: ALLY_PANEL,
+  w: WALK_COLS * ALLY_PANEL,
+  h: WALK_ROWS * ALLY_PANEL
+}]
+
+const siegeArms: WalkSpec[] = ARM_ENGINES.map((e) => ({
+  kind: 'siegeArm',
+  id: e.id,
+  file: `arm-${e.id}`,
+  target: `images/siege-arms/${e.id}.webp`,
+  name: e.name,
+  tagline: e.blurb,
+  panels: e.panels,
+  span: e.span,
+  faces: 'right',
+  // The arm is composited on the same square box the chassis is, centred on the
+  // machine's origin — so it hangs by the middle, not off a ground line.
   anchor: 'centre',
   cols: WALK_COLS,
   rows: WALK_ROWS,
@@ -1196,7 +1448,214 @@ const siegeWalks: WalkSpec[] = SIEGE_ENGINES.map((e) => ({
   h: WALK_ROWS * SIEGE_PANEL
 }))
 
-export const WALKS: WalkSpec[] = [...monsterWalks, ...siegeWalks]
+/**
+ * The three hulls.
+ *
+ * Not a cycle — one still each, which is why they are here and not on the
+ * blocks sheet: a hull is not a square cell of material. The panel is the
+ * CLIP BAND `drawShip` cuts a boat off at, so what comes back drops onto
+ * exactly the rectangle the renderer blits, and the roll, the heave and the
+ * wake are all applied to it afterwards.
+ *
+ * 960 x 732 because 960 / 1.6 is a whole 600 px per unit and 1.22 units of
+ * height is then exactly 732 — an off-by-a-fraction panel would land the
+ * waterline in the wrong place on every boat.
+ */
+const SHIP_PANEL_W = 960
+const SHIP_PANEL_H = 732
+
+const SHIP_HULLS = [
+  {
+    id: 'skiff', name: 'Skiff hull',
+    blurb: 'A small single-masted clinker-built timber boat, seen side-on and '
+      + 'facing RIGHT: a shallow raked hull of overlapping planks, a gunwale '
+      + 'rail along the sheer, and a stubby mast well aft carrying a scrap of '
+      + 'blue livery sail. Cut off flat at the waterline.'
+  },
+  {
+    id: 'longship', name: 'Longship hull',
+    blurb: 'A lean clinker-built longship, seen side-on and facing RIGHT: '
+      + 'overlapping planks, a carved stem-post curling over the bow, a row of '
+      + 'round shields hung along the sheer in red livery, four oars out, and '
+      + 'a mast amidships with a red sail. Cut off flat at the waterline.'
+  },
+  {
+    id: 'galley', name: 'War Galley hull',
+    blurb: 'A broad oared warship, seen side-on and facing RIGHT: a heavy '
+      + 'planked hull, a bronze ram at the waterline on the bow, an armoured '
+      + 'bulwark along the sheer with a row of shields above it, a timber '
+      + 'fighting castle aft with battlements, five oars out, and a mast with '
+      + 'a yellow livery sail. Cut off flat at the waterline.'
+  }
+] as const
+
+const shipHulls: WalkSpec[] = SHIP_HULLS.map((h) => ({
+  kind: 'ship',
+  id: h.id,
+  file: `hull-${h.id}`,
+  target: `images/ships/${h.id}.webp`,
+  name: h.name,
+  tagline: h.blurb,
+  faces: 'right',
+  // The waterline IS this thing's ground line, and it is the bottom edge of
+  // the panel — so a return is registered by its BOTTOM, exactly as a walking
+  // creature is registered by its feet.
+  //
+  // 'centre' here first, on the reasoning that the cut is always in the same
+  // place so there was nothing to align. That is the opposite of true: the
+  // normaliser reads this to decide what to line up, and centring let the
+  // painted skiff keep the 18%-of-a-frame margin it was drawn with under the
+  // hull. In game that margin is the boat hovering a fifth of a cell above
+  // its own water.
+  anchor: 'feet',
+  cols: 1,
+  rows: 1,
+  frames: 1,
+  panelW: SHIP_PANEL_W,
+  panelH: SHIP_PANEL_H,
+  w: SHIP_PANEL_W,
+  h: SHIP_PANEL_H
+}))
+
+/**
+ * The weapons a block carries, and what they are bolted to.
+ *
+ * A square panel two fixture-scales across — `FIXTURE_BOX` — because that is
+ * the box the renderer bakes a fixture into and blits from, so a return drops
+ * straight onto it.
+ *
+ * Authored at aim ZERO, level and pointing right. The game rotates the weapon
+ * to its firing angle out of this one still, which is why the mount is a
+ * separate sheet: a carriage rotated with its barrel swings two cart wheels
+ * through the air every time the block tracks something.
+ *
+ * Only the seven WEAPONS. The resource buildings animate off a clock — a
+ * swinging axe, a bobbing stack of coins — and a still would freeze them, so
+ * they keep their drawing until someone wants to cut them a cycle.
+ */
+const FIXTURE_PANEL = 512
+
+const FIXTURE_WEAPONS = [
+  {
+    id: 'cannon', name: 'Cannon barrel',
+    blurb: 'A cast-iron cannon barrel on its trunnions, lying dead level '
+      + 'and pointing RIGHT: a fat breech and cascabel at the left end, '
+      + 'two reinforcing rings, a swell at the muzzle. NOTHING else — '
+      + 'no carriage, no wheels, no block, no smoke, no ball.'
+  },
+  {
+    id: 'archer', name: 'Archery bow',
+    blurb: 'A war bow seen side-on, drawn and level, pointing RIGHT: two '
+      + 'recurved limbs meeting at a wrapped grip, the string back at '
+      + 'full draw with a nocked arrow on it. NOTHING else — no '
+      + 'parapet, no merlons, no archer, no block.'
+  },
+  {
+    id: 'mortar', name: 'Mortar tube',
+    blurb: 'A squat siege mortar tube on its bed, elevated at a steep '
+      + 'fixed angle to lob over a wall, mouth up and to the RIGHT: a '
+      + 'short fat bore, heavy trunnion straps, a scorched muzzle. '
+      + 'NOTHING else — no block, no crew, no shell, no smoke.'
+  },
+  {
+    id: 'bombard', name: 'Bombard barrel',
+    blurb: 'A stubby wrought-iron bombard, elevated to lob, mouth up and '
+      + 'to the RIGHT: a thick banded barrel bound with hoops along its '
+      + 'whole length, wider at the mouth than at the breech. NOTHING '
+      + 'else — no block, no carriage, no shot.'
+  },
+  {
+    id: 'tesla', name: 'Arc coil',
+    blurb: 'A lightning coil standing upright: an iron post wound with '
+      + 'copper wire, a polished ball terminal on top, ceramic '
+      + 'insulators at its foot and a faint cool blue charge glow '
+      + 'around the terminal. Symmetrical — it has no front. NOTHING '
+      + 'else — no arc, no bolt, no block.'
+  },
+  {
+    id: 'frost', name: 'Frost emitter',
+    blurb: 'A cluster of pale blue ice crystals growing from a rimed iron '
+      + 'socket, tallest in the middle, with hoar frost creeping up '
+      + 'their facets. Symmetrical — it has no front. NOTHING else — no '
+      + 'mist, no projectile, no block.'
+  },
+  {
+    id: 'stonepit', name: 'Stone pit heap',
+    blurb: 'A heap of three rounded pale stones with a quarryman’s pick held '
+      + 'raised over them, angled back ready to strike down and to the LEFT: a '
+      + 'dark timber haft and a curved iron head. NOTHING else: no block, no '
+      + 'ground, no dust.'
+  },
+  {
+    id: 'banner', name: 'Hanging banner',
+    blurb: 'A cloth banner hanging from a cross-staff, held in a gentle '
+      + 'curve as if in a light breeze: deep rose cloth with a gilt '
+      + 'edge and a swallow-tailed hem. NOTHING else: no pole below the '
+      + 'hem, no block, no wall.'
+  },
+  {
+    id: 'obelisk', name: 'Arcane spire',
+    blurb: 'A tapered standing stone with a pale blue seam of glyphs lit '
+      + 'up its face, floating just clear of its base. NOTHING else: no '
+      + 'block, no ground, no beam of light.'
+  },
+  {
+    id: 'lumberHut', name: 'Lumber hut roof',
+    blurb: 'A steep shingled roof over stacked cut logs, with a thin curl '
+      + 'of smoke rising from the ridge. NOTHING else: no block, no '
+      + 'walls, no axe, no ground.'
+  },
+  {
+    id: 'coffer', name: 'Open coffer',
+    blurb: 'An iron-banded strongbox with its lid held ajar and gold coins '
+      + 'spilling over the near edge. NOTHING else: no block, no '
+      + 'pedestal, no ground.'
+  },
+  {
+    id: 'repair', name: 'Repair crane',
+    blurb: 'A slim timber crane arm with an iron hook and a lit amber lamp '
+      + 'at its head, angled up and to the RIGHT. NOTHING else: no '
+      + 'block, no rope to the ground, no scaffolding.'
+  },
+  {
+    id: 'spikes', name: 'Iron spikes',
+    blurb: 'A row of forged iron spikes on a bolted rail, points up, '
+      + 'uneven in height and pitted with rust. Symmetrical — it has no '
+      + 'front. NOTHING else — no block, no blood, no ground.'
+  }
+] as const
+
+
+const fixtureSheet = (e: { id: string; name: string; blurb: string }): WalkSpec => ({
+  kind: 'fixture',
+  id: e.id,
+  file: `fixture-${e.id}`,
+  target: `images/fixtures/${e.id}.webp`,
+  name: e.name,
+  tagline: e.blurb,
+  faces: 'right',
+  // 'feet', which reads as odd for a bow — but it is what makes a return
+  // register against the REFERENCE rather than against the middle of the
+  // panel. 'centre' means "put it in the middle of the box", which is right
+  // for a swimmer and wrong for a fixture: the lumber hut's roof sits well
+  // above the middle of its box and the painted one was dragged down to the
+  // centre, a seventh of a box below where the drawing has it.
+  anchor: 'feet',
+  cols: 1,
+  rows: 1,
+  frames: 1,
+  panelW: FIXTURE_PANEL,
+  panelH: FIXTURE_PANEL,
+  w: FIXTURE_PANEL,
+  h: FIXTURE_PANEL
+})
+
+const fixtureSheets: WalkSpec[] = FIXTURE_WEAPONS.map(fixtureSheet)
+
+export const WALKS: WalkSpec[] = [
+  ...monsterWalks, ...allyWalks, ...siegeWalks, ...siegeArms, ...shipHulls,
+  ...fixtureSheets
+]
 
 /**
  * A ready-to-paste prompt for one walk cycle.
@@ -1207,62 +1666,363 @@ export const WALKS: WalkSpec[] = [...monsterWalks, ...siegeWalks]
  * the same reason `BACKGROUND_RULE` is — it is the thing that makes the result
  * usable or useless, and models weight what they read first.
  */
-export const promptForWalk = (w: WalkSpec): string => [
-  `# ${w.id} — ${w.name}  (${w.target})`,
-  '',
-  `Repaint a WALK CYCLE. The attached sheet is ${w.cols} columns x ${w.rows} rows`,
-  `= EXACTLY ${w.frames} panels, read left to right along the top row and then the`,
-  'bottom row. Every panel is the SAME creature at a different moment of one step.',
-  '',
-  `· ${w.frames} panels. Not ${w.frames + 4}, not ${w.frames * 3}.`
-  + ` Exactly ${w.rows} rows of ${w.cols} — do not add a row.`,
-  '',
-  'ONE CHARACTER — read this before anything else.',
-  `All ${w.frames} panels must show the same individual: identical colours,`,
-  'identical clothing and gear, identical proportions, identical silhouette,',
-  'identical markings, identical number of limbs and horns. Only the POSE changes,',
-  'and it changes exactly as the reference shows — same limb positions, same body',
-  'lean, same head angle, same height off the ground, panel for panel.',
-  '· ONE colour scheme, taken from the reference, in every panel. A creature that',
-  '  is blue-grey in one panel and tan in another is not one creature animated,',
-  '  it is several creatures side by side, and the result is unusable.',
-  '· Do not redesign it. Do not add or remove equipment between panels.',
-  '· Do not turn it to face a different direction in any panel.',
-  '· Do not re-scale it: the creature must be the same size in every panel, and',
-  '  the same size it is in the reference. Do not move it around inside its panel.',
-  `· It faces ${w.faces === 'front' ? 'the viewer' : w.faces.toUpperCase()} in the`
-  + ` reference. Keep that direction in all ${w.frames} panels.`,
-  '',
-  `WHAT IT IS: ${w.name} — ${w.tagline}`,
-  '',
-  STYLE,
-  '',
-  'LAYOUT — the grid is a cutting guide, and it is cut blindly.',
-  `Each panel is exactly 1/${w.cols} of the width and 1/${w.rows} of the height.`,
-  'ONE correction to the style note above: "fills the square edge to edge" is for',
-  'building blocks and is WRONG here. A creature does NOT fill its panel — it is',
-  'centred in it, at the size the reference draws it, with clear magenta all round.',
-  'Never let a limb, tail, weapon or shadow cross into a neighbouring panel.',
-  'Do not add, drop, merge or reorder panels.',
-  'Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or',
-  'numbers — in ANY colour, magenta included. The magenta is the empty space the',
-  'creatures sit in, not a grid to draw with: the space BETWEEN two panels is the',
-  'same flat background as the space around each creature, and nothing marks the',
-  'join. The panels are found by measuring, so a drawn line is not a help, it is',
-  'a mark that ends up welded into the sprite.',
-  '',
-  BACKGROUND_RULE,
-  '',
-  w.anchor === 'centre'
-    ? 'This one SWIMS. It has no feet and is centred on the middle of its body, so\n'
-      + 'keep it centred vertically in the panel exactly as the reference has it.'
-    : 'The feet land on the same line in every panel — the same height from the\n'
-      + 'bottom of the panel as in the reference. If the feet drift up or down\n'
-      + 'between panels the creature bobs when it walks.',
-  '',
-  `OUTPUT: one image, ${w.w} x ${w.h} pixels (16:9). If your tool has an`,
-  'aspect-ratio control, set it to 16:9. No labels, captions or watermarks.'
-].join('\n')
+export const promptForWalk = (w: WalkSpec): string => {
+  const machine = w.kind === 'siege' || w.kind === 'siegeArm' || w.kind === 'ship'
+    || w.kind === 'fixture'
+
+  // A one-frame sheet is a different job with a different set of ways to go
+  // wrong, so it gets its own prompt rather than a cycle prompt with the plural
+  // filed off. Nothing here is about consistency between panels, because there
+  // are none — it is all about size and placement in the frame.
+  if (w.frames === 1) {
+    return [
+      `# ${w.id} — ${w.name}  (${w.target})`,
+      '',
+      `Repaint ONE ${w.kind === 'ship' ? 'ship' : machine ? 'machine' : 'character'},`
+      + ` in a single ${w.w === w.h ? 'square' : 'landscape'} image.`,
+      'The attached reference is exactly what to paint, at exactly the size and',
+      'position it is drawn at. Match both.',
+      '',
+      `WHAT IT IS: ${w.name} — ${w.tagline}`,
+      // A hull carries its own livery colour — the blue skiff, the red
+      // longship, the yellow galley — and that colour is how a player tells
+      // three brown boats apart at harbour scale.
+      ...(w.kind === 'ship' ? ['', paletteLine(w.id)] : []),
+      // A ship IS its palette; a fixture must stand out FROM one.
+      //
+      // Handing a fixture `paletteLine` was a real mistake: that palette
+      // belongs to the block underneath, so it read as "paint the bow in the
+      // colour of the crate it sits on" — and the returned bow was pale timber
+      // on pale timber, all but invisible from two feet away. The drawn one
+      // never had the problem because it is iron and dark oiled wood over the
+      // same crate.
+      ...(w.kind === 'fixture' && paletteLine(w.id)
+        ? ['',
+          'IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted',
+          `around ${paletteFor(w.id).mid} and its neighbouring tones, so do NOT`,
+          'paint this part in those colours: pick materials that separate from',
+          'them — cold iron and steel, dark oiled',
+          'timber, blackened rope, a cool shadow side — and keep the ink line',
+          'strong enough to hold the shape on its own. A part in the same hue and',
+          'the same value as the block underneath disappears into it, which is',
+          'the one way this drawing can fail that looks fine on its own sheet.']
+        : []),
+      ...(w.kind === 'fixture'
+        ? ['',
+          'THIS IS ONE PART OF A BLOCK, ON ITS OWN. In the game it is painted on',
+          'top of a block that is already there, so the block must not be here:',
+          'no crate, no stone face, no wall, no ground, no shadow. Draw only the',
+          'part itself, floating on the magenta exactly where the reference has',
+          'it — where it sits in the frame is where it bolts on.',
+          '',
+          'DRAW IT AT REST, level and pointing RIGHT, exactly as the reference',
+          'has it. The game turns it to its own firing angle out of this one',
+          'picture, so do not draw it already aimed, angled, tilted or',
+          'mid-swing, and add no motion blur, sparks, smoke or muzzle flash: a',
+          'tilt painted in here is a tilt the game adds its own on top of.',
+          '',
+          'KEEP ANY GLOW TIGHT. A halo, aura or bloom spreading out into the',
+          'background is measured as part of the object when the return is fitted',
+          'back onto the reference — a wide aura therefore comes back as a tiny',
+          'crystal inside a huge smear. It also cannot be keyed: soft light over',
+          'magenta turns pink rather than transparent. Any glow belongs inside',
+          'the shape’s own outline, or within a hair of it.']
+        : []),
+      ...(w.kind === 'ship'
+        ? ['',
+          'DRAW ONLY WHAT THE REFERENCE SHOWS. A ship here is a BASE for a weapon,',
+          'the same way a block is: the deck weapon — the swivel bolt-thrower, the',
+          'harpoon, the bombards — aims at whatever the ship is shooting at, so it',
+          'is drawn live on top of this and must NOT be painted in. Everything the',
+          'reference does show stays, sail and oars and shields included.',
+          '',
+          'THE WATERLINE IS THE BOTTOM EDGE OF THE IMAGE. The hull runs straight',
+          'off the bottom of the frame and is cut flat by it, exactly as the',
+          'reference is — the game draws the water, the wake and the reflection',
+          'below that edge, and the boat sits down into them. So paint no water,',
+          'no foam, no ripples, no shadow, no reflection and no waterline of your',
+          'own, and leave no margin under the hull: the last row of pixels in the',
+          'image is planking, not background.']
+        : machine
+          ? ['',
+            'DRAW ONLY WHAT THE REFERENCE SHOWS. The moving weapon — the arm, the bow,',
+            'the counterweight, the sling — is painted separately and animated on top of',
+            'this in the game. If you add one here the machine ends up with two.',
+            'Anything the reference DOES show, including ammunition stacked on the bed,',
+            'stays.']
+          : []),
+      '',
+      STYLE,
+      '',
+      'SIZE AND PLACEMENT — this is the part that goes wrong.',
+      'Do not enlarge it to fill the frame. The reference leaves air around the',
+      `${w.kind === 'ship' ? 'hull' : machine ? 'machine' : 'character'} on every`
+      + ' side and that air is not waste — it',
+      'is where the parts that animate get drawn. Keep the subject the same',
+      'fraction of the frame that the reference has it, and standing on the same',
+      w.kind === 'ship'
+        ? 'line: the waterline the hull is cut off at must land at the same height'
+        : 'line: the wheels and feet must sit at the same height from the bottom edge.',
+      ...(w.kind === 'ship' ? ['from the bottom edge as the reference has it.'] : []),
+      `· It faces ${w.faces === 'front' ? 'the viewer' : w.faces.toUpperCase()} in the`
+      + ' reference. Keep that direction.',
+      '· Do not rotate it or change the viewing angle.',
+      '· No cast shadow on the ground. The game draws its own.',
+      '',
+      BACKGROUND_RULE,
+      '',
+      `OUTPUT: one image, exactly ${w.w} x ${w.h} pixels`
+      + `${w.w === w.h ? ' (square, 1:1)' : ' — landscape, and NOT square'}.`,
+      ...(w.w === w.h
+        ? []
+        : ['If your tool has an aspect-ratio control, set it to match: a square',
+          'return squashes the hull and puts the waterline in the wrong place.']),
+      'No labels, captions or watermarks.'
+    ].join('\n')
+  }
+  // ── A moving PART, not a machine and not a character ──
+  //
+  // This needed its own prompt after the first attempt came back as a complete
+  // ballista, carriage and wheels and all. The cause was on this side: an arm
+  // fell through to the creature branch and was asked for "the SAME creature at
+  // a different moment of one step", with the one line that mattered — draw the
+  // arm ALONE — buried in the subject description underneath it.
+  //
+  // So the exclusion is the first thing said, and it is said as a rule about the
+  // reference rather than as a list of parts to leave out: a list invites
+  // argument about what counts, and the reference does not.
+  //
+  // It came back a whole ballista a SECOND time, and worse: one square painting
+  // of a complete machine in three-quarter view, no grid at all. Three things
+  // in here were feeding it, and all three are now fixed rather than argued
+  // with. The blurb called it the bow of a "wheeled bolt thrower", which is a
+  // noun to draw. The shared style block promised the object fills its square,
+  // which this prompt then spent a paragraph retracting. And the only
+  // statement of the deliverable's SHAPE was the word "sheet" up top and a
+  // pixel size at the very bottom — so the sheet is now the headline, the
+  // panel count is a number that cannot be read as a suggestion, and the
+  // aspect ratio is repeated at the end where the walk prompt already learned
+  // to repeat it.
+  if (w.kind === 'siegeArm') {
+    return [
+      `# ${w.id} — ${w.name}  (${w.target})`,
+      '',
+      'WHAT COMES BACK IS A SPRITE SHEET, NOT A PICTURE OF A MACHINE.',
+      `One landscape image, ${w.w} x ${w.h} pixels — twice as wide as it is tall —`,
+      `holding ${w.frames} SEPARATE small drawings laid out ${w.cols} across and ${w.rows}`,
+      'down, on the same grid as the attached reference, read left to right along',
+      'the top row and then the bottom row. Each drawing is the same part at a',
+      'different moment of one shot.',
+      `· ${w.frames} panels. Not 1, not ${w.frames - 2}, not ${w.frames * 2}.`
+      + ` Exactly ${w.rows} rows of ${w.cols} — do not add a row.`,
+      '· ONE big drawing of a siege engine filling the canvas is the wrong answer',
+      '  however well it is painted, and so is a square canvas. That is what came',
+      '  back last time, and none of it could be used.',
+      '',
+      'THIS IS A PART, NOT A MACHINE — read this before anything else.',
+      'It is one moving assembly, lifted off the war engine it belongs to. In the',
+      'game it is painted ON TOP of a separate carriage that already exists, so',
+      'the carriage must not be here as well.',
+      '· Draw ONLY what the reference shows in each panel, and nothing else.',
+      '· NO wheels. NO cart, bed or stock. NO chassis, frame, A-frame, base or',
+      '  stand. NO ground, no shadow, no scenery, no crew. If it is not in the',
+      '  reference panel, it is not in the picture.',
+      '· Do not complete it into a whole siege engine. Every panel is meant to',
+      '  look unfinished, like a part laid out on a bench — the missing half is',
+      '  painted separately, and anything you add here ends up doubled.',
+      '· The reference settles every argument about what belongs. If you are',
+      '  reaching for a part because the machine would "need" it to work, that',
+      '  part is already on the other layer.',
+      '',
+      `WHAT IT IS: ${w.tagline}`,
+      ...(w.panels ? ['', `READ THE PANELS: ${w.panels}`] : []),
+      // The three arms came back in pale straw and driftwood over a dark-brown
+      // reference, which matters more here than on any other sheet: this part
+      // is composited ON TOP of a chassis painted from the same palette, and a
+      // beam two shades lighter than the frame it swings in reads as somebody
+      // else's machine. `paletteLine` already exists for exactly this and was
+      // simply never wired to the arms.
+      ...(paletteLine(w.id)
+        ? ['', paletteLine(w.id),
+          `It is the same machine as the ${w.id} carriage sheet, which is painted`,
+          'from this palette too and is what this part gets laid on top of. Side',
+          'by side the two have to look like one object: the same timber, the same',
+          'iron, the same age of wear. Pale straw, driftwood or bleached wood is',
+          'the wrong tree.']
+        : []),
+      '',
+      'THE VIEW — a flat side elevation, square on from the side, the way a',
+      'woodcut or a joiner’s drawing shows a machine.',
+      '· NO three-quarter view, no perspective, no vanishing point, no',
+      '  foreshortening, no tilt. Nothing turns to face the viewer, and no part',
+      '  is nearer the eye than another.',
+      '· Every timber keeps the angle the reference draws it at.',
+      '',
+      'ONE MECHANISM.',
+      `All ${w.frames} panels are the same assembly at a different moment of one`,
+      'shot. Identical timbers, identical ironwork, identical rope, identical',
+      'proportions and identical thickness in every panel. Only the POSE changes —',
+      'the beam swings, the string draws, the weight falls — and it changes exactly',
+      'as the reference shows it, panel for panel.',
+      '· ONE colour scheme, taken from the reference, in all of them.',
+      '· Do not re-scale it between panels, and do not re-scale it from the',
+      '  reference: it has to keep meeting a carriage it cannot see.',
+      `· It faces ${w.faces === 'front' ? 'the viewer' : w.faces.toUpperCase()} in the`
+      + ' reference. Keep that direction throughout.',
+      '',
+      STYLE_PART,
+      '',
+      'LAYOUT — the grid is a cutting guide, and it is cut blindly.',
+      `Each panel is exactly 1/${w.cols} of the width and 1/${w.rows} of the height.`,
+      'The mechanism is SMALL inside its panel and does not fill it. It floats',
+      'clear of all four panel edges with wide empty magenta around it, exactly as',
+      'the reference has it.',
+      ...(w.span
+        ? ['',
+          'SIZE — measure it against the PANEL, not against the paper. In the',
+          `reference ${w.span}`,
+          'If yours reaches three quarters of the way across its panel it is about',
+          'twice the size it should be, and it will not meet the carriage under it.',
+          'Bigger is not clearer here: the empty space is where the machine goes.']
+        : []),
+      '',
+      'WHERE it sits in its panel is not a composition choice — it is the point',
+      'the part bolts on to. The exact centre of a panel is the machine’s origin,',
+      'the spot a carriage you cannot see holds this part at, so keep every piece',
+      'the same distance and direction from that centre as the reference has it,',
+      'panel by panel — including the panels where the part sits well off to one',
+      'side or high up. Do not re-centre it on its own outline, do not tidy the',
+      'arrangement, do not even out the spacing.',
+      'Never let it cross into a neighbouring panel.',
+      'Do not add, drop, merge or reorder panels.',
+      'Do NOT draw the panel edges: no boxes, borders, gutters, guides or numbers,',
+      'in any colour, magenta included.',
+      '',
+      BACKGROUND_RULE,
+      '· The muted, dusty, low-contrast palette above is for the OBJECT. The',
+      '  ground is not part of the painting and is not toned down with it: it',
+      '  stays a vivid, eye-hurting #FF00FF however soft everything else is.',
+      '  Dusty rose, pale pink and mauve are the failure this whole clause is',
+      '  about — they cannot be keyed, only flood-filled, and a flood fill eats',
+      '  pale paint.',
+      '',
+      'BEFORE YOU CALL IT FINISHED, count and check:',
+      `· ${w.cols} panels across, ${w.rows} down, ${w.frames} in all.`,
+      '· The canvas is landscape, twice as wide as it is tall.',
+      '· There is not one wheel, cart or frame anywhere in it.',
+      '· Nothing in any panel is anywhere near filling it — check the widest',
+      '  panel against the SIZE note above, in fractions of the panel.',
+      '· Every panel holds the same assembly, at the same size, in the same',
+      `  colours, facing ${w.faces === 'front' ? 'the viewer' : w.faces.toUpperCase()}.`,
+      '· Every pixel that is not the part itself is flat, vivid #FF00FF — hold it',
+      '  against a pure magenta swatch, not against your memory of one.',
+      '',
+      `OUTPUT: one image, ${w.w} x ${w.h} pixels (2:1, landscape). If your tool`,
+      'has an aspect-ratio control, set it to 2:1 — a square return crushes the',
+      'grid and cannot be cut. No labels, captions, numbers or watermarks.'
+    ].join('\n')
+  }
+
+  // The cast is monsters, with one rider in it. Rather than a third branch
+  // for a single sheet, the nouns bend: a knight is not a creature, does not
+  // have horns to count, and gallops rather than walks — and a prompt that
+  // calls him a creature invites exactly the redesign the rest of it forbids.
+  const ally = w.kind === 'ally'
+  const IT = machine ? 'machine' : ally ? 'rider' : 'creature'
+  const ITS = machine ? 'machines' : ally ? 'riders' : 'creatures'
+  const CYCLE = machine ? 'ROLL CYCLE' : ally ? 'GALLOP CYCLE' : 'WALK CYCLE'
+  const MOMENT = machine
+    ? 'the same machine with its wheels at a different angle of one full revolution'
+    : ally
+      ? 'the SAME horse and rider at a different moment of ONE gallop stride'
+      : 'the SAME creature at a different moment of one step'
+
+  return [
+    `# ${w.id} — ${w.name}  (${w.target})`,
+    '',
+    `Repaint a ${CYCLE}. The attached sheet is ${w.cols} columns x ${w.rows} rows`,
+    `= EXACTLY ${w.frames} panels, read left to right along the top row and then the`,
+    `bottom row. Every panel is ${MOMENT}.`,
+    '',
+    `· ${w.frames} panels. Not ${w.frames + 4}, not ${w.frames * 3}.`
+    + ` Exactly ${w.rows} rows of ${w.cols} — do not add a row.`,
+    '',
+    `ONE ${machine ? 'MACHINE' : 'CHARACTER'} — read this before anything else.`,
+    `All ${w.frames} panels must show the same ${machine ? 'machine' : 'individual'}:`,
+    machine
+      ? 'identical timbers, identical ironwork, identical proportions, identical'
+      : 'identical colours, identical clothing and gear, identical proportions,',
+    machine
+      ? 'silhouette, identical wheel size. Only the WHEEL ANGLE changes, exactly as'
+      : ally
+        ? 'identical silhouette, identical livery, identical barding, harness and'
+        : 'identical silhouette, identical markings, identical number of limbs and',
+    machine
+      ? 'the reference shows — the spokes turn and nothing else moves at all.'
+      : ally
+        ? 'heraldry. Only the POSE changes, and it changes exactly as the reference'
+        : 'horns. Only the POSE changes, and it changes exactly as the reference',
+    ...(machine ? [] : ['shows — same limb positions, same body lean, same head angle.']),
+    `· ONE colour scheme, taken from the reference, in every panel. ${machine
+      ? 'A machine built of pale timber in one panel and dark in another is not one'
+      : ally
+        ? 'A rider whose livery is blue in one panel and green in another is not one'
+        : 'A creature that is blue-grey in one panel and tan in another is not one'}`,
+    `  ${IT} animated, it is several ${ITS} side by side, and the result is unusable.`,
+    '· Do not redesign it. Do not add or remove parts between panels.',
+    '· Do not turn it to face a different direction in any panel.',
+    `· Do not re-scale it: the ${IT} must be the same size in every panel, and the`,
+    '  same size it is in the reference. Do not move it around inside its panel.',
+    `· It faces ${w.faces === 'front' ? 'the viewer' : w.faces.toUpperCase()} in the`
+    + ` reference. Keep that direction in all ${w.frames} panels.`,
+    '',
+    `WHAT IT IS: ${w.name} — ${w.tagline}`,
+    ...(w.panels ? ['', `READ THE PANELS: ${w.panels}`] : []),
+    ...(paletteLine(w.kind === 'ally' ? w.id : '')
+      ? ['', paletteLine(w.id)]
+      : []),
+    ...(machine
+      ? ['',
+        'DRAW ONLY WHAT THE REFERENCE SHOWS. The moving weapon — the arm, the bow,',
+        'the counterweight, the sling — is painted separately and animated on top of',
+        'this in the game. If you add one here the machine ends up with two. Anything',
+        'the reference DOES show, including the ammunition stacked on the bed, stays.']
+      : []),
+    '',
+    STYLE,
+    '',
+    'LAYOUT — the grid is a cutting guide, and it is cut blindly.',
+    `Each panel is exactly 1/${w.cols} of the width and 1/${w.rows} of the height.`,
+    'ONE correction to the style note above: "fills the square edge to edge" is for',
+    `building blocks and is WRONG here. A ${IT} does NOT fill its panel — it is`,
+    'centred in it, at the size the reference draws it, with clear magenta all round.',
+    'Never let a limb, tail, weapon or shadow cross into a neighbouring panel.',
+    'Do not add, drop, merge or reorder panels.',
+    'Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or',
+    'numbers — in ANY colour, magenta included. The magenta is the empty space the',
+    `${ITS} sit in, not a grid to draw with: the space BETWEEN two panels is the`,
+    `same flat background as the space around each ${IT}, and nothing marks the`,
+    'join. The panels are found by measuring, so a drawn line is not a help, it is',
+    'a mark that ends up welded into the sprite.',
+    '',
+    BACKGROUND_RULE,
+    '',
+    machine
+      ? 'The wheels touch the same line in every panel — the same height from the\n'
+        + 'bottom of the panel as in the reference. If the machine drifts up or down\n'
+        + 'between panels it will hop as it rolls.'
+      : w.anchor === 'centre'
+        ? 'This one SWIMS. It has no feet and is centred on the middle of its body, so\n'
+          + 'keep it centred vertically in the panel exactly as the reference has it.'
+        : 'The feet land on the same line in every panel — the same height from the\n'
+          + 'bottom of the panel as in the reference. If the feet drift up or down\n'
+          + `between panels the ${IT} bobs when it ${ally ? 'gallops' : 'walks'}.`,
+    '',
+    `OUTPUT: one image, ${w.w} x ${w.h} pixels`
+    + `${w.w * 9 === w.h * 16 ? ' (16:9)' : w.w === w.h * 2 ? ' (2:1)' : ''}. If your`,
+    'tool has an aspect-ratio control, set it to match. No labels or watermarks.'
+  ].join('\n')
+}
 
 /** A ready-to-paste prompt for one scenery asset. */
 export const promptForScenery = (a: SceneryAsset): string => [

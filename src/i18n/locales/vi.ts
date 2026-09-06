@@ -10,11 +10,23 @@ export default {
   'tip': 'Mẹo',
   'crazyGamesOnly': 'Trò chơi này chỉ có trên',
 
+  // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'mobile': {
+    'rotatePortrait': 'Cầm điện thoại theo chiều dọc để chơi',
+    'columnFull': 'Cột đã đầy',
+    'repairAll': 'Sửa tất cả',
+    'volley': 'Loạt tên',
+    'swap': 'Đổi',
+    'menu': 'Menu',
+    'materials': 'vật liệu',
+    'zoom': 'Thu phóng'
+  },
+
   'hud': {
     'wave': 'Đợt', 'enemies': 'Kẻ địch', 'callWave': 'Gọi đợt', 'callBoss': 'Gọi trùm',
     'speed': 'Tốc độ {n}×',
-    'speedOffer': 'Tốc độ gấp đôi khi xem quảng cáo',
-    'speedFor': '{n} phút', 'recenter': 'Căn giữa khung nhìn',
+    'speedOffer': 'Mở khóa tốc độ {n}×',
+    'speedGroup': 'Tốc độ trò chơi', 'recenter': 'Căn giữa khung nhìn',
     'rotateLeft': 'Xoay trái',
     'rotateRight': 'Xoay phải',
     'arrowRain': 'Mưa Tên',
@@ -31,6 +43,14 @@ export default {
     'outOfReach': 'Ngoài tầm bắn ×{n} — cần tầm {m}'
   },
   'hints': {
+    'dropBlock': {
+      'touch': 'Chạm vào một cột để thả khối',
+      'desktop': 'Nhấp vào một cột để thả khối'
+    },
+    'mergeBlock': {
+      'touch': 'Thả khối lên khối giống nó để hợp nhất',
+      'desktop': 'Thả khối lên khối giống nó để hợp nhất'
+    },
     'selectBlock': { 'touch': 'Chạm vào một khối bên dưới để chọn', 'desktop': 'Nhấp vào một khối bên dưới để chọn' },
     'placeBlock': { 'touch': 'Giờ hãy chạm vào ô phát sáng để xây', 'desktop': 'Giờ hãy nhấp vào ô phát sáng để xây' },
     'camera': { 'touch': 'Kéo để di chuyển · Chụm để phóng to', 'desktop': 'Kéo để di chuyển · Cuộn để phóng to' },
@@ -83,7 +103,6 @@ export default {
       'gate': 'Cổng', 'wood': 'Thùng gỗ', 'brace': 'Thùng gia cố', 'stone': 'Khối đá',
       'archer': 'Tháp cung thủ', 'cannon': 'Đại bác', 'mortar': 'Súng cối', 'tesla': 'Cuộn sét',
       'frost': 'Tháp băng', 'repair': 'Xưởng sửa chữa',
-      'sawmill': 'Xưởng cưa', 'quarry': 'Mỏ đá', 'mint': 'Mỏ vàng',
       'spikes': 'Tường gai',
       'bombard': 'Pháo cối'
     },
@@ -106,9 +125,6 @@ export default {
       'tesla': 'Tia sét nhảy giữa các kẻ địch gần nhau.',
       'frost': 'Đóng băng cả nhóm và làm chậm chúng nghiêm trọng.',
       'repair': 'Sửa các khối liền kề giữa các đợt.',
-      'sawmill': 'Sản xuất gỗ sau mỗi đợt chặn thành công.',
-      'quarry': 'Sản xuất đá sau mỗi đợt chặn thành công.',
-      'mint': 'Sản xuất xu sau mỗi đợt chặn thành công.',
       'spikes': 'Kẻ tấn công tự làm mình bị thương sau mỗi đòn đánh.',
       'bombard': 'Bắn đạn thẳng lên cao. Vụ nổ nhỏ, chỉ nhắm mục tiêu mặt đất.'
     },
@@ -138,6 +154,8 @@ export default {
 
   // ─── First-stage tutorial ─────────────────────────────────────────────────
   'tutorial': {
+    'drop': 'Chạm vào một cột để thả khối.',
+    'merge': 'Thả khối giống nhau lên nhau để hợp nhất.',
     'gate': 'Bảo vệ Cổng. Cổng đổ là kết thúc.',
     'gateSeeded': 'Chúng tôi đã dựng sẵn pháo đài khởi đầu cho bạn. Bảo vệ Cổng — Cổng đổ là kết thúc.',
     'pick': 'Chọn một mảnh.',
@@ -177,6 +195,9 @@ export default {
   },
 
   'tech': {
+    'blueprints': {
+      'title': 'Bản thiết kế'
+    },
     'intro1': 'Mọi thứ bạn mua ở đây là vĩnh viễn và theo bạn sang mọi lượt chơi sau.',
     'intro2': 'Xu đến từ mỗi trận vây hãm, dù thắng hay thua. Đây là nơi tiêu chúng.',
     'intro3': 'Nút vàng bạn mua được ngay. Nút xanh cần thêm xu, nút mờ cần nút phía trước.',
@@ -192,6 +213,7 @@ export default {
     'requires': 'Cần {n}',
     'spotlight': 'Hãy tiêu!',
     'names': {
+      'm2_lumberHut': 'Lều gỗ',
       'logistics': 'Hậu cần',
       'unlockCoffer': 'Rương vàng',
       'yields': 'Sản lượng',
@@ -205,12 +227,12 @@ export default {
       'admiralty': 'Bộ Hải quân',
       'foundations': 'Nền móng', 'sharpBolts': 'Mũi tên sắc', 'unlockBrace': 'Thùng gia cố',
       'lumberStock': 'Kho gỗ', 'longSight': 'Tầm nhìn xa', 'rapidFire': 'Bắn nhanh',
-      'reinforced': 'Dầm gia cố', 'unlockSawmill': 'Xưởng cưa', 'quarryStock': 'Kho đá',
+      'reinforced': 'Dầm gia cố', 'unlockSawmill': 'Mạch giàu', 'quarryStock': 'Kho đá',
       'unlockMortar': 'Súng cối', 'heavyOrdnance': 'Pháo hạng nặng', 'unlockTesla': 'Cuộn sét',
-      'gateArmor': 'Giáp cổng', 'unlockQuarry': 'Mỏ đá', 'richHauls': 'Chiến lợi phẩm dồi dào',
+      'gateArmor': 'Giáp cổng', 'unlockQuarry': 'Hầm sâu', 'richHauls': 'Chiến lợi phẩm dồi dào',
       'wideFoundation': 'Nền móng rộng', 'siegeShells': 'Đạn công thành', 'unlockFrost': 'Tháp băng',
       'forkedBolts': 'Sét phân nhánh', 'ironPlating': 'Tấm thép', 'unlockRepair': 'Xưởng sửa chữa',
-      'unlockMint': 'Mỏ vàng', 'looting': 'Cướp bóc', 'overcharge': 'Quá tải',
+      'unlockMint': 'Hiến chương hội', 'looting': 'Cướp bóc', 'overcharge': 'Quá tải',
       'masterwork': 'Kiệt tác', 'fieldRepairs': 'Sửa chữa dã chiến', 'greatFoundation': 'Đại nền móng',
       'warChest': 'Quỹ chiến tranh',
       'unlockSpikes': 'Tường gai',
@@ -220,6 +242,7 @@ export default {
       'artilleryDoctrine': 'Học thuyết pháo binh'
     },
     'descriptions': {
+      'm2_lumberHut': 'Mở khóa Lều gỗ — cho gỗ sau mỗi đợt.',
       'logistics': 'Mở khoá Hố đá — nhà sản xuất rẻ, mua được ngay trong ván cần nó.',
       'unlockCoffer': 'Mở khoá Rương vàng, khối duy nhất đúc ra vàng.',
       'yields': 'Mỗi khối kinh tế cho thêm +{n}%.',
@@ -242,13 +265,13 @@ export default {
       'longSight': 'Tầm bắn mọi vũ khí +{n}% mỗi bậc.',
       'rapidFire': 'Mọi vũ khí bắn nhanh hơn {n}% mỗi bậc.',
       'reinforced': 'Mọi khối trên tháp nhận +{n}% HP mỗi bậc.',
-      'unlockSawmill': 'Mở khóa Xưởng cưa — sản xuất gỗ mỗi đợt.',
+      'unlockSawmill': 'Mọi công trình sản xuất cho thêm +{n}% mỗi cấp.',
       'quarryStock': 'Bắt đầu mỗi cuộc vây hãm với +{n} đá mỗi bậc.',
       'unlockMortar': 'Mở khóa Súng cối — sát thương diện rộng tầm xa.',
       'heavyOrdnance': 'Bán kính diện rộng +{n}% mỗi bậc.',
       'unlockTesla': 'Mở khóa Cuộn sét — tia sét nhảy giữa kẻ địch.',
       'gateArmor': 'Cổng nhận +{n}% HP mỗi bậc.',
-      'unlockQuarry': 'Mở khóa Mỏ đá — sản xuất đá mỗi đợt.',
+      'unlockQuarry': 'Mọi công trình sản xuất cho thêm +{n}% nữa mỗi cấp.',
       'richHauls': 'Phần thưởng đợt +{n}% mỗi bậc.',
       'wideFoundation': 'Xây rộng thêm {n} cột mỗi bậc.',
       'siegeShells': 'Vũ khí trên tháp gây +{n}% sát thương mỗi bậc.',
@@ -256,7 +279,7 @@ export default {
       'forkedBolts': 'Sét nhảy thêm {n} kẻ địch mỗi bậc.',
       'ironPlating': 'Mọi khối nhận +{n} giáp mỗi bậc.',
       'unlockRepair': 'Mở khóa Xưởng sửa chữa — hồi máu khối liền kề mỗi đợt.',
-      'unlockMint': 'Mở khóa Mỏ vàng — sản xuất xu mỗi đợt.',
+      'unlockMint': 'Mọi công trình sản xuất cho thêm +{n}% nữa mỗi cấp.',
       'looting': 'Kẻ địch rơi thêm {n}% xu mỗi bậc.',
       'overcharge': 'Mọi vũ khí bắn nhanh hơn {n}% mỗi bậc.',
       'masterwork': 'Vũ khí trên tháp gây +{n}% sát thương mỗi bậc.',

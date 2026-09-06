@@ -137,10 +137,14 @@ describe('what a rank is worth to output', () => {
   it('rounds an economy yield up to at least one extra unit per rank', async () => {
     // A rank that pays +0.8 wood and rounds to +0 would be a purchase with no
     // observable effect, which is the one thing an upgrade may never be.
-    for (const id of ['sawmill', 'quarry', 'mint'] as const) {
-      const base = BLOCK_DEFS[id]!.economy!
-      const amount = base.wood ?? base.stone ?? base.coins ?? 0
-      expect(Math.round(amount * upgradePowerMul(1))).toBeGreaterThan(amount)
+    // Every producer in the catalogue, derived rather than listed — see the
+    // same note in `balancePass`.
+    const producers = Object.values(BLOCK_DEFS).filter((d) => d.kind === 'economy')
+    expect(producers.length).toBeGreaterThan(0)
+    for (const d of producers) {
+      const base = d.economy!
+      const amount = base.wood ?? base.stone ?? base.gold ?? base.coins ?? 0
+      expect(Math.round(amount * upgradePowerMul(1)), d.id).toBeGreaterThan(amount)
     }
   })
 })

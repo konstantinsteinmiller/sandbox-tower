@@ -10,11 +10,23 @@ export default {
   'tip': '팁',
   'crazyGamesOnly': '이 게임은 다음에서만 이용할 수 있습니다:',
 
+  // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'mobile': {
+    'rotatePortrait': '세로로 들고 플레이하세요',
+    'columnFull': '열이 가득 찼습니다',
+    'repairAll': '모두 수리',
+    'volley': '일제 사격',
+    'swap': '교체',
+    'menu': '메뉴',
+    'materials': '자재',
+    'zoom': '확대/축소'
+  },
+
   'hud': {
     'wave': '웨이브', 'enemies': '적', 'callWave': '웨이브 호출', 'callBoss': '보스 호출',
     'speed': '속도 {n}×',
-    'speedOffer': '광고 보고 2배속',
-    'speedFor': '{n}분', 'recenter': '화면 중앙 정렬',
+    'speedOffer': '{n}× 속도 잠금 해제',
+    'speedGroup': '게임 속도', 'recenter': '화면 중앙 정렬',
     'rotateLeft': '왼쪽으로 회전',
     'rotateRight': '오른쪽으로 회전',
     'arrowRain': '화살비',
@@ -31,6 +43,14 @@ export default {
     'outOfReach': '사거리 밖 ×{n} — 사거리 {m} 필요'
   },
   'hints': {
+    'dropBlock': {
+      'touch': '열을 탭해 조각을 떨어뜨리세요',
+      'desktop': '열을 클릭해 조각을 떨어뜨리세요'
+    },
+    'mergeBlock': {
+      'touch': '같은 조각 위에 떨어뜨리면 합쳐집니다',
+      'desktop': '같은 조각 위에 떨어뜨리면 합쳐집니다'
+    },
     'selectBlock': { 'touch': '아래 블록을 탭해 선택하세요', 'desktop': '아래 블록을 클릭해 선택하세요' },
     'placeBlock': { 'touch': '이제 빛나는 칸을 탭해 건설하세요', 'desktop': '이제 빛나는 칸을 클릭해 건설하세요' },
     'camera': { 'touch': '드래그로 이동 · 핀치로 확대', 'desktop': '드래그로 이동 · 스크롤로 확대' },
@@ -83,7 +103,6 @@ export default {
       'gate': '성문', 'wood': '나무 상자', 'brace': '보강 상자', 'stone': '석재 블록',
       'archer': '궁수탑', 'cannon': '대포', 'mortar': '박격포', 'tesla': '번개 코일',
       'frost': '서리 첨탑', 'repair': '수리소',
-      'sawmill': '제재소', 'quarry': '채석장', 'mint': '금광',
       'spikes': '가시벽',
       'bombard': '박격포탑'
     },
@@ -106,9 +125,6 @@ export default {
       'tesla': '근처 적들 사이로 튀는 번개.',
       'frost': '무리 전체를 얼려 크게 둔화시킵니다.',
       'repair': '웨이브 사이에 인접 블록을 수리합니다.',
-      'sawmill': '웨이브를 막을 때마다 목재를 생산합니다.',
-      'quarry': '웨이브를 막을 때마다 석재를 생산합니다.',
-      'mint': '웨이브를 막을 때마다 코인을 생산합니다.',
       'spikes': '때리는 적은 매번 그 피해를 그대로 되돌려 받습니다.',
       'bombard': '포탄을 수직으로 쏘아 올립니다. 폭발은 작고 지상 목표만 타격.'
     },
@@ -138,6 +154,8 @@ export default {
 
   // ─── First-stage tutorial ─────────────────────────────────────────────────
   'tutorial': {
+    'drop': '열을 탭해 조각을 떨어뜨리세요.',
+    'merge': '같은 조각 위에 떨어뜨려 합치세요.',
     'gate': '성문을 지켜라. 무너지면 끝이다.',
     'gateSeeded': '시작용 요새를 지어 뒀다. 성문을 지켜라. 무너지면 끝이다.',
     'pick': '조각을 하나 골라라.',
@@ -177,6 +195,9 @@ export default {
   },
 
   'tech': {
+    'blueprints': {
+      'title': '설계도'
+    },
     'intro1': '여기서 구매한 것은 모두 영구적이며, 이후 모든 플레이에 이어집니다.',
     'intro2': '코인은 승패와 상관없이 모든 공성전에서 얻습니다. 여기서 사용하세요.',
     'intro3': '금색 노드는 지금 구매 가능합니다. 파란색은 코인이 더 필요하고, 흐린 것은 앞 노드가 필요합니다.',
@@ -192,6 +213,7 @@ export default {
     'requires': '필요: {n}',
     'spotlight': '사용하세요!',
     'names': {
+      'm2_lumberHut': '벌목 오두막',
       'logistics': '병참',
       'unlockCoffer': '금고',
       'yields': '산출',
@@ -205,12 +227,12 @@ export default {
       'admiralty': '해군 본부',
       'foundations': '기초', 'sharpBolts': '날카로운 화살', 'unlockBrace': '보강 상자',
       'lumberStock': '목재 비축', 'longSight': '원시', 'rapidFire': '속사',
-      'reinforced': '보강 들보', 'unlockSawmill': '제재소', 'quarryStock': '석재 비축',
+      'reinforced': '보강 들보', 'unlockSawmill': '풍부한 광맥', 'quarryStock': '석재 비축',
       'unlockMortar': '박격포', 'heavyOrdnance': '중포', 'unlockTesla': '번개 코일',
-      'gateArmor': '성문 장갑', 'unlockQuarry': '채석장', 'richHauls': '풍성한 전리품',
+      'gateArmor': '성문 장갑', 'unlockQuarry': '깊은 갱도', 'richHauls': '풍성한 전리품',
       'wideFoundation': '넓은 기초', 'siegeShells': '공성 포탄', 'unlockFrost': '서리 첨탑',
       'forkedBolts': '갈라지는 번개', 'ironPlating': '철갑', 'unlockRepair': '수리소',
-      'unlockMint': '금광', 'looting': '약탈', 'overcharge': '과충전',
+      'unlockMint': '길드 헌장', 'looting': '약탈', 'overcharge': '과충전',
       'masterwork': '명작', 'fieldRepairs': '야전 수리', 'greatFoundation': '대기초',
       'warChest': '군자금',
       'unlockSpikes': '가시벽',
@@ -220,6 +242,7 @@ export default {
       'artilleryDoctrine': '포병 교리'
     },
     'descriptions': {
+      'm2_lumberHut': '벌목 오두막 해금 — 매 웨이브 후 목재를 줍니다.',
       'logistics': '채석 구덩이 해금 — 필요한 그 판에서 살 수 있는 저렴한 생산 블록입니다.',
       'unlockCoffer': '골드를 주조하는 유일한 블록, 금고를 해금합니다.',
       'yields': '경제 블록 산출량 +{n}%.',
@@ -242,13 +265,13 @@ export default {
       'longSight': '모든 무기의 사거리가 등급당 +{n}%.',
       'rapidFire': '모든 무기의 공격 속도가 등급당 +{n}%.',
       'reinforced': '탑의 모든 블록의 체력이 등급당 +{n}%.',
-      'unlockSawmill': '제재소 해금 — 매 웨이브 목재 생산.',
+      'unlockSawmill': '모든 생산 건물 산출이 랭크당 +{n}%.',
       'quarryStock': '공성전 시작 석재가 등급당 +{n}.',
       'unlockMortar': '박격포 해금 — 장거리 범위 피해.',
       'heavyOrdnance': '범위 반경이 등급당 +{n}%.',
       'unlockTesla': '번개 코일 해금 — 번개가 적 사이로 튑니다.',
       'gateArmor': '성문 체력이 등급당 +{n}%.',
-      'unlockQuarry': '채석장 해금 — 매 웨이브 석재 생산.',
+      'unlockQuarry': '모든 생산 건물 산출이 랭크당 +{n}% 추가.',
       'richHauls': '웨이브 보상이 등급당 +{n}%.',
       'wideFoundation': '건설 가능 폭이 등급당 {n}칸 확장.',
       'siegeShells': '탑 무기의 피해가 등급당 +{n}%.',
@@ -256,7 +279,7 @@ export default {
       'forkedBolts': '번개가 등급당 적 {n}명에게 더 튑니다.',
       'ironPlating': '모든 블록의 방어가 등급당 +{n}.',
       'unlockRepair': '수리소 해금 — 매 웨이브 인접 블록 회복.',
-      'unlockMint': '금광 해금 — 매 웨이브 코인 생산.',
+      'unlockMint': '모든 생산 건물 산출이 랭크당 +{n}% 추가.',
       'looting': '적의 코인 드롭이 등급당 +{n}%.',
       'overcharge': '모든 무기의 공격 속도가 등급당 +{n}%.',
       'masterwork': '탑 무기의 피해가 등급당 +{n}%.',

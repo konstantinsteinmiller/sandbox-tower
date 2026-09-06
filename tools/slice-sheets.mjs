@@ -81,6 +81,16 @@ const OUT_ROOT = resolve(ROOT, opts['--out'] ?? 'public')
 const QUALITY = num('--quality', 0.92)
 const FORCE_SHEET = opts['--sheet'] ?? null
 const FORCE_SIZE = num('--size', null)
+
+/**
+ * How tall one frame of a walk strip is written, in px.
+ *
+ * Never larger than the painting actually came back at — upsampling a return
+ * buys file size and no detail — and never larger than the cap: 384 for a
+ * cycle, 640 for a single, or whatever `--size` says.
+ */
+const walkEdge = (sheet, cell, sy) =>
+  Math.min(FORCE_SIZE ?? (sheet.frames === 1 ? 640 : 384), Math.round(cell.h * sy))
 // Accept a walk sheet whose grid came back with a different number of panels,
 // treating what arrived as one cycle. Only honoured when it matches what the
 // detector actually measured, so it cannot be used to force a bad cut.
@@ -207,6 +217,14 @@ const TARGETS = [
   // character would jitter around its own feet for the entire walk.
   ...(index.walks ?? []).map((a) => ({
     id: a.id, kind: 'walk',
+    // Where the reference sits inside a panel, so a return painted at a
+    // different size can be normalised back onto it.
+    fit: a.fit ?? null, anchor: a.anchor ?? 'feet',
+    // A fixture's box is a hard boundary — it is the space a block lends the
+    // weapon bolted to it — so a return is fitted INSIDE it in both axes. A
+    // creature's box is not: it stands on open ground, and shrinking it
+    // because a painted arm swings wider would lift its feet off the line.
+    tight: a.kind === 'fixture',
     // `walk-grumpling` and a bare `grumpling` both land; longest stem wins, so
     // the prefixed form is never mistaken for anything else.
     stems: [a.file.replace(/\.png$/, ''), a.id],
@@ -236,11 +254,34 @@ const identify = (file, w, h) => {
     return t
   }
   const name = basename(file).toLowerCase()
+  /** The leading `word-` of a name, including the dash, or '' if it has none. */
+  const prefixOf = (n) => (n.includes('-') ? n.slice(0, n.indexOf('-') + 1) : '')
+
   // Longest stem wins, so "strip-blocks-r1" beats "blocks", and
   // "mountains-near" beats a bare "mountains".
+  //
+  // A BARE-ID hit is refused when the file carries somebody else's prefix.
+  // Every walk entry answers to its id alone, so `mount-archer.jpg` — a
+  // sheet that was deleted from the manifest, whose file nobody removed —
+  // matched on `archer` and was sliced straight over the archer's FIXTURE.
+  // The tower then flew a stone parapet where its bow should be, and the
+  // only trace was a good sprite silently getting smaller on disk. The
+  // same shape of accident is waiting in every `roll-*.jpg` left over from
+  // the eight-panel siege sheets.
   const byName = TARGETS
-    .map((t) => ({ t, hit: t.stems.filter((st) => name.includes(st.toLowerCase()))
-      .sort((a, b) => b.length - a.length)[0] }))
+    .map((t) => {
+      const hit = t.stems.filter((st) => name.includes(st.toLowerCase()))
+        .sort((a, b) => b.length - a.length)[0]
+      if (!hit) return { t, hit: undefined }
+      const primary = t.stems[0].toLowerCase()
+      // Stale when the match came only from the bare id AND the file leads
+      // with somebody else's prefix. `mountains-far` still answers to its own
+      // id because the name STARTS with it; `mount-archer` does not.
+      const stale = !name.includes(primary)
+        && !name.startsWith(hit.toLowerCase())
+        && !(prefixOf(primary) && name.startsWith(prefixOf(primary)))
+      return { t, hit: stale ? undefined : hit }
+    })
     .filter((x) => x.hit)
     .sort((a, b) => b.hit.length - a.hit.length)
   if (byName.length) return byName[0].t
@@ -397,9 +438,14 @@ try {
       ? 0
       : Math.abs(sx - sy) / Math.max(sx, sy)
     if (drift > 0.01) {
-      if (sheet.kind !== 'strip' || drift > 0.15) {
+      // A walk sheet is forgiven the same way a strip is, and for the same
+      // reason: the panels still divide the frame evenly, every one is distorted
+      // by the same factor, and each is resampled back to its nominal box on the
+      // way out. Refusing a good generation over arithmetic we can do ourselves
+      // is the more expensive mistake when a generation costs a re-roll.
+      if (!['strip', 'walk'].includes(sheet.kind) || drift > 0.15) {
         console.error(`  ✗ aspect ratio changed (${sx.toFixed(3)} vs ${sy.toFixed(3)}).`)
-        console.error(sheet.kind === 'strip'
+        console.error(['strip', 'walk'].includes(sheet.kind)
           ? '    Too far off to correct — ask for it again at the stated size.'
           : '    The model re-composed the grid; the cell rects no longer apply.')
         failed++
@@ -652,18 +698,30 @@ try {
       // else. Its presence is what routes the panel into the strip composer
       // instead of straight to a file of its own.
       frame: c.frame,
+      // Panels are written at the NOMINAL panel shape, not the returned one.
+      //
+      // That is what makes a sheet that came back 16:9 when it was asked for 2:1
+      // usable instead of rejected: the squash is uniform across every panel, so
+      // resampling each one back to the box it is supposed to be undoes it
+      // exactly. Capped by height because a 4K return would otherwise compose
+      // into an 8192 px strip — pure payload, when the frame box is ~156 px in
+      // game and the bake already downsamples at maximum zoom on a 3x screen.
+      // A walk frame is sized by its TALL edge, and `--size` caps it.
+      //
+      // The cap used to be the constant alone, which quietly made `--size` a
+      // no-op for every strip in the game: a pass meant to shrink the payload
+      // took 128 px off each block and left the seventeen monster strips —
+      // by far the heaviest thing shipped — at full size.
       outW: sheet.kind === 'scenery'
         ? c.w
         : sheet.kind === 'walk'
-          // Panels keep their proportions and are capped by height. A sheet
-          // returned at 4K would otherwise compose into an 8192 px strip, which
-          // is pure payload: the frame box is ~156 px in game and the bake is
-          // already downsampling at maximum zoom on a 3x screen.
-          ? Math.round(Math.min(384, Math.round(c.h * sy)) * (c.w * sx) / (c.h * sy))
+          ? Math.round(walkEdge(sheet, c, sy) * (c.w / c.h))
           : undefined,
       outH: sheet.kind === 'scenery'
         ? c.h
-        : sheet.kind === 'walk' ? Math.min(384, Math.round(c.h * sy)) : undefined,
+        : sheet.kind === 'walk'
+          ? walkEdge(sheet, c, sy)
+          : undefined,
       out: FORCE_SIZE ?? (sheet.kind === 'cell'
         ? Math.min(512, Math.round(Math.max(c.w * sx, c.h * sy)))
         : Math.round(c.w * sx))
@@ -675,6 +733,9 @@ try {
         const plan = ${JSON.stringify(plan)};
         const q = ${QUALITY};
         const CHROMA = ${chroma && sheet.bg !== 'opaque'};
+        const FIT_REF = ${JSON.stringify(sheet.fit ?? null)};
+        const FIT_TIGHT = ${sheet.tight ? 'true' : 'false'};
+        const ANCHOR_REF = ${JSON.stringify(sheet.anchor ?? 'feet')};
         const out = [];
         // Walk-cycle panels, held back so they can be composed into one strip.
         const strip = [];
@@ -834,7 +895,29 @@ try {
           // border pixels left to start from and the card sailed through. The
           // seeds are therefore every opaque pixel that touches transparency or
           // the frame — the outline of whatever is actually left.
-          if (p.autoBg) {
+          //
+          // AND IT ONLY RUNS WHEN THE KEY FOUND NOTHING.
+          //
+          // Seeding is from the frame (see below), so after a magenta key has
+          // succeeded the only opaque pixels left on that frame are ARTWORK that
+          // crossed the cut line — six pixels of thornwick's leaves in one panel,
+          // seventeen in the next. A handful of artwork pixels are then 100% of
+          // the seeds, they clear the 70% cluster gate by themselves, and the
+          // flood adopts the creature's own pale timber as "the background" and
+          // eats the frame from the inside. Two of thornwick's eight frames came
+          // back empty, and a boss that vanishes for an eighth of a second every
+          // stride is the kind of bug that reads as a rendering fault.
+          //
+          // There is nothing to lose by skipping it: this is the fallback for the
+          // grounds a colour key cannot express — white, cream, painted-in
+          // checkerboard, dusty pink — and if the key already cleared the ground,
+          // everything still opaque is the drawing.
+          //
+          // The seed floor guards the same failure on the paths where the key is
+          // off or found nothing: a real background reaches a good share of the
+          // frame it is behind. A dozen pixels of leaf do not.
+          const shore = p.seedTopOnly ? p.sw : 2 * (p.sw + p.sh);
+          if (p.autoBg && keyed <= N_PIX * 0.03) {
             const W = p.sw, H = p.sh, N = W * H;
             const A = (k) => d[k * 4 + 3];
             const q = (i) => ((d[i] >> 4) << 8) | ((d[i + 1] >> 4) << 4) | (d[i + 2] >> 4);
@@ -897,7 +980,7 @@ try {
             const keep = (i) => refs.some((r2) => near(r2, [d[i], d[i + 1], d[i + 2]]));
 
             // A flat ground clusters; a block's wood-grain border does not.
-            if (seeds.length > 0 && covered / seeds.length >= 0.7) {
+            if (seeds.length >= shore * 0.1 && covered / seeds.length >= 0.7) {
               const seen = new Uint8Array(N);
               const stack = [];
               for (const k of seeds) {
@@ -1001,6 +1084,11 @@ try {
           }
 
           let x0 = p.sw, y0 = p.sh, x1 = -1, y1 = -1, opaque = 0;
+          // A SECOND box at a high alpha floor, for the fit measurement only.
+          // The reference is measured the same way: a soft shadow belongs to
+          // neither silhouette, and letting one into the comparison sinks the
+          // sprite by the depth of a shadow the other side never painted.
+          let fx0 = p.sw, fy0 = p.sh, fx1 = -1, fy1 = -1;
           for (let y = 0; y < p.sh; y++)
             for (let x = 0; x < p.sw; x++) {
               const a = d[(y * p.sw + x) * 4 + 3];
@@ -1009,7 +1097,12 @@ try {
                 if (x < x0) x0 = x; if (x > x1) x1 = x;
                 if (y < y0) y0 = y; if (y > y1) y1 = y;
               }
+              if (a > 140) {
+                if (x < fx0) fx0 = x; if (x > fx1) fx1 = x;
+                if (y < fy0) fy0 = y; if (y > fy1) fy1 = y;
+              }
             }
+          if (fx1 < 0) { fx0 = x0; fy0 = y0; fx1 = x1; fy1 = y1; }
           if (x1 < 0) {
             // A dropped panel is the commonest way a walk sheet comes back wrong,
             // and it must not silently become a hole in the animation.
@@ -1092,6 +1185,7 @@ try {
               // These are what catch a creature that wandered between frames.
               foot: (y1 + 1) / p.sh, top: y0 / p.sh,
               midX: ((x0 + x1) / 2) / p.sw,
+              box: { x0: fx0 / p.sw, y0: fy0 / p.sh, x1: (fx1 + 1) / p.sw, y1: (fy1 + 1) / p.sh },
               coverage: opaque / (p.sw * p.sh)
             });
             continue;
@@ -1152,6 +1246,89 @@ try {
             out.push({ id: walkId, empty: true });
           } else {
             const fw = solid[0].cv.width, fh = solid[0].cv.height;
+
+            // ── Normalise onto the reference's box ──
+            //
+            // Every returned siege sheet so far enlarged the machine to fill its
+            // panel and dropped it to the bottom — the catapult at more than
+            // double size. On its own that looks fine; against the arm, which is
+            // drawn live from the geometry, it is plainly a different machine.
+            //
+            // ONE correction for the whole strip, never per frame. Fitting each
+            // frame to its own content is exactly what makes a cycle jitter, so
+            // the union across all frames is measured, a single scale and offset
+            // fall out of it, and every frame gets identical treatment.
+            const FIT = FIT_REF;
+            let fitNote = null;
+            if (FIT && FIT.h > 0) {
+              let bx0 = 1, by0 = 1, bx1 = 0, by1 = 0;
+              for (const f of solid) {
+                if (f.box.x0 < bx0) bx0 = f.box.x0;
+                if (f.box.y0 < by0) by0 = f.box.y0;
+                if (f.box.x1 > bx1) bx1 = f.box.x1;
+                if (f.box.y1 > by1) by1 = f.box.y1;
+              }
+              const gotH = by1 - by0;
+              const gotW = bx1 - bx0;
+              const kH = gotH > 0.01 ? FIT.h / gotH : 1;
+              // Match the reference box's AREA when the box is a boundary.
+              //
+              // Height alone lets a part that came back a different SHAPE — a
+              // longer, slimmer barrel — overhang the block by however much its
+              // proportions differ; the cannon reached a block and a quarter.
+              // But taking the tighter axis instead is the opposite mistake: the
+              // barrel then fits the width exactly and stands 40% shorter than
+              // the drawn one, and every fixture on the tower reads shrunken.
+              //
+              // The geometric mean splits it. A painting with the reference's own
+              // proportions is untouched, because both axes agree; one that is
+              // half again as long comes back a quarter over on width and a
+              // quarter under on height, which is what "the same size, drawn
+              // differently" actually looks like.
+              const kW = FIT_TIGHT && FIT.w > 0 && gotW > 0.01
+                ? FIT.w / gotW
+                : Infinity;
+              const k = Number.isFinite(kW) ? Math.sqrt(kH * kW) : kH;
+              const gotBottom = by1, gotCx = (bx0 + bx1) / 2;
+              // A wild measurement must never obliterate the art, and a
+              // correction under 4% is not worth resampling for.
+              //
+              // The floor is looser for a TIGHT box, because there the
+              // measurement cannot be wild: the reference says exactly how
+              // much room the part gets, so a factor of four means a part
+              // painted four times too big, not a mis-measurement. The
+              // repair crane came back at 4.15x — a good drawing, simply
+              // filling its frame — and the 0.25 floor refused to shrink it,
+              // which shipped a crane longer than the block it stands on.
+              const floor = FIT_TIGHT ? 0.1 : 0.25;
+              // A FIXTURE is centred in its box on both axes, whatever the
+              // drawing did. The drawn parts sit wherever their procedural
+              // code put them — a coil standing on the block's top edge, a
+              // barrel with its carriage hanging below — and registering a
+              // painting against that left every part high and to one side.
+              // Centring also puts the turn axis through the part's own
+              // middle, so a bow rotates in place instead of orbiting.
+              const byFeet = ANCHOR_REF !== 'centre';
+              const gotMidY = (by0 + by1) / 2;
+              const fromY = FIT_TIGHT ? gotMidY : byFeet ? gotBottom : gotMidY;
+              const toY = FIT_TIGHT ? 0.5 : byFeet ? FIT.bottom : 0.5;
+              const toX = FIT_TIGHT ? 0.5 : FIT.cx;
+              if (k > floor && k < 4 && (Math.abs(k - 1) > 0.04
+                  || Math.abs(fromY - toY) > 0.02
+                  || Math.abs(gotCx - toX) > 0.02)) {
+                for (const f of solid) {
+                  const to = document.createElement('canvas');
+                  to.width = fw; to.height = fh;
+                  const g2 = to.getContext('2d');
+                  g2.translate(toX * fw, toY * fh);
+                  g2.scale(k, k);
+                  g2.translate(-gotCx * fw, -fromY * fh);
+                  g2.drawImage(f.cv, 0, 0);
+                  f.cv = to;
+                }
+                fitNote = { k: +k.toFixed(3), dy: +(FIT.bottom - gotBottom).toFixed(3) };
+              }
+            }
             const cv = document.createElement('canvas');
             cv.width = fw * strip.length;
             cv.height = fh;
@@ -1171,6 +1348,7 @@ try {
               feet: solid.map((f) => f.foot),
               mids: solid.map((f) => f.midX),
               coverages: solid.map((f) => f.coverage),
+              fitNote,
               keyed: solid.reduce((a2, f) => a2 + f.keyed, 0),
               srcArea: solid.reduce((a2, f) => a2 + f.srcArea, 0),
               w: cv.width, h: cv.height,
@@ -1217,15 +1395,17 @@ try {
         console.warn('      that is now welded in. Re-generate it on flat magenta.')
       }
 
-      // Enemies and allies are ANIMATED. `drawEnemy` early-returns on an
-      // override and blits the still, so a bitmap here does not restyle the
-      // character — it freezes it, replacing a 16-frame walk cycle with one
-      // pose that slides across the ground. Blocks do not have this problem
-      // because a block never moves.
+      // Enemies are ANIMATED. `drawEnemy` early-returns on an override and
+      // blits the still, so a bitmap here does not restyle the character — it
+      // freezes it, replacing a 16-frame walk cycle with one pose that slides
+      // across the ground. Blocks do not have this problem because a block
+      // never moves.
       //
       // `images/monsters/` is the answer to this and gets no such warning: it
-      // is a strip, and it keeps the character walking.
-      if (/^images\/(enemies|allies)\//.test(r.target ?? '')) {
+      // is a strip, and it keeps the character walking. `images/allies/` is
+      // now a strip too — the cavalry gallop — so it came out of this test
+      // rather than warning about a freeze that no longer happens.
+      if (/^images\/enemies\//.test(r.target ?? '')) {
         console.warn(`    ! ${r.id} is an ANIMATED character. This still replaces its`)
         console.warn('      whole 16-frame walk cycle with one frozen pose.')
         console.warn(`      A walk-cycle sheet (art-sheets/walk-*.png) restyles it instead.`)
@@ -1239,6 +1419,13 @@ try {
       // panel. None of that is visible in the file — it is visible in the game,
       // as a limp.
       if (r.frames !== undefined) {
+        if (r.fitNote) {
+          console.log(`    · normalised onto the reference: scaled to`
+            + ` ${(r.fitNote.k * 100).toFixed(0)}% and`
+            + ` moved ${(r.fitNote.dy * 100).toFixed(0)}% of a panel vertically.`)
+          console.log('      It came back a different size from the sheet it was painted')
+          console.log('      over, and the parts drawn live over it are not negotiable.')
+        }
         if (r.missing?.length) {
           console.warn(`    ! frame${r.missing.length > 1 ? 's' : ''} ${r.missing.join(', ')}`
             + ` of ${r.frames} came back EMPTY — the walk will hitch there.`)
@@ -1246,15 +1433,20 @@ try {
         const spread = (xs) => (xs?.length ? Math.max(...xs) - Math.min(...xs) : 0)
         // The feet must land on one line. This is the difference between a walk
         // and a hop, and it is the single most likely thing to be wrong.
+        // A machine rolls on wheels and a creature walks on feet; the check is
+        // the same line-of-contact either way, and calling a trebuchet's wheels
+        // its feet reads as the tool having got lost.
+        const wheels = (r.target ?? '').startsWith('images/siege/')
         const foot = spread(r.feet)
         if (foot > 0.04) {
-          console.warn(`    ! the feet move ${(foot * 100).toFixed(0)}% of the panel height`
-            + ' between frames — the creature will bob as it walks.')
+          console.warn(`    ! the ${wheels ? 'wheels' : 'feet'} move`
+            + ` ${(foot * 100).toFixed(0)}% of the panel height between frames —`
+            + ` it will ${wheels ? 'hop as it rolls' : 'bob as it walks'}.`)
         }
         const mid = spread(r.mids)
         if (mid > 0.08) {
           console.warn(`    ! the body drifts ${(mid * 100).toFixed(0)}% of the panel width`
-            + ' between frames — it will slide as it walks.')
+            + ` between frames — it will slide as it ${wheels ? 'rolls' : 'walks'}.`)
         }
         // A frame that is much bigger or smaller than its neighbours is a
         // redraw at a different scale, not a pose.

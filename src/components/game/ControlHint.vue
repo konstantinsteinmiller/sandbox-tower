@@ -14,7 +14,10 @@ import { mobileCheck } from '@/utils/function'
  * — nagging a competent player is its own kind of failure.
  */
 
-export type HintId = 'selectBlock' | 'placeBlock' | 'camera' | 'callWave' | 'inspect'
+/** `dropBlock` and `mergeBlock` belong to the mobile-fit board; the rest are shared. */
+export type HintId =
+  | 'selectBlock' | 'placeBlock' | 'camera' | 'callWave' | 'inspect'
+  | 'dropBlock' | 'mergeBlock'
 
 interface Props {
   hint: HintId | null

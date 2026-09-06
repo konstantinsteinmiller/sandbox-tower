@@ -110,8 +110,8 @@ export const clampDifficulty = (mul: number): number =>
  * raises the wave budget by about 54%, so over-building is always rewarded —
  * you come out ahead — but never lets you switch off.
  */
-export const adaptiveFactor = (wave: number, power: number): number => {
-  const ratio = power / expectedPower(wave)
+export const adaptiveFactor = (wave: number, power: number, expectedMul = 1): number => {
+  const ratio = power / (expectedPower(wave) * expectedMul)
   if (!Number.isFinite(ratio) || ratio <= 0) return MIN_ADAPTIVE
   return Math.max(MIN_ADAPTIVE, Math.min(MAX_ADAPTIVE, Math.pow(ratio, 0.62)))
 }
@@ -219,18 +219,23 @@ export class FlawlessTracker {
  * This is the one difficulty term the player can switch off completely, and
  * they do it by playing: spend the pile and the surcharge is gone next wave.
  */
-export const hoardFactor = (wood: number, stone: number, coins: number): number => {
+export const hoardFactor = (wood: number, stone: number, coins: number, divisor = 1): number => {
   const w = Math.max(0, wood)
   const s = Math.max(0, stone)
   const c = Math.max(0, coins)
-  if (w > 1000 || s > 1000 || c > 1000) return 2
-  if (w >= 500 || s >= 500) return 1.5
-  if (w > 200 && s > 200) return 1.25
+  // A mode with a smaller economy divides the bands rather than re-authoring
+  // them, so the ladder keeps its shape.
+  const d = divisor > 0 ? divisor : 1
+  if (w > 1000 / d || s > 1000 / d || c > 1000 / d) return 2
+  if (w >= 500 / d || s >= 500 / d) return 1.5
+  if (w > 200 / d && s > 200 / d) return 1.25
   return 1
 }
 
 /** Which hoard band is in force, for the HUD warning. 0 = none. */
-export const hoardTier = (wood: number, stone: number, coins: number): 0 | 1 | 2 | 3 => {
-  const f = hoardFactor(wood, stone, coins)
+export const hoardTier = (
+  wood: number, stone: number, coins: number, divisor = 1
+): 0 | 1 | 2 | 3 => {
+  const f = hoardFactor(wood, stone, coins, divisor)
   return f === 2 ? 3 : f === 1.5 ? 2 : f === 1.25 ? 1 : 0
 }

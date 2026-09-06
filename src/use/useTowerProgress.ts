@@ -2,14 +2,16 @@ import { ref, computed, watch, type Ref, type ComputedRef } from 'vue'
 import { saveDataVersion, flushSaveNow } from '@/use/useSaveStatus'
 import { getState, setState, setStates, towerState } from '@/use/useTowerState'
 import {
-  TECH_KEY, BEST_WAVE_KEY, BEST_HEIGHT_KEY, BEST_BLOCKS_KEY,
+  BEST_HEIGHT_KEY, BEST_BLOCKS_KEY,
   TOTAL_KILLS_KEY, TOTAL_WAVES_KEY, RUNS_KEY, TOTAL_BLOCKS_KEY, BEST_SCORE_KEY
 } from '@/keys'
 import useTowerEconomy from '@/use/useTowerEconomy'
 import {
-  TECH_NODES, TECH_BY_ID, techCost, sumEffect, hasEffect, unlockedBlocks
+  TECH_NODES, techCost, sumEffect, hasEffect, unlockedBlocks, nodeIn
 } from '@/game/tech'
 import { BLOCK_DEFS } from '@/game/blocks'
+import { activeRules, onRulesChange, type RuleSet } from '@/game/rules'
+import type { TechNode } from '@/game/types'
 
 /**
  * Meta progression: permanent tech levels + lifetime statistics.
@@ -19,9 +21,22 @@ import { BLOCK_DEFS } from '@/game/blocks'
  * changes (a cloud sync wrote back into the blob) — the two-watcher pattern is
  * what keeps a returning player from being rendered as a fresh one for the
  * frame or two between boot and hydrate.
+ *
+ * WHICH tree and WHICH keys are the active rule set's business
+ * (`@/game/rules`): the desktop DAG lives under `ts_tech`, a mobile-fit mode's
+ * strip under its own key, and the two never see each other's levels. The
+ * wallet, the lifetime counters and the run count are shared on purpose —
+ * progress follows the player across devices.
  */
 
 interface TechState { levels: Record<string, number> }
+
+const R = (): RuleSet => activeRules.current
+const nodesNow = (): ReadonlyArray<TechNode> => R().tech.nodes
+const nodeOf = (id: string): TechNode | undefined => nodeIn(nodesNow(), id)
+
+/** Bumped whenever the rule set changes, so every computed below re-reads. */
+const rulesVersion = ref(0)
 
 const readNumber = (key: string, fallback: number): number => {
   const v = getState<unknown>(key)
@@ -31,10 +46,10 @@ const readNumber = (key: string, fallback: number): number => {
 }
 
 const loadTech = (): TechState => {
-  const v = getState<Partial<TechState> | null>(TECH_KEY, null)
+  const v = getState<Partial<TechState> | null>(R().tech.stateKey, null)
   const levels: Record<string, number> = {}
   if (v && v.levels && typeof v.levels === 'object') {
-    for (const node of TECH_NODES) {
+    for (const node of nodesNow()) {
       const lvl = (v.levels as Record<string, unknown>)[node.id]
       if (typeof lvl === 'number' && Number.isFinite(lvl)) {
         // Repeatable nodes are uncapped, so the clamp only ever bites on the
@@ -47,7 +62,7 @@ const loadTech = (): TechState => {
 }
 
 const tech: Ref<TechState> = ref(loadTech())
-const bestWave: Ref<number> = ref(readNumber(BEST_WAVE_KEY, 0))
+const bestWave: Ref<number> = ref(readNumber(R().save.bestWaveKey, 0))
 const bestHeight: Ref<number> = ref(readNumber(BEST_HEIGHT_KEY, 0))
 const bestBlocks: Ref<number> = ref(readNumber(BEST_BLOCKS_KEY, 0))
 const bestScore: Ref<number> = ref(readNumber(BEST_SCORE_KEY, 0))
@@ -58,7 +73,7 @@ const runs: Ref<number> = ref(readNumber(RUNS_KEY, 0))
 
 const refresh = (): void => {
   tech.value = loadTech()
-  bestWave.value = readNumber(BEST_WAVE_KEY, bestWave.value)
+  bestWave.value = readNumber(R().save.bestWaveKey, bestWave.value)
   bestHeight.value = readNumber(BEST_HEIGHT_KEY, bestHeight.value)
   bestBlocks.value = readNumber(BEST_BLOCKS_KEY, bestBlocks.value)
   bestScore.value = readNumber(BEST_SCORE_KEY, bestScore.value)
@@ -70,6 +85,17 @@ const refresh = (): void => {
 watch(saveDataVersion, refresh)
 watch(towerState, refresh, { deep: false })
 
+// The module-level refs were read from the DESKTOP keys at import time. A mode
+// that applies its own rules afterwards has to re-read, or it would play its
+// first run on the desktop's tech levels until the next cloud hydrate.
+onRulesChange(() => {
+  rulesVersion.value++
+  // `bestWave` is per mode; a fresh read must not fall back to the other
+  // mode's record.
+  bestWave.value = 0
+  refresh()
+})
+
 // ─── Derived combat modifiers ───────────────────────────────────────────────
 //
 // One computed per effect kind, each read once per wave (not per frame) by the
@@ -79,28 +105,41 @@ watch(towerState, refresh, { deep: false })
 
 export const levelOf = (id: string): number => tech.value.levels[id] ?? 0
 
-export const damageMul: ComputedRef<number> = computed(() => 1 + sumEffect(tech.value.levels, 'damage') / 100)
-export const fireRateMul: ComputedRef<number> = computed(() => 1 + sumEffect(tech.value.levels, 'fireRate') / 100)
-export const rangeMul: ComputedRef<number> = computed(() => 1 + sumEffect(tech.value.levels, 'range') / 100)
-export const splashMul: ComputedRef<number> = computed(() => 1 + sumEffect(tech.value.levels, 'splash') / 100)
-export const chainBonus: ComputedRef<number> = computed(() => sumEffect(tech.value.levels, 'chain'))
-export const blockHpMul: ComputedRef<number> = computed(() => 1 + sumEffect(tech.value.levels, 'blockHp') / 100)
-export const gateHpMul: ComputedRef<number> = computed(() => 1 + sumEffect(tech.value.levels, 'gateHp') / 100)
-export const armorBonus: ComputedRef<number> = computed(() => sumEffect(tech.value.levels, 'armor'))
-export const waveRewardMul: ComputedRef<number> = computed(() => 1 + sumEffect(tech.value.levels, 'waveReward') / 100)
-export const coinDropMul: ComputedRef<number> = computed(() => 1 + sumEffect(tech.value.levels, 'coinDrop') / 100)
-export const waveRepairPct: ComputedRef<number> = computed(() => sumEffect(tech.value.levels, 'waveRepair') / 100)
+const sum = (kind: Parameters<typeof sumEffect>[1]): number => {
+  void rulesVersion.value
+  return sumEffect(tech.value.levels, kind, nodesNow())
+}
+
+export const damageMul: ComputedRef<number> = computed(() => 1 + sum('damage') / 100)
+export const fireRateMul: ComputedRef<number> = computed(() => 1 + sum('fireRate') / 100)
+export const rangeMul: ComputedRef<number> = computed(() => 1 + sum('range') / 100)
+export const splashMul: ComputedRef<number> = computed(() => 1 + sum('splash') / 100)
+export const chainBonus: ComputedRef<number> = computed(() => sum('chain'))
+export const blockHpMul: ComputedRef<number> = computed(() => 1 + sum('blockHp') / 100)
+export const gateHpMul: ComputedRef<number> = computed(() => 1 + sum('gateHp') / 100)
+export const armorBonus: ComputedRef<number> = computed(() => sum('armor'))
+export const waveRewardMul: ComputedRef<number> = computed(() => 1 + sum('waveReward') / 100)
+export const coinDropMul: ComputedRef<number> = computed(() => 1 + sum('coinDrop') / 100)
+export const waveRepairPct: ComputedRef<number> = computed(() => sum('waveRepair') / 100)
 /** Spiked-wall reflect multiplier. */
-export const thornsMul: ComputedRef<number> = computed(() => 1 + sumEffect(tech.value.levels, 'thorns') / 100)
+export const thornsMul: ComputedRef<number> = computed(() => 1 + sum('thorns') / 100)
 /** Cavalry HP + damage multiplier. */
-export const cavalryMul: ComputedRef<number> = computed(() => 1 + sumEffect(tech.value.levels, 'cavalryPower') / 100)
+export const cavalryMul: ComputedRef<number> = computed(() => 1 + sum('cavalryPower') / 100)
 
 // ─── Merging ────────────────────────────────────────────────────────────────
 
-/** Whether adjacent blocks fuse at all. */
-export const mergeUnlocked: ComputedRef<boolean> = computed(
-  () => hasEffect(tech.value.levels, 'mergeUnlock')
-)
+/**
+ * Whether adjacent blocks fuse at all.
+ *
+ * A LANDING-merge mode fuses without any node — the merge is its core verb,
+ * not a purchase — so the rule set answers first and the tree second.
+ */
+export const mergeUnlocked: ComputedRef<boolean> = computed(() => {
+  void rulesVersion.value
+  if (R().merge === 'landing') return true
+  if (R().merge === 'off') return false
+  return hasEffect(tech.value.levels, 'mergeUnlock', nodesNow())
+})
 
 /**
  * Extra damage for MERGED blocks only.
@@ -110,7 +149,7 @@ export const mergeUnlocked: ComputedRef<boolean> = computed(
  * has not. A flat damage bonus dressed up as a merge bonus would be neither.
  */
 export const mergeDamageMul: ComputedRef<number> = computed(
-  () => 1 + sumEffect(tech.value.levels, 'mergePower') / 100
+  () => 1 + sum('mergePower') / 100
 )
 
 // ─── The Harbour ────────────────────────────────────────────────────────────
@@ -122,11 +161,11 @@ export const mergeDamageMul: ComputedRef<number> = computed(
 
 /** Damage multiplier for ship weapons only. */
 export const navalDamageMul: ComputedRef<number> = computed(
-  () => 1 + sumEffect(tech.value.levels, 'navalDamage') / 100
+  () => 1 + sum('navalDamage') / 100
 )
 /** Max-HP multiplier for hulls only. */
 export const navalHpMul: ComputedRef<number> = computed(
-  () => 1 + sumEffect(tech.value.levels, 'navalHp') / 100
+  () => 1 + sum('navalHp') / 100
 )
 
 // ─── The Works ──────────────────────────────────────────────────────────────
@@ -139,17 +178,21 @@ export const navalHpMul: ComputedRef<number> = computed(
  * that compounds through every block touching more than one of them.
  */
 export const buffPowerMul: ComputedRef<number> = computed(
-  () => 1 + sumEffect(tech.value.levels, 'buffPower') / 100
+  () => 1 + sum('buffPower') / 100
 )
 
 /** End-of-wave yield multiplier for every economy block. */
 export const economyMul: ComputedRef<number> = computed(
-  () => 1 + sumEffect(tech.value.levels, 'economyYield') / 100
+  () => 1 + sum('economyYield') / 100
 )
 
 /** Starting build resources for a fresh run. */
-export const startWood: ComputedRef<number> = computed(() => 120 + sumEffect(tech.value.levels, 'startWood'))
-export const startStone: ComputedRef<number> = computed(() => 40 + sumEffect(tech.value.levels, 'startStone'))
+export const startWood: ComputedRef<number> = computed(
+  () => R().economy.startWood + sum('startWood')
+)
+export const startStone: ComputedRef<number> = computed(
+  () => R().economy.startStone + sum('startStone')
+)
 
 /**
  * Half-width of the FOUNDATION: four cells either side of the Gate at the
@@ -161,7 +204,7 @@ export const startStone: ComputedRef<number> = computed(() => 40 + sumEffect(tec
  * the ones every enemy can reach and the ones everything above has to stand on.
  */
 export const buildHalfWidth: ComputedRef<number> = computed(
-  () => 4 + sumEffect(tech.value.levels, 'buildWidth')
+  () => 4 + sum('buildWidth')
 )
 
 /**
@@ -173,15 +216,28 @@ export const buildHalfWidth: ComputedRef<number> = computed(
  * thing the player should be able to see the outline of.
  */
 export const dockHalfWidth: ComputedRef<number> = computed(
-  () => 3 + sumEffect(tech.value.levels, 'dockWidth')
+  () => 3 + sum('dockWidth')
 )
 
 /** Block ids the player may place right now. */
 export const availableBlocks: ComputedRef<Set<string>> = computed(() => {
-  const unlocked = unlockedBlocks(tech.value.levels)
+  void rulesVersion.value
+  const unlocked = unlockedBlocks(tech.value.levels, nodesNow())
+  const catalogue = R().blocks.catalogue
   const out = new Set<string>()
   for (const def of Object.values(BLOCK_DEFS)) {
     if (def.kind === 'core') continue
+    if (catalogue && !catalogue.has(def.id)) continue
+    // A mode's tree may gate a block the desktop deals freely (the lumber hut
+    // is un-gated there): if ANY node in the active tree unlocks it, that node
+    // decides; otherwise the block's own `unlockNode` does.
+    const gatedHere = nodesNow().some(
+      (n) => n.effect.kind === 'unlock' && n.effect.blockId === def.id
+    )
+    if (gatedHere) {
+      if (unlocked.has(def.id)) out.add(def.id)
+      continue
+    }
     if (!def.unlockNode || unlocked.has(def.id)) out.add(def.id)
   }
   return out
@@ -193,22 +249,22 @@ export const availableBlocks: ComputedRef<Set<string>> = computed(() => {
 export const gamesPlayedTotal: ComputedRef<number> = computed(() => runs.value)
 export const maxStageReached: ComputedRef<number> = computed(() => Math.max(1, bestWave.value))
 
-const persistTech = (): void => setState(TECH_KEY, tech.value)
+const persistTech = (): void => setState(R().tech.stateKey, tech.value)
 
 export default function useTowerProgress() {
   const { coins, spendCoins, addCoins } = useTowerEconomy()
 
   /** A node is visible+purchasable once every prerequisite has ≥ 1 level. */
   const isUnlocked = (id: string): boolean => {
-    const node = TECH_BY_ID[id]
+    const node = nodeOf(id)
     if (!node) return false
     return node.requires.every((req) => levelOf(req) > 0)
   }
 
-  const costOf = (id: string): number => techCost(id, levelOf(id))
+  const costOf = (id: string): number => techCost(id, levelOf(id), nodesNow())
 
   const canBuy = (id: string): boolean => {
-    const node = TECH_BY_ID[id]
+    const node = nodeOf(id)
     if (!node) return false
     if (!isUnlocked(id)) return false
     if (levelOf(id) >= node.maxLevel) return false
@@ -241,7 +297,7 @@ export default function useTowerProgress() {
   const refundOf = (id: string): number => {
     const level = levelOf(id)
     if (level <= 0) return 0
-    return Math.floor(techCost(id, level - 1) * 0.5)
+    return Math.floor(techCost(id, level - 1, nodesNow()) * 0.5)
   }
 
   /**
@@ -253,7 +309,7 @@ export default function useTowerProgress() {
    */
   const sellBlockers = (id: string): string[] => {
     if (levelOf(id) !== 1) return []
-    return TECH_NODES
+    return nodesNow()
       .filter((n) => n.requires.includes(id) && levelOf(n.id) > 0)
       .map((n) => n.id)
   }
@@ -279,9 +335,10 @@ export default function useTowerProgress() {
 
   /** Count of affordable, not-yet-maxed nodes — drives the Tech button badge
    *  and the one-shot "spend your coins" spotlight. */
-  const affordableCount = computed(
-    () => TECH_NODES.filter((n) => canBuy(n.id)).length
-  )
+  const affordableCount = computed(() => {
+    void rulesVersion.value
+    return nodesNow().filter((n) => canBuy(n.id)).length
+  })
 
   /** Record a finished run. Every lifetime counter is written in ONE batched
    *  state update so the persist layer schedules a single write. */
@@ -312,7 +369,7 @@ export default function useTowerProgress() {
     totalBlocks.value = nextBlocks
 
     setStates({
-      [BEST_WAVE_KEY]: nextBestWave,
+      [R().save.bestWaveKey]: nextBestWave,
       [BEST_HEIGHT_KEY]: nextBestHeight,
       [BEST_BLOCKS_KEY]: nextBestBlocks,
       [BEST_SCORE_KEY]: nextBestScore,
@@ -353,6 +410,8 @@ export default function useTowerProgress() {
     availableBlocks,
     recordRunEnd,
     recordRunStart,
+    /** The desktop DAG — the tech-tree modal lays it out; a mode's own tree
+     *  is read through `activeRules`. */
     TECH_NODES
   }
 }

@@ -26,7 +26,7 @@ export const makeRng = (seed: number): (() => number) => {
 }
 
 /** Every 10th wave is a boss wave. */
-export const isBossWave = (wave: number): boolean => wave > 0 && wave % 10 === 0
+export const isBossWave = (wave: number, every = 10): boolean => wave > 0 && wave % every === 0
 
 /**
  * Total enemy "cost" the wave may spend.
@@ -93,8 +93,8 @@ export const firstRunBudgetScale = (wave: number): number =>
  * Simulated at exponent 1.16, waves 12-15 cost 14-17 blocks each against ~4
  * rebuilt, and the run died to attrition every time from full health.
  */
-export const enemyHpScale = (wave: number): number =>
-  1 + 0.135 * Math.max(0, wave - 2)
+export const enemyHpScale = (wave: number, slope = 0.135): number =>
+  1 + slope * Math.max(0, wave - 2)
 
 /**
  * Hard ceiling on how long one wave may last, ms.
@@ -122,9 +122,9 @@ export const SPAWN_FLUSH_AT_MS = 96_000
  *
  *   w<9 → 0    w9 → 0.10   w14 → 0.20   w20 → 0.32   w25+ → 0.35 (cap)
  */
-export const airShare = (wave: number): number => {
-  if (wave < 9) return 0
-  return Math.min(0.35, 0.1 + (wave - 9) * 0.022)
+export const airShare = (wave: number, from = 9): number => {
+  if (wave < from) return 0
+  return Math.min(0.35, 0.1 + (wave - from) * 0.022)
 }
 
 /**
@@ -139,9 +139,9 @@ export const airShare = (wave: number): number => {
  *
  *   w<11 → 0   w11 → 0.30   w20 → 0.48   w24+ → 0.55 (cap)
  */
-export const bombShare = (wave: number): number => {
-  if (wave < 11) return 0
-  return Math.min(0.55, 0.3 + (wave - 11) * 0.02)
+export const bombShare = (wave: number, from = 11): number => {
+  if (wave < from) return 0
+  return Math.min(0.55, 0.3 + (wave - from) * 0.02)
 }
 
 /**
@@ -151,9 +151,9 @@ export const bombShare = (wave: number): number => {
  *
  *   w<12 → 0   w12 → 0.08   w20 → 0.18   w28+ → 0.24 (cap)
  */
-export const seaShare = (wave: number): number => {
-  if (wave < 12) return 0
-  return Math.min(0.24, 0.08 + (wave - 12) * 0.0125)
+export const seaShare = (wave: number, from = 12): number => {
+  if (wave < from) return 0
+  return Math.min(0.24, 0.08 + (wave - from) * 0.0125)
 }
 
 /**
@@ -189,7 +189,9 @@ export const seaShare = (wave: number): number => {
  *    starting weapon can reach. Seeing exactly one park out of range and shoot
  *    is a different lesson from meeting two while the wall is already burning.
  */
-const PREVIEWS: Readonly<Record<number, ReadonlyArray<readonly [string, number]>>> = {
+export type PreviewTable = Readonly<Record<number, ReadonlyArray<readonly [string, number]>>>
+
+export const PREVIEWS: PreviewTable = {
   4: [['bat', 2]],
   5: [['bat', 2], ['eel', 1]],
   6: [['bat', 2], ['bomber', 1]],
@@ -199,8 +201,9 @@ const PREVIEWS: Readonly<Record<number, ReadonlyArray<readonly [string, number]>
 }
 
 /** The scripted preview spawns for a wave, as `[typeId, count]` pairs. */
-export const previewsFor = (wave: number): ReadonlyArray<readonly [string, number]> =>
-  PREVIEWS[wave] ?? []
+export const previewsFor = (
+  wave: number, table: PreviewTable = PREVIEWS
+): ReadonlyArray<readonly [string, number]> => table[wave] ?? []
 
 /**
  * Fraction reserved for SIEGE ENGINES.
@@ -211,9 +214,9 @@ export const previewsFor = (wave: number): ReadonlyArray<readonly [string, numbe
  *
  *   w<14 → 0   w14 → 0.10   w22 → 0.22   w30+ → 0.30 (cap)
  */
-export const siegeShare = (wave: number): number => {
-  if (wave < 14) return 0
-  return Math.min(0.3, 0.1 + (wave - 14) * 0.015)
+export const siegeShare = (wave: number, from = 14): number => {
+  if (wave < from) return 0
+  return Math.min(0.3, 0.1 + (wave - from) * 0.015)
 }
 
 /**
@@ -227,14 +230,16 @@ export const spawnInterval = (wave: number): number =>
   Math.max(150, Math.min(900, 900 - wave * 26))
 
 /** The cadence actually used, once the order count is known. */
-export const pacedInterval = (wave: number, orderCount: number, difficulty = 1): number => {
+export const pacedInterval = (
+  wave: number, orderCount: number, difficulty = 1, windowMs = MAX_SPAWN_WINDOW_MS
+): number => {
   // Compress the cadence as the wave gets heavier, so a harder wave arrives
   // FASTER rather than merely lasting longer. Square root, not linear: the
   // schedule still stretches somewhat with size, it just stops absorbing the
   // entire difficulty increase.
   const base = spawnInterval(wave) / Math.sqrt(Math.max(1, difficulty))
   if (orderCount <= 1) return base
-  return Math.min(base, MAX_SPAWN_WINDOW_MS / (orderCount - 1))
+  return Math.min(base, windowMs / (orderCount - 1))
 }
 
 /**
@@ -320,16 +325,39 @@ export const waveReward = (wave: number): { coins: number; wood: number; stone: 
  * `difficulty` on purpose: difficulty also compresses the spawn cadence, and a
  * first wave that arrives SLOWER than normal is the opposite of the lesson.
  */
-export const planWave = (wave: number, difficulty = 1, firstRun = false): WavePlan => {
+/**
+ * What a MODE may change about the director, with the desktop's values as the
+ * defaults — see `RuleSet.waves` / `RuleSet.enemies` in `rules.ts`. The pure
+ * function takes them as an options bag so this module stays free of the
+ * active-rules holder and every existing call site is unchanged.
+ */
+export interface WaveRuleOpts {
+  budgetMul?: number
+  roster?: ReadonlySet<string> | null
+  minWaveOverride?: Readonly<Record<string, number>>
+  airFromWave?: number
+  seaFromWave?: number | null
+  siegeFromWave?: number | null
+  previews?: PreviewTable
+  spawnWindowMs?: number
+  bossEvery?: number
+  bossBudget?: number
+}
+
+export const planWave = (
+  wave: number, difficulty = 1, firstRun = false, opts: WaveRuleOpts = {}
+): WavePlan => {
   const rng = makeRng(wave * 2654435761)
-  const boss = isBossWave(wave)
-  const pool = enemyPool(wave)
+  const roster = opts.roster ?? null
+  const boss = isBossWave(wave, opts.bossEvery ?? 10)
+  const pool = enemyPool(wave, roster, opts.minWaveOverride)
   const orders: SpawnOrder[] = []
 
   // A boss soaks most of the wave's threat; the escort is deliberately thin so
   // the fight reads as "one huge thing" rather than a soup.
   const totalBudget = waveBudget(wave, difficulty)
-    * (boss ? 0.6 : 1)
+    * (opts.budgetMul ?? 1)
+    * (boss ? (opts.bossBudget ?? 0.6) : 1)
     * (firstRun ? firstRunBudgetScale(wave) : 1)
 
   // Guard against a pathological pool (shouldn't happen — grunt is minWave 1).
@@ -343,9 +371,9 @@ export const planWave = (wave: number, difficulty = 1, firstRun = false): WavePl
   // floor keeps a preview from ever eating a wave whole, however heavy a future
   // one gets.
   let previewCost = 0
-  for (const [typeId, count] of previewsFor(wave)) {
+  for (const [typeId, count] of previewsFor(wave, opts.previews)) {
     const def = ENEMY_DEFS[typeId]
-    if (!def) continue
+    if (!def || (roster && !roster.has(typeId))) continue
     for (let i = 0; i < count; i++) {
       orders.push({ typeId, side: 1, atMs: 0 })
       previewCost += def.cost
@@ -402,20 +430,25 @@ export const planWave = (wave: number, difficulty = 1, firstRun = false): WavePl
   // run of cheap ground units winning the weighted roll.
   const airPool = pool.filter((d) => d.movement === 'air')
   const seaPool = pool.filter((d) => d.movement === 'sea')
-  const engines = siegePool(wave)
+  const engines = siegePool(wave, roster)
   // Plain infantry: ground units that are NOT siege engines, so the engine
   // budget can't be spent twice.
   const groundPool = pool.filter((d) => d.movement === 'ground' && !d.siege)
 
-  const airBudget = airPool.length > 0 ? budget * airShare(wave) : 0
-  const seaBudget = seaPool.length > 0 ? budget * seaShare(wave) : 0
-  const siegeBudget = engines.length > 0 ? budget * siegeShare(wave) : 0
+  const airFrom = opts.airFromWave ?? 9
+  const airBudget = airPool.length > 0 ? budget * airShare(wave, airFrom) : 0
+  const seaBudget = seaPool.length > 0 && opts.seaFromWave !== null
+    ? budget * seaShare(wave, opts.seaFromWave ?? 12)
+    : 0
+  const siegeBudget = engines.length > 0 && opts.siegeFromWave !== null
+    ? budget * siegeShare(wave, opts.siegeFromWave ?? 14)
+    : 0
 
   // Split the air budget so bombers are never crowded out by cheap bats — the
   // two are different problems and the player has to meet both.
   const bomberPool = airPool.filter((d) => !!d.bombRun)
   const diverPool = airPool.filter((d) => !d.bombRun)
-  const bombBudget = bomberPool.length > 0 ? airBudget * bombShare(wave) : 0
+  const bombBudget = bomberPool.length > 0 ? airBudget * bombShare(wave, airFrom + 2) : 0
   spend(bombBudget, bomberPool)
   spend(airBudget - bombBudget, diverPool.length > 0 ? diverPool : airPool)
 
@@ -432,7 +465,7 @@ export const planWave = (wave: number, difficulty = 1, firstRun = false): WavePl
     ;[orders[i], orders[j]] = [orders[j]!, orders[i]!]
   }
 
-  const interval = pacedInterval(wave, orders.length, difficulty)
+  const interval = pacedInterval(wave, orders.length, difficulty, opts.spawnWindowMs)
   let t = 0
   let side: 1 | -1 = rng() < 0.5 ? 1 : -1
   for (const order of orders) {
@@ -443,7 +476,7 @@ export const planWave = (wave: number, difficulty = 1, firstRun = false): WavePl
     side = side === 1 ? -1 : 1
   }
 
-  if (boss) {
+  if (boss && (!roster || roster.has(ENEMY_DEFS.golem!.id))) {
     // The boss enters first, alone, so the banner lands on an empty field and
     // the player registers the threat before the escort arrives.
     for (const order of orders) order.atMs += 1600

@@ -15,14 +15,26 @@ export default {
   'crazyGamesOnly': 'This game is only available on',
 
   // ─── HUD ──────────────────────────────────────────────────────────────────
+  // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'mobile': {
+    'rotatePortrait': 'Hold your phone upright to play',
+    'columnFull': 'Column full',
+    'repairAll': 'Repair all',
+    'volley': 'Volley',
+    'swap': 'Swap',
+    'menu': 'Menu',
+    'materials': 'materials',
+    'zoom': 'Zoom'
+  },
+
   'hud': {
     'wave': 'Wave',
     'enemies': 'Enemies',
     'callWave': 'Call Wave',
     'callBoss': 'Call Boss',
     'speed': 'Speed {n}×',
-    'speedOffer': 'Double speed for an ad',
-    'speedFor': '{n} min',
+    'speedOffer': 'Unlock {n}× speed',
+    'speedGroup': 'Game speed',
     'recenter': 'Recentre the view',
     'rotateLeft': 'Rotate left',
     'rotateRight': 'Rotate right',
@@ -42,6 +54,14 @@ export default {
     'outOfReach': 'Outranged ×{n} — needs {m} range'
   },
   'hints': {
+    'dropBlock': {
+      'touch': 'Tap a column to drop the piece',
+      'desktop': 'Click a column to drop the piece'
+    },
+    'mergeBlock': {
+      'touch': 'Land a piece on its twin to merge them',
+      'desktop': 'Land a piece on its twin to merge them'
+    },
     'selectBlock': {
       'touch': 'Tap a block below to pick it',
       'desktop': 'Click a block below to pick it'
@@ -134,9 +154,6 @@ export default {
       'tesla': 'Lightning Coil',
       'frost': 'Frost Spire',
       'repair': 'Repair Bay',
-      'sawmill': 'Sawmill',
-      'quarry': 'Quarry',
-      'mint': 'Gold Mine',
       'spikes': 'Spiked Wall',
       'bombard': 'Bombard'
     },
@@ -159,9 +176,6 @@ export default {
       'tesla': 'Bolts that fork between nearby enemies.',
       'frost': 'Chills a whole cluster and slows it to a crawl.',
       'repair': 'Patches every neighbouring block between waves.',
-      'sawmill': 'Produces wood at the end of every cleared wave.',
-      'quarry': 'Produces stone at the end of every cleared wave.',
-      'mint': 'Produces coins at the end of every cleared wave.',
       'spikes': 'Attackers wound themselves on it every time they strike.',
       'bombard': 'Lobs a shell straight up. Small blast, ground targets only.'
     }
@@ -197,6 +211,8 @@ export default {
   // ─── Result / run summary ─────────────────────────────────────────────────
   // ─── First-stage tutorial ─────────────────────────────────────────────────
   'tutorial': {
+    'drop': 'Tap a column to drop the piece.',
+    'merge': 'Drop a twin on a twin to merge them.',
     'gate': 'Protect the Gate. If it falls, the run ends.',
     // The `*Seeded` variants are shown when the first-session scripted opening
     // has already put a free starter fort on the foundation — the plain lines
@@ -240,6 +256,9 @@ export default {
 
   // ─── Tech tree ────────────────────────────────────────────────────────────
   'tech': {
+    'blueprints': {
+      'title': 'Blueprints'
+    },
     'sell': 'Sell rank',
     'sellBlocked': 'Sell {n} first — it needs this.',
     'intro1': 'Everything you buy here is permanent. It carries into every future run.',
@@ -255,6 +274,7 @@ export default {
     'requires': 'Requires {n}',
     'spotlight': 'Spend!',
     'names': {
+      'm2_lumberHut': 'Lumber Hut',
       'unlockMerge': 'Fusion', 'forgeWelds': 'Forge Welds',
       'logistics': 'Logistics',
       'unlockCoffer': 'Coffers',
@@ -273,13 +293,13 @@ export default {
       'longSight': 'Long Sight',
       'rapidFire': 'Rapid Fire',
       'reinforced': 'Reinforced Beams',
-      'unlockSawmill': 'Sawmill',
+      'unlockSawmill': 'Rich Seams',
       'quarryStock': 'Stone Stockpile',
       'unlockMortar': 'Mortar',
       'heavyOrdnance': 'Heavy Ordnance',
       'unlockTesla': 'Lightning Coil',
       'gateArmor': 'Gate Armour',
-      'unlockQuarry': 'Quarry',
+      'unlockQuarry': 'Deep Workings',
       'richHauls': 'Rich Hauls',
       'wideFoundation': 'Wide Foundation',
       'siegeShells': 'Siege Shells',
@@ -287,7 +307,7 @@ export default {
       'forkedBolts': 'Forked Bolts',
       'ironPlating': 'Iron Plating',
       'unlockRepair': 'Repair Bay',
-      'unlockMint': 'Gold Mine',
+      'unlockMint': 'Guild Charter',
       'looting': 'Looting',
       'overcharge': 'Overcharge',
       'masterwork': 'Masterwork',
@@ -301,6 +321,7 @@ export default {
       'artilleryDoctrine': 'Artillery Doctrine'
     },
     'descriptions': {
+      'm2_lumberHut': 'Unlocks the Lumber Hut — pays wood after every wave.',
       'unlockMerge': 'Two matching blocks side by side fuse into one, up to three deep.',
       'forgeWelds': 'Merged blocks produce +{n}% more per rank — damage, thorns and yield.',
       'logistics': 'Unlocks the Stone Pit — a cheap producer you can afford in the run it matters.',
@@ -323,13 +344,13 @@ export default {
       'longSight': 'All weapons reach +{n}% further per rank.',
       'rapidFire': 'All weapons fire {n}% faster per rank.',
       'reinforced': 'Every tower block gains +{n}% HP per rank.',
-      'unlockSawmill': 'Unlocks the Sawmill — produces wood each wave.',
+      'unlockSawmill': 'Every producer yields +{n}% more per rank.',
       'quarryStock': 'Start each siege with +{n} stone per rank.',
       'unlockMortar': 'Unlocks the Mortar — long-range arcing splash.',
       'heavyOrdnance': 'Splash radius +{n}% per rank.',
       'unlockTesla': 'Unlocks the Lightning Coil — bolts fork between enemies.',
       'gateArmor': 'The Gate gains +{n}% HP per rank.',
-      'unlockQuarry': 'Unlocks the Quarry — produces stone each wave.',
+      'unlockQuarry': 'Every producer yields a further +{n}% per rank.',
       'richHauls': 'Wave rewards +{n}% per rank.',
       'wideFoundation': 'Build {n} columns wider per rank.',
       'siegeShells': 'Tower weapons deal +{n}% damage per rank.',
@@ -337,7 +358,7 @@ export default {
       'forkedBolts': 'Lightning forks to {n} extra enemy per rank.',
       'ironPlating': 'Every block gains +{n} armour per rank.',
       'unlockRepair': 'Unlocks the Repair Bay — heals neighbours each wave.',
-      'unlockMint': 'Unlocks the Gold Mine — produces coins each wave.',
+      'unlockMint': 'Every producer yields a further +{n}% per rank.',
       'looting': 'Enemies drop +{n}% more coins per rank.',
       'overcharge': 'All weapons fire {n}% faster per rank.',
       'masterwork': 'Tower weapons deal +{n}% damage per rank.',

@@ -311,7 +311,52 @@ export const ART_FOLDERS = {
    * reload and stays procedural on top, exactly as a block's fixture does over
    * its painted body.
    */
-  siege: 'images/siege'
+  siege: 'images/siege',
+  /**
+   * Painted throwing arms, one strip per engine across its RELOAD.
+   *
+   * Composited over the chassis on the same box, and indexed by `cycle` —
+   * the simulation's own progress toward the next shot — so a painted arm
+   * still swings against the moment the machine actually fires.
+   */
+  siegeArm: 'images/siege-arms',
+  /**
+   * The player's own cavalry, one strip across ONE gallop.
+   *
+   * A still was the target here for a while and nothing ever read it, which
+   * is the worst of both: the sheet promised a drop-in and the game ignored
+   * the file. A rider is a character with a gait — four beats and a
+   * suspension phase — and freezing that is more damage than leaving it
+   * drawn, so it is a strip on the same terms the monsters get.
+   */
+  ally: 'images/allies',
+  /**
+   * Painted HULLS, one still per ship.
+   *
+   * A ship is a block that floats: a base with a weapon bolted to it. So it
+   * adopts art the way a block does — the hull is a bitmap and the deck gun
+   * stays drawn, because it aims. The still covers the clip band a hull is
+   * visible in, and the roll, the heave and the wake are applied to it live.
+   */
+  ship: 'images/ships',
+  /**
+   * The WEAPON a block carries, authored level and pointing RIGHT.
+   *
+   * A gun turns. So the bitmap is one still at aim zero and the renderer
+   * rotates it to the block's own firing angle, exactly as a projectile is
+   * authored pointing right and blitted along its heading — 48 aim buckets
+   * out of one file rather than 48 files.
+   */
+  fixture: 'images/fixtures',
+  /**
+   * Projectiles, keyed by round.
+   *
+   * A round is authored pointing RIGHT and blitted rotated to its heading,
+   * the same way the drawn shape is — so one still covers every direction.
+   * Only the shafted rounds have a hook: a cannonball is a circle and a
+   * lightning bolt is a polyline rebuilt every frame from the simulation.
+   */
+  round: 'images/rounds'
 } as const
 
 export type ArtKind = keyof typeof ART_FOLDERS
@@ -351,6 +396,18 @@ export const BLOCK_ART_BASE: Record<string, string> = {
   brace: 'braced', obelisk: 'arcane', banner: 'heraldry', gate: 'gate'
 }
 
+/**
+ * Blocks that have NO block bitmap, ever.
+ *
+ * A hull is drawn by `drawShip`, which carries its own probe under
+ * `images/ships/`. But a ship is still a block to the build tray, and the
+ * tray paints every tile through the block path — so each ship tile probed
+ * `images/blocks/skiff.webp`, a file that will never exist, and a portal's
+ * QA console logged the three misses on every start. Listed here rather
+ * than read off the block defs, for the same reason `BG_IDS` is.
+ */
+const NO_BLOCK_ART = new Set(['skiff', 'longship', 'galley'])
+
 /** The bitmap a block reads from. Falls back to the block's own id. */
 export const blockArtBase = (typeId: string): string =>
   BLOCK_ART_BASE[typeId] ?? typeId
@@ -363,10 +420,17 @@ export const BLOCK_ART_BASES: string[] =
  * Return a decoded override bitmap for `(kind, id)` or null when none exists.
  * Never throws, never blocks — a missing file simply means "keep drawing it".
  */
-export const spriteFor = (kind: ArtKind, id: string): HTMLImageElement | null => {
+/** A hint to the browser's fetch scheduler. Only honoured on the request that
+ *  creates a probe; a later call with a different hint changes nothing. */
+export type FetchPriority = 'high' | 'low'
+
+export const spriteFor = (
+  kind: ArtKind, id: string, priority?: FetchPriority
+): HTMLImageElement | null => {
   // Before the cache, before the `Image` — with the feature off, not one
   // request is made and the renderer simply keeps drawing.
   if (!enabled) return null
+  if (kind === 'block' && NO_BLOCK_ART.has(id)) return null
 
   // A block reads from its SHARED base bitmap; everything else is keyed by its
   // own id. Resolved here so no call site has to remember.
@@ -380,6 +444,10 @@ export const spriteFor = (kind: ArtKind, id: string): HTMLImageElement | null =>
     probes.set(cacheKey, probe)
     const img = new Image()
     img.decoding = 'async'
+    // `fetchPriority` is what lets the late tiers of `artPreload` go out
+    // without elbowing the first wave's strips off the wire. A browser that
+    // does not know the property ignores the assignment.
+    if (priority) (img as HTMLImageElement & { fetchPriority?: string }).fetchPriority = priority
     img.addEventListener('load', () => {
       // A zero-size decode is as good as missing.
       if (img.naturalWidth > 0) {
@@ -421,8 +489,41 @@ const BG_IDS = [
  */
 const ICON_IDS = ['wood', 'stone', 'gold'] as const
 
+/** One bitmap the scene will ask for: a kind and the id it is keyed by. */
+export type ArtWant = readonly [ArtKind, string]
+
 /**
- * Wait for every drop-in bitmap to decode, so the splash can hold for them.
+ * The bitmaps that ARE the screen from frame one: the scenery bands and the
+ * HUD's resource glyphs. Every other tier-0 want is game knowledge and lives
+ * in `artPreload`; these two lists are here because this module is on the
+ * eager boot path and must not import a manifest to learn them.
+ */
+export const sceneArtWants = (): ArtWant[] => [
+  ...BG_IDS.map((id): ArtWant => ['bg', id]),
+  ...ICON_IDS.map((id): ArtWant => ['icon', id])
+]
+
+/**
+ * Start probing `(kind, id)` and hand back the promise that settles when it
+ * has decoded or failed. Null with overrides off, so a caller can `await`
+ * only what it actually asked for.
+ */
+export const artSettled = (
+  kind: ArtKind, id: string, priority?: FetchPriority
+): Promise<void> | null => {
+  if (!enabled) return null
+  spriteFor(kind, id, priority)
+  return probes.get(`${kind}/${kind === 'block' ? blockArtBase(id) : id}`)?.settled ?? null
+}
+
+/**
+ * Wait for the bitmaps in `wants` to decode, so the splash can hold for them.
+ *
+ * WHICH bitmaps is the caller's business — `artPreload` derives the wave-1
+ * set from the enemy definitions, and this module stays off that import path
+ * on purpose. It used to hold for every base, every band and every icon at
+ * once, and then the first frame fired sixty more probes for the whole cast;
+ * see `artPreload` for why a first-time player now waits for a tenth of it.
  *
  * Without this the art POPS IN: the game starts on the procedural drawing and
  * swaps to paint a second or two later, block by block, which reads as the
@@ -436,18 +537,15 @@ const ICON_IDS = ['wood', 'stone', 'gold'] as const
  * and the procedural path simply keeps drawing.
  */
 export const preloadArtOverrides = async (
+  wants: ReadonlyArray<ArtWant>,
   onProgress?: (done: number, total: number) => void
 ): Promise<void> => {
   if (!enabled) return
   const jobs: Promise<void>[] = []
-  const want = (kind: ArtKind, id: string): void => {
-    spriteFor(kind, id)
-    const p = probes.get(`${kind}/${kind === 'block' ? blockArtBase(id) : id}`)
-    if (p) jobs.push(p.settled)
+  for (const [kind, id] of wants) {
+    const p = artSettled(kind, id, 'high')
+    if (p) jobs.push(p)
   }
-  for (const id of BLOCK_ART_BASES) want('block', id)
-  for (const id of BG_IDS) want('bg', id)
-  for (const id of ICON_IDS) want('icon', id)
 
   let done = 0
   const total = jobs.length
@@ -455,13 +553,6 @@ export const preloadArtOverrides = async (
   await Promise.allSettled(jobs.map((j) => j.then(() => { onProgress?.(++done, total) })))
 }
 
-/** Kick off override probing for everything the scene might draw, on an idle
- *  slot after first paint. Purely opportunistic — nothing waits on it. */
-export const warmSpriteProbes = (blockIds: string[], enemyIds: string[]): void => {
-  if (!enabled) return
-  for (const id of blockIds) spriteFor('block', id)
-  for (const id of enemyIds) spriteFor('enemy', id)
-}
 
 // ─── Colour helpers ─────────────────────────────────────────────────────────
 

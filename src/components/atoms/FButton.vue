@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import GameIcon from '@/components/icons/GameIcon.vue'
+import type { GameIconName } from '@/components/icons/iconNames'
 
 /**
  * The primary CTA button.
@@ -29,6 +31,17 @@ interface Props {
   /** Stretch to the container's width. Off by default so a button in a row
    *  sizes to its content instead of fighting its siblings. */
   block?: boolean
+  /** A glyph from the shared set, beside the caption. */
+  icon?: GameIconName
+  /** Which side of the caption it sits on. Trailing by default: the label is
+   *  read first and the glyph confirms it. */
+  iconPosition?: 'left' | 'right'
+  /** Drop the caption and keep only the glyph. The button then squares up to
+   *  its touch-target floor instead of collapsing to a bare icon's width, and
+   *  it MUST carry an `ariaLabel` — a glyph has no accessible name. */
+  iconOnly?: boolean
+  /** The accessible name for an icon-only button. */
+  ariaLabel?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -37,7 +50,11 @@ const props = withDefaults(defineProps<Props>(), {
   variant: 'default',
   size: 'md',
   attention: false,
-  block: false
+  block: false,
+  icon: undefined,
+  iconPosition: 'right',
+  iconOnly: false,
+  ariaLabel: undefined
 })
 
 defineEmits(['click'])
@@ -134,9 +151,11 @@ const styleVars = computed(() => ({
       variant === 'brawl' ? 'is-brawl' : '',\
       block ? 'is-block' : '',\
       attention ? 'attention-bounce' : '',\
-      isDisabled ? 'is-disabled' : ''\
+      isDisabled ? 'is-disabled' : '',\
+      iconOnly ? 'is-icon-only' : ''\
     ]"
     :disabled="isDisabled"
+    :aria-label="ariaLabel"
     @click="!isDisabled && $emit('click')"
   )
     //- 3D depth plate behind the body.
@@ -144,8 +163,10 @@ const styleVars = computed(() => ({
     span.f-button__body
       //- Classic top shine.
       span.f-button__shine(aria-hidden="true")
-      span.f-button__text
+      GameIcon.f-button__icon(v-if="icon && (iconOnly || iconPosition === 'left')" :name="icon")
+      span.f-button__text(v-if="!iconOnly")
         slot {{ label }}
+      GameIcon.f-button__icon(v-if="icon && !iconOnly && iconPosition === 'right'" :name="icon")
 </template>
 
 <style scoped lang="sass">
@@ -191,6 +212,36 @@ const styleVars = computed(() => ({
       transform: skewX(10deg)
       font-style: italic
       letter-spacing: -0.01em
+
+// ─── Glyph ──────────────────────────────────────────────────────────────────
+//
+// Sized off the caption's own fluid metric rather than a fixed px, so the
+// glyph grows with the button it sits in instead of drifting out of proportion
+// at the size extremes.
+.f-button__icon
+  flex-shrink: 0
+  width: calc(var(--fbtn-font) * 1.3)
+  height: calc(var(--fbtn-font) * 1.3)
+
+.f-button__text + .f-button__icon,
+.f-button__icon + .f-button__text
+  margin-left: 0.45em
+
+// Losing the caption removes the thing that was holding the button open, so an
+// icon-only control squares up to its own height floor on BOTH axes — never a
+// wide pill with one lonely glyph adrift in the middle of it.
+.f-button.is-icon-only
+  min-width: var(--fbtn-min-h)
+
+  .f-button__body
+    width: auto
+    min-width: var(--fbtn-min-h)
+    padding-left: var(--fbtn-py)
+    padding-right: var(--fbtn-py)
+
+  .f-button__icon
+    width: calc(var(--fbtn-font) * 1.55)
+    height: calc(var(--fbtn-font) * 1.55)
 
 .f-button__shadow
   position: absolute

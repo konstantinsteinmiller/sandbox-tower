@@ -1,6 +1,9 @@
 import { blockDef, GATE_ID, isShip, tierOf } from '@/game/blocks'
+import { rulesNow } from '@/game/rules'
 import { enemyDef } from '@/game/enemies'
-import { themedPalette, spriteFor, withAlpha, mixHex, type Palette } from '@/game/art'
+import {
+  themedPalette, spriteFor, withAlpha, mixHex, onArtChanged, type Palette
+} from '@/game/art'
 import { isBossWave } from '@/game/waves'
 import {
   monsterFrame, monsterFaces, monsterAnchor, pickMonster, primeMonsterSprites,
@@ -148,8 +151,8 @@ const SCENERY_INK = 'rgba(59,42,33,0.55)'
 const SCENERY_INK_SOFT = 'rgba(59,42,33,0.32)'
 import { rotatedShape } from '@/game/shapes'
 import { drawSiegeMachine } from '@/game/siegeArt'
-import { drawShip } from '@/game/shipArt'
-import { drawCavalry } from '@/game/cavalryArt'
+import { drawShip, type ShipLayer } from '@/game/shipArt'
+import { drawCavalry, cavalryCycle01, drawCavalryDust } from '@/game/cavalryArt'
 import { ALLY_DEFS } from '@/game/allies'
 import { GRASS_DEPTH, SEA_LEVEL } from '@/game/world'
 import type { Ally, Block, Enemy, EnemyDef, Projectile } from '@/game/types'
@@ -162,8 +165,10 @@ import {
 } from '@/use/useTowerCamera'
 import {
   drainFx, emit, emitText, emitDecal, stepParticles, stepTexts, stepDecals,
-  drawParticles, getTexts, getDecals, sampleFrame, quality, type FxEvent
+  drawParticles, getTexts, getDecals, sampleFrame, quality, setParticleCap, setTextCap,
+  type FxEvent
 } from '@/use/useTowerVfx'
+import type { RenderProfile } from '@/use/useDeviceTier'
 import { useScreenshake } from '@/use/useScreenshake'
 import { playFx } from '@/use/useTowerAudio'
 
@@ -385,7 +390,6 @@ const drawBlockBody = (
 const drawMaterial = (ctx: CanvasRenderingContext2D, typeId: string, p: Palette, w: number): void => {
   switch (typeId) {
     case 'wood':
-    case 'sawmill':
     case 'lumberHut': {
       // A real packing crate: three sawn boards held between two vertical
       // frame rails, with visible grain and iron corner brackets. The extra
@@ -499,7 +503,6 @@ const drawMaterial = (ctx: CanvasRenderingContext2D, typeId: string, p: Palette,
       break
     }
     case 'stone':
-    case 'quarry':
     case 'stonepit':
     case 'obelisk': {
       // Running-bond masonry. Each stone is drawn as its own rounded block with
@@ -755,7 +758,10 @@ const MORTAR_ELEV = 0.98
 /** The bombard drops it just over the wall, so it sits far steeper. */
 const BOMBARD_ELEV = 1.24
 
-const drawFixture = (ctx: CanvasRenderingContext2D, b: Block, cx: number, cy: number, s: number, t: number): void => {
+const drawFixture = (
+  ctx: CanvasRenderingContext2D, b: Block, cx: number, cy: number, s: number,
+  t: number, layer: FixtureLayer = 'all'
+): void => {
   const def = blockDef(b.typeId)
   const p = themedPalette(def.palette)
   const recoil = b.recoil * s * 0.12
@@ -766,6 +772,7 @@ const drawFixture = (ctx: CanvasRenderingContext2D, b: Block, cx: number, cy: nu
   switch (b.typeId) {
     case 'cannon': {
       // Carriage first, in BLOCK space — it does not rotate with the gun.
+      if (layer !== 'weapon') {
       ctx.save()
       ctx.fillStyle = withAlpha('#3a2a1a', 0.95)
       roundRect(ctx, -s * 0.26, s * 0.04, s * 0.52, s * 0.16, s * 0.04)
@@ -784,6 +791,7 @@ const drawFixture = (ctx: CanvasRenderingContext2D, b: Block, cx: number, cy: nu
         ctx.fillStyle = p.accent; ctx.fill()
       }
       ctx.restore()
+      }
 
       ctx.rotate(-b.aim)
       ctx.translate(-recoil, 0)
@@ -847,6 +855,7 @@ const drawFixture = (ctx: CanvasRenderingContext2D, b: Block, cx: number, cy: nu
     }
     case 'archer': {
       // Merlons: a crenellated parapet the bow sits behind, in block space.
+      if (layer !== 'weapon') {
       ctx.save()
       ctx.fillStyle = withAlpha(p.dark, 0.9)
       for (const mx of [-0.32, -0.06, 0.2]) {
@@ -854,6 +863,7 @@ const drawFixture = (ctx: CanvasRenderingContext2D, b: Block, cx: number, cy: nu
         ctx.fill()
       }
       ctx.restore()
+      }
 
       ctx.rotate(-b.aim)
       ctx.translate(-recoil * 0.6, 0)
@@ -1084,44 +1094,6 @@ const drawFixture = (ctx: CanvasRenderingContext2D, b: Block, cx: number, cy: nu
       ctx.fill()
       break
     }
-    case 'sawmill': {
-      ctx.rotate(t / 260)
-      ctx.strokeStyle = p.accent
-      ctx.fillStyle = withAlpha(p.light, 0.9)
-      ctx.beginPath(); ctx.arc(0, -s * 0.18, s * 0.2, 0, Math.PI * 2); ctx.fill()
-      ctx.lineWidth = Math.max(1, s * 0.03)
-      for (let i = 0; i < 8; i++) {
-        const a = (i / 8) * Math.PI * 2
-        ctx.beginPath()
-        ctx.moveTo(Math.cos(a) * s * 0.2, -s * 0.18 + Math.sin(a) * s * 0.2)
-        ctx.lineTo(Math.cos(a) * s * 0.27, -s * 0.18 + Math.sin(a) * s * 0.27)
-        ctx.stroke()
-      }
-      break
-    }
-    case 'quarry': {
-      ctx.rotate(Math.sin(t / 320) * 0.5 - 0.4)
-      ctx.strokeStyle = p.accent
-      ctx.lineWidth = Math.max(1.5, s * 0.05)
-      ctx.beginPath()
-      ctx.moveTo(-s * 0.02, -s * 0.05); ctx.lineTo(-s * 0.02, -s * 0.34)
-      ctx.stroke()
-      ctx.beginPath()
-      ctx.arc(-s * 0.02, -s * 0.34, s * 0.18, Math.PI * 1.1, Math.PI * 1.9)
-      ctx.stroke()
-      break
-    }
-    case 'mint': {
-      const bob = Math.sin(t / 400) * s * 0.03
-      for (let i = 0; i < 3; i++) {
-        ctx.fillStyle = i === 0 ? p.accent2 : p.accent
-        ctx.beginPath()
-        ctx.ellipse(0, -s * 0.14 - i * s * 0.08 + bob, s * 0.15, s * 0.055, 0, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.strokeStyle = withAlpha('#000', 0.35); ctx.lineWidth = Math.max(1, s * 0.015); ctx.stroke()
-      }
-      break
-    }
     // ── Buffs ──
     //
     // Both are drawn ABOVE the cell rather than on its face, so a banner wedged
@@ -1140,7 +1112,9 @@ const drawFixture = (ctx: CanvasRenderingContext2D, b: Block, cx: number, cy: nu
       //
       // The sway is part of that budget: at its extreme the tip must still be
       // inside the cell, which is what caps it at 0.09 rather than 0.14.
-      const sway = Math.sin(t / 520 + b.uid) * 0.09
+      // Held mid-curve rather than flat: a banner with no bend in it reads
+      // as a painted plank, and stillness is not supposed to cost the cloth.
+      const sway = 0.05
       ctx.save()
       // Staff, from just under the cell's ceiling to just above its floor.
       ctx.fillStyle = '#3a2a18'
@@ -1168,7 +1142,7 @@ const drawFixture = (ctx: CanvasRenderingContext2D, b: Block, cx: number, cy: nu
       break
     }
     case 'obelisk': {
-      const glow = 0.55 + 0.45 * Math.sin(t / 620 + b.uid)
+      const glow = 0.8
       ctx.save()
       // A standing stone, tapered, with a lit seam up its face. Its apex is
       // inside the cell for the same reason the banner's finial is — see there.
@@ -1213,21 +1187,26 @@ const drawFixture = (ctx: CanvasRenderingContext2D, b: Block, cx: number, cy: nu
       for (let i = 0; i <= 6; i++) {
         const k = i / 6
         const y = -s * 0.44 - k * s * 0.3
-        const x = s * 0.16 + Math.sin(t / 340 + k * 3 + b.uid) * s * 0.05
+        // Shaped by k alone, so the smoke still curls but never moves.
+        const x = s * 0.16 + Math.sin(k * 3) * s * 0.05
         i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
       }
       ctx.stroke()
       break
     }
     case 'stonepit': {
+      // STILL. The support blocks stopped animating: nine fixture types each
+      // re-baking a sprite every 50 ms, per lane, bought motion nobody watches
+      // on a block that is not shooting — and it doubled the art, because a
+      // moving part cannot be one painted still.
       ctx.fillStyle = p.light
       for (const [x, y, r] of [[-0.16, 0.02, 0.12], [0.14, -0.06, 0.15], [0.02, 0.16, 0.1]] as const) {
         ctx.beginPath(); ctx.arc(x * s, y * s, r * s, 0, Math.PI * 2); ctx.fill()
       }
-      // Pick, rocking as it works.
+      // Pick, held raised over the heap.
       ctx.save()
       ctx.translate(-s * 0.02, -s * 0.24)
-      ctx.rotate(Math.sin(t / 260 + b.uid) * 0.5 - 0.4)
+      ctx.rotate(-0.4)
       ctx.fillStyle = '#3a2a18'
       ctx.fillRect(-s * 0.025, 0, s * 0.05, s * 0.3)
       ctx.fillStyle = p.accent
@@ -1239,7 +1218,8 @@ const drawFixture = (ctx: CanvasRenderingContext2D, b: Block, cx: number, cy: nu
       break
     }
     case 'coffer': {
-      const lid = Math.max(0, Math.sin(t / 900 + b.uid)) * s * 0.1
+      // Held ajar, so the coins inside still read.
+      const lid = s * 0.06
       ctx.fillStyle = p.dark
       ctx.fillRect(-s * 0.26, -s * 0.06, s * 0.52, s * 0.3)
       ctx.strokeStyle = withAlpha('#000', 0.45)
@@ -1261,7 +1241,7 @@ const drawFixture = (ctx: CanvasRenderingContext2D, b: Block, cx: number, cy: nu
     }
 
     case 'repair': {
-      const pulse = 0.6 + 0.4 * Math.sin(t / 300)
+      const pulse = 0.8
       ctx.fillStyle = withAlpha(p.accent, pulse)
       const arm = s * 0.09
       ctx.fillRect(-arm / 2, -s * 0.4, arm, s * 0.34)
@@ -1296,24 +1276,145 @@ const drawFixture = (ctx: CanvasRenderingContext2D, b: Block, cx: number, cy: nu
 // same frame — otherwise every repaint in the scene bunches into one spike
 // three times a second, which is worse than the problem being solved.
 
-const FIXTURE_BOX = 2 // sprite box, as a multiple of the fixture's own scale
+/** Sprite box for a fixture, as a multiple of the fixture's own scale. It is
+ *  also the box a painted weapon or mount is authored and blitted in. */
+export const FIXTURE_BOX = 2
 const FIXTURE_LANES = 8
 const FIXTURE_PHASE_MS = 50
 const FIXTURE_AIM_STEPS = 48
 const FIXTURE_CACHE_MAX = 640
 const TAU = Math.PI * 2
 
+/**
+ * Which part of a block's fixture to draw.
+ *
+ * `weapon` is everything past `ctx.rotate(-b.aim)` — the part that tracks a
+ * target — and leaves out what it is bolted to: the cannon's carriage, the
+ * archer's parapet. Only those two have such a part, and only the art bench
+ * ever asks for this: a painted gun has to be authored WITHOUT its carriage,
+ * or the wheels swing through the air every time the block turns.
+ *
+ * The carriage itself is not painted. It was going to be — there were mount
+ * sheets for both — and a barrel sitting straight on the block turned out to
+ * read fine, so two sheets and a whole probed folder came back out.
+ */
+export type FixtureLayer = 'all' | 'weapon'
+
 /** Fixtures whose art tracks a target. */
 const AIMED_FIXTURES = new Set(['cannon', 'archer'])
+/**
+ * How much bigger a painted fixture is blitted than the box it was fitted to.
+ *
+ * A deliberate override of the fit, not a correction to it, and it is per
+ * fixture because the reason is per fixture.
+ *
+ * FROST: the drawn emitter is a small crystal cluster inside a wide soft
+ * glow, and the glow is most of what a player sees. The painting has no glow,
+ * so a crystal fitted to the drawn crystal reads as a chip of ice on an empty
+ * plate. Its return also measures larger than it is — half-keyed speckle from
+ * the glow it was painted with survives the key and inflates the box the fit
+ * is computed from — so the fit lands it at two thirds of even that.
+ *
+ * TESLA: no such story. It just reads small next to the coil it replaces.
+ */
+const FIXTURE_ART_SCALE: Record<string, number> = {
+  // Re-trimmed when the fit moved from "inside the box" to "the box's
+  // area": every painting got its height back, so each knob had to give up
+  // the share of the growth the fit is now doing itself. They are targets
+  // against the DRAWN fixture — frost about 1.6x it, tesla about 1.2x,
+  // the hut about level — not multipliers anyone should read on their own.
+  frost: 1.5,
+  tesla: 1.12,
+  archer: 1.25,
+  // The drawn crane is a small thing in a big box; the painting matched it
+  // faithfully and read as a matchstick on a crate.
+  repair: 1.7,
+  // The drawn hut carries a curl of smoke the painting leaves out, so the
+  // reference box is taller than the roof that has to fill it.
+  lumberHut: 1.35
+}
+
+/**
+ * Where a painted fixture sits, nudged, in fractions of its sprite box.
+ *
+ * Empty on purpose. It held the banner (dragged back to centre) and the
+ * lumber hut (lifted back onto its block) while the slicer registered a
+ * fixture against the drawing it replaced; the slicer now centres every
+ * fixture in its box, so both corrections would push a centred part OFF
+ * centre by the same amount. Kept as the knob for the next one-off.
+ */
+const FIXTURE_ART_NUDGE: Record<string, [number, number]> = {}
+
+/**
+ * Where a painted fixture's ink actually sits inside its file, 0..1.
+ *
+ * Measured once per bitmap, off a thumbnail — a bounding box does not need
+ * full resolution — and kept on a WeakMap so it dies with the image.
+ *
+ * Growing a sprite has to happen about its CONTENT. A fixture file is mostly
+ * empty, and its part is not in the middle of it: the frost crystal sits a
+ * fifteenth of a box below centre, so scaling about the middle at 2.25x also
+ * pushed it a fifth of a cell downwards, into the block it stands on. "Make
+ * it bigger" must not also mean "and move it".
+ */
+const artCentres = new WeakMap<HTMLImageElement, { x: number; y: number }>()
+
+const artCentre = (img: HTMLImageElement): { x: number; y: number } => {
+  const known = artCentres.get(img)
+  if (known) return known
+  const centre = { x: 0.5, y: 0.5 }
+  const w = img.naturalWidth, h = img.naturalHeight
+  if (w > 0 && h > 0) {
+    const c = document.createElement('canvas')
+    c.width = Math.max(1, Math.round(w / 8))
+    c.height = Math.max(1, Math.round(h / 8))
+    const cc = c.getContext('2d', { willReadFrequently: true })
+    if (cc) {
+      cc.drawImage(img, 0, 0, c.width, c.height)
+      const d = cc.getImageData(0, 0, c.width, c.height).data
+      let x0 = c.width, y0 = c.height, x1 = -1, y1 = -1
+      for (let y = 0; y < c.height; y++) {
+        for (let x = 0; x < c.width; x++) {
+          if (d[(y * c.width + x) * 4 + 3]! <= 24) continue
+          if (x < x0) x0 = x
+          if (x > x1) x1 = x
+          if (y < y0) y0 = y
+          if (y > y1) y1 = y
+        }
+      }
+      if (x1 >= 0) {
+        centre.x = ((x0 + x1 + 1) / 2) / c.width
+        centre.y = ((y0 + y1 + 1) / 2) / c.height
+      }
+    }
+  }
+  artCentres.set(img, centre)
+  return centre
+}
+
+/** Fixtures a painted bitmap is looked for: all thirteen. */
+const FIXTURE_ART = new Set([
+  'cannon', 'archer', 'mortar', 'bombard', 'tesla', 'frost', 'spikes',
+  'banner', 'obelisk', 'lumberHut', 'stonepit', 'coffer', 'repair'
+])
+
 /** Fixtures that kick when they fire. */
 const RECOIL_FIXTURES = new Set(['cannon', 'archer', 'mortar', 'bombard'])
 /** Lobbers: fixed elevation, but mirrored by which side of the tower they sit on. */
 const LOBBED_FIXTURES = new Set(['mortar', 'bombard'])
-/** Fixtures that animate off the clock rather than off combat. */
-const TIMED_FIXTURES = new Set([
-  'tesla', 'frost', 'spikes', 'sawmill', 'quarry', 'mint',
-  'banner', 'obelisk', 'lumberHut', 'stonepit', 'coffer', 'repair'
-])
+/**
+ * Fixtures that animate off the clock rather than off combat.
+ *
+ * Three, and they are all WEAPONS. The nine support blocks used to be here
+ * too — a spinning blade, a rocking pick, a swaying banner, a bobbing stack
+ * of coins — and each one of them meant a fresh sprite bake every 50 ms, per
+ * lane, for every support type on the board. That is a per-frame cost paid
+ * continuously for motion on the blocks a player is not looking at, and it
+ * also doubled the art: a part that moves cannot be one painted still, so
+ * each of the nine would have needed a cycle strip. They are drawn at a
+ * fixed pose now and bake once per type and scale, for the life of the page.
+ */
+const TIMED_FIXTURES = new Set(['tesla', 'frost', 'spikes'])
 
 type FixtureSprite = { cv: HTMLCanvasElement; c2d: CanvasRenderingContext2D; box: number; phase: number }
 
@@ -1325,6 +1426,25 @@ let fixtureDpr = 0
 const fixtureProxy = { typeId: '', aim: 0, recoil: 0, uid: 0, c: 0 } as unknown as Block
 
 /**
+ * Paint one block's fixture at `cx, cy`, cached sprite or live drawing.
+ *
+ * The tower, the build ghost and the playground all go through here, so what
+ * a test scene shows is what the battlefield draws — down to which of the two
+ * paths a given fixture took.
+ */
+const blitFixture = (
+  ctx: CanvasRenderingContext2D, b: Block, cx: number, cy: number, s: number, t: number
+): void => {
+  const sprite = getFixtureSprite(b, s, t)
+  if (sprite) {
+    const box = s * FIXTURE_BOX
+    ctx.drawImage(sprite.cv, cx - box / 2, cy - box / 2, box, box)
+  } else {
+    drawFixture(ctx, b, cx, cy, s, t)
+  }
+}
+
+/**
  * The sprite for `b`'s fixture at scale `s`, painting it first if this is a new
  * bucket or if its clock bucket has moved on.
  */
@@ -1333,7 +1453,15 @@ const getFixtureSprite = (b: Block, s: number, t: number): FixtureSprite | null 
   const aimed = AIMED_FIXTURES.has(type)
   const timed = TIMED_FIXTURES.has(type)
   const lobbed = LOBBED_FIXTURES.has(type)
-  if (!aimed && !timed && !lobbed && !RECOIL_FIXTURES.has(type)) return null
+  // Nothing about a support fixture varies any more — and that is a reason
+  // to cache it, not a reason to skip it. Freezing the nine took them out of
+  // every one of these sets, this gate started returning null for them, and
+  // the caller fell back to drawing them live: painted art never got a look
+  // in, and a static fixture paid a full procedural draw on every frame of
+  // every block. Anything with a fixture at all is cached; the ones that do
+  // not move simply bake once and are blitted forever.
+  if (!aimed && !timed && !lobbed && !RECOIL_FIXTURES.has(type)
+    && !FIXTURE_ART.has(type)) return null
 
   const scale = bucketed(s)
   const aimQ = aimed
@@ -1381,7 +1509,50 @@ const getFixtureSprite = (b: Block, s: number, t: number): FixtureSprite | null 
 
   const g = e.c2d
   g.clearRect(0, 0, e.box, e.box)
-  drawFixture(g, fixtureProxy, e.box / 2, e.box / 2, scale, timed ? phase * FIXTURE_PHASE_MS : t)
+  const clock = timed ? phase * FIXTURE_PHASE_MS : t
+
+  // A painted weapon, if one has been dropped in.
+  //
+  // It goes into the SAME cached sprite the drawing goes into, which is what
+  // makes this cheap: the cache is already bucketed by aim, recoil and side,
+  // so one still at aim zero serves all 48 firing angles and is re-blitted
+  // only when a block actually swings. The mount is laid down first and
+  // unrotated — painted too, if there is art for it, and drawn otherwise —
+  // because a carriage that turns with its barrel swings its wheels through
+  // the air.
+  const gun = FIXTURE_ART.has(type) ? spriteFor('fixture', type) : null
+  if (gun) {
+    g.save()
+    g.translate(e.box / 2, e.box / 2)
+    if (aimed) g.rotate(-px.aim)
+    // Lobbers do not aim; they are mirrored by which side of the tower they
+    // stand on, so both flanks throw outward.
+    if (side) g.scale(-1, 1)
+    g.translate(-px.recoil * scale * 0.12, 0)
+    // Grown about its own ink, so a fixture that reads too small next to the
+    // drawing it replaces can be given back the size without re-slicing it —
+    // and without sliding out of the place the fit put it.
+    const grow = FIXTURE_ART_SCALE[type] ?? 1
+    const [nx, ny] = FIXTURE_ART_NUDGE[type] ?? [0, 0]
+    if (grow === 1) {
+      g.drawImage(gun, -e.box / 2 + nx * e.box, -e.box / 2 + ny * e.box, e.box, e.box)
+    } else {
+      const gw = e.box * grow
+      const c = artCentre(gun)
+      // Solve for the offset that leaves the content's centre where it was:
+      // it sits at (c - 0.5) * box today, and at (c - 0.5) * gw once grown.
+      const off = (v: number): number => (v - 0.5) * (e.box - gw)
+      g.drawImage(
+        gun,
+        -gw / 2 + off(c.x) + nx * e.box,
+        -gw / 2 + off(c.y) + ny * e.box,
+        gw, gw
+      )
+    }
+    g.restore()
+  } else {
+    drawFixture(g, fixtureProxy, e.box / 2, e.box / 2, scale, clock)
+  }
   e.phase = phase
   return e
 }
@@ -1474,20 +1645,55 @@ const endUnitLayer = (
 // right and the caller already has a `scale(facing, 1)` in force, so one sprite
 // serves both directions.
 
-const SIEGE_BOX = 2.4 // sprite box as a multiple of the machine's scale
+/** Sprite box as a multiple of the machine's scale. Exported so the art bench
+ *  lays its reference panels out on the exact rectangle the game blits. */
+export const SIEGE_ART_BOX = 2.4
 
 /**
- * Which engines a painted chassis may replace.
+ * The rider's sprite box, as a multiple of its scale.
  *
- * Only the three whose ARM is already drawn as a separate live layer. The ram,
- * the iron ram and the siege tower draw their moving parts inside the static
- * pass and interleaved in z-order with their own shells — the iron ram's log
- * runs BEHIND its casemate, the tower's crew stand BEHIND the merlons — so a
- * painted chassis there would either freeze the motion or float it over the
- * armour. Splitting those three is a z-order refactor, not a drop-in, and until
- * it is done they keep drawing themselves completely.
+ * 2.3 rather than the siege engines' 2.4, and it is not a taste: it is the
+ * number the art bench has always fitted a cavalry cell at, so a painted
+ * strip cut against that reference drops onto exactly this rectangle. The
+ * horse is as long as it is tall once the lance is counted, which is why the
+ * box is square while a monster's is portrait.
  */
-const SIEGE_STRIPS = new Set(['ballista', 'catapult', 'trebuchet'])
+export const ALLY_ART_BOX = 2.3
+
+/** Allies with a painted gallop strip to look for. */
+const ALLY_STRIPS = new Set(['cavalry'])
+const SIEGE_BOX = SIEGE_ART_BOX
+
+/**
+ * Every engine can take a painted chassis.
+ *
+ * All six now draw their moving part on a separate live layer, so the bitmap
+ * replaces the frame and the machine keeps working: the arm still swings
+ * against its own reload, the ram's log still strikes, the tower's ramp still
+ * falls. The three that were whole-static each needed one small concession to
+ * z-order first — see `drawSiegeMachine`.
+ */
+/**
+ * Engines whose ARM can be replaced by a painted strip.
+ *
+ * The three throwing engines, because their arm is drawn from `cycle` — a real
+ * loop keyed to the reload. The ram, the iron ram and the tower move their parts
+ * on a wall clock and against `engaged`, which is not a cycle a strip can hold.
+ */
+const SIEGE_ARM_STRIPS = new Set(['ballista', 'catapult', 'trebuchet'])
+
+/**
+ * Where a painted arm sits when the engine is only rolling.
+ *
+ * The drawn arms hold near the end of their reload while not engaged — a
+ * catapult rolls up already winched, which is what makes it read as loaded — so
+ * the strip is held at the same place rather than at frame zero.
+ */
+const SIEGE_ARM_REST = 0.86
+
+const SIEGE_STRIPS = new Set([
+  'ballista', 'catapult', 'trebuchet', 'ram', 'ironRam', 'siegeTower'
+])
 const SIEGE_SPIN_STEPS = 16
 const SIEGE_PHASE_MS = 50
 const SIEGE_CACHE_MAX = 96
@@ -1639,9 +1845,19 @@ const drawEnemy = (target: CanvasRenderingContext2D, e: Enemy, t: number): void 
     if (painted) {
       const box = s * SIEGE_BOX
       ctx.drawImage(painted, -box / 2, -box / 2, box, box)
-      drawSiegeMachine(ctx, def.id, s, p, {
-        spin: engaged ? 0 : e.x * 1.6, engaged, t, cycle, flaming, layer: 'moving'
-      })
+      // A painted ARM too, where one has been dropped in. It is indexed by the
+      // machine's own reload rather than by a wall clock, which is the whole
+      // reason the arm was ever a separate layer — and at rest it holds the
+      // frame the drawn arm holds, so a rolling engine is not caught mid-throw.
+      const arm = SIEGE_ARM_STRIPS.has(def.id)
+        ? stripFrame('siegeArm', def.id, 1, engaged ? cycle : SIEGE_ARM_REST)
+        : null
+      if (arm) ctx.drawImage(arm, -box / 2, -box / 2, box, box)
+      else {
+        drawSiegeMachine(ctx, def.id, s, p, {
+          spin: engaged ? 0 : e.x * 1.6, engaged, t, cycle, flaming, layer: 'moving'
+        })
+      }
       ctx.restore()
       stamp()
       if (e.hp < e.maxHp && e.dying <= 0) {
@@ -1848,15 +2064,44 @@ const drawAlly = (target: CanvasRenderingContext2D, a: Ally, t: number): void =>
   ctx.save()
   ctx.globalAlpha = dieT * expiring
   ctx.translate(cx, cy)
-  ctx.scale(a.dir, 1)
+  // By `facing`, not `dir`: the flank it was sent to is not the way it is
+  // pointed once something has got past it.
+  ctx.scale(a.facing, 1)
 
-  // The whole rider is drawn by its own module, from the same ink/cel kit as
-  // the monster cast — see `cavalryArt`.
-  drawCavalry(ctx, s, p, {
-    phase: a.phase,
-    striking: a.targetUid >= 0,
-    t
-  })
+  // A painted rider, if one has been dropped in.
+  //
+  // The strip covers ONE gallop and is indexed by the same `gait()` the
+  // drawing runs on, at the same phase offset — so a squad of three still
+  // moves out of lockstep, and a painted hoof lands on the beat the drawn one
+  // did rather than on a wall clock of its own.
+  //
+  // It replaces the WHOLE rider, unlike a siege engine's chassis: the lance
+  // is couched under the arm and its thrust travels through the shoulder and
+  // the seat, so there is no seam to split the strike out along. The cost is
+  // that an adopted rider gallops through its attack instead of thrusting.
+  // Swapping mid-charge would be worse — a unit that pops between painted and
+  // drawn every time it finds a target reads as a glitch, not as an animation.
+  const painted = ALLY_STRIPS.has(a.typeId)
+    ? stripFrame('ally', a.typeId, 1, cavalryCycle01(t, a.phase))
+    : null
+  if (painted) {
+    // The caller's `scale(a.dir, 1)` is still in force, so the one
+    // right-facing strip serves both directions.
+    // The dust stays live and stays UNDER the rider, the same way a ship's
+    // wake does: it is transient, it is off the body, and over the magenta of
+    // a reference sheet it would key to a pink smudge instead of to nothing.
+    drawCavalryDust(ctx, s, t, a.phase)
+    const box = s * ALLY_ART_BOX
+    ctx.drawImage(painted, -box / 2, -box / 2, box, box)
+  } else {
+    // The whole rider is drawn by its own module, from the same ink/cel kit as
+    // the monster cast — see `cavalryArt`.
+    drawCavalry(ctx, s, p, {
+      phase: a.phase,
+      striking: a.targetUid >= 0,
+      t
+    })
+  }
   ctx.restore()
   stamp()
 
@@ -3409,6 +3654,31 @@ const consumeFx = (ev: FxEvent): void => {
       playFx('place')
       break
     }
+    case 'merge': {
+      // Louder than a placement on purpose: a fused block is worth three of the
+      // piece that made it, and the tell has to say so. The block's own accent
+      // bursts outward, a ring swells over it, and the multiplier lands as text
+      // so "×3" is learned the first time it happens rather than explained.
+      const p = themedPalette(ev.palette)
+      const rgb = hexToRgb(p.accent2)
+      for (let i = 0; i < Math.round(18 * density); i++) {
+        const a = Math.random() * Math.PI * 2
+        const v = 1.4 + Math.random() * 2.2
+        emit({
+          x: ev.x, y: ev.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v,
+          life: 420 + Math.random() * 200, size: 0.1 + Math.random() * 0.06,
+          color: rgb, alpha: 0.9, additive: true, drag: 2.4
+        })
+      }
+      emit({ x: ev.x, y: ev.y, vx: 0, vy: 0, life: 320, size: 1.6, color: rgb, alpha: 0.55, additive: true })
+      emitText({
+        x: ev.x, y: ev.y + 0.6, vy: 1.4, life: 900,
+        text: `×${Math.pow(3, Math.max(1, ev.tier) - 1)}`,
+        color: '#ffd93c', size: 0.42, crit: true
+      })
+      playFx('place')
+      break
+    }
     case 'sell': {
       for (let i = 0; i < Math.round(10 * density); i++) {
         emit({
@@ -4127,6 +4397,50 @@ const drawArrowShape = (
     ctx.moveTo(-u * 1.75, 0)
     ctx.lineTo(-u * 1.1, f * u * 0.55)
     ctx.lineTo(-u * 0.55, f * u * 0.12)
+    ctx.closePath()
+    ctx.fill()
+  }
+}
+
+/**
+ * The siege ballista's quarrel — a machine's round, not an archer's.
+ *
+ * It shared the arrow's drawing until the two were split, and at a few pixels
+ * across that made the engine's shot read as a stray arrow: the one round in
+ * the game the player is supposed to see coming and answer.
+ *
+ * Everything here is set against `drawArrowShape` on purpose. SHORTER, so the
+ * silhouette is a stub rather than a needle. THICKER, in dark oiled timber
+ * rather than pale ash. A blunt iron bodkin instead of a bright leaf-shaped
+ * broadhead — a bolt punches, an arrow slices. And stiff leather vanes rather
+ * than feather fletching, because a quarrel is spun by a machine.
+ */
+const drawQuarrelShape = (
+  ctx: CanvasRenderingContext2D, u: number, seed: number, rich: boolean
+): void => {
+  // Shaft: two-thirds the arrow's reach and half again its weight.
+  inkStroke(ctx, [[-u * 1.1, 0], [u * 0.3, 0], [u * 1.0, 0]], u * 0.26, u * 0.44, '#7a5a34', seed)
+  inkStroke(ctx, [[-u * 1.1, u * 0.14], [u * 1.0, u * 0.14]], u * 0.1, u * 0.16, '#402a13', seed + 3)
+
+  // A binding of cord where the head is socketed on — the detail that says
+  // "assembled by a crew" rather than "grown on a shaft".
+  fillShape(ctx, [
+    [u * 0.78, -u * 0.3], [u * 1.02, -u * 0.3], [u * 1.02, u * 0.3], [u * 0.78, u * 0.3]
+  ], '#caa26a')
+
+  // Head: a squat four-sided bodkin, dark iron with one lit facet.
+  const head: Pt[] = [[u * 2.0, 0], [u * 1.0, -u * 0.42], [u * 1.15, 0], [u * 1.0, u * 0.42]]
+  fillShape(ctx, head, '#5d6672')
+  fillShape(ctx, [[u * 1.92, -u * 0.03], [u * 1.05, -u * 0.34], [u * 1.18, -u * 0.04]], '#aab6c4')
+  if (rich) ink(ctx, head, { width: u * 0.16, color: '#12161b', breakUp: 0.28, seed: seed + 7 })
+
+  // Vanes: cut leather, straight-edged and swept back hard.
+  ctx.fillStyle = '#8c3b2c'
+  for (const f of [-1, 1]) {
+    ctx.beginPath()
+    ctx.moveTo(-u * 1.15, 0)
+    ctx.lineTo(-u * 0.72, f * u * 0.48)
+    ctx.lineTo(-u * 0.34, f * u * 0.16)
     ctx.closePath()
     ctx.fill()
   }
@@ -5015,6 +5329,25 @@ const celOrb = (
 /** Iron, as it reads on every round the tower and the enemy throw. */
 const IRON = { deep: '#0f1114', mid: '#333a42', lit: '#6e7783', line: '#07080a' }
 
+/**
+ * How long a painted round is drawn, in world units per unit of zoom.
+ *
+ * The drawn arrow spans −1.75u to +2.5u at u = 0.1 zoom, so 0.425. A painted
+ * round is fitted to its cell by the export bench, which means the bitmap's own
+ * proportions are whatever the painter drew — only the LENGTH can be pinned,
+ * and the height follows from the image.
+ */
+const ROUND_ART_SPAN = 0.44
+
+/**
+ * Where the round's origin sits along that span, as a fraction from the left.
+ *
+ * The drawn arrow straddles its origin unevenly — 1.75u of shaft behind, 2.5u of
+ * head in front — because a projectile is positioned by its point of impact,
+ * not by its middle. A painted round has to hang the same way or it lands early.
+ */
+const ROUND_ART_ORIGIN = 1.75 / 4.25
+
 const drawProjectile = (ctx: CanvasRenderingContext2D, p: Projectile): void => {
   const zoom = getZoom()
   const x = worldToScreenX(p.x)
@@ -5070,12 +5403,25 @@ const drawProjectile = (ctx: CanvasRenderingContext2D, p: Projectile): void => {
   }
 
   switch (p.kind) {
-    case 'bolt': {
+    case 'bolt':
+    case 'quarrel': {
       const ang = Math.atan2(-p.vy, p.vx)
       ctx.save()
       ctx.translate(x, y)
       ctx.rotate(ang)
-      drawArrowShape(ctx, zoom * 0.1, seed, rich)
+      // Drop-in art, if a round has been painted. Authored pointing right, so
+      // the rotation above serves every heading — the same trick the drawn
+      // shape uses, and the reason one still is enough for a projectile.
+      const painted = spriteFor('round', p.kind)
+      if (painted?.naturalWidth) {
+        const w = zoom * ROUND_ART_SPAN
+        const h = w * (painted.naturalHeight / painted.naturalWidth)
+        ctx.drawImage(painted, -w * ROUND_ART_ORIGIN, -h / 2, w, h)
+      } else if (p.kind === 'quarrel') {
+        drawQuarrelShape(ctx, zoom * 0.1, seed, rich)
+      } else {
+        drawArrowShape(ctx, zoom * 0.1, seed, rich)
+      }
       ctx.restore()
       break
     }
@@ -5241,6 +5587,16 @@ const drawProjectile = (ctx: CanvasRenderingContext2D, p: Projectile): void => {
 
 // ─── Build-mode world UI ────────────────────────────────────────────────────
 
+/** One column of the drop board, as the overlay needs to draw it. */
+export interface DropGuide {
+  /** The column. */
+  c: number
+  /** The row the armed piece would come to rest in. */
+  r: number
+  /** Whether the column still has room for it. */
+  valid: boolean
+}
+
 export interface BuildOverlay {
   /** Shape the player has armed in the tray, or null. */
   selectedShape: string | null
@@ -5260,11 +5616,25 @@ export interface BuildOverlay {
   aimX: number | null
   /** Half-width of that beaten zone, in cells. */
   aimRadius: number
+  /** Column a drop is armed over (the mobile-fit board), or null. */
+  dropColumn: number | null
+  /** Whether that column still has room for the piece. */
+  dropValid: boolean
+  /** The board's ceiling row — how tall the drop band is drawn. */
+  dropRows: number
+  /**
+   * Every column the piece in hand could go to. Empty when nothing is armed.
+   */
+  dropGuides: ReadonlyArray<DropGuide>
+  /** Ground units still walking in beyond each edge of the frame. */
+  edgeLeft: number
+  edgeRight: number
 }
 
 let overlay: BuildOverlay = {
   selectedShape: null, selectedRot: 0, hoverC: null, hoverR: null, hoverValid: false,
-  slots: [], inspectC: null, inspectR: null, aimX: null, aimRadius: 4
+  slots: [], inspectC: null, inspectR: null, aimX: null, aimRadius: 4,
+  dropColumn: null, dropValid: false, dropRows: 0, dropGuides: [], edgeLeft: 0, edgeRight: 0
 }
 
 export const setBuildOverlay = (next: Partial<BuildOverlay>): void => {
@@ -5345,18 +5715,127 @@ const drawGhostCell = (
   // actually fire from once placed.
   ghostProxy.typeId = typeId
   ghostProxy.c = col
-  const sprite = getFixtureSprite(ghostProxy, size, t)
-  if (sprite) {
-    const box = size * FIXTURE_BOX
-    ctx.drawImage(sprite.cv, cx - box / 2, cy - box / 2, box, box)
-  } else {
-    drawFixture(ctx, ghostProxy, cx, cy, size, t)
-  }
+  blitFixture(ctx, ghostProxy, cx, cy, size, t)
+}
+
+/**
+ * A chevron with a count on one edge of the frame: ground units still walking
+ * in from that side.
+ *
+ * On the portrait board the approach lane is a cell and a half wide, so a unit
+ * is on screen for its last two seconds of a seven-second walk. The arrow
+ * carries the rest, and a wall that starts taking hits is never hit "from
+ * nowhere" — which reads as unfair even when the wave was announced.
+ */
+const drawEdgeArrow = (
+  ctx: CanvasRenderingContext2D, side: 1 | -1, count: number, zoom: number, pulse: number
+): void => {
+  if (count <= 0) return
+  const rect = viewRect()
+  const x = side === 1
+    ? worldToScreenX(rect.r) - zoom * 0.85
+    : worldToScreenX(rect.l) + zoom * 0.85
+  const y = worldToScreenY(0.55)
+  const s = zoom * 0.34
+  // Pointing INTO the frame, the way the units are walking.
+  const dir = -side
+  ctx.save()
+  ctx.globalAlpha = 0.72 + pulse * 0.28
+  ctx.strokeStyle = '#ff7a4a'
+  ctx.lineWidth = Math.max(2, zoom * 0.09)
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.beginPath()
+  ctx.moveTo(x - dir * s * 0.5, y - s)
+  ctx.lineTo(x + dir * s * 0.5, y)
+  ctx.lineTo(x - dir * s * 0.5, y + s)
+  ctx.stroke()
+  const label = String(count)
+  const tx = x - dir * s * 1.4
+  ctx.font = `900 ${Math.max(11, Math.round(zoom * 0.42))}px Angry, sans-serif`
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.lineWidth = Math.max(2, zoom * 0.08)
+  ctx.strokeStyle = 'rgba(0,0,0,0.85)'
+  ctx.strokeText(label, tx, y)
+  ctx.fillStyle = '#ffffff'
+  ctx.fillText(label, tx, y)
+  ctx.restore()
 }
 
 const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
   const zoom = getZoom()
   const pulse = 0.5 + 0.5 * Math.sin(t / 420)
+
+  // ── Drop guides (the mobile-fit board) ──
+  //
+  // A piece in hand and the tutorial saying "tap a column" used to be the
+  // whole of it: the columns themselves were invisible until a finger was
+  // already on the board, so the instruction named a target the player could
+  // not see. Arming a piece now lights every column it could go to.
+  //
+  // Neighbouring columns are separated by alternating band strengths rather
+  // than by divider lines — five bands and six lines on a 50 px grid is a
+  // cage, and the board has to stay readable underneath. Each column also
+  // shows the cell the piece would land in, dashed so it never competes with
+  // the solid outline the aimed column gets below. A full column goes red and
+  // loses its landing cell: there is nowhere for the piece to rest.
+  if (overlay.dropGuides.length > 0) {
+    const gTop = worldToScreenY(overlay.dropRows + 1)
+    const gGround = worldToScreenY(0)
+    ctx.save()
+    for (const g of overlay.dropGuides) {
+      const gl = worldToScreenX(g.c - 0.5)
+      ctx.fillStyle = g.valid
+        ? `rgba(150,215,255,${Math.abs(g.c) % 2 === 1 ? 0.055 : 0.11})`
+        : 'rgba(255,110,110,0.14)'
+      ctx.fillRect(gl, gTop, zoom, gGround - gTop)
+      // A hairline down each side. The bands alone vanish where the column
+      // crosses the pale mountains behind the board.
+      ctx.fillStyle = 'rgba(205,238,255,0.2)'
+      ctx.fillRect(gl, gTop, Math.max(1, zoom * 0.02), gGround - gTop)
+      ctx.fillRect(gl + zoom - Math.max(1, zoom * 0.02), gTop, Math.max(1, zoom * 0.02), gGround - gTop)
+      if (!g.valid || g.c === overlay.dropColumn) continue
+      // The cell the piece would come to rest in: filled and dashed, so the
+      // column reads as "this far down" and not merely as a lit stripe.
+      const gy = worldToScreenY(g.r + 1)
+      ctx.fillStyle = `rgba(150,225,255,${0.08 + pulse * 0.05})`
+      ctx.fillRect(gl, gy, zoom, zoom)
+      ctx.setLineDash([zoom * 0.17, zoom * 0.13])
+      ctx.lineWidth = Math.max(2, zoom * 0.055)
+      ctx.strokeStyle = `rgba(175,238,255,${0.6 + pulse * 0.2})`
+      roundRect(ctx, gl + zoom * 0.09, gy + zoom * 0.09, zoom * 0.82, zoom * 0.82, zoom * 0.13)
+      ctx.stroke()
+      ctx.setLineDash([])
+    }
+    ctx.restore()
+  }
+
+  // ── Drop column (the mobile-fit board) ──
+  //
+  // The whole column is the target, so the whole column lights: a band from
+  // the ground to the board's ceiling, and a hard outline on the cell the
+  // piece will come to rest in. Red when the column is full.
+  if (overlay.dropColumn != null) {
+    const c = overlay.dropColumn
+    const l = worldToScreenX(c - 0.5)
+    const top = worldToScreenY(overlay.dropRows + 1)
+    const ground = worldToScreenY(0)
+    ctx.fillStyle = overlay.dropValid
+      ? `rgba(120,220,255,${0.1 + pulse * 0.06})`
+      : `rgba(255,90,90,${0.12 + pulse * 0.06})`
+    ctx.fillRect(l, top, zoom, ground - top)
+    if (overlay.hoverR != null) {
+      ctx.lineWidth = Math.max(2, zoom * 0.06)
+      ctx.strokeStyle = overlay.dropValid ? '#5ef08a' : '#ff5a5a'
+      roundRect(ctx, l, worldToScreenY(overlay.hoverR + 1), zoom, zoom, zoom * 0.12)
+      ctx.stroke()
+    }
+  }
+
+  // ── Edge arrows (the mobile-fit board) ──
+  drawEdgeArrow(ctx, -1, overlay.edgeLeft, zoom, pulse)
+  drawEdgeArrow(ctx, 1, overlay.edgeRight, zoom, pulse)
   // Rotated here rather than at the call site so the ghost, the footprint
   // outline and the seal markers all read the SAME cells the placement check
   // will run against.
@@ -5499,19 +5978,87 @@ const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
       // from the wave-start cache so a rank bought with the inspector open
       // redraws immediately, matching `BlockInspector`.
       const rr = w.range * effectiveRangeMul.value * zoom
-      ctx.strokeStyle = `rgba(120,220,255,${0.35 + pulse * 0.25})`
-      ctx.lineWidth = Math.max(1.5, zoom * 0.035)
-      ctx.setLineDash([zoom * 0.22, zoom * 0.16])
-      ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.stroke()
+
+      // DOUBLE-STROKED: a fat dark pass under a bright thin one.
+      //
+      // A single translucent cyan line is only visible against something darker
+      // than it, and most of what this ring crosses is not — daylit sky, snow on
+      // the far peaks, pale stone, the water. It read as a faint scratch at
+      // noon and vanished outright where it crossed a bright peak, which makes
+      // the one overlay in the game that TEACHES reach unreadable exactly when
+      // the player is using it.
+      //
+      // Backing it with its own dark outline is the same fix the rank chevrons
+      // use, and it is background-independent: the halo supplies the contrast,
+      // so the ring holds at every hour of the day cycle without the overlay
+      // having to know what time it is. Both passes share the dash pattern, so
+      // the dark is an outline around each dash rather than a solid ring behind
+      // a dotted one.
+      const dash: [number, number] = [zoom * 0.22, zoom * 0.16]
+      const lw = Math.max(2, zoom * 0.045)
+
+      /**
+       * The reachable region, as a path.
+       *
+       * A radial weapon is a circle. A PLUNGING one is a circle only ABOVE the
+       * muzzle — below it, height is free, so the region is a column of the
+       * same width falling away to the ground and past it. Drawing that as a
+       * dome on top of two verticals is the whole rule in one shape: "this far
+       * to either side, and anything under it".
+       *
+       * Canvas angles run clockwise on screen because y points down, so the
+       * half ABOVE the muzzle is π → 2π (left, over the top, to right).
+       */
+      const region = (): void => {
+        ctx.beginPath()
+        if (!w.plunging) {
+          ctx.arc(cx, cy, rr, 0, Math.PI * 2)
+          return
+        }
+        // Past the bottom of the frame, because the reach genuinely does not
+        // stop — a bottom edge drawn anywhere would be inventing a limit.
+        const floor = ctx.canvas.height + lw * 4
+        ctx.moveTo(cx - rr, floor)
+        ctx.lineTo(cx - rr, cy)
+        ctx.arc(cx, cy, rr, Math.PI, Math.PI * 2)
+        ctx.lineTo(cx + rr, floor)
+      }
+
+      ctx.setLineDash(dash)
+      ctx.lineCap = 'round'
+
+      ctx.strokeStyle = `rgba(6,18,34,${0.5 + pulse * 0.28})`
+      ctx.lineWidth = lw * 2.4
+      region(); ctx.stroke()
+
+      // Near-opaque on top. The pulse now rides the top of the range rather
+      // than the bottom — it should read as breathing, never as fading out.
+      ctx.strokeStyle = `rgba(150,232,255,${0.82 + pulse * 0.18})`
+      ctx.lineWidth = lw
+      region(); ctx.stroke()
+
       ctx.setLineDash([])
-      ctx.fillStyle = 'rgba(120,220,255,0.06)'
-      ctx.beginPath(); ctx.arc(cx, cy, rr, 0, Math.PI * 2); ctx.fill()
-      // Selection ring on the block itself.
+      ctx.lineCap = 'butt'
+
+      // The disc stays a whisper. It covers a huge area of hand-painted
+      // scenery, and anything strong enough to help on its own would wash the
+      // art out — the ring is what carries the read.
+      ctx.fillStyle = 'rgba(120,220,255,0.07)'
+      region(); ctx.closePath(); ctx.fill()
+      // Selection ring on the block itself, backed the same way. It sits on
+      // pale stone and painted crates rather than on sky, so it was never as
+      // badly off as the range ring — but a selection that half-disappears
+      // against a light block is the same bug one step smaller.
+      const sw = Math.max(2, zoom * 0.06)
+      const sx = worldToScreenX(b.c - 0.5)
+      const sy = worldToScreenY(b.r + spanH(b))
+      ctx.strokeStyle = 'rgba(6,18,34,0.7)'
+      ctx.lineWidth = sw * 2
+      roundRect(ctx, sx, sy, zoom * spanW(b), zoom * spanH(b), zoom * 0.12)
+      ctx.stroke()
       ctx.strokeStyle = '#7fe0ff'
-      ctx.lineWidth = Math.max(2, zoom * 0.06)
-      roundRect(ctx,
-        worldToScreenX(b.c - 0.5), worldToScreenY(b.r + spanH(b)),
-        zoom * spanW(b), zoom * spanH(b), zoom * 0.12)
+      ctx.lineWidth = sw
+      roundRect(ctx, sx, sy, zoom * spanW(b), zoom * spanH(b), zoom * 0.12)
       ctx.stroke()
     }
   }
@@ -5529,8 +6076,16 @@ const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
  * carriage. Doubling per tier puts a tier-3 at 2.2 cells — a single siege piece
  * straddling four blocks' worth of masonry.
  */
-const mergeArtSpan = (tier: number): number =>
-  tier <= 1 ? 1 : 1.1 * Math.pow(2, tier - 2)
+const mergeArtSpan = (b: Block): number => {
+  if (tierOf(b.tier) <= 1 || rulesNow().mergeArt === 'cell') return 1
+  // The SHORTEST side, not the tier. A weld doubles its footprint's AREA every
+  // tier but only widens both axes every other one — 2×1, 2×2, 4×2, 4×4 — so
+  // doubling the gun per tier (what this used to do) put a 4.4-cell barrel on
+  // a two-cell-tall tier-4 and hung it out into the sky. Measured off the
+  // short side it overflows by the same tenth at every tier, which is the
+  // "too much cannon for the carriage" read the merged art is going for.
+  return 1.1 * Math.min(spanW(b), spanH(b))
+}
 
 /**
  * The steel plate that says how deep the weld goes.
@@ -5546,6 +6101,17 @@ const mergeArtSpan = (tier: number): number =>
  * the plate was buried. It is drawn after the fixture instead, so it sits on
  * top of the barrel rather than dodging it.
  */
+/**
+ * What the plate says.
+ *
+ * Roman through III, which is every tier the desktop board can reach and the
+ * only thing that ever fitted the stamped-steel look. An uncapped board goes
+ * past that, and "VIII" in a plate a third of a cell wide is a smear — so from
+ * four up it is the Arabic number, which never exceeds two characters.
+ */
+const tierLabel = (tier: number): string =>
+  tier >= 4 ? String(tier) : tier >= 3 ? 'III' : 'II'
+
 const drawTierPlate = (
   ctx: CanvasRenderingContext2D, tier: number, bx: number, by: number, size: number
 ): void => {
@@ -5561,7 +6127,7 @@ const drawTierPlate = (
   ctx.font = `900 ${Math.round(size * 0.24)}px sans-serif`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  ctx.fillText(tier >= 3 ? 'III' : 'II', bx, by + size * 0.01)
+  ctx.fillText(tierLabel(tier), bx, by + size * 0.01)
   ctx.restore()
 }
 
@@ -5600,7 +6166,7 @@ const drawBlock = (ctx: CanvasRenderingContext2D, b: Block, t: number, fallOffse
   if (isShip(b.typeId)) {
     // A fused fleet is one bigger hull, so the whole ship scales with the span
     // rather than being tiled — two skiffs lashed together are a longship.
-    drawShip(ctx, b.typeId, size * mergeArtSpan(tierOf(b.tier)),
+    drawShip(ctx, b.typeId, size * mergeArtSpan(b),
       themedPalette(blockDef(b.typeId).palette), { aim: b.aim, t, seed: b.uid })
     ctx.restore()
     if (b.hp < b.maxHp && fallOffset === 0) {
@@ -5705,7 +6271,38 @@ const drawBlock = (ctx: CanvasRenderingContext2D, b: Block, t: number, fallOffse
       drawRoof(ctx, cx - fw / 2 + size * (ix + 0.5), topY, size)
     }
   }
+}
 
+/**
+ * The per-block SECOND pass: the gun, and everything else that has to sit on
+ * top of the tower rather than inside it.
+ *
+ * Split out of `drawBlock` because a weapon mount is bigger than the cell it
+ * stands on. The gun art overflows its footprint by design — a carriage, a
+ * barrel and two wheels do not fit inside one crate — so while it was drawn
+ * with the block body, ANY block that happened to be drawn later painted over
+ * it. Map order is placement order, so whether your cannon had a barrel came
+ * down to whether you built the wall beside it before or after the gun.
+ *
+ * The same argument covers the burn, the hit flash, the HP bar and the badges:
+ * every one of them is a readout ABOUT the block, and a readout half-hidden
+ * behind the neighbour is worse than no readout.
+ *
+ * Runs after every body and before the enemies, so mounts stack over the tower
+ * but still pass under the units, projectiles and VFX in front of it.
+ */
+const drawBlockOverlays = (ctx: CanvasRenderingContext2D, b: Block, t: number): void => {
+  // Hulls draw their own gun inside `drawShip` and carry their badges with it.
+  if (isShip(b.typeId)) return
+
+  const zoom = getZoom()
+  const size = zoom
+  const cw = spanW(b)
+  const ch = spanH(b)
+  const fw = size * cw
+  const fh = size * ch
+  const cx = worldToScreenX(centreX(b))
+  const cy = worldToScreenY(centreY(b))
   // ONE gun for the whole span, CENTRED on the footprint in both axes.
   //
   // The lift is only what the art overflows below the footprint's underside: a
@@ -5714,17 +6311,11 @@ const drawBlock = (ctx: CanvasRenderingContext2D, b: Block, t: number, fallOffse
   // its carriage buried in the ground.
   //
   // Blitted from a cached sprite rather than re-drawn — see the fixture cache.
-  const artSpan = mergeArtSpan(tierOf(b.tier))
-  if (fallOffset === 0) {
+  const artSpan = mergeArtSpan(b)
+  {
     const fs = size * artSpan
     const fy = cy - size * (Math.max(0, (artSpan - ch) / 2) * 0.6)
-    const sprite = getFixtureSprite(b, fs, t)
-    if (sprite) {
-      const box = fs * FIXTURE_BOX
-      ctx.drawImage(sprite.cv, cx - box / 2, fy - box / 2, box, box)
-    } else {
-      drawFixture(ctx, b, cx, fy, fs, t)
-    }
+    blitFixture(ctx, b, cx, fy, fs, t)
   }
 
   // Burning — a molotov left this block alight and it is still losing HP.
@@ -5733,7 +6324,7 @@ const drawBlock = (ctx: CanvasRenderingContext2D, b: Block, t: number, fallOffse
   // a fire that lasts five seconds on a dozen blocks at once would otherwise
   // dominate the particle budget for the whole wave, and the flame has to keep
   // burning during the build phase where nothing else is emitting.
-  if (b.burnMs && b.burnMs > 0 && fallOffset === 0) {
+  if (b.burnMs && b.burnMs > 0) {
     // Fade the last 700 ms so the fire visibly dies rather than blinking out.
     const fade = Math.min(1, b.burnMs / 700)
     ctx.save()
@@ -5788,13 +6379,13 @@ const drawBlock = (ctx: CanvasRenderingContext2D, b: Block, t: number, fallOffse
 
   // Damage bar — only on wounded blocks, and never on debris. It spans the
   // footprint, which is also the clearest read of how much block is at stake.
-  if (b.hp < b.maxHp && fallOffset === 0) {
+  if (b.hp < b.maxHp) {
     drawHpBar(ctx, cx, cy - fh / 2 - size * 0.1, fw * 0.72, Math.max(2, size * 0.07),
       b.hp / b.maxHp, b.typeId === GATE_ID)
   }
 
   // ── Merge tier ──
-  if (tierOf(b.tier) > 1 && fallOffset === 0) {
+  if (tierOf(b.tier) > 1) {
     drawTierPlate(ctx, tierOf(b.tier), cx + fw / 2 - size * 0.2, cy - fh / 2 + size * 0.17, size)
   }
 
@@ -5804,7 +6395,7 @@ const drawBlock = (ctx: CanvasRenderingContext2D, b: Block, t: number, fallOffse
   // a cell no digit is legible, but "how many notches" is, and that is the only
   // question the marker has to answer from across the tower.
   const rank = b.level ?? 0
-  if (rank > 0 && fallOffset === 0) {
+  if (rank > 0) {
     ctx.save()
     ctx.translate(cx - fw / 2 + size * 0.14, cy + fh / 2 - size * 0.14)
     ctx.lineCap = 'round'
@@ -5889,6 +6480,31 @@ const drawReflection = (ctx: CanvasRenderingContext2D, t: number): void => {
 
 // ─── Public API ─────────────────────────────────────────────────────────────
 
+// ─── Render profile ─────────────────────────────────────────────────────────
+//
+// What the device can afford, decided once at boot by the scene (see
+// `useDeviceTier`). The desktop scene never sets one, so these defaults ARE the
+// desktop's behaviour.
+
+let renderProfile: RenderProfile = {
+  dpr: 2, drawEvery: 1, shine: true, particleCap: null, textCap: null
+}
+
+export const setRenderProfile = (p: RenderProfile): void => {
+  renderProfile = p
+  setParticleCap(p.particleCap)
+  setTextCap(p.textCap)
+}
+
+/**
+ * Only these monster designs are pre-baked, or null for the whole cast.
+ *
+ * The bake costs ~10 ms a frame per design and ~1.7 MB of canvas each; a mode
+ * that fields nine enemies has no use for the other eight.
+ */
+let monsterPrimeFilter: string[] | null = null
+export const setMonsterPrimeFilter = (ids: string[] | null): void => { monsterPrimeFilter = ids }
+
 let lastFrame = 0
 
 /**
@@ -5910,7 +6526,12 @@ export const drawScene = (
   // work involved, and anything still unbaked draws its older body.
   if (!monstersPrimed) {
     monstersPrimed = true
-    primeMonsterSprites(allMonsterIds())
+    // Bake only. The strips — and every other painted bitmap — are fetched by
+    // `artPreload` in debut order: behind the splash for what wave 1 can put
+    // on screen, on idle slots at low priority for the rest. Firing all sixty
+    // probes from here on the first frame was how a first-time player paid
+    // for the trebuchet at wave 0.
+    primeMonsterSprites(monsterPrimeFilter ?? allMonsterIds(), { fetch: false })
   }
   tintDpr = dpr
   if (fixtureDpr !== dpr) {
@@ -5918,7 +6539,7 @@ export const drawScene = (
     fixtureCache.clear()
     siegeCache.clear()
   }
-  shineOn = getTowerBlocks().size <= SHINE_MAX_BLOCKS
+  shineOn = renderProfile.shine && getTowerBlocks().size <= SHINE_MAX_BLOCKS
   sampleFrame(dtMs)
   updateCamera(dtMs)
 
@@ -5985,7 +6606,7 @@ export const drawScene = (
     if (Math.abs(e.x) < 1.2) drawEnemy(ctx, e, t)
   }
 
-  // 7b. Blocks — culled to the visible rect.
+  // 7b. Block BODIES — culled to the visible rect.
   for (const b of getTowerBlocks().values()) {
     if (b.c + spanW(b) - 1 < rect.l - 1 || b.c > rect.r + 1) continue
     if (b.r + spanH(b) - 0.5 < rect.b - 1 || b.r + 0.5 > rect.t + 1) continue
@@ -5995,6 +6616,22 @@ export const drawScene = (
   for (const b of getDebris()) {
     const f = b.falling!
     drawBlock(ctx, b, t, f.dy, f.rot, f.dx)
+  }
+
+  // 7b-ii. Weapon mounts and per-block readouts, over EVERY body.
+  //
+  // A separate pass because a gun is bigger than the cell it stands on, so
+  // drawing it with its own block let the next block in map order paint over
+  // the barrel — and map order is placement order, which made it look random.
+  // See `drawBlockOverlays`. Still before the enemies, so a mount is part of
+  // the tower rather than something floating in front of the battle.
+  //
+  // The cull is a cell wider than the body pass on purpose: a mount whose block
+  // is just off-screen still has half a carriage inside the frame.
+  for (const b of getTowerBlocks().values()) {
+    if (b.c + spanW(b) - 1 < rect.l - 2 || b.c > rect.r + 2) continue
+    if (b.r + spanH(b) - 0.5 < rect.b - 2 || b.r + 0.5 > rect.t + 2) continue
+    drawBlockOverlays(ctx, b, t)
   }
 
   // 7c. Everything else in front.
@@ -6097,6 +6734,22 @@ export const invalidateSprites = (): void => {
   bgKey = ''
 }
 
+// ── …and whenever the art layer itself changes ──
+//
+// These caches bake a DECISION, not just pixels: each entry was drawn either
+// from a painted bitmap or from the procedural fallback, depending on whether
+// the probe had decoded at the moment that bucket was first needed. Probing is
+// asynchronous, so the buckets touched during the first second of a run were
+// baked before the art arrived — and they kept the drawing for the life of the
+// page. Zooming to any OTHER bucket baked a fresh one, with art. The result
+// was a tower that showed painted guns at most camera distances and drawn ones
+// at a few specific distances, which reads as a rendering fault rather than as
+// a cache.
+//
+// It is also what made `__art.refresh()` look like it did nothing: it forgets
+// the probes, but every sprite already baked from a miss survived it.
+onArtChanged(invalidateSprites)
+
 // ─── Portrait API, for the art-sheet bench ──────────────────────────────────
 //
 // `/art-sheets` bakes the whole cast onto a pixel lattice so it can leave the
@@ -6117,6 +6770,20 @@ export const paintBlockBody = (
 }
 
 /**
+ * A block face the way the WORLD draws it, for a test scene.
+ *
+ * `paintBlockBody` below paints the procedural body — the tray tile with its
+ * coloured rim — which is not what stands in the tower once art has loaded.
+ * This goes through `blockFace`, the one path every world-side block body
+ * takes: the painted bitmap when it has decoded, the bake otherwise.
+ */
+export const paintWorldBlock = (
+  ctx: CanvasRenderingContext2D, typeId: string, x: number, y: number, size: number
+): void => {
+  ctx.drawImage(blockFace(typeId, 0, size), x, y, size, size)
+}
+
+/**
  * The moving part bolted to a block — barrel, bow, coil, blade, wrench.
  *
  * `aim` and `recoil` are the two things the battlefield varies, so they are the
@@ -6126,27 +6793,57 @@ export const paintBlockBody = (
 export const paintBlockFixture = (
   ctx: CanvasRenderingContext2D, typeId: string,
   cx: number, cy: number, s: number,
-  opts: { aim?: number; recoil?: number; t?: number; seed?: number } = {}
+  opts: {
+    aim?: number; recoil?: number; t?: number; seed?: number; layer?: FixtureLayer
+  } = {}
 ): void => {
   const stand = {
     uid: opts.seed ?? 1, c: 0, r: 0, typeId,
     hp: 1, maxHp: 1, cd: 0,
     aim: opts.aim ?? 0, recoil: opts.recoil ?? 0
   } as unknown as Block
-  drawFixture(ctx, stand, cx, cy, s, opts.t ?? 0)
+  drawFixture(ctx, stand, cx, cy, s, opts.t ?? 0, opts.layer ?? 'all')
+}
+
+/**
+ * A fixture painted the way the BATTLEFIELD paints it, for a test scene.
+ *
+ * `paintBlockFixture` above is the bench's painter and goes straight to the
+ * drawing — right for a reference sheet, useless for checking what ships,
+ * because it never consults the painted bitmap. This is the live path: same
+ * cache, same aim buckets, same overrides.
+ */
+export const paintLiveFixture = (
+  ctx: CanvasRenderingContext2D, typeId: string, cx: number, cy: number, s: number,
+  opts: { aim?: number; recoil?: number; t?: number; uid?: number; col?: number } = {}
+): void => {
+  const b = {
+    uid: opts.uid ?? 1, c: opts.col ?? 0, r: 0, typeId,
+    hp: 1, maxHp: 1, cd: 0, tier: 0,
+    aim: opts.aim ?? 0, recoil: opts.recoil ?? 0
+  } as unknown as Block
+  blitFixture(ctx, b, cx, cy, s, opts.t ?? 0)
 }
 
 /** A whole hull, for the three ship blocks — they bypass the block body path. */
 export const paintShipBlock = (
   ctx: CanvasRenderingContext2D, typeId: string, s: number,
-  opts: { aim?: number; t?: number; seed?: number } = {}
+  opts: { aim?: number; t?: number; seed?: number; layer?: ShipLayer } = {}
 ): void => {
   drawShip(ctx, typeId, s, themedPalette(blockDef(typeId).palette),
-    { aim: opts.aim ?? 0, t: opts.t ?? 0, seed: opts.seed ?? 1 })
+    { aim: opts.aim ?? 0, t: opts.t ?? 0, seed: opts.seed ?? 1, layer: opts.layer })
 }
 
-/** How wide a merged block's gun is drawn, in cells. Doubles per tier. */
-export const fixtureSpanForTier = (tier: number): number => mergeArtSpan(tier)
+/**
+ * How wide a merged block's gun is drawn, in cells, for the CANONICAL
+ * footprint of a tier — the art-sheet tool has a tier but no block.
+ *
+ * A tier-n weld covers 2^(n-1) cells, squared up as far as it goes, so its
+ * short side is 2^floor((n-1)/2). Agrees with `mergeArtSpan` on every
+ * footprint the board actually builds.
+ */
+export const fixtureSpanForTier = (tier: number): number =>
+  tier <= 1 ? 1 : 1.1 * Math.pow(2, Math.floor((tier - 1) / 2))
 
 /** The riveted steel plate that says how deep a weld goes. */
 export const paintTierPlate = (

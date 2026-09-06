@@ -10,11 +10,23 @@ export default {
   'tip': 'Consejo',
   'crazyGamesOnly': 'Este juego solo está disponible en',
 
+  // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'mobile': {
+    'rotatePortrait': 'Sostén el móvil en vertical para jugar',
+    'columnFull': 'Columna llena',
+    'repairAll': 'Reparar todo',
+    'volley': 'Descarga',
+    'swap': 'Cambiar',
+    'menu': 'Menú',
+    'materials': 'materiales',
+    'zoom': 'Zoom'
+  },
+
   'hud': {
     'wave': 'Oleada', 'enemies': 'Enemigos', 'callWave': 'Llamar oleada', 'callBoss': 'Llamar jefe',
     'speed': 'Velocidad {n}×',
-    'speedOffer': 'Doble velocidad por un anuncio',
-    'speedFor': '{n} min', 'recenter': 'Centrar la vista',
+    'speedOffer': 'Desbloquear velocidad {n}×',
+    'speedGroup': 'Velocidad del juego', 'recenter': 'Centrar la vista',
     'rotateLeft': 'Girar a la izquierda',
     'rotateRight': 'Girar a la derecha',
     'arrowRain': 'Lluvia de flechas',
@@ -31,6 +43,14 @@ export default {
     'outOfReach': 'Fuera de alcance ×{n} — necesitas {m} de alcance'
   },
   'hints': {
+    'dropBlock': {
+      'touch': 'Toca una columna para soltar la pieza',
+      'desktop': 'Haz clic en una columna para soltar la pieza'
+    },
+    'mergeBlock': {
+      'touch': 'Deja caer una pieza sobre su gemela para fusionarlas',
+      'desktop': 'Deja caer una pieza sobre su gemela para fusionarlas'
+    },
     'selectBlock': { 'touch': 'Toca un bloque de abajo para elegirlo', 'desktop': 'Haz clic en un bloque de abajo para elegirlo' },
     'placeBlock': { 'touch': 'Ahora toca una casilla iluminada para construir', 'desktop': 'Ahora haz clic en una casilla iluminada para construir' },
     'camera': { 'touch': 'Arrastra para mover · Pellizca para acercar', 'desktop': 'Arrastra para mover · Rueda para acercar' },
@@ -83,7 +103,6 @@ export default {
       'gate': 'Portón', 'wood': 'Caja de madera', 'brace': 'Caja reforzada', 'stone': 'Bloque de piedra',
       'archer': 'Arquería', 'cannon': 'Cañón', 'mortar': 'Mortero', 'tesla': 'Bobina eléctrica',
       'frost': 'Aguja de escarcha', 'repair': 'Taller',
-      'sawmill': 'Aserradero', 'quarry': 'Cantera', 'mint': 'Mina de oro',
       'spikes': 'Muro de púas',
       'bombard': 'Bombarda'
     },
@@ -106,9 +125,6 @@ export default {
       'tesla': 'Rayos que saltan entre enemigos cercanos.',
       'frost': 'Congela grupos enteros y los deja al ralentí.',
       'repair': 'Repara los bloques vecinos entre oleadas.',
-      'sawmill': 'Produce madera al final de cada oleada superada.',
-      'quarry': 'Produce piedra al final de cada oleada superada.',
-      'mint': 'Produce monedas al final de cada oleada superada.',
       'spikes': 'Los atacantes se hieren con él en cada golpe.',
       'bombard': 'Lanza un proyectil casi vertical. Explosión pequeña, solo objetivos terrestres.'
     },
@@ -138,6 +154,8 @@ export default {
 
   // ─── First-stage tutorial ─────────────────────────────────────────────────
   'tutorial': {
+    'drop': 'Toca una columna para soltar la pieza.',
+    'merge': 'Suelta una gemela sobre otra para fusionarlas.',
     'gate': 'Protege la Puerta. Si cae, la partida termina.',
     'gateSeeded': 'Te construimos un fuerte inicial. Protege la Puerta: si cae, la partida termina.',
     'pick': 'Elige una pieza.',
@@ -177,6 +195,9 @@ export default {
   },
 
   'tech': {
+    'blueprints': {
+      'title': 'Planos'
+    },
     'intro1': 'Todo lo que compras aquí es permanente y se mantiene en cada partida futura.',
     'intro2': 'Las monedas llegan tras cada asedio, ganes o pierdas. Aquí es donde se gastan.',
     'intro3': 'Los nodos dorados ya puedes pagarlos. Los azules piden más monedas; los apagados, el nodo anterior.',
@@ -192,6 +213,7 @@ export default {
     'requires': 'Requiere {n}',
     'spotlight': '¡Gasta!',
     'names': {
+      'm2_lumberHut': 'Cabaña maderera',
       'logistics': 'Logística',
       'unlockCoffer': 'Cofres',
       'yields': 'Rendimientos',
@@ -205,12 +227,12 @@ export default {
       'admiralty': 'Almirantazgo',
       'foundations': 'Cimientos', 'sharpBolts': 'Virotes afilados', 'unlockBrace': 'Cajas reforzadas',
       'lumberStock': 'Reserva de madera', 'longSight': 'Vista larga', 'rapidFire': 'Fuego rápido',
-      'reinforced': 'Vigas reforzadas', 'unlockSawmill': 'Aserradero', 'quarryStock': 'Reserva de piedra',
+      'reinforced': 'Vigas reforzadas', 'unlockSawmill': 'Vetas ricas', 'quarryStock': 'Reserva de piedra',
       'unlockMortar': 'Mortero', 'heavyOrdnance': 'Artillería pesada', 'unlockTesla': 'Bobina eléctrica',
-      'gateArmor': 'Blindaje del portón', 'unlockQuarry': 'Cantera', 'richHauls': 'Botín abundante',
+      'gateArmor': 'Blindaje del portón', 'unlockQuarry': 'Galerías profundas', 'richHauls': 'Botín abundante',
       'wideFoundation': 'Cimiento amplio', 'siegeShells': 'Proyectiles de asedio', 'unlockFrost': 'Aguja de escarcha',
       'forkedBolts': 'Rayos bifurcados', 'ironPlating': 'Placas de hierro', 'unlockRepair': 'Taller',
-      'unlockMint': 'Mina de oro', 'looting': 'Saqueo', 'overcharge': 'Sobrecarga',
+      'unlockMint': 'Carta gremial', 'looting': 'Saqueo', 'overcharge': 'Sobrecarga',
       'masterwork': 'Obra maestra', 'fieldRepairs': 'Reparaciones de campo', 'greatFoundation': 'Gran cimiento',
       'warChest': 'Cofre de guerra',
       'unlockSpikes': 'Muro de púas',
@@ -220,6 +242,7 @@ export default {
       'artilleryDoctrine': 'Doctrina de artillería'
     },
     'descriptions': {
+      'm2_lumberHut': 'Desbloquea la Cabaña maderera: produce madera tras cada oleada.',
       'logistics': 'Desbloquea la cantera pequeña: un productor barato que puedes costear en la partida.',
       'unlockCoffer': 'Desbloquea el cofre, el único bloque que acuña oro.',
       'yields': 'Cada bloque de economía rinde un +{n} % más.',
@@ -242,13 +265,13 @@ export default {
       'longSight': 'Todas las armas alcanzan un +{n} % más por rango.',
       'rapidFire': 'Todas las armas disparan un {n} % más rápido por rango.',
       'reinforced': 'Cada bloque de la torre gana +{n} % de PV por rango.',
-      'unlockSawmill': 'Desbloquea el aserradero: produce madera cada oleada.',
+      'unlockSawmill': 'Cada productor rinde un +{n}% más por rango.',
       'quarryStock': 'Empieza cada asedio con +{n} de piedra por rango.',
       'unlockMortar': 'Desbloquea el mortero: daño en área a larga distancia.',
       'heavyOrdnance': 'Radio de área +{n} % por rango.',
       'unlockTesla': 'Desbloquea la bobina eléctrica: los rayos saltan entre enemigos.',
       'gateArmor': 'El portón gana +{n} % de PV por rango.',
-      'unlockQuarry': 'Desbloquea la cantera: produce piedra cada oleada.',
+      'unlockQuarry': 'Cada productor rinde un +{n}% adicional por rango.',
       'richHauls': 'Recompensas de oleada +{n} % por rango.',
       'wideFoundation': 'Construye {n} columnas más anchas por rango.',
       'siegeShells': 'Las armas de la torre hacen +{n} % de daño por rango.',
@@ -256,7 +279,7 @@ export default {
       'forkedBolts': 'El rayo salta a {n} enemigo más por rango.',
       'ironPlating': 'Cada bloque gana +{n} de armadura por rango.',
       'unlockRepair': 'Desbloquea el taller: cura a los vecinos cada oleada.',
-      'unlockMint': 'Desbloquea la mina de oro: produce monedas cada oleada.',
+      'unlockMint': 'Cada productor rinde un +{n}% adicional por rango.',
       'looting': 'Los enemigos sueltan un +{n} % más de monedas por rango.',
       'overcharge': 'Todas las armas disparan un {n} % más rápido por rango.',
       'masterwork': 'Las armas de la torre hacen +{n} % de daño por rango.',

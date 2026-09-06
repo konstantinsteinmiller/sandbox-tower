@@ -10,11 +10,23 @@ export default {
   'tip': 'ヒント',
   'crazyGamesOnly': 'このゲームは以下でのみプレイできます：',
 
+  // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'mobile': {
+    'rotatePortrait': '縦向きに持ってプレイしてください',
+    'columnFull': '列がいっぱいです',
+    'repairAll': 'すべて修理',
+    'volley': '一斉射撃',
+    'swap': '交換',
+    'menu': 'メニュー',
+    'materials': '資材',
+    'zoom': 'ズーム'
+  },
+
   'hud': {
     'wave': 'ウェーブ', 'enemies': '敵', 'callWave': 'ウェーブを呼ぶ', 'callBoss': 'ボスを呼ぶ',
     'speed': '速度 {n}×',
-    'speedOffer': '広告で2倍速',
-    'speedFor': '{n}分', 'recenter': '視点を戻す',
+    'speedOffer': '{n}×速度を解放',
+    'speedGroup': 'ゲーム速度', 'recenter': '視点を戻す',
     'rotateLeft': '左に回転',
     'rotateRight': '右に回転',
     'arrowRain': '矢の雨',
@@ -31,6 +43,14 @@ export default {
     'outOfReach': '射程外 ×{n} — 射程{m}が必要'
   },
   'hints': {
+    'dropBlock': {
+      'touch': '列をタップしてピースを落とす',
+      'desktop': '列をクリックしてピースを落とす'
+    },
+    'mergeBlock': {
+      'touch': '同じピースの上に落とすと合体します',
+      'desktop': '同じピースの上に落とすと合体します'
+    },
     'selectBlock': { 'touch': '下のブロックをタップして選択', 'desktop': '下のブロックをクリックして選択' },
     'placeBlock': { 'touch': '光っているマスをタップして建設', 'desktop': '光っているマスをクリックして建設' },
     'camera': { 'touch': 'ドラッグで移動 · ピンチでズーム', 'desktop': 'ドラッグで移動 · スクロールでズーム' },
@@ -83,7 +103,6 @@ export default {
       'gate': 'ゲート', 'wood': '木箱', 'brace': '補強木箱', 'stone': '石ブロック',
       'archer': '弓塔', 'cannon': 'キャノン', 'mortar': '迫撃砲', 'tesla': '雷コイル',
       'frost': '氷塔', 'repair': '修理場',
-      'sawmill': '製材所', 'quarry': '採石場', 'mint': '金鉱',
       'spikes': 'とげ壁',
       'bombard': '臼砲'
     },
@@ -106,9 +125,6 @@ export default {
       'tesla': '近くの敵へ跳ねる稲妻。',
       'frost': '集団ごと凍らせて大幅に減速。',
       'repair': 'ウェーブの合間に隣接ブロックを修理。',
-      'sawmill': 'ウェーブを守り切るたびに木材を産出。',
-      'quarry': 'ウェーブを守り切るたびに石材を産出。',
-      'mint': 'ウェーブを守り切るたびにコインを産出。',
       'spikes': '殴った敵は毎回そのダメージを自分で受けます。',
       'bombard': '砲弾を真上に打ち上げます。爆発は小さく、地上の敵のみ。'
     },
@@ -138,6 +154,8 @@ export default {
 
   // ─── First-stage tutorial ─────────────────────────────────────────────────
   'tutorial': {
+    'drop': '列をタップしてピースを落としましょう。',
+    'merge': '同じピースの上に落として合体させましょう。',
     'gate': 'ゲートを守れ。落ちたら終わりだ。',
     'gateSeeded': '最初の砦を建てておいた。ゲートを守れ。落ちたら終わりだ。',
     'pick': 'ブロックを選ぼう。',
@@ -177,6 +195,9 @@ export default {
   },
 
   'tech': {
+    'blueprints': {
+      'title': '設計図'
+    },
     'intro1': 'ここで買ったものはすべて永続します。以降のすべてのプレイに引き継がれます。',
     'intro2': 'コインは勝敗を問わず、包囲戦ごとに手に入ります。使う場所はここです。',
     'intro3': '金色のノードは今すぐ買えます。青はコイン不足、暗いものは前提ノードが必要です。',
@@ -192,6 +213,7 @@ export default {
     'requires': '必要：{n}',
     'spotlight': '使おう！',
     'names': {
+      'm2_lumberHut': '木こり小屋',
       'logistics': '兵站',
       'unlockCoffer': '金庫',
       'yields': '産出',
@@ -205,12 +227,12 @@ export default {
       'admiralty': '海軍本部',
       'foundations': '基礎', 'sharpBolts': '鋭利な矢', 'unlockBrace': '補強木箱',
       'lumberStock': '木材備蓄', 'longSight': '遠見', 'rapidFire': '速射',
-      'reinforced': '補強梁', 'unlockSawmill': '製材所', 'quarryStock': '石材備蓄',
+      'reinforced': '補強梁', 'unlockSawmill': '豊かな鉱脈', 'quarryStock': '石材備蓄',
       'unlockMortar': '迫撃砲', 'heavyOrdnance': '重砲', 'unlockTesla': '雷コイル',
-      'gateArmor': 'ゲート装甲', 'unlockQuarry': '採石場', 'richHauls': '豊かな戦利品',
+      'gateArmor': 'ゲート装甲', 'unlockQuarry': '深層坑道', 'richHauls': '豊かな戦利品',
       'wideFoundation': '広い基礎', 'siegeShells': '攻城弾', 'unlockFrost': '氷塔',
       'forkedBolts': '分岐する雷', 'ironPlating': '鉄板装甲', 'unlockRepair': '修理場',
-      'unlockMint': '金鉱', 'looting': '略奪', 'overcharge': 'オーバーチャージ',
+      'unlockMint': 'ギルド特許', 'looting': '略奪', 'overcharge': 'オーバーチャージ',
       'masterwork': '傑作', 'fieldRepairs': '野戦修理', 'greatFoundation': '大基礎',
       'warChest': '軍資金',
       'unlockSpikes': 'とげ壁',
@@ -220,6 +242,7 @@ export default {
       'artilleryDoctrine': '砲兵ドクトリン'
     },
     'descriptions': {
+      'm2_lumberHut': '木こり小屋を解放 — 毎ウェーブ後に木材を産出。',
       'logistics': '石切り場を解放。必要なその走行中に買える安価な産出ブロックです。',
       'unlockCoffer': '金を鋳造する唯一のブロック、金庫を解放します。',
       'yields': '経済ブロックの産出量 +{n}%。',
@@ -242,13 +265,13 @@ export default {
       'longSight': '全兵器の射程がランクごとに +{n}%。',
       'rapidFire': '全兵器の攻撃速度がランクごとに +{n}%。',
       'reinforced': '塔の全ブロックのHPがランクごとに +{n}%。',
-      'unlockSawmill': '製材所を解放——毎ウェーブ木材を産出。',
+      'unlockSawmill': '各生産施設の産出がランクごとに+{n}%。',
       'quarryStock': '包囲戦開始時の石材がランクごとに +{n}。',
       'unlockMortar': '迫撃砲を解放——長射程の範囲ダメージ。',
       'heavyOrdnance': '範囲半径がランクごとに +{n}%。',
       'unlockTesla': '雷コイルを解放——稲妻が敵の間を跳ねます。',
       'gateArmor': 'ゲートのHPがランクごとに +{n}%。',
-      'unlockQuarry': '採石場を解放——毎ウェーブ石材を産出。',
+      'unlockQuarry': '各生産施設の産出がランクごとにさらに+{n}%。',
       'richHauls': 'ウェーブ報酬がランクごとに +{n}%。',
       'wideFoundation': '建設可能幅がランクごとに {n} 列拡大。',
       'siegeShells': '塔の兵器のダメージがランクごとに +{n}%。',
@@ -256,7 +279,7 @@ export default {
       'forkedBolts': '稲妻の跳ね先がランクごとに {n} 体増加。',
       'ironPlating': '全ブロックの装甲がランクごとに +{n}。',
       'unlockRepair': '修理場を解放——毎ウェーブ隣接ブロックを回復。',
-      'unlockMint': '金鉱を解放——毎ウェーブコインを産出。',
+      'unlockMint': '各生産施設の産出がランクごとにさらに+{n}%。',
       'looting': '敵のコイン落とし量がランクごとに +{n}%。',
       'overcharge': '全兵器の攻撃速度がランクごとに +{n}%。',
       'masterwork': '塔の兵器のダメージがランクごとに +{n}%。',

@@ -39,6 +39,44 @@ Named after the DESIGN, not the enemy type — one design can field several rank
 and it is the design that owns the gait. `walk-grumpling.png` and a bare
 `grumpling.png` both land.
 
+## Siege engines roll
+
+`siege-<engine>.png` is ONE square image per engine, not a cycle. It shipped as
+an eight-panel roll first; the wheels do turn, but nobody has ever watched a
+spoke go round in game, and asking for eight views of one machine got eight
+machines — the catapult came back at a different three-quarter angle in every
+panel. A single image has no perspective to lose. They land at
+`public/images/siege/<engine>.webp`.
+
+`arm-<engine>.png` is the part that genuinely IS a cycle: eight panels across
+the throwing arm's reload, for the ballista, catapult and trebuchet only. Their
+arm is drawn from `cycle` — 0 the frame a round leaves, 1 the frame the next one
+does — so the strip stays keyed to when the machine actually fires. It lands at
+`public/images/siege-arms/<engine>.webp` and is composited over the chassis.
+Paint the arm alone: no wheels, no carriage, no frame.
+
+The reference shows the CARRIAGE ONLY. The arm, bow, counterweight and sling
+are keyed to each machine's own reload and are still drawn live on top, exactly
+as a block's fixture is drawn over its painted body. Paint an arm into the sheet
+and the engine ends up with two.
+
+All six engines have a sheet. The ram, the iron ram and the siege tower each
+needed one concession to z-order first, which is why their references show less
+than you might expect: the ram's roof but not its log, the iron ram's casemate
+but not the log sliding out of it, the tower's body but not the ramp, banner,
+crew or battlements. Those all animate, so they all stay live.
+
+## Rounds
+
+`cell-projectile-bolt` and `cell-projectile-quarrel` land at
+`public/images/rounds/<kind>.webp`. Both are drawn pointing RIGHT and rotated to
+their heading in game, so one still covers every direction.
+
+They are two different things and must look it: `bolt` is the archer post's
+arrow, `quarrel` is the siege ballista's — short, heavy, dark, iron-headed. The
+other rounds are reference only; a cannonball is a circle drawn at its own
+radius and the shell, bomb and molotov each carry something live on top.
+
 The grid is cut blind, so the slicer checks what it cannot see and reports it:
 an empty panel, feet that wander between frames, a body that slides sideways, a
 creature redrawn at a different size. Any of those means ask for it again.

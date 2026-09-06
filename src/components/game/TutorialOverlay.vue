@@ -23,7 +23,8 @@ import { useI18n } from 'vue-i18n'
  *   4. It is skippable from the first frame.
  */
 
-export type TutorialStep = 'gate' | 'pick' | 'place' | 'call'
+/** `drop` and `merge` are the mobile-fit board's beats; the rest are shared. */
+export type TutorialStep = 'gate' | 'pick' | 'place' | 'call' | 'drop' | 'merge'
 
 interface Props {
   /** Which step is live, or null when the tutorial is finished/never started. */

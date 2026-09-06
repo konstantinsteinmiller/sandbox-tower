@@ -10,11 +10,23 @@ export default {
   'tip': 'Tips',
   'crazyGamesOnly': 'Gim ini hanya tersedia di',
 
+  // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'mobile': {
+    'rotatePortrait': 'Pegang ponsel secara tegak untuk bermain',
+    'columnFull': 'Kolom penuh',
+    'repairAll': 'Perbaiki semua',
+    'volley': 'Tembakan salvo',
+    'swap': 'Tukar',
+    'menu': 'Menu',
+    'materials': 'bahan',
+    'zoom': 'Zoom'
+  },
+
   'hud': {
     'wave': 'Gelombang', 'enemies': 'Musuh', 'callWave': 'Panggil gelombang', 'callBoss': 'Panggil bos',
     'speed': 'Kecepatan {n}×',
-    'speedOffer': 'Kecepatan ganda dengan satu iklan',
-    'speedFor': '{n} mnt', 'recenter': 'Pusatkan tampilan',
+    'speedOffer': 'Buka kecepatan {n}×',
+    'speedGroup': 'Kecepatan game', 'recenter': 'Pusatkan tampilan',
     'rotateLeft': 'Putar ke kiri',
     'rotateRight': 'Putar ke kanan',
     'arrowRain': 'Hujan Panah',
@@ -31,6 +43,14 @@ export default {
     'outOfReach': 'Di luar jangkauan ×{n} — perlu jangkauan {m}'
   },
   'hints': {
+    'dropBlock': {
+      'touch': 'Ketuk sebuah kolom untuk menjatuhkan balok',
+      'desktop': 'Klik sebuah kolom untuk menjatuhkan balok'
+    },
+    'mergeBlock': {
+      'touch': 'Jatuhkan balok di atas kembarannya untuk menggabungkan',
+      'desktop': 'Jatuhkan balok di atas kembarannya untuk menggabungkan'
+    },
     'selectBlock': { 'touch': 'Ketuk blok di bawah untuk memilihnya', 'desktop': 'Klik blok di bawah untuk memilihnya' },
     'placeBlock': { 'touch': 'Sekarang ketuk kotak bercahaya untuk membangun', 'desktop': 'Sekarang klik kotak bercahaya untuk membangun' },
     'camera': { 'touch': 'Seret untuk menggeser · Cubit untuk zoom', 'desktop': 'Seret untuk menggeser · Gulir untuk zoom' },
@@ -83,7 +103,6 @@ export default {
       'gate': 'Gerbang', 'wood': 'Peti Kayu', 'brace': 'Peti Diperkuat', 'stone': 'Blok Batu',
       'archer': 'Menara Pemanah', 'cannon': 'Meriam', 'mortar': 'Mortir', 'tesla': 'Kumparan Petir',
       'frost': 'Menara Es', 'repair': 'Bengkel',
-      'sawmill': 'Penggergajian', 'quarry': 'Tambang Batu', 'mint': 'Tambang Emas',
       'spikes': 'Dinding Berduri',
       'bombard': 'Bombardir'
     },
@@ -106,9 +125,6 @@ export default {
       'tesla': 'Petir yang melompat antar musuh terdekat.',
       'frost': 'Membekukan seluruh kelompok dan memperlambatnya drastis.',
       'repair': 'Memperbaiki blok tetangga di antara gelombang.',
-      'sawmill': 'Menghasilkan kayu di akhir setiap gelombang yang bertahan.',
-      'quarry': 'Menghasilkan batu di akhir setiap gelombang yang bertahan.',
-      'mint': 'Menghasilkan koin di akhir setiap gelombang yang bertahan.',
       'spikes': 'Penyerang melukai diri sendiri setiap kali memukulnya.',
       'bombard': 'Melontarkan peluru lurus ke atas. Ledakan kecil, hanya target darat.'
     },
@@ -138,6 +154,8 @@ export default {
 
   // ─── First-stage tutorial ─────────────────────────────────────────────────
   'tutorial': {
+    'drop': 'Ketuk sebuah kolom untuk menjatuhkan balok.',
+    'merge': 'Jatuhkan kembaran di atas kembaran untuk menggabungkannya.',
     'gate': 'Lindungi Gerbang. Kalau jatuh, ronde berakhir.',
     'gateSeeded': 'Kami bangunkan benteng awal untukmu. Lindungi Gerbang — kalau jatuh, ronde berakhir.',
     'pick': 'Pilih satu bagian.',
@@ -177,6 +195,9 @@ export default {
   },
 
   'tech': {
+    'blueprints': {
+      'title': 'Cetak biru'
+    },
     'intro1': 'Semua yang kamu beli di sini permanen dan terbawa ke setiap ronde berikutnya.',
     'intro2': 'Koin datang dari setiap pengepungan, menang atau kalah. Di sinilah kamu membelanjakannya.',
     'intro3': 'Node emas sudah terjangkau. Yang biru butuh lebih banyak koin, yang redup butuh node sebelumnya.',
@@ -192,6 +213,7 @@ export default {
     'requires': 'Butuh {n}',
     'spotlight': 'Belanjakan!',
     'names': {
+      'm2_lumberHut': 'Pondok Kayu',
       'logistics': 'Logistik',
       'unlockCoffer': 'Peti Harta',
       'yields': 'Hasil',
@@ -205,12 +227,12 @@ export default {
       'admiralty': 'Kelaksamanaan',
       'foundations': 'Fondasi', 'sharpBolts': 'Anak Panah Tajam', 'unlockBrace': 'Peti Diperkuat',
       'lumberStock': 'Stok Kayu', 'longSight': 'Penglihatan Jauh', 'rapidFire': 'Tembakan Cepat',
-      'reinforced': 'Balok Diperkuat', 'unlockSawmill': 'Penggergajian', 'quarryStock': 'Stok Batu',
+      'reinforced': 'Balok Diperkuat', 'unlockSawmill': 'Urat kaya', 'quarryStock': 'Stok Batu',
       'unlockMortar': 'Mortir', 'heavyOrdnance': 'Artileri Berat', 'unlockTesla': 'Kumparan Petir',
-      'gateArmor': 'Armor Gerbang', 'unlockQuarry': 'Tambang Batu', 'richHauls': 'Rampasan Melimpah',
+      'gateArmor': 'Armor Gerbang', 'unlockQuarry': 'Galian dalam', 'richHauls': 'Rampasan Melimpah',
       'wideFoundation': 'Fondasi Lebar', 'siegeShells': 'Peluru Pengepungan', 'unlockFrost': 'Menara Es',
       'forkedBolts': 'Petir Bercabang', 'ironPlating': 'Pelat Besi', 'unlockRepair': 'Bengkel',
-      'unlockMint': 'Tambang Emas', 'looting': 'Penjarahan', 'overcharge': 'Muatan Berlebih',
+      'unlockMint': 'Piagam serikat', 'looting': 'Penjarahan', 'overcharge': 'Muatan Berlebih',
       'masterwork': 'Mahakarya', 'fieldRepairs': 'Perbaikan Lapangan', 'greatFoundation': 'Fondasi Agung',
       'warChest': 'Peti Perang',
       'unlockSpikes': 'Dinding Berduri',
@@ -220,6 +242,7 @@ export default {
       'artilleryDoctrine': 'Doktrin Artileri'
     },
     'descriptions': {
+      'm2_lumberHut': 'Membuka Pondok Kayu — menghasilkan kayu setelah setiap gelombang.',
       'logistics': 'Membuka Galian Batu — produsen murah yang terjangkau di ronde yang membutuhkannya.',
       'unlockCoffer': 'Membuka Peti Harta, satu-satunya blok yang mencetak emas.',
       'yields': 'Setiap blok ekonomi menghasilkan +{n}% lebih banyak.',
@@ -242,13 +265,13 @@ export default {
       'longSight': 'Jangkauan semua senjata +{n}% per peringkat.',
       'rapidFire': 'Semua senjata menembak {n}% lebih cepat per peringkat.',
       'reinforced': 'Setiap blok menara mendapat +{n}% HP per peringkat.',
-      'unlockSawmill': 'Membuka Penggergajian — menghasilkan kayu tiap gelombang.',
+      'unlockSawmill': 'Setiap produsen menghasilkan +{n}% lebih banyak per tingkat.',
       'quarryStock': 'Mulai tiap pengepungan dengan +{n} batu per peringkat.',
       'unlockMortar': 'Membuka Mortir — kerusakan area jarak jauh.',
       'heavyOrdnance': 'Radius area +{n}% per peringkat.',
       'unlockTesla': 'Membuka Kumparan Petir — petir melompat antar musuh.',
       'gateArmor': 'Gerbang mendapat +{n}% HP per peringkat.',
-      'unlockQuarry': 'Membuka Tambang Batu — menghasilkan batu tiap gelombang.',
+      'unlockQuarry': 'Setiap produsen menghasilkan +{n}% tambahan per tingkat.',
       'richHauls': 'Hadiah gelombang +{n}% per peringkat.',
       'wideFoundation': 'Bangun {n} kolom lebih lebar per peringkat.',
       'siegeShells': 'Senjata menara memberi +{n}% kerusakan per peringkat.',
@@ -256,7 +279,7 @@ export default {
       'forkedBolts': 'Petir melompat ke {n} musuh tambahan per peringkat.',
       'ironPlating': 'Setiap blok mendapat +{n} armor per peringkat.',
       'unlockRepair': 'Membuka Bengkel — menyembuhkan tetangga tiap gelombang.',
-      'unlockMint': 'Membuka Tambang Emas — menghasilkan koin tiap gelombang.',
+      'unlockMint': 'Setiap produsen menghasilkan +{n}% tambahan per tingkat.',
       'looting': 'Musuh menjatuhkan +{n}% lebih banyak koin per peringkat.',
       'overcharge': 'Semua senjata menembak {n}% lebih cepat per peringkat.',
       'masterwork': 'Senjata menara memberi +{n}% kerusakan per peringkat.',

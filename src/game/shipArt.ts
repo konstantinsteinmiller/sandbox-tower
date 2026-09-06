@@ -3,7 +3,7 @@ import {
   type Pt, type CelTones
 } from '@/game/inkArt'
 import { INK, LINE, paint } from '@/game/monsterKit'
-import { mixHex, type Palette } from '@/game/art'
+import { mixHex, spriteFor, type Palette } from '@/game/art'
 
 /**
  * ─── Ships ──────────────────────────────────────────────────────────────────
@@ -247,9 +247,10 @@ const waterLine = (
  */
 const drawSkiff = (
   ctx: CanvasRenderingContext2D, S: number, m: ShipParts,
-  roll: number, aim: number, t: number
+  roll: number, aim: number, t: number, layer: ShipLayer
 ): void => {
   const deck = -0.1
+  if (layer === 'fixtures') { skiffGun(ctx, S, m, aim, deck); return }
 
   // Hull: a shallow clinker-built boat with a raked stem.
   const hull = slab([
@@ -274,7 +275,21 @@ const drawSkiff = (
   // A stubby mast with a scrap of sail, well aft.
   sail(ctx, S, -0.16 * S, deck, 0.44, 0.3, m.accent, roll, t, 506)
 
-  // Swivel bolt-thrower on the foredeck, tracking its target.
+  if (layer !== 'hull') skiffGun(ctx, S, m, aim, deck)
+}
+
+/**
+ * The skiff’s swivel bolt-thrower.
+ *
+ * Split out because it AIMS. Everything else about a hull holds still
+ * enough to be a bitmap; a weapon that tracks its target cannot be, so it
+ * is the one layer that carries on being drawn live over painted art —
+ * the same bargain a block strikes with its fixture.
+ */
+const skiffGun = (
+  ctx: CanvasRenderingContext2D, S: number, m: ShipParts,
+  aim: number, deck: number
+): void => {
   ctx.save()
   ctx.translate(0.22 * S, (deck - 0.02) * S)
   plank(ctx, S, [0, 0], [0, -0.12 * S], 0.05 * S, m.timberDark, 510)
@@ -290,6 +305,7 @@ const drawSkiff = (
   ctx.restore()
 }
 
+
 /**
  * Longship — the workhorse.
  *
@@ -298,9 +314,10 @@ const drawSkiff = (
  */
 const drawLongship = (
   ctx: CanvasRenderingContext2D, S: number, m: ShipParts,
-  roll: number, aim: number, t: number
+  roll: number, aim: number, t: number, layer: ShipLayer
 ): void => {
   const deck = -0.14
+  if (layer === 'fixtures') { longshipGun(ctx, S, m, aim, deck); return }
 
   // Oars, drawn first so the hull covers where they enter the water.
   const stroke_ = Math.sin(t / 520) * 0.06
@@ -344,7 +361,21 @@ const drawLongship = (
   gunwaleShields(ctx, S, -0.4, 0.36, deck - 0.02, 5, m.accent, 540)
   sail(ctx, S, -0.04 * S, deck, 0.6, 0.44, m.accent, roll, t, 545)
 
-  // Harpoon thrower on the foredeck.
+  if (layer !== 'hull') longshipGun(ctx, S, m, aim, deck)
+}
+
+/**
+ * The longship’s harpoon thrower.
+ *
+ * Split out because it AIMS. Everything else about a hull holds still
+ * enough to be a bitmap; a weapon that tracks its target cannot be, so it
+ * is the one layer that carries on being drawn live over painted art —
+ * the same bargain a block strikes with its fixture.
+ */
+const longshipGun = (
+  ctx: CanvasRenderingContext2D, S: number, m: ShipParts,
+  aim: number, deck: number
+): void => {
   ctx.save()
   ctx.translate(0.34 * S, (deck - 0.04) * S)
   plank(ctx, S, [0, 0], [0, -0.14 * S], 0.06 * S, m.timberDark, 550)
@@ -359,6 +390,7 @@ const drawLongship = (
   ctx.restore()
 }
 
+
 /**
  * War galley — the capital ship.
  *
@@ -368,9 +400,10 @@ const drawLongship = (
  */
 const drawGalley = (
   ctx: CanvasRenderingContext2D, S: number, m: ShipParts,
-  roll: number, aim: number, t: number
+  roll: number, aim: number, t: number, layer: ShipLayer
 ): void => {
   const deck = -0.16
+  if (layer === 'fixtures') { galleyBattery(ctx, S, m, aim, deck); return }
 
   const oarBeat = Math.sin(t / 420) * 0.07
   for (let i = 0; i < 5; i++) {
@@ -426,12 +459,23 @@ const drawGalley = (
 
   sail(ctx, S, 0.02 * S, deck - 0.02, 0.7, 0.5, m.accent, roll, t, 590)
 
-  // ── The battery ──
-  //
-  // TWO bombards, fore and aft of the mast. The galley is the capital ship and
-  // the top of the harbour tree, and a single gun made it read as a longship
-  // with a nicer hull — a broadside is the silhouette that earns the price.
-  // Both track the same target, because they are crewed by the same order.
+  if (layer !== 'hull') galleyBattery(ctx, S, m, aim, deck)
+}
+
+/**
+ * The galley’s broadside — two bombards, fore and aft of the mast.
+ *
+ * TWO because the galley is the capital ship and the top of the harbour tree,
+ * and a single gun made it read as a longship with a nicer hull. Both track
+ * the same target, because they are crewed by the same order.
+ *
+ * Split out because it AIMS, and so is the one layer that carries on being
+ * drawn live over a painted hull.
+ */
+const galleyBattery = (
+  ctx: CanvasRenderingContext2D, S: number, m: ShipParts,
+  aim: number, deck: number
+): void => {
   const bombard = (x: number, scale: number, seed: number): void => {
     ctx.save()
     ctx.translate(x * S, (deck - 0.06) * S)
@@ -478,37 +522,104 @@ const drawGalley = (
  * against the bank behind it. Dropping it clear of the grass strip is what puts
  * it visibly on open water.
  */
-const DRAFT = 0.42
+export const SHIP_DRAFT = 0.42
+
+/**
+ * Which half of a ship to draw.
+ *
+ * `hull` is everything that holds still — planking, sail, oars, castle — and
+ * is what a painted bitmap replaces. `fixtures` is the deck weapon, which
+ * aims at whatever the ship is shooting at and so can never be baked. The
+ * ships are blocks in every way that matters: a base, with a gun on top.
+ */
+export type ShipLayer = 'all' | 'hull' | 'fixtures'
+
+/**
+ * The band of a hull that is actually visible, in units of S, measured from
+ * the waterline origin.
+ *
+ * It IS the clip rectangle below — everything outside it is cut away — which
+ * makes it the one honest box to hand a painter and to blit a return into.
+ * Exported so the art bench renders the reference at exactly the rectangle
+ * the renderer will draw it back into.
+ */
+export const SHIP_CLIP = { x: -1.2, y: -1.6, w: 2.4, h: 1.82 } as const
+
+/**
+ * The rectangle a PAINTED hull occupies, in the same units.
+ *
+ * Not the clip band, which is sized for the wake — three trailing bands that
+ * reach well over a boat-length to either side. Handing a painter that box
+ * put the skiff in the bottom third of an otherwise empty frame and spent
+ * three quarters of the resolution on background.
+ *
+ * These numbers are measured off the three drawn hulls rather than chosen:
+ * the widest (the galley, ram to stern) runs -0.61..+0.79 and the tallest
+ * masthead reaches -0.90, so the box is those with a little air. Its bottom
+ * IS the clip, which is what makes the waterline the frame's own bottom edge
+ * — nothing to describe, nothing to line up by eye.
+ */
+export const SHIP_ART = { x: -0.7, y: -1.0, w: 1.6, h: 1.22 } as const
+
+/** Hulls with a painted bitmap to look for. */
+const SHIP_HULLS = new Set(['skiff', 'longship', 'galley'])
 
 export const drawShip = (
   ctx: CanvasRenderingContext2D, id: string, S: number, p: Palette,
-  opts: { aim: number; t: number; seed: number }
+  opts: { aim: number; t: number; seed: number; layer?: ShipLayer }
 ): void => {
   const m = shipParts(p)
   const { aim, t, seed } = opts
+  const layer = opts.layer ?? 'all'
   // Every hull rolls and heaves on its own phase, so a line of moored ships
   // never moves as one object.
-  const phase = seed * 1.7
-  const roll = Math.sin(t / 1450 + phase) * 0.05 * S
-  const heave = Math.sin(t / 1100 + phase * 1.3) * 0.022 * S
+  // A reference bake sits DEAD LEVEL. The roll is applied to the bitmap at
+  // run time, so baking a tilt into it would tilt the hull twice.
+  const phase = layer === 'hull' ? 0 : seed * 1.7
+  const roll = layer === 'hull' ? 0 : Math.sin(t / 1450 + phase) * 0.05 * S
+  const heave = layer === 'hull' ? 0 : Math.sin(t / 1100 + phase * 1.3) * 0.022 * S
 
   ctx.save()
-  ctx.translate(0, DRAFT * S)
+  ctx.translate(0, SHIP_DRAFT * S)
 
-  waterLine(ctx, S, id === 'skiff' ? 0.5 : id === 'longship' ? 0.58 : 0.62, t, phase)
+  // The wake belongs to the water, not to the ship: it stays live, and it is
+  // never part of what a painter is asked for.
+  if (layer !== 'hull') {
+    waterLine(ctx, S, id === 'skiff' ? 0.5 : id === 'longship' ? 0.58 : 0.62, t, phase)
+  }
 
   ctx.save()
   // Clip away everything below the waterline: the origin of the water row IS
   // the surface, so a boat drawn whole always looks beached on the lake.
   ctx.beginPath()
-  ctx.rect(-S * 1.2, -S * 1.6, S * 2.4, S * 1.6 + S * 0.22)
+  ctx.rect(SHIP_CLIP.x * S, SHIP_CLIP.y * S, SHIP_CLIP.w * S, SHIP_CLIP.h * S)
   ctx.clip()
   ctx.translate(0, heave)
   ctx.rotate(roll / S * 0.5)
 
-  if (id === 'longship') drawLongship(ctx, S, m, roll, aim, t)
-  else if (id === 'galley') drawGalley(ctx, S, m, roll, aim, t)
-  else drawSkiff(ctx, S, m, roll, aim, t)
+  const draw = (l: ShipLayer): void => {
+    if (id === 'longship') drawLongship(ctx, S, m, roll, aim, t, l)
+    else if (id === 'galley') drawGalley(ctx, S, m, roll, aim, t, l)
+    else drawSkiff(ctx, S, m, roll, aim, t, l)
+  }
+
+  // A painted hull, if one has been dropped in.
+  //
+  // Blitted into the clip rectangle it was drawn against, INSIDE the roll and
+  // heave, so a painted boat still moves on the water — and the deck weapon
+  // carries on being drawn live on top, still tracking its target. Never
+  // consulted while baking a reference (`layer` is explicit then), which is
+  // what stops the bench painting last week's return into this week's sheet.
+  const painted = layer === 'all' && SHIP_HULLS.has(id) ? spriteFor('ship', id) : null
+  if (painted) {
+    ctx.drawImage(
+      painted,
+      SHIP_ART.x * S, SHIP_ART.y * S, SHIP_ART.w * S, SHIP_ART.h * S
+    )
+    draw('fixtures')
+  } else {
+    draw(layer)
+  }
 
   ctx.restore()
   ctx.restore()

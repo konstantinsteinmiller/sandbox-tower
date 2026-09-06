@@ -3,7 +3,7 @@ import {
   BLOCK_DEFS, blockDef, GATE_ID, isShip, sellRefund, ENHANCED_HP_MUL, ENHANCED_DAMAGE_MUL,
   ROOF_HP_MUL, ROOF_TOP_DEFENSE_DIV,
   MAX_BLOCK_LEVEL, blockUpgradeCost, upgradeHpMul, upgradePowerMul, upgradeArmorBonus,
-  MAX_MERGE_TIER, tierOf, mergePowerMul, mergeHpMul, canMergeBlocks,
+  SAFE_MAX_TIER, MAX_FOOTPRINT_SPAN, tierOf, mergePowerMul, mergeHpMul, canMergeBlocks,
   FORTIFY_TARGET, canFortifyType, fortifyCost
 } from '@/game/blocks'
 import { ENEMY_DEFS, enemyDef, isImmuneTo, resistOf } from '@/game/enemies'
@@ -11,14 +11,13 @@ import { monsterGore } from '@/game/monsters'
 import { pickMonster } from '@/game/monsterSprites'
 import { ALLY_DEFS, allyDef, CAVALRY_SQUAD } from '@/game/allies'
 import {
-  OFFER_SLOTS, shapeCost, rollOffer, rollOffers, SHAPE_BY_ID, rotatedShape,
+  shapeCost, rollOffer, rollOffers, SHAPE_BY_ID, rotatedShape,
   upgradeCrateShape, crateBaseId,
-  WEAPON_SLOT, pickAffordableWeapon
+  pickAffordableWeapon, type OfferLaneConfig
 } from '@/game/shapes'
 import { SEA_SWIM_Y, SEA_STRIKE_Y } from '@/game/world'
 import {
-  planWave, buildTimeMs, earlyCallBonus, waveReward, isBossWave, SPAWN_FLUSH_AT_MS,
-  enemyHpScale
+  planWave, earlyCallBonus, waveReward, isBossWave, enemyHpScale, type WaveRuleOpts
 } from '@/game/waves'
 import {
   FlawlessTracker, adaptiveFactor, clampDifficulty, hoardFactor, hoardTier, towerPower,
@@ -38,8 +37,84 @@ import {
 import useTowerEconomy from '@/use/useTowerEconomy'
 import { difficultyFactor } from '@/use/useUser'
 import { getState, setState, removeState } from '@/use/useTowerState'
-import { ONBOARDED_KEY, RUN_KEY } from '@/keys'
+import { activeRules, setActiveRules, type RuleSet } from '@/game/rules'
 import { pushFx } from '@/use/useTowerVfx'
+
+// ─── The rules in force ─────────────────────────────────────────────────────
+//
+// Read from the holder on EVERY use, never cached in a module variable, so a
+// mode that applies its rule set before its first run is in force everywhere
+// at once. See `@/game/rules` for what a rule set may change and why the
+// simulation is parametrised rather than forked.
+
+const R = (): RuleSet => activeRules.current
+
+/** The director options the active rules translate to. */
+const waveOpts = (): WaveRuleOpts => {
+  const w = R().waves
+  const e = R().enemies
+  return {
+    budgetMul: w.budgetMul,
+    roster: e.roster,
+    minWaveOverride: e.minWaveOverride,
+    airFromWave: w.airFromWave,
+    seaFromWave: w.seaFromWave,
+    siegeFromWave: w.siegeFromWave,
+    previews: w.previews,
+    spawnWindowMs: w.spawnWindowMs,
+    bossEvery: w.bossEvery,
+    bossBudget: w.bossBudget
+  }
+}
+
+/** How a mode deals its hand. */
+const laneCfg = (): OfferLaneConfig => {
+  const o = R().offers
+  return { slots: o.slots, lanes: o.lanes, supportSlot: o.supportSlot, pool: o.pool }
+}
+
+/**
+ * A price as THIS mode charges it.
+ *
+ * With stone folded into wood (`foldStoneIntoWood`), every stone cost is
+ * charged as wood at the fold rate and stone itself is never touched — one
+ * "materials" pile on a screen with no room for three. Grants (start stock,
+ * refunds, the continue bonus) go through the same conversion, so a stone
+ * refund never appears in a currency the mode does not show.
+ */
+const priceOf = (
+  cost: { wood?: number; stone?: number; coins?: number }
+): { wood: number; stone: number; coins: number } => {
+  const fold = R().blocks.foldStoneIntoWood
+  const wood = cost.wood ?? 0
+  const stone = cost.stone ?? 0
+  const coins = cost.coins ?? 0
+  return fold === null
+    ? { wood, stone, coins }
+    : { wood: wood + Math.round(stone * fold), stone: 0, coins }
+}
+
+/** What an offered piece costs under the active rules — for the tray. */
+export const priceOfShape = (shapeId: string): { wood: number; stone: number; coins: number } =>
+  priceOf(shapeCost(shapeId))
+
+/** What a block costs under the active rules. */
+export const priceOfBlock = (typeId: string): { wood: number; stone: number; coins: number } =>
+  priceOf(blockDef(typeId).cost)
+
+/**
+ * What the hoard surcharge is measured against.
+ *
+ * With stone folded into wood there is ONE materials pile, and the two-pile
+ * band of the ladder has to see it on both sides or it could never fire.
+ */
+const hoardArgs = (): [number, number, number, number] => {
+  const fold = R().blocks.foldStoneIntoWood
+  const d = R().difficulty.hoardDivisor
+  return fold !== null
+    ? [wood.value, wood.value, runCoins.value, d]
+    : [wood.value, stone.value, runCoins.value, d]
+}
 
 /**
  * ─── Tower Siege — simulation ───────────────────────────────────────────────
@@ -63,7 +138,14 @@ import { pushFx } from '@/use/useTowerVfx'
 
 const TICK_MS = 1000 / 60
 /** Max substeps per rAF — a tab restored after 30 s must not simulate 30 s. */
-const MAX_SUBSTEPS = 4
+// Six, not four. This is the ceiling on how much SIMULATED time one frame may
+// advance, and it has to clear the fastest speed the player can buy on the
+// slowest refresh they are likely to have: 3x on a 30 Hz frame is 100 ms, which
+// is six ticks. At four the clamp silently ate the third multiplier on exactly
+// the devices that most need it — the player pays for 3x and gets 2x, with
+// nothing on screen to say so. Still a hard bound: the render loop clamps its
+// own delta to 120 ms first, so a tab-switch stall can never teleport the siege.
+const MAX_SUBSTEPS = 6
 /** How far off-screen (in cells) enemies spawn, measured from the tower edge. */
 const SPAWN_MARGIN = 6
 /** Cells beyond the visible edge an enemy is placed at. Two, not one: the
@@ -95,7 +177,7 @@ const GRAVITY = 26
 /** A falling block is destroyed once it has dropped this far. */
 /** Falling this many cells destroys a block outright; less costs a
  *  proportional slice of its max HP. */
-const FALL_KILL_CELLS = 5
+const fallKillCells = (): number => R().fall.killCells
 /** Crush damage a collapsing block deals to ground enemies beneath it. */
 /** How far a crushed boss is shoved away from the tower, in cells. */
 const BOSS_KNOCKBACK_CELLS = 2.4
@@ -125,7 +207,7 @@ export const WATER_ROW = -1
  * more dead slots — the opposite of what a reroll is for. Four independent
  * timers let the player fix the hand they were dealt and still have the hand.
  */
-const REROLL_COOLDOWN_MS = 5_000
+// (The cooldown itself is `RuleSet.offers.rerollMs`.)
 
 // ─── Live state (plain, non-reactive) ───────────────────────────────────────
 
@@ -310,7 +392,7 @@ export const offers = shallowRef<string[]>([])
 
 /** Parallel to `offers`: true where that slot holds an ENHANCED shape dealt by
  *  the rewarded-ad button. */
-export const offerEnhanced = shallowRef<boolean[]>([false, false, false, false])
+export const offerEnhanced = shallowRef<boolean[]>(new Array(R().offers.slots).fill(false))
 
 /**
  * Whole SECONDS left on each slot's reroll cooldown; 0 means ready.
@@ -320,10 +402,10 @@ export const offerEnhanced = shallowRef<boolean[]>([false, false, false, false])
  * when one of the displayed numbers actually changes — otherwise the build tray
  * would re-render sixty times a second to show the same "3".
  */
-export const rerollReadyIn = shallowRef<number[]>(new Array(OFFER_SLOTS).fill(0))
+export const rerollReadyIn = shallowRef<number[]>(new Array(R().offers.slots).fill(0))
 
 /** Live per-slot cooldowns in ms. Plain: ticked every frame, never rendered. */
-const rerollTimers: number[] = new Array(OFFER_SLOTS).fill(0)
+const rerollTimers: number[] = new Array(R().offers.slots).fill(0)
 
 /** Push the whole-second projection out to the HUD if it changed. */
 const syncRerollClocks = (): void => {
@@ -379,7 +461,9 @@ const isReachable = (e: Enemy): boolean => {
     const r = w.range * mRange
     const dx = e.x - centreX(b)
     const dy = e.y - centreY(b)
-    if (dx * dx + dy * dy <= r * r) return true
+    // Same rule the turret itself fires by — a warning that measured reach
+    // differently from the gun would be wrong in whichever direction hurt more.
+    if (reachSq(dx, dy, w.plunging === true) <= r * r) return true
   }
   return false
 }
@@ -443,6 +527,7 @@ const syncRangeMul = (): void => { mRange = effectiveRangeMul.value }
 
 /** Grant spotters for the rest of the wave. Called after the rewarded video. */
 export const grantRangeBuff = (): void => {
+  if (!R().abilities.rangeBoost) return
   isRangeBuffed.value = true
   syncRangeMul()
   // The scan is what drives the free-cavalry offer and the HUD hint; leaving it
@@ -521,7 +606,7 @@ const flawless = new FlawlessTracker()
 let lostBlockThisWave = false
 
 export const gateHpPct = computed(() => (gateMaxHp.value > 0 ? gateHp.value / gateMaxHp.value : 0))
-export const isBossIncoming = computed(() => isBossWave(wave.value + 1))
+export const isBossIncoming = computed(() => isBossWave(wave.value + 1, R().waves.bossEvery))
 
 /**
  * What the CURRENT wave is actually made of.
@@ -557,10 +642,10 @@ export const previewNextWave = (): WavePlan => {
   const strength = measureTower()
   strength.hp = Math.max(0, strength.hp - repairedSinceMeasure)
   const dynamic = clampDifficulty(
-    adaptiveFactor(next, towerPower(strength)) * flawless.multiplier
+    adaptiveFactor(next, towerPower(strength), R().waves.expectedPowerMul) * flawless.multiplier
   )
-  const hoard = hoardFactor(wood.value, stone.value, runCoins.value)
-  return planWave(next, difficultyFactor() * dynamic * hoard, isFirstSession())
+  const hoard = hoardFactor(...hoardArgs())
+  return planWave(next, difficultyFactor() * dynamic * hoard, isFirstSession(), waveOpts())
 }
 
 /**
@@ -570,8 +655,7 @@ export const previewNextWave = (): WavePlan => {
  * without explanation reads as the game cheating; a wave that doubles next to a
  * chip saying the war chest did it reads as a decision the player made.
  */
-export const currentHoardTier = (): 0 | 1 | 2 | 3 =>
-  hoardTier(wood.value, stone.value, runCoins.value)
+export const currentHoardTier = (): 0 | 1 | 2 | 3 => hoardTier(...hoardArgs())
 
 // ─── Accessors for the renderer ─────────────────────────────────────────────
 
@@ -821,12 +905,19 @@ const syncTowerStats = (): void => {
  * stops the legal-slot scan and the camera's auto-fit from walking off into
  * infinity if someone sets out to build a mile-wide shelf.
  */
-export const halfWidthAt = (r: number): number =>
-  r === WATER_ROW
-    ? Math.min(dockHalfWidth.value, UPPER_HALF_WIDTH)
-    : r === 0
-      ? Math.min(buildHalfWidth.value, UPPER_HALF_WIDTH)
-      : UPPER_HALF_WIDTH
+export const halfWidthAt = (r: number): number => {
+  const b = R().board
+  // −1 makes every column illegal: `|c| > −1` holds for any c. That is how a
+  // mode with no water row, or a ceiling, refuses a row without a special case
+  // at each placement check.
+  if (r === WATER_ROW) return b.waterRow ? Math.min(dockHalfWidth.value, b.upperHalfWidth) : -1
+  if (r > b.maxRow) return -1
+  if (r === 0) {
+    const ground = b.groundHalfWidth === 'tech' ? buildHalfWidth.value : b.groundHalfWidth
+    return Math.min(ground, b.upperHalfWidth)
+  }
+  return b.upperHalfWidth
+}
 
 /**
  * Is `(c, r)` a legal berth for a hull?
@@ -909,7 +1000,7 @@ export const canPlaceShapeAt = (
 
 /** Can the player pay for `shapeId` right now? */
 export const canAffordShape = (shapeId: string): boolean => {
-  const cost = shapeCost(shapeId)
+  const cost = priceOf(shapeCost(shapeId))
   return wood.value >= cost.wood && stone.value >= cost.stone && runCoins.value >= cost.coins
 }
 
@@ -928,7 +1019,7 @@ export const placeShape = (
   // Rotation moves cells; it never changes WHICH blocks the piece is made of,
   // so the price is the unrotated one by construction.
   const def = rotatedShape(shapeId, rot)
-  const cost = shapeCost(shapeId)
+  const cost = priceOf(shapeCost(shapeId))
   wood.value -= cost.wood
   stone.value -= cost.stone
   runCoins.value -= cost.coins
@@ -972,11 +1063,14 @@ const ensureAffordableWeapon = (): void => {
     (id) => SHAPE_BY_ID[id]?.lane === 'weapon' && canAffordShape(id)
   )
   if (armed) return
-  const gun = pickAffordableWeapon(wave.value, availableBlocks.value, canAffordShape)
+  const gun = pickAffordableWeapon(
+    wave.value, availableBlocks.value, canAffordShape, Math.random, R().offers.pool
+  )
   if (!gun) return
-  if (offers.value[WEAPON_SLOT] !== gun) {
+  const weaponSlot = R().offers.weaponSlot
+  if (offers.value[weaponSlot] !== gun) {
     const next = offers.value.slice()
-    next[WEAPON_SLOT] = gun
+    next[weaponSlot] = gun
     offers.value = next
   }
 
@@ -995,10 +1089,10 @@ const ensureAffordableWeapon = (): void => {
   // can already afford anything at all.
   if (reliefGiven || offers.value.some((id) => canAffordShape(id))) return
   reliefGiven = true
-  const cost = shapeCost(gun)
-  wood.value = Math.max(wood.value, cost.wood ?? 0)
-  stone.value = Math.max(stone.value, cost.stone ?? 0)
-  runCoins.value = Math.max(runCoins.value, cost.coins ?? 0)
+  const cost = priceOf(shapeCost(gun))
+  wood.value = Math.max(wood.value, cost.wood)
+  stone.value = Math.max(stone.value, cost.stone)
+  runCoins.value = Math.max(runCoins.value, cost.coins)
 }
 
 /**
@@ -1029,7 +1123,8 @@ export const rerollOffer = (slotIndex: number): void => {
     // different crate and read as the button doing nothing.
     (outgoing ? [...others, outgoing] : others).map(crateBaseId),
     Math.random,
-    outgoing ? crateBaseId(outgoing) : undefined
+    outgoing ? crateBaseId(outgoing) : undefined,
+    laneCfg()
   ))
   offers.value = next
   // A rerolled slot loses its enhanced status — the reinforcement came with the
@@ -1050,27 +1145,27 @@ export const rerollOffer = (slotIndex: number): void => {
  * longer freezes the three that were fine.
  */
 export const canManualReroll = (slotIndex: number): boolean =>
-  slotIndex >= 0 && slotIndex < OFFER_SLOTS && (rerollTimers[slotIndex] ?? 0) <= 0
+  slotIndex >= 0 && slotIndex < R().offers.slots && (rerollTimers[slotIndex] ?? 0) <= 0
 
 export const manualReroll = (slotIndex: number): boolean => {
   if (!canManualReroll(slotIndex)) return false
   rerollOffer(slotIndex)
-  rerollTimers[slotIndex] = REROLL_COOLDOWN_MS
+  rerollTimers[slotIndex] = R().offers.rerollMs
   syncRerollClocks()
   return true
 }
 
 /** Replace the whole hand with four ENHANCED shapes (the rewarded-ad payout). */
 export const dealEnhancedOffers = (): void => {
-  offers.value = rollOffers(wave.value, availableBlocks.value).map(dealt)
-  offerEnhanced.value = [true, true, true, true]
+  offers.value = rollOffers(wave.value, availableBlocks.value, Math.random, laneCfg()).map(dealt)
+  offerEnhanced.value = new Array(R().offers.slots).fill(true)
   ensureAffordableWeapon()
 }
 
-/** Deal a fresh hand of four. */
+/** Deal a fresh hand. */
 const dealOffers = (): void => {
-  offers.value = rollOffers(wave.value, availableBlocks.value).map(dealt)
-  offerEnhanced.value = [false, false, false, false]
+  offers.value = rollOffers(wave.value, availableBlocks.value, Math.random, laneCfg()).map(dealt)
+  offerEnhanced.value = new Array(R().offers.slots).fill(false)
   ensureAffordableWeapon()
 }
 
@@ -1090,16 +1185,15 @@ const dealOffers = (): void => {
 const unlockedKey = computed(() => [...availableBlocks.value].sort().join(','))
 
 watch(unlockedKey, () => {
-  if (offers.value.length !== OFFER_SLOTS) return
-  rerollOffer(2)
-  rerollOffer(3)
+  if (offers.value.length !== R().offers.slots) return
+  for (const slot of R().offers.unlockRerollSlots) rerollOffer(slot)
 })
 
 export const canAfford = (typeId: string): boolean => {
-  const cost = blockDef(typeId).cost
-  return wood.value >= (cost.wood ?? 0)
-    && stone.value >= (cost.stone ?? 0)
-    && runCoins.value >= (cost.coins ?? 0)
+  const cost = priceOf(blockDef(typeId).cost)
+  return wood.value >= cost.wood
+    && stone.value >= cost.stone
+    && runCoins.value >= cost.coins
 }
 
 /** Attempt to place `typeId` at `(c, r)`. Returns false (and changes nothing)
@@ -1161,12 +1255,21 @@ const MERGE_DIRS: ReadonlyArray<readonly [number, number]> = [
 const unionRect = (
   a: Block, b: Block
 ): { c: number; r: number; w: number; h: number } | null => {
-  // Merged blocks square up or stay put; loose ones go together either way.
-  const mustSquare = tierOf(a.tier) >= 2
+  // Merged blocks stay stocky — no side more than twice the other; loose ones
+  // go together either way.
+  //
+  // This used to demand an exact SQUARE, which was a second tier ceiling
+  // hiding behind the first: two 2×2 bastions make a 4×2 and there is no way
+  // to square them, so a tier-3 could never fuse at all. Lifting
+  // `maxMergeTier` alone would have changed nothing. At 2:1 the progression is
+  // the one the art already assumes — 2×1, 2×2, 4×2, 4×4, 8×4 — and it still
+  // refuses the shape the square rule existed to refuse: a 4×1 strip with one
+  // gun stranded in the middle of it.
+  const merged = tierOf(a.tier) >= 2
   const take = (
     rect: { c: number; r: number; w: number; h: number }
   ): { c: number; r: number; w: number; h: number } | null =>
-    !mustSquare || rect.w === rect.h ? rect : null
+    !merged || Math.max(rect.w, rect.h) <= 2 * Math.min(rect.w, rect.h) ? rect : null
 
   // Side by side: same rows, touching columns.
   if (a.r === b.r && spanH(a) === spanH(b)) {
@@ -1208,12 +1311,12 @@ const unionRect = (
 const mergeAt = (c0: number, r0: number): boolean => {
   let c = c0
   let r = r0
-  if (!mergeUnlocked.value) return false
+  if (R().merge !== 'adjacency' || !mergeUnlocked.value) return false
   let fused = false
 
   for (;;) {
     const b = blockAt(c, r)
-    if (!b || tierOf(b.tier) >= MAX_MERGE_TIER) break
+    if (!b || tierOf(b.tier) >= R().maxMergeTier) break
 
     // Scan every cell around the whole footprint, not just around one cell —
     // a 2×1 has six neighbours and any of them may be its next half.
@@ -1222,7 +1325,7 @@ const mergeAt = (c0: number, r0: number): boolean => {
     outer: for (const [cc, rr] of cellsOf(b)) {
       for (const [dx, dy] of MERGE_DIRS) {
         const n = blockAt(cc + dx, rr + dy)
-        if (!n || n === b || !canMergeBlocks(b, n)) continue
+        if (!n || n === b || !canMergeBlocks(b, n, R().mergeTypes, R().maxMergeTier)) continue
         const u = unionRect(b, n)
         if (u) { other = n; rect = u; break outer }
       }
@@ -1303,7 +1406,7 @@ const mergeAt = (c0: number, r0: number): boolean => {
  * a loop that cannot terminate is a worse bug than the one being fixed.
  */
 const settleMerges = (): void => {
-  if (!mergeUnlocked.value) return
+  if (R().merge !== 'adjacency' || !mergeUnlocked.value) return
   for (let pass = 0; pass < 4; pass++) {
     let fused = false
     for (const b of [...towerBlocks()]) {
@@ -1322,9 +1425,10 @@ export const placeBlock = (typeId: string, c: number, r: number): boolean => {
   if (!canPlaceAt(c, r, typeId) || !canAfford(typeId)) return false
 
   const def = blockDef(typeId)
-  wood.value -= def.cost.wood ?? 0
-  stone.value -= def.cost.stone ?? 0
-  runCoins.value -= def.cost.coins ?? 0
+  const cost = priceOf(def.cost)
+  wood.value -= cost.wood
+  stone.value -= cost.stone
+  runCoins.value -= cost.coins
   spawnBlock(typeId, c, r)
   blocksPlacedThisRun++
   mergeAt(c, r)
@@ -1338,18 +1442,120 @@ export const placeBlock = (typeId: string, c: number, r: number): boolean => {
 export const sellBlock = (c: number, r: number): { wood: number; stone: number; coins: number } | null => {
   const b = blockAt(c, r)
   if (!b || b.typeId === GATE_ID) return null
-  const refund = sellRefund(b.typeId, spanW(b) * spanH(b), b.level ?? 0)
+  const refund = priceOf(sellRefund(b.typeId, spanW(b) * spanH(b), b.level ?? 0))
   wood.value += refund.wood
   stone.value += refund.stone
   runCoins.value += refund.coins
   removeBlock(b, false)
-  resolveOrphans()
+  settleSupport()
   syncTowerStats()
   pushFx({ kind: 'sell', x: c, y: r + 0.5 })
   return refund
 }
 
 // ─── In-run block upgrades ──────────────────────────────────────────────────
+
+// ─── Drops ──────────────────────────────────────────────────────────────────
+//
+// The mobile-fit board is built by DROPPING: the player picks a column and the
+// offered piece falls into it, landing on whatever is there. Nothing is aimed
+// at a cell, so nothing can be missed by a fingertip's width — the column is
+// the target, and a column on a phone is forty-odd pixels wide and three
+// hundred tall.
+
+/**
+ * Highest row taken in column `c`, or −1 for an empty column.
+ *
+ * Pieces still in the air have already claimed their landing rows, or two
+ * quick drops into one column would both be sold the same cell and the second
+ * would shatter on the first the moment it landed.
+ */
+export const columnTop = (c: number): number => {
+  let top = -1
+  for (const b of towerBlocks()) {
+    if (c < b.c || c > b.c + spanW(b) - 1) continue
+    if (topRow(b) > top) top = topRow(b)
+  }
+  for (const d of debris) {
+    if (!d.falling?.gentle || d.c !== c) continue
+    top = Math.max(top, landingRowFor(c, d.falling.fromRow ?? d.r, spanW(d)) + spanH(d) - 1)
+  }
+  return top
+}
+
+/** Can `cells` more blocks come to rest in column `c`? */
+export const canDropAt = (c: number, cells = 1): boolean => {
+  if (phase.value === 'defeat') return false
+  const b = R().board
+  const ground = b.groundHalfWidth === 'tech' ? buildHalfWidth.value : b.groundHalfWidth
+  if (Math.abs(c) > Math.min(ground, b.upperHalfWidth)) return false
+  return columnTop(c) + cells <= b.maxRow
+}
+
+/**
+ * A block that starts life in the air.
+ *
+ * Built exactly as `spawnBlock` builds one, but it occupies nothing yet: it
+ * joins the tower on landing, through the same path collapsing debris takes,
+ * so a drop and a fall are one piece of physics rather than two.
+ */
+const spawnFallingBlock = (
+  typeId: string, c: number, fromRow: number, enhanced = false
+): Block => {
+  const maxHp = maxHpFor(typeId, enhanced, false, 0, 1)
+  const block: Block = {
+    uid: uidCounter++,
+    c, r: fromRow, w: 1, h: 1,
+    typeId,
+    roof: false,
+    enhanced,
+    level: 0,
+    tier: 1,
+    hp: maxHp,
+    maxHp,
+    cd: 0,
+    flash: 0,
+    bornAt: -9999,
+    recoil: 0,
+    aim: 0,
+    falling: { dy: 0, vy: 0, rot: 0, vrot: 0, dx: 0, vx: 0, fromRow, gentle: true }
+  }
+  debris.push(block)
+  return block
+}
+
+/**
+ * Drop the piece in offer slot `slotIndex` into column `c`.
+ *
+ * Charges the piece and rerolls the slot the moment it is released — the
+ * decision is made — but the tower only gains the blocks when they land, which
+ * is also the first moment a snapshot can carry them (see `stepDebris`).
+ * A two-tall piece is dropped bottom cell first, one row apart, so it stacks
+ * in the order it was drawn.
+ */
+export const dropOffer = (slotIndex: number, c: number): boolean => {
+  const shapeId = offers.value[slotIndex]
+  if (!shapeId || phase.value === 'defeat') return false
+  const def = SHAPE_BY_ID[shapeId]
+  if (!def) return false
+  const cells = [...def.cells].sort((a, b) => a[1] - b[1])
+  // Drops are one column wide by construction; anything else is a shape for
+  // the placement board, not for this one.
+  if (cells.some(([dx]) => dx !== 0)) return false
+  if (!canDropAt(c, cells.length) || !canAffordShape(shapeId)) return false
+
+  const cost = priceOf(shapeCost(shapeId))
+  wood.value -= cost.wood
+  stone.value -= cost.stone
+  runCoins.value -= cost.coins
+
+  const enhanced = offerEnhanced.value[slotIndex] === true
+  const from = Math.min(R().board.maxRow, 40) + 2
+  cells.forEach(([, , typeId], i) => { spawnFallingBlock(typeId, c, from + i, enhanced) })
+  blocksPlacedThisRun += cells.length
+  rerollOffer(slotIndex)
+  return true
+}
 
 /** Gold price of the next rank on the block at `(c, r)`, or `Infinity`. */
 export const upgradeCostAt = (c: number, r: number): number => {
@@ -1561,6 +1767,46 @@ export const canRepairBlock = (c: number, r: number): boolean => {
   return runCoins.value >= repairCostAt(c, r)
 }
 
+/** Total gold to patch every wounded block back to full. 0 when nothing is hurt. */
+export const repairAllCost = (): number => {
+  let gold = 0
+  for (const b of towerBlocks()) {
+    if (b.hp >= b.maxHp) continue
+    gold += Math.max(1, Math.ceil((b.maxHp - b.hp) / REPAIR_HP_PER_GOLD))
+  }
+  return gold
+}
+
+/**
+ * Patch the whole tower between waves, for run gold.
+ *
+ * The mobile-fit board has no per-block inspector — a five-column tower is
+ * repaired as a whole. Priced on the WOUNDS rather than the ceilings, unlike
+ * the inspector's per-block patch, because "fix everything" is a decision
+ * about the purse, not about which block is nearly gone. Build phase only:
+ * mid-wave it would be a "pay to undo the wave" button.
+ */
+export const repairAll = (): boolean => {
+  if (phase.value !== 'build') return false
+  const cost = repairAllCost()
+  if (cost <= 0 || runCoins.value < cost) return false
+  runCoins.value -= cost
+  for (const b of towerBlocks()) {
+    if (b.hp >= b.maxHp) continue
+    // Same ledger as every other heal: what a repair puts back must not be
+    // re-counted as strength the director prices the next wave against.
+    repairedSinceMeasure += b.maxHp - b.hp
+    b.hp = b.maxHp
+    b.repairedAt = clock
+    pushFx({ kind: 'repair', x: centreX(b), y: centreY(b) })
+  }
+  ensureAffordableWeapon()
+  syncGateRefs()
+  towerVersion.value++
+  saveRunSnapshot()
+  return true
+}
+
 /** Spend run gold to patch one block back to full. */
 export const repairBlock = (c: number, r: number): boolean => {
   if (!canRepairBlock(c, r)) return false
@@ -1748,6 +1994,103 @@ const resolveOrphans = (): void => {
   }
 }
 
+// ─── Column support ─────────────────────────────────────────────────────────
+//
+// The mobile-fit board has no flood fill: a block rests on the block below it
+// or on the ground, and that is the whole rule. When something dies, whatever
+// stood on it drops one landing — a cascade the player reads off the column
+// alone, with nothing to learn about chains back to the Gate.
+
+const settleColumns = (): void => {
+  const gentle = R().fall.gentleSettle
+  // Bottom-up, so a stack over a gap is released from its lowest block first
+  // and every block above it finds the cell below already emptied.
+  const standing = [...towerBlocks()].sort((a, b) => a.r - b.r)
+  let dropped = 0
+  for (const b of standing) {
+    if (b.r <= 0 || b.typeId === GATE_ID) continue
+    let supported = false
+    for (let dx = 0; dx < spanW(b); dx++) {
+      if (blocks.has(key(b.c + dx, b.r - 1))) { supported = true; break }
+    }
+    if (supported) continue
+    release(b)
+    blocksByUid.delete(b.uid)
+    b.falling = { dy: 0, vy: 0, rot: 0, vrot: 0, dx: 0, vx: 0, fromRow: b.r, gentle }
+    debris.push(b)
+    dropped++
+  }
+  // A gentle settle is not a collapse — no rumble, no screen shake. The
+  // landing thump is all the feedback a one-row drop needs.
+  if (dropped > 0 && !gentle) pushFx({ kind: 'collapse', x: 0, y: 0, count: dropped })
+}
+
+/** Re-check support after the tower changed, by whichever rule is in force. */
+const settleSupport = (): void => {
+  if (R().support === 'column') settleColumns()
+  else resolveOrphans()
+}
+
+/**
+ * Fuse a block that has just come to rest with any twin it TOUCHES.
+ *
+ * The landing-merge rule of the mobile-fit board — `R().mergeDirs` says which
+ * neighbours count, and there it is all four.
+ *
+ * The survivor is the LONGEST-LIVING of the pair, which is the lower `uid`:
+ * uids are handed out in creation order and never reused. Downward that is
+ * always the block below — a column-support board is built strictly bottom-up,
+ * so within a column older is always lower — which is exactly what this rule
+ * used to say outright, and why no existing behaviour moves. Sideways there is
+ * no gravity to appeal to and "the one that was already there" is what a
+ * player predicts: the piece just dropped slides into the tower, rather than
+ * the tower sliding into it.
+ *
+ * The loop repeats from the survivor, so a weld that creates a new twin
+ * resolves in the same tick and a run of them cascades. It terminates because
+ * every pass deletes one block.
+ *
+ * A sideways weld vacates a cell that may have had blocks standing on it. The
+ * caller settles: `stepDebris` runs `settleColumns` in the same tick as the
+ * landings, and those settled blocks land and merge in their turn.
+ *
+ * The bookkeeping — wounds carried, the better rank kept, reinforcement only
+ * if both halves had it — follows `mergeAt` exactly, so a merged block means
+ * the same thing on both boards.
+ */
+const mergeOnLanding = (landed: Block): void => {
+  let b = landed
+  for (;;) {
+    let other: Block | undefined
+    for (const [dx, dy] of R().mergeDirs) {
+      const n = blockAt(b.c + dx, b.r + dy)
+      if (!n || n === b || n.typeId === GATE_ID || n.falling) continue
+      if (!canMergeBlocks(b, n, R().mergeTypes, R().maxMergeTier)) continue
+      other = n
+      break
+    }
+    if (!other) return
+    const keep = other.uid < b.uid ? other : b
+    const gone = keep === other ? b : other
+    const missing = Math.max(0, keep.maxHp - keep.hp) + Math.max(0, gone.maxHp - gone.hp)
+    release(gone)
+    blocksByUid.delete(gone.uid)
+    keep.tier = tierOf(keep.tier) + 1
+    keep.level = Math.max(keep.level ?? 0, gone.level ?? 0)
+    keep.enhanced = keep.enhanced === true && gone.enhanced === true
+    keep.maxHp = maxHpFor(keep.typeId, keep.enhanced, keep.roof, keep.level, keep.tier)
+    keep.hp = Math.max(1, keep.maxHp - missing)
+    keep.bornAt = clock
+    pushFx({
+      kind: 'merge',
+      x: centreX(keep), y: centreY(keep),
+      tier: tierOf(keep.tier),
+      palette: blockDef(keep.typeId).palette
+    })
+    b = keep
+  }
+}
+
 /**
  * Where a block falling down column `c` from `fromRow` comes to rest.
  *
@@ -1787,7 +2130,7 @@ const damageBlock = (b: Block, amount: number, fromY?: number): void => {
   // that never loses a block is one the current curve cannot threaten.
   lostBlockThisWave = true
   removeBlock(b, true)
-  resolveOrphans()
+  settleSupport()
   syncTowerStats()
 
   if (wasGate) endRun()
@@ -2124,7 +2467,8 @@ const shootSiegeBolt = (e: Enemy, def: EnemyDef, target: Block): void => {
 
   const bolt = acquireProjectile()
   bolt.uid = uidCounter++
-  bolt.kind = 'bolt'
+  // A machine's quarrel, not an archer's arrow — its own round and its own art.
+  bolt.kind = 'quarrel'
   bolt.x = sx
   bolt.y = sy
   bolt.vx = (dx / dist) * SIEGE_BOLT_SPEED
@@ -2323,7 +2667,7 @@ const stepEnemies = (dt: number): void => {
         // Gentle bobbing so flight reads as flight.
         e.y += Math.sin(e.phase * 1.6) * 0.012
       } else {
-        e.x += Math.sign(dx || e.dir) * speed * dtSec
+        e.x += Math.sign(dx || e.dir) * speed * R().enemies.speedMul * dtSec
       }
       continue
     }
@@ -2496,6 +2840,7 @@ export const cavalryCost = (): number => ALLY_DEFS.cavalry!.cost
  * spend, not which pixel to click.
  */
 export const summonCavalry = (): boolean => {
+  if (!R().abilities.cavalry) return false
   if (phase.value === 'defeat') return false
 
   // Score each side; standoff engines dominate because they are the reason
@@ -2523,6 +2868,7 @@ export const summonCavalry = (): boolean => {
       hp,
       maxHp: hp,
       dir,
+      facing: dir,
       cd: 0,
       targetUid: -1,
       flash: 0,
@@ -2579,11 +2925,18 @@ const stepAllies = (dt: number): void => {
     if (!target) {
       // Nothing left on this flank — patrol outward rather than idling.
       a.targetUid = -1
+      a.facing = a.dir
       a.x += a.dir * def.speed * 0.5 * dtSec
       continue
     }
 
     const dx = target.x - a.x
+    // Point at whatever it is going for, not at the flank it was sent to.
+    // These disagree the moment something gets past the rider: the chase is
+    // then back toward the tower, and facing by `dir` gallops it tail-first.
+    // The dead band keeps a rider that is level with its target from
+    // flickering between the two on the sign of a rounding error.
+    if (Math.abs(dx) > 0.05) a.facing = dx > 0 ? 1 : -1
     if (Math.abs(dx) - 0.5 > def.reach) {
       a.targetUid = -1
       a.x += Math.sign(dx) * def.speed * dtSec
@@ -2631,9 +2984,24 @@ const stepAllyCombat = (dt: number): void => {
 
 // ─── Turrets ────────────────────────────────────────────────────────────────
 
+/**
+ * How far a shot has to travel to count as "in range".
+ *
+ * For a PLUNGING weapon (see `WeaponSpec.plunging`) height below the muzzle is
+ * free: a round that falls reaches at least as far downhill as it does flat, so
+ * only the horizontal gap is charged against the range. Above the muzzle — a
+ * flyer higher than the mount — the honest radius still applies, because
+ * nothing here lobs upward for free.
+ *
+ * Returned SQUARED, so the caller compares against `range * range` without a
+ * root, and so the targeting modes can keep scoring off the same number.
+ */
+const reachSq = (dx: number, dy: number, plunging: boolean): number =>
+  (plunging && dy <= 0 ? dx * dx : dx * dx + dy * dy)
+
 const pickTarget = (
   b: Block, range: number, hitsAir: boolean, mode: string, kind?: ProjectileKind,
-  hitsSubmerged = false
+  hitsSubmerged = false, plunging = false
 ): Enemy | null => {
   const bx = centreX(b)
   const by = centreY(b)
@@ -2659,7 +3027,7 @@ const pickTarget = (
     if (def.movement === 'sea' && (e.surfaced ?? 0) < 0.35 && !hitsSubmerged) continue
     const dx = e.x - bx
     const dy = e.y - by
-    const d2 = dx * dx + dy * dy
+    const d2 = reachSq(dx, dy, plunging)
     if (d2 > r2) continue
 
     let score: number
@@ -2687,7 +3055,8 @@ const stepTurrets = (dt: number): void => {
 
     const range = w.range * mRange
     const target = pickTarget(
-      b, range, w.hitsAir, w.targeting, w.projectile, w.hitsSubmerged === true
+      b, range, w.hitsAir, w.targeting, w.projectile, w.hitsSubmerged === true,
+      w.plunging === true
     )
     if (!target) continue
 
@@ -2927,6 +3296,7 @@ const stepDebris = (dt: number): void => {
   // taken yet and the two end up inside each other.
   debris.sort((a, b) => (a.r + a.falling!.dy) - (b.r + b.falling!.dy))
 
+  let landed = 0
   for (let i = 0; i < debris.length; i++) {
     const b = debris[i]!
     const f = b.falling!
@@ -2941,7 +3311,8 @@ const stepDebris = (dt: number): void => {
 
     // ── Landed ──
     const fallCells = Math.max(0, fromRow - landRow)
-    const impact = Math.min(1, fallCells / FALL_KILL_CELLS)
+    // A gentle fall — a drop, or a column settling — costs nothing on landing.
+    const impact = f.gentle ? 0 : Math.min(1, fallCells / fallKillCells())
 
     crushEnemiesAt(centreX(b), landRow + spanH(b) / 2, impact)
     triggerImpactFx(b, landRow, impact)
@@ -2963,12 +3334,26 @@ const stepDebris = (dt: number): void => {
     }
 
     // Survived — put it back in the tower at the row it came to rest on.
+    const gentle = f.gentle === true
     b.r = landRow
     b.hp = Math.max(1, b.hp - b.maxHp * impact)
-    b.flash = 1
+    b.flash = gentle ? 0 : 1
     b.falling = undefined
     occupy(b)
     blocksByUid.set(b.uid, b)
+    // A landing merge fuses the piece down into the twin it came to rest on.
+    if (gentle && R().merge === 'landing') mergeOnLanding(b)
+    landed++
+  }
+
+  if (landed > 0 && R().support === 'column') {
+    // What just came to rest may now hold up — or drop — its neighbours, and a
+    // dropped piece is only in the tower once it has landed, so this is the
+    // first moment a snapshot can carry it.
+    settleColumns()
+    syncTowerStats()
+    if (phase.value === 'build') saveRunSnapshot()
+    return
   }
 
   if (debris.length === 0) return
@@ -3077,7 +3462,7 @@ const cacheTechMultipliers = (): void => {
  * mid-boot cannot hand a veteran on a second device the beginner's opening.
  */
 export const isFirstSession = (): boolean =>
-  getState<boolean>(ONBOARDED_KEY, false) !== true
+  getState<boolean>(R().save.onboardedKey, false) !== true
 
 /** Start the next wave immediately. Called by the Call Wave button and by the
  *  build timer running out. */
@@ -3094,7 +3479,7 @@ export const callWave = (): void => {
   const strength = measureTower()
   strength.hp = Math.max(0, strength.hp - repairedSinceMeasure)
   repairedSinceMeasure = 0
-  const adaptive = adaptiveFactor(next, towerPower(strength))
+  const adaptive = adaptiveFactor(next, towerPower(strength), R().waves.expectedPowerMul)
   // Clamped as a PAIR. Bounding the adaptive term alone let the two multiply
   // out to 5.72 — see `clampDifficulty`.
   const dynamic = clampDifficulty(adaptive * flawless.multiplier)
@@ -3104,7 +3489,7 @@ export const callWave = (): void => {
   // the player can clear it at any time by spending. Folding it inside the
   // clamp would let a tower already at the 2.6 ceiling hoard for free, which is
   // precisely the player it is meant to reach.
-  const hoard = hoardFactor(wood.value, stone.value, runCoins.value)
+  const hoard = hoardFactor(...hoardArgs())
   const mul = difficultyFactor() * dynamic * hoard
   difficultyMul.value = Math.round(mul * 100) / 100
   // Toughness takes a SOFTENED share of the dynamic terms, not the whole of
@@ -3122,7 +3507,7 @@ export const callWave = (): void => {
   // The first session's opening waves are priced under the curve. Threaded as
   // its own flag rather than folded into `mul`, so the discount never reaches
   // the spawn cadence or the difficulty read-out on the HUD.
-  plan = planWave(next, mul, isFirstSession())
+  plan = planWave(next, mul, isFirstSession(), waveOpts())
   waveVersion.value++
   spawnCursor = 0
   waveClock = 0
@@ -3186,26 +3571,36 @@ const spawnEnemy = (typeId: string, side: 1 | -1): void => {
   // used to read `difficultyFactor()` alone, which meant the adaptive
   // difficulty — the whole system that measures the player's tower and prices
   // the wave against it — moved enemy COUNTS and never enemy toughness.
-  const hp = Math.max(1, Math.round(def.hp * waveHpMul * enemyHpScale(wave.value)))
+  const hp = Math.max(1, Math.round(def.hp * waveHpMul * enemyHpScale(wave.value, R().waves.hpSlope)))
   // Bombers enter already at cruising height rather than climbing from the
   // dive lane — a bomber that spawned low would take its first pass THROUGH
   // the anti-air it exists to fly over.
+  // A mode may pin the bombers' station: a board with a low ceiling has no sky
+  // for the desktop's three-plus cells above the crown.
+  const altitude = R().enemies.bomberAltitude ?? def.bombRun?.altitude ?? 0
+  // Divers may enter from the TOP of the frame instead of the flanks — on the
+  // portrait board the sky above the tower is the air lane.
+  const fromTop = R().enemies.airSpawn === 'top' && def.movement === 'air' && !def.bombRun
   const spawnY = def.bombRun
-    ? crownRow() + 1 + def.bombRun.altitude
-    : def.movement === 'air'
-      ? 2.4 + Math.random() * 2.2
-      : def.movement === 'sea'
-        ? SEA_SWIM_Y
-        : def.scale / 2
+    ? crownRow() + 1 + altitude
+    : fromTop
+      ? Math.min(R().board.maxRow, 40) + 3.5
+      : def.movement === 'air'
+        ? 2.4 + Math.random() * 2.2
+        : def.movement === 'sea'
+          ? SEA_SWIM_Y
+          : def.scale / 2
   const spawnUid = uidCounter++
   const enemy: Enemy = {
     uid: spawnUid,
     typeId: def.id,
-    x: edge,
+    x: fromTop ? side * (0.4 + Math.random() * 1.4) : edge,
     y: spawnY,
     hp,
     maxHp: hp,
-    dir: side,
+    // A diver entering from above on the right half of the board faces LEFT,
+    // toward the tower — `dir` is which way it is heading, not where it began.
+    dir: fromTop ? (-side as 1 | -1) : side,
     cd: 0,
     targetUid: -1,
     slowMs: 0,
@@ -3225,12 +3620,19 @@ const stepSpawns = (dt: number): void => {
   // is still trickling in after a minute and a half has stopped asking the
   // player anything — they have made every decision it has, and are watching a
   // queue drain. Better to hand them the rest and let the fight end.
-  const flush = waveClock >= SPAWN_FLUSH_AT_MS
+  const flush = waveClock >= R().waves.flushAtMs
+  // A mode may cap what is on the field at once; the rest wait in the queue.
+  // The flush respects the cap too — releasing everything onto a five-column
+  // board at once is the exact pile-up the cap exists to prevent.
+  const cap = R().enemies.maxOnField
+  let live = cap === Infinity ? 0 : enemies.reduce((n, e) => n + (e.dying > 0 ? 0 : 1), 0)
   while (spawnCursor < plan.orders.length
+    && live < cap
     && (flush || plan.orders[spawnCursor]!.atMs <= waveClock)) {
     const order = plan.orders[spawnCursor]!
     spawnCursor++
     spawnEnemy(order.typeId, order.side)
+    live++
   }
 }
 
@@ -3304,13 +3706,13 @@ export const debugSetWave = (n: number): void => {
   pendingBonus = 1
 
   phase.value = 'build'
-  buildTimeLeft.value = buildTimeMs(target)
+  buildTimeLeft.value = R().waves.buildMs
   buildDeadline = buildTimeLeft.value
   // The deck is wave-gated, so a jump has to re-deal or the player meets wave
   // 20 holding wave 1's hand.
   dealOffers()
   rerollTimers.fill(0)
-  rerollReadyIn.value = new Array(OFFER_SLOTS).fill(0)
+  rerollReadyIn.value = new Array(R().offers.slots).fill(0)
   syncTowerStats()
   syncGateRefs()
   saveRunSnapshot()
@@ -3319,10 +3721,12 @@ export const debugSetWave = (n: number): void => {
 const completeWave = (): void => {
   const base = waveReward(wave.value)
   const mul = waveRewardMul.value * pendingBonus
+  // Materials scale with the mode; coins never do — the wallet is shared.
+  const matMul = mul * R().waves.rewardMul
 
   let coins = Math.round(base.coins * mul)
-  let gainedWood = Math.round(base.wood * mul)
-  let gainedStone = Math.round(base.stone * mul)
+  let gainedWood = Math.round(base.wood * matMul)
+  let gainedStone = Math.round(base.stone * matMul)
   /** Run gold minted by coffers. Kill drops are added as they happen. */
   let gainedGold = 0
 
@@ -3385,6 +3789,13 @@ const completeWave = (): void => {
   clearRangeBuff()
   unreachableSiege.value = 0
 
+  // One materials pile where the mode folds stone into wood.
+  const fold = R().blocks.foldStoneIntoWood
+  if (fold !== null) {
+    gainedWood += Math.round(gainedStone * fold)
+    gainedStone = 0
+  }
+
   runCoins.value += gainedGold
   runCoinsEarned.value += gainedGold
   wood.value += gainedWood
@@ -3417,7 +3828,7 @@ const completeWave = (): void => {
   }
 
   phase.value = 'build'
-  buildTimeLeft.value = buildTimeMs(wave.value + 1)
+  buildTimeLeft.value = R().waves.buildMs
   buildDeadline = buildTimeLeft.value
   // Entering a build phase is the moment the guarantee matters most: whatever
   // the player does next, they must be able to put a gun on the tower.
@@ -3470,11 +3881,12 @@ export const CONTINUE_STONE = 100
 
 export const continueRun = (): boolean => {
   if (!graceSnapshot || graceUsed) return false
-  setState(RUN_KEY, graceSnapshot)
+  setState(R().save.runKey, graceSnapshot)
   const ok = resumeRun()
   if (!ok) return false
-  wood.value += CONTINUE_WOOD
-  stone.value += CONTINUE_STONE
+  const grant = priceOf({ wood: CONTINUE_WOOD, stone: CONTINUE_STONE })
+  wood.value += grant.wood
+  stone.value += grant.stone
   // The purse just changed, so the hand may have become payable — and the very
   // next thing this player does is try to buy a gun with it.
   ensureAffordableWeapon()
@@ -3497,9 +3909,9 @@ const endRun = (): void => {
   // The run is over — drop the resume snapshot so the next boot starts fresh
   // rather than restoring a tower whose gate is already rubble. Hold it in
   // memory first, though: it is what a grace continue rebuilds from.
-  graceSnapshot = getState<RunSnapshot | null>(RUN_KEY, null)
+  graceSnapshot = getState<RunSnapshot | null>(R().save.runKey, null)
   graceAvailable.value = !graceUsed && !!graceSnapshot?.blocks?.length
-  removeState(RUN_KEY)
+  removeState(R().save.runKey)
   pushFx({ kind: 'gateFell', x: 0, y: 0 })
 }
 
@@ -3526,15 +3938,24 @@ export const saveRunSnapshot = (): void => {
     offers: offers.value.slice(),
     // Same reason: without it, a reload is a free volley.
     arrowRain: arrowRainStock.value,
+    rules: R().id,
     startedAt: Date.now()
   }
-  setState(RUN_KEY, snapshot)
+  setState(R().save.runKey, snapshot)
 }
 
-export const hasSavedRun = (): boolean => {
-  const snap = getState<RunSnapshot | null>(RUN_KEY, null)
-  return !!snap && Array.isArray(snap.blocks) && snap.blocks.length > 0
-}
+/**
+ * A snapshot written under THESE rules.
+ *
+ * One from another mode — or a pre-seam save, which is a desktop one — is
+ * never restored elsewhere: its board, pieces and keys mean different things.
+ */
+const snapshotFits = (snap: RunSnapshot | null): snap is RunSnapshot =>
+  !!snap && Array.isArray(snap.blocks) && snap.blocks.length > 0
+  && (snap.rules ?? 'desktop') === R().id
+
+export const hasSavedRun = (): boolean =>
+  snapshotFits(getState<RunSnapshot | null>(R().save.runKey, null))
 
 // ─── Run lifecycle ──────────────────────────────────────────────────────────
 
@@ -3567,8 +3988,9 @@ export const startRun = (): void => {
   accumulator = 0
   clearWorld()
   wave.value = 0
-  wood.value = startWood.value
-  stone.value = startStone.value
+  const start = priceOf({ wood: startWood.value, stone: startStone.value })
+  wood.value = start.wood
+  stone.value = start.stone
   runCoins.value = 0
   runCoinsEarned.value = 0
   graceSnapshot = null
@@ -3594,9 +4016,9 @@ export const startRun = (): void => {
   syncTowerStats()
   dealOffers()
   rerollTimers.fill(0)
-  rerollReadyIn.value = new Array(OFFER_SLOTS).fill(0)
+  rerollReadyIn.value = new Array(R().offers.slots).fill(0)
   phase.value = 'build'
-  buildTimeLeft.value = buildTimeMs(1)
+  buildTimeLeft.value = R().waves.buildMs
   buildDeadline = buildTimeLeft.value
   saveRunSnapshot()
 }
@@ -3643,8 +4065,8 @@ export const seedScriptedOpening = (): boolean => {
 /** Restore the persisted siege. Returns false when there is nothing to resume,
  *  so the caller can fall back to `startRun()`. */
 export const resumeRun = (): boolean => {
-  const snap = getState<RunSnapshot | null>(RUN_KEY, null)
-  if (!snap || !Array.isArray(snap.blocks) || snap.blocks.length === 0) return false
+  const snap = getState<RunSnapshot | null>(R().save.runKey, null)
+  if (!snapshotFits(snap)) return false
 
   clock = 0
   accumulator = 0
@@ -3685,12 +4107,19 @@ export const resumeRun = (): boolean => {
     // Older snapshots have no rank field at all, so an absent one is rank 0.
     const rank = Math.max(0, Math.min(MAX_BLOCK_LEVEL, Math.floor(Number(level) || 0)))
     // Older snapshots have no tier field; an absent one is a plain block.
-    const mergeTier = Math.max(1, Math.min(MAX_MERGE_TIER, Math.floor(Number(tier) || 1)))
+    const mergeTier = Math.max(1, Math.min(
+      Math.min(R().maxMergeTier, SAFE_MAX_TIER), Math.floor(Number(tier) || 1)
+    ))
     // Footprints only appeared with multi-cell merging; a snapshot without one
     // describes single cells, and a tier-2 block from such a save simply comes
     // back as a 1×1 rather than corrupting the grid with a guessed shape.
-    const fw = Math.max(1, Math.min(4, Math.floor(Number(w) || 1)))
-    const fh = Math.max(1, Math.min(4, Math.floor(Number(h) || 1)))
+    //
+    // The span cap is a corruption guard, not a game rule: with no tier
+    // ceiling a legitimate weld can be 8 or 16 cells along one axis (a tier-7
+    // is an 8×8), and clamping those to the old 4 would have silently rewritten
+    // real towers. Sixteen is past anything a board this size can grow.
+    const fw = Math.max(1, Math.min(MAX_FOOTPRINT_SPAN, Math.floor(Number(w) || 1)))
+    const fh = Math.max(1, Math.min(MAX_FOOTPRINT_SPAN, Math.floor(Number(h) || 1)))
     if (typeId === GATE_ID) {
       spawnGate(Math.max(1, Number(hp) || 1), rank)
       gateRestored = true
@@ -3713,7 +4142,7 @@ export const resumeRun = (): boolean => {
   if (!gateRestored) spawnGate()
   // The restored layout may reference a narrower build width than the player
   // now has, or (after a corrupt write) contain floating blocks — settle it.
-  resolveOrphans()
+  settleSupport()
   syncTowerStats()
 
   // Restore the exact hand the player was looking at. Anything the snapshot
@@ -3727,13 +4156,15 @@ export const resumeRun = (): boolean => {
   // here to prevent. A short hand is a hand from an older build, not a corrupt
   // one: honour it and top it up.
   const saved = Array.isArray(snap.offers) ? snap.offers : []
-  const kept = saved.filter((id) => typeof id === 'string' && SHAPE_BY_ID[id]).slice(0, OFFER_SLOTS)
-  const fresh = rollOffers(wave.value, availableBlocks.value).map(dealt)
-  offers.value = Array.from({ length: OFFER_SLOTS }, (_, i) => kept[i] ?? fresh[i]!)
+  const slots = R().offers.slots
+  const kept = saved.filter((id) => typeof id === 'string' && SHAPE_BY_ID[id]).slice(0, slots)
+  const fresh = rollOffers(wave.value, availableBlocks.value, Math.random, laneCfg()).map(dealt)
+  offers.value = Array.from({ length: slots }, (_, i) => kept[i] ?? fresh[i]!)
+  offerEnhanced.value = new Array(slots).fill(false)
   ensureAffordableWeapon()
 
   phase.value = 'build'
-  buildTimeLeft.value = buildTimeMs(wave.value + 1)
+  buildTimeLeft.value = R().waves.buildMs
   buildDeadline = buildTimeLeft.value
   return true
 }
@@ -3758,6 +4189,26 @@ export const runSummary = () => ({
 })
 
 // ─── Fixed-step driver ──────────────────────────────────────────────────────
+
+/**
+ * Put a rule set in force before a run starts.
+ *
+ * Resizes the per-slot hand state to the new slot count; everything else reads
+ * the rules live. A snapshot from the previous rules is left where it is — it
+ * lives under that mode's own key and `hasSavedRun` will not see it. Calling
+ * this mid-run is not supported: a run is played to one set of rules from its
+ * first tick to its last.
+ */
+export const applyRules = (rules: RuleSet): void => {
+  setActiveRules(rules)
+  const slots = rules.offers.slots
+  rerollTimers.length = 0
+  for (let i = 0; i < slots; i++) rerollTimers.push(0)
+  rerollReadyIn.value = new Array(slots).fill(0)
+  offerEnhanced.value = new Array(slots).fill(false)
+  offers.value = []
+  cacheTechMultipliers()
+}
 
 const fixedStep = (dt: number): void => {
   clock += dt
@@ -3814,27 +4265,65 @@ const fixedStep = (dt: number): void => {
   if (allSpawned && noneAlive && projectiles.length === 0) completeWave()
 }
 
-// ─── Double speed ───────────────────────────────────────────────────────────
+// ─── Fast-forward ───────────────────────────────────────────────────────────
 //
-// 2× is a TIMED BUFF bought with a rewarded video, not a free toggle. It is
+// Speed is a TIMED BUFF bought with a rewarded video, not a free toggle. It is
 // worth paying for because it compresses the part of a wave the player has
 // already solved — once the tower is built and the shooting starts, the
 // decisions are made and the rest is watching. Five minutes covers several
 // waves, so one video is a real purchase rather than a per-wave tax.
+//
+// ONE purchase unlocks the whole ladder, and the player picks a rung whenever
+// they like. 2x alone was not enough for the case this control exists for: a
+// run that died at wave 20 has to replay twenty waves it has already solved,
+// and at 2x that is still minutes of watching a tower you know will hold.
+// Charging a second video for the third rung would be charging twice for the
+// same thing — the video buys "fast-forward", and how fast is a preference.
 
-/** How long one purchase of 2× lasts, ms. */
+/** How long one purchase lasts, ms. */
 export const SPEED_BUFF_MS = 5 * 60 * 1000
 
-/** Remaining 2× time, ms. Drives the HUD countdown. */
+/** The fastest rung. Bounded by `MAX_SUBSTEPS`: past this the clamp in `step`
+ *  starts eating multiplier the player asked for. */
+export const MAX_GAME_SPEED = 3
+
+/** Every rung the switch offers, slowest first. 1x is always available. */
+export const GAME_SPEEDS = [1, 2, 3] as const
+
+/** Remaining buff time, ms. */
 export const speedBuffLeft = ref(0)
 export const isSpeedBuffed = computed(() => speedBuffLeft.value > 0)
 
-/** Grant (or extend) the 2× buff. Called after the rewarded video completes. */
-export const grantSpeedBuff = (): void => {
+/**
+ * Grant (or extend) the buff, and jump straight to the rung that was asked for.
+ *
+ * `target` is the segment the player actually tapped. Landing them on 2x after
+ * they pressed 3x would make the purchase feel like it half-worked.
+ */
+export const grantSpeedBuff = (target = 2): void => {
   // Extends rather than replaces: a player who watches a second video part-way
   // through the first buff must not lose the time they already paid for.
   speedBuffLeft.value = Math.min(SPEED_BUFF_MS * 2, speedBuffLeft.value + SPEED_BUFF_MS)
-  gameSpeed.value = 2
+  gameSpeed.value = Math.min(
+    Math.max(...R().abilities.speeds), MAX_GAME_SPEED, Math.max(1, Math.round(target))
+  )
+}
+
+/**
+ * Move to a specific rung.
+ *
+ * Anything above 1x needs the buff; 1x is always allowed, so the player can
+ * always slow down — including before they have paid for anything. Returns
+ * whether the speed actually changed, so a caller can tell "done" apart from
+ * "that needs buying first".
+ */
+export const setGameSpeed = (n: number): boolean => {
+  const next = Math.min(MAX_GAME_SPEED, Math.max(1, Math.round(n)))
+  // A rung the mode does not offer cannot be selected, paid for or not.
+  if (!R().abilities.speeds.includes(next)) return false
+  if (next > 1 && !isSpeedBuffed.value) return false
+  gameSpeed.value = next
+  return true
 }
 
 /**
@@ -3853,13 +4342,21 @@ const stepSpeedBuff = (realDt: number): void => {
   if (speedBuffLeft.value <= 0) gameSpeed.value = 1
 }
 
-/** Turn 2× off (or back on) without spending the remaining buff time. */
+/**
+ * Cycle through the rungs — the keyboard shortcut and the cheat key.
+ *
+ * Wraps back to 1x off the top so one repeated key reaches every rung. The
+ * on-screen control is a switch, so this is only the fast path for a player
+ * whose hand is already on the keyboard.
+ */
 export const toggleSpeed = (): void => {
   if (!isSpeedBuffed.value) {
     gameSpeed.value = 1
     return
   }
-  gameSpeed.value = gameSpeed.value === 1 ? 2 : 1
+  const ladder = R().abilities.speeds
+  const at = ladder.indexOf(gameSpeed.value)
+  gameSpeed.value = at < 0 || at >= ladder.length - 1 ? 1 : ladder[at + 1]!
 }
 
 /**

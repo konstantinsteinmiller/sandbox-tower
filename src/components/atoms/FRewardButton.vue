@@ -6,6 +6,8 @@ import {
 } from '@/use/useAdGate'
 import { coins as walletCoins } from '@/use/useTowerEconomy'
 import IconCoin from '@/components/icons/IconCoin.vue'
+import GameIcon from '@/components/icons/GameIcon.vue'
+import type { GameIconName } from '@/components/icons/iconNames'
 
 /**
  * A button for a perk that MAY be paid for with a rewarded video.
@@ -36,6 +38,13 @@ interface Props {
   /** Override the balance the price is checked against. Defaults to the
    *  wallet, which is what the price is actually taken from. */
   coins?: number
+  /** A glyph from the shared set, in place of the caption. `label` stays
+   *  required and becomes the accessible name — the string is read aloud
+   *  rather than read on screen. */
+  icon?: GameIconName
+  /** Drop the caption and keep the glyph. The video badge and the coin price
+   *  still show: those carry information a glyph cannot. */
+  iconOnly?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -44,7 +53,9 @@ const props = withDefaults(defineProps<Props>(), {
   isDisabled: false,
   free: false,
   coinCost: REWARD_COIN_COST,
-  coins: undefined
+  coins: undefined,
+  icon: undefined,
+  iconOnly: false
 })
 
 const purse = computed(() => props.coins ?? walletCoins.value)
@@ -71,22 +82,33 @@ const disabled = computed(() =>
 <template lang="pug">
   button.f-reward-button(
     type="button"
-    :class="[`tone-${tone}`, `size-${size}`, { 'is-disabled': disabled }]"
+    :class="[`tone-${tone}`, `size-${size}`, { 'is-disabled': disabled, 'is-icon-only': iconOnly }]"
     :disabled="disabled"
+    :aria-label="iconOnly ? label : undefined"
     @click="!disabled && $emit('click')"
   )
     span.f-reward-button__shadow(aria-hidden="true")
     span.f-reward-button__body
+      //- The video badge LEADS: it is not a price, it is what tapping this
+      //- does, and the player needs to know that before they read the offer.
       img.f-reward-button__movie(
         v-if="showMovie"
         :src="movieSrc"
         alt=""
         draggable="false"
       )
-      IconCoin.f-reward-button__coin(v-else-if="showCoin")
-      span.f-reward-button__label
+      GameIcon.f-reward-button__icon(v-if="iconOnly && icon" :name="icon")
+      span.f-reward-button__label(v-else)
         slot {{ label }}
-      span.f-reward-button__price(v-if="showCoin") {{ coinCost }}
+      //- A coin price TRAILS, amount first and glyph after it — "30 coins",
+      //- the order it is said in, and the order every other priced control in
+      //- the HUD already uses (the wave bonus, the ad-reward badge). Leading
+      //- with the glyph put a coin at the head of the button where the video
+      //- badge sits on a portal build, so the same control read as two
+      //- different things depending on the platform.
+      span.f-reward-button__price(v-if="showCoin")
+        | {{ coinCost }}
+        IconCoin.f-reward-button__coin
 </template>
 
 <style scoped lang="sass">
@@ -95,11 +117,21 @@ const disabled = computed(() =>
   height: 1.05em
   flex-shrink: 0
 
+// Pale yellow on a gold button is two shades of the same colour, and the single
+// bottom-right shadow it used to carry does not separate them — the price was
+// the one number on the control the player could not read. It now takes the
+// LABEL's treatment: white, fully outlined, legible on all three tones. The
+// coin beside it is what says "money", so the text does not have to be gold to
+// say it too.
 .f-reward-button__price
+  display: inline-flex
+  align-items: center
+  gap: 0.22em
+  color: #fff
   font-weight: 900
-  color: #ffe066
   font-variant-numeric: tabular-nums
-  text-shadow: 2px 2px 0 #000
+  line-height: 1.15
+  text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000
 
 .f-reward-button
   position: relative
@@ -155,6 +187,31 @@ const disabled = computed(() =>
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6))
   pointer-events: none
 
+// Same contract as FButton's: the glyph replaces the caption, and the control
+// squares up rather than keeping a caption's width with nothing in it. The
+// video badge and the coin price are NOT dropped — those carry information a
+// glyph cannot.
+.f-reward-button__icon
+  flex-shrink: 0
+  width: 1.5em
+  height: 1.5em
+
+.f-reward-button.is-icon-only
+  min-width: 2.75rem
+
+  .f-reward-button__body
+    padding-left: clamp(0.4rem, 1.8vw, 0.7rem)
+    padding-right: clamp(0.4rem, 1.8vw, 0.7rem)
+
+.f-reward-button.is-icon-only.size-sm
+  min-width: 2.25rem
+
+.size-md .f-reward-button__icon
+  font-size: clamp(0.8rem, 3.4vw, 1.2rem)
+
+.size-sm .f-reward-button__icon
+  font-size: clamp(0.68rem, 2.8vw, 0.95rem)
+
 .f-reward-button__label
   color: #fff
   font-weight: 900
@@ -166,6 +223,12 @@ const disabled = computed(() =>
 .size-md .f-reward-button__label
   font-size: clamp(0.8rem, 3.4vw, 1.2rem)
 
+// The price tracks the label rather than inheriting the page default, or it
+// drifts out of proportion with the offer it is pricing at either end of the
+// clamp. A touch smaller: it is the terms, not the offer.
+.size-md .f-reward-button__price
+  font-size: clamp(0.72rem, 3vw, 1.05rem)
+
 .size-sm
   min-height: 2.25rem
 
@@ -175,6 +238,9 @@ const disabled = computed(() =>
 
   .f-reward-button__label
     font-size: clamp(0.68rem, 2.8vw, 0.95rem)
+
+  .f-reward-button__price
+    font-size: clamp(0.62rem, 2.5vw, 0.86rem)
 
 .tone-gold
   .f-reward-button__shadow

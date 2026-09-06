@@ -1,39 +1,33 @@
 <script setup lang="ts">
 import { computed, ref, watch, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { ENEMY_DEFS } from '@/game/enemies'
-import { themedPalette } from '@/game/art'
 import { canOfferReward, adInFlight } from '@/use/useAdGate'
 import FRewardButton from '@/components/atoms/FRewardButton.vue'
-import IconGold from '@/components/icons/IconGold.vue'
-import IconWood from '@/components/icons/IconWood.vue'
-import IconStone from '@/components/icons/IconStone.vue'
-import IconCoin from '@/components/icons/IconCoin.vue'
 
 /**
- * The "wave survived" payout toast (a compact take on reference image 7).
+ * The "wave survived" banner.
  *
- * Shown for a few seconds after each cleared wave: what you killed, and what it
- * paid. It auto-dismisses so the build phase isn't gated behind a click — the
- * player's attention should be back on the tower as fast as possible.
+ * One line: which wave was cleared, and the early-call bonus it was cleared
+ * for. Nothing else — and that is the design, not an omission.
  *
- * The payout row is the LOUDEST thing on the card, deliberately. A new player
- * clears wave one, watches wood and stone jump in the top bar, and has no idea
- * why — the earlier version of this toast whispered "+12 +8 +40" in three small
- * coloured numerals with no icons, which is not an explanation of an income
- * source, it is a receipt in a language nobody was taught. So: the same glyphs
- * the resource bar uses, an oversized `+`, and a caption naming the row as the
- * reward. The eye can then travel toast → top bar and connect the two.
+ * It used to be a card carrying a kill tally and a full payout table, parked in
+ * the middle of the screen for three and a half seconds. Two problems, both
+ * fatal at the moment it appears. The tally answered a question nobody asks
+ * (the count of grunts killed changes no decision the player is about to make),
+ * and the payout table said what the wave paid somewhere OTHER than at the
+ * numbers it paid into — while covering the tower, which is the one thing the
+ * player is actually trying to read while deciding what to build next.
+ *
+ * So the payout moved to where it belongs: `useResourceFloats` sends a "+n"
+ * rising into each figure in the resource bar. What is left here is the single
+ * fact a banner is good at — you survived that one — and it gets out of the
+ * way in a second and a half.
  */
 
 interface Reward {
   wave: number
   coins: number
-  gold: number
-  wood: number
-  stone: number
   bonusPct: number
-  tally: Record<string, number>
 }
 
 interface Props {
@@ -47,14 +41,16 @@ const emit = defineEmits<{ (e: 'triple'): void }>()
 const { t } = useI18n()
 
 /**
- * How long the toast lingers.
+ * How long the banner lingers.
  *
- * A plain payout readout should get out of the way fast — the player's
- * attention belongs on the tower. But when the toast is also carrying the
- * triple-coins offer it is a DECISION, and a decision that expires in three
- * seconds is a decision the player will miss and resent missing.
+ * One short line needs about as long as it takes to read, and the payout it
+ * used to carry is now animating into the resource bar on its own clock — so
+ * there is nothing left on this card worth covering the tower for. But when it
+ * is also carrying the triple-coins offer it is a DECISION, and a decision that
+ * expires in a second and a half is a decision the player will miss and resent
+ * missing, so that case keeps its own much longer window.
  */
-const PLAIN_MS = 3400
+const PLAIN_MS = 1500
 const OFFER_MS = 8000
 
 const visible = ref(false)
@@ -94,38 +90,6 @@ const onTriple = (): void => {
   emit('triple')
 }
 
-/** Kill tally, richest first, capped so the row never wraps on a phone. */
-const tallyRows = computed(() => {
-  const tally = props.reward?.tally ?? {}
-  return Object.entries(tally)
-    .filter(([, n]) => n > 0)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 6)
-    .map(([id, n]) => ({
-      id,
-      n,
-      color: themedPalette(ENEMY_DEFS[id]?.palette ?? 'grunt').mid
-    }))
-})
-
-/**
- * The payout chips, in resource order, skipping anything that paid nothing.
- *
- * A "+0 stone" chip is worse than no chip: it teaches the player that the row
- * is noise they can stop reading.
- */
-const payouts = computed(() => {
-  const r = props.reward
-  if (!r) return []
-  return ([
-    { id: 'wood', amount: r.wood },
-    { id: 'stone', amount: r.stone },
-    // Coffer output, shown beside the resources it sits alongside. Kill drops
-    // are deliberately absent — those already floated off the enemy.
-    { id: 'gold', amount: r.gold },
-    { id: 'coin', amount: r.coins }
-  ] as const).filter((p) => p.amount > 0)
-})
 </script>
 
 <template lang="pug">
@@ -136,43 +100,6 @@ const payouts = computed(() => {
         div.wave-toast__title.text-white
           | {{ t('result.waveCleared', { n: reward.wave }) }}
           span.text-white.wave-toast__bonus(v-if="reward.bonusPct > 0") +{{ reward.bonusPct }}%
-
-        //- Kill tally: a coloured pip per enemy type with its count.
-        div.wave-toast__tally(v-if="tallyRows.length > 0")
-          span.wave-toast__pip(v-for="row in tallyRows" :key="row.id")
-            i.wave-toast__dot(:style="{ backgroundColor: row.color }")
-            | {{ row.n }}
-
-        //- ── Payout ─────────────────────────────────────────────────────
-        //- Names itself, so the player learns that clearing a wave is what
-        //- pays for the next one.
-        div.wave-toast__payout(v-if="payouts.length > 0")
-          span.wave-toast__payout-label {{ t('rewards') }}
-          div.wave-toast__rewards
-            span.wave-toast__reward(
-              v-for="(p, i) in payouts"
-              :key="p.id"
-              :class="`is-${p.id}`"
-              :style="{ animationDelay: `${i * 90}ms` }"
-            )
-              //- The SAME components as the resource bar at the top of the
-              //- screen — the whole point is that the player links the two.
-              //-
-              //- These were hand-inlined copies of the bar's old vector glyphs,
-              //- which held while both were drawn by the same hand. The moment
-              //- the bar's icons learned to swap themselves for painted bitmaps,
-              //- the copies stayed vector and the link broke: the toast paid out
-              //- in a different currency from the one the bar counted.
-              IconWood.wave-toast__icon(v-if="p.id === 'wood'")
-              IconStone.wave-toast__icon(v-else-if="p.id === 'stone'")
-              //- The RUN currency is an INGOT, not a coin. A round coin here
-              //- while the bar at the top of the screen shows a bar taught the
-              //- player that the wave paid out the meta wallet, which it does
-              //- not — that is the tech tree's balance.
-              IconGold.wave-toast__icon(v-else-if="p.id === 'gold'")
-              IconCoin.wave-toast__icon(v-else)
-              span.wave-toast__plus +
-              span.wave-toast__amount {{ p.amount }}
 
         //- Triple the wave payout for a video. Offered here rather than on the
         //- defeat screen because this is the moment the number is on screen and
@@ -235,125 +162,16 @@ const payouts = computed(() => {
   padding: 0 0.4em
   font-size: 0.72em
 
-.wave-toast__tally
-  display: flex
-  flex-wrap: wrap
-  align-items: center
-  justify-content: center
-  gap: 0.15rem 0.5rem
-
-.wave-toast__pip
-  display: inline-flex
-  align-items: center
-  gap: 0.2em
-  color: #dbe6ff
-  font-weight: 900
-  font-size: clamp(0.55rem, 2.5vw, 0.78rem)
-  text-shadow: 1px 1px 0 #000
-
-.wave-toast__dot
-  display: inline-block
-  width: 0.55em
-  height: 0.55em
-  border-radius: 999px
-  border: 1px solid rgba(0, 0, 0, 0.5)
-
-// ─── Payout ─────────────────────────────────────────────────────────────────
-
-.wave-toast__payout
-  display: flex
-  flex-direction: column
-  align-items: center
-  gap: 0.15rem
-  width: 100%
-  margin-top: 0.15rem
-  padding-top: 0.25rem
-  border-top: 1px solid rgba(255, 217, 60, 0.28)
-
-.wave-toast__payout-label
-  color: #9fb6de
-  font-weight: 900
-  text-transform: uppercase
-  letter-spacing: 0.12em
-  font-size: clamp(0.42rem, 1.9vw, 0.58rem)
-
-.wave-toast__rewards
-  display: flex
-  flex-wrap: wrap
-  align-items: center
-  justify-content: center
-  gap: clamp(0.25rem, 1.6vw, 0.55rem)
-
-// Each payout is a raised chip rather than a bare numeral: the plus, the icon
-// and the amount have to read as ONE object that just landed in the player's
-// pocket, at a glance, from the far side of the screen.
-.wave-toast__reward
-  display: inline-flex
-  align-items: center
-  gap: 0.1em
-  padding: clamp(0.1rem, 0.8vw, 0.22rem) clamp(0.3rem, 1.8vw, 0.55rem)
-  border: 2px solid rgba(0, 0, 0, 0.45)
-  border-radius: 999px
-  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(0, 0, 0, 0.22))
-  font-weight: 900
-  font-variant-numeric: tabular-nums
-  line-height: 1
-  text-shadow: 2px 2px 0 #000
-  // Backwards, so the chip is already at rest if animations are suppressed.
-  animation: reward-pop 460ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards
-
-  &.is-wood
-    color: #ffc27a
-    box-shadow: inset 0 0 0 1px rgba(217, 154, 83, 0.5)
-  &.is-stone
-    color: #dce4ee
-    box-shadow: inset 0 0 0 1px rgba(184, 194, 206, 0.5)
-  &.is-coin
-    color: #ffd93c
-    box-shadow: inset 0 0 0 1px rgba(255, 217, 60, 0.55)
-
-  // Run gold sits beside wallet coins on this row, so it gets its own tone —
-  // two identical yellow chips would undo the work the two glyphs are doing.
-  &.is-gold
-    color: #ffb648
-    box-shadow: inset 0 0 0 1px rgba(255, 182, 72, 0.55)
-
-.wave-toast__icon
-  flex: 0 0 auto
-  width: clamp(0.95rem, 4.4vw, 1.45rem)
-  height: clamp(0.95rem, 4.4vw, 1.45rem)
-  margin-right: 0.1em
-
-// Oversized on purpose. "+" is the entire message — the resource went UP.
-.wave-toast__plus
-  font-size: clamp(0.85rem, 4vw, 1.35rem)
-  line-height: 1
-
-.wave-toast__amount
-  font-size: clamp(0.95rem, 4.6vw, 1.55rem)
-  line-height: 1
-
-@keyframes reward-pop
-  0%
-    opacity: 0
-    scale: 0.55
-    translate: 0 0.5rem
-  60%
-    opacity: 1
-    scale: 1.14
-  100%
-    opacity: 1
-    scale: 1
-    translate: 0 0
-
-@media (prefers-reduced-motion: reduce)
-  .wave-toast__reward
-    animation: none
+// The kill tally, the payout table and their chip styling all lived here. They
+// went with the markup: what the wave paid is now announced by a float rising
+// into the resource bar, at the number it changed.
 
 .toast-enter-active
-  transition: opacity 200ms ease-out, translate 260ms cubic-bezier(0.34, 1.56, 0.64, 1)
+  transition: opacity 160ms ease-out, translate 240ms cubic-bezier(0.34, 1.56, 0.64, 1)
+// Tightened with the shorter dwell. A 400 ms fade on top of a 1.5 s banner is a
+// third again as long as the banner was asked to be there for.
 .toast-leave-active
-  transition: opacity 400ms ease-in, translate 400ms ease-in
+  transition: opacity 260ms ease-in, translate 260ms ease-in
 
 .toast-enter-from, .toast-leave-to
   opacity: 0
