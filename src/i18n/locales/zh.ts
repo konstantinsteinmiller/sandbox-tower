@@ -24,6 +24,7 @@ export default {
 
   'hud': {
     'wave': '波次', 'enemies': '敌人', 'callWave': '召唤波次', 'callBoss': '召唤首领',
+    'monstersIncoming': '怪物来袭！',
     'speed': '速度 {n}×',
     'speedOffer': '解锁 {n}× 速度',
     'speedGroup': '游戏速度', 'recenter': '视角复位',
@@ -152,22 +153,6 @@ export default {
     }
   },
 
-  // ─── First-stage tutorial ─────────────────────────────────────────────────
-  'tutorial': {
-    'drop': '点击一列放下方块。',
-    'merge': '把相同的方块叠在一起即可合并。',
-    'gate': '守住城门，城门倒下即结束。',
-    'gateSeeded': '我们为你搭好了初始堡垒。守住城门，城门倒下即结束。',
-    'pick': '选择一个方块。',
-    'place': '把它放在城门旁边。',
-    'placeSeeded': '把方块叠在你的墙上。',
-    'call': '准备好就召唤敌潮。',
-    'next': '下一步',
-    'offer': '需要新手教学吗？',
-    'start': '开始',
-    'skip': '跳过'
-  },
-
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
     'cavalry': '骑兵',
@@ -201,6 +186,7 @@ export default {
     'intro1': '在这里购买的一切都是永久的，会带入之后的每一局。',
     'intro2': '每场攻城战都会给你金币，无论输赢。金币就在这里花。',
     'intro3': '金色节点你现在就买得起，蓝色还差金币，暗色需要先解锁前置节点。',
+    'introNext': '下一步',
     'introDone': '知道了',
     'sell': '出售等级',
     'sellBlocked': '请先出售 {n}——它依赖此项。',

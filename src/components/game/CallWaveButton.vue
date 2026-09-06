@@ -32,11 +32,20 @@ interface Props {
   speedBuffLeft?: number
   /** The rungs on offer, slowest first. A mode with no 3× simply omits it. */
   speeds?: ReadonlyArray<number>
+  /**
+   * Bounce, because something is telling the player to press this.
+   *
+   * The first-run coach mark's last beat: the rest of the screen is dimmed and
+   * an arrow points here, and the button moving is what makes it read as the
+   * live thing rather than another piece of dimmed HUD.
+   */
+  attention?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   speedBuffLeft: 0,
-  speeds: () => GAME_SPEEDS
+  speeds: () => GAME_SPEEDS,
+  attention: false
 })
 const emit = defineEmits<{
   (e: 'call'): void
@@ -123,7 +132,7 @@ const onSpeed = (n: number): void => {
     button.call-wave__btn(
       v-if="phase === 'build'"
       type="button"
-      :class="{ 'is-urgent': urgent, 'is-boss': bossIncoming }"
+      :class="{ 'is-urgent': urgent, 'is-boss': bossIncoming, 'is-attention': attention }"
       @click="emit('call')"
     )
       span.call-wave__shadow(aria-hidden="true")
@@ -348,6 +357,24 @@ const onSpeed = (n: number): void => {
   width: clamp(0.75rem, 3.2vw, 1rem)
   height: clamp(0.75rem, 3.2vw, 1rem)
   pointer-events: none
+
+// Something is pointing at this button and waiting. Whole-button bounce rather
+// than the urgent glow: it has to be legible as THE thing to press with the
+// rest of the screen dimmed behind a coach mark, and a shadow pulse is not.
+.call-wave__btn.is-attention
+  animation: cw-attention 0.72s ease-in-out infinite
+
+@keyframes cw-attention
+  0%, 100%
+    transform: translateY(0) scale(1)
+  40%
+    transform: translateY(-9px) scale(1.06)
+  70%
+    transform: translateY(0) scale(0.98)
+
+@media (prefers-reduced-motion: reduce)
+  .call-wave__btn.is-attention
+    animation: none
 
 // The wave is about to start on its own.
 .call-wave__btn.is-urgent .call-wave__body

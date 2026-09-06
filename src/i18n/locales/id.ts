@@ -24,6 +24,7 @@ export default {
 
   'hud': {
     'wave': 'Gelombang', 'enemies': 'Musuh', 'callWave': 'Panggil gelombang', 'callBoss': 'Panggil bos',
+    'monstersIncoming': 'Monster datang!',
     'speed': 'Kecepatan {n}×',
     'speedOffer': 'Buka kecepatan {n}×',
     'speedGroup': 'Kecepatan game', 'recenter': 'Pusatkan tampilan',
@@ -152,22 +153,6 @@ export default {
     }
   },
 
-  // ─── First-stage tutorial ─────────────────────────────────────────────────
-  'tutorial': {
-    'drop': 'Ketuk sebuah kolom untuk menjatuhkan balok.',
-    'merge': 'Jatuhkan kembaran di atas kembaran untuk menggabungkannya.',
-    'gate': 'Lindungi Gerbang. Kalau jatuh, ronde berakhir.',
-    'gateSeeded': 'Kami bangunkan benteng awal untukmu. Lindungi Gerbang — kalau jatuh, ronde berakhir.',
-    'pick': 'Pilih satu bagian.',
-    'place': 'Letakkan di samping Gerbang.',
-    'placeSeeded': 'Susun satu bagian di atas dindingmu.',
-    'call': 'Panggil gelombang saat siap.',
-    'next': 'Lanjut',
-    'offer': 'Butuh tutorial?',
-    'start': 'Mulai',
-    'skip': 'Lewati'
-  },
-
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
     'cavalry': 'Kavaleri',
@@ -201,6 +186,7 @@ export default {
     'intro1': 'Semua yang kamu beli di sini permanen dan terbawa ke setiap ronde berikutnya.',
     'intro2': 'Koin datang dari setiap pengepungan, menang atau kalah. Di sinilah kamu membelanjakannya.',
     'intro3': 'Node emas sudah terjangkau. Yang biru butuh lebih banyak koin, yang redup butuh node sebelumnya.',
+    'introNext': 'Lanjut',
     'introDone': 'Mengerti',
     'sell': 'Jual peringkat',
     'sellBlocked': 'Jual {n} dulu — ia membutuhkannya.',

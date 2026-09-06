@@ -24,6 +24,7 @@ export default {
 
   'hud': {
     'wave': 'Onda', 'enemies': 'Inimigos', 'callWave': 'Chamar onda', 'callBoss': 'Chamar chefe',
+    'monstersIncoming': 'Monstros a caminho!',
     'speed': 'Velocidade {n}×',
     'speedOffer': 'Desbloquear velocidade {n}×',
     'speedGroup': 'Velocidade do jogo', 'recenter': 'Centralizar a vista',
@@ -152,22 +153,6 @@ export default {
     }
   },
 
-  // ─── First-stage tutorial ─────────────────────────────────────────────────
-  'tutorial': {
-    'drop': 'Toque numa coluna para soltar a peça.',
-    'merge': 'Solte uma gêmea sobre outra para fundi-las.',
-    'gate': 'Proteja o Portão. Se cair, a partida acaba.',
-    'gateSeeded': 'Construímos um forte inicial para você. Proteja o Portão: se cair, a partida acaba.',
-    'pick': 'Escolha uma peça.',
-    'place': 'Coloque-a ao lado do Portão.',
-    'placeSeeded': 'Coloque uma peça sobre o seu muro.',
-    'call': 'Chame a onda quando estiver pronto.',
-    'next': 'Próximo',
-    'offer': 'Precisa de um tutorial?',
-    'start': 'Começar',
-    'skip': 'Pular'
-  },
-
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
     'cavalry': 'Cavalaria',
@@ -201,6 +186,7 @@ export default {
     'intro1': 'Tudo o que compras aqui é permanente e acompanha-te em todas as partidas.',
     'intro2': 'As moedas vêm de cada cerco, ganhes ou percas. É aqui que as gastas.',
     'intro3': 'Os nós dourados já podes pagar. Os azuis pedem mais moedas; os apagados, o nó anterior.',
+    'introNext': 'Próximo',
     'introDone': 'Entendi',
     'sell': 'Vender nível',
     'sellBlocked': 'Venda antes {n} — ele precisa disto.',

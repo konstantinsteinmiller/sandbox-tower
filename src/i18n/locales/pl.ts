@@ -24,6 +24,7 @@ export default {
 
   'hud': {
     'wave': 'Fala', 'enemies': 'Wrogowie', 'callWave': 'Wezwij falę', 'callBoss': 'Wezwij bossa',
+    'monstersIncoming': 'Nadchodzą potwory!',
     'speed': 'Prędkość {n}×',
     'speedOffer': 'Odblokuj prędkość {n}×',
     'speedGroup': 'Szybkość gry', 'recenter': 'Wyśrodkuj widok',
@@ -152,22 +153,6 @@ export default {
     }
   },
 
-  // ─── First-stage tutorial ─────────────────────────────────────────────────
-  'tutorial': {
-    'drop': 'Dotknij kolumny, aby upuścić element.',
-    'merge': 'Upuść bliźniaka na bliźniaka, aby je połączyć.',
-    'gate': 'Broń Bramy. Gdy padnie, koniec gry.',
-    'gateSeeded': 'Zbudowaliśmy ci fort na start. Broń Bramy — gdy padnie, koniec gry.',
-    'pick': 'Wybierz element.',
-    'place': 'Postaw go obok Bramy.',
-    'placeSeeded': 'Postaw element na swoim murze.',
-    'call': 'Wezwij falę, gdy będziesz gotów.',
-    'next': 'Dalej',
-    'offer': 'Potrzebujesz samouczka?',
-    'start': 'Start',
-    'skip': 'Pomiń'
-  },
-
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
     'cavalry': 'Kawaleria',
@@ -201,6 +186,7 @@ export default {
     'intro1': 'Wszystko, co tu kupisz, jest trwałe i zostaje na każdą kolejną rozgrywkę.',
     'intro2': 'Monety dostajesz po każdym oblężeniu, wygranym czy przegranym. Tutaj je wydajesz.',
     'intro3': 'Złote węzły już cię stać. Niebieskie wymagają więcej monet, przygaszone — węzła przed nimi.',
+    'introNext': 'Dalej',
     'introDone': 'Jasne',
     'sell': 'Sprzedaj rangę',
     'sellBlocked': 'Najpierw sprzedaj {n} — tego wymaga.',

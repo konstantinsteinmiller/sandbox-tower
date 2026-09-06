@@ -114,6 +114,23 @@ export interface RuleSet {
   waves: {
     budgetMul: number
     buildMs: number
+    /**
+     * The build window before the OPENING wave, which is a different problem
+     * from every wave after it.
+     *
+     * The game boots into a live stage with a tower already standing (the
+     * scripted opening's fort on a first session, the player's own opener
+     * after that), and wave 1 is the one wave that tower is guaranteed to
+     * hold. A full build window there is not a decision — it is the player
+     * watching a countdown before anything has happened, which is the most
+     * expensive place in the whole run to spend fifteen seconds.
+     *
+     * The clock does not start until the player has actually touched the game
+     * (`awaitingFirstInteraction`), so this is three seconds of THEIRS, not
+     * three seconds of the page loading. Building carries on during the
+     * battle, so nothing is taken away — only the waiting.
+     */
+    firstBuildMs: number
     /** All spawning finishes inside this window. */
     spawnWindowMs: number
     /** Past this, every remaining order is released at once. */
@@ -185,6 +202,7 @@ export const DESKTOP_RULES: RuleSet = {
   waves: {
     budgetMul: 1,
     buildMs: 15_000,
+    firstBuildMs: 3_000,
     spawnWindowMs: 82_000,
     flushAtMs: 96_000,
     bossEvery: 10,

@@ -1,0 +1,201 @@
+// ─── First-stage tutorial ───────────────────────────────────────────────────
+//
+// The FIRST STAGE ONLY. Four beats, one line each, each pointing at the thing
+// it is talking about — and then never again, for this player, on any device
+// the save syncs to.
+//
+// It is deliberately not a difficulty setting or a replayable help screen: a
+// player who needs it needs it once, and a player who does not is insulted by
+// it. Everything after stage one is taught by the game being hard.
+
+const TUTORIAL_STEPS: TutorialStep[] = ['gate', 'pick', 'place', 'call']
+
+// Three states, only one of which is persisted.
+//
+//   not answered  → the offer box beside the tower
+//   running       → the coach marks
+//   answered      → nothing, ever again
+//
+// Only the ANSWER is written to `ts_tutorial`, and it goes through
+// `setState`, which the SaveManager mirrors to whichever backend the build
+// actually has — the platform SDK's cloud store on CrazyGames / Playgama /
+// Yandex, plain localStorage everywhere else. So a player who skips on their
+// phone is not asked again on their desktop.
+const tutorialDone = ref(getState<boolean>(TUTORIAL_KEY, false) === true)
+/** In-memory: the player tapped Start. Never persisted — an interrupted
+ *  tutorial should offer itself again next session, not resume mid-step. */
+const tutorialActive = ref(false)
+const tutorialIndex = ref(0)
+/** Rect of the element the current beat points at, in screen space. */
+const tutorialRect = ref<{ x: number; y: number; w: number; h: number } | null>(null)
+
+/** True while the first stage is still the right moment to teach anything. */
+const inFirstStage = computed(() =>
+  !tutorialDone.value
+  && wave.value <= 1
+  && !showResult.value
+  && !isAnyModalOpen.value
+)
+
+/**
+ * Is the scripted opening's free starter fort standing?
+ *
+ * Read off the TOWER rather than off a flag, so it survives a reload mid-first
+ * run — `ts_run` restores the fort, and the coach marks have to agree with what
+ * is on screen, not with what the boot path happened to do.
+ */
+const starterFort = computed(() => {
+  void towerVersion.value
+  return getBlocks().has('-1,0') && getBlocks().has('1,0')
+})
+
+/**
+ * The row the `place` beat points at: the first one with a free cell beside the
+ * Gate's column.
+ *
+ * An empty foundation means the cells flanking the Gate. With the starter fort
+ * standing those are taken, and pointing a "place it here" spotlight at two
+ * occupied cells is worse than not pointing at all — so it moves up to the
+ * shoulders.
+ */
+const placeRow = computed(() => {
+  void towerVersion.value
+  const blocks = getBlocks()
+  for (let r = 0; r < 6; r++) {
+    if (!blocks.has(`-1,${r}`) || !blocks.has(`1,${r}`)) return r
+  }
+  return 0
+})
+
+const tutorialStep = computed<TutorialStep | null>(() => {
+  if (!inFirstStage.value || !tutorialActive.value) return null
+  return TUTORIAL_STEPS[tutorialIndex.value] ?? null
+})
+
+/** The offer is up until the player answers it one way or the other. */
+const showTutorialPrompt = computed(() => inFirstStage.value && !tutorialActive.value)
+
+/**
+ * Where the offer box sits: beside the tower's footprint, level with the Gate.
+ *
+ * Projected from world space rather than pinned to a screen corner, so it reads
+ * as pointing AT the tower and follows the camera when the player pans — but
+ * flipped to the other side when the preferred one has no room. On a portrait
+ * phone the tower sits near the middle of a 400 px-wide screen, and a box
+ * anchored to its right simply runs off the edge.
+ */
+const PROMPT_WIDTH_PX = 190
+const PROMPT_MARGIN_PX = 10
+
+const tutorialPromptPos = computed(() => {
+  void tutorialTick.value
+  const half = halfWidthAt(0) + 1.2
+  const right = worldToScreenX(half)
+  const left = worldToScreenX(-half)
+  const vw = typeof window === 'undefined' ? 1024 : window.innerWidth
+
+  // Prefer the right of the tower; take the left when the box would be clipped.
+  const fitsRight = right + PROMPT_WIDTH_PX + PROMPT_MARGIN_PX <= vw
+  const onRight = fitsRight || left - PROMPT_WIDTH_PX - PROMPT_MARGIN_PX < 0
+  const rawX = onRight ? right : left - PROMPT_WIDTH_PX
+
+  return {
+    // Clamped as a last resort: on a very narrow screen NEITHER side fits, and
+    // a box half off the edge is worse than one overlapping the tower.
+    x: Math.round(Math.max(
+      PROMPT_MARGIN_PX,
+      Math.min(rawX, vw - PROMPT_WIDTH_PX - PROMPT_MARGIN_PX)
+    )),
+    y: Math.round(worldToScreenY(1.2)),
+    onRight
+  }
+})
+
+// ─── The tutorial holds the opening countdown ───────────────────────────────
+//
+// Wave 1 lands three seconds after the player's first gesture, and those three
+// seconds are meant to be THEIRS. While the tutorial has the floor they are
+// not: the offer box is a question waiting to be answered, and every coach
+// mark after it waits on an action only the player can take. Its last beat is
+// the Call Wave button, so a countdown running underneath would fire the wave
+// out from under the tutorial and leave the player on a step whose button is
+// no longer on screen — a tutorial that can never be finished, and so is never
+// recorded as answered.
+//
+// The hold covers BOTH halves, the unanswered offer and the running tutorial,
+// and lifts the moment the tutorial is answered — whichever way it ends. SKIP,
+// the last beat and a cancel from the overlay all go through `finishTutorial`,
+// which is what closes the offer box and the coach marks alike.
+watch(
+  () => tutorialActive.value || showTutorialPrompt.value,
+  (held) => { buildClockHeld.value = held },
+  { immediate: true }
+)
+
+const startTutorial = (): void => {
+  tutorialActive.value = true
+  tutorialIndex.value = 0
+  measureTutorialTarget()
+}
+
+/** Persist the answer — completed and skipped are the same answer. */
+const finishTutorial = (): void => {
+  tutorialDone.value = true
+  tutorialActive.value = false
+  setState(TUTORIAL_KEY, true)
+}
+
+const advanceTutorial = (): void => {
+  tutorialIndex.value++
+  if (tutorialIndex.value >= TUTORIAL_STEPS.length) finishTutorial()
+}
+
+/** Advance when the player performs the step's action, not on a Next tap. */
+const completeTutorialStep = (step: TutorialStep): void => {
+  if (tutorialStep.value !== step) return
+  advanceTutorial()
+}
+
+/**
+ * Measure whatever the current beat is pointing at.
+ *
+ * Polled rather than observed: the targets are a canvas rect, a tray tile and a
+ * HUD button that all move as the layout settles, and three ResizeObservers
+ * plus a canvas-to-screen projection is a lot of machinery for four beats that
+ * only ever run once.
+ */
+const measureTutorialTarget = (): void => {
+  const step = tutorialStep.value
+  if (!step) { tutorialRect.value = null; return }
+
+  const fromEl = (sel: string): { x: number; y: number; w: number; h: number } | null => {
+    const el = document.querySelector(sel)
+    if (!el) return null
+    const b = el.getBoundingClientRect()
+    if (b.width <= 0 || b.height <= 0) return null
+    return { x: b.x, y: b.y, w: b.width, h: b.height }
+  }
+
+  if (step === 'pick') { tutorialRect.value = fromEl('.build-tray__scroll'); return }
+  if (step === 'call') { tutorialRect.value = fromEl('.call-wave__btn'); return }
+
+  // `gate` and `place` point at the battlefield, which lives on the canvas —
+  // so the rect is projected from world space rather than read from the DOM.
+  const size = Math.max(48, getZoom())
+  const gx = worldToScreenX(0)
+  const gy = worldToScreenY(0.5)
+  if (step === 'gate') {
+    tutorialRect.value = { x: gx - size / 2, y: gy - size / 2, w: size, h: size }
+    return
+  }
+  // `place`: the cells flanking the Gate's column on the lowest row that still
+  // has room — the foundation on an empty start, the fort's shoulders once the
+  // scripted opening has filled it.
+  tutorialRect.value = {
+    x: worldToScreenX(-1.5),
+    y: worldToScreenY(placeRow.value + 0.5) - size / 2,
+    w: size * 3,
+    h: size
+  }
+}
+

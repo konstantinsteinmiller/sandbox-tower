@@ -15,6 +15,12 @@ const load = async () => {
   const { PIECE_DEFS } = await import('@/mobile-fit/pieces')
   game.applyRules(DROPMERGE_RULES)
   game.startRun()
+  // This board has NO opening build window — it calls wave 1 on the first tick
+  // (see `firstBuildMs`), which is the whole point of it. Every spec below is
+  // about the board itself, though, so the clock is frozen and the phase stays
+  // where the mechanics under test live; the opening wave has its own specs in
+  // `tests/game/openingWave.test.ts`.
+  game.buildClockHeld.value = true
   return { game, rules: DROPMERGE_RULES, BOARD_MAX_ROW, BOARD_HALF_WIDTH, PIECE_DEFS }
 }
 

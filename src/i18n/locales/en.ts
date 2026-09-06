@@ -31,6 +31,7 @@ export default {
     'wave': 'Wave',
     'enemies': 'Enemies',
     'callWave': 'Call Wave',
+    'monstersIncoming': 'Monsters incoming!',
     'callBoss': 'Call Boss',
     'speed': 'Speed {n}×',
     'speedOffer': 'Unlock {n}× speed',
@@ -208,26 +209,6 @@ export default {
     }
   },
 
-  // ─── Result / run summary ─────────────────────────────────────────────────
-  // ─── First-stage tutorial ─────────────────────────────────────────────────
-  'tutorial': {
-    'drop': 'Tap a column to drop the piece.',
-    'merge': 'Drop a twin on a twin to merge them.',
-    'gate': 'Protect the Gate. If it falls, the run ends.',
-    // The `*Seeded` variants are shown when the first-session scripted opening
-    // has already put a free starter fort on the foundation — the plain lines
-    // describe a bare board the player is not looking at.
-    'gateSeeded': 'We built you a starter fort. Protect the Gate — if it falls, the run ends.',
-    'pick': 'Pick a piece.',
-    'place': 'Place it next to the Gate.',
-    'placeSeeded': 'Stack a piece on your wall.',
-    'call': 'Call the wave when you are ready.',
-    'next': 'Next',
-    'offer': 'Need a tutorial?',
-    'start': 'Start',
-    'skip': 'Skip'
-  },
-
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
     'cavalry': 'Cavalry',
@@ -236,6 +217,7 @@ export default {
     'outOfReachHint': 'Out of reach — ride out or extend your range'
   },
 
+  // ─── Result / run summary ─────────────────────────────────────────────────
   'result': {
     'towerFell': 'The Tower Fell!',
     'reachedWave': 'You survived to wave {n}',
@@ -264,6 +246,7 @@ export default {
     'intro1': 'Everything you buy here is permanent. It carries into every future run.',
     'intro2': 'Coins come from every siege, win or lose. This is where you spend them.',
     'intro3': 'Gold nodes you can afford now. Blue need more coins. Dim need the node before them.',
+    'introNext': 'Next',
     'introDone': 'Got it',
     'title': 'Tech Tree',
     'rank': 'Rank {current}/{total}',

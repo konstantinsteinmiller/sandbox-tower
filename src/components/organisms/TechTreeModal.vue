@@ -535,7 +535,7 @@ const nodeTotal = (id: string, level: number): string | null => {
                   v-for="i in 3" :key="i" :class="{ 'is-on': i - 1 === introStep }"
                 )
               button.tech-intro__go(type="button" @click.stop="advanceIntro")
-                | {{ introStep < 2 ? t('tutorial.next') : t('tech.introDone') }}
+                | {{ introStep < 2 ? t('tech.introNext') : t('tech.introDone') }}
 </template>
 
 <style scoped lang="sass">

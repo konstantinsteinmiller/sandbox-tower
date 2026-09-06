@@ -21,14 +21,18 @@ const loadGate = async (opts: { crazy?: boolean; fullRelease?: boolean; granted?
     isPoki: false
   }))
   vi.doMock('@/use/useMatch', () => ({ isCrazyGamesFullRelease: opts.fullRelease ?? true }))
-  const showRewardedAd = vi.fn(async () => opts.granted ?? true)
+  // The gate reaches the ad layer through `requestRewardedGrant` — the seam
+  // that decides whether an activation is one of the player's free ones before
+  // any video is asked for. Mocked as a plain "did it ask for a video" spy, so
+  // these specs stay about the GATE; the free grants have their own file.
+  const requestRewardedGrant = vi.fn(async () => opts.granted ?? true)
   vi.doMock('@/use/useAds', async () => {
     const { ref } = await import('vue')
-    return { isRewardedReady: ref(true), showRewardedAd }
+    return { isRewardedReady: ref(true), requestRewardedGrant }
   })
   const mod = await import('@/use/useAdGate')
   mod.__resetRewardWindow()
-  return { ...mod, showRewardedAd }
+  return { ...mod, requestRewardedGrant }
 }
 
 beforeEach(() => {
@@ -42,7 +46,7 @@ describe('rewarded rate limit', () => {
     for (let i = 0; i < 6; i++) {
       await expect(gate.claimReward(vi.fn()), `request ${i + 1}`).resolves.toBe(true)
     }
-    expect(gate.showRewardedAd).toHaveBeenCalledTimes(6)
+    expect(gate.requestRewardedGrant).toHaveBeenCalledTimes(6)
   })
 
   it('refuses the seventh without touching the provider', async () => {
@@ -52,7 +56,7 @@ describe('rewarded rate limit', () => {
     await expect(gate.claimReward(grant)).resolves.toBe(false)
     expect(grant).not.toHaveBeenCalled()
     // The seventh must not reach the network at all.
-    expect(gate.showRewardedAd).toHaveBeenCalledTimes(6)
+    expect(gate.requestRewardedGrant).toHaveBeenCalledTimes(6)
   })
 
   it('counts requests, not grants — a no-fill still spends allowance', async () => {
@@ -96,7 +100,7 @@ describe('rewarded rate limit', () => {
     for (let i = 0; i < 20; i++) {
       await expect(gate.claimReward(vi.fn())).resolves.toBe(true)
     }
-    expect(gate.showRewardedAd).not.toHaveBeenCalled()
+    expect(gate.requestRewardedGrant).not.toHaveBeenCalled()
     expect(gate.canOfferReward.value).toBe(true)
   })
 })

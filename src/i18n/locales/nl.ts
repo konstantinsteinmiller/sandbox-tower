@@ -24,6 +24,7 @@ export default {
 
   'hud': {
     'wave': 'Golf', 'enemies': 'Vijanden', 'callWave': 'Golf oproepen', 'callBoss': 'Boss oproepen',
+    'monstersIncoming': 'Monsters in aantocht!',
     'speed': 'Snelheid {n}×',
     'speedOffer': '{n}× snelheid ontgrendelen',
     'speedGroup': 'Spelsnelheid', 'recenter': 'Beeld centreren',
@@ -152,22 +153,6 @@ export default {
     }
   },
 
-  // ─── First-stage tutorial ─────────────────────────────────────────────────
-  'tutorial': {
-    'drop': 'Tik op een kolom om het stuk te laten vallen.',
-    'merge': 'Laat een tweeling op een tweeling vallen om ze samen te voegen.',
-    'gate': 'Bescherm de Poort. Valt hij, dan is het voorbij.',
-    'gateSeeded': 'We bouwden alvast een fort voor je. Bescherm de Poort: valt hij, dan is het voorbij.',
-    'pick': 'Kies een stuk.',
-    'place': 'Plaats het naast de Poort.',
-    'placeSeeded': 'Zet een stuk op je muur.',
-    'call': 'Roep de golf als je klaar bent.',
-    'next': 'Volgende',
-    'offer': 'Uitleg nodig?',
-    'start': 'Start',
-    'skip': 'Overslaan'
-  },
-
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
     'cavalry': 'Cavalerie',
@@ -201,6 +186,7 @@ export default {
     'intro1': 'Alles wat je hier koopt is permanent en gaat mee in elke volgende run.',
     'intro2': 'Munten komen uit elk beleg, of je nu wint of verliest. Hier geef je ze uit.',
     'intro3': 'Gouden knopen kun je nu betalen. Blauwe vragen meer munten, doffe de knoop ervoor.',
+    'introNext': 'Volgende',
     'introDone': 'Begrepen',
     'sell': 'Rang verkopen',
     'sellBlocked': 'Verkoop eerst {n} — die heeft dit nodig.',

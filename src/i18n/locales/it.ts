@@ -24,6 +24,7 @@ export default {
 
   'hud': {
     'wave': 'Ondata', 'enemies': 'Nemici', 'callWave': 'Chiama ondata', 'callBoss': 'Chiama boss',
+    'monstersIncoming': 'Mostri in arrivo!',
     'speed': 'Velocità {n}×',
     'speedOffer': 'Sblocca la velocità {n}×',
     'speedGroup': 'Velocità di gioco', 'recenter': 'Ricentra la vista',
@@ -152,22 +153,6 @@ export default {
     }
   },
 
-  // ─── First-stage tutorial ─────────────────────────────────────────────────
-  'tutorial': {
-    'drop': 'Tocca una colonna per far cadere il pezzo.',
-    'merge': 'Fai cadere un gemello su un gemello per fonderli.',
-    'gate': 'Proteggi il Cancello. Se cade, la partita finisce.',
-    'gateSeeded': 'Ti abbiamo costruito un forte iniziale. Proteggi il Cancello: se cade, la partita finisce.',
-    'pick': 'Scegli un pezzo.',
-    'place': 'Mettilo accanto al Cancello.',
-    'placeSeeded': 'Metti un pezzo sopra il tuo muro.',
-    'call': 'Chiama l’ondata quando sei pronto.',
-    'next': 'Avanti',
-    'offer': 'Serve un tutorial?',
-    'start': 'Inizia',
-    'skip': 'Salta'
-  },
-
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
     'cavalry': 'Cavalleria',
@@ -201,6 +186,7 @@ export default {
     'intro1': 'Tutto ciò che compri qui è permanente e resta in ogni partita futura.',
     'intro2': 'Le monete arrivano da ogni assedio, vinto o perso. È qui che si spendono.',
     'intro3': 'I nodi dorati sono già alla tua portata. I blu chiedono più monete, gli spenti il nodo precedente.',
+    'introNext': 'Avanti',
     'introDone': 'Capito',
     'sell': 'Vendi grado',
     'sellBlocked': 'Vendi prima {n}: ne ha bisogno.',

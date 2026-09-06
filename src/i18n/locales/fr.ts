@@ -24,6 +24,7 @@ export default {
 
   'hud': {
     'wave': 'Vague', 'enemies': 'Ennemis', 'callWave': 'Appeler la vague', 'callBoss': 'Appeler le boss',
+    'monstersIncoming': 'Les monstres arrivent !',
     'speed': 'Vitesse {n}×',
     'speedOffer': 'Débloquer la vitesse {n}×',
     'speedGroup': 'Vitesse du jeu', 'recenter': 'Recentrer la vue',
@@ -152,22 +153,6 @@ export default {
     }
   },
 
-  // ─── First-stage tutorial ─────────────────────────────────────────────────
-  'tutorial': {
-    'drop': 'Touchez une colonne pour lâcher la pièce.',
-    'merge': 'Lâchez une jumelle sur une jumelle pour les fusionner.',
-    'gate': 'Protège la Porte. Si elle tombe, la partie est finie.',
-    'gateSeeded': 'On t’a construit un fort de départ. Protège la Porte : si elle tombe, la partie est finie.',
-    'pick': 'Choisis une pièce.',
-    'place': 'Pose-la à côté de la Porte.',
-    'placeSeeded': 'Pose une pièce sur ton mur.',
-    'call': 'Lance la vague quand tu es prêt.',
-    'next': 'Suivant',
-    'offer': 'Besoin d’un tutoriel ?',
-    'start': 'Démarrer',
-    'skip': 'Passer'
-  },
-
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
     'cavalry': 'Cavalerie',
@@ -201,6 +186,7 @@ export default {
     'intro1': 'Tout ce que vous achetez ici est permanent et vous suit dans chaque partie.',
     'intro2': 'Les pièces tombent après chaque siège, victoire ou défaite. C’est ici qu’on les dépense.',
     'intro3': 'Les nœuds dorés sont abordables. Les bleus exigent plus de pièces, les ternes le nœud précédent.',
+    'introNext': 'Suivant',
     'introDone': 'Compris',
     'sell': 'Vendre un rang',
     'sellBlocked': 'Vendez d’abord {n} — il en dépend.',

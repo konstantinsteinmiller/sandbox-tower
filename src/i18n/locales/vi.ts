@@ -24,6 +24,7 @@ export default {
 
   'hud': {
     'wave': 'Đợt', 'enemies': 'Kẻ địch', 'callWave': 'Gọi đợt', 'callBoss': 'Gọi trùm',
+    'monstersIncoming': 'Quái vật đang đến!',
     'speed': 'Tốc độ {n}×',
     'speedOffer': 'Mở khóa tốc độ {n}×',
     'speedGroup': 'Tốc độ trò chơi', 'recenter': 'Căn giữa khung nhìn',
@@ -152,22 +153,6 @@ export default {
     }
   },
 
-  // ─── First-stage tutorial ─────────────────────────────────────────────────
-  'tutorial': {
-    'drop': 'Chạm vào một cột để thả khối.',
-    'merge': 'Thả khối giống nhau lên nhau để hợp nhất.',
-    'gate': 'Bảo vệ Cổng. Cổng đổ là kết thúc.',
-    'gateSeeded': 'Chúng tôi đã dựng sẵn pháo đài khởi đầu cho bạn. Bảo vệ Cổng — Cổng đổ là kết thúc.',
-    'pick': 'Chọn một mảnh.',
-    'place': 'Đặt nó cạnh Cổng.',
-    'placeSeeded': 'Xếp một mảnh lên tường của bạn.',
-    'call': 'Gọi đợt tấn công khi đã sẵn sàng.',
-    'next': 'Tiếp',
-    'offer': 'Cần hướng dẫn?',
-    'start': 'Bắt đầu',
-    'skip': 'Bỏ qua'
-  },
-
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
     'cavalry': 'Kỵ binh',
@@ -201,6 +186,7 @@ export default {
     'intro1': 'Mọi thứ bạn mua ở đây là vĩnh viễn và theo bạn sang mọi lượt chơi sau.',
     'intro2': 'Xu đến từ mỗi trận vây hãm, dù thắng hay thua. Đây là nơi tiêu chúng.',
     'intro3': 'Nút vàng bạn mua được ngay. Nút xanh cần thêm xu, nút mờ cần nút phía trước.',
+    'introNext': 'Tiếp',
     'introDone': 'Đã hiểu',
     'sell': 'Bán cấp',
     'sellBlocked': 'Bán {n} trước — nó cần cái này.',

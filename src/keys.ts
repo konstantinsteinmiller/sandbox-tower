@@ -100,6 +100,8 @@ export const CHEST_KEY = 'ts_chest'
 export const CHEST_DAY_KEY = 'ts_chest_day'
 /** Rewarded-ad button cooldown timestamp. */
 export const AD_COOLDOWN_KEY = 'ts_ad_cooldown'
+/** How many of the house's free rewarded grants this player has spent. */
+export const FREE_REWARDS_KEY = 'ts_free_rewards'
 
 // ─── Onboarding / one-shot UI nudges ────────────────────────────────────────
 

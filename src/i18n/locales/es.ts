@@ -24,6 +24,7 @@ export default {
 
   'hud': {
     'wave': 'Oleada', 'enemies': 'Enemigos', 'callWave': 'Llamar oleada', 'callBoss': 'Llamar jefe',
+    'monstersIncoming': '¡Llegan los monstruos!',
     'speed': 'Velocidad {n}×',
     'speedOffer': 'Desbloquear velocidad {n}×',
     'speedGroup': 'Velocidad del juego', 'recenter': 'Centrar la vista',
@@ -152,22 +153,6 @@ export default {
     }
   },
 
-  // ─── First-stage tutorial ─────────────────────────────────────────────────
-  'tutorial': {
-    'drop': 'Toca una columna para soltar la pieza.',
-    'merge': 'Suelta una gemela sobre otra para fusionarlas.',
-    'gate': 'Protege la Puerta. Si cae, la partida termina.',
-    'gateSeeded': 'Te construimos un fuerte inicial. Protege la Puerta: si cae, la partida termina.',
-    'pick': 'Elige una pieza.',
-    'place': 'Colócala junto a la Puerta.',
-    'placeSeeded': 'Coloca una pieza sobre tu muro.',
-    'call': 'Llama a la oleada cuando estés listo.',
-    'next': 'Siguiente',
-    'offer': '¿Necesitas un tutorial?',
-    'start': 'Empezar',
-    'skip': 'Saltar'
-  },
-
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
     'cavalry': 'Caballería',
@@ -201,6 +186,7 @@ export default {
     'intro1': 'Todo lo que compras aquí es permanente y se mantiene en cada partida futura.',
     'intro2': 'Las monedas llegan tras cada asedio, ganes o pierdas. Aquí es donde se gastan.',
     'intro3': 'Los nodos dorados ya puedes pagarlos. Los azules piden más monedas; los apagados, el nodo anterior.',
+    'introNext': 'Siguiente',
     'introDone': 'Entendido',
     'sell': 'Vender rango',
     'sellBlocked': 'Vende antes {n}: lo necesita.',

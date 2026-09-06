@@ -24,6 +24,7 @@ export default {
 
   'hud': {
     'wave': 'Dalga', 'enemies': 'Düşmanlar', 'callWave': 'Dalgayı çağır', 'callBoss': 'Boss’u çağır',
+    'monstersIncoming': 'Canavarlar geliyor!',
     'speed': 'Hız {n}×',
     'speedOffer': '{n}× hızı aç',
     'speedGroup': 'Oyun hızı', 'recenter': 'Görünümü ortala',
@@ -152,22 +153,6 @@ export default {
     }
   },
 
-  // ─── First-stage tutorial ─────────────────────────────────────────────────
-  'tutorial': {
-    'drop': 'Parçayı bırakmak için bir sütuna dokun.',
-    'merge': 'Birleştirmek için ikizi ikizin üstüne bırak.',
-    'gate': 'Kapıyı koru. Düşerse tur biter.',
-    'gateSeeded': 'Sana bir başlangıç kalesi kurduk. Kapıyı koru — düşerse tur biter.',
-    'pick': 'Bir parça seç.',
-    'place': 'Kapının yanına yerleştir.',
-    'placeSeeded': 'Duvarının üstüne bir parça koy.',
-    'call': 'Hazır olunca dalgayı çağır.',
-    'next': 'İleri',
-    'offer': 'Eğitim ister misin?',
-    'start': 'Başla',
-    'skip': 'Atla'
-  },
-
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
     'cavalry': 'Süvari',
@@ -201,6 +186,7 @@ export default {
     'intro1': 'Burada aldığın her şey kalıcıdır ve sonraki tüm turlara taşınır.',
     'intro2': 'Paralar her kuşatmadan gelir, kazan ya da kaybet. Onları burada harcarsın.',
     'intro3': 'Altın düğümleri şimdi alabilirsin. Maviler daha çok para, sönükler önceki düğümü ister.',
+    'introNext': 'İleri',
     'introDone': 'Anladım',
     'sell': 'Rütbe sat',
     'sellBlocked': 'Önce {n} sat — buna ihtiyacı var.',

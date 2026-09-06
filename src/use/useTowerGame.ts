@@ -39,6 +39,7 @@ import { difficultyFactor } from '@/use/useUser'
 import { getState, setState, removeState } from '@/use/useTowerState'
 import { activeRules, setActiveRules, type RuleSet } from '@/game/rules'
 import { pushFx } from '@/use/useTowerVfx'
+import { awaitingFirstInteraction } from '@/use/useFirstInteraction'
 
 // ─── The rules in force ─────────────────────────────────────────────────────
 //
@@ -375,6 +376,46 @@ export const enemiesTotal = ref(0)
 export const gateHp = ref(0)
 export const gateMaxHp = ref(1)
 export const buildTimeLeft = ref(0)
+
+/**
+ * External freeze on the build countdown.
+ *
+ * Set by the scene while the tutorial is teaching. The tutorial's last beat is
+ * "press Call Wave", and a timer that calls the wave out from under it leaves
+ * that beat pointing at a button which is no longer on screen — the player is
+ * then stuck on a step they can never complete, and the tutorial is never
+ * marked as answered. Freezing the clock is the honest reading anyway: a
+ * player being taught is not a player deciding how long to build for.
+ */
+export const buildClockHeld = ref(false)
+
+/**
+ * How long the build phase that is opening RIGHT NOW should last.
+ *
+ * `wave` holds the wave already survived, so zero is the opening — see
+ * `firstBuildMs` in the rule set for why that one is short.
+ */
+const buildWindowMs = (): number =>
+  wave.value === 0 ? R().waves.firstBuildMs : R().waves.buildMs
+
+/**
+ * Is the build countdown standing still?
+ *
+ * Two reasons, both of them "the player is not in a position to be spending
+ * their build time": the tutorial has the floor, or — on the opening wave only
+ * — they have not yet touched the game at all. The second is what makes a
+ * short opening a promise rather than a trap: the clock measures the player's
+ * own time, starting on their first gesture, not the time the page spent
+ * loading in a background tab.
+ *
+ * A rule set with NO opening window (`firstBuildMs: 0`) is saying it does not
+ * want that wait at all — its wave is already on its way when the game
+ * finishes loading, so there is nothing for a gesture to start.
+ */
+const isBuildClockHeld = (): boolean =>
+  buildClockHeld.value
+  || (wave.value === 0 && R().waves.firstBuildMs > 0 && awaitingFirstInteraction.value)
+
 export const blockCount = ref(0)
 export const towerHeight = ref(0)
 /** 1× / 2× battle-speed toggle (reference image 3). Build phase is unaffected. */
@@ -3706,7 +3747,7 @@ export const debugSetWave = (n: number): void => {
   pendingBonus = 1
 
   phase.value = 'build'
-  buildTimeLeft.value = R().waves.buildMs
+  buildTimeLeft.value = buildWindowMs()
   buildDeadline = buildTimeLeft.value
   // The deck is wave-gated, so a jump has to re-deal or the player meets wave
   // 20 holding wave 1's hand.
@@ -3828,7 +3869,7 @@ const completeWave = (): void => {
   }
 
   phase.value = 'build'
-  buildTimeLeft.value = R().waves.buildMs
+  buildTimeLeft.value = buildWindowMs()
   buildDeadline = buildTimeLeft.value
   // Entering a build phase is the moment the guarantee matters most: whatever
   // the player does next, they must be able to put a gun on the tower.
@@ -4018,7 +4059,7 @@ export const startRun = (): void => {
   rerollTimers.fill(0)
   rerollReadyIn.value = new Array(R().offers.slots).fill(0)
   phase.value = 'build'
-  buildTimeLeft.value = R().waves.buildMs
+  buildTimeLeft.value = buildWindowMs()
   buildDeadline = buildTimeLeft.value
   saveRunSnapshot()
 }
@@ -4164,7 +4205,7 @@ export const resumeRun = (): boolean => {
   ensureAffordableWeapon()
 
   phase.value = 'build'
-  buildTimeLeft.value = R().waves.buildMs
+  buildTimeLeft.value = buildWindowMs()
   buildDeadline = buildTimeLeft.value
   return true
 }
@@ -4221,9 +4262,11 @@ const fixedStep = (dt: number): void => {
   if (cooling) syncRerollClocks()
 
   if (phase.value === 'build') {
-    buildDeadline -= dt
-    buildTimeLeft.value = Math.max(0, buildDeadline)
-    if (buildDeadline <= 0) callWave()
+    if (!isBuildClockHeld()) {
+      buildDeadline -= dt
+      buildTimeLeft.value = Math.max(0, buildDeadline)
+      if (buildDeadline <= 0) callWave()
+    }
     // Turrets still cool down and debris still settles between waves, so the
     // build phase never looks frozen.
     stepTurrets(dt)

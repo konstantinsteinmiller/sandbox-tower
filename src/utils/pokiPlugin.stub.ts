@@ -40,6 +40,7 @@ export const pokiPlugin = async (): Promise<void> => {}
 export const readPokiLanguage = (): string | null => null
 export const pokiGameLoadingFinished = (): void => {}
 export const pokiGameplayStart = (): void => {}
+export const pokiNoteUserInteraction = (): void => {}
 export const pokiGameplayStop = (): void => {}
 export const __resetPokiGameplayBracketForTests = (): void => {}
 

@@ -23,6 +23,7 @@ import { isCrazyWeb, isWaveDash, isItch, isGlitch, isGameDistribution, isPlaygam
 import type { AdProvider } from './ads/types'
 import { resolveAdProvider } from '@/platforms/resolveAdProvider'
 import { isRewardedThrottled, recordRewardedGranted } from '@/use/useRewardedThrottle'
+import { consumeFreeReward, FREE_REWARDS, freeRewardsLeft } from '@/use/useFreeRewards'
 import { markInterstitialShown } from '@/use/useInterstitialPacing'
 import { isAdShowing, isGamePaused, acquireAppPause } from '@/use/useGamePause'
 import { installGamePauseAudio } from '@/use/useGamePauseAudio'
@@ -113,6 +114,27 @@ export const dismissAdsBlockedModal = (): void => {
 }
 
 export const initAds = (): Promise<void> => provider.init()
+
+/**
+ * Ask for a rewarded grant — the entry point every PLACEMENT should use.
+ *
+ * The distinction from `showRewardedAd` is the point of this function: a
+ * placement wants the perk paid for, and the first `FREE_REWARDS` of a
+ * player's life are on the house (see `useFreeRewards` for why). Those grants
+ * open no video, so they touch none of the machinery below — no pause gate, no
+ * audio kill, no impression, and nothing recorded against the watch budget,
+ * because nothing was watched.
+ *
+ * `showRewardedAd` keeps meaning exactly what it says, so a caller that
+ * genuinely needs a video — and every provider-level spec — is unaffected.
+ */
+export const requestRewardedGrant = async (): Promise<boolean> => {
+  if (consumeFreeReward()) {
+    dlog(`${TAG} ✔ rewarded FREE (on the house, ${freeRewardsLeft.value}/${FREE_REWARDS} left)`)
+    return true
+  }
+  return showRewardedAd()
+}
 
 export const showRewardedAd = async (): Promise<boolean> => {
   // Throttle gate: refuse the SDK call once the player has burned
@@ -270,6 +292,7 @@ const useAds = () => ({
   isRewardedReady,
   isInterstitialReady,
   initAds,
+  requestRewardedGrant,
   showRewardedAd,
   showMidgameAd
 })

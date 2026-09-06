@@ -3,7 +3,7 @@ import {
   isCrazyWeb, isGameDistribution, isPlaygama, isGamepix, isGameMonetize, isYandex, isPoki
 } from '@/use/useUser'
 import { isCrazyGamesFullRelease } from '@/use/useMatch'
-import { isRewardedReady, showRewardedAd } from '@/use/useAds'
+import { isRewardedReady, requestRewardedGrant } from '@/use/useAds'
 import useTowerEconomy, { coins } from '@/use/useTowerEconomy'
 
 /**
@@ -160,7 +160,9 @@ export const claimReward = async (
   adInFlight.value = true
   recordRewardRequest()
   try {
-    const ok = await showRewardedAd()
+    // Not `showRewardedAd`: the first couple of activations in a player's life
+    // are granted with no video at all. See `useFreeRewards`.
+    const ok = await requestRewardedGrant()
     if (ok) grant()
     return ok
   } finally {

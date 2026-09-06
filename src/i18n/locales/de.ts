@@ -24,6 +24,7 @@ export default {
 
   'hud': {
     'wave': 'Welle', 'enemies': 'Gegner', 'callWave': 'Welle rufen', 'callBoss': 'Boss rufen',
+    'monstersIncoming': 'Monster im Anmarsch!',
     'speed': 'Tempo {n}×',
     'speedOffer': '{n}× Tempo freischalten',
     'speedGroup': 'Spieltempo', 'recenter': 'Ansicht zentrieren',
@@ -152,22 +153,6 @@ export default {
     }
   },
 
-  // ─── First-stage tutorial ─────────────────────────────────────────────────
-  'tutorial': {
-    'drop': 'Tippe auf eine Spalte, um das Teil fallen zu lassen.',
-    'merge': 'Lass einen Zwilling auf einen Zwilling fallen, um sie zu verschmelzen.',
-    'gate': 'Schütze das Tor. Fällt es, ist der Lauf vorbei.',
-    'gateSeeded': 'Wir haben dir eine Startfeste gebaut. Schütze das Tor – fällt es, ist der Lauf vorbei.',
-    'pick': 'Wähle ein Teil.',
-    'place': 'Setze es neben das Tor.',
-    'placeSeeded': 'Setze ein Teil auf deine Mauer.',
-    'call': 'Ruf die Welle, wenn du bereit bist.',
-    'next': 'Weiter',
-    'offer': 'Tutorial gefällig?',
-    'start': 'Start',
-    'skip': 'Überspringen'
-  },
-
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
     'cavalry': 'Kavallerie',
@@ -201,6 +186,7 @@ export default {
     'intro1': 'Alles, was du hier kaufst, ist dauerhaft und gilt in jedem weiteren Lauf.',
     'intro2': 'Münzen gibt es nach jeder Belagerung – ob Sieg oder Niederlage. Hier gibst du sie aus.',
     'intro3': 'Goldene Knoten kannst du dir jetzt leisten. Blaue brauchen mehr Münzen, dunkle den Knoten davor.',
+    'introNext': 'Weiter',
     'introDone': 'Alles klar',
     'sell': 'Rang verkaufen',
     'sellBlocked': 'Verkaufe zuerst {n} — es braucht dies.',

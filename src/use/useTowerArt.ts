@@ -5677,6 +5677,33 @@ const drawSealMark = (
   ctx.restore()
 }
 
+/**
+ * Stroke the CURRENT path twice — dark first, bright on top.
+ *
+ * The build UI is drawn over a backdrop that moves: the sky runs from a
+ * near-white midday blue to a near-black midnight over ninety seconds, and the
+ * tower itself stands against pale painted mountains, water and trees. A
+ * single light-blue outline is tuned for exactly one of those. At night it
+ * read fine; at noon, against the mountains, the placement sockets disappeared
+ * completely — players could not see where they were allowed to build, which
+ * is the one thing the build phase has to communicate.
+ *
+ * A dark stroke laid down first and a narrower bright one over it means one of
+ * the two always has contrast, whatever is behind it — the same trick the HUD
+ * numbers already use (black `strokeText` under white `fillText`). It costs
+ * one extra stroke of a path that is already built.
+ */
+const strokeTwoTone = (
+  ctx: CanvasRenderingContext2D, width: number, dark: string, light: string
+): void => {
+  ctx.lineWidth = width * 2.5
+  ctx.strokeStyle = dark
+  ctx.stroke()
+  ctx.lineWidth = width
+  ctx.strokeStyle = light
+  ctx.stroke()
+}
+
 /** Stand-in Block for the ghost — the same five fields `drawFixture` reads. */
 const ghostProxy = { typeId: '', aim: 0, recoil: 0, uid: 0, c: 0 } as unknown as Block
 
@@ -5845,28 +5872,41 @@ const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
 
   // Legal anchor sockets.
   //
-  // Two deliberate limits keep this readable. Only the ANCHOR cell is marked,
-  // not the whole footprint of every candidate. And once the pointer is over
-  // the field, sockets fade with distance from it — a twenty-block tower has
-  // fifty legal anchors, and drawing them all at full strength wallpapers the
-  // sky in blue and hides the tower the player is trying to read.
+  // Only the ANCHOR cell is marked, not the whole footprint of every candidate,
+  // and sockets fade with distance from the pointer: a twenty-block tower has
+  // fifty legal anchors, and drawing every one at full strength wallpapers the
+  // sky and hides the tower the player is trying to read.
+  //
+  // What the fade must never do is take a socket below "visible". It used to:
+  // a 5 % cyan fill under a 22 % cyan outline, times a falloff that bottomed
+  // out at 0.12, is a mark that exists only against a night sky. At midday,
+  // against the painted mountains, there was nothing on screen at all — the
+  // player had to guess where the game would accept a block, and the ones who
+  // guessed wrong concluded it was broken and left. So the floor is high
+  // enough to read, and every mark is drawn two-tone (see `strokeTwoTone`) so
+  // the backdrop cannot swallow it at any hour.
   if (shape && overlay.slots.length > 0) {
-    ctx.lineWidth = Math.max(1, zoom * 0.03)
+    const stroke = Math.max(1.5, zoom * 0.035)
     const hasHover = overlay.hoverC != null && overlay.hoverR != null
-    const FALLOFF = 5.5
+    const FALLOFF = 7
+    /** Distant sockets are SECONDARY, never invisible. */
+    const FAR_FLOOR = 0.45
     for (const [c, r] of overlay.slots) {
       let near = 1
       if (hasHover) {
         const d = Math.hypot(c - overlay.hoverC!, r - overlay.hoverR!)
-        near = Math.max(0.12, 1 - d / FALLOFF)
+        near = Math.max(FAR_FLOOR, 1 - d / FALLOFF)
       }
       const x = worldToScreenX(c - 0.5)
       const y = worldToScreenY(r + 1)
-      ctx.fillStyle = `rgba(120,220,255,${(0.05 + pulse * 0.045) * near})`
-      ctx.strokeStyle = `rgba(150,230,255,${(0.22 + pulse * 0.16) * near})`
       roundRect(ctx, x, y, zoom, zoom, zoom * 0.12)
+      ctx.fillStyle = `rgba(140,232,255,${(0.17 + pulse * 0.07) * near})`
       ctx.fill()
-      ctx.stroke()
+      strokeTwoTone(
+        ctx, stroke,
+        `rgba(4,14,26,${0.6 * near})`,
+        `rgba(214,248,255,${(0.88 + pulse * 0.12) * near})`
+      )
     }
   }
 
@@ -5908,13 +5948,16 @@ const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
     })
     ctx.restore()
 
-    ctx.lineWidth = Math.max(2, zoom * 0.06)
-    ctx.strokeStyle = overlay.hoverValid ? '#5ef08a' : '#ff5a5a'
+    // The verdict on the cell under the pointer. Two-tone as well: a green
+    // outline on a sunlit mountain is exactly as hard to see as a blue one,
+    // and this is the mark that says whether the tap will be accepted.
+    const verdict = Math.max(2, zoom * 0.06)
+    const light = overlay.hoverValid ? '#5ef08a' : '#ff5a5a'
     for (const [dx, dy] of shape.cells) {
       const x = worldToScreenX(overlay.hoverC! + dx - 0.5)
       const y = worldToScreenY(overlay.hoverR! + dy + 1)
       roundRect(ctx, x, y, zoom, zoom, zoom * 0.12)
-      ctx.stroke()
+      strokeTwoTone(ctx, verdict, 'rgba(4,14,26,0.7)', light)
     }
 
     // What THIS piece would seal if the player commits, at full strength — the

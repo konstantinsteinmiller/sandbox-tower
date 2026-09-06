@@ -24,6 +24,7 @@ import {
 import { resetVfx } from '@/use/useTowerVfx'
 import { warmAudio, playFx } from '@/use/useTowerAudio'
 import useTowerProgress, { bestWave } from '@/use/useTowerProgress'
+import { awaitingFirstInteraction } from '@/use/useFirstInteraction'
 import useTowerEconomy from '@/use/useTowerEconomy'
 import useMissions, { beginMissionRun } from '@/use/useMissions'
 import useAchievements from '@/use/useAchievements'
@@ -67,7 +68,7 @@ import RotateOverlay from './components/RotateOverlay.vue'
 import ControlHint, { type HintId } from '@/components/game/ControlHint.vue'
 import WaveClearToast from '@/components/game/WaveClearToast.vue'
 import TutorialOverlay, { type TutorialStep } from '@/components/game/TutorialOverlay.vue'
-import TutorialPrompt from '@/components/game/TutorialPrompt.vue'
+import IncomingBanner from '@/components/game/IncomingBanner.vue'
 import FReward from '@/components/atoms/FReward.vue'
 import FButton from '@/components/atoms/FButton.vue'
 import FRewardButton from '@/components/atoms/FRewardButton.vue'
@@ -188,8 +189,23 @@ const layoutFrame = (): void => {
 
 const ZOOM_MIN = 0.5
 const ZOOM_MAX = 1
+/**
+ * Where the camera opens: a quarter out from the fitted frame.
+ *
+ * The fit is the largest the board can be drawn at, and it spends every spare
+ * pixel on the board itself — which is the one part of the screen where
+ * nothing ever surprises the player. A quarter out costs a little cell size
+ * and buys the flanks and the sky back, so the opening wave is visible walking
+ * in rather than arriving already at the wall. That matters here more than it
+ * would anywhere else, because this board calls its first wave as soon as the
+ * game has loaded.
+ *
+ * The player still owns the control: the rail runs from here in both
+ * directions, and `resetZoom` returns to the fit.
+ */
+const ZOOM_START = 0.75
 /** 1 is the fitted frame; below it the board shrinks and the world widens. */
-const zoomLevel = ref(ZOOM_MAX)
+const zoomLevel = ref(ZOOM_START)
 /** What the fit alone decided, before the player's zoom is applied. */
 let fitCell = 48
 let fitCentreY = 0
@@ -216,7 +232,14 @@ const applyFrame = (): void => {
   setFixedFrame({ cell, x: 0, y: groundOffset / cell })
 }
 
-const isZoomed = computed(() => zoomLevel.value < ZOOM_MAX - 0.001)
+/**
+ * Has the player moved the view off the opening one?
+ *
+ * Measured against `ZOOM_START`, not the fit: the recenter button restores the
+ * DEFAULT view, and a button that is already lit on the first frame reads as
+ * something the player is supposed to fix.
+ */
+const zoomMoved = computed(() => Math.abs(zoomLevel.value - ZOOM_START) > 0.001)
 
 /** The slider speaks in whole percent; the camera in a multiplier. */
 const zoomPercent = computed({
@@ -232,8 +255,8 @@ const setZoom = (z: number): void => {
 }
 
 const resetZoom = (): void => {
-  if (!isZoomed.value) return
-  setZoom(ZOOM_MAX)
+  if (!zoomMoved.value) return
+  setZoom(ZOOM_START)
   playSound('modal-open', 0.04)
 }
 
@@ -705,7 +728,6 @@ const callBonusPct = computed(() =>
 
 const onCallWave = (): void => {
   markHintDone('callWave')
-  completeTutorialStep('call')
   selectedSlot.value = null
   sellTarget.value = null
   callWave()
@@ -757,7 +779,10 @@ const merged = computed(() => {
 watch(merged, (m) => { if (m) markHintDone('mergeBlock') })
 
 const activeHint = computed<HintId | null>(() => {
-  if (onboarded.value || showResult.value || isAnyModalOpen.value || tutorialActive.value) return null
+  // Never over the coach marks: they are deliberately wordless, and a hint
+  // bubble is the one thing on screen that would put copy back on them.
+  if (onboarded.value || showResult.value || isAnyModalOpen.value) return null
+  if (tutorialStep.value) return null
   if (phase.value === 'defeat') return null
   if (!hintsDone.value.has('dropBlock')) return 'dropBlock'
   if (!hintsDone.value.has('callWave') && phase.value === 'build' && wave.value === 0) return 'callWave'
@@ -774,32 +799,51 @@ watch(wave, (w) => {
 
 // ─── Tutorial ───────────────────────────────────────────────────────────────
 //
-// Three beats: drop, merge, call. The merge beat deals a cannon into the
-// weapon slot so the twin of the fort's cannon is in the player's hand.
-
-const TUTORIAL_STEPS: TutorialStep[] = ['drop', 'merge', 'call']
+// Two beats: drop, then merge. The merge beat deals a cannon into the weapon
+// slot so the twin of the fort's cannon is in the player's hand.
+//
+// Wordless and unskippable, like the desktop board's — it starts on the first
+// frame with no offer to accept, carries no copy and no buttons, and each beat
+// ends only when the player performs it. Everything outside the lit column is
+// inert while it is up, so there is nothing else to do but the lesson.
+//
+// There is no third "call the wave" beat here, unlike the desktop board. This
+// one calls its own opening wave the moment the game has loaded, so the wave is
+// already walking in — and a coach mark pointing at a Call Wave button that the
+// battle has replaced with the speed switch is a step the player can never
+// complete, which leaves the tutorial unfinished and therefore never recorded
+// as done. What the beat taught is now taught by the game: the wave comes, and
+// the button is there for the waves after it.
+const TUTORIAL_STEPS: TutorialStep[] = ['drop', 'merge']
 const tutorialDone = ref(getState<boolean>(M2_TUTORIAL_KEY, false) === true)
-const tutorialActive = ref(false)
 const tutorialIndex = ref(0)
 const tutorialRect = ref<{ x: number; y: number; w: number; h: number } | null>(null)
 const tutorialTick = ref(0)
 let tutorialTimer = 0
 
 const inFirstStage = computed(() =>
-  !tutorialDone.value && wave.value <= 1 && !showResult.value && !isAnyModalOpen.value
+  !tutorialDone.value
+  && wave.value <= 1
+  && !showResult.value
+  && !isAnyModalOpen.value
+  // A rotate prompt owns the whole screen; a spotlight measured behind it
+  // points at wherever the board happened to be before the turn.
+  && !rotateBlocked.value
 )
-const tutorialStep = computed<TutorialStep | null>(() => {
-  if (!inFirstStage.value || !tutorialActive.value) return null
-  return TUTORIAL_STEPS[tutorialIndex.value] ?? null
-})
-const showTutorialPrompt = computed(() => inFirstStage.value && !tutorialActive.value && !rotateBlocked.value)
 
-const PROMPT_WIDTH_PX = 190
-const tutorialPromptPos = computed(() => {
-  void tutorialTick.value
-  void band.value
-  const x = Math.max(10, Math.min(cssW - PROMPT_WIDTH_PX - 10, Math.round(cssW / 2 - PROMPT_WIDTH_PX / 2)))
-  return { x, y: Math.round(worldToScreenY(BOARD_MAX_ROW + 1.2)), onRight: true }
+/**
+ * Show the game's premise over the opening frame.
+ *
+ * `bestWave` is the whole audience test — and it is this board's own record,
+ * not the desktop tower's, so a player meeting the phone game for the first
+ * time is told what it is even if they have played the other one. It leaves on
+ * their first touch: this board's wave 1 is already walking in by then, so the
+ * banner names the thing they are about to watch happen.
+ */
+const showIncoming = computed(() => bestWave.value === 0 && awaitingFirstInteraction.value)
+const tutorialStep = computed<TutorialStep | null>(() => {
+  if (!inFirstStage.value) return null
+  return TUTORIAL_STEPS[tutorialIndex.value] ?? null
 })
 
 /** The first empty column beside the fort, for the drop beat. */
@@ -832,15 +876,9 @@ const measureTutorialTarget = (): void => {
   }
 }
 
-const startTutorial = (): void => {
-  tutorialActive.value = true
-  tutorialIndex.value = 0
-  measureTutorialTarget()
-}
-
+/** Persist it. The only caller is the last beat completing. */
 const finishTutorial = (): void => {
   tutorialDone.value = true
-  tutorialActive.value = false
   setState(M2_TUTORIAL_KEY, true)
 }
 
@@ -857,6 +895,11 @@ const completeTutorialStep = (step: TutorialStep): void => {
 // Each beat arms the piece it is about to teach with, so the only thing left
 // to do is tap the lit column. The merge beat also needs a twin in the hand —
 // a cannon, like the fort's — and puts one in the weapon slot.
+//
+// `immediate`, and it has to be. The first beat is live on the very first
+// evaluation now that nothing has to be accepted first, so a watcher that only
+// fired on a CHANGE would never arm the drop piece — leaving the player behind
+// a dim layer whose one live column drops nothing, with no way out.
 watch(tutorialStep, (step) => {
   measureTutorialTarget()
   if (step === 'drop') {
@@ -868,7 +911,7 @@ watch(tutorialStep, (step) => {
     offers.value = offers.value.map((id, i) => (i === 1 ? 'b_cannon' : id))
   }
   selectedSlot.value = offers.value.indexOf('b_cannon')
-})
+}, { immediate: true })
 watch(merged, (m) => { if (m) completeTutorialStep('merge') })
 
 // ─── Result flow ────────────────────────────────────────────────────────────
@@ -1195,6 +1238,12 @@ onUnmounted(() => {
     )
 
     div.drop__hud
+      //- The game's premise, said once, in the biggest type on the screen.
+      //- First-time players only, and gone on their first touch — see
+      //- `showIncoming`.
+      Transition(name="fade")
+        IncomingBanner(v-if="showIncoming")
+
       TopStrip(
         ref="stripRef"
         :wave="wave"
@@ -1222,7 +1271,7 @@ onUnmounted(() => {
             )
           Transition(name="fade")
             button.drop__zoom-reset(
-              v-if="isZoomed"
+              v-if="zoomMoved"
               type="button"
               :aria-label="t('hud.recenter')"
               @click="resetZoom"
@@ -1357,20 +1406,10 @@ onUnmounted(() => {
               @click="onRebuild"
             )
 
-    TutorialPrompt(
-      v-if="showTutorialPrompt"
-      :x="tutorialPromptPos.x"
-      :y="tutorialPromptPos.y"
-      :on-right="tutorialPromptPos.onRight"
-      @start="startTutorial"
-      @skip="finishTutorial"
-    )
+    //- No handlers: it emits nothing, because there is nothing on it to press.
     TutorialOverlay(
       :step="tutorialStep"
       :target="tutorialRect"
-      :seeded="false"
-      @next="advanceTutorial"
-      @skip="finishTutorial"
     )
 
     OptionsModal(:is-open="showOptions" @close="showOptions = false")

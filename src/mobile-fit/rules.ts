@@ -81,6 +81,20 @@ export const DROPMERGE_RULES: RuleSet = {
     // three grunts on a normal wave 1 and one on the very first.
     budgetMul: 0.5,
     buildMs: 10_000,
+    // ZERO, where the desktop board waits three seconds for the player's first
+    // gesture.
+    //
+    // A five-column board with nothing on it is not a calm opening, it is a
+    // game that has not started: there is no tower to admire, no lane to read
+    // and nothing coming, so the first thing the player does is wait. Wave 1
+    // here is one grunt against a fort that already stands — the threat IS the
+    // introduction, and it should be walking in by the time the loader clears.
+    //
+    // A zero window also means the opening does not wait on the gesture gate
+    // (see `isBuildClockHeld`). The gesture still gates what the PORTAL is
+    // told — `gameplayStart` is held until the player touches the game — but
+    // it no longer gates what the player is shown.
+    firstBuildMs: 0,
     spawnWindowMs: 35_000,
     flushAtMs: 45_000,
     bossEvery: 8,

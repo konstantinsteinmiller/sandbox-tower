@@ -42,6 +42,10 @@
 // the ref from both places would double-manage the gate.
 
 import { ref, computed } from 'vue'
+import {
+  armFirstInteraction, hasUserInteracted, noteUserInteraction, onFirstInteraction,
+  __resetFirstInteractionForTests
+} from '@/use/useFirstInteraction'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -186,6 +190,11 @@ export const readPokiLanguage = (): string | null => {
 export const pokiPlugin = (): Promise<void> => {
   if (initPromise) return initPromise
 
+  // Armed BEFORE the SDK is awaited: a player who taps during the splash has
+  // already interacted by the time the bracket opens, and arming later would
+  // make the gate demand a second tap. Idempotent — `main.ts` arms it too.
+  armFirstInteraction()
+
   initPromise = (async () => {
     ensureScriptTag()
     const sdk = await waitForSdk()
@@ -245,21 +254,65 @@ export const pokiGameLoadingFinished = (): void => {
 
 // ─── Gameplay bracket (bad-event-safe) ──────────────────────────────────────
 
+// The interaction gate.
+//
+// Poki forbids `gameplayStart()` before the player has touched the page. It is
+// enforced by hand in QA rather than by the SDK, so nothing throws — the build
+// simply comes back rejected, and until it does the numbers look BETTER:
+// conversion-to-play is measured on the first `gameplayStart()`, so one fired
+// on load counts every bounce as a player.
+//
+// This game boots straight into a live stage (no menu, by design), so
+// `isLiveGameplay` goes true during mount and `GameScene`'s
+// `watch(…, { immediate: true })` reported a start before anyone had moved.
+//
+// The fix is a GATE, not a delay: hold the start and release it on the first
+// trusted gesture. A "press start" screen would also satisfy Poki and would
+// cost real conversion — the clock should begin on the first frame the player
+// ACTS on, which is what the metric was always supposed to mean.
+//
+// The gesture watch itself lives in `useFirstInteraction`, because the opening
+// wave's countdown hangs off the same edge and two watches would drift.
+
+/**
+ * The player has acted. Releases a held start, if one is still wanted.
+ *
+ * Kept as a Poki-named export because the stub and the specs both address the
+ * gate through the plugin; the state is the shared one.
+ */
+export const pokiNoteUserInteraction = (): void => { noteUserInteraction() }
+
+const releaseHeldStart = (): void => {
+  // Only if the bracket is STILL open. A modal or an ad may have closed it
+  // while we waited, and a stop with no start before it is itself a bad event.
+  if (bracket === 'playing' && !startEmitted && !pendingStart) scheduleStart()
+}
+
 type Bracket = 'idle' | 'playing'
 
 let bracket: Bracket = 'idle'
 let lastStopEmittedAt = 0
 let pendingStart: ReturnType<typeof setTimeout> | null = null
+/**
+ * Did a start actually REACH the SDK for the bracket that is open?
+ *
+ * Tracked apart from `bracket` because the two diverge for exactly as long as a
+ * start is held behind the gate, and `gameplayStop()` must emit nothing when
+ * nothing was ever emitted.
+ */
+let startEmitted = false
 
 const emitStart = (): void => {
   const sdk = getSdk()
   if (!sdk) return
+  startEmitted = true
   try { sdk.gameplayStart() } catch (e) { warn('gameplayStart threw', e) }
 }
 
 const emitStop = (): void => {
   const sdk = getSdk()
   if (!sdk) return
+  startEmitted = false
   try { sdk.gameplayStop() } catch (e) { warn('gameplayStop threw', e) }
   lastStopEmittedAt = performance.now()
 }
@@ -276,6 +329,18 @@ export const pokiGameplayStart = (): void => {
   if (bracket === 'playing') return
   bracket = 'playing'
 
+  // Held, not dropped: the first real gesture releases it, and if the bracket
+  // closes before that there was never a start to match.
+  if (!hasUserInteracted.value) {
+    onFirstInteraction(releaseHeldStart)
+    return
+  }
+
+  scheduleStart()
+}
+
+/** Emit the start, honouring the SDK's 50 ms bad-event window. */
+const scheduleStart = (): void => {
   const since = performance.now() - lastStopEmittedAt
   if (lastStopEmittedAt === 0 || since >= MIN_EVENT_GAP_MS) {
     emitStart()
@@ -304,6 +369,9 @@ export const pokiGameplayStop = (): void => {
     pendingStart = null
     return
   }
+  // A start held behind the gate never reached the SDK, so there is nothing
+  // to close. An unmatched stop is a bad event in its own right.
+  if (!startEmitted) return
   emitStop()
 }
 
@@ -314,6 +382,8 @@ export const __resetPokiGameplayBracketForTests = (): void => {
   bracket = 'idle'
   lastStopEmittedAt = 0
   loadingFinishedSent = false
+  startEmitted = false
+  __resetFirstInteractionForTests()
 }
 
 // ─── Ads ────────────────────────────────────────────────────────────────────

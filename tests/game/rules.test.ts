@@ -79,6 +79,10 @@ describe('DESKTOP_RULES reproduces the pre-seam constants', () => {
     expect(d.enemies.airSpawn).toBe('sides')
     expect(d.waves.budgetMul).toBe(1)
     expect(d.waves.buildMs).toBe(15_000)
+    // The opening is its own window: short, and started by the player's first
+    // gesture rather than by the page loading. Zero on the phone board, which
+    // calls its wave as soon as the game has loaded. See `openingWave.test.ts`.
+    expect(d.waves.firstBuildMs).toBe(3_000)
     expect(d.waves.spawnWindowMs).toBe(82_000)
     expect(d.waves.flushAtMs).toBe(96_000)
     expect(d.waves.bossEvery).toBe(10)

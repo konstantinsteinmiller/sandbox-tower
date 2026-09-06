@@ -5,7 +5,7 @@ import IconCoin from '@/components/icons/IconCoin.vue'
 import FHudButton from '@/components/atoms/FHudButton.vue'
 import FHudBadge from '@/components/atoms/FHudBadge.vue'
 import IconMovie from '@/components/icons/IconMovie.vue'
-import { isRewardedReady, showRewardedAd } from '@/use/useAds'
+import { isRewardedReady, requestRewardedGrant } from '@/use/useAds'
 import useTowerEconomy from '@/use/useTowerEconomy'
 import { getState, setState } from '@/use/useTowerState'
 import { AD_COOLDOWN_KEY } from '@/keys'
@@ -55,7 +55,9 @@ onUnmounted(() => {
 
 const triggerAdReward = async () => {
   if (cooldownActive.value) return
-  const ok = await showRewardedAd()
+  // The house covers a player's first couple of activations — see
+  // `useFreeRewards`. The cooldown below still applies to those.
+  const ok = await requestRewardedGrant()
   if (ok) {
     addCoins(props.coins)
     const el = (rootEl.value?.$el ?? rootEl.value) as HTMLElement | null

@@ -8,7 +8,7 @@ import {
 } from '@/game/difficulty'
 import { BLOCK_DEFS, sellRefund, blockUpgradeCost } from '@/game/blocks'
 import { ENEMY_DEFS } from '@/game/enemies'
-import { TECH_BY_ID, TECH_NODES } from '@/game/tech'
+import { TECH_BY_ID, TECH_NODES, techCost } from '@/game/tech'
 
 /**
  * Contracts from the first-time-player balance pass (see `balancing.md`).
@@ -212,6 +212,24 @@ describe('economy', () => {
       if (n.effect.kind !== 'unlock') continue
       expect(BLOCK_DEFS[n.effect.blockId], n.id).toBeDefined()
     }
+  })
+
+  it('keeps the in-game Fusion offer buyable in one tap', () => {
+    // GameScene offers Fusion from the HUD — the mechanic almost nobody found
+    // in the store — and buys it with the prerequisite in a single tap, for a
+    // total it reads off this tree. That shortcut assumes the shape below:
+    // ONE prerequisite, itself a root. Grow the chain and the offer would
+    // charge for the first node and silently fail on the second, which is the
+    // worst outcome available. Break this deliberately, and fix `onBuyMerge`.
+    const merge = TECH_BY_ID['unlockMerge']!
+    expect(merge.requires).toEqual(['foundations'])
+    expect(TECH_BY_ID['foundations']!.requires).toEqual([])
+
+    // And the price the HUD shows. 200 for the unlock, plus 20 for the first
+    // rank of `foundations` — half of its 40, because a ranked node's opening
+    // rank is discounted. This is the "220 coins" the offer waits for.
+    expect(techCost('unlockMerge', 0)).toBe(200)
+    expect(techCost('foundations', 0)).toBe(20)
   })
 
   it('refunds the gold sunk into a block s ranks', () => {

@@ -33,6 +33,10 @@ const clearOneWave = (g: {
 const stocked = async () => {
   const g = await loadGame()
   g.startRun()
+  // These are BUILD-phase skills, and the opening wave now calls itself three
+  // seconds in — a repair cooldown is longer than that, so the clock is frozen
+  // rather than raced. Every wave in this file is called explicitly.
+  g.buildClockHeld.value = true
   g.wood.value = 9999
   g.stone.value = 9999
   g.runCoins.value = 9999

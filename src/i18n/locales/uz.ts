@@ -24,6 +24,7 @@ export default {
 
   'hud': {
     'wave': 'To‘lqin', 'enemies': 'Dushmanlar', 'callWave': 'To‘lqinni chaqirish', 'callBoss': 'Bossni chaqirish',
+    'monstersIncoming': 'Maxluqlar yaqinlashmoqda!',
     'speed': 'Tezlik {n}×',
     'speedOffer': '{n}× tezlikni ochish',
     'speedGroup': 'Oʻyin tezligi', 'recenter': 'Ko‘rinishni markazlash',
@@ -152,22 +153,6 @@ export default {
     }
   },
 
-  // ─── First-stage tutorial ─────────────────────────────────────────────────
-  'tutorial': {
-    'drop': 'Bo‘lakni tashlash uchun ustunga bosing.',
-    'merge': 'Birlashtirish uchun egizakni egizak ustiga tashlang.',
-    'gate': 'Darvozani himoya qil. Qulasa, o‘yin tugaydi.',
-    'gateSeeded': 'Senga boshlang‘ich qal‘a qurib berdik. Darvozani himoya qil — qulasa, o‘yin tugaydi.',
-    'pick': 'Bo‘lak tanla.',
-    'place': 'Uni Darvoza yoniga qo‘y.',
-    'placeSeeded': 'Devoring ustiga bo‘lak qo‘y.',
-    'call': 'Tayyor bo‘lsang, to‘lqinni chaqir.',
-    'next': 'Keyingi',
-    'offer': 'Qo‘llanma kerakmi?',
-    'start': 'Boshlash',
-    'skip': 'O‘tkazish'
-  },
-
   // ─── Allies ───────────────────────────────────────────────────────────────
   'allies': {
     'cavalry': 'Otliqlar',
@@ -201,6 +186,7 @@ export default {
     'intro1': 'Bu yerda sotib olganingizning hammasi doimiy — har bir keyingi yurishga o‘tadi.',
     'intro2': 'Tangalar har qamaldan tushadi: yutasizmi yoki yutqazasizmi. Ularni shu yerda sarflaysiz.',
     'intro3': 'Oltin tugunlarga hozir kuchingiz yetadi. Ko‘klarga ko‘proq tanga, xiralarga oldingi tugun kerak.',
+    'introNext': 'Keyingi',
     'introDone': 'Tushunarli',
     'sell': 'Darajani sotish',
     'sellBlocked': 'Avval {n} ni soting — unga shu kerak.',

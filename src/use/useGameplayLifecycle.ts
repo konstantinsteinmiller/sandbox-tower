@@ -1,5 +1,6 @@
 import { syncGameplayLifecycle as syncCrazyGameplay } from '@/use/useCrazyGames'
 import { pokiGameplayStart, pokiGameplayStop } from '@/utils/pokiPlugin'
+import { awaitingFirstInteraction, onFirstInteraction } from '@/use/useFirstInteraction'
 
 /**
  * ─── "Is the player actually playing?" ──────────────────────────────────────
@@ -24,7 +25,52 @@ import { pokiGameplayStart, pokiGameplayStop } from '@/utils/pokiPlugin'
  * about in as many words ("don't touch another platform's SDK in a build").
  * `main.ts` gates its Playgama init the same way.
  */
+
+/**
+ * What the game last reported.
+ *
+ * The gate below can DEFER an opening edge, and a deferred start must never
+ * fire after the game has gone quiet again — a start reported into a modal or
+ * an ad is worse than a late one.
+ */
+let wanted = false
+/** Is a deferred open already queued behind the gate? */
+let queued = false
+
+/**
+ * Report whether gameplay is live.
+ *
+ * The OPENING edge is held until the player has actually touched the game.
+ * Poki enforces this by hand in QA, but it is the right rule on every portal:
+ * this game boots straight into a live stage, so a start reported at mount
+ * counts every bounce as a session — conversion-to-play is measured on the
+ * first start, and inflating it makes the number useless to us and wrong for
+ * them. On the Drop & Merge board it matters most, because wave 1 is already
+ * walking in by the time the loader clears.
+ *
+ * Only the opening edge waits. A stop is always safe to report: every plugin
+ * below no-ops a stop for a bracket it never opened.
+ */
 export const syncGameplayLifecycle = (live: boolean): void => {
+  wanted = live
+
+  if (live && awaitingFirstInteraction.value) {
+    if (!queued) {
+      queued = true
+      // Registered once, and re-checks `wanted` when it fires: the player may
+      // well open a modal before their first gesture reaches the battlefield.
+      onFirstInteraction(() => {
+        queued = false
+        if (wanted) emitGameplayLifecycle(true)
+      })
+    }
+    return
+  }
+
+  emitGameplayLifecycle(live)
+}
+
+const emitGameplayLifecycle = (live: boolean): void => {
   // No-ops unless this is a full CrazyGames release build.
   syncCrazyGameplay(live)
 

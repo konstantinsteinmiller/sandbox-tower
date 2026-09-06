@@ -38,10 +38,14 @@ const loadGate = async (opts: {
     isPoki: opts.poki ?? false
   }))
   vi.doMock('@/use/useMatch', () => ({ isCrazyGamesFullRelease: opts.fullRelease ?? false }))
-  const showRewardedAd = vi.fn(async () => opts.granted ?? true)
+  // The gate reaches the ad layer through `requestRewardedGrant` — the seam
+  // that decides whether an activation is one of the player's free ones before
+  // any video is asked for. Mocked as a plain "did it ask for a video" spy, so
+  // these specs stay about the GATE; the free grants have their own file.
+  const requestRewardedGrant = vi.fn(async () => opts.granted ?? true)
   vi.doMock('@/use/useAds', async () => {
     const { ref } = await import('vue')
-    return { isRewardedReady: ref(opts.rewardedReady ?? true), showRewardedAd }
+    return { isRewardedReady: ref(opts.rewardedReady ?? true), requestRewardedGrant }
   })
   const economy = await import('@/use/useTowerEconomy')
   // ...and then set the balance on the ref as well.
@@ -54,7 +58,7 @@ const loadGate = async (opts: {
   // flight. Writing the ref is immune to the race.
   economy.coins.value = opts.wallet ?? 1000
   const mod = await import('@/use/useAdGate')
-  return { ...mod, showRewardedAd, wallet: economy.coins }
+  return { ...mod, requestRewardedGrant, wallet: economy.coins }
 }
 
 beforeEach(() => {
@@ -69,7 +73,7 @@ describe('reward gating', () => {
     expect(gate.isRewardGated).toBe(false)
     await expect(gate.claimReward(grant)).resolves.toBe(true)
     expect(grant).toHaveBeenCalledTimes(1)
-    expect(gate.showRewardedAd).not.toHaveBeenCalled()
+    expect(gate.requestRewardedGrant).not.toHaveBeenCalled()
     expect(gate.wallet.value).toBe(100 - gate.REWARD_COIN_COST)
   })
 
@@ -82,7 +86,7 @@ describe('reward gating', () => {
     expect(gate.isRewardGated).toBe(false)
     await gate.claimReward(grant)
     expect(grant).toHaveBeenCalledTimes(1)
-    expect(gate.showRewardedAd).not.toHaveBeenCalled()
+    expect(gate.requestRewardedGrant).not.toHaveBeenCalled()
     expect(gate.wallet.value).toBe(100 - gate.REWARD_COIN_COST)
   })
 
@@ -94,7 +98,7 @@ describe('reward gating', () => {
     const grant = vi.fn()
     expect(gate.isRewardGated).toBe(true)
     await expect(gate.claimReward(grant)).resolves.toBe(true)
-    expect(gate.showRewardedAd).toHaveBeenCalledTimes(1)
+    expect(gate.requestRewardedGrant).toHaveBeenCalledTimes(1)
     expect(gate.wallet.value).toBe(100)
   })
 
@@ -108,7 +112,7 @@ describe('reward gating', () => {
     const grant = vi.fn()
     expect(gate.isRewardGated).toBe(true)
     await expect(gate.claimReward(grant)).resolves.toBe(true)
-    expect(gate.showRewardedAd).toHaveBeenCalledTimes(1)
+    expect(gate.requestRewardedGrant).toHaveBeenCalledTimes(1)
     // The video is the price — the wallet must not be touched.
     expect(gate.wallet.value).toBe(100)
   })
@@ -135,7 +139,7 @@ describe('reward gating', () => {
   it('never charges coins where the video IS the price', async () => {
     const gate = await loadGate({ crazy: true, fullRelease: true, wallet: 100 })
     await gate.claimReward(vi.fn())
-    expect(gate.showRewardedAd).toHaveBeenCalledTimes(1)
+    expect(gate.requestRewardedGrant).toHaveBeenCalledTimes(1)
     expect(gate.wallet.value).toBe(100)
   })
 
@@ -152,13 +156,13 @@ describe('reward gating', () => {
     const grant = vi.fn()
     expect(gate.isRewardGated).toBe(true)
     await expect(gate.claimReward(grant)).resolves.toBe(true)
-    expect(gate.showRewardedAd).toHaveBeenCalledTimes(1)
+    expect(gate.requestRewardedGrant).toHaveBeenCalledTimes(1)
     expect(grant).toHaveBeenCalledTimes(1)
   })
 
   it('grants nothing when the video does not complete', async () => {
     const gate = await loadGate({ crazy: true, fullRelease: true })
-    ;(gate.showRewardedAd as ReturnType<typeof vi.fn>).mockResolvedValueOnce(false)
+    ;(gate.requestRewardedGrant as ReturnType<typeof vi.fn>).mockResolvedValueOnce(false)
     const grant = vi.fn()
     await expect(gate.claimReward(grant)).resolves.toBe(false)
     expect(grant).not.toHaveBeenCalled()
@@ -167,7 +171,7 @@ describe('reward gating', () => {
   it('refuses to start a second video while one is in flight', async () => {
     const gate = await loadGate({ crazy: true, fullRelease: true })
     let release: (v: boolean) => void = () => {}
-    ;(gate.showRewardedAd as ReturnType<typeof vi.fn>).mockImplementationOnce(
+    ;(gate.requestRewardedGrant as ReturnType<typeof vi.fn>).mockImplementationOnce(
       () => new Promise<boolean>((r) => { release = r })
     )
     const grantA = vi.fn()
@@ -184,7 +188,7 @@ describe('reward gating', () => {
 
   it('clears the in-flight flag even when the provider throws', async () => {
     const gate = await loadGate({ crazy: true, fullRelease: true })
-    ;(gate.showRewardedAd as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('no fill'))
+    ;(gate.requestRewardedGrant as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('no fill'))
     await expect(gate.claimReward(vi.fn())).rejects.toThrow('no fill')
     // A stuck flag would disable every reward button for the rest of the run.
     expect(gate.adInFlight.value).toBe(false)

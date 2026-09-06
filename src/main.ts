@@ -21,6 +21,7 @@ import { SaveManager } from '@/utils/save/SaveManager'
 import { resolveSaveStrategy } from '@/platforms/resolveSaveStrategy'
 import { installSaveStatus } from '@/use/useSaveStatus'
 import { bootstrapVConsoleFromUrl } from '@/use/useVConsole'
+import { armFirstInteraction } from '@/use/useFirstInteraction'
 
 // Build-config self-check moved inline below — the previous top-level
 // `looksLikeCrazyGamesPortal` helper baked `crazygames.com` /
@@ -36,6 +37,12 @@ const bootstrap = async () => {
   // platform SDK pause, and app modals all suspend music + SFX through this
   // and log the transition. Idempotent (useAds also calls it at import).
   installGamePauseAudio()
+
+  // Start watching for the player's first real gesture, here rather than in
+  // the scene: a tap on the splash is an interaction, and both things that
+  // hang off this edge — the opening wave's countdown and Poki's
+  // `gameplayStart` — should count it rather than ask for a second tap.
+  armFirstInteraction()
 
   // vConsole is mounted on demand via either:
   //   • the StageBadge chord (N taps in 60s) — see `useVConsole.ts`

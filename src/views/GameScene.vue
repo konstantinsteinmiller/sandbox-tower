@@ -19,7 +19,7 @@ import useTowerGame, {
   bestWeaponReach, unreachableSiege, isCavalryFree, isRangeBuffed, grantRangeBuff,
   RANGE_BUFF_MUL, effectiveRangeMul,
   halfWidthAt, UPPER_HALF_WIDTH, WATER_ROW, speedBuffLeft, grantSpeedBuff, graceAvailable,
-  continueRun, isFirstSession, seedScriptedOpening
+  continueRun, isFirstSession, seedScriptedOpening, buildClockHeld
 } from '@/use/useTowerGame'
 import {
   setViewport, snapToFit, screenToCell, panBy, zoomAt,
@@ -30,6 +30,7 @@ import { drawScene, resetDrawnFx, setBuildOverlay } from '@/use/useTowerArt'
 import { resetVfx } from '@/use/useTowerVfx'
 import { warmAudio, playFx } from '@/use/useTowerAudio'
 import useTowerProgress, { bestWave, mergeUnlocked } from '@/use/useTowerProgress'
+import { awaitingFirstInteraction } from '@/use/useFirstInteraction'
 import {
   reportRun, rankFor, boardSize, playerTotal, leaderboardEnabled,
   leaderboardPending, OUTSIDE_BOARD
@@ -39,7 +40,7 @@ import useMissions, { beginMissionRun } from '@/use/useMissions'
 import useAchievements from '@/use/useAchievements'
 import useBattlePass from '@/use/useBattlePass'
 import { isShip, blockDef } from '@/game/blocks'
-import { OFFER_SLOTS, canRotateShape, normRot, rotatedShape } from '@/game/shapes'
+import { OFFER_SLOTS, WEAPON_SLOT, canRotateShape, normRot, rotatedShape } from '@/game/shapes'
 import { ENEMY_DEFS } from '@/game/enemies'
 import {
   earlyCallBonus, countSiege, countOutranged, deepestStandoff
@@ -77,7 +78,6 @@ import CallWaveButton from '@/components/game/CallWaveButton.vue'
 import ControlHint, { type HintId } from '@/components/game/ControlHint.vue'
 import WaveClearToast from '@/components/game/WaveClearToast.vue'
 import TutorialOverlay, { type TutorialStep } from '@/components/game/TutorialOverlay.vue'
-import TutorialPrompt from '@/components/game/TutorialPrompt.vue'
 import FHudButton from '@/components/atoms/FHudButton.vue'
 import FHudBadge from '@/components/atoms/FHudBadge.vue'
 import FMuteButton from '@/components/atoms/FMuteButton.vue'
@@ -94,6 +94,8 @@ import MissionsModal from '@/components/organisms/MissionsModal.vue'
 import OptionsModal from '@/components/organisms/OptionsModal.vue'
 import TechTreeModal from '@/components/organisms/TechTreeModal.vue'
 import IconCoin from '@/components/icons/IconCoin.vue'
+import TechIcon from '@/components/game/TechIcon.vue'
+import IncomingBanner from '@/components/game/IncomingBanner.vue'
 import IconStone from '@/components/icons/IconStone.vue'
 import IconWood from '@/components/icons/IconWood.vue'
 import IconGold from '@/components/icons/IconGold.vue'
@@ -534,7 +536,10 @@ const onSelectSlot = (slot: number | null): void => {
   inspected.value = null
   if (slot != null) {
     markHintDone('selectBlock')
-    completeTutorialStep('pick')
+    // Only the slot the coach mark lit. Nothing else is reachable while it is
+    // up, but the beat's contract is "you armed the archer", not "you armed
+    // something".
+    if (slot === TUTORIAL_SLOT) completeTutorialStep('pick')
   }
 }
 
@@ -556,6 +561,9 @@ const markHintDone = (id: HintId): void => {
 const activeHint = computed<HintId | null>(() => {
   // Never nag a veteran, and never talk over a result screen.
   if (onboarded.value || showResult.value || isAnyModalOpen.value) return null
+  // Never over the coach marks either: they are deliberately wordless, and a
+  // hint bubble is the one thing on screen that would put copy back on them.
+  if (tutorialStep.value) return null
   if (phase.value === 'defeat') return null
   if (!hintsDone.value.has('selectBlock') && selectedSlot.value == null) return 'selectBlock'
   if (!hintsDone.value.has('placeBlock') && selectedSlot.value != null) return 'placeBlock'
@@ -861,6 +869,9 @@ const beginRun = (): void => {
   // Last run's payout must not still be drifting up into a fresh bar.
   clearResourceFloats()
   if (isFirstSession()) seedScriptedOpening()
+  // The first beat points at one tile; that tile has to hold the archer before
+  // the player is looking at it.
+  armTutorialHand()
 }
 
 /** Wipe the battlefield and start a fresh siege. */
@@ -967,31 +978,54 @@ watch(lastWaveReward, async (r) => {
 
 // ─── First-stage tutorial ───────────────────────────────────────────────────
 //
-// The FIRST STAGE ONLY. Four beats, one line each, each pointing at the thing
-// it is talking about — and then never again, for this player, on any device
-// the save syncs to.
+// THE FIRST STAGE OF THE FIRST SESSION, once, for everybody — and there is no
+// way past it but through it.
 //
-// It is deliberately not a difficulty setting or a replayable help screen: a
-// player who needs it needs it once, and a player who does not is insulted by
-// it. Everything after stage one is taught by the game being hard.
+// Three beats, no words, no buttons: arm the archer, place the archer, call the
+// wave. Each one dims the screen except for the single thing it wants tapped
+// and drops a fat yellow arrow on it, so the only move available is the move
+// being taught. Nothing advances on a "Next"; every beat advances on the ACTION
+// it exists to teach.
+//
+// What it replaced, and why none of it comes back:
+//
+//   * An OFFER ("Need a tutorial?" — Start / Skip). A first-time player is not
+//     equipped to answer that question, and the ones who most needed the answer
+//     were the likeliest to tap the smaller, quieter button. Nobody is asked
+//     any more; the tutorial simply happens.
+//   * A "Protect the Gate" intro beat. It was two lines of prose about a thing
+//     the game demonstrates by itself thirty seconds later, and it stood
+//     between the player and the first thing they could actually do.
+//   * A NEXT button on every beat. It let a player finish the tutorial without
+//     placing a single block, which is the one thing the tutorial is for.
+//   * Every line of copy. This ships to children on portals, and reading is
+//     where they leave. A spotlight and an arrow need no locale.
 
-const TUTORIAL_STEPS: TutorialStep[] = ['gate', 'pick', 'place', 'call']
+const TUTORIAL_STEPS: TutorialStep[] = ['pick', 'place', 'call']
 
-// Three states, only one of which is persisted.
+/**
+ * The piece the tutorial teaches with, dealt into the weapon slot.
+ *
+ * A lone archer, on purpose: it is the cheapest weapon in the game (20 wood
+ * against a 120-wood opening purse, so it is affordable on every first run,
+ * including one that resumed), it is one cell — so it fits anywhere the
+ * spotlight can point and cannot be placed "wrong" by rotation — and it is a
+ * WEAPON, which is the lesson. A tower of crates loses; the player has to learn
+ * that some blocks shoot.
+ */
+const TUTORIAL_SHAPE = 'archer1'
+const TUTORIAL_SLOT = WEAPON_SLOT
+
+// Two states, only one of which is persisted.
 //
-//   not answered  → the offer box beside the tower
-//   running       → the coach marks
-//   answered      → nothing, ever again
+//   not done  → the coach marks, from the first frame, unconditionally
+//   done      → nothing, ever again
 //
-// Only the ANSWER is written to `ts_tutorial`, and it goes through
-// `setState`, which the SaveManager mirrors to whichever backend the build
-// actually has — the platform SDK's cloud store on CrazyGames / Playgama /
-// Yandex, plain localStorage everywhere else. So a player who skips on their
-// phone is not asked again on their desktop.
+// The answer goes through `setState`, which the SaveManager mirrors to whichever
+// backend the build actually has — the platform SDK's cloud store on
+// CrazyGames / Playgama / Yandex, plain localStorage everywhere else. So a
+// player taught on their phone is not taught again on their desktop.
 const tutorialDone = ref(getState<boolean>(TUTORIAL_KEY, false) === true)
-/** In-memory: the player tapped Start. Never persisted — an interrupted
- *  tutorial should offer itself again next session, not resume mid-step. */
-const tutorialActive = ref(false)
 const tutorialIndex = ref(0)
 /** Rect of the element the current beat points at, in screen space. */
 const tutorialRect = ref<{ x: number; y: number; w: number; h: number } | null>(null)
@@ -1004,90 +1038,93 @@ const inFirstStage = computed(() =>
   && !isAnyModalOpen.value
 )
 
-/**
- * Is the scripted opening's free starter fort standing?
- *
- * Read off the TOWER rather than off a flag, so it survives a reload mid-first
- * run — `ts_run` restores the fort, and the coach marks have to agree with what
- * is on screen, not with what the boot path happened to do.
- */
-const starterFort = computed(() => {
-  void towerVersion.value
-  return getBlocks().has('-1,0') && getBlocks().has('1,0')
-})
-
-/**
- * The row the `place` beat points at: the first one with a free cell beside the
- * Gate's column.
- *
- * An empty foundation means the cells flanking the Gate. With the starter fort
- * standing those are taken, and pointing a "place it here" spotlight at two
- * occupied cells is worse than not pointing at all — so it moves up to the
- * shoulders.
- */
-const placeRow = computed(() => {
-  void towerVersion.value
-  const blocks = getBlocks()
-  for (let r = 0; r < 6; r++) {
-    if (!blocks.has(`-1,${r}`) || !blocks.has(`1,${r}`)) return r
-  }
-  return 0
-})
-
 const tutorialStep = computed<TutorialStep | null>(() => {
-  if (!inFirstStage.value || !tutorialActive.value) return null
+  if (!inFirstStage.value) return null
   return TUTORIAL_STEPS[tutorialIndex.value] ?? null
 })
 
-/** The offer is up until the player answers it one way or the other. */
-const showTutorialPrompt = computed(() => inFirstStage.value && !tutorialActive.value)
-
 /**
- * Where the offer box sits: beside the tower's footprint, level with the Gate.
+ * Where the archer goes.
  *
- * Projected from world space rather than pinned to a screen corner, so it reads
- * as pointing AT the tower and follows the camera when the player pans — but
- * flipped to the other side when the preferred one has no room. On a portrait
- * phone the tower sits near the middle of a 400 px-wide screen, and a box
- * anchored to its right simply runs off the edge.
+ * A preference list walked through the real placement rule, not a fixed cell:
+ * the beat has to point at somewhere the piece can actually go, and what is
+ * legal depends on what is standing. First choice is the shoulder of the
+ * scripted opening's starter fort, beside its cannon — that reads as "add to
+ * your tower" rather than "start a second one" — and the fallbacks cover a
+ * board that, for any reason, is not the one the opening built.
  */
-const PROMPT_WIDTH_PX = 190
-const PROMPT_MARGIN_PX = 10
+const TUTORIAL_CELLS: ReadonlyArray<readonly [number, number]> = [
+  [-1, 1], [1, 1], [-2, 0], [2, 0], [0, 2], [-1, 0], [1, 0]
+]
 
-const tutorialPromptPos = computed(() => {
-  void tutorialTick.value
-  const half = halfWidthAt(0) + 1.2
-  const right = worldToScreenX(half)
-  const left = worldToScreenX(-half)
-  const vw = typeof window === 'undefined' ? 1024 : window.innerWidth
-
-  // Prefer the right of the tower; take the left when the box would be clipped.
-  const fitsRight = right + PROMPT_WIDTH_PX + PROMPT_MARGIN_PX <= vw
-  const onRight = fitsRight || left - PROMPT_WIDTH_PX - PROMPT_MARGIN_PX < 0
-  const rawX = onRight ? right : left - PROMPT_WIDTH_PX
-
-  return {
-    // Clamped as a last resort: on a very narrow screen NEITHER side fits, and
-    // a box half off the edge is worse than one overlapping the tower.
-    x: Math.round(Math.max(
-      PROMPT_MARGIN_PX,
-      Math.min(rawX, vw - PROMPT_WIDTH_PX - PROMPT_MARGIN_PX)
-    )),
-    y: Math.round(worldToScreenY(1.2)),
-    onRight
+const tutorialCell = computed<{ c: number; r: number }>(() => {
+  void towerVersion.value
+  for (const [c, r] of TUTORIAL_CELLS) {
+    if (canPlaceShapeAt(TUTORIAL_SHAPE, c, r, 0)) return { c, r }
   }
+  // Nothing on the list is legal — an odd board, a resumed run. Take the first
+  // legal cell anywhere on the foundation's span rather than point at a cell
+  // the player cannot build on.
+  for (let r = 0; r < 6; r++) {
+    const half = halfWidthAt(r)
+    for (let c = -half; c <= half; c++) {
+      if (canPlaceShapeAt(TUTORIAL_SHAPE, c, r, 0)) return { c, r }
+    }
+  }
+  return { c: -2, r: 0 }
 })
 
-const startTutorial = (): void => {
-  tutorialActive.value = true
-  tutorialIndex.value = 0
-  measureTutorialTarget()
+/**
+ * Put the archer in the player's hand.
+ *
+ * The hand is dealt at random, and a tutorial that has to say "tap whichever of
+ * these five happens to be a weapon" is not the tutorial being built here. So
+ * the weapon slot is overwritten with the piece the beats are drawn around —
+ * on a fresh run and on a resumed one, since the snapshot restores whatever was
+ * dealt before the reload.
+ *
+ * Not reinforced: the gold sweep a reinforced tile carries is a second thing to
+ * look at on the one screen that must have exactly one.
+ */
+const armTutorialHand = (): void => {
+  if (tutorialDone.value) return
+  if (offers.value[TUTORIAL_SLOT] === TUTORIAL_SHAPE) return
+  const next = offers.value.slice()
+  next[TUTORIAL_SLOT] = TUTORIAL_SHAPE
+  offers.value = next
+  if (offerEnhanced.value[TUTORIAL_SLOT]) {
+    const flags = offerEnhanced.value.slice()
+    flags[TUTORIAL_SLOT] = false
+    offerEnhanced.value = flags
+  }
 }
 
-/** Persist the answer — completed and skipped are the same answer. */
+// ─── The tutorial holds the opening countdown ───────────────────────────────
+//
+// Wave 1 lands three seconds after the player's first gesture, and those three
+// seconds are meant to be THEIRS. While the tutorial has the floor they are
+// not: every beat waits on an action only the player can take. Its last beat is
+// the Call Wave button, so a countdown running underneath would fire the wave
+// out from under the tutorial and leave the player on a step whose button is no
+// longer on screen — a tutorial that can never be finished, and so is never
+// recorded as done.
+//
+// The hold lifts the moment the tutorial ends, which now has exactly one route:
+// the player performed all three actions.
+//
+// `immediate`, and it has to be: the first beat is live on the very first
+// evaluation now that nothing has to be accepted first, so a watcher that only
+// fires on a CHANGE would never see the tutorial open — it would only ever see
+// it close, and the countdown would run underneath the whole thing.
+watch(
+  () => tutorialStep.value !== null,
+  (held) => { buildClockHeld.value = held },
+  { immediate: true }
+)
+
+/** Persist it. The only caller is the last beat completing. */
 const finishTutorial = (): void => {
   tutorialDone.value = true
-  tutorialActive.value = false
   setState(TUTORIAL_KEY, true)
 }
 
@@ -1096,7 +1133,7 @@ const advanceTutorial = (): void => {
   if (tutorialIndex.value >= TUTORIAL_STEPS.length) finishTutorial()
 }
 
-/** Advance when the player performs the step's action, not on a Next tap. */
+/** Advance when the player performs the step's action. It is the only way. */
 const completeTutorialStep = (step: TutorialStep): void => {
   if (tutorialStep.value !== step) return
   advanceTutorial()
@@ -1105,10 +1142,15 @@ const completeTutorialStep = (step: TutorialStep): void => {
 /**
  * Measure whatever the current beat is pointing at.
  *
- * Polled rather than observed: the targets are a canvas rect, a tray tile and a
- * HUD button that all move as the layout settles, and three ResizeObservers
- * plus a canvas-to-screen projection is a lot of machinery for four beats that
+ * Polled rather than observed: the targets are a canvas cell, one tray tile and
+ * a HUD button that all move as the layout settles, and three ResizeObservers
+ * plus a canvas-to-screen projection is a lot of machinery for three beats that
  * only ever run once.
+ *
+ * A null here is load-bearing. The overlay renders nothing without a rect, so a
+ * target that is missing or not laid out yet leaves the player in a normal,
+ * fully playable game rather than under a dim layer with no hole in it — which,
+ * with no Skip button anywhere, would be unescapable.
  */
 const measureTutorialTarget = (): void => {
   const step = tutorialStep.value
@@ -1122,26 +1164,33 @@ const measureTutorialTarget = (): void => {
     return { x: b.x, y: b.y, w: b.width, h: b.height }
   }
 
-  if (step === 'pick') { tutorialRect.value = fromEl('.build-tray__scroll'); return }
-  if (step === 'call') { tutorialRect.value = fromEl('.call-wave__btn'); return }
-
-  // `gate` and `place` point at the battlefield, which lives on the canvas —
-  // so the rect is projected from world space rather than read from the DOM.
-  const size = Math.max(48, getZoom())
-  const gx = worldToScreenX(0)
-  const gy = worldToScreenY(0.5)
-  if (step === 'gate') {
-    tutorialRect.value = { x: gx - size / 2, y: gy - size / 2, w: size, h: size }
+  // ONE tile, not the whole tray: the player is being told to take this piece,
+  // and a hole over five offers is a menu, which is a decision, which is the
+  // thing this beat is designed not to ask for.
+  if (step === 'pick') {
+    tutorialRect.value = fromEl(`.build-tray__slot[data-slot="${TUTORIAL_SLOT}"]`)
     return
   }
-  // `place`: the cells flanking the Gate's column on the lowest row that still
-  // has room — the foundation on an empty start, the fort's shoulders once the
-  // scripted opening has filled it.
+  if (step === 'call') { tutorialRect.value = fromEl('.call-wave__btn'); return }
+
+  // A beat that cannot be performed must not be forced. The archer is 20 wood
+  // against a 120-wood opening purse, so this is only reachable by a resumed
+  // run that spent itself down while the overlay had nothing to point at — but
+  // there is no Skip button to rescue anyone from it, so it is answered with
+  // the same null the missing-target path uses: no rect, no dim, normal game.
+  if (!canAffordShape(TUTORIAL_SHAPE)) { tutorialRect.value = null; return }
+
+  // `place` points at the battlefield, which lives on the canvas — so the rect
+  // is projected from world space rather than read from the DOM. Exactly one
+  // cell wide: the hole is the only place a tap survives the dim layer, so its
+  // size IS the placement's tolerance.
+  const cell = getZoom()
+  const { c, r } = tutorialCell.value
   tutorialRect.value = {
-    x: worldToScreenX(-1.5),
-    y: worldToScreenY(placeRow.value + 0.5) - size / 2,
-    w: size * 3,
-    h: size
+    x: worldToScreenX(c - 0.5),
+    y: worldToScreenY(r + 0.5) - cell / 2,
+    w: cell,
+    h: cell
   }
 }
 
@@ -1153,7 +1202,19 @@ let tutorialTimer = 0
 // down — an immediate watcher evaluates the computed during setup and dies in
 // the temporal dead zone. The first measurement happens on mount instead, by
 // which time every ref exists and the layout is real.
-watch(tutorialStep, () => { measureTutorialTarget() })
+watch(tutorialStep, (step) => {
+  // Re-armed on the beat rather than only at boot: a tech unlock rerolls two
+  // slots mid-run, and the hand has to still hold the piece the arrow is
+  // pointing at.
+  if (step === 'pick') armTutorialHand()
+  measureTutorialTarget()
+})
+
+// The wave starting by any other route retires the beat that asks for it. A
+// coach mark aimed at a button the battle has just replaced with the speed
+// switch can never be completed, and an unfinished tutorial is never recorded
+// as done — so the player would meet it again next session.
+watch(phase, (p) => { if (p !== 'build') completeTutorialStep('call') })
 
 // ─── Early-call bonus preview ───────────────────────────────────────────────
 
@@ -1339,9 +1400,73 @@ const onContinueRun = async (): Promise<void> => {
   })
 }
 
+/**
+ * Show the game's premise over the opening frame.
+ *
+ * `bestWave` is the whole audience test: a player who has survived a wave has
+ * been told what this game is by playing it, and telling them again is noise.
+ * `awaitingFirstInteraction` is the dismissal — the same edge that starts the
+ * opening wave's countdown and opens the portal's gameplay bracket, so the
+ * banner is on screen for exactly as long as the game is waiting for them.
+ */
+const showIncoming = computed(() => bestWave.value === 0 && awaitingFirstInteraction.value)
+
 const enhancedHandOffered = computed(() =>
   phase.value === 'build' && !offerEnhanced.value.some(Boolean)
 )
+
+// ─── The Fusion offer ───────────────────────────────────────────────────────
+//
+// Merging is the mechanic players stay for: two matching blocks become one, and
+// the tower stops being a wall of separate cells. It is also the mechanic
+// almost nobody finds. It lives two nodes deep in a store behind one small
+// button, so a player who has never opened the tech tree has no way to learn
+// that fusing exists at all — let alone that it is a couple of hundred coins
+// away — and the feature that would have sold them the game is invisible.
+//
+// So the offer goes to them, in the place they are already looking: the perk
+// row directly above their hand, wearing the price it actually costs and
+// buying the node on the tap. It TAKES the reinforced hand's slot rather than
+// adding a button beside it — a row that grows a control is a row that has to
+// be re-read, and the hand is a per-wave nicety the player gets back the
+// moment this is bought, which happens exactly once per save.
+//
+// It only ever appears when the player can actually pay, prerequisite
+// included: an offer that answers a tap with "not enough coins" teaches them
+// to ignore the row.
+
+/** The node itself, and the one rank the tree wants under it. */
+const MERGE_NODE = 'unlockMerge'
+const MERGE_PREREQ = 'foundations'
+
+/**
+ * What owning Fusion costs from here: the node, plus the prerequisite rank the
+ * player has not bought yet.
+ *
+ * Read off the tree rather than written down. `foundations` is half price at
+ * its first rank (20 of its 40), so the honest total is 220 for a player who
+ * has never spent a coin and 200 for one who already owns it — a number typed
+ * into the HUD would have been wrong for one of them, and wrong again the next
+ * time the tree is tuned.
+ */
+const mergeOfferCost = computed(() =>
+  progress.costOf(MERGE_NODE)
+  + (progress.levelOf(MERGE_PREREQ) > 0 ? 0 : progress.costOf(MERGE_PREREQ))
+)
+
+const mergeOffered = computed(() =>
+  !mergeUnlocked.value
+  && phase.value === 'build'
+  && coins.value >= mergeOfferCost.value
+)
+
+/** Buy the prerequisite and the node together, in one tap. */
+const onBuyMerge = (): void => {
+  if (!mergeOffered.value) return
+  if (progress.levelOf(MERGE_PREREQ) === 0 && !progress.buyTech(MERGE_PREREQ)) return
+  if (!progress.buyTech(MERGE_NODE)) return
+  playSound('level-up', 0.09)
+}
 
 // ─── Arrow Rain ─────────────────────────────────────────────────────────────
 //
@@ -1632,6 +1757,9 @@ const boot = async (): Promise<void> => {
       beginRun()
       progress.recordRunStart()
     }
+    // A resumed run deals from its snapshot, which was written before the
+    // tutorial existed for this player — arm the hand either way.
+    armTutorialHand()
     beginMissionRun()
     await nextTick()
     resize()
@@ -1695,10 +1823,9 @@ onMounted(() => {
   // so it re-measures on a short cadence while it is up — and not at all once
   // it is finished, which for all but the first run is immediately.
   measureTutorialTarget()
-  // Both the coach-mark spotlight and the offer box are positioned in screen
-  // space from a camera that is still easing, so they re-measure on a short
-  // cadence — and not at all once the tutorial is answered, which for every
-  // run after the first is immediately.
+  // The spotlight is positioned in screen space from a camera that is still
+  // easing, so it re-measures on a short cadence — and not at all once the
+  // tutorial is done, which for every run after the first is immediately.
   tutorialTimer = window.setInterval(() => {
     if (tutorialDone.value) return
     tutorialTick.value++
@@ -1717,6 +1844,9 @@ onUnmounted(() => {
   toastRo = null
   clearLongPress()
   stopBattleMusic()
+  // Module-level state: a scene that unmounts mid-tutorial must not leave the
+  // next one with a frozen build clock.
+  buildClockHeld.value = false
   // A tab close mid-build must never cost the player their tower.
   saveRunSnapshot()
 })
@@ -1738,6 +1868,11 @@ onUnmounted(() => {
     //- ── HUD overlay ───────────────────────────────────────────────────────
     //- Non-interactive by default; individual controls opt back in.
     div.scene__hud
+      //- The game's premise, said once, in the biggest type on the screen.
+      //- First-time players only, and gone on their first touch — see
+      //- `showIncoming`.
+      Transition(name="fade")
+        IncomingBanner(v-if="showIncoming")
       //- Top bar: wave status (left), resources (centre), wallet (right).
       div.scene__top(ref="topBarRef")
         WaveHud(
@@ -1822,8 +1957,23 @@ onUnmounted(() => {
             //- quit rather than the moment they adapt. It takes a row of its
             //- own so the two answers sit directly underneath the problem.
             div.scene__reach-hint(v-if="outOfReachNow") {{ t('allies.outOfReachHint') }}
+            //- Fusion, offered where the player is already looking, and only
+            //- while they can pay for it. Takes the reinforced hand's slot for
+            //- the one build phase in which it is bought — see `mergeOffered`.
+            button.scene__merge(
+              v-if="mergeOffered"
+              type="button"
+              :aria-label="`${t('tech.names.unlockMerge')} — ${t('tech.descriptions.unlockMerge')}`"
+              :title="t('tech.descriptions.unlockMerge')"
+              @click="onBuyMerge"
+            )
+              TechIcon.scene__merge-icon(icon="merge")
+              span.scene__merge-name {{ t('tech.names.unlockMerge') }}
+              span.scene__merge-cost
+                IconCoin.scene__merge-coin
+                | {{ mergeOfferCost }}
             FRewardButton(
-              v-if="enhancedHandOffered"
+              v-if="enhancedHandOffered && !mergeOffered"
               tone="gold"
               size="sm"
               :label="t('blocks.enhancedHand')"
@@ -1894,6 +2044,7 @@ onUnmounted(() => {
             :stone="stone"
             :coins="runCoins"
             :reroll-seconds="rerollReadyIn"
+            :hide-reroll="tutorialStep !== null"
             @select="onSelectSlot"
             @reroll="onReroll"
           )
@@ -1964,6 +2115,7 @@ onUnmounted(() => {
             :speed="gameSpeed"
             :boss-incoming="isBossIncoming"
             :speed-buff-left="speedBuffLeft"
+            :attention="tutorialStep === 'call'"
             @call="onCallWave"
             @set-speed="onSetSpeed"
             @buy-speed="onBuySpeed"
@@ -2097,24 +2249,12 @@ onUnmounted(() => {
             )
 
 
-    //- The opt-in offer, beside the tower. Never auto-starts.
-    TutorialPrompt(
-      v-if="showTutorialPrompt"
-      :x="tutorialPromptPos.x"
-      :y="tutorialPromptPos.y"
-      :on-right="tutorialPromptPos.onRight"
-      @start="startTutorial"
-      @skip="finishTutorial"
-    )
-
     //- First-stage coach marks. Outside `.scene__ui` so its dim layer covers
     //- the whole screen rather than sitting inside the HUD's stacking context.
+    //- No handlers: it emits nothing, because there is nothing on it to press.
     TutorialOverlay(
       :step="tutorialStep"
       :target="tutorialRect"
-      :seeded="starterFort"
-      @next="advanceTutorial"
-      @skip="finishTutorial"
     )
 
     OptionsModal(:is-open="showOptions" @close="showOptions = false")
@@ -2405,6 +2545,105 @@ onUnmounted(() => {
 
   @media (prefers-reduced-motion: reduce)
     animation: none
+
+// ─── The Fusion offer ───────────────────────────────────────────────────────
+//
+// Loud on purpose, and only ever once per save: this is the button whose whole
+// problem was that nobody saw it. A gold pill — the tech tree's own colour for
+// "you can afford this" — standing in a warm glow, with a sheen crossing it
+// every few seconds so it catches the eye of a player whose attention is on
+// the tray below it.
+.scene__merge
+  position: relative
+  display: inline-flex
+  align-items: center
+  gap: clamp(0.18rem, 1.1vw, 0.38rem)
+  // Tap-target floor, matching the perk buttons it stands among.
+  min-height: 2.25rem
+  padding: clamp(0.2rem, 1.2vw, 0.4rem) clamp(0.45rem, 2.4vw, 0.85rem)
+  border: 2px solid #0f1a30
+  border-radius: clamp(0.5rem, 2.4vw, 0.9rem)
+  background-image: linear-gradient(to bottom, #ffd469, #f0a12c)
+  color: #2a1602
+  font-weight: 900
+  font-size: clamp(0.62rem, 2.6vw, 0.78rem)
+  letter-spacing: 0.02em
+  text-transform: uppercase
+  cursor: pointer
+  touch-action: manipulation
+  -webkit-tap-highlight-color: transparent
+  // The sheen sweeps INSIDE the pill; the glow is a box-shadow so it is not
+  // clipped by the same rule.
+  overflow: hidden
+  animation: merge-glow 2.2s ease-in-out infinite
+  transition: transform 100ms ease-out, filter 100ms ease-out
+
+  &::after
+    content: ''
+    position: absolute
+    // Oversized and skewed, so the band crosses the whole pill corner to
+    // corner rather than wiping down it like a progress bar.
+    inset: -60% -70%
+    background-image: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, 0.85) 50%, transparent 58%)
+    transform: translateX(-120%)
+    animation: merge-sheen 3.6s ease-in-out infinite
+    pointer-events: none
+
+  &:hover
+    filter: brightness(1.06)
+
+  &:active
+    transform: translateY(2px) scale(0.96)
+
+.scene__merge-icon
+  width: clamp(0.9rem, 4vw, 1.15rem)
+  height: clamp(0.9rem, 4vw, 1.15rem)
+  color: #2a1602
+
+.scene__merge-cost
+  display: inline-flex
+  align-items: center
+  gap: 0.18rem
+  padding-left: clamp(0.18rem, 1.1vw, 0.36rem)
+  border-left: 2px solid rgba(42, 22, 2, 0.28)
+
+.scene__merge-coin
+  width: clamp(0.72rem, 3.2vw, 0.95rem)
+  height: clamp(0.72rem, 3.2vw, 0.95rem)
+
+// Three shadows, and each is doing a different job.
+//
+// A dark CONTACT shadow first: the row sits over pale planks and paler water,
+// and a warm glow alone on a light background is the same mistake the
+// placement sockets were making — invisible at exactly the moment it matters.
+// Then a saturated amber halo, which is the part that reads as "glow", and a
+// wide soft one behind it for the bloom. The low keyframe still carries all
+// three: a pulse that fades to nothing is invisible half the time, and half of
+// "the button nobody noticed" is the problem this button exists to solve.
+@keyframes merge-glow
+  0%, 100%
+    box-shadow: 0 0.16rem 0.45rem rgba(8, 16, 30, 0.6), 0 0 0.7rem rgba(255, 168, 40, 0.85), 0 0 1.9rem rgba(255, 140, 25, 0.45)
+  50%
+    box-shadow: 0 0.16rem 0.45rem rgba(8, 16, 30, 0.6), 0 0 1.2rem rgba(255, 190, 70, 1), 0 0 3.1rem rgba(255, 145, 30, 0.75)
+
+// Most of the cycle is the wait; the sweep itself is quick, the way a
+// highlight crossing a real surface is.
+@keyframes merge-sheen
+  0%, 55%
+    transform: translateX(-120%)
+  100%
+    transform: translateX(120%)
+
+// The glow is the affordance; the movement is only the invitation. Held still,
+// it keeps the first and drops the second.
+@media (prefers-reduced-motion: reduce)
+  .scene__merge
+    animation: none
+    box-shadow: 0 0 0.8rem rgba(255, 214, 130, 0.75), 0 0 2rem rgba(255, 170, 60, 0.45)
+
+    &::after
+      animation: none
+      opacity: 0
 
 .scene__cavalry
   position: relative

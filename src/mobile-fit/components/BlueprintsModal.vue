@@ -147,7 +147,7 @@ const buy = (id: string): void => {
       //- The three-beat explainer, once per save.
       div.bp__intro(v-if="introOpen")
         p.bp__intro-text {{ t(`tech.intro${introStep + 1}`) }}
-        FButton(size="sm" @click="advanceIntro") {{ introStep < 2 ? t('tutorial.next') : t('tech.introDone') }}
+        FButton(size="sm" @click="advanceIntro") {{ introStep < 2 ? t('tech.introNext') : t('tech.introDone') }}
 </template>
 
 <style scoped lang="sass">

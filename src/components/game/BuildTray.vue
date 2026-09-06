@@ -39,11 +39,15 @@ interface Props {
   /** Whole seconds left on EACH slot's reroll cooldown; 0 means ready.
    *  Per-slot, so swapping one piece never freezes the other three. */
   rerollSeconds?: number[]
+  /** Hide the per-tile swap buttons. Set while the tutorial is teaching with a
+   *  specific piece, which a reroll would take out of the player's hand. */
+  hideReroll?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   enhanced: () => [],
-  rerollSeconds: () => []
+  rerollSeconds: () => [],
+  hideReroll: false
 })
 
 /** Seconds left on `slot`, or 0 when it is ready to swap. */
@@ -290,7 +294,10 @@ const infoEntry = computed(() => {
           | {{ t('blocks.enhancedNote', { hp: enhancedHpPct, dmg: enhancedDmgPct }) }}
 
     div.build-tray__scroll
-      div.build-tray__slot(v-for="e in entries" :key="e.slot")
+      //- `data-slot` is the tutorial's handle on ONE offer. Its first beat cuts
+      //- a hole over a single tile — the free archer it deals into the weapon
+      //- slot — so it needs to address that tile and no other.
+      div.build-tray__slot(v-for="e in entries" :key="e.slot" :data-slot="e.slot")
         button.build-tray__tile(
           type="button"
           :class="{ 'is-selected': selected === e.slot, 'is-poor': !e.affordable, 'is-enhanced': e.enhanced }"
@@ -333,7 +340,13 @@ const infoEntry = computed(() => {
         //- Swap this piece for a fresh draw. Each slot carries its OWN timer,
         //- so the countdown a tile shows is the cost of the swap the player
         //- made on that tile — nothing else in the hand is charged for it.
+        //-
+        //- Gone entirely while the tutorial has the floor: it sits ON the lit
+        //- tile, so it is inside the one hole the coach mark leaves live, and a
+        //- first-time player who hits it swaps the archer they were about to be
+        //- taught with for a random piece they cannot necessarily afford.
         button.build-tray__reroll(
+          v-if="!hideReroll"
           type="button"
           :class="{ 'is-cooling': coolingFor(e.slot) > 0 }"
           :disabled="coolingFor(e.slot) > 0"

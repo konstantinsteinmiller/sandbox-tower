@@ -14,6 +14,27 @@ const advance = (g: { step: (ms: number) => void }, ms: number): void => {
   for (let t = 0; t < ms; t += 16) g.step(16)
 }
 
+/**
+ * Run the sim through the BATTLE pipeline, with no director wave in it.
+ *
+ * `stepProjectiles` is a battle-phase step: during the build phase rounds are
+ * fired but never advanced, hit anything or retired — so a pool spec that runs
+ * there measures nothing at all. These used to sit inside the opening build
+ * window and did exactly that; two of them passed while asserting on a frozen
+ * field.
+ *
+ * The phase is pinned rather than a wave called, because a director wave on
+ * top of the spawns below kills the tower long before the count ends, and then
+ * the spec measures how fast a weaponless tower dies instead of how the pool
+ * behaves. `plan` stays empty, so nothing arrives that the spec did not ask for.
+ */
+const fight = (g: { step: (ms: number) => void, phase: { value: string } }, ms: number): void => {
+  for (let t = 0; t < ms; t += 16) {
+    g.phase.value = 'battle'
+    g.step(16)
+  }
+}
+
 beforeEach(() => {
   localStorage.clear()
 })
@@ -135,13 +156,13 @@ describe('projectile pooling', () => {
 
     // Bombers first, so hostile rounds are the ones that get recycled.
     g.debugSpawn(['bombardier'])
-    advance(g, 6000)
+    fight(g, 6000)
 
     const before = g.measureTower().hp
     // Now a long stretch of purely friendly fire. If a recycled round came back
     // still flagged hostile, the tower would be shooting itself.
     for (let i = 0; i < 6; i++) g.debugSpawn(['grunt'])
-    advance(g, 8000)
+    fight(g, 8000)
     const after = g.measureTower().hp
 
     expect(after).toBeLessThanOrEqual(before)
@@ -159,9 +180,15 @@ describe('projectile pooling', () => {
     // A long, busy fight, so the pool is churning the whole time. Two distinct
     // ways swap-and-pop plus a free list can go wrong, checked every step:
     // the same OBJECT handed out while still live, and two rounds sharing a uid.
+    // The field is cleared on each spawn beat so the four archers always have
+    // fresh targets and never a queue that reaches the tower.
     let maxLive = 0
     for (let i = 0; i < 900; i++) {
-      if (i % 40 === 0) for (let k = 0; k < 4; k++) g.debugSpawn(['grunt'])
+      g.phase.value = 'battle'
+      if (i % 40 === 0) {
+        g.getEnemies().length = 0
+        for (let k = 0; k < 4; k++) g.debugSpawn(['grunt'])
+      }
       g.step(16)
       const live = g.getProjectiles()
       maxLive = Math.max(maxLive, live.length)
@@ -186,7 +213,11 @@ describe('projectile pooling', () => {
     const uids = new Set<number>()
     let peakLive = 0
     for (let i = 0; i < 1400; i++) {
-      if (i % 30 === 0) g.debugSpawn(['grunt', 'grunt'])
+      g.phase.value = 'battle'
+      if (i % 30 === 0) {
+        g.getEnemies().length = 0
+        g.debugSpawn(['grunt', 'grunt'])
+      }
       g.step(16)
       const live = g.getProjectiles()
       peakLive = Math.max(peakLive, live.length)
@@ -208,7 +239,7 @@ describe('projectile pooling', () => {
     g.wood.value = 5000
     expect(g.placeBlock('archer', 1, 0)).toBe(true)
     for (let i = 0; i < 6; i++) g.debugSpawn(['grunt'])
-    advance(g, 1500)
+    fight(g, 1500)
 
     g.startRun()
     expect(g.getProjectiles().length).toBe(0)
