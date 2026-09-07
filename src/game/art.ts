@@ -450,13 +450,30 @@ export const spriteFor = (
     if (priority) (img as HTMLImageElement & { fetchPriority?: string }).fetchPriority = priority
     img.addEventListener('load', () => {
       // A zero-size decode is as good as missing.
-      if (img.naturalWidth > 0) {
+      if (img.naturalWidth === 0) { probe!.state = 'missing'; done(); return }
+
+      // `load` means the BYTES arrived, not that they are a bitmap yet, and
+      // `decoding: 'async'` above only governs how the browser paints an <img>
+      // in the document — these images are never in the document, they are
+      // blitted onto a canvas. So the decode was landing on whichever frame
+      // first drew the sprite, synchronously, inside `drawScene`: measured at
+      // 63 ms on the frame a new monster design walked on and 120 ms on the
+      // one that baked the backdrop, at 4x throttle. `decode()` does that work
+      // off the frame and only then lets the renderer see the image.
+      //
+      // Failure is not fatal and must not be: an aborted decode (a navigation,
+      // a memory-pressured phone) still leaves a usable `Image`, and the old
+      // behaviour — hand it over and let the frame decode it — is exactly the
+      // right fallback.
+      const ready = (): void => {
         probe!.state = 'ready'
         probe!.img = img
         // The whole point: whoever painted before this arrived gets to repaint.
         artChanged()
-      } else probe!.state = 'missing'
-      done()
+        done()
+      }
+      if (typeof img.decode === 'function') img.decode().then(ready, ready)
+      else ready()
     }, { once: true })
     img.addEventListener('error', () => { probe!.state = 'missing'; done() }, { once: true })
     // The generation suffix only appears AFTER an explicit refresh. A clean

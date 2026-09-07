@@ -172,12 +172,31 @@ export const paintMonsterFrame = (
 }
 
 /**
+ * What one `bakeFrame` has actually cost on THIS device, ms.
+ *
+ * The slice guard below used to be the constant 12 — the cost of the cast's
+ * most expensive frame, measured on a developer's laptop. A mid-range phone
+ * pays three to five times that, so the guard was reading "13 ms left, a frame
+ * costs 12, start one" and then overrunning the idle slice by 30-40 ms. An
+ * overrun inside `requestIdleCallback` is a dropped frame, and it repeated for
+ * every slice until the whole cast was baked — which is most of the early
+ * game, on exactly the devices least able to absorb it.
+ *
+ * So the floor is measured instead of assumed. A rolling MAX rather than a
+ * mean, because the guard's job is to be safe for the next frame, and the next
+ * frame may be the treant. It decays slowly so one unlucky sample (a GC
+ * landing mid-bake) does not stall the queue forever.
+ */
+let bakeCostMs = 12
+
+/**
  * Bake while the browser says it has room, then hand control back.
  *
  * Progress is measured per FRAME, not per design: a treant costs five times
- * what an imp does, so committing to a whole design in one slice would blow any
- * deadline. The 12 ms floor is the cost of the most expensive single frame in
- * the cast, so we never START one we cannot finish inside the slice.
+ * what an imp does, so committing to a whole design in one slice would blow
+ * any deadline. One frame is always baked — without that the queue could never
+ * advance on a device whose idle slices are all shorter than a single frame —
+ * and every FURTHER frame in the slice has to fit in the time left.
  */
 const pump = (deadline?: IdleTime): void => {
   scheduled = false
@@ -189,12 +208,15 @@ const pump = (deadline?: IdleTime): void => {
       if (!def) continue
       building = { id, def, frames: [] }
     }
+    const t0 = performance.now()
     building.frames.push(bakeFrame(building.def, building.frames.length))
+    const cost = performance.now() - t0
+    bakeCostMs = cost > bakeCostMs ? cost : bakeCostMs * 0.98 + cost * 0.02
     if (building.frames.length >= FRAMES) {
       CACHE.set(building.id, building.frames)
       building = null
     }
-  } while ((deadline?.timeRemaining() ?? 0) > 12)
+  } while ((deadline?.timeRemaining() ?? 0) > bakeCostMs)
   schedule()
 }
 

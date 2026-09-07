@@ -169,6 +169,8 @@ import {
   type FxEvent
 } from '@/use/useTowerVfx'
 import type { RenderProfile } from '@/use/useDeviceTier'
+import { override } from '@/use/perfVariants'
+import { perf } from '@/use/usePerfProbe'
 import { useScreenshake } from '@/use/useScreenshake'
 import { playFx } from '@/use/useTowerAudio'
 
@@ -2699,7 +2701,8 @@ const skyNow = (): number => {
  * what keeps them agreeing: a sunset sky with the sun still overhead is the
  * kind of mismatch that reads as broken even when nobody can say why.
  */
-export const dayPhase = (): number => (skyNow() % DAY_CYCLE_MS) / DAY_CYCLE_MS
+export const dayPhase = (): number =>
+  fxDayCycle ? (skyNow() % DAY_CYCLE_MS) / DAY_CYCLE_MS : fxStaticPhase
 
 /**
  * Sky keyframes around the cycle. Interpolated, not switched.
@@ -3039,7 +3042,16 @@ const renderBackground = (w: number, h: number, dpr: number): void => {
   const zoom = getZoom()
   const rect = viewRect()
   // Quantise the key: re-render only on a meaningful camera move.
-  const key = `${w}x${h}|${Math.round(rect.l * 4)}|${Math.round(rect.b * 4)}|${Math.round(zoom)}|${wave.value}|${Math.round(dayPhase() * 40)}|${quality.value}`
+  //
+  // The day phase is in the key because the haze, the water and the ridge
+  // tones are all mixed from the sky colour — but ONLY while the sky moves.
+  // With the cycle frozen it was costing a full re-bake of the ridges, both
+  // tree lines, the meadow and the grain pass forty times a day cycle, i.e.
+  // every 4.5 s, for a wash whose colour had not visibly changed. On a fixed
+  // camera that timer was the ONLY thing invalidating the cache, so freezing
+  // it turns the backdrop into a bake-once layer. See PERF-LEDGER.md (E2).
+  const day = fxDayCycle ? Math.round(dayPhase() * 40) : 0
+  const key = `${w}x${h}|${Math.round(rect.l * 4)}|${Math.round(rect.b * 4)}|${Math.round(zoom)}|${wave.value}|${day}|${quality.value}`
   if (key === bgKey && bgCanvas) return
   bgKey = key
 
@@ -3055,11 +3067,17 @@ const renderBackground = (w: number, h: number, dpr: number): void => {
   c.setTransform(dpr, 0, 0, dpr, 0, 0)
   c.clearRect(0, 0, w, h)
 
-  // The sky and the two bodies are NOT drawn here — they change every frame and
-  // this canvas is cached across many. They are painted live underneath it (see
-  // `drawSky`), and the sky band of this canvas is simply left transparent for
-  // them to show through. The scenery on top is opaque, so it composites
-  // exactly as it did when it was one layer.
+  // The sky and the two bodies are painted live UNDERNEATH this canvas while
+  // the day cycle runs — they change every frame and this canvas is cached
+  // across many, so its sky band is simply left transparent for them to show
+  // through. The scenery on top is opaque, so it composites exactly as it did
+  // when it was one layer.
+  //
+  // Once the cycle is frozen that reasoning inverts: the sky is now the same
+  // full-screen gradient plus the same celestial bloom every single frame, so
+  // it belongs in the cache with everything else and the frame stops paying
+  // for two whole-viewport gradient fills it cannot tell apart.
+  if (fxBakedSky) drawSky(c, w, h)
   const [, mid] = skyFor(wave.value)
   const groundY = worldToScreenY(0)
 
@@ -3454,7 +3472,11 @@ const renderBackground = (w: number, h: number, dpr: number): void => {
   //
   // Fixed in screen space on purpose: the paper is the screen, not the world,
   // so it must not slide around under the scenery.
-  grain(c, w, h, 0.055, 11)
+  //
+  // Skipped on the phone tiers. It is a whole-viewport fill in `multiply`
+  // blend, which is the slowest composite a 2D canvas has, and at phone size
+  // the tooth is below the threshold anyone can see anyway.
+  if (fxGrain) grain(c, w, h, 0.055, 11)
 }
 
 // ─── FX event → presentation ────────────────────────────────────────────────
@@ -6155,23 +6177,71 @@ const mergeArtSpan = (b: Block): number => {
 const tierLabel = (tier: number): string =>
   tier >= 4 ? String(tier) : tier >= 3 ? 'III' : 'II'
 
+/**
+ * The merge-tier badge, baked once per (tier, size).
+ *
+ * Drop & Merge puts one of these on nearly every block on the board, and the
+ * honest version paid a rounded-rect fill, a stroke, a `ctx.font` assignment
+ * built as a fresh template string, and a `fillText` — per block, per frame.
+ * Text rasterisation is the expensive half and the string was a per-frame
+ * allocation on top; at forty blocks it was the single heaviest named function
+ * in a 6x-throttled profile. Nothing about the badge changes between frames,
+ * so it is a bitmap.
+ *
+ * Keyed on the rounded cell size as well as the tier because the desktop scene
+ * zooms; on the fixed mobile camera there is exactly one size and the cache
+ * holds a handful of entries for the life of the run.
+ */
+interface PlateSprite { cv: HTMLCanvasElement; ox: number; oy: number; w: number; h: number }
+const plateCache = new Map<string, PlateSprite>()
+const PLATE_CACHE_MAX = 24
+
+const tierPlate = (tier: number, size: number): PlateSprite => {
+  const q = Math.max(4, Math.round(size))
+  const key = `${tier}|${q}|${Math.round(tintDpr * 4)}`
+  const hit = plateCache.get(key)
+  if (hit) return hit
+
+  // The badge sits from -0.15..+0.17 of a cell across and ±0.12 down, and the
+  // stroke straddles that edge — so the bitmap needs a margin or the outline
+  // comes back clipped on two sides.
+  const pad = q * 0.05 + 2
+  const w = q * 0.32 + pad * 2
+  const h = q * 0.24 + pad * 2
+  const ss = Math.min(3, Math.max(1, tintDpr || 1))
+  const cv = document.createElement('canvas')
+  cv.width = Math.max(1, Math.round(w * ss))
+  cv.height = Math.max(1, Math.round(h * ss))
+  const c = cv.getContext('2d')!
+  c.scale(ss, ss)
+
+  const steel = tier >= 3 ? '#eef4fb' : '#c3d0de'
+  c.fillStyle = 'rgba(12,16,26,0.82)'
+  roundRect(c, pad, pad, q * 0.32, q * 0.24, q * 0.06)
+  c.fill()
+  c.strokeStyle = steel
+  c.lineWidth = Math.max(1, q * 0.026)
+  c.stroke()
+  c.fillStyle = steel
+  c.font = `900 ${Math.round(q * 0.24)}px sans-serif`
+  c.textAlign = 'center'
+  c.textBaseline = 'middle'
+  c.fillText(tierLabel(tier), pad + q * 0.15, pad + q * 0.12 + q * 0.01)
+
+  const sprite: PlateSprite = { cv, ox: pad + q * 0.15, oy: pad + q * 0.12, w, h }
+  plateCache.set(key, sprite)
+  if (plateCache.size > PLATE_CACHE_MAX) {
+    const oldest = plateCache.keys().next().value
+    if (oldest !== undefined && oldest !== key) plateCache.delete(oldest)
+  }
+  return sprite
+}
+
 const drawTierPlate = (
   ctx: CanvasRenderingContext2D, tier: number, bx: number, by: number, size: number
 ): void => {
-  const steel = tier >= 3 ? '#eef4fb' : '#c3d0de'
-  ctx.save()
-  ctx.fillStyle = 'rgba(12,16,26,0.82)'
-  roundRect(ctx, bx - size * 0.15, by - size * 0.12, size * 0.32, size * 0.24, size * 0.06)
-  ctx.fill()
-  ctx.strokeStyle = steel
-  ctx.lineWidth = Math.max(1, size * 0.026)
-  ctx.stroke()
-  ctx.fillStyle = steel
-  ctx.font = `900 ${Math.round(size * 0.24)}px sans-serif`
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-  ctx.fillText(tierLabel(tier), bx, by + size * 0.01)
-  ctx.restore()
+  const s = tierPlate(tier, size)
+  ctx.drawImage(s.cv, bx - s.ox, by - s.oy, s.w, s.h)
 }
 
 const drawBlock = (ctx: CanvasRenderingContext2D, b: Block, t: number, fallOffset = 0, fallRot = 0, fallDx = 0): void => {
@@ -6475,10 +6545,18 @@ const drawBlockOverlays = (ctx: CanvasRenderingContext2D, b: Block, t: number): 
 /**
  * Mirror the tower into the water strip below the ground line. Cheap version of
  * a real reflection: re-draw the blocks flipped, at low alpha, with a horizontal
- * sine wobble applied per scanline band. Skipped entirely below `high` quality.
+ * sine wobble applied per scanline band.
+ *
+ * Two gates, and they answer different questions. `renderProfile.reflection` is
+ * the device's standing answer, decided at boot and never revisited — a phone
+ * simply does not draw the tower twice. `quality` is the rolling tier, which
+ * still takes it away from a desktop that has started to struggle. Without the
+ * first gate a phone got the reflection for as long as its opening seconds
+ * looked fast, then lost it mid-wave, then got it back: the tower's mirror
+ * blinking in and out is more distracting than never having had one.
  */
 const drawReflection = (ctx: CanvasRenderingContext2D, t: number): void => {
-  if (quality.value !== 'high') return
+  if (!fxReflection || quality.value !== 'high') return
   const zoom = getZoom()
   const h = ctx.canvas.height
 
@@ -6530,14 +6608,51 @@ const drawReflection = (ctx: CanvasRenderingContext2D, t: number): void => {
 // desktop's behaviour.
 
 let renderProfile: RenderProfile = {
-  dpr: 2, drawEvery: 1, shine: true, particleCap: null, textCap: null
+  dpr: 2, drawEvery: 1, shine: true, particleCap: null, textCap: null,
+  dayCycle: true, staticDayPhase: 0.18, reflection: true, grain: true
+}
+
+// ─── Backdrop fidelity, resolved once ───────────────────────────────────────
+//
+// The profile decides; a `?perf.<name>=on|off` from the A/B runner overrides
+// exactly one decision so a rep can measure it in isolation. Both are read at
+// module load / `setRenderProfile` time and cached in plain module bindings —
+// a flag consulted inside the frame would be the regression under measurement.
+// See `perfVariants.ts` and PERF-LEDGER.md.
+const OV_STATICSKY = override('staticsky')
+const OV_BAKEDSKY = override('bakedsky')
+const OV_REFLECTION = override('reflection')
+const OV_GRAIN = override('grain')
+
+let fxDayCycle = true
+let fxStaticPhase = 0.18
+let fxBakedSky = false
+let fxReflection = true
+let fxGrain = true
+
+const applyFidelity = (p: RenderProfile): void => {
+  fxDayCycle = OV_STATICSKY === null ? p.dayCycle : !OV_STATICSKY
+  fxStaticPhase = p.staticDayPhase
+  fxReflection = OV_REFLECTION === null ? p.reflection : OV_REFLECTION
+  fxGrain = OV_GRAIN === null ? p.grain : OV_GRAIN
+  // Baking the sky into the cached layer is only sound while that sky is
+  // standing still. A moving sun behind a cached backdrop would either freeze
+  // mid-arc or drag the whole scenery re-bake along with it — which is the
+  // cost this was removing in the first place.
+  const wants = OV_BAKEDSKY === null ? !fxDayCycle : OV_BAKEDSKY
+  fxBakedSky = wants && !fxDayCycle
+  // The cached layer's contents now depend on these, so anything already baked
+  // under the old answers has to go.
+  bgKey = ''
 }
 
 export const setRenderProfile = (p: RenderProfile): void => {
   renderProfile = p
+  applyFidelity(p)
   setParticleCap(p.particleCap)
   setTextCap(p.textCap)
 }
+
 
 /**
  * Only these monster designs are pre-baked, or null for the whole cast.
@@ -6567,6 +6682,7 @@ export const drawScene = (
   // Monster strips bake in idle time. Priming the whole cast up front is safe:
   // the build phase gives it orders of magnitude more idle than the ~620 ms of
   // work involved, and anything still unbaked draws its older body.
+  perf.phase('prime')
   if (!monstersPrimed) {
     monstersPrimed = true
     // Bake only. The strips — and every other painted bitmap — are fetched by
@@ -6576,11 +6692,13 @@ export const drawScene = (
     // for the trebuchet at wave 0.
     primeMonsterSprites(monsterPrimeFilter ?? allMonsterIds(), { fetch: false })
   }
+  perf.phase('vfx')
   tintDpr = dpr
   if (fixtureDpr !== dpr) {
     fixtureDpr = dpr
     fixtureCache.clear()
     siegeCache.clear()
+    plateCache.clear()
   }
   shineOn = renderProfile.shine && getTowerBlocks().size <= SHINE_MAX_BLOCKS
   sampleFrame(dtMs)
@@ -6613,7 +6731,12 @@ export const drawScene = (
   ctx.clearRect(0, 0, w, h)
 
   // 1–4. Cached background.
-  drawSky(ctx, w, h)
+  //
+  // Two shapes, depending on the profile:
+  //   • desktop    — live sky, then the cached scenery copied over it
+  //   • baked sky  — sky inside the cache, so the frame is one copy
+  perf.phase('backdrop')
+  if (!fxBakedSky) drawSky(ctx, w, h)
   renderBackground(w, h, dpr)
   if (bgCanvas) ctx.drawImage(bgCanvas, 0, 0, w, h)
 
@@ -6624,6 +6747,12 @@ export const drawScene = (
   drawReflection(ctx, t)
 
   // 6. Ground decals.
+  //
+  // A fresh radial gradient per decal per frame, and it stays that way: a
+  // cached alpha-ramp sprite scaled into place measured no better and possibly
+  // worse (PERF-LEDGER.md E13). A GPU rasterises a small radial about as
+  // cheaply as it filters a scaled blit, and the sprite path wanted a
+  // `globalAlpha` set and reset around every one.
   for (const d of getDecals()) {
     const a = (d.life / d.maxLife) * d.dark
     if (a <= 0.02) continue
@@ -6649,6 +6778,7 @@ export const drawScene = (
     if (Math.abs(e.x) < 1.2) drawEnemy(ctx, e, t)
   }
 
+  perf.phase('blocks')
   // 7b. Block BODIES — culled to the visible rect.
   for (const b of getTowerBlocks().values()) {
     if (b.c + spanW(b) - 1 < rect.l - 1 || b.c > rect.r + 1) continue
@@ -6677,6 +6807,7 @@ export const drawScene = (
     drawBlockOverlays(ctx, b, t)
   }
 
+  perf.phase('enemies')
   // 7c. Everything else in front.
   for (const e of enemies) {
     if (e.x < rect.l - 3 || e.x > rect.r + 3) continue
@@ -6704,12 +6835,14 @@ export const drawScene = (
   // arrows that had not reached it yet.
   for (const v of arrowVolleys) drawArrowVolley(ctx, v)
 
+  perf.phase('particles')
   // 9. Particles.
   drawParticles(ctx, worldToScreenX, worldToScreenY, zoom)
 
   // 10. Floating combat text.
   drawFloatingTexts(ctx, zoom)
 
+  perf.phase('overlay')
   // 11. Build UI.
   if (phase.value !== 'defeat') drawBuildOverlay(ctx, t)
 
@@ -6774,6 +6907,7 @@ export const invalidateSprites = (): void => {
   spriteCache.clear()
   fixtureCache.clear()
   siegeCache.clear()
+  plateCache.clear()
   bgKey = ''
 }
 

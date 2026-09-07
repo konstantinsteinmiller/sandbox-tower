@@ -1,6 +1,6 @@
 {
   "name": "tower-siege",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "private": true,
   "type": "module",
   "scripts": {
@@ -26,7 +26,11 @@
     "type-check": "vue-tsc --build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "slice-sheets": "node tools/slice-sheets.mjs"
+    "slice-sheets": "node tools/slice-sheets.mjs",
+    "perf:preview": "vite build && vite preview --port 4177 --strictPort",
+    "perf:ab": "node tools/perf-ab.mjs --url http://localhost:4177/index.html --gpu --reps 5 --frames 1800 --warmframes 240 --throttle 4 --viewport 412x915x2 --seed 7 --tier mid --wave 10 --warmup 1",
+    "perf:profile-build": "vite build --minify false --outDir dist-prof",
+    "perf:profile": "node tools/perf-profile.mjs --url http://localhost:4178/index.html --gpu --throttle 4 --wave 10 --tier mid"
   },
   "dependencies": {
     "@vueuse/core": "^14.2.1",

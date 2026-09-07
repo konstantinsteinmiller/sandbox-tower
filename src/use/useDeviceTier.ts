@@ -31,12 +31,44 @@ export interface RenderProfile {
   particleCap: number | null
   /** Floating combat-text cap, or null for the default. */
   textCap: number | null
+
+  // ── Backdrop fidelity ─────────────────────────────────────────────────────
+  //
+  // The scenery layer is CACHED, so none of these are per-frame costs in the
+  // ordinary sense — they are the price of a cache MISS, paid as one long
+  // frame. What made them worth a profile field is that the day/night clock
+  // was invalidating that cache on a timer, which turned a one-off bake into a
+  // stutter every few seconds for the whole run. See PERF-LEDGER.md.
+
+  /** Animate the day/night cycle. Off freezes the sky at `staticDayPhase`. */
+  dayCycle: boolean
+  /** Where the frozen sky sits in its day, 0..1 (0.18 ≈ mid-morning). */
+  staticDayPhase: number
+  /** Mirror the tower into the water — a second pass over every block. */
+  reflection: boolean
+  /** Paper-tooth grain over the backdrop: one full-canvas `multiply` fill. */
+  grain: boolean
 }
 
+/**
+ * The desktop's behaviour, and the base every tier below is a subtraction from.
+ *
+ * `high` is what the game did before there were tiers at all — the desktop
+ * scene never applies a profile, so this record IS its behaviour.
+ */
 export const PROFILES: Readonly<Record<DeviceTier, RenderProfile>> = {
-  high: { dpr: 2, drawEvery: 1, shine: true, particleCap: null, textCap: null },
-  mid: { dpr: 1.5, drawEvery: 1, shine: false, particleCap: 150, textCap: 16 },
-  low: { dpr: 1, drawEvery: 2, shine: false, particleCap: 80, textCap: 16 }
+  high: {
+    dpr: 2, drawEvery: 1, shine: true, particleCap: null, textCap: null,
+    dayCycle: true, staticDayPhase: 0.18, reflection: true, grain: true
+  },
+  mid: {
+    dpr: 1.5, drawEvery: 1, shine: false, particleCap: 150, textCap: 16,
+    dayCycle: false, staticDayPhase: 0.18, reflection: false, grain: false
+  },
+  low: {
+    dpr: 1, drawEvery: 2, shine: false, particleCap: 80, textCap: 16,
+    dayCycle: false, staticDayPhase: 0.18, reflection: false, grain: false
+  }
 }
 
 export interface DeviceSignals {

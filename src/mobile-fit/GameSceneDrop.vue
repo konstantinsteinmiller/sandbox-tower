@@ -53,6 +53,8 @@ import { syncGameplayLifecycle } from '@/use/useGameplayLifecycle'
 import { isAnyModalOpen } from '@/use/useModalState'
 import { playFirstStartInterstitial } from '@/use/useFirstStartInterstitial'
 import { initDeviceTier, type RenderProfile } from '@/use/useDeviceTier'
+import { perf } from '@/use/usePerfProbe'
+import { debugSetWave } from '@/use/useTowerGame'
 
 import {
   DROPMERGE_RULES, BOARD_HALF_WIDTH, BOARD_MAX_ROW, SKY_ROWS, GROUND_ROWS, LANE_CELLS, STONE_FOLD
@@ -131,6 +133,9 @@ let cssH = 0
 let dpr = 1
 let frameNo = 0
 let drawAccum = 0
+
+/** Scripted autoplay, installed only under a bench flag — see `benchDriver.ts`. */
+let benchStep: ((dtMs: number) => void) | null = null
 
 /** How many rows of sky the frame currently shows (drops to one on a very
  *  short screen, so cells stay a thumb wide). */
@@ -337,25 +342,45 @@ const updateEdgeArrows = (): void => {
   }
 }
 
+/**
+ * A frame-counted benchmark runs the clock off the frame counter, not the
+ * wall: one nominal 60 Hz tick per rendered frame, whatever the frame actually
+ * cost. Two variants then step the simulation identically and the only thing
+ * that differs between them is how long the frames took — which is the thing
+ * being measured. Zero outside `?benchframes=`, and the branch folds to a
+ * constant comparison the JIT hoists out of the loop.
+ */
+const FIXED_BENCH_DT = perf.benchFrames > 0 ? 1000 / 60 : 0
+
 const loop = (t: number): void => {
   rafId = requestAnimationFrame(loop)
-  const dt = lastT ? Math.min(t - lastT, 120) : 16
+  const dt = FIXED_BENCH_DT || (lastT ? Math.min(t - lastT, 120) : 16)
   lastT = t
+  perf.beginFrame(t)
 
   // The pause gate covers ads, hidden tabs and platform pauses; the rotate
   // overlay and the result screen hold the clock as well.
-  if (!isGamePaused.value && !showResult.value && !rotateBlocked.value) step(dt)
+  perf.phase('update')
+  if (!isGamePaused.value && !showResult.value && !rotateBlocked.value) {
+    if (benchStep) benchStep(dt)
+    step(dt)
+  }
 
   // On the low tier every second frame is skipped; the VFX get the accumulated
   // time so motion stays honest.
   frameNo++
   drawAccum += dt
-  if (frameNo % profile.drawEvery !== 0) return
+  if (frameNo % profile.drawEvery !== 0) {
+    perf.endFrame()
+    return
+  }
   if (ctx) {
     updateEdgeArrows()
+    perf.phase('render')
     drawScene(ctx, cssW, cssH, drawAccum, dpr)
   }
   drawAccum = 0
+  perf.endFrame()
 }
 
 // ─── Rotation ───────────────────────────────────────────────────────────────
@@ -1170,8 +1195,30 @@ const boot = async (): Promise<void> => {
 const onOrientationChange = (): void => { setTimeout(resize, 250) }
 let layoutTimer = 0
 
+/**
+ * Scripted autoplay for the A/B runner. Dynamically imported so the driver
+ * never reaches a player's bundle, and gated on the same `?bench=` /
+ * `?benchframes=` flags the probe reads — without one of those nothing here
+ * runs and `benchStep` stays null.
+ */
+const installBenchDriver = (): void => {
+  if (!perf.benchMs && !perf.benchFrames) return
+  const q = new URLSearchParams(location.search)
+  void import('./benchDriver').then(({ makeBenchDriver }) => {
+    benchStep = makeBenchDriver(
+      {
+        phase, wave, wood, offers,
+        callWave, dropOffer, canDropAt, debugSetWave, setGameSpeed
+      },
+      Number(q.get('seed')) || 7,
+      Number(q.get('benchwave')) || 12
+    )
+  })
+}
+
 onMounted(() => {
   void boot()
+  installBenchDriver()
   installFullscreenWatch()
   window.addEventListener('resize', resize)
   window.addEventListener('orientationchange', onOrientationChange)

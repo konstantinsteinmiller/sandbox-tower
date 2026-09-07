@@ -22,6 +22,8 @@ node_modules
 .DS_Store
 dist
 dist-ssr
+# Unminified profiling build (tools/perf-profile.mjs)
+dist-prof
 coverage
 *.local
 *.env
