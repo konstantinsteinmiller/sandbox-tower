@@ -290,5 +290,30 @@ export const ICON_PATHS: Record<GameIconName, string[]> = {
     'M15.25 5.2A2.95 2.95 0 1 1 21.15 5.2A2.95 2.95 0 1 1 15.25 5.2Z',
     'M2.85 12A2.95 2.95 0 1 1 8.75 12A2.95 2.95 0 1 1 2.85 12Z',
     'M15.25 18.8A2.95 2.95 0 1 1 21.15 18.8A2.95 2.95 0 1 1 15.25 18.8Z'
+  ],
+
+  // ── Tools ───────────────────────────────────────────────────────────────
+  //
+  // Repair: a BLOCK with the heal cross knocked out of it.
+  //
+  // It replaces a wrench, and not because a wrench is the wrong idea — because
+  // a wrench does not survive this size. A diagonal spanner was drawn four ways
+  // (open jaw, boss-and-slot, forward prongs, ring-and-bore) and photographed
+  // at 16-72px against the button it actually sits on: the open jaws closed up
+  // into a syringe, the ring read as a KEY, and the shipping one read as a
+  // lollipop. What they all have in common is a thin diagonal limb with a
+  // detail at one end, and at 16px the detail is three pixels.
+  //
+  // A filled square with a cross punched through it has no thin limb anywhere,
+  // so it is the same shape at 16px as at 72px. It is also the more honest
+  // glyph: the button does not hand the player a tool, it puts hit points back
+  // into blocks, and the square IS the thing being healed.
+  //
+  // The cross is wound the other way round so nonzero punches it out rather
+  // than filling it in — drawn the same direction it disappears completely,
+  // which is the failure this file's header warns about.
+  'repair': [
+    'M7 3.4L17 3.4A3.6 3.6 0 0 1 20.6 7L20.6 17A3.6 3.6 0 0 1 17 20.6L7 20.6A3.6 3.6 0 0 1 3.4 17L3.4 7A3.6 3.6 0 0 1 7 3.4Z',
+    'M10.2 10.2L6.6 10.2L6.6 13.8L10.2 13.8L10.2 17.4L13.8 17.4L13.8 13.8L17.4 13.8L17.4 10.2L13.8 10.2L13.8 6.6L10.2 6.6Z'
   ]
 }

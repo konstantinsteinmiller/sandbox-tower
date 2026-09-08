@@ -1604,6 +1604,39 @@ export const upgradeCostAt = (c: number, r: number): number => {
   return b ? blockUpgradeCost(b.typeId, b.level ?? 0) : Infinity
 }
 
+/**
+ * Put exactly one rank's price in the purse, for the first-run tutorial.
+ *
+ * The rank beat lands before wave 1, and a run opens with an empty purse — so
+ * the lesson "you can spend gold to make a block stronger" is one the player
+ * cannot perform at the moment they are being taught it. Every other way out is
+ * worse: teaching it later means teaching it after the player has already died
+ * once for want of it, and leaving the beat unaffordable strands a tutorial
+ * that has no Skip button anywhere in it.
+ *
+ * So the tutorial pays for its own lesson, and only for that: the purse is
+ * TOPPED UP to the price rather than given a stipend, so the player finishes
+ * the beat back at zero and the run's economy is exactly where it would have
+ * been. Same bargain as the scripted opening's free starter fort — the first
+ * session is shown the game rather than made to invent it.
+ *
+ * Returns the price, or 0 when there is nothing to pay for (no block, already
+ * maxed) — which is also the signal to the caller that the beat cannot run.
+ */
+export const seedTutorialRankGold = (c: number, r: number): number => {
+  const b = blockAt(c, r)
+  if (!b || (b.level ?? 0) >= MAX_BLOCK_LEVEL) return 0
+  const cost = blockUpgradeCost(b.typeId, b.level ?? 0)
+  if (!Number.isFinite(cost)) return 0
+  if (runCoins.value < cost) {
+    runCoins.value = cost
+    // The purse just grew, which can bring the offered gun into reach.
+    ensureAffordableWeapon()
+    if (phase.value === 'build') saveRunSnapshot()
+  }
+  return cost
+}
+
 /** Is the next rank both available and affordable right now? */
 export const canUpgradeBlock = (c: number, r: number): boolean => {
   const b = blockAt(c, r)
@@ -1808,39 +1841,124 @@ export const canRepairBlock = (c: number, r: number): boolean => {
   return runCoins.value >= repairCostAt(c, r)
 }
 
-/** Total gold to patch every wounded block back to full. 0 when nothing is hurt. */
-export const repairAllCost = (): number => {
-  let gold = 0
-  for (const b of towerBlocks()) {
-    if (b.hp >= b.maxHp) continue
-    gold += Math.max(1, Math.ceil((b.maxHp - b.hp) / REPAIR_HP_PER_GOLD))
-  }
-  return gold
+/** One wounded block and what patching it back to full costs, in run gold. */
+interface RepairTicket {
+  block: Block
+  /** Hit points missing right now — what decides this block's place in the queue. */
+  wound: number
+  cost: number
 }
 
 /**
- * Patch the whole tower between waves, for run gold.
+ * Every wounded block, worst wound first — the order gold is actually spent in.
+ *
+ * A half-empty purse has to buy the repairs that matter, and what matters is
+ * the block nearest to falling, not whichever one the occupancy map happens to
+ * hand back first. Iteration order over the tower is an implementation detail
+ * that shifts as blocks are placed, sold and merged, so leaving the spend to it
+ * would make the same press do different things on two identical towers.
+ *
+ * Ties break on `uid`, which is monotonic and never reused: two crates with the
+ * same wound must be patched in a fixed order or the plan the button shows and
+ * the repair the press performs could disagree.
+ */
+const repairQueue = (): RepairTicket[] => {
+  const queue: RepairTicket[] = []
+  for (const b of towerBlocks()) {
+    if (b.hp >= b.maxHp) continue
+    const wound = b.maxHp - b.hp
+    queue.push({ block: b, wound, cost: Math.max(1, Math.ceil(wound / REPAIR_HP_PER_GOLD)) })
+  }
+  queue.sort((a, z) => (z.wound - a.wound) || (a.block.uid - z.block.uid))
+  return queue
+}
+
+/** Total gold to patch every wounded block back to full. 0 when nothing is hurt. */
+export const repairAllCost = (): number => {
+  let gold = 0
+  for (const t of repairQueue()) gold += t.cost
+  return gold
+}
+
+/** What a Repair-All press would actually do, given the purse right now. */
+export interface RepairAllPlan {
+  /** How many blocks are damaged at all. */
+  damaged: number
+  /** Gold to patch every damaged block back to full. */
+  totalCost: number
+  /** Gold the purse would actually spend, most-damaged-first. */
+  spend: number
+  /** How many blocks that gold would actually patch. */
+  repairs: number
+}
+
+/**
+ * Price a Repair-All press without performing it.
+ *
+ * Pure read, because the button's caption and its disabled state are computed
+ * every frame off this — a version bump or an fx burst in here would either
+ * loop the reactivity graph or spray repair sparks over an untouched tower.
+ *
+ * A block the leftover gold cannot cover is SKIPPED, not a wall the walk stops
+ * at: the purse then rolls on to a cheaper, less-wounded block and patches that
+ * instead. Stopping dead would make a player holding 8 gold in front of a
+ * 10-gold wound unable to spend anything at all, even with three 2-gold
+ * scratches behind it.
+ */
+export const repairAllPlan = (): RepairAllPlan => {
+  const queue = repairQueue()
+  let purse = runCoins.value
+  let totalCost = 0
+  let spend = 0
+  let repairs = 0
+  for (const t of queue) {
+    totalCost += t.cost
+    if (t.cost > purse) continue
+    purse -= t.cost
+    spend += t.cost
+    repairs++
+  }
+  return { damaged: queue.length, totalCost, spend, repairs }
+}
+
+/** Build phase, something damaged, and the purse covers at least one block. */
+export const canRepairAll = (): boolean =>
+  phase.value === 'build' && repairAllPlan().repairs > 0
+
+/**
+ * Patch what the purse can reach between waves, for run gold.
  *
  * The mobile-fit board has no per-block inspector — a five-column tower is
  * repaired as a whole. Priced on the WOUNDS rather than the ceilings, unlike
  * the inspector's per-block patch, because "fix everything" is a decision
  * about the purse, not about which block is nearly gone. Build phase only:
  * mid-wave it would be a "pay to undo the wave" button.
+ *
+ * It is deliberately NOT all-or-nothing. The button shows the full bill but
+ * stays pressable while a single wound is affordable, because the player who
+ * most needs a patch is the one who cannot pay for all of them — refusing them
+ * every repair until they can afford the whole tower is exactly backwards.
+ *
+ * Walks `repairQueue` so the spend can never disagree with the plan the button
+ * printed: one ordering, read by the caption and executed by the press.
  */
 export const repairAll = (): boolean => {
   if (phase.value !== 'build') return false
-  const cost = repairAllCost()
-  if (cost <= 0 || runCoins.value < cost) return false
-  runCoins.value -= cost
-  for (const b of towerBlocks()) {
-    if (b.hp >= b.maxHp) continue
+  let purse = runCoins.value
+  let healed = 0
+  for (const { block: b, cost } of repairQueue()) {
+    if (cost > purse) continue
+    purse -= cost
     // Same ledger as every other heal: what a repair puts back must not be
     // re-counted as strength the director prices the next wave against.
     repairedSinceMeasure += b.maxHp - b.hp
     b.hp = b.maxHp
     b.repairedAt = clock
     pushFx({ kind: 'repair', x: centreX(b), y: centreY(b) })
+    healed++
   }
+  if (healed === 0) return false
+  runCoins.value = purse
   ensureAffordableWeapon()
   syncGateRefs()
   towerVersion.value++
@@ -4310,18 +4428,22 @@ const fixedStep = (dt: number): void => {
 
 // ─── Fast-forward ───────────────────────────────────────────────────────────
 //
-// Speed is a TIMED BUFF bought with a rewarded video, not a free toggle. It is
-// worth paying for because it compresses the part of a wave the player has
-// already solved — once the tower is built and the shooting starts, the
-// decisions are made and the rest is watching. Five minutes covers several
-// waves, so one video is a real purchase rather than a per-wave tax.
+// A three-rung ladder where the middle rung is FREE and only the top one is
+// bought: 1x, 1.5x, 3x.
 //
-// ONE purchase unlocks the whole ladder, and the player picks a rung whenever
-// they like. 2x alone was not enough for the case this control exists for: a
-// run that died at wave 20 has to replay twenty waves it has already solved,
-// and at 2x that is still minutes of watching a tower you know will hold.
-// Charging a second video for the third rung would be charging twice for the
-// same thing — the video buys "fast-forward", and how fast is a preference.
+// Every rung above 1x used to be behind the same rewarded video, which priced
+// the wrong thing. What a player wants thirty seconds into a wave they have
+// already solved is a nudge — get on with it — and charging a video for that
+// makes the ordinary rhythm of the game feel toll-gated. So the nudge is free
+// at 1.5x, and the video buys the thing that is actually worth a video: 3x,
+// which is the difference between watching twenty solved waves and skipping
+// them.
+//
+// The purchase is still a TIMED BUFF rather than a per-use charge, and one
+// purchase still covers every paid rung there is — charging twice for the same
+// fast-forward is the pattern this section has always refused. Five minutes
+// covers several waves, so one video is a real purchase rather than a per-wave
+// tax.
 
 /** How long one purchase lasts, ms. */
 export const SPEED_BUFF_MS = 5 * 60 * 1000
@@ -4330,8 +4452,25 @@ export const SPEED_BUFF_MS = 5 * 60 * 1000
  *  starts eating multiplier the player asked for. */
 export const MAX_GAME_SPEED = 3
 
+/**
+ * The fastest rung that costs nothing.
+ *
+ * A THRESHOLD rather than a list, so a mode can shape its own ladder without
+ * restating which of its rungs are free — everything at or below this is given
+ * away, everything above it needs the buff.
+ */
+export const FREE_MAX_SPEED = 1.5
+
+/** Does this rung have to be paid for? */
+export const needsSpeedBuff = (n: number): boolean => n > FREE_MAX_SPEED
+
 /** Every rung the switch offers, slowest first. 1x is always available. */
-export const GAME_SPEEDS = [1, 2, 3] as const
+export const GAME_SPEEDS = [1, 1.5, 3] as const
+
+/** The fastest rung this mode gives away — where an expiring buff lands, and
+ *  the top of the ladder for a player who has never bought anything. */
+const fastestFreeSpeed = (): number =>
+  [...R().abilities.speeds].filter((s) => !needsSpeedBuff(s)).pop() ?? 1
 
 /** Remaining buff time, ms. */
 export const speedBuffLeft = ref(0)
@@ -4343,13 +4482,17 @@ export const isSpeedBuffed = computed(() => speedBuffLeft.value > 0)
  * `target` is the segment the player actually tapped. Landing them on 2x after
  * they pressed 3x would make the purchase feel like it half-worked.
  */
-export const grantSpeedBuff = (target = 2): void => {
+export const grantSpeedBuff = (target = MAX_GAME_SPEED): void => {
   // Extends rather than replaces: a player who watches a second video part-way
   // through the first buff must not lose the time they already paid for.
   speedBuffLeft.value = Math.min(SPEED_BUFF_MS * 2, speedBuffLeft.value + SPEED_BUFF_MS)
-  gameSpeed.value = Math.min(
-    Math.max(...R().abilities.speeds), MAX_GAME_SPEED, Math.max(1, Math.round(target))
-  )
+  const ladder = R().abilities.speeds
+  const wanted = Math.min(Math.max(...ladder), MAX_GAME_SPEED, Math.max(1, target))
+  // Snapped DOWN to a real rung, and NOT rounded. `target` is the segment the
+  // player tapped so it is normally exact — but the ladder now has a fractional
+  // rung, and `Math.round` turned a 1.5x tap into a request for a 2x that is on
+  // no ladder at all.
+  gameSpeed.value = [...ladder].filter((s) => s <= wanted + 1e-9).pop() ?? 1
 }
 
 /**
@@ -4361,10 +4504,14 @@ export const grantSpeedBuff = (target = 2): void => {
  * "that needs buying first".
  */
 export const setGameSpeed = (n: number): boolean => {
-  const next = Math.min(MAX_GAME_SPEED, Math.max(1, Math.round(n)))
+  // Clamped into range but NOT rounded — see `grantSpeedBuff`. The clamp is
+  // what makes a nonsense 0 land on 1x rather than being refused, which is the
+  // forgiving direction for the one rung the player must always be able to
+  // reach.
+  const next = Math.min(MAX_GAME_SPEED, Math.max(1, n))
   // A rung the mode does not offer cannot be selected, paid for or not.
   if (!R().abilities.speeds.includes(next)) return false
-  if (next > 1 && !isSpeedBuffed.value) return false
+  if (needsSpeedBuff(next) && !isSpeedBuffed.value) return false
   gameSpeed.value = next
   return true
 }
@@ -4377,12 +4524,17 @@ export const setGameSpeed = (n: number): boolean => {
  * twice as fast precisely because they bought it.
  */
 const stepSpeedBuff = (realDt: number): void => {
+  // An expiring buff falls back to the fastest FREE rung, not to a dead stop.
+  // The player only ever paid for the difference between 1.5x and 3x, so taking
+  // 1.5x away when the timer runs out is confiscating something that was never
+  // sold — and a battle that lurches from 3x to 1x mid-wave reads as the game
+  // freezing rather than as a purchase ending.
   if (speedBuffLeft.value <= 0) {
-    if (gameSpeed.value !== 1) gameSpeed.value = 1
+    if (needsSpeedBuff(gameSpeed.value)) gameSpeed.value = fastestFreeSpeed()
     return
   }
   speedBuffLeft.value = Math.max(0, speedBuffLeft.value - realDt)
-  if (speedBuffLeft.value <= 0) gameSpeed.value = 1
+  if (speedBuffLeft.value <= 0) gameSpeed.value = fastestFreeSpeed()
 }
 
 /**
@@ -4393,13 +4545,15 @@ const stepSpeedBuff = (realDt: number): void => {
  * whose hand is already on the keyboard.
  */
 export const toggleSpeed = (): void => {
-  if (!isSpeedBuffed.value) {
-    gameSpeed.value = 1
-    return
-  }
-  const ladder = R().abilities.speeds
-  const at = ladder.indexOf(gameSpeed.value)
-  gameSpeed.value = at < 0 || at >= ladder.length - 1 ? 1 : ladder[at + 1]!
+  // Only the rungs the player can actually use right now. Unbought, that is
+  // 1x and 1.5x — the key used to pin them at 1x, which was correct when every
+  // rung above it was behind a video and is now a key that refuses to do the
+  // free thing it is pointing at.
+  const usable = R().abilities.speeds.filter(
+    (s) => !needsSpeedBuff(s) || isSpeedBuffed.value
+  )
+  const at = usable.indexOf(gameSpeed.value)
+  gameSpeed.value = at < 0 || at >= usable.length - 1 ? (usable[0] ?? 1) : usable[at + 1]!
 }
 
 /**

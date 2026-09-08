@@ -28,8 +28,18 @@ import { computed, ref, onMounted, onUnmounted } from 'vue'
  *      component has no escape hatch to offer them.
  */
 
-/** `drop` and `merge` are the mobile-fit board's beats; the rest are shared. */
-export type TutorialStep = 'pick' | 'place' | 'call' | 'drop' | 'merge'
+/**
+ * `drop` and `merge` are the mobile-fit board's beats; the rest are shared.
+ *
+ * `mergeGuide` is the odd one out and deliberately so: it is a beat of the
+ * TUTORIAL, but it is not a coach mark. It has no target to cut a hole over —
+ * it hands the screen to `MergeGuide`, a pictogram card — so this component
+ * renders nothing for it, by the same no-hole-no-overlay rule every other step
+ * obeys. It lives in the union anyway so the scene's step list stays one typed
+ * sequence rather than a sequence plus a special case beside it.
+ */
+export type TutorialStep =
+  'pick' | 'place' | 'mergeGuide' | 'inspectMerged' | 'rankUp' | 'call' | 'drop' | 'merge'
 
 interface Props {
   /** Which step is live, or null when the tutorial is finished/never started. */
@@ -40,10 +50,21 @@ interface Props {
 
 const props = defineProps<Props>()
 
+/**
+ * Beats that are NOT coach marks — they hand the whole screen to a card.
+ *
+ * Enforced here rather than by the scene passing a null rect, because "the
+ * scene remembered to stop measuring" is not a guarantee: `measureTutorialTarget`
+ * is on a poll, and one stale rect surviving a step change would cut a hole in
+ * a card with nothing reachable behind it and dim the card itself.
+ */
+const CARD_STEPS = new Set<TutorialStep>(['mergeGuide'])
+
 /** Padding around the highlighted element, so the hole never crops it. */
 const PAD = 10
 
 const hole = computed(() => {
+  if (props.step && CARD_STEPS.has(props.step)) return null
   const r = props.target
   if (!r) return null
   return {

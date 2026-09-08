@@ -218,7 +218,7 @@ export const DESKTOP_RULES: RuleSet = {
   difficulty: { hoardDivisor: 1 },
   economy: { startWood: 120, startStone: 40 },
   tech: { nodes: TECH_NODES, stateKey: TECH_KEY },
-  abilities: { arrowRain: 'aim', cavalry: true, rangeBoost: true, speeds: [1, 2, 3] },
+  abilities: { arrowRain: 'aim', cavalry: true, rangeBoost: true, speeds: [1, 1.5, 3] },
   save: {
     runKey: RUN_KEY,
     bestWaveKey: BEST_WAVE_KEY,

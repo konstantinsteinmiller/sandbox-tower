@@ -35,7 +35,11 @@ const routes: RouteRecordRaw[] = [
   ...(import.meta.env.DEV
     ? [
       { path: '/art-sheets', name: 'art-sheets', component: () => import('@/views/ArtSheets.vue') },
-      { path: '/playground', name: 'playground', component: () => import('@/views/Playground.vue') }
+      { path: '/playground', name: 'playground', component: () => import('@/views/Playground.vue') },
+      // Same guard again: the two teaching cards fire once per save, on moments
+      // that cannot be re-entered, and a screen nobody can look at twice is a
+      // screen that ships broken in landscape.
+      { path: '/tutorial-lab', name: 'tutorial-lab', component: () => import('@/views/TutorialLab.vue') }
     ]
     : []),
   { path: '/:pathMatch(.*)*', redirect: '/' }

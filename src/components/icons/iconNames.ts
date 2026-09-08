@@ -24,7 +24,9 @@ export const GAME_ICON_NAMES = [
   // Steppers / arrows
   'plus', 'minus', 'left', 'right', 'up', 'down',
   // Game nouns
-  'coin', 'gem', 'heart', 'flask', 'wheel', 'gift', 'fullscreen', 'share'
+  'coin', 'gem', 'heart', 'flask', 'wheel', 'gift', 'fullscreen', 'share',
+  // Tools
+  'repair'
 ] as const
 
 export type GameIconName = (typeof GAME_ICON_NAMES)[number]

@@ -10,7 +10,7 @@ import {
   startRun, resumeRun, callWave, setGameSpeed, step, runSummary, saveRunSnapshot,
   manualReroll, canManualReroll, dealEnhancedOffers, speedBuffLeft, grantSpeedBuff,
   graceAvailable, continueRun, isFirstSession, seedScriptedOpening, applyRules,
-  dropOffer, canDropAt, columnTop, repairAll, repairAllCost, canAffordShape, sellBlock,
+  dropOffer, canDropAt, columnTop, repairAll, repairAllCost, canRepairAll, canAffordShape, sellBlock,
   blockCount, CONTINUE_WOOD, CONTINUE_STONE
 } from '@/use/useTowerGame'
 import {
@@ -74,6 +74,8 @@ import RotateOverlay from './components/RotateOverlay.vue'
 import ControlHint, { type HintId } from '@/components/game/ControlHint.vue'
 import WaveClearToast from '@/components/game/WaveClearToast.vue'
 import TutorialOverlay, { type TutorialStep } from '@/components/game/TutorialOverlay.vue'
+import MergeGuide from '@/components/game/MergeGuide.vue'
+import { readTutorialCheat, type TutorialCheat } from '@/use/useTutorialCheat'
 import IncomingBanner from '@/components/game/IncomingBanner.vue'
 import FReward from '@/components/atoms/FReward.vue'
 import FButton from '@/components/atoms/FButton.vue'
@@ -365,7 +367,7 @@ const loop = (t: number): void => {
   // The pause gate covers ads, hidden tabs and platform pauses; the rotate
   // overlay and the result screen hold the clock as well.
   perf.phase('update')
-  if (!isGamePaused.value && !showResult.value && !rotateBlocked.value) {
+  if (!isGamePaused.value && !showResult.value && !rotateBlocked.value && !showMergeGuide.value) {
     if (benchStep) benchStep(dt)
     step(dt)
   }
@@ -726,7 +728,16 @@ const repairCost = computed(() => {
   void phase.value
   return repairAllCost()
 })
-const canRepair = computed(() => phase.value === 'build' && repairCost.value > 0 && runCoins.value >= repairCost.value)
+// Not `runCoins >= repairCost` any more. `repairAll` spends most-damaged-first
+// and stops when the purse does, so a player who can afford SOME of the bill
+// gets the blocks that matter most patched — gating the button on the full
+// total left the one player who most needed it staring at a dead control.
+const canRepair = computed(() => {
+  void towerVersion.value
+  void runCoins.value
+  void phase.value
+  return canRepairAll()
+})
 
 const onRepairAll = (): void => {
   if (!repairAll()) {
@@ -843,7 +854,18 @@ watch(wave, (w) => {
 // complete, which leaves the tutorial unfinished and therefore never recorded
 // as done. What the beat taught is now taught by the game: the wave comes, and
 // the button is there for the waves after it.
-const TUTORIAL_STEPS: TutorialStep[] = ['drop', 'merge']
+//
+// The pictogram is the third beat, and the LAST one — where the desktop board
+// hands off to its Call Wave coach mark, this one has no wave to call, so the
+// ladder is the note the tutorial ends on.
+//
+// It carries the `cell` ladder, not the desktop's. A weld here collapses back
+// into ONE cell whatever its tier (`mergeArt: 'cell'`, `maxMergeTier:
+// Infinity`), so the growing-rectangle picture the tower game shows would be a
+// promise this board never keeps — and on five columns the belief the player
+// actually needs is the opposite one: that a single cell is worth stacking
+// twins into, because the frontage never grows however deep the gun goes.
+const TUTORIAL_STEPS: TutorialStep[] = ['drop', 'merge', 'mergeGuide']
 const tutorialDone = ref(getState<boolean>(M2_TUTORIAL_KEY, false) === true)
 const tutorialIndex = ref(0)
 const tutorialRect = ref<{ x: number; y: number; w: number; h: number } | null>(null)
@@ -885,6 +907,9 @@ const tutorialDropColumn = (): number => {
 const measureTutorialTarget = (): void => {
   const step = tutorialStep.value
   if (!step) { tutorialRect.value = null; return }
+  // The pictogram beat owns the whole screen through `MergeGuide`; a hole cut
+  // in a card with nothing reachable behind it is a dim layer over a dim layer.
+  if (step === 'mergeGuide') { tutorialRect.value = null; return }
   const cell = getZoom()
   if (step === 'call') {
     const el = document.querySelector('.call-wave__btn')
@@ -942,6 +967,33 @@ watch(tutorialStep, (step) => {
   selectedSlot.value = offers.value.indexOf('b_cannon')
 }, { immediate: true })
 watch(merged, (m) => { if (m) completeTutorialStep('merge') })
+
+// ─── The merge pictogram ────────────────────────────────────────────────────
+
+/** Open exactly while its beat is live. `forcedMerge` is the replay hatch,
+ *  kept as a separate OR so a replay cannot resurrect the coach marks. */
+const forcedMerge = ref(false)
+const showMergeGuide = computed(() => forcedMerge.value || tutorialStep.value === 'mergeGuide')
+
+const onMergeGuideContinue = (): void => {
+  if (forcedMerge.value) { forcedMerge.value = false; return }
+  completeTutorialStep('mergeGuide')
+}
+
+// ─── Tutorial replay ────────────────────────────────────────────────────────
+//
+// `?tut=merge` shows the ladder now, `?tut=reset` forgets the tutorial so the
+// next run teaches it again. `trap` belongs to the desktop board — the collapse
+// trick is a thing you do to a cantilevered tower, and this board has columns —
+// so it is accepted and ignored rather than special-cased at the parser.
+
+const replayTutorial = (what: TutorialCheat): void => {
+  if (what === 'merge') { forcedMerge.value = true; return }
+  if (what !== 'reset') return
+  setState(M2_TUTORIAL_KEY, false)
+  tutorialDone.value = false
+  tutorialIndex.value = 0
+}
 
 // ─── Result flow ────────────────────────────────────────────────────────────
 //
@@ -1199,12 +1251,21 @@ const onKey = (e: KeyboardEvent): void => {
 
 // ─── Gameplay lifecycle ─────────────────────────────────────────────────────
 
+// The card HOLDS THE CLOCK here, unlike on the desktop board.
+//
+// This board opens its wave the instant the game loads (`firstBuildMs: 0`), so
+// unlike the tower game there is no build phase for a full-screen card to sit
+// inside — without the hold the player reads a pictogram while a grunt eats
+// their gate, and the beat that was supposed to sell them the mechanic is the
+// one they remember losing to. A held clock is also a gameplay STOP as far as
+// the portal is concerned, which is what the line below is for.
 const isLiveGameplay = computed(
   () => phase.value !== 'defeat'
     && !showResult.value
     && !isAnyModalOpen.value
     && !isAdShowing.value
     && !rotateBlocked.value
+    && !showMergeGuide.value
 )
 watch(isLiveGameplay, syncGameplayLifecycle, { immediate: true })
 
@@ -1226,6 +1287,12 @@ const boot = async (): Promise<void> => {
     resize()
     startBattleMusic()
     signalGameplayLoaded()
+
+    // Applied AFTER the run exists: `reset` re-arms a tutorial whose first beat
+    // arms a piece, and a card opened over an empty board has nothing to return
+    // the player to.
+    const cheat = readTutorialCheat()
+    if (cheat) replayTutorial(cheat)
   } finally {
     booting = false
   }
@@ -1522,6 +1589,14 @@ onUnmounted(() => {
     TutorialOverlay(
       :step="tutorialStep"
       :target="tutorialRect"
+    )
+
+    //- The merge ladder, in its one-cell form. Holds the wave clock while it is
+    //- up — see `isLiveGameplay`.
+    MergeGuide(
+      variant="cell"
+      :model-value="showMergeGuide"
+      @continue="onMergeGuideContinue"
     )
 
     OptionsModal(:is-open="showOptions" @close="showOptions = false")

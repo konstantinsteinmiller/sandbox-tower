@@ -19,7 +19,8 @@ import useTowerGame, {
   bestWeaponReach, unreachableSiege, isCavalryFree, isRangeBuffed, grantRangeBuff,
   RANGE_BUFF_MUL, effectiveRangeMul,
   halfWidthAt, UPPER_HALF_WIDTH, WATER_ROW, speedBuffLeft, grantSpeedBuff, graceAvailable,
-  continueRun, isFirstSession, seedScriptedOpening, buildClockHeld
+  continueRun, isFirstSession, seedScriptedOpening, buildClockHeld,
+  repairAll, repairAllPlan, canRepairAll, seedTutorialRankGold
 } from '@/use/useTowerGame'
 import {
   setViewport, snapToFit, screenToCell, panBy, zoomAt,
@@ -48,8 +49,10 @@ import { SEA_LEVEL } from '@/game/world'
 import type { Block } from '@/game/types'
 
 import { getState, setState } from '@/use/useTowerState'
+import { readTutorialCheat, type TutorialCheat } from '@/use/useTutorialCheat'
 import {
-  ONBOARDED_KEY, TECH_SPOTLIGHT_KEY, TIP_CURSOR_KEY, TUTORIAL_KEY
+  ONBOARDED_KEY, TECH_SPOTLIGHT_KEY, TIP_CURSOR_KEY, TUTORIAL_KEY,
+  MERGE_GUIDE_KEY, TRAP_TUTORIAL_KEY
 } from '@/keys'
 import useSounds, { useMusic } from '@/use/useSound'
 import { useScreenshake } from '@/use/useScreenshake'
@@ -77,6 +80,9 @@ import CallWaveButton from '@/components/game/CallWaveButton.vue'
 import ControlHint, { type HintId } from '@/components/game/ControlHint.vue'
 import WaveClearToast from '@/components/game/WaveClearToast.vue'
 import TutorialOverlay, { type TutorialStep } from '@/components/game/TutorialOverlay.vue'
+import MergeGuide from '@/components/game/MergeGuide.vue'
+import TrapTutorial from '@/components/game/TrapTutorial.vue'
+import RepairAllButton from '@/components/game/RepairAllButton.vue'
 import FHudButton from '@/components/atoms/FHudButton.vue'
 import FHudBadge from '@/components/atoms/FHudBadge.vue'
 import FMuteButton from '@/components/atoms/FMuteButton.vue'
@@ -94,6 +100,7 @@ import OptionsModal from '@/components/organisms/OptionsModal.vue'
 import TechTreeModal from '@/components/organisms/TechTreeModal.vue'
 import { markTechFound, refreshTechFound, techNudge } from '@/use/useTechDiscovery'
 import IconCoin from '@/components/icons/IconCoin.vue'
+import TechTreeGlyph from '@/components/icons/TechTreeGlyph.vue'
 import GameIcon from '@/components/icons/GameIcon.vue'
 import IncomingBanner from '@/components/game/IncomingBanner.vue'
 import IconStone from '@/components/icons/IconStone.vue'
@@ -500,6 +507,19 @@ const onPointerUp = (e: PointerEvent): void => {
 
   // Nothing armed: tap a block to inspect it, tap empty space to dismiss.
   inspected.value = getBlocks().get(`${cell.c},${cell.r}`) ?? null
+  // The beat's contract is "you opened THIS block", not "you opened something":
+  // the panel it hands off to is about the weld, and the rank beat that follows
+  // measures the button inside it.
+  //
+  // Compared by UID, never by identity. `inspected` is a deep `ref`, so reading
+  // it back hands out a reactive PROXY of the block while `mergedBlock` returns
+  // the raw object out of the simulation's own map — `===` between the two is
+  // false for the very block the player just tapped, and the beat could never
+  // be completed.
+  if (tutorialStep.value === 'inspectMerged') {
+    const weld = mergedBlock()
+    if (weld && inspected.value?.uid === weld.uid) completeTutorialStep('inspectMerged')
+  }
 }
 
 const onWheel = (e: WheelEvent): void => {
@@ -520,13 +540,32 @@ const tryPlace = (c: number, r: number): void => {
   }
   if (!placeShape(slot, c, r, selectedRot.value)) return
 
+  // Captured BEFORE the beat is completed — completing it moves the index, so
+  // afterwards there is no way to tell that this placement was the taught one.
+  const taughtPlacement = tutorialStep.value === 'place'
+
   markHintDone('placeBlock')
   completeTutorialStep('place')
-  // The slot has already rerolled to a new piece. Keep it armed only if the
-  // replacement is affordable — otherwise the player would be left holding a
-  // shape they cannot place, with the ghost stuck red under their finger.
-  const next = offers.value[slot]
-  if (!next || !canAffordShape(next)) selectedSlot.value = null
+
+  if (taughtPlacement) {
+    // The tutorial's placement ALWAYS disarms the hand, whatever the reroll
+    // dealt into the slot.
+    //
+    // The pointer has not moved, so the hover cell is still the cell the piece
+    // just went into — and the slot rerolls on placement. Left armed, the
+    // renderer draws the NEW shape's ghost (an archer, say) directly on top of
+    // the block the player just placed, and the tutorial's next beat is spent
+    // looking at two blocks in one cell. The player is not being asked to build
+    // again here: what follows is a pictogram, then a block to tap, and both
+    // are worse with a piece stuck under the cursor.
+    selectedSlot.value = null
+  } else {
+    // The slot has already rerolled to a new piece. Keep it armed only if the
+    // replacement is affordable — otherwise the player would be left holding a
+    // shape they cannot place, with the ghost stuck red under their finger.
+    const next = offers.value[slot]
+    if (!next || !canAffordShape(next)) selectedSlot.value = null
+  }
   if (phase.value === 'build') saveRunSnapshot()
 }
 
@@ -845,6 +884,14 @@ const presentDefeat = async (): Promise<void> => {
   // so this catches one that was already in flight.
   await waitForAdGateClear()
 
+  // The trick demo goes in the gap the break just left, BEFORE the result
+  // screen — never over the top of it. Two reasons it belongs here rather than
+  // after: the ordering QA grades is break → screen, and a full-screen
+  // animation covering a screen that has a rewarded offer on it is the exact
+  // shape a portal reviewer rejects. It resolves immediately for everyone who
+  // has already seen it, which is every player after their first death.
+  await runTrapTutorial()
+
   showResult.value = true
   void grantRunCoins()
 }
@@ -1036,7 +1083,35 @@ watch(lastWaveReward, async (r) => {
 //   * Every line of copy. This ships to children on portals, and reading is
 //     where they leave. A spotlight and an arrow need no locale.
 
-const TUTORIAL_STEPS: TutorialStep[] = ['pick', 'place', 'call']
+/**
+ * `mergeGuide` sits between the placement and the wave because that is where
+ * the "Aha!" happens, not where it would be convenient to explain it.
+ *
+ * The `place` beat is aimed at a cell where the dealt cannon FUSES with the
+ * starter fort's cannon (see `tutorialCell`), so the player's first placement
+ * is also their first merge — and merging is the single mechanic that moved
+ * average playtime most. What they do not learn from one accidental fusion is
+ * that the ladder continues: 2×1, then 2×2, then 4×2, then on. One pictogram,
+ * on the frame they just felt it work, is where that lands.
+ *
+ * It is CONDITIONAL. A board that offered no fusing neighbour never produced
+ * the moment, and explaining a payoff to somebody who has not had it is the
+ * kind of tutorial beat players skip past and resent — `advanceTutorial` steps
+ * over it in that case.
+ */
+const TUTORIAL_STEPS: TutorialStep[] = [
+  'pick', 'place', 'mergeGuide', 'inspectMerged', 'rankUp', 'call'
+]
+
+/**
+ * The three beats that only exist for a player who has just fused something.
+ *
+ * They are skipped together, never individually: a board that offered the
+ * dealt cannon no partner produced no weld, so there is no ladder to explain,
+ * nothing worth inspecting and nothing to rank. Showing any one of them to that
+ * player is a beat about a thing that did not happen.
+ */
+const MERGE_BEATS = new Set<TutorialStep>(['mergeGuide', 'inspectMerged', 'rankUp'])
 
 /**
  * The piece the tutorial teaches with, dealt into the weapon slot.
@@ -1196,8 +1271,38 @@ const finishTutorial = (): void => {
   setState(TUTORIAL_KEY, true)
 }
 
+/**
+ * The weld the player just made, or null if they made none.
+ *
+ * Read live off the tower rather than remembered from the placement, and by
+ * UID rather than by cell, so a two-cell block is one answer instead of two.
+ * The deepest weld wins, which on this beat is the only one there is — but it
+ * keeps the coach mark pointing at the biggest thing on the board if a resumed
+ * run ever reaches here with more.
+ */
+const mergedBlock = (): Block | null => {
+  let best: Block | null = null
+  for (const b of getTowerBlocks().values()) {
+    if (tierOf(b.tier) <= 1) continue
+    if (!best || tierOf(b.tier) > tierOf(best.tier)) best = b
+  }
+  return best
+}
+
 const advanceTutorial = (): void => {
   tutorialIndex.value++
+  // Step over the whole merge arc when there is no weld to talk about — that
+  // player is taught less, not stranded, which is the same rule `tutorialCell`
+  // follows when no fusing cell is legal. A loop rather than one `if` because
+  // the three beats are consecutive and skipping only the first would land the
+  // player on a coach mark pointing at a block that does not exist.
+  while (
+    tutorialIndex.value < TUTORIAL_STEPS.length
+    && MERGE_BEATS.has(TUTORIAL_STEPS[tutorialIndex.value]!)
+    && !mergedBlock()
+  ) {
+    tutorialIndex.value++
+  }
   if (tutorialIndex.value >= TUTORIAL_STEPS.length) finishTutorial()
 }
 
@@ -1241,6 +1346,35 @@ const measureTutorialTarget = (): void => {
   }
   if (step === 'call') { tutorialRect.value = fromEl('.call-wave__btn'); return }
 
+  // The pictogram beat owns the whole screen through `MergeGuide`. A coach mark
+  // underneath it would cut a hole in a card that has nothing behind it worth
+  // reaching, so this step deliberately measures nothing and the overlay's
+  // no-hole rule renders it away.
+  if (step === 'mergeGuide') { tutorialRect.value = null; return }
+
+  // The weld itself, projected from world space — the hole has to cover BOTH
+  // its cells or the arrow points at a block whose left half is the only live
+  // pixel on the screen, and a player who taps the other half is tapping a dim
+  // layer that does nothing.
+  if (step === 'inspectMerged') {
+    const b = mergedBlock()
+    if (!b) { tutorialRect.value = null; return }
+    const x = worldToScreenX(b.c - 0.5)
+    const y = worldToScreenY(b.r + spanH(b))
+    tutorialRect.value = {
+      x,
+      y,
+      w: worldToScreenX(b.c + spanW(b) - 0.5) - x,
+      h: worldToScreenY(b.r) - y
+    }
+    return
+  }
+
+  // The rank button inside the inspector the previous beat just opened. A null
+  // here — the panel not laid out yet on the frame the beat flips — leaves the
+  // player in a normal game for a frame rather than under a holeless dim.
+  if (step === 'rankUp') { tutorialRect.value = fromEl('.inspector__upgrade'); return }
+
   // A beat that cannot be performed must not be forced. The cannon is 25 wood
   // and 10 stone against a 120/40 opening purse, so this is only reachable by a
   // resumed run that spent itself down while the overlay had nothing to point
@@ -1276,6 +1410,31 @@ watch(tutorialStep, (step) => {
   // slots mid-run, and the hand has to still hold the piece the arrow is
   // pointing at.
   if (step === 'pick') armTutorialHand()
+
+  // Keep the hand empty for the whole merge arc.
+  //
+  // `tryPlace` already disarms on the taught placement, which is what stops the
+  // rerolled ghost landing on top of the block that was just placed. This is
+  // the backstop for every other way a slot can end up armed while these beats
+  // are live — a tech unlock rerolling the hand, a resumed run, a stray tap
+  // before the dim layer went up. It matters most on `inspectMerged`: with a
+  // piece in hand a tap on the battlefield BUILDS, so the player told to tap
+  // their new weld would drop a crate on it instead and the beat could never be
+  // completed.
+  if (step === 'mergeGuide' || step === 'inspectMerged') selectedSlot.value = null
+
+  // The tutorial buys the rank it is about to teach — see `seedTutorialRankGold`
+  // for why the first run cannot afford its own lesson. A zero back means there
+  // is nothing to rank after all (no weld, or somehow already maxed), and the
+  // beat retires rather than pointing at a button that can never light up.
+  if (step === 'rankUp') {
+    const b = mergedBlock()
+    if (!b || seedTutorialRankGold(b.c, b.r) <= 0) {
+      completeTutorialStep('rankUp')
+      return
+    }
+  }
+
   measureTutorialTarget()
 })
 
@@ -1284,6 +1443,137 @@ watch(tutorialStep, (step) => {
 // switch can never be completed, and an unfinished tutorial is never recorded
 // as done — so the player would meet it again next session.
 watch(phase, (p) => { if (p !== 'build') completeTutorialStep('call') })
+
+// ─── The merge pictogram ────────────────────────────────────────────────────
+
+/** Open exactly while its beat is live — the tutorial index IS the state, so
+ *  the card cannot get out of step with the sequence around it. `forcedMerge`
+ *  is the replay hatch (see `Tutorial replay`), kept as a separate OR rather
+ *  than by rewinding the index, so a replay on wave 9 cannot resurrect the
+ *  coach marks around it. */
+const forcedMerge = ref(false)
+const showMergeGuide = computed(() => forcedMerge.value || tutorialStep.value === 'mergeGuide')
+
+/**
+ * Remembered separately from `TUTORIAL_KEY`.
+ *
+ * The beat is conditional, so "finished the tutorial" and "was shown the merge
+ * ladder" are different facts about a save, and a player who was stepped over
+ * because their first cannon found no partner should still meet the card the
+ * first time something on their board actually fuses. Folding it into the
+ * tutorial flag loses that player the explanation permanently.
+ */
+const onMergeGuideContinue = (): void => {
+  if (forcedMerge.value) { forcedMerge.value = false; return }
+  setState(MERGE_GUIDE_KEY, true)
+  completeTutorialStep('mergeGuide')
+}
+
+// ─── The collapse-trap demonstration ────────────────────────────────────────
+//
+// Shown once, after the player's FIRST death, in the gap the defeat screen was
+// about to fill.
+//
+// Dropping a wall on a monster is the best thing in this game and almost nobody
+// finds it: the support rule is invisible until you break it on purpose, and
+// nothing in the build loop suggests selling a block you just paid for. So it
+// is demonstrated rather than hinted — a canned animation of a cursor selling
+// the one pillar under a long arm, and the arm burying what was standing under
+// it.
+//
+// The moment is chosen, not convenient. A player who has just lost is asking
+// "what could I have done differently", which is the one second in a session
+// where a trick is welcome rather than an interruption.
+
+const trapSeen = ref(getState<boolean>(TRAP_TUTORIAL_KEY, false) === true)
+const showTrap = ref(false)
+/** Resolves `presentDefeat`'s await. Held so the result screen cannot appear
+ *  underneath the demo, and so an unmount can never strand the promise. */
+let trapResolve: (() => void) | null = null
+
+const runTrapTutorial = (): Promise<void> => {
+  if (trapSeen.value) return Promise.resolve()
+  showTrap.value = true
+  return new Promise<void>((resolve) => { trapResolve = resolve })
+}
+
+const onTrapContinue = (): void => {
+  showTrap.value = false
+  trapSeen.value = true
+  setState(TRAP_TUTORIAL_KEY, true)
+  trapResolve?.()
+  trapResolve = null
+}
+
+// ─── Repair all ─────────────────────────────────────────────────────────────
+//
+// The per-block patch lives in the inspector, which means repairing a battered
+// tower is one selection and one press PER BLOCK — a dozen interactions in the
+// fifteen seconds before the next wave, on the exact turn the player is also
+// trying to decide what to build. This is the same spend as one button.
+//
+// It appears only with TWO or more wounds on the board, because with one the
+// inspector already answers it and a second control saying the same thing is
+// noise.
+
+const repairPlan = computed(() => {
+  void towerVersion.value
+  void waveVersion.value
+  void phase.value
+  void runCoins.value
+  return repairAllPlan()
+})
+
+const showRepairAll = computed(() =>
+  phase.value === 'build' && !showResult.value && repairPlan.value.damaged >= 2
+)
+
+const repairAllReady = computed(() => {
+  void towerVersion.value
+  void runCoins.value
+  void phase.value
+  return canRepairAll()
+})
+
+const onRepairAll = (): void => {
+  if (!repairAll()) {
+    playSound('obstacle-hit', 0.03)
+    return
+  }
+  playSound('level-up', 0.05)
+}
+
+// ─── Tutorial replay ────────────────────────────────────────────────────────
+//
+// Both new beats fire ONCE per save, on moments that cannot be re-entered: the
+// pictogram on the first fusion of a first run, the trap demo on the first
+// death ever. Testing either meant wiping the save and replaying the opening,
+// which is how a teaching screen ships with its layout broken on a phone —
+// nobody looks at it twice.
+//
+// So there is one hatch, and it only ever replays teaching UI: no resources, no
+// wave jumps, nothing that changes a run. It is reachable from a URL in EVERY
+// build on purpose — these screens break on the real device and the real
+// portal shell, which is exactly where a dev-only switch cannot reach.
+//
+//   ?tut=merge   the merge ladder, now
+//   ?tut=trap    the collapse demo, now
+//   ?tut=reset   forget both, so the next run teaches them again
+//
+// The keyboard shortcuts (Shift+M / Shift+T / Shift+N) are DEV only — a stray
+// modifier chord in a shipped build is a bug report nobody can reproduce.
+
+const replayTutorial = (what: TutorialCheat): void => {
+  if (what === 'merge') { forcedMerge.value = true; return }
+  if (what === 'trap') { showTrap.value = true; return }
+  setState(MERGE_GUIDE_KEY, false)
+  setState(TRAP_TUTORIAL_KEY, false)
+  setState(TUTORIAL_KEY, false)
+  trapSeen.value = false
+  tutorialDone.value = false
+  tutorialIndex.value = 0
+  armTutorialHand()
+}
 
 // ─── Early-call bonus preview ───────────────────────────────────────────────
 
@@ -1349,6 +1639,7 @@ const onUpgradeInspected = (): void => {
     playSound('obstacle-hit', 0.03)
     return
   }
+  completeTutorialStep('rankUp')
   playSound('level-up', 0.05)
 }
 
@@ -1706,6 +1997,14 @@ const onKey = (e: KeyboardEvent): void => {
   }
   if (e.repeat) return
 
+  // Tutorial replay chords. DEV only — folded out of every shipped bundle by
+  // the `import.meta.env.DEV` literal, so a portal build has no chord at all.
+  if (import.meta.env.DEV && e.shiftKey) {
+    if (e.code === 'KeyM') { e.preventDefault(); replayTutorial('merge'); return }
+    if (e.code === 'KeyT') { e.preventDefault(); replayTutorial('trap'); return }
+    if (e.code === 'KeyN') { e.preventDefault(); replayTutorial('reset'); return }
+  }
+
   if ((e.code === 'Space' || e.code === 'Enter') && phase.value === 'build' && !showResult.value) {
     e.preventDefault()
     onCallWave()
@@ -1784,6 +2083,12 @@ const boot = async (): Promise<void> => {
     // Loading is genuinely finished here: the run is resumed or started, the
     // canvas is sized, and the first frame is about to draw.
     signalGameplayLoaded()
+
+    // `?tut=` is applied AFTER the run exists: `reset` re-arms the tutorial
+    // hand, and a card opened before there is a board behind it has nothing to
+    // return the player to.
+    const cheat = readTutorialCheat()
+    if (cheat) replayTutorial(cheat)
   } finally {
     booting = false
   }
@@ -1855,6 +2160,11 @@ onMounted(() => {
 
 onUnmounted(() => {
   cancelAnimationFrame(rafId)
+  // The defeat flow is parked on this promise. Leaving it unresolved keeps
+  // `presentDefeat` alive on a scene that no longer exists, and the result
+  // screen it was about to show never gets its turn.
+  trapResolve?.()
+  trapResolve = null
   window.removeEventListener('resize', resize)
   window.removeEventListener('orientationchange', onOrientationChange)
   window.removeEventListener('keydown', onKey)
@@ -1946,25 +2256,43 @@ onUnmounted(() => {
 
       //- ── Bottom bar ────────────────────────────────────────────────────
       div.scene__bottom(ref="bottomBarRef")
-        //- Meta buttons.
-        div.scene__meta
-          //- On CrazyGames the platform toolbar owns the mute control and QA
-          //- rejects a second one competing with it — except in fullscreen,
-          //- where that toolbar is gone and this is the only way to shut the
-          //- game up.
-          FMuteButton(v-if="showMuteButton")
-          FHudButton(
-            tone="slate"
-            :aria-label="t('options.title')"
-            @click="showOptions = true"
-          )
-            svg(viewBox="0 0 24 24" fill="currentColor")
-              path(d="M12 4 a1 1 0 0 1 1 1 v1.6 a6 6 0 0 1 1.8 0.7 l1.1 -1.1 a1 1 0 0 1 1.4 1.4 l -1.1 1.1 a6 6 0 0 1 0.7 1.8 H18 a1 1 0 1 1 0 2 h-1.6 a6 6 0 0 1 -0.7 1.8 l1.1 1.1 a1 1 0 0 1 -1.4 1.4 l-1.1 -1.1 a6 6 0 0 1 -1.8 0.7 V18 a1 1 0 1 1 -2 0 v -1.6 a6 6 0 0 1 -1.8 -0.7 l-1.1 1.1 a1 1 0 0 1 -1.4 -1.4 l1.1 -1.1 a6 6 0 0 1 -0.7 -1.8 H6 a1 1 0 1 1 0 -2 h1.6 a6 6 0 0 1 0.7 -1.8 L7.2 7.6 a1 1 0 0 1 1.4 -1.4 l1.1 1.1 a6 6 0 0 1 1.8 -0.7 V5 a1 1 0 0 1 1 -1 Z M12 9 a3 3 0 1 0 0 6 a3 3 0 0 0 0 -6 Z")
-          //DailyRewards(@coins-awarded="fireCoinExplosion")
-          MissionsModal(@opened="feedMissions" @coins-awarded="fireCoinExplosion")
-          //AchievementsButton(@coins-awarded="fireCoinExplosion")
-          //AdRewardButton(@coins-awarded="fireCoinExplosion")
-          //BattlePass(@coins-awarded="fireCoinExplosion")
+        //- Meta buttons, with Repair-All on its own row directly above them.
+        //-
+        //- The repair pill is NOT in the settings row. That row's grid track is
+        //- width-tuned to the pixel (see `.scene__bottom`), and a control that
+        //- comes and goes with the tower's damage would make the hand beside it
+        //- resize every wave. A row of its own, right-aligned to the cluster it
+        //- belongs to, costs the tray nothing.
+        div.scene__meta-col
+          Transition(name="fade")
+            RepairAllButton(
+              v-if="showRepairAll"
+              compact
+              :damaged="repairPlan.damaged"
+              :total-cost="repairPlan.totalCost"
+              :spend="repairPlan.spend"
+              :repairs="repairPlan.repairs"
+              :can-repair="repairAllReady"
+              @repair="onRepairAll"
+            )
+          div.scene__meta
+            //- On CrazyGames the platform toolbar owns the mute control and QA
+            //- rejects a second one competing with it — except in fullscreen,
+            //- where that toolbar is gone and this is the only way to shut the
+            //- game up.
+            FMuteButton(v-if="showMuteButton")
+            FHudButton(
+              tone="slate"
+              :aria-label="t('options.title')"
+              @click="showOptions = true"
+            )
+              svg(viewBox="0 0 24 24" fill="currentColor")
+                path(d="M12 4 a1 1 0 0 1 1 1 v1.6 a6 6 0 0 1 1.8 0.7 l1.1 -1.1 a1 1 0 0 1 1.4 1.4 l -1.1 1.1 a6 6 0 0 1 0.7 1.8 H18 a1 1 0 1 1 0 2 h-1.6 a6 6 0 0 1 -0.7 1.8 l1.1 1.1 a1 1 0 0 1 -1.4 1.4 l-1.1 -1.1 a6 6 0 0 1 -1.8 0.7 V18 a1 1 0 1 1 -2 0 v -1.6 a6 6 0 0 1 -1.8 -0.7 l-1.1 1.1 a1 1 0 0 1 -1.4 -1.4 l1.1 -1.1 a6 6 0 0 1 -0.7 -1.8 H6 a1 1 0 1 1 0 -2 h1.6 a6 6 0 0 1 0.7 -1.8 L7.2 7.6 a1 1 0 0 1 1.4 -1.4 l1.1 1.1 a6 6 0 0 1 1.8 -0.7 V5 a1 1 0 0 1 1 -1 Z M12 9 a3 3 0 1 0 0 6 a3 3 0 0 0 0 -6 Z")
+            //DailyRewards(@coins-awarded="fireCoinExplosion")
+            MissionsModal(@opened="feedMissions" @coins-awarded="fireCoinExplosion")
+            //AchievementsButton(@coins-awarded="fireCoinExplosion")
+            //AdRewardButton(@coins-awarded="fireCoinExplosion")
+            //BattlePass(@coins-awarded="fireCoinExplosion")
 
         //- Build tray.
         div.scene__tray
@@ -2096,12 +2424,12 @@ onUnmounted(() => {
                 :aria-label="t('tech.title')"
                 @click="openTech"
               )
-                svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
-                  circle(cx="12" cy="4" r="2")
-                  circle(cx="5" cy="13" r="2")
-                  circle(cx="19" cy="13" r="2")
-                  circle(cx="12" cy="20" r="2")
-                  path(d="M12 6 L5 11 M12 6 L19 11 M5 15 L12 18 M19 15 L12 18")
+                //- Its own palette, not `currentColor`. The flat line-art node
+                //- graph that used to live here was the same colour as the chip
+                //- behind it and the same weight as the cog beside it, and the
+                //- tree went unopened — which on a run-based game means the meta
+                //- currency is never spent and the player never gets stronger.
+                TechTreeGlyph(:active="showTechSpotlight || techNudge || progress.affordableCount.value > 0")
                 template(#badge)
                   FHudBadge(v-if="progress.affordableCount.value > 0" tone="red") {{ progress.affordableCount.value }}
 
@@ -2267,6 +2595,21 @@ onUnmounted(() => {
       :target="tutorialRect"
     )
 
+    //- The merge ladder, on the frame the player's first fusion landed. Its own
+    //- beat of the tutorial sequence, so the build countdown stays held while it
+    //- is up (see `buildClockHeld`) and the wave cannot fire out from under it.
+    MergeGuide(
+      :model-value="showMergeGuide"
+      @continue="onMergeGuideContinue"
+    )
+
+    //- The collapse trap, once, in the beat between the first death's ad break
+    //- and the defeat screen. `presentDefeat` awaits it.
+    TrapTutorial(
+      v-model="showTrap"
+      @continue="onTrapContinue"
+    )
+
     OptionsModal(:is-open="showOptions" @close="showOptions = false")
     TechTreeModal(v-model="showTech" :intro="techIntro")
 </template>
@@ -2420,9 +2763,26 @@ onUnmounted(() => {
   gap: clamp(0.25rem, 1.6vw, 0.7rem)
   padding: 0 calc(clamp(0.35rem, 2vw, 0.7rem) + env(safe-area-inset-right, 0px)) calc(clamp(0.35rem, 2vw, 0.7rem) + env(safe-area-inset-bottom, 0px)) calc(clamp(0.35rem, 2vw, 0.7rem) + env(safe-area-inset-left, 0px))
 
-.scene__meta
+// The `meta` grid cell holds TWO rows: the repair pill and the settings cluster.
+//
+// The wrapper — not `.scene__meta` — owns the grid area, and it shrink-wraps
+// (`justify-self: start`), so its width is whatever its widest row needs. That
+// keeps the track's min-content the width of the settings row, which is the
+// figure `.scene__bottom`'s column comment is measured against; a repair pill
+// that widened the track would take it straight out of the hand beside it.
+// `align-items: flex-end` is what right-aligns the pill to the cluster below.
+.scene__meta-col
   grid-area: meta
   justify-self: start
+  display: flex
+  flex-direction: column
+  align-items: flex-end
+  gap: clamp(0.15rem, 1vw, 0.35rem)
+  min-width: 0
+  max-width: 40vw
+  pointer-events: auto
+
+.scene__meta
   display: flex
   // `nowrap` is load-bearing for the BAR, not just for this cluster.
   //
@@ -2436,7 +2796,6 @@ onUnmounted(() => {
   flex-wrap: nowrap
   align-items: flex-end
   gap: clamp(0.15rem, 1vw, 0.35rem)
-  max-width: 40vw
   pointer-events: auto
 
 .scene__tray
@@ -2894,10 +3253,9 @@ onUnmounted(() => {
   .scene__tray
     grid-area: tray
 
-  .scene__meta
+  .scene__meta-col
     grid-area: meta
     max-width: none
-    flex: 1
 
   .scene__right
     grid-area: right

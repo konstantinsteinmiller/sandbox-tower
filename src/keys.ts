@@ -131,6 +131,26 @@ export const TIP_CURSOR_KEY = 'ts_tip_cursor'
 export const TECH_INTRO_KEY = 'ts_tech_intro'
 /** Which control hints the player has already followed (bitmask-ish string[]). */
 export const HINTS_SEEN_KEY = 'ts_hints_seen'
+/**
+ * The collapse-trap demonstration has been shown.
+ *
+ * Separate from `TUTORIAL_KEY` because it is taught at a different MOMENT and
+ * for a different reason: the coach marks run before the first wave and teach
+ * the controls, this one runs after the first DEATH and teaches the trick that
+ * makes the physics worth exploiting. Folding them into one flag meant a player
+ * who finished the coach marks was counted as having been shown the trap, and
+ * the best thing in the game stayed undiscovered for hours of play.
+ */
+export const TRAP_TUTORIAL_KEY = 'ts_trap_tutorial'
+/**
+ * The merge-ladder pictogram has been shown.
+ *
+ * Its own flag rather than a tutorial index, because the beat is CONDITIONAL —
+ * a board that offered the first cannon no fusing neighbour never reaches it —
+ * and a player who was skipped past it on their first run should still meet it
+ * the first time they actually fuse something.
+ */
+export const MERGE_GUIDE_KEY = 'ts_merge_guide'
 
 // ─── User settings ──────────────────────────────────────────────────────────
 

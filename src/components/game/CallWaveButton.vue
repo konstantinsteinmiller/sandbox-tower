@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { GAME_SPEEDS } from '@/use/useTowerGame'
+import { GAME_SPEEDS, needsSpeedBuff } from '@/use/useTowerGame'
 import { useI18n } from 'vue-i18n'
 import { prependBaseUrl } from '@/utils/function'
 import {
@@ -70,7 +70,7 @@ const urgent = computed(() => props.phase === 'build' && props.timeLeft <= 10_00
 
 // ─── Fast-forward switch ────────────────────────────────────────────────────
 //
-// A segmented 1× / 2× / 3× switch, not a button that changes meaning.
+// A segmented 1× / 1.5× / 3× switch, not a button that changes meaning.
 //
 // The old control was two different buttons wearing the same slot: an OFFER
 // while unpaid, and a 1×/2× toggle once paid. That made the corner unreadable
@@ -79,14 +79,18 @@ const urgent = computed(() => props.phase === 'build' && props.timeLeft <= 10_00
 // exists for. A tower that died at wave 20 has to replay twenty solved waves.
 //
 // A switch fixes both. Every rung is visible and labelled at all times, so the
-// player can see where they are AND where they could be, and the third rung
-// costs nothing extra: one purchase unlocks fast-forward, and how fast is then
-// a preference rather than a second transaction.
+// player can see where they are AND where they could be, and the paid rung
+// costs nothing extra beyond the one purchase: how fast is a preference, not a
+// second transaction.
 //
-// The video badge rides on the rungs it actually gates. It must never be an
-// invisible cost — a control that silently opens a video on tap is the single
-// most complained-about pattern in portal QA — so 2× and 3× carry the badge
-// until they are paid for, and 1× never does because 1× is never charged for.
+// The badge rides on the rungs it ACTUALLY gates, and `needsSpeedBuff` is the
+// one place that decides which those are — the test used to be `n > 1` here,
+// in the aria-label, in the lock and in the tap handler, which is four copies
+// of a rule that has since changed. It must never be an invisible cost (a
+// control that silently opens a video on tap is the single most complained-
+// about pattern in portal QA) and it must never be a visible cost that is not
+// real: 1.5× is free, so a film badge on it would be a lie that costs a tap to
+// discover.
 const movieSrc = prependBaseUrl('images/icons/movie_128x96.webp')
 
 /** True once fast-forward is paid for, whatever rung is selected. */
@@ -110,14 +114,16 @@ const offerDisabled = computed(
 
 /**
  * A rung is locked when it needs paying for and the purchase cannot be made
- * right now. 1× is never locked: the player must always be able to slow down.
+ * right now. The free rungs are never locked: the player must always be able to
+ * slow down, and must never be blocked from the nudge they are not paying for.
  */
-const isLocked = (n: number): boolean => n > 1 && !buffOwned.value && offerDisabled.value
+const isLocked = (n: number): boolean =>
+  needsSpeedBuff(n) && !buffOwned.value && offerDisabled.value
 
 const onSpeed = (n: number): void => {
   if (n === props.speed) return
   // Already paid for, or free: just move.
-  if (n === 1 || buffOwned.value) { emit('set-speed', n); return }
+  if (!needsSpeedBuff(n) || buffOwned.value) { emit('set-speed', n); return }
   if (offerDisabled.value) return
   // Unpaid: the tap is a purchase, and it carries the rung that was asked for
   // so the video lands the player where they pressed.
@@ -155,18 +161,18 @@ const onSpeed = (n: number): void => {
           type="button"
           :class="{ 'is-active': speed === n, 'is-locked': isLocked(n) }"
           :aria-pressed="speed === n"
-          :aria-label="n > 1 && !buffOwned ? t('hud.speedOffer', { n }) : t('hud.speed', { n })"
+          :aria-label="needsSpeedBuff(n) && !buffOwned ? t('hud.speedOffer', { n }) : t('hud.speed', { n })"
           @click="onSpeed(n)"
         )
           span.speed-switch__x {{ n }}×
           //- Only on the rungs it gates, and only until they are paid for.
           img.speed-switch__movie(
-            v-if="n > 1 && showMovie"
+            v-if="needsSpeedBuff(n) && showMovie"
             :src="movieSrc"
             alt=""
             draggable="false"
           )
-          IconCoin.speed-switch__coin(v-else-if="n > 1 && showPrice")
+          IconCoin.speed-switch__coin(v-else-if="needsSpeedBuff(n) && showPrice")
 
 </template>
 

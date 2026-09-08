@@ -96,7 +96,7 @@ describe('DESKTOP_RULES reproduces the pre-seam constants', () => {
     expect(d.difficulty.hoardDivisor).toBe(1)
     expect(d.economy).toEqual({ startWood: 120, startStone: 40 })
     expect(d.tech.stateKey).toBe('ts_tech')
-    expect(d.abilities).toEqual({ arrowRain: 'aim', cavalry: true, rangeBoost: true, speeds: [1, 2, 3] })
+    expect(d.abilities).toEqual({ arrowRain: 'aim', cavalry: true, rangeBoost: true, speeds: [1, 1.5, 3] })
     expect(d.save).toEqual({
       runKey: 'ts_run', bestWaveKey: 'ts_best_wave', onboardedKey: 'ts_onboarded', tutorialKey: 'ts_tutorial'
     })

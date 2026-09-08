@@ -6961,6 +6961,30 @@ export const paintWorldBlock = (
 }
 
 /**
+ * The battlefield's meadow, for a test scene.
+ *
+ * Returns FALSE when there is no painted strip — art overrides off, or the
+ * bitmap still decoding — so the caller keeps its own drawn ground rather than
+ * getting a blank band. That is the whole contract: a scene that assumed the
+ * painting was there rendered its tower standing on nothing for the first
+ * second of every load.
+ *
+ * Goes through `tileBand`, not a plain `drawImage` loop, so a bench scene gets
+ * the same mirrored repeat the battlefield does — the seam the mirroring exists
+ * to hide is exactly the kind of thing a test scene is supposed to reveal, and
+ * a private tiling would hide a different one.
+ */
+export const paintMeadowBand = (
+  ctx: CanvasRenderingContext2D,
+  x: number, y: number, w: number, h: number, offset = 0
+): boolean => {
+  const meadow = bgSprite('grass')
+  if (!meadow?.naturalWidth) return false
+  tileBand(ctx, meadow, x, y, w, h, offset)
+  return true
+}
+
+/**
  * The moving part bolted to a block — barrel, bow, coil, blade, wrench.
  *
  * `aim` and `recoil` are the two things the battlefield varies, so they are the

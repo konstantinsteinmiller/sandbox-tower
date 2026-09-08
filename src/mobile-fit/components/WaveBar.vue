@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n'
 import CallWaveButton from '@/components/game/CallWaveButton.vue'
 import IconGold from '@/components/icons/IconGold.vue'
+import GameIcon from '@/components/icons/GameIcon.vue'
 
 /**
  * The bottom bar: menu, Repair all, and the wave control.
@@ -64,8 +65,7 @@ const { t } = useI18n()
       :disabled="!canRepair"
       @click="emit('repair-all')"
     )
-      svg.bar__repair-icon(viewBox="0 0 24 24" fill="currentColor" aria-hidden="true")
-        path(d="M14.5 2a5.5 5.5 0 0 0-5 7.8L2.8 16.5a2 2 0 0 0 0 2.8l1.9 1.9a2 2 0 0 0 2.8 0l6.7-6.7A5.5 5.5 0 1 0 14.5 2z")
+      GameIcon.bar__repair-icon(name="repair")
       span.bar__repair-label {{ t('mobile.repairAll') }}
       span.bar__repair-cost
         IconGold.bar__gold
@@ -169,7 +169,15 @@ const { t } = useI18n()
     filter: grayscale(0.6) brightness(0.7)
     cursor: not-allowed
 
-.bar__repair-icon
+// Nested one level deeper than it needs to be, on purpose.
+//
+// `GameIcon`'s own scoped rule sizes `.game-icon` to fill its box, which is
+// the same specificity as a bare `.bar__repair-icon` — so which of the two
+// sizes the glyph would come down to the order Vite happened to emit the two
+// stylesheets in. A glyph that fills its flex parent instead of measuring a
+// rem is not a subtle bug, and it is not one a unit test would ever catch;
+// the extra selector makes the answer independent of build order.
+.bar__repair .bar__repair-icon
   width: 1rem
   height: 1rem
 

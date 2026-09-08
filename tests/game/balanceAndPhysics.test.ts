@@ -267,7 +267,7 @@ describe('falling blocks', () => {
   })
 })
 
-describe('the 2x speed buff', () => {
+describe('the fast-forward buff', () => {
   it('is not free — the default state is 1x with no buff', async () => {
     const g = await loadGame()
     g.startRun()
@@ -275,12 +275,12 @@ describe('the 2x speed buff', () => {
     expect(g.gameSpeed.value).toBe(1)
   })
 
-  it('grants five minutes and turns 2x on', async () => {
+  it('grants five minutes and lands on the top rung', async () => {
     const g = await loadGame()
     g.startRun()
     g.grantSpeedBuff()
     expect(g.speedBuffLeft.value).toBe(g.SPEED_BUFF_MS)
-    expect(g.gameSpeed.value).toBe(2)
+    expect(g.gameSpeed.value).toBe(g.MAX_GAME_SPEED)
   })
 
   it('extends rather than replaces, so a second video never loses time', async () => {
@@ -293,21 +293,26 @@ describe('the 2x speed buff', () => {
     expect(g.speedBuffLeft.value).toBeGreaterThan(afterOne)
   })
 
-  it('expires on real time and drops back to 1x', async () => {
+  it('expires on real time and falls back to the free rung', async () => {
+    // Not to 1x: only the difference between the free rung and the paid one was
+    // ever sold, so that is all the expiry may take away.
     const g = await loadGame()
     g.startRun()
     g.grantSpeedBuff()
     g.speedBuffLeft.value = 500
     advance(g, 1500)
     expect(g.speedBuffLeft.value).toBe(0)
-    expect(g.gameSpeed.value).toBe(1)
+    expect(g.gameSpeed.value).toBe(g.FREE_MAX_SPEED)
   })
 
-  it('cannot be toggled to 2x without owning the buff', async () => {
+  it('cannot reach a PAID rung without owning the buff', async () => {
+    // The free rungs stay reachable — the toggle used to pin at 1x, which is
+    // now a key refusing to do the one thing it costs nothing to do.
     const g = await loadGame()
     g.startRun()
     g.toggleSpeed()
-    expect(g.gameSpeed.value).toBe(1)
+    expect(g.gameSpeed.value).toBe(g.FREE_MAX_SPEED)
+    expect(g.setGameSpeed(g.MAX_GAME_SPEED)).toBe(false)
   })
 })
 

@@ -400,12 +400,18 @@ describe('repair all', () => {
 })
 
 describe('abilities', () => {
-  it('has no third speed rung and no cavalry', async () => {
+  it('has no third speed rung, no paid rung at all, and no cavalry', async () => {
+    // Two rungs, and both are free — this board gives the nudge away and never
+    // sells fast-forward. A grant asked for the tower game's 3x snaps DOWN to
+    // the fastest rung this ladder actually has rather than setting a speed no
+    // segment on the switch can select.
     const { game } = await load()
     game.grantSpeedBuff(3)
-    expect(game.gameSpeed.value).toBe(2)
+    expect(game.gameSpeed.value).toBe(1.5)
     expect(game.setGameSpeed(3)).toBe(false)
-    expect(game.setGameSpeed(2)).toBe(true)
+    expect(game.setGameSpeed(2)).toBe(false)
+    expect(game.setGameSpeed(1.5)).toBe(true)
+    expect(game.needsSpeedBuff(1.5)).toBe(false)
     game.toggleSpeed()
     expect(game.gameSpeed.value).toBe(1)
     expect(game.summonCavalry()).toBe(false)

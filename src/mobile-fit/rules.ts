@@ -113,7 +113,17 @@ export const DROPMERGE_RULES: RuleSet = {
   // Ninety materials; stone is folded, so there is no separate stone stock.
   economy: { startWood: 90, startStone: 0 },
   tech: { nodes: TECH_NODES_DROPMERGE, stateKey: M2_TECH_KEY },
-  abilities: { arrowRain: 'auto', cavalry: false, rangeBoost: false, speeds: [1, 2] },
+  // Two rungs, and the fast one is now FREE.
+  //
+  // This board has always refused the tower game's third rung — a phone bar has
+  // no room for a third segment beside the wave control, and a five-column
+  // board clears a wave far faster than a tower does, so the wave-skipping case
+  // 3x exists for barely arises here. The old pair was 1x and a video-gated 2x;
+  // that 2x becomes the free 1.5x, which leaves this board with NO paid speed
+  // rung at all. That is a rewarded placement given up on purpose: the
+  // alternative was keeping a toll on the one nudge the tower game now gives
+  // away, and having the two boards disagree about what 1.5x costs.
+  abilities: { arrowRain: 'auto', cavalry: false, rangeBoost: false, speeds: [1, 1.5] },
   save: {
     runKey: M2_RUN_KEY,
     bestWaveKey: M2_BEST_WAVE_KEY,
