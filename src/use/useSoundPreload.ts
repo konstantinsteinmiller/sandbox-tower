@@ -18,7 +18,7 @@
 
 import { prependBaseUrl } from '@/utils/function'
 import { loadAudioBuffer, resourceCache } from '@/use/useAssets'
-import { MUSIC_TRACK_FILES, type MusicTrack } from '@/use/useUser'
+import { MUSIC_TRACK_FILES, DEFAULT_MUSIC_TRACK, type MusicTrack } from '@/use/useUser'
 import { getState } from '@/use/useTowerState'
 import { MUSIC_TRACK_KEY, MUSIC_KEY } from '@/keys'
 
@@ -88,10 +88,10 @@ export const schedulePreloadOnIdle = (): void => {
 
 // ─── Background music: fetched on demand, AFTER the critical path ──────────
 //
-// The music track is the single biggest asset the game ships (~150 kB for
-// trance, ~68 kB for cozy) and it is not needed to render a frame. It must
-// therefore never be on the hot path — but it must also not be fetched
-// cold at `startBattleMusic()`, because that lands the download in the one
+// The music track is the single biggest asset the game ships (~68 kB for the
+// default cozy loop, ~150 kB for trance) and it is not needed to render a
+// frame. It must therefore never be on the hot path — but it must also not be
+// fetched cold at `startBattleMusic()`, because that lands the download in the one
 // moment the player is watching: the first wave starting. The track then
 // fades in a beat or two late, or not at all on a slow link.
 //
@@ -140,8 +140,8 @@ export const prefetchMusicTrack = (): void => {
   musicPrefetchStarted = true
   if (musicIsSilenced() || connectionIsFrugal()) return
 
-  const track = getState<MusicTrack>(MUSIC_TRACK_KEY) ?? 'trance'
-  const file = MUSIC_TRACK_FILES[track] ?? MUSIC_TRACK_FILES.trance
+  const track = getState<MusicTrack>(MUSIC_TRACK_KEY) ?? DEFAULT_MUSIC_TRACK
+  const file = MUSIC_TRACK_FILES[track] ?? MUSIC_TRACK_FILES[DEFAULT_MUSIC_TRACK]
   const src = prependBaseUrl(`audio/music/${file}`)
   if (resourceCache.audio.has(src)) return
 

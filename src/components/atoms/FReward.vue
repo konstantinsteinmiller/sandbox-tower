@@ -21,7 +21,10 @@
         v-if="$slots.ribbon"
         :class="{ 'is-compact': isCompact, 'is-desktop': !isCompact && !isMobilePortrait }"
       )
-        div.ribbon-banner
+        div.ribbon-banner(
+          :class="{ 'is-slim': slimRibbon }"
+          :style="slimRibbon ? { backgroundImage: `url('${slimRibbon}')` } : undefined"
+        )
           div.ribbon-content
             slot(name="ribbon")
               span.text-white.font-black.uppercase.italic.game-text {{ t('rewards') }}
@@ -60,9 +63,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, useSlots, watch, onUnmounted } from 'vue'
+import { computed, ref, useSlots, watch, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isMobileLandscape, isMobilePortrait, isShortViewport } from '@/use/useUser'
+import { spriteFor, onArtChanged } from '@/game/art'
 
 // "Compact" layout = the short-viewport treatment: mobile landscape OR any
 // short embed (≤500px tall, e.g. a CG iframe on a Chromebook). In both cases
@@ -94,6 +98,32 @@ const isMobile = computed(() => {
   return typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
 })
 
+/**
+ * The painted 5:1 title band, when the art layer has one.
+ *
+ * The shipped `parchment-ribbon_553x188.webp` is 2.94:1 and hides a quarter of
+ * its height under a bottom curl the label has to dodge — which is why the wrap
+ * below carries four media queries whose only job is to claw that height back.
+ * The painted banner is a flat band with its writing panel centred, so the same
+ * width costs 41% less vertical room and the content's -14% lift can go.
+ *
+ * Null until the bitmap decodes, and null forever with art overrides off — in
+ * which case every rule here falls back to the shipped ribbon and the screen
+ * looks exactly as it does today. The probe subscribes because it is async and
+ * the first paint happens before the image is in.
+ */
+const slimRibbon = ref<string | null>(null)
+const syncRibbon = (): void => { slimRibbon.value = spriteFor('bg', 'ribbon')?.src ?? null }
+let stopArt: (() => void) | null = null
+
+// Probed on MOUNT rather than on open: this component is mounted with the game
+// scene and only shown when a siege ends, so the request goes out minutes
+// before the result screen needs it and the band never pops in.
+onMounted(() => {
+  syncRibbon()
+  stopArt = onArtChanged(syncRibbon)
+})
+
 const handleOverlayClick = () => {
   if (props.showContinue) emit('continue')
 }
@@ -123,6 +153,7 @@ watch(() => props.modelValue, (open) => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onContinueKey)
+  stopArt?.()
 })
 </script>
 
@@ -194,6 +225,16 @@ onUnmounted(() => {
   align-items: center
   justify-content: center
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5))
+
+  // Painted slim banner (1280×256). A flat 5:1 band instead of 2.94:1, which
+  // is a 41% cut in height at every one of the widths below — none of them
+  // move, so nothing that portal QA tuned on the horizontal axis changes.
+  // Its writing panel is centred by contract, so the lift below goes to zero.
+  &.is-slim
+    aspect-ratio: 5 / 1
+
+    .ribbon-content
+      margin-top: 0
 
 .ribbon-content
   position: relative

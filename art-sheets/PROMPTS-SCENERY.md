@@ -642,3 +642,119 @@ One object, centred in the frame.
 
 OUTPUT: exactly 512 x 512 pixels. If your tool has an aspect-ratio
 control, set it to match. No labels, captions or watermarks.
+
+---
+
+# ribbon  (images/bg/ribbon.webp)
+
+Paint one background element for a cozy medieval-fantasy tower-defence game.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+WHAT IT IS: The result screen TITLE BANNER: one long, flat, horizontal parchment ribbon seen straight on, with a small folded tail at each end. Aged warm vellum, a soft ink border and a little foxing along the edges. SHAPE IS THE WHOLE JOB HERE — it is WIDE AND SHALLOW, a 5:1 band rather than a scroll, and it must use the entire frame: the left tail touches the left edge, the right tail touches the right edge, and the tallest part of the ribbon touches the top and the bottom edge. Leave no magenta margin on any side — a banner painted small inside the frame arrives on screen as a small banner with dead space around it, which is the exact fault this asset replaces. The middle 70% of the width is the WRITING PANEL: flat, straight, parallel top and bottom edges, at least 80% of the frame height, and VERTICALLY CENTRED — the game prints its title across it, so keep that panel an even, quiet, uncluttered surface in a mid parchment tone that white lettering with a dark outline will read on. Do not write anything on it: no words, no letters, no numerals, no monogram, no crest, no icon, no ornament in the centre. The ends carry ONE shallow fold each and nothing more — no deep curls, no rolled scroll ends, no ribbon looping behind itself, no swallowtail notch deeper than a fifth of the width. Nothing may sit above or below the band: no pole, no finial, no hanging cords, tassels, nails, rings, shadow or ground. Every pixel of height that is not ribbon is height the result screen loses.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+FILL THE FRAME — the rule this asset lives or dies on.
+The artwork must reach ALL FOUR EDGES of the image: left, right, top and
+bottom. No margin, no padding, no breathing room, not even a few pixels.
+Nothing is cropped or re-centred on the way back in, so a subject painted
+small inside its frame is shipped small with the empty border baked in,
+and it appears in the game as a shrunken version of itself surrounded by
+dead space. Let the artwork run off every edge rather than leave a border.
+
+OUTPUT: exactly 1280 x 256 pixels. If your tool has an aspect-ratio
+control, set it to match. No labels, captions or watermarks.
+
+---
+
+# icon-chest  (images/icons/chest.webp)
+
+Paint one background element for a cozy medieval-fantasy tower-defence game.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+WHAT IT IS: The daily TREASURE CHEST icon: a small, sturdy, CLOSED wooden chest seen straight on from the front — a domed lid, two dark iron bands running across the body, and a gold lock plate with a keyhole centred on the front. Warm timber browns, dark iron, one warm gold accent. It sits in the HUD at about 50 px and is the thing a player taps for their free coins, so it should look inviting and full: bold shapes, strong silhouette, no fine detail. The lid stays SHUT — the game plays the opening itself. Keep it ONE compact closed shape, with no dangling straps, no key, no spilled coins, no ground and no shadow beneath it: a cooldown shade is masked to this silhouette, so anything detached from the body becomes a floating fleck. It must not be mistakable for the gold resource icon at a glance — that one is the coins, this one is the box they came in.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+One object, centred in the frame.
+
+OUTPUT: exactly 512 x 512 pixels. If your tool has an aspect-ratio
+control, set it to match. No labels, captions or watermarks.

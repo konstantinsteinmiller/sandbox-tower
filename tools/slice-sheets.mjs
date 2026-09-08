@@ -9,6 +9,7 @@
  *   node tools/slice-sheets.mjs art-sheets/painted/sheet-blocks.png
  *   pnpm slice-sheets                      # every PNG in art-sheets/painted/
  *   pnpm slice-sheets --dry                # print the plan, write nothing
+ *   pnpm slice-sheets --only icon-chest    # write that one file, touch nothing else
  *
  * WHY IT DRIVES A BROWSER
  *
@@ -52,7 +53,11 @@ const CHROME_CANDIDATES = [
 // Options that consume the next argument. Everything else that is not a flag
 // is an input path — walked in order rather than filtered, so `--out public`
 // cannot leave "public" behind looking like a file to slice.
-const VALUED = new Set(['--sheet', '--out', '--size', '--quality', '--fit', '--frames'])
+const VALUED = new Set(['--sheet', '--out', '--size', '--quality', '--fit', '--frames', '--only'])
+// Options that may be given more than once. `--only a --only b` is two
+// selectors, not "b" — overwriting would silently drop half of what was asked
+// for, and this is the flag whose whole job is to be precise about scope.
+const MULTI = new Set(['--only'])
 const argv = process.argv.slice(2)
 const opts = {}
 const files = []
@@ -60,7 +65,8 @@ for (let i = 0; i < argv.length; i++) {
   const a = argv[i]
   if (VALUED.has(a)) {
     if (i + 1 >= argv.length) { console.error(`${a} needs a value`); process.exit(1) }
-    opts[a] = argv[++i]
+    if (MULTI.has(a)) (opts[a] ??= []).push(argv[++i])
+    else opts[a] = argv[++i]
   } else if (a.startsWith('-')) {
     opts[a] = true
   } else {
@@ -77,6 +83,50 @@ const num = (name, fallback) => {
 }
 
 const DRY = flag('--dry')
+
+/**
+ * Which cells this run is allowed to write, or an empty list for all of them.
+ *
+ * A sheet is sliced WHOLE by default, which is right the first time and wrong
+ * every time after. The bitmaps already on disk have been through an image
+ * compressor; re-slicing a sheet to pick up ONE newly painted asset replaces
+ * that entire compressed set with freshly encoded copies, and the only visible
+ * trace is the repo getting bigger. `--only` narrows the run to the asset
+ * actually being added and leaves every other file exactly as it is.
+ *
+ * Selectors are matched against the cell id, its target path, or that path's
+ * file name — see `selects`.
+ */
+const ONLY = (opts['--only'] ?? [])
+  .flatMap((v) => v.split(','))
+  .map((v) => v.trim().toLowerCase())
+  .filter(Boolean)
+
+/**
+ * Does this cell answer to one of the `--only` selectors?
+ *
+ * Matched against the names a person actually has in front of them: the id
+ * from the index (`icon-chest`, `ui/coin`, `block/gate/body`), the target path
+ * it writes (`images/icons/chest.webp`), and that path's file name with or
+ * without the extension. A walk frame carries `#3` on its id, so the frame
+ * suffix comes off first — a cycle is selected as one asset, never as a
+ * fraction of one, because a strip composed from some of its frames is worse
+ * than no strip at all.
+ *
+ * EXACT matches only. A substring rule would make `--only stone` quietly take
+ * `block/stonepit/body` as well, and overwriting a neighbour is precisely what
+ * this flag exists to prevent.
+ */
+const selects = (cell) => {
+  const target = String(cell.target ?? '').toLowerCase()
+  const base = target.slice(target.lastIndexOf('/') + 1)
+  const names = new Set([
+    String(cell.id).toLowerCase().replace(/#\d+$/, ''),
+    target, base, base.replace(/\.[a-z0-9]+$/, '')
+  ])
+  return ONLY.some((sel) => names.has(sel))
+}
+
 const OUT_ROOT = resolve(ROOT, opts['--out'] ?? 'public')
 const QUALITY = num('--quality', 0.92)
 const FORCE_SHEET = opts['--sheet'] ?? null
@@ -131,6 +181,14 @@ Slice repainted contact sheets back into drop-in bitmaps.
   --frames <n>     Accept a walk sheet that came back with n panels instead of
                    the 8 it was asked for, and play them as one cycle. Must
                    match the grid the slicer measured.
+  --only <id>      Write ONLY the named cells and leave every other file on
+                   disk untouched — the flag for adding one asset to a sheet
+                   whose other bitmaps are already compressed. Repeatable, and
+                   comma-separated lists work. A selector is a cell id
+                   (icon-chest, ui/coin, block/gate/body), a target path
+                   (images/icons/chest.webp) or its file name (chest.webp,
+                   chest); matches are exact, and a run that selects nothing
+                   fails rather than writing everything.
   --dry            Print the plan and write nothing.
 `)
   process.exit(0)
@@ -342,6 +400,9 @@ const safeTarget = (target) => {
 let written = 0
 let skipped = 0
 let failed = 0
+/** Cells `--only` actually picked up, and every id it could have picked from. */
+let selected = 0
+const offered = new Set()
 
 try {
   let page = null
@@ -653,10 +714,24 @@ try {
       }
     }
 
-    const slices = sheet.cells.filter((c) => c.target)
-    if (!slices.length) {
+    const drops = sheet.cells.filter((c) => c.target)
+    if (!drops.length) {
       console.log(`  (no cell on this ${sheet.kind} has a drop-in target — reference only)`)
       continue
+    }
+    for (const c of drops) offered.add(String(c.id).replace(/#\d+$/, ''))
+
+    const slices = ONLY.length ? drops.filter(selects) : drops
+    if (ONLY.length) {
+      selected += slices.length
+      if (!slices.length) {
+        console.log(`  (--only selects nothing here — all ${drops.length} left as they are)`)
+        continue
+      }
+      console.log(`  --only: ${slices.length} of ${drops.length} cell(s)`
+        + (drops.length > slices.length
+          ? `; the other ${drops.length - slices.length} stay on disk untouched`
+          : ''))
     }
 
     const plan = slices.map((c) => ({
@@ -1485,6 +1560,18 @@ try {
       }
       written++
     }
+  }
+
+  // A selector that matched nothing means the run did nothing, and a run that
+  // does nothing while reporting success is how a missing asset ships.
+  if (ONLY.length && !selected) {
+    console.error(`\n✗ --only ${ONLY.join(', ')} matched no cell on the sheets given.`)
+    console.error('  A selector must equal a cell id, its target path, or that file name.')
+    if (offered.size) {
+      console.error(`  Available here: ${[...offered].sort().slice(0, 40).join(', ')}`
+        + (offered.size > 40 ? `, … (${offered.size} total)` : ''))
+    }
+    failed++
   }
 
   console.log(`\n${DRY ? 'would write' : 'wrote'} ${written} file(s)`

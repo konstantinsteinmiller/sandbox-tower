@@ -21,6 +21,11 @@ interface Props {
   tone?: 'gold' | 'blue' | 'green' | 'slate'
   /** Soft glow pulse — used when the button has an unclaimed reward. */
   attention?: boolean
+  /** Hop, on top of the glow. A glow says "something changed here"; a button
+   *  that MOVES says "press me", and that is the difference between a player
+   *  noticing the tech tree and a player never opening it. Kept separate from
+   *  `attention` so the quieter signals stay quiet. */
+  bounce?: boolean
   isDisabled?: boolean
   ariaLabel?: string
 }
@@ -28,6 +33,7 @@ interface Props {
 withDefaults(defineProps<Props>(), {
   tone: 'gold',
   attention: false,
+  bounce: false,
   isDisabled: false
 })
 
@@ -37,7 +43,7 @@ defineEmits(['click'])
 <template lang="pug">
   button.f-hud-button(
     type="button"
-    :class="[`tone-${tone}`, { 'is-attention': attention, 'is-disabled': isDisabled }]"
+    :class="[`tone-${tone}`, { 'is-attention': attention, 'is-bounce': bounce, 'is-disabled': isDisabled }]"
     :aria-label="ariaLabel"
     :disabled="isDisabled"
     @click="!isDisabled && $emit('click')"
@@ -149,4 +155,36 @@ defineEmits(['click'])
     filter: drop-shadow(0 0 0 rgba(255, 200, 0, 0))
   50%
     filter: drop-shadow(0 0 8px rgba(255, 200, 0, 0.75))
+
+// A double hop, then a long pause. A continuous bounce reads as decoration and
+// the eye filters it out within seconds; a burst every couple of seconds keeps
+// catching the eye for as long as it takes, which is the whole job. `transform`
+// only, so it composites and never lays the HUD out again.
+//
+// It rides on the SAME element as the glow, so the two animations have to be
+// declared together — a second `animation` property would replace the first
+// rather than add to it, and the button would bounce without its aura.
+.is-bounce
+  animation: hud-bounce 2.4s ease-in-out infinite
+
+.is-attention.is-bounce
+  animation: hud-pulse 1.6s ease-in-out infinite, hud-bounce 2.4s ease-in-out infinite
+
+@keyframes hud-bounce
+  0%, 34%, 100%
+    transform: translateY(0)
+  8%
+    transform: translateY(-22%)
+  17%
+    transform: translateY(0)
+  25%
+    transform: translateY(-11%)
+
+// A player who has asked the OS for less motion still needs to find the tech
+// tree — they just must not be jumped at. The glow carries the signal on its
+// own, so the hop is dropped rather than the whole nudge.
+@media (prefers-reduced-motion: reduce)
+  .is-bounce,
+  .is-attention.is-bounce
+    animation: hud-pulse 1.6s ease-in-out infinite
 </style>

@@ -1,5 +1,5 @@
 import { prependBaseUrl } from '@/utils/function'
-import useUser, { MUSIC_TRACK_FILES } from '@/use/useUser'
+import useUser, { MUSIC_TRACK_FILES, DEFAULT_MUSIC_TRACK } from '@/use/useUser'
 import { getAudioContext, loadAudioBuffer, resourceCache, registerHtmlAudio, unregisterHtmlAudio, isAudioSuspended, registerOneShotSource } from '@/use/useAssets'
 import { isGamePaused } from '@/use/useGamePause'
 import { isMobileAudioMuted } from '@/use/useMobileAudioMute'
@@ -86,7 +86,7 @@ export const useMusic = () => {
 
   // Resolve the active track's filename, falling back to the default.
   const currentTrackFile = (): string =>
-    MUSIC_TRACK_FILES[userMusicTrack.value] ?? MUSIC_TRACK_FILES.trance
+    MUSIC_TRACK_FILES[userMusicTrack.value] ?? MUSIC_TRACK_FILES[DEFAULT_MUSIC_TRACK]
 
   // Point the music element at the active track and fade it in — using the
   // preloaded/decoded copy when available, otherwise fetching on demand.

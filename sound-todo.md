@@ -63,8 +63,8 @@ deleted.
 
 | Track | File | Notes |
 |---|---|---|
-| Trance Tunnel (default) | `/public/audio/music/trance.ogg` | Selected via Options |
-| Cozy Harmony | `/public/audio/music/bg-cozy.ogg` | Selected via Options |
+| Cozy Harmony (default) | `/public/audio/music/bg-cozy.ogg` | Selected via Options |
+| Trance Tunnel | `/public/audio/music/trance.ogg` | Selected via Options |
 
 Both are streamed lazily on first play and registered with the global
 suspend/resume registry, so tab-hide and ads pause them correctly.
@@ -180,8 +180,8 @@ read better with its own voice.
 
 | # | Track | File | Status | Notes |
 |---|---|---|---|---|
-| D1 | Trance Tunnel | `/public/audio/music/trance.ogg` | shipped | Default, selectable in Options |
-| D2 | Cozy Harmony | `/public/audio/music/bg-cozy.ogg` | shipped | Selectable in Options |
+| D1 | Trance Tunnel | `/public/audio/music/trance.ogg` | shipped | Selectable in Options |
+| D2 | Cozy Harmony | `/public/audio/music/bg-cozy.ogg` | shipped | Default, selectable in Options |
 | D3 | Boss theme | — | **wanted, P1** | Percussive drive for the every-10th-wave boss |
 | D4 | Build-phase layer | — | wanted, P2 | Calm bed; pairs with D5 |
 | D5 | Battle-phase layer | — | wanted, P2 | Same key and tempo as D4, crossfaded on `phase` |

@@ -1033,6 +1033,17 @@ export interface SceneryAsset {
    * checkerboard and painted it in as if the squares were scenery.
    */
   bg: 'magenta' | 'magenta-sky' | 'opaque'
+  /**
+   * Must the artwork reach all four edges of the frame?
+   *
+   * The default layout line asks for one object centred in the frame, which is
+   * right for a tree and wrong for a band. Scenery is never trimmed on the way
+   * back in, so a subject painted small inside its frame is written out at the
+   * declared size with the empty border baked in — and it arrives on screen as
+   * a shrunken version of itself surrounded by dead space. A tileable band gets
+   * this for free from the seam rule; anything else has to be told.
+   */
+  bleed?: boolean
   blurb: string
 }
 
@@ -1101,6 +1112,34 @@ export const SCENERY: SceneryAsset[] = [
     id: 'icon-gold', file: 'icon-gold', target: 'images/icons/gold.webp',
     w: 512, h: 512, tileable: false, bg: 'magenta',
     blurb: 'The GOLD resource icon: a small bar or stack of coins in warm gold. Read at about 26 px in the HUD bar — bold shape, strong silhouette, no fine detail. It is the premium currency, so it should be the brightest and most eye-catching of the three.'
+  },
+  {
+    // The result screen's title band, and the reason it is here rather than
+    // left as the `ui/ribbon` cell: SHAPE.
+    //
+    // The shipped `parchment-ribbon_553x188.webp` is 2.94:1 and spends roughly
+    // a quarter of its height on a bottom curl the label has to dodge —
+    // `.ribbon-content` lifts itself 14% to clear it. At 340 px wide that band
+    // stood 116 px tall on a 390 px viewport, and FReward carries four media
+    // queries whose only job is to claw the height back. A flat 5:1 band with
+    // the writing panel in the middle costs 41% less vertical room at exactly
+    // the same width, so none of those widths have to move.
+    //
+    // A NEW id and a NEW path on purpose. The old bitmap stays where it is and
+    // keeps working as the fallback, so a build with no painted ribbon looks
+    // exactly like today's.
+    id: 'ribbon', file: 'bg-ribbon', target: 'images/bg/ribbon.webp',
+    w: 1280, h: 256, tileable: false, bg: 'magenta', bleed: true,
+    blurb: 'The result screen TITLE BANNER: one long, flat, horizontal parchment ribbon seen straight on, with a small folded tail at each end. Aged warm vellum, a soft ink border and a little foxing along the edges. SHAPE IS THE WHOLE JOB HERE — it is WIDE AND SHALLOW, a 5:1 band rather than a scroll, and it must use the entire frame: the left tail touches the left edge, the right tail touches the right edge, and the tallest part of the ribbon touches the top and the bottom edge. Leave no magenta margin on any side — a banner painted small inside the frame arrives on screen as a small banner with dead space around it, which is the exact fault this asset replaces. The middle 70% of the width is the WRITING PANEL: flat, straight, parallel top and bottom edges, at least 80% of the frame height, and VERTICALLY CENTRED — the game prints its title across it, so keep that panel an even, quiet, uncluttered surface in a mid parchment tone that white lettering with a dark outline will read on. Do not write anything on it: no words, no letters, no numerals, no monogram, no crest, no icon, no ornament in the centre. The ends carry ONE shallow fold each and nothing more — no deep curls, no rolled scroll ends, no ribbon looping behind itself, no swallowtail notch deeper than a fifth of the width. Nothing may sit above or below the band: no pole, no finial, no hanging cords, tassels, nails, rings, shadow or ground. Every pixel of height that is not ribbon is height the result screen loses.'
+  },
+  {
+    // Not a resource glyph: it is a BUTTON, and the only one on the HUD that
+    // rewards looking at it. It also carries a cooldown shade masked to its own
+    // silhouette, which is why the outline has to stay one closed shape — a
+    // detached strap or a spilled coin masks as a floating fleck of shadow.
+    id: 'icon-chest', file: 'icon-chest', target: 'images/icons/chest.webp',
+    w: 512, h: 512, tileable: false, bg: 'magenta',
+    blurb: 'The daily TREASURE CHEST icon: a small, sturdy, CLOSED wooden chest seen straight on from the front — a domed lid, two dark iron bands running across the body, and a gold lock plate with a keyhole centred on the front. Warm timber browns, dark iron, one warm gold accent. It sits in the HUD at about 50 px and is the thing a player taps for their free coins, so it should look inviting and full: bold shapes, strong silhouette, no fine detail. The lid stays SHUT — the game plays the opening itself. Keep it ONE compact closed shape, with no dangling straps, no key, no spilled coins, no ground and no shadow beneath it: a cooldown shade is masked to this silhouette, so anything detached from the body becomes a floating fleck. It must not be mistakable for the gold resource icon at a glance — that one is the coins, this one is the box they came in.'
   }
 ]
 
@@ -2053,7 +2092,15 @@ export const promptForScenery = (a: SceneryAsset): string => [
       + 'a landscape wider than the screen. The right edge must join the left edge\n'
       + 'with no visible seam, no matching feature straddling the join, and no\n'
       + 'vignette or fade at either side. It does NOT need to tile vertically.'
-    : 'One object, centred in the frame.',
+    : a.bleed
+      ? 'FILL THE FRAME — the rule this asset lives or dies on.\n'
+        + 'The artwork must reach ALL FOUR EDGES of the image: left, right, top and\n'
+        + 'bottom. No margin, no padding, no breathing room, not even a few pixels.\n'
+        + 'Nothing is cropped or re-centred on the way back in, so a subject painted\n'
+        + 'small inside its frame is shipped small with the empty border baked in,\n'
+        + 'and it appears in the game as a shrunken version of itself surrounded by\n'
+        + 'dead space. Let the artwork run off every edge rather than leave a border.'
+      : 'One object, centred in the frame.',
   '',
   `OUTPUT: exactly ${a.w} x ${a.h} pixels. If your tool has an aspect-ratio`,
   `control, set it to match. No labels, captions or watermarks.`

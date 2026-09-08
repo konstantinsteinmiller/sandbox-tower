@@ -498,13 +498,15 @@ const BG_IDS = [
 ] as const
 
 /**
- * The resource glyphs, which the HUD shows before anything else is on screen.
+ * The HUD glyphs, which the bar shows before anything else is on screen.
  *
- * They sit in the bar at the top of every single frame of the game, so a
- * hand-painted tower above three flat vector icons is the one mismatch the eye
- * cannot avoid.
+ * They sit at the top of every single frame of the game, so a hand-painted
+ * tower above flat vector icons is the one mismatch the eye cannot avoid.
+ *
+ * `chest` is the daily-reward button rather than a resource, but it lives in
+ * the same bar and is on screen just as early, so it loads on the same tier.
  */
-const ICON_IDS = ['wood', 'stone', 'gold'] as const
+const ICON_IDS = ['wood', 'stone', 'gold', 'chest'] as const
 
 /** One bitmap the scene will ask for: a kind and the id it is keyed by. */
 export type ArtWant = readonly [ArtKind, string]

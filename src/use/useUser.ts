@@ -85,14 +85,33 @@ const readString = <T extends string>(key: string, fallback: T): T => {
 export const DEFAULT_SOUND_VOLUME = 0.7
 export const DEFAULT_MUSIC_VOLUME = 0.6
 
+/**
+ * The track a player hears if they never open Options — which is nearly all of
+ * them.
+ *
+ * Cozy Harmony, not Trance Tunnel. The game is a hand-drawn medieval tower a
+ * player builds while a timer runs; a warm loop is what that scene sounds like,
+ * and it is the bed most people will keep. It is also less than half the bytes
+ * (68 kB against 151 kB), and it is the one the preloader fetches, so the
+ * default costs the first-paint budget less than the alternative did.
+ *
+ * Both spellings of "the default" — the setting's fallback and the filename
+ * fallback for an unknown id — read this, so the choice lives in exactly one
+ * place.
+ */
+export const DEFAULT_MUSIC_TRACK: MusicTrack = 'cozy'
+
 const userSoundVolume: Ref<number> = ref(readNumber(SOUND_KEY, DEFAULT_SOUND_VOLUME))
 const userMusicVolume: Ref<number> = ref(readNumber(MUSIC_KEY, DEFAULT_MUSIC_VOLUME))
 const userLanguage: Ref<string> = ref(readString(LANGUAGE_KEY, 'en'))
 // Difficulty defaults to MEDIUM. It scales enemy HP + wave budget (Easy −20%,
 // Hard +25%) via `difficultyFactor()` below, read by the wave director.
 const userDifficulty: Ref<Difficulties> = ref(readString<Difficulties>(DIFFICULTY_KEY, DIFFICULTY.MEDIUM))
-// Background-music track — defaults to 'trance' (Trance Tunnel).
-const userMusicTrack: Ref<MusicTrack> = ref(readString<MusicTrack>(MUSIC_TRACK_KEY, 'trance'))
+// Background-music track — see `DEFAULT_MUSIC_TRACK`. A stored choice always
+// wins, so a player who picked the other one keeps it.
+const userMusicTrack: Ref<MusicTrack> = ref(
+  readString<MusicTrack>(MUSIC_TRACK_KEY, DEFAULT_MUSIC_TRACK)
+)
 
 // Re-read on hydrate-success bump. Module init reads these synchronously
 // from localStorage, but on cloud-only builds (CrazyGames) the blob is

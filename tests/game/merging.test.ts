@@ -7,16 +7,21 @@ import type { Block } from '@/game/types'
 
 /**
  * Merging changes how every block in the tower is placed, so the rules it must
- * NOT break are as important as the ones it adds: it cannot fuse the Gate, it
- * cannot destroy something the player paid for, and it cannot happen at all
- * until the node is bought.
+ * NOT break are as important as the ones it adds: it cannot fuse the Gate, and
+ * it cannot destroy something the player paid for.
+ *
+ * It is NOT bought any more. Merging used to hang off a 200-coin tech node and
+ * the players who never opened the tree never met the best mechanic in the
+ * game, so the tree stopped selling it and the tutorial teaches it instead —
+ * every `loadGame` below therefore starts with no tech at all, which is the
+ * state a first-time player is actually in.
  *
  * There is no tier ceiling on this board any more; what shapes the curve is
  * the FOOTPRINT rule — a weld stays inside 2:1, so the tower climbs 2×1, 2×2,
  * 4×2, 4×4 and each step needs twice the blocks of the last.
  */
 
-const loadGame = async (levels: Record<string, number> = { unlockMerge: 1 }) => {
+const loadGame = async (levels: Record<string, number> = {}) => {
   vi.resetModules()
   localStorage.clear()
   localStorage.setItem('tower_state', JSON.stringify({ ts_tech: { levels } }))
@@ -359,13 +364,17 @@ describe('fusing on the board', () => {
     expect(at(h, -1, 0)!.enhanced).toBe(false)
   })
 
-  it('does nothing at all until the node is bought', async () => {
+  it('fuses for a player who owns no tech at all', async () => {
+    // The first-run state, and the one that used to get nothing: merging is
+    // the game's best verb and it is on from the first placement. Nothing in
+    // the tree may sell it back — a node here would be a toll gate on the
+    // mechanic the tutorial now teaches in its second beat.
     const g = await loadGame({})
-    expect(TECH_BY_ID.unlockMerge!.effect.kind).toBe('mergeUnlock')
+    expect(TECH_BY_ID.unlockMerge).toBeUndefined()
     g.placeBlock('cannon', -2, 0)
     g.placeBlock('cannon', -1, 0)
-    expect(count(g, 'cannon')).toBe(2)
-    expect(tierOf(at(g, -1, 0)!.tier)).toBe(1)
+    expect(count(g, 'cannon')).toBe(1)
+    expect(tierOf(at(g, -1, 0)!.tier)).toBe(2)
   })
 
   it('is reached from either side, not just from its anchor', async () => {
@@ -464,12 +473,15 @@ describe('settling merges outside placement', () => {
     expect(size(fused)).toEqual([4, 4])
   })
 
-  it('fuses a pair restored from a save written before Fusion was owned', async () => {
-    // The player's actual path: build, die, buy Fusion, resume. `mergeAt` only
-    // ever ran from a placement, so every gun already in the tower stayed
-    // stubbornly single — which reads as the merge system being broken, because
-    // from where the player is sitting two identical guns are touching.
+  it('fuses a pair restored from a save written while merging was locked', async () => {
+    // Every player who was mid-run when merging stopped being a purchase: their
+    // snapshot holds guns that were placed under the old gate and stayed
+    // stubbornly single, because `mergeAt` only ever ran from a placement. On
+    // resume two identical guns are touching, and from where the player is
+    // sitting a board that leaves them like that is simply broken.
     const stale = await loadGame({})
+    const { DESKTOP_RULES } = await import('@/game/rules')
+    stale.applyRules({ ...DESKTOP_RULES, merge: 'off' })
     stale.placeBlock('cannon', -2, 0)
     stale.placeBlock('cannon', -1, 0)
     expect(count(stale, 'cannon')).toBe(2)
@@ -479,11 +491,9 @@ describe('settling merges outside placement', () => {
     await flushSaveNow()
     const snapshot = localStorage.getItem('tower_state')!
 
-    // Same save, now with Fusion owned.
+    // Same save, on the build that merges.
     vi.resetModules()
-    const blob = JSON.parse(snapshot)
-    blob.ts_tech = { levels: { unlockMerge: 1 } }
-    localStorage.setItem('tower_state', JSON.stringify(blob))
+    localStorage.setItem('tower_state', snapshot)
     const g = await import('@/use/useTowerGame')
 
     expect(g.resumeRun()).toBe(true)
@@ -514,12 +524,16 @@ describe('settling merges outside placement', () => {
     expect(adjacent, 'two twins were left touching and unmerged').toBe(false)
   })
 
-  it('does nothing at all while Fusion is unowned', async () => {
+  it('respects a rule set that switches merging off', async () => {
+    // The tech gate is gone, so the RULE SET is the only remaining answer to
+    // "does this board fuse". Both paths have to honour it — the placement
+    // merge and the settle pass that runs on every structural change — or a
+    // board authored without merging quietly gets it anyway.
     const g = await loadGame({})
+    const { DESKTOP_RULES } = await import('@/game/rules')
+    g.applyRules({ ...DESKTOP_RULES, merge: 'off' })
     g.placeBlock('cannon', -2, 0)
     g.placeBlock('cannon', -1, 0)
-    // The settle pass runs on every structural change; it must still respect
-    // the gate, or it becomes a way around the node that sells merging.
     g.placeBlock('crate', -3, 0)
     expect(count(g, 'cannon')).toBe(2)
   })
@@ -564,11 +578,11 @@ describe('selling tech ranks', () => {
     expect(levelOf('foundations')).toBe(1)
   })
 
-  it('sells a binary unlock back — the merge skill included', async () => {
-    const { p, levelOf } = await loadProgress({ foundations: 1, unlockMerge: 1, unlockBrace: 1 })
-    expect(p.canSellTech('unlockMerge')).toBe(true)
-    expect(p.sellTech('unlockMerge')).toBeGreaterThan(0)
-    expect(levelOf('unlockMerge')).toBe(0)
+  it('sells a binary unlock back', async () => {
+    const { p, levelOf } = await loadProgress({ foundations: 1, unlockSpikes: 1, unlockBrace: 1 })
+    expect(p.canSellTech('unlockSpikes')).toBe(true)
+    expect(p.sellTech('unlockSpikes')).toBeGreaterThan(0)
+    expect(levelOf('unlockSpikes')).toBe(0)
 
     expect(p.canSellTech('unlockBrace')).toBe(true)
     expect(p.sellTech('unlockBrace')).toBeGreaterThan(0)
@@ -584,11 +598,11 @@ describe('selling tech ranks', () => {
 
 describe('the forge-weld node', () => {
   it('pays out only on merged blocks', async () => {
-    const plain = await loadGame({ unlockMerge: 1 })
+    const plain = await loadGame({})
     plain.placeBlock('cannon', -1, 0)
     const solo = plain.measureTower().dps
 
-    const welded = await loadGame({ unlockMerge: 1, forgeWelds: 5 })
+    const welded = await loadGame({ forgeWelds: 5 })
     welded.placeBlock('cannon', -1, 0)
     // One unmerged cannon: the node must be worth nothing here.
     expect(welded.measureTower().dps).toBeCloseTo(solo, 5)

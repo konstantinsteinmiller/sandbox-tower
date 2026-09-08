@@ -9,6 +9,7 @@ import IconCoin from '@/components/icons/IconCoin.vue'
 // SaveManager mirrors to localStorage AND the active platform SDK's cloud save.
 import { getState, setState } from '@/use/useTowerState'
 import { CHEST_KEY, CHEST_DAY_KEY } from '@/keys'
+import { spriteFor, onArtChanged } from '@/game/art'
 
 interface Props {
   /** Element where the coin explosion VFX flies to (the coin badge). */
@@ -145,6 +146,33 @@ const cooldownRingPct = computed(() => {
   return remainingMs.value / SMALL_READY_AT_MS
 })
 
+/**
+ * The painted chest, once the art layer has one; the drawn SVG until then.
+ *
+ * Same contract as the HUD resource glyphs: a probe that is null with art
+ * overrides off or the bitmap missing, and a subscription because the probe is
+ * async — the first paint happens before the image decodes, and without it the
+ * chest would keep the vector until something else forced a re-render.
+ */
+const painted = ref<string | null>(null)
+const syncArt = (): void => { painted.value = spriteFor('icon', 'chest')?.src ?? null }
+
+/**
+ * The cooldown shade, as an overlay instead of a clipped SVG rect.
+ *
+ * The bitmap masks it to its own alpha, which is what `chestClip` does for the
+ * vector — so the shade still drains INSIDE the chest's outline rather than
+ * sitting over it as a rectangle. Same geometry as the rect: it covers the
+ * whole icon at the start of a cooldown and shrinks away as the chest fills.
+ */
+const shadeMask = computed(() => (painted.value
+  ? { maskImage: `url('${painted.value}')`, WebkitMaskImage: `url('${painted.value}')` }
+  : {}))
+const shadeRect = computed(() => ({
+  top: `${(1 - cooldownRingPct.value) * 100}%`,
+  height: `${cooldownRingPct.value * 100}%`
+}))
+
 const rootEl = ref<HTMLElement | null>(null)
 
 const onClick = () => {
@@ -162,7 +190,11 @@ const onClick = () => {
   setState(CHEST_DAY_KEY, next)
 }
 
+let stopArt: (() => void) | null = null
+
 onMounted(() => {
+  syncArt()
+  stopArt = onArtChanged(syncArt)
   tickIntervalId = window.setInterval(() => {
     tickNow.value = Date.now()
     const stored = readStoredAt()
@@ -173,6 +205,7 @@ onMounted(() => {
 })
 onUnmounted(() => {
   if (tickIntervalId !== null) clearInterval(tickIntervalId)
+  stopArt?.()
 })
 </script>
 
@@ -182,13 +215,28 @@ onUnmounted(() => {
     :class="{ 'is-ready': isReady, 'is-big': phase === 'big' && !isSpent, 'is-spent': isSpent, 'cursor-pointer': isReady }"
     @click="onClick"
   )
+    //- Painted chest, when the art layer has one. The shade is masked to the
+    //- bitmap's own alpha, which is what the SVG gets from `chestClip` — so it
+    //- drains inside the chest's outline either way.
+    div.chest-art(
+      v-if="painted"
+      class="block w-12 h-12 sm:w-14 sm:h-14 chest-icon"
+    )
+      img.chest-art__img(:src="painted" alt="" aria-hidden="true" draggable="false")
+      div.chest-art__clip(
+        v-if="isSpent || phase === 'cooldown'"
+        :style="shadeMask"
+      )
+        div.chest-art__shade(:style="shadeRect")
+
     //- Programmatic chest art (SVG). The cooldown overlay sits inside the
     //- same SVG so a clipPath built from the chest body + lid can mask it
     //- to the icon's silhouette — the overlay shrinks within the chest
     //- outline rather than as a separate ring around it.
     svg(
+      v-else
       viewBox="0 0 64 64"
-      class="block w-12 h-12 sm:w-14 sm:h-14 chest-svg"
+      class="block w-12 h-12 sm:w-14 sm:h-14 chest-icon"
     )
       defs
         linearGradient(id="chestBody" x1="0" y1="0" x2="0" y2="1")
@@ -241,10 +289,13 @@ onUnmounted(() => {
     width: 3.5rem
     height: 3.5rem
 
-.chest-svg
+// Both arms of the icon — the painted bitmap and the drawn SVG — wear this, so
+// the bob, the glow and the spent-day desaturation are written once and the
+// caller never has to care which one it got.
+.chest-icon
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6))
 
-.is-ready .chest-svg
+.is-ready .chest-icon
   animation: chest-bob 1s ease-in-out infinite alternate
 
 @keyframes chest-bob
@@ -253,14 +304,50 @@ onUnmounted(() => {
   to
     transform: translateY(-3px)
 
-.is-big .chest-svg
+.is-big .chest-icon
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 8px rgba(255, 160, 0, 0.8))
 
 // Spent for the day — drained of colour so the chest reads as put away, and the
 // countdown underneath is to midnight rather than to a fill that cannot pay.
-.is-spent .chest-svg
+.is-spent .chest-icon
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6)) grayscale(0.6)
   opacity: 0.7
+
+// ─── Painted arm ────────────────────────────────────────────────────────────
+//
+// The clip is a full-size layer carrying the mask, and the shade is the moving
+// rectangle inside it. The mask has to be sized to the whole ICON, not to the
+// part of it currently shaded — put it on the shade itself and the silhouette
+// would squash as the cooldown ran down.
+//
+// `contain` on both the image and the mask letterboxes them the same way, so
+// the shade lands exactly on the chest whatever aspect the painting came at.
+.chest-art
+  position: relative
+
+.chest-art__img
+  display: block
+  width: 100%
+  height: 100%
+  object-fit: contain
+
+.chest-art__clip
+  position: absolute
+  inset: 0
+  pointer-events: none
+  -webkit-mask-size: contain
+  -webkit-mask-repeat: no-repeat
+  -webkit-mask-position: center
+  mask-size: contain
+  mask-repeat: no-repeat
+  mask-position: center
+
+.chest-art__shade
+  position: absolute
+  left: 0
+  right: 0
+  background-color: rgba(0, 0, 0, 0.5)
+  transition: top 0.3s linear, height 0.3s linear
 
 // ─── Status label ───────────────────────────────────────────────────────────
 //

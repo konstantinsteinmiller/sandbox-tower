@@ -108,22 +108,18 @@ export const TECH_NODES: ReadonlyArray<TechNode> = [
 
   // ── Merging ──────────────────────────────────────────────────────────────
   //
-  // Off the SPINE rather than a lane, because merging is not an offensive or
-  // an economic idea — it changes how every block in the tower is placed. A
-  // player who owns it stops thinking in single cells.
-  {
-    id: 'unlockMerge',
-    tier: 1, col: 2, maxLevel: 1,
-    costBase: 200, costGrowth: 1,
-    requires: ['foundations'],
-    effect: { kind: 'mergeUnlock' },
-    icon: 'merge'
-  },
+  // Merging itself is NOT sold here any more. It used to sit on this spot as
+  // `unlockMerge` — 200 coins, off the spine — and it was the single best
+  // mechanic in the game locked behind the one screen most players never
+  // opened. A player who never found the tree never found merging, which is
+  // most of them; the tutorial now fuses two cannons on the very first
+  // placement instead. What remains for sale is the node that makes the merge
+  // PAY MORE, which is a real choice rather than a toll gate.
   {
     id: 'forgeWelds',
-    tier: 2, col: 3, maxLevel: UNCAPPED,
+    tier: 1, col: 2, maxLevel: UNCAPPED,
     costBase: 260, costGrowth: 1.31,
-    requires: ['unlockMerge'],
+    requires: ['foundations'],
     effect: { kind: 'mergePower', pct: 12 },
     icon: 'weld'
   },
@@ -589,20 +585,6 @@ export const sumEffect = (
   }
   return total
 }
-
-/**
- * Is any node carrying `kind` owned?
- *
- * `sumEffect` cannot answer this for a flagless effect — it adds up `pct`/`add`
- * and a switch has neither, so a bought `mergeUnlock` sums to zero exactly like
- * an unbought one.
- */
-export const hasEffect = (
-  levels: Record<string, number>,
-  kind: TechEffect['kind'],
-  nodes: ReadonlyArray<TechNode> = TECH_NODES
-): boolean =>
-  nodes.some((n) => n.effect.kind === kind && (levels[n.id] ?? 0) > 0)
 
 /** Set of block ids unlocked by the player's tech levels. */
 export const unlockedBlocks = (

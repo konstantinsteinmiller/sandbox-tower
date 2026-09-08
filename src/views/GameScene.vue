@@ -29,17 +29,16 @@ import {
 import { drawScene, resetDrawnFx, setBuildOverlay } from '@/use/useTowerArt'
 import { resetVfx } from '@/use/useTowerVfx'
 import { warmAudio, playFx } from '@/use/useTowerAudio'
-import useTowerProgress, { bestWave, mergeUnlocked } from '@/use/useTowerProgress'
+import useTowerProgress, { bestWave } from '@/use/useTowerProgress'
 import { awaitingFirstInteraction } from '@/use/useFirstInteraction'
 import {
-  reportRun, rankFor, boardSize, playerTotal, leaderboardEnabled,
-  leaderboardPending, OUTSIDE_BOARD
+  reportRun, rankFor, playerTotal, leaderboardEnabled, leaderboardPending
 } from '@/use/useLeaderboard'
 import useTowerEconomy from '@/use/useTowerEconomy'
 import useMissions, { beginMissionRun } from '@/use/useMissions'
 import useAchievements from '@/use/useAchievements'
 import useBattlePass from '@/use/useBattlePass'
-import { isShip, blockDef } from '@/game/blocks'
+import { isShip, blockDef, tierOf } from '@/game/blocks'
 import { OFFER_SLOTS, WEAPON_SLOT, canRotateShape, normRot, rotatedShape } from '@/game/shapes'
 import { ENEMY_DEFS } from '@/game/enemies'
 import {
@@ -50,7 +49,7 @@ import type { Block } from '@/game/types'
 
 import { getState, setState } from '@/use/useTowerState'
 import {
-  DAILY_BONUS_DAY_KEY, ONBOARDED_KEY, TECH_SPOTLIGHT_KEY, TIP_CURSOR_KEY, TUTORIAL_KEY
+  ONBOARDED_KEY, TECH_SPOTLIGHT_KEY, TIP_CURSOR_KEY, TUTORIAL_KEY
 } from '@/keys'
 import useSounds, { useMusic } from '@/use/useSound'
 import { useScreenshake } from '@/use/useScreenshake'
@@ -93,12 +92,12 @@ import AchievementsButton from '@/components/organisms/AchievementsButton.vue'
 import MissionsModal from '@/components/organisms/MissionsModal.vue'
 import OptionsModal from '@/components/organisms/OptionsModal.vue'
 import TechTreeModal from '@/components/organisms/TechTreeModal.vue'
+import { markTechFound, refreshTechFound, techNudge } from '@/use/useTechDiscovery'
 import IconCoin from '@/components/icons/IconCoin.vue'
-import TechIcon from '@/components/game/TechIcon.vue'
+import GameIcon from '@/components/icons/GameIcon.vue'
 import IncomingBanner from '@/components/game/IncomingBanner.vue'
 import IconStone from '@/components/icons/IconStone.vue'
 import IconWood from '@/components/icons/IconWood.vue'
-import IconGold from '@/components/icons/IconGold.vue'
 import IconMovie from '@/components/icons/IconMovie.vue'
 
 const { t } = useI18n()
@@ -596,7 +595,6 @@ const showTech = ref(false)
 const techIntro = ref(false)
 const isAdInFlight = ref(false)
 const twoXUsed = ref(false)
-const firstRunBonusActive = ref(false)
 const summary = ref(runSummary())
 
 // ── Leaderboard ──
@@ -616,19 +614,27 @@ const rankPending = computed(() => leaderboardPending.value && rankValue.value =
 const showRank = computed(
   () => leaderboardEnabled && bestScoreValue.value > 0 && (rankPending.value || rankValue.value !== 0)
 )
-/** Formatted in script, not in the template: `#{…}` is Pug's own interpolation
- *  syntax, so a literal `#` in front of a mustache is a parse error. */
+/**
+ * Formatted in script, not in the template: `#{…}` is Pug's own interpolation
+ * syntax, so a literal `#` in front of a mustache is a parse error.
+ *
+ * THERE IS NO "#100+" BRANCH ANY MORE, and putting one back is a regression.
+ * The published rows stop at 100 and this board has 361 players, so the old
+ * sentinel was shown to 72 % of them — a non-answer delivered to exactly the
+ * players who most needed a number. `rankFor` now returns a real placing for
+ * every score: exact from the Worker's score histogram wherever one is in
+ * hand, and otherwise estimated and pinned for the session. It has no sentinel
+ * left to render, which is what stops this being re-broken by the next screen
+ * that shows a rank.
+ */
 const rankDisplay = computed(() => {
   if (rankPending.value) return '…'
-  if (rankValue.value === OUTSIDE_BOARD) return `#${boardSize().toLocaleString()}+`
   return `#${rankValue.value.toLocaleString()}`
 })
 
 const rewardCoinRef = ref<HTMLElement | null>(null)
 const coinBadgeRef = ref<InstanceType<typeof CoinBadge> | null>(null)
 const coinBadgeEl = computed<HTMLElement | null>(() => coinBadgeRef.value?.rootEl ?? null)
-
-const todayKey = (): string => new Date().toISOString().slice(0, 10)
 
 /**
  * What the rewarded video multiplies the run's coin payout to.
@@ -639,9 +645,34 @@ const todayKey = (): string => new Date().toISOString().slice(0, 10)
  */
 const RESULT_COIN_MULTIPLIER = 3
 
+/**
+ * Deaths before the 3× offer appears at all.
+ *
+ * A player meeting a rewarded video on the screen that ends their FIRST run
+ * learns that dying is the moment the game asks them for something. `runs` is
+ * counted at run START, so the second defeat screen is the first one where it
+ * reads 2.
+ */
+const RESULT_TWOX_MIN_DEATHS = 2
+
 const twoXAvailable = computed(() =>
-  !twoXUsed.value && summary.value.coins > 0 && canOfferReward.value
+  !twoXUsed.value
+  && summary.value.coins > 0
+  && progress.runs.value >= RESULT_TWOX_MIN_DEATHS
+  && canOfferReward.value
 )
+
+/**
+ * The wave the continue hands the tower back at.
+ *
+ * The last wave actually BEATEN, not the one that killed the run: a continue
+ * restores the snapshot from before the fatal wave, so what the player gets is
+ * another build phase on the tower that cleared `wavesCleared` — a chance to
+ * fortify against the wave that broke through rather than to replay it as-is.
+ * Floored at 1: a run that ends before clearing anything still comes back to a
+ * wave rather than to wave zero.
+ */
+const continueWave = computed(() => Math.max(1, summary.value.wavesCleared))
 
 const RESULT_INTERSTITIAL_DELAY_MS = 600
 const wait = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
@@ -759,8 +790,7 @@ const pickDeathTip = (): string | null => {
 
   if (!kinds.has('economy')) eligible.push('eco')
   if (!kinds.has('buff')) eligible.push('buff')
-  if (!mergeUnlocked.value) eligible.push('mergeLocked')
-  else if (!merged) eligible.push('merge')
+  if (!merged) eligible.push('merge')
   if (progress.affordableCount.value > 0) eligible.push('spend')
   eligible.push('branches', 'shape', 'gold')
 
@@ -805,7 +835,6 @@ const presentDefeat = async (): Promise<void> => {
   // the number the board holds and the number the rank belongs to. Never
   // awaited: a slow or dead endpoint must not hold up the defeat screen.
   void reportRun(progress.bestScore.value, Math.max(s.wave, 1))
-  firstRunBonusActive.value = getState<string>(DAILY_BONUS_DAY_KEY, '') !== todayKey()
 
   // The session's FIRST break belongs here, on the first death screen, however
   // early it arrives — the 121 s floor is there to stop breaks stacking, and
@@ -850,12 +879,6 @@ const onTwoX = async (): Promise<void> => {
   })
 }
 
-const consumeFirstRunBonus = (): void => {
-  if (!firstRunBonusActive.value) return
-  firstRunBonusActive.value = false
-  setState(DAILY_BONUS_DAY_KEY, todayKey())
-}
-
 /**
  * Begin a brand-new siege.
  *
@@ -869,7 +892,7 @@ const beginRun = (): void => {
   // Last run's payout must not still be drifting up into a fresh bar.
   clearResourceFloats()
   if (isFirstSession()) seedScriptedOpening()
-  // The first beat points at one tile; that tile has to hold the archer before
+  // The first beat points at one tile; that tile has to hold the cannon before
   // the player is looking at it.
   armTutorialHand()
 }
@@ -899,7 +922,6 @@ const startFreshRun = (): void => {
  */
 const onRebuild = (): void => {
   if (adInFlight.value) return
-  consumeFirstRunBonus()
   startFreshRun()
 }
 
@@ -914,7 +936,6 @@ const onRebuild = (): void => {
  */
 const onUpgrade = (): void => {
   if (adInFlight.value) return
-  consumeFirstRunBonus()
   showResult.value = false
   techIntro.value = true
   showTech.value = true
@@ -930,7 +951,12 @@ const onUpgrade = (): void => {
 // nothing and dropping them back on wave 0 with the tower they just lost with.
 // Handing back the screen they came from costs one tap and loses nothing.
 watch(showTech, (open, wasOpen) => {
-  if (open) return
+  // The tree is FOUND the moment it opens, by whatever route — the HUD button,
+  // or the defeat screen's Upgrade button. Watching the modal rather than
+  // marking it at each call site is deliberate: there are already two ways in,
+  // and a third added later would otherwise leave the nudge bouncing at a
+  // player who is looking straight at the screen it points to.
+  if (open) { markTechFound(); return }
   techIntro.value = false
   if (wasOpen && phase.value === 'defeat') showResult.value = true
 })
@@ -981,11 +1007,20 @@ watch(lastWaveReward, async (r) => {
 // THE FIRST STAGE OF THE FIRST SESSION, once, for everybody — and there is no
 // way past it but through it.
 //
-// Three beats, no words, no buttons: arm the archer, place the archer, call the
-// wave. Each one dims the screen except for the single thing it wants tapped
-// and drops a fat yellow arrow on it, so the only move available is the move
-// being taught. Nothing advances on a "Next"; every beat advances on the ACTION
-// it exists to teach.
+// Three beats, no words, no buttons: arm the cannon, place it BESIDE ITS TWIN,
+// call the wave. Each one dims the screen except for the single thing it wants
+// tapped and drops a fat yellow arrow on it, so the only move available is the
+// move being taught. Nothing advances on a "Next"; every beat
+// advances on the ACTION it exists to teach.
+//
+// THE FIRST PLACEMENT IS A MERGE, and that is the whole point of the beat. The
+// tutorial used to hand over a lone archer and ask for it to be put down
+// anywhere legal, which taught "blocks go on the tower" — true, and something
+// the player would have worked out unaided. Merging is what the game is
+// actually about, and it used to be a 200-coin node in a screen most players
+// never opened, so most players never met it at all. Now their FIRST move
+// fuses two cannons into one that hits three times as hard, in front of them,
+// before they have read a single word.
 //
 // What it replaced, and why none of it comes back:
 //
@@ -1006,14 +1041,19 @@ const TUTORIAL_STEPS: TutorialStep[] = ['pick', 'place', 'call']
 /**
  * The piece the tutorial teaches with, dealt into the weapon slot.
  *
- * A lone archer, on purpose: it is the cheapest weapon in the game (20 wood
- * against a 120-wood opening purse, so it is affordable on every first run,
- * including one that resumed), it is one cell — so it fits anywhere the
- * spotlight can point and cannot be placed "wrong" by rotation — and it is a
- * WEAPON, which is the lesson. A tower of crates loses; the player has to learn
- * that some blocks shoot.
+ * A lone cannon, and it has to be a cannon: the scripted opening's fort already
+ * has one standing on the Gate, so this is the piece that TWINS with what is
+ * already on the board. Put it beside its twin and the two fuse on the spot —
+ * the lesson, delivered by the player's own hand rather than by a tip.
+ *
+ * It is affordable on every first run (25 wood + 10 stone against a 120/40
+ * opening purse), it is one cell — so it fits anywhere the spotlight can point
+ * and cannot be placed "wrong" by rotation — and it is a WEAPON, which is the
+ * second lesson: a tower of crates loses, some blocks shoot.
  */
-const TUTORIAL_SHAPE = 'archer1'
+const TUTORIAL_SHAPE = 'cannon1'
+/** The block that shape puts down — what a merge partner has to match. */
+const TUTORIAL_BLOCK = 'cannon'
 const TUTORIAL_SLOT = WEAPON_SLOT
 
 // Two states, only one of which is persisted.
@@ -1044,38 +1084,66 @@ const tutorialStep = computed<TutorialStep | null>(() => {
 })
 
 /**
- * Where the archer goes.
+ * Where the cannon goes.
  *
  * A preference list walked through the real placement rule, not a fixed cell:
  * the beat has to point at somewhere the piece can actually go, and what is
  * legal depends on what is standing. First choice is the shoulder of the
- * scripted opening's starter fort, beside its cannon — that reads as "add to
- * your tower" rather than "start a second one" — and the fallbacks cover a
- * board that, for any reason, is not the one the opening built.
+ * scripted opening's starter fort, beside its cannon — which is both "add to
+ * your tower" rather than "start a second one" AND, now that the hand holds a
+ * cannon too, the cell where the two fuse.
+ *
+ * Every candidate is checked for a merge partner before it is checked for mere
+ * legality, so the beat lands on a fusing cell whenever the board has one. A
+ * board that offers none still has to be finishable — there is no Skip button
+ * anywhere — so the plain legal cell is the second answer rather than no
+ * answer: that player is taught less, not stranded.
  */
 const TUTORIAL_CELLS: ReadonlyArray<readonly [number, number]> = [
-  [-1, 1], [1, 1], [-2, 0], [2, 0], [0, 2], [-1, 0], [1, 0]
+  [-1, 1], [1, 1], [0, 2], [-2, 0], [2, 0], [-1, 0], [1, 0]
 ]
+
+/** The four cells a merge reaches from — the simulation's own list. */
+const MERGE_NEIGHBOURS = [[-1, 0], [1, 0], [0, -1], [0, 1]] as const
+
+/**
+ * Would the tutorial piece fuse with something already standing, put here?
+ *
+ * Read off the live occupancy map, so it answers for the board as it actually
+ * is rather than the one the opening was supposed to build: an orthogonal
+ * neighbour of the same block at the same tier is what the merge rule looks
+ * for, and tier 1 is the only tier a lone piece can join.
+ */
+const tutorialMergesAt = (c: number, r: number): boolean => {
+  const cells = getBlocks()
+  for (const [dx, dy] of MERGE_NEIGHBOURS) {
+    const n = cells.get(`${c + dx},${r + dy}`)
+    if (n && n.typeId === TUTORIAL_BLOCK && tierOf(n.tier) === 1) return true
+  }
+  return false
+}
 
 const tutorialCell = computed<{ c: number; r: number }>(() => {
   void towerVersion.value
-  for (const [c, r] of TUTORIAL_CELLS) {
-    if (canPlaceShapeAt(TUTORIAL_SHAPE, c, r, 0)) return { c, r }
-  }
-  // Nothing on the list is legal — an odd board, a resumed run. Take the first
-  // legal cell anywhere on the foundation's span rather than point at a cell
-  // the player cannot build on.
+  const legal = (c: number, r: number): boolean => canPlaceShapeAt(TUTORIAL_SHAPE, c, r, 0)
+
+  for (const [c, r] of TUTORIAL_CELLS) if (legal(c, r) && tutorialMergesAt(c, r)) return { c, r }
+  for (const [c, r] of TUTORIAL_CELLS) if (legal(c, r)) return { c, r }
+
+  // Nothing on the list is legal — an odd board, a resumed run. Take a legal
+  // cell anywhere on the foundation's span rather than point at a cell the
+  // player cannot build on, still preferring one that fuses.
+  const span: Array<[number, number]> = []
   for (let r = 0; r < 6; r++) {
     const half = halfWidthAt(r)
-    for (let c = -half; c <= half; c++) {
-      if (canPlaceShapeAt(TUTORIAL_SHAPE, c, r, 0)) return { c, r }
-    }
+    for (let c = -half; c <= half; c++) if (legal(c, r)) span.push([c, r])
   }
-  return { c: -2, r: 0 }
+  const [c, r] = span.find(([cc, rr]) => tutorialMergesAt(cc, rr)) ?? span[0] ?? [-2, 0]
+  return { c, r }
 })
 
 /**
- * Put the archer in the player's hand.
+ * Put the cannon in the player's hand.
  *
  * The hand is dealt at random, and a tutorial that has to say "tap whichever of
  * these five happens to be a weapon" is not the tutorial being built here. So
@@ -1173,11 +1241,12 @@ const measureTutorialTarget = (): void => {
   }
   if (step === 'call') { tutorialRect.value = fromEl('.call-wave__btn'); return }
 
-  // A beat that cannot be performed must not be forced. The archer is 20 wood
-  // against a 120-wood opening purse, so this is only reachable by a resumed
-  // run that spent itself down while the overlay had nothing to point at — but
-  // there is no Skip button to rescue anyone from it, so it is answered with
-  // the same null the missing-target path uses: no rect, no dim, normal game.
+  // A beat that cannot be performed must not be forced. The cannon is 25 wood
+  // and 10 stone against a 120/40 opening purse, so this is only reachable by a
+  // resumed run that spent itself down while the overlay had nothing to point
+  // at — but there is no Skip button to rescue anyone from it, so it is
+  // answered with the same null the missing-target path uses: no rect, no dim,
+  // normal game.
   if (!canAffordShape(TUTORIAL_SHAPE)) { tutorialRect.value = null; return }
 
   // `place` points at the battlefield, which lives on the canvas — so the rect
@@ -1414,59 +1483,6 @@ const showIncoming = computed(() => bestWave.value === 0 && awaitingFirstInterac
 const enhancedHandOffered = computed(() =>
   phase.value === 'build' && !offerEnhanced.value.some(Boolean)
 )
-
-// ─── The Fusion offer ───────────────────────────────────────────────────────
-//
-// Merging is the mechanic players stay for: two matching blocks become one, and
-// the tower stops being a wall of separate cells. It is also the mechanic
-// almost nobody finds. It lives two nodes deep in a store behind one small
-// button, so a player who has never opened the tech tree has no way to learn
-// that fusing exists at all — let alone that it is a couple of hundred coins
-// away — and the feature that would have sold them the game is invisible.
-//
-// So the offer goes to them, in the place they are already looking: the perk
-// row directly above their hand, wearing the price it actually costs and
-// buying the node on the tap. It TAKES the reinforced hand's slot rather than
-// adding a button beside it — a row that grows a control is a row that has to
-// be re-read, and the hand is a per-wave nicety the player gets back the
-// moment this is bought, which happens exactly once per save.
-//
-// It only ever appears when the player can actually pay, prerequisite
-// included: an offer that answers a tap with "not enough coins" teaches them
-// to ignore the row.
-
-/** The node itself, and the one rank the tree wants under it. */
-const MERGE_NODE = 'unlockMerge'
-const MERGE_PREREQ = 'foundations'
-
-/**
- * What owning Fusion costs from here: the node, plus the prerequisite rank the
- * player has not bought yet.
- *
- * Read off the tree rather than written down. `foundations` is half price at
- * its first rank (20 of its 40), so the honest total is 220 for a player who
- * has never spent a coin and 200 for one who already owns it — a number typed
- * into the HUD would have been wrong for one of them, and wrong again the next
- * time the tree is tuned.
- */
-const mergeOfferCost = computed(() =>
-  progress.costOf(MERGE_NODE)
-  + (progress.levelOf(MERGE_PREREQ) > 0 ? 0 : progress.costOf(MERGE_PREREQ))
-)
-
-const mergeOffered = computed(() =>
-  !mergeUnlocked.value
-  && phase.value === 'build'
-  && coins.value >= mergeOfferCost.value
-)
-
-/** Buy the prerequisite and the node together, in one tap. */
-const onBuyMerge = (): void => {
-  if (!mergeOffered.value) return
-  if (progress.levelOf(MERGE_PREREQ) === 0 && !progress.buyTech(MERGE_PREREQ)) return
-  if (!progress.buyTech(MERGE_NODE)) return
-  playSound('level-up', 0.09)
-}
 
 // ─── Arrow Rain ─────────────────────────────────────────────────────────────
 //
@@ -1784,6 +1800,10 @@ let insetTimer = 0
 onMounted(() => {
   void boot()
   installFullscreenWatch()
+  // Re-read after boot: on a platform build the cloud save may not have landed
+  // when `useTechDiscovery` first read it, and a returning player must not be
+  // told about a screen they already use.
+  refreshTechFound()
   window.addEventListener('resize', resize)
   window.addEventListener('orientationchange', onOrientationChange)
   window.addEventListener('keydown', onKey)
@@ -1957,23 +1977,8 @@ onUnmounted(() => {
             //- quit rather than the moment they adapt. It takes a row of its
             //- own so the two answers sit directly underneath the problem.
             div.scene__reach-hint(v-if="outOfReachNow") {{ t('allies.outOfReachHint') }}
-            //- Fusion, offered where the player is already looking, and only
-            //- while they can pay for it. Takes the reinforced hand's slot for
-            //- the one build phase in which it is bought — see `mergeOffered`.
-            button.scene__merge(
-              v-if="mergeOffered"
-              type="button"
-              :aria-label="`${t('tech.names.unlockMerge')} — ${t('tech.descriptions.unlockMerge')}`"
-              :title="t('tech.descriptions.unlockMerge')"
-              @click="onBuyMerge"
-            )
-              TechIcon.scene__merge-icon(icon="merge")
-              span.scene__merge-name {{ t('tech.names.unlockMerge') }}
-              span.scene__merge-cost
-                IconCoin.scene__merge-coin
-                | {{ mergeOfferCost }}
             FRewardButton(
-              v-if="enhancedHandOffered && !mergeOffered"
+              v-if="enhancedHandOffered"
               tone="gold"
               size="sm"
               :label="t('blocks.enhancedHand')"
@@ -2078,9 +2083,16 @@ onUnmounted(() => {
 
             div.scene__tech-wrap
               span.scene__spotlight(v-if="showTechSpotlight") {{ t('tech.spotlight') }}
+              //- Two reasons this button can be lit, and they arrive in the
+              //- opposite order to the one you would guess: the DISCOVERY
+              //- nudge fires first (wave 1, before the player can afford
+              //- anything), and the "Spend!" spotlight only once there is
+              //- something to buy. The bounce belongs to the first — a player
+              //- who already knows the screen does not need to be jumped at.
               FHudButton(
                 tone="green"
-                :attention="showTechSpotlight"
+                :attention="showTechSpotlight || techNudge"
+                :bounce="techNudge"
                 :aria-label="t('tech.title')"
                 @click="openTech"
               )
@@ -2147,12 +2159,11 @@ onUnmounted(() => {
           //- payout explosion still originates on the coin, not the whole row.
           div.result__payout
             span.result__record(v-if="summary.wave >= bestWave && summary.wave > 0") {{ t('result.newRecord') }}
-            //- Run gold, not wallet coins — `summary.coins` is `runCoins`. The
-            //- ingot is the glyph the resource bar and the wave toast use for
-            //- it; printing the wallet's round coin here taught the player that
-            //- the two balances were one, on the screen where they meet.
+            //- The wallet coin, not the gold ingot: `grantRunCoins` pays this
+            //- straight into the purse the tech tree spends from, so the glyph
+            //- has to be the one on the coin badge it flies to.
             div.result__coins(ref="rewardCoinRef")
-              IconGold(class="result__coin-icon")
+              IconCoin(class="result__coin-icon")
               span.result__coin-value +{{ summary.coins }}
 
           //- Score, and where it stands. One strip, two cells: they stay side
@@ -2189,14 +2200,12 @@ onUnmounted(() => {
             v-if="twoXAvailable"
             tone="gold"
             label=""
-            :aria-label="firstRunBonusActive ? t('result.firstRunBonus') : t('result.tripleCoins')"
+            :aria-label="t('result.tripleCoins')"
             @click="onTwoX"
           )
             span.result__twox
-              span(v-if="firstRunBonusActive") {{ t('result.firstRunBonus') }}
-              template(v-else)
-                span {{ RESULT_COIN_MULTIPLIER }}×
-                IconCoin(class="result__twox-icon")
+              span {{ RESULT_COIN_MULTIPLIER }}×
+              IconCoin(class="result__twox-icon")
 
           //- One grace continue per run. Offered ABOVE the restart CTAs so it
           //- reads as the alternative to ending the run rather than a variant
@@ -2213,7 +2222,8 @@ onUnmounted(() => {
             //- offer, and they have to be ON the button rather than discovered
             //- after the ad has already played.
             span.result__continue
-              span {{ t('result.continueRun') }}
+              GameIcon.result__continue-icon(name="fast-forward")
+              span {{ t('result.continueWave', { n: continueWave }) }}
               span.result__continue-bonus
                 span +{{ CONTINUE_WOOD }}
                 IconWood.result__res-icon
@@ -2545,105 +2555,6 @@ onUnmounted(() => {
 
   @media (prefers-reduced-motion: reduce)
     animation: none
-
-// ─── The Fusion offer ───────────────────────────────────────────────────────
-//
-// Loud on purpose, and only ever once per save: this is the button whose whole
-// problem was that nobody saw it. A gold pill — the tech tree's own colour for
-// "you can afford this" — standing in a warm glow, with a sheen crossing it
-// every few seconds so it catches the eye of a player whose attention is on
-// the tray below it.
-.scene__merge
-  position: relative
-  display: inline-flex
-  align-items: center
-  gap: clamp(0.18rem, 1.1vw, 0.38rem)
-  // Tap-target floor, matching the perk buttons it stands among.
-  min-height: 2.25rem
-  padding: clamp(0.2rem, 1.2vw, 0.4rem) clamp(0.45rem, 2.4vw, 0.85rem)
-  border: 2px solid #0f1a30
-  border-radius: clamp(0.5rem, 2.4vw, 0.9rem)
-  background-image: linear-gradient(to bottom, #ffd469, #f0a12c)
-  color: #2a1602
-  font-weight: 900
-  font-size: clamp(0.62rem, 2.6vw, 0.78rem)
-  letter-spacing: 0.02em
-  text-transform: uppercase
-  cursor: pointer
-  touch-action: manipulation
-  -webkit-tap-highlight-color: transparent
-  // The sheen sweeps INSIDE the pill; the glow is a box-shadow so it is not
-  // clipped by the same rule.
-  overflow: hidden
-  animation: merge-glow 2.2s ease-in-out infinite
-  transition: transform 100ms ease-out, filter 100ms ease-out
-
-  &::after
-    content: ''
-    position: absolute
-    // Oversized and skewed, so the band crosses the whole pill corner to
-    // corner rather than wiping down it like a progress bar.
-    inset: -60% -70%
-    background-image: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, 0.85) 50%, transparent 58%)
-    transform: translateX(-120%)
-    animation: merge-sheen 3.6s ease-in-out infinite
-    pointer-events: none
-
-  &:hover
-    filter: brightness(1.06)
-
-  &:active
-    transform: translateY(2px) scale(0.96)
-
-.scene__merge-icon
-  width: clamp(0.9rem, 4vw, 1.15rem)
-  height: clamp(0.9rem, 4vw, 1.15rem)
-  color: #2a1602
-
-.scene__merge-cost
-  display: inline-flex
-  align-items: center
-  gap: 0.18rem
-  padding-left: clamp(0.18rem, 1.1vw, 0.36rem)
-  border-left: 2px solid rgba(42, 22, 2, 0.28)
-
-.scene__merge-coin
-  width: clamp(0.72rem, 3.2vw, 0.95rem)
-  height: clamp(0.72rem, 3.2vw, 0.95rem)
-
-// Three shadows, and each is doing a different job.
-//
-// A dark CONTACT shadow first: the row sits over pale planks and paler water,
-// and a warm glow alone on a light background is the same mistake the
-// placement sockets were making — invisible at exactly the moment it matters.
-// Then a saturated amber halo, which is the part that reads as "glow", and a
-// wide soft one behind it for the bloom. The low keyframe still carries all
-// three: a pulse that fades to nothing is invisible half the time, and half of
-// "the button nobody noticed" is the problem this button exists to solve.
-@keyframes merge-glow
-  0%, 100%
-    box-shadow: 0 0.16rem 0.45rem rgba(8, 16, 30, 0.6), 0 0 0.7rem rgba(255, 168, 40, 0.85), 0 0 1.9rem rgba(255, 140, 25, 0.45)
-  50%
-    box-shadow: 0 0.16rem 0.45rem rgba(8, 16, 30, 0.6), 0 0 1.2rem rgba(255, 190, 70, 1), 0 0 3.1rem rgba(255, 145, 30, 0.75)
-
-// Most of the cycle is the wait; the sweep itself is quick, the way a
-// highlight crossing a real surface is.
-@keyframes merge-sheen
-  0%, 55%
-    transform: translateX(-120%)
-  100%
-    transform: translateX(120%)
-
-// The glow is the affordance; the movement is only the invitation. Held still,
-// it keeps the first and drops the second.
-@media (prefers-reduced-motion: reduce)
-  .scene__merge
-    animation: none
-    box-shadow: 0 0 0.8rem rgba(255, 214, 130, 0.75), 0 0 2rem rgba(255, 170, 60, 0.45)
-
-    &::after
-      animation: none
-      opacity: 0
 
 .scene__cavalry
   position: relative
@@ -3242,6 +3153,16 @@ onUnmounted(() => {
   flex: 0 0 auto
   width: 1.35em
   height: 1.35em
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45))
+
+// The fast-forward mark that opens the caption. It replaces the words "Rebuild
+// & continue", which wrapped onto two lines in German and Vietnamese and made
+// the button the tallest control on the screen. Sized off the label rather
+// than fixed, so it tracks the button's own type scale.
+.result__continue-icon
+  flex: 0 0 auto
+  width: 1.15em
+  height: 1.15em
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45))
 
 .result__actions

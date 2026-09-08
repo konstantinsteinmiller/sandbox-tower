@@ -214,21 +214,21 @@ describe('economy', () => {
     }
   })
 
-  it('keeps the in-game Fusion offer buyable in one tap', () => {
-    // GameScene offers Fusion from the HUD — the mechanic almost nobody found
-    // in the store — and buys it with the prerequisite in a single tap, for a
-    // total it reads off this tree. That shortcut assumes the shape below:
-    // ONE prerequisite, itself a root. Grow the chain and the offer would
-    // charge for the first node and silently fail on the second, which is the
-    // worst outcome available. Break this deliberately, and fix `onBuyMerge`.
-    const merge = TECH_BY_ID['unlockMerge']!
-    expect(merge.requires).toEqual(['foundations'])
-    expect(TECH_BY_ID['foundations']!.requires).toEqual([])
+  it('never puts merging back behind a purchase', () => {
+    // Merging was a 200-coin node — 220 with its prerequisite — plus a glowing
+    // HUD button that sold both in one tap, and it was still the mechanic
+    // almost nobody met: finding it meant opening a screen a first-time player
+    // has no reason to open. It is the core verb now, taught by the tutorial's
+    // own first placement and free to everybody. Nothing here may sell it back.
+    expect(TECH_BY_ID['unlockMerge']).toBeUndefined()
+    for (const n of TECH_NODES) expect(n.effect.kind, n.id).not.toBe('mergeUnlock')
 
-    // And the price the HUD shows. 200 for the unlock, plus 20 for the first
-    // rank of `foundations` — half of its 40, because a ranked node's opening
-    // rank is discounted. This is the "220 coins" the offer waits for.
-    expect(techCost('unlockMerge', 0)).toBe(200)
+    // What survives is the node that pays MORE for merging, and it hangs off a
+    // root so a player can reach it from their first purchase.
+    const welds = TECH_BY_ID['forgeWelds']!
+    expect(welds.effect.kind).toBe('mergePower')
+    expect(welds.requires).toEqual(['foundations'])
+    expect(TECH_BY_ID['foundations']!.requires).toEqual([])
     expect(techCost('foundations', 0)).toBe(20)
   })
 

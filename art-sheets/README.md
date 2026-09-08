@@ -225,7 +225,18 @@ parent sheet.
 pnpm slice-sheets              # everything in art-sheets/painted/
 pnpm slice-sheets --dry        # print the plan, write nothing
 pnpm slice-sheets art-sheets/painted/sheet-blocks.png
+pnpm slice-sheets --only icon-chest    # that one file; nothing else is rewritten
 ```
+
+**Adding ONE asset to a set that is already compressed? Use `--only`.** A sheet
+is sliced whole by default, so a run that exists to pick up a single new bitmap
+re-encodes every other target on that sheet as well — the art looks identical
+and the compressed copies are gone. `--only` narrows the run to what is
+actually being added: pass a cell id (`icon-chest`, `ui/coin`,
+`block/gate/body`), a target path (`images/icons/chest.webp`) or just its file
+name (`chest`). It repeats, it takes comma-separated lists, a walk cycle is
+always selected as a whole strip, and matching is exact — a selector that hits
+nothing fails the run rather than quietly writing everything.
 
 Each sliceable cell is cut, encoded as WebP and written to its `target` under
 `public/`. Output edge defaults to the painted cell size — slice the `@2x` sheet

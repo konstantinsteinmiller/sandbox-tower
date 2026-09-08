@@ -12,7 +12,7 @@
  */
 export const GAME_ICON_NAMES = [
   // Transport / run control
-  'play', 'pause', 'replay', 'skip-forward', 'skip-back', 'stop',
+  'play', 'pause', 'replay', 'skip-forward', 'skip-back', 'fast-forward', 'stop',
   // Navigation
   'menu', 'home', 'back', 'forward', 'close', 'check',
   // Meta screens

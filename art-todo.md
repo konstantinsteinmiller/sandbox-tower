@@ -325,6 +325,8 @@ painted backdrops, add a `bg` probe in `renderBackground` keyed by tier.
 | G3 | `/public/images/bg/parchment-ribbon_553x188.webp` | Result ribbon (`FReward`) | shipped |
 | G4 | `/public/images/icons/movie_128x96.webp` | Every rewarded-ad button | shipped |
 | G5 | `/public/favicon.ico` | Favicon | shipped |
+| G6 | `/public/images/bg/ribbon.webp` | Result ribbon (`FReward`) — flat 5:1 band replacing G3, 41% shorter at the same width | shipped |
+| G7 | `/public/images/icons/wood.webp`, `stone.webp`, `gold.webp`, `chest.webp` | HUD glyphs and the daily chest — art-layer overrides probed by `ICON_IDS`, vector fallback when absent | shipped |
 
 ## H. Effects — procedural by design
 

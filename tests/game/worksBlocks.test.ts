@@ -88,7 +88,7 @@ describe('buff auras', () => {
   })
 
   it('counts one aura once, however many cells a merged neighbour touches', async () => {
-    const g = await loadGame({ unlockMerge: 1 })
+    const g = await loadGame({})
     // A 2x1 merged cannon with a single banner beside it touches that banner
     // along one cell; a naive per-cell walk would still have counted it twice.
     g.placeBlock('cannon', -3, 0)

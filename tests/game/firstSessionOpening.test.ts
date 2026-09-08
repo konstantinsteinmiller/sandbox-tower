@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { firstRunBudgetScale, planWave } from '@/game/waves'
+import { tierOf } from '@/game/blocks'
 
 /**
  * ─── The first-session scripted opening ─────────────────────────────────────
@@ -120,6 +121,62 @@ describe('the free starter fort', () => {
     expect(g2.resumeRun()).toBe(true)
     expect(g2.getBlocks().get('0,1')?.typeId).toBe('cannon')
     expect(g2.getBlocks().size).toBe(4)
+  })
+})
+
+/**
+ * ─── The tutorial's first placement is a MERGE ───────────────────────────────
+ *
+ * The coach marks deal a `cannon1` into the weapon slot and point at the
+ * shoulder of the fort — the first entry of `TUTORIAL_CELLS` in `GameScene` —
+ * because the fort already has a cannon on the Gate and the two fuse on
+ * contact. That is how a first-time player meets merging now: not as a
+ * 200-coin node in a screen they never open, but as the first thing their own
+ * hand does.
+ *
+ * The beat is spread over the scene component, the shape catalogue and the
+ * opening purse, so nothing else can pin it: change the fort's gun, the
+ * tutorial's shape or the starting resources and the lesson silently becomes
+ * "put a block somewhere" again, with every test still green.
+ */
+describe('the tutorial merge', () => {
+  /** Kept in step with `TUTORIAL_SHAPE` / `TUTORIAL_CELLS[0]` in GameScene. */
+  const TUTORIAL_SHAPE = 'cannon1'
+  const SHOULDER = { c: -1, r: 1 }
+
+  it('deals the same gun the fort is already carrying', async () => {
+    const { SHAPE_BY_ID } = await import('@/game/shapes')
+    const cells = SHAPE_BY_ID[TUTORIAL_SHAPE]!.cells
+    // One cell, so it cannot be placed "wrong" by rotation, and a cannon, so
+    // it twins with the one the scripted opening puts on the Gate.
+    expect(cells).toHaveLength(1)
+    expect(cells[0]![2]).toBe('cannon')
+  })
+
+  it('is affordable out of the opening purse', async () => {
+    const g = await loadGame()
+    g.startRun()
+    g.seedScriptedOpening()
+    // The beat has no Skip button, so a piece the player cannot buy would
+    // strand them. 25 wood + 10 stone against 120 + 40.
+    expect(g.canAffordShape(TUTORIAL_SHAPE)).toBe(true)
+  })
+
+  it('fuses with the fort cannon on the very first placement', async () => {
+    const g = await loadGame()
+    g.startRun()
+    g.seedScriptedOpening()
+    expect(g.canPlaceShapeAt(TUTORIAL_SHAPE, SHOULDER.c, SHOULDER.r, 0)).toBe(true)
+
+    g.offers.value = [...g.offers.value.slice(0, 1), TUTORIAL_SHAPE, ...g.offers.value.slice(2)]
+    expect(g.placeShape(1, SHOULDER.c, SHOULDER.r, 0)).toBe(true)
+
+    // One gun where there were two, two cells wide, at tier 2 — and no tech
+    // whatsoever bought to get it.
+    const cannons = [...g.getTowerBlocks().values()].filter((b) => b.typeId === 'cannon')
+    expect(cannons).toHaveLength(1)
+    expect(tierOf(cannons[0]!.tier)).toBe(2)
+    expect([cannons[0]!.w ?? 1, cannons[0]!.h ?? 1]).toEqual([2, 1])
   })
 })
 

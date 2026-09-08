@@ -54,6 +54,18 @@ export const ICON_PATHS: Record<GameIconName, string[]> = {
     'M20 17.06A1.6 1.6 0 0 1 17.53 18.41L9.68 13.34A1.6 1.6 0 0 1 9.68 10.66L17.53 5.59A1.6 1.6 0 0 1 20 6.94L20 17.06Z',
     'M3.6 6.5A1.6 1.6 0 0 1 5.2 4.9L5.4 4.9A1.6 1.6 0 0 1 7 6.5L7 17.5A1.6 1.6 0 0 1 5.4 19.1L5.2 19.1A1.6 1.6 0 0 1 3.6 17.5L3.6 6.5Z'
   ],
+  // Two right-facing triangles — the 'fast forward' mark, and NOT `skip-forward`
+  // above, which is a triangle plus a bar and means 'next'. Both are on the
+  // defeat screen at once (continue, and start over), so they have to be
+  // different shapes or the two buttons read as the same button.
+  //
+  // Derived from `play`'s triangle by an affine squeeze rather than drawn from
+  // scratch, so the corner rounding is the same hand-tuned curve; the arcs are
+  // elliptical for exactly that reason.
+  'fast-forward': [
+    'M2.9 7.06A1.41 1.7 0 0 1 5.04 5.6L11.85 10.54A1.41 1.7 0 0 1 11.85 13.46L5.04 18.4A1.41 1.7 0 0 1 2.9 16.94L2.9 7.06Z',
+    'M12.65 7.06A1.41 1.7 0 0 1 14.79 5.6L21.6 10.54A1.41 1.7 0 0 1 21.6 13.46L14.79 18.4A1.41 1.7 0 0 1 12.65 16.94L12.65 7.06Z'
+  ],
   'stop': [
     'M4.8 8.2A3.4 3.4 0 0 1 8.2 4.8L15.8 4.8A3.4 3.4 0 0 1 19.2 8.2L19.2 15.8A3.4 3.4 0 0 1 15.8 19.2L8.2 19.2A3.4 3.4 0 0 1 4.8 15.8L4.8 8.2Z'
   ],

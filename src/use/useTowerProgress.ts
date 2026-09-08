@@ -7,7 +7,7 @@ import {
 } from '@/keys'
 import useTowerEconomy from '@/use/useTowerEconomy'
 import {
-  TECH_NODES, techCost, sumEffect, hasEffect, unlockedBlocks, nodeIn
+  TECH_NODES, techCost, sumEffect, unlockedBlocks, nodeIn
 } from '@/game/tech'
 import { BLOCK_DEFS } from '@/game/blocks'
 import { activeRules, onRulesChange, type RuleSet } from '@/game/rules'
@@ -131,14 +131,18 @@ export const cavalryMul: ComputedRef<number> = computed(() => 1 + sum('cavalryPo
 /**
  * Whether adjacent blocks fuse at all.
  *
- * A LANDING-merge mode fuses without any node — the merge is its core verb,
- * not a purchase — so the rule set answers first and the tree second.
+ * The rule set is the ONLY answer now: merging is the game's best verb and it
+ * is on from the first placement of a first run, on both boards. It used to be
+ * sold in the tech tree for 200 coins, and the measured outcome was that most
+ * players never met it — finding it required reading a screen they had no
+ * reason to open. A mechanic nobody discovers is worth less than a mechanic
+ * nobody pays for, so the node is gone and the tutorial teaches the merge
+ * instead. `off` stays reachable for a rule set that genuinely wants no
+ * merging; nothing ships with it today.
  */
 export const mergeUnlocked: ComputedRef<boolean> = computed(() => {
   void rulesVersion.value
-  if (R().merge === 'landing') return true
-  if (R().merge === 'off') return false
-  return hasEffect(tech.value.levels, 'mergeUnlock', nodesNow())
+  return R().merge !== 'off'
 })
 
 /**

@@ -1,6 +1,6 @@
 {
   "name": "tower-siege",
-  "version": "2.0.4",
+  "version": "2.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -27,6 +27,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "slice-sheets": "node tools/slice-sheets.mjs",
+    "slice-sheets-only": "node tools/slice-sheets.mjs --only ribbon",
+    "leaderboard:snapshot": "node scripts/leaderboard-snapshot.mjs",
+    "leaderboard:seed": "node scripts/leaderboard-seed.mjs",
     "perf:preview": "vite build && vite preview --port 4177 --strictPort",
     "perf:ab": "node tools/perf-ab.mjs --url http://localhost:4177/index.html --gpu --reps 5 --frames 1800 --warmframes 240 --throttle 4 --viewport 412x915x2 --seed 7 --tier mid --wave 10 --warmup 1",
     "perf:profile-build": "vite build --minify false --outDir dist-prof",

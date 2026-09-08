@@ -35,6 +35,29 @@ const fight = (g: { step: (ms: number) => void, phase: { value: string } }, ms: 
   }
 }
 
+/**
+ * Four archers around the Gate, STAGGERED so no two of them touch.
+ *
+ * They used to sit shoulder to shoulder at -2, -1, 1, 2. Merging is the
+ * board's default now, so that line builds two fused 2x1 guns rather than four
+ * — half the rounds in flight, which is half of what these specs measure. The
+ * crates lift the inner pair a row instead: same cluster, same distance to the
+ * lane the grunts walk, and four separate barrels.
+ *
+ * Spacing them sideways (-3, -1, 1, 3) is NOT the same fixture and does not
+ * work: the outer pair fires late enough that the grunt is already dead, and
+ * the round count comes out at the two-gun figure anyway.
+ */
+const armFourGuns = (g: {
+  placeBlock: (typeId: string, c: number, r: number) => boolean
+}): void => {
+  const fort: ReadonlyArray<readonly [string, number, number]> = [
+    ['archer', -2, 0], ['wood', -1, 0], ['archer', -1, 1],
+    ['archer', 2, 0], ['wood', 1, 0], ['archer', 1, 1]
+  ]
+  for (const [id, c, r] of fort) expect(g.placeBlock(id, c, r), `${id} ${c},${r}`).toBe(true)
+}
+
 beforeEach(() => {
   localStorage.clear()
 })
@@ -175,7 +198,7 @@ describe('projectile pooling', () => {
     const g = await loadGame()
     g.startRun()
     g.wood.value = 5000
-    for (const c of [-2, -1, 1, 2]) expect(g.placeBlock('archer', c, 0)).toBe(true)
+    armFourGuns(g)
 
     // A long, busy fight, so the pool is churning the whole time. Two distinct
     // ways swap-and-pop plus a free list can go wrong, checked every step:
@@ -204,7 +227,7 @@ describe('projectile pooling', () => {
     const g = await loadGame()
     g.startRun()
     g.wood.value = 5000
-    for (const c of [-2, -1, 1, 2]) expect(g.placeBlock('archer', c, 0)).toBe(true)
+    armFourGuns(g)
 
     // Distinct OBJECTS handed out, against distinct ROUNDS fired. If the pool
     // were bypassed the two would track each other; the whole point is that the

@@ -68,10 +68,11 @@ const difficultyList = computed(() => [
 
 const difficultyHint = computed(() => t('options.difficultyHints.' + userDifficulty.value))
 
-// Background-music track picker — Trance Tunnel (default) vs Cozy Harmony.
+// Background-music track picker. The default leads, so the first option is
+// the one the player is already hearing — see `DEFAULT_MUSIC_TRACK`.
 const musicTrackList = computed(() => [
-  { value: 'trance', label: t('options.musicTracks.trance') },
-  { value: 'cozy', label: t('options.musicTracks.cozy') }
+  { value: 'cozy', label: t('options.musicTracks.cozy') },
+  { value: 'trance', label: t('options.musicTracks.trance') }
 ])
 </script>
 

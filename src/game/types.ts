@@ -576,8 +576,6 @@ export type TechEffect =
   | { kind: 'navalDamage'; pct: number }
   | { kind: 'navalHp'; pct: number }
   | { kind: 'dockWidth'; add: number }
-  /** Permits merging at all. Binary. */
-  | { kind: 'mergeUnlock' }
   /** Extra damage for MERGED blocks only (tier 2 and 3). */
   | { kind: 'mergePower'; pct: number }
   /** Strengthens what a BUFF block's aura is worth, not how many it reaches. */

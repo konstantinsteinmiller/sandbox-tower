@@ -25,6 +25,11 @@ interface Props {
   canRepair: boolean
   warnings: Array<{ id: string; n: number; m?: number }>
   menuOpen: boolean
+  /** Pull the eye to the menu, because the tech tree is behind it and the
+   *  player has not found it yet. Drops the moment the drawer is opened —
+   *  holding it while the drawer is up would be shouting at a door that is
+   *  already open. */
+  menuAttention?: boolean
 }
 
 defineProps<Props>()
@@ -44,7 +49,7 @@ const { t } = useI18n()
   div.bar
     button.bar__menu(
       type="button"
-      :class="{ 'is-open': menuOpen }"
+      :class="{ 'is-open': menuOpen, 'is-attention': menuAttention && !menuOpen }"
       :aria-label="t('mobile.menu')"
       @click="emit('menu')"
     )
@@ -113,6 +118,35 @@ const { t } = useI18n()
 
   &.is-open
     border-color: #7fe0ff
+
+  // The tech tree lives behind this button, so on the phone the nudge has to
+  // start here — a glow on a screen the player cannot see is no nudge at all.
+  // Same gold aura and same double-hop as the tech button itself
+  // (`FHudButton.is-bounce`), so the two read as one trail rather than two
+  // unrelated blinking things.
+  &.is-attention
+    border-color: #ffcd00
+    animation: bar-menu-pulse 1.6s ease-in-out infinite, bar-menu-bounce 2.4s ease-in-out infinite
+
+@keyframes bar-menu-pulse
+  0%, 100%
+    filter: drop-shadow(0 0 0 rgba(255, 200, 0, 0))
+  50%
+    filter: drop-shadow(0 0 8px rgba(255, 200, 0, 0.75))
+
+@keyframes bar-menu-bounce
+  0%, 34%, 100%
+    transform: translateY(0)
+  8%
+    transform: translateY(-22%)
+  17%
+    transform: translateY(0)
+  25%
+    transform: translateY(-11%)
+
+@media (prefers-reduced-motion: reduce)
+  .bar__menu.is-attention
+    animation: bar-menu-pulse 1.6s ease-in-out infinite
 
 .bar__repair
   display: flex

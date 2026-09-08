@@ -89,6 +89,15 @@
       "target": "images/bg/roof.webp"
     },
     {
+      "id": "ribbon",
+      "file": "bg-ribbon.png",
+      "width": 1280,
+      "height": 256,
+      "tileable": false,
+      "bg": "magenta",
+      "target": "images/bg/ribbon.webp"
+    },
+    {
       "id": "icon-wood",
       "file": "icon-wood.png",
       "width": 512,
@@ -114,6 +123,15 @@
       "tileable": false,
       "bg": "magenta",
       "target": "images/icons/gold.webp"
+    },
+    {
+      "id": "icon-chest",
+      "file": "icon-chest.png",
+      "width": 512,
+      "height": 512,
+      "tileable": false,
+      "bg": "magenta",
+      "target": "images/icons/chest.webp"
     }
   ],
   "walks": [

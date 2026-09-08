@@ -112,6 +112,16 @@ export const ONBOARDED_KEY = 'ts_onboarded'
 export const TUTORIAL_KEY = 'ts_tutorial'
 /** One-time "you can afford a tech node" spotlight on the Tech button. */
 export const TECH_SPOTLIGHT_KEY = 'ts_tech_spotlight_seen'
+/**
+ * Has the player ever opened the tech tree at all?
+ *
+ * Distinct from `TECH_SPOTLIGHT_KEY`, which fires only once there is something
+ * AFFORDABLE to spend on — a moment that can arrive many runs in, or never.
+ * This one drives the "there is a tech tree, go and look at it" nudge that
+ * starts after wave 1, and it is shared by both boards: a player who found the
+ * tree on the phone must not be nagged about it again on the desktop.
+ */
+export const TECH_FOUND_KEY = 'ts_tech_found'
 /** Rotating cursor into the defeat-screen tip pool, so two deaths in a row
  *  never teach the same thing twice. */
 export const TIP_CURSOR_KEY = 'ts_tip_cursor'

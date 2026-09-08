@@ -37,7 +37,7 @@ import { spriteFor } from '@/game/art'
 import type { Block } from '@/game/types'
 
 import { getState, setState } from '@/use/useTowerState'
-import { DAILY_BONUS_DAY_KEY, M2_ONBOARDED_KEY, M2_TUTORIAL_KEY } from '@/keys'
+import { M2_ONBOARDED_KEY, M2_TUTORIAL_KEY } from '@/keys'
 import useSounds, { useMusic } from '@/use/useSound'
 import { useScreenshake } from '@/use/useScreenshake'
 import { isGamePaused, isAdShowing, acquireAppPause } from '@/use/useGamePause'
@@ -53,6 +53,9 @@ import { syncGameplayLifecycle } from '@/use/useGameplayLifecycle'
 import { isAnyModalOpen } from '@/use/useModalState'
 import { playFirstStartInterstitial } from '@/use/useFirstStartInterstitial'
 import { initDeviceTier, type RenderProfile } from '@/use/useDeviceTier'
+import {
+  reportRun, rankFor, playerTotal, leaderboardEnabled, leaderboardPending
+} from '@/use/useLeaderboard'
 import { perf } from '@/use/usePerfProbe'
 import { debugSetWave } from '@/use/useTowerGame'
 
@@ -66,6 +69,7 @@ import TopStrip from './components/TopStrip.vue'
 import DropTray from './components/DropTray.vue'
 import WaveBar from './components/WaveBar.vue'
 import BlueprintsModal from './components/BlueprintsModal.vue'
+import { markTechFound, refreshTechFound, techNudge } from '@/use/useTechDiscovery'
 import RotateOverlay from './components/RotateOverlay.vue'
 import ControlHint, { type HintId } from '@/components/game/ControlHint.vue'
 import WaveClearToast from '@/components/game/WaveClearToast.vue'
@@ -80,7 +84,7 @@ import MissionsModal from '@/components/organisms/MissionsModal.vue'
 import TreasureChest from '@/components/organisms/TreasureChest.vue'
 import OptionsModal from '@/components/organisms/OptionsModal.vue'
 import IconCoin from '@/components/icons/IconCoin.vue'
-import IconGold from '@/components/icons/IconGold.vue'
+import GameIcon from '@/components/icons/GameIcon.vue'
 import IconWood from '@/components/icons/IconWood.vue'
 
 /**
@@ -945,10 +949,27 @@ watch(merged, (m) => { if (m) completeTutorialStep('merge') })
 // requested and awaited BEFORE the result screen is revealed.
 
 const twoXUsed = ref(false)
-const firstRunBonusActive = ref(false)
 const summary = ref(runSummary())
 const rewardCoinRef = ref<HTMLElement | null>(null)
-const todayKey = (): string => new Date().toISOString().slice(0, 10)
+
+// ─── Where this run leaves the player, globally ─────────────────────────────
+//
+// The lifetime best, not this run's score: the board is a table of bests, and
+// ranking a single run against it would show a player their placing FALL after
+// a bad game.
+const bestScoreValue = computed(() => Math.max(progress.bestScore.value, summary.value.score))
+const rankValue = computed(() => rankFor(bestScoreValue.value))
+const rankPending = computed(() => leaderboardPending.value && rankValue.value === 0)
+const showRank = computed(
+  () => leaderboardEnabled && bestScoreValue.value > 0 && (rankPending.value || rankValue.value !== 0)
+)
+/** Built in script, not the template: `#{…}` is Pug's own interpolation, so a
+ *  literal `#` in front of a mustache is a parse error, not a hash sign.
+ *
+ *  No "#100+" branch — `rankFor` has no sentinel to return. */
+const rankDisplay = computed(() =>
+  rankPending.value ? '…' : `#${rankValue.value.toLocaleString()}`
+)
 const RESULT_COIN_MULTIPLIER = 3
 const RESULT_INTERSTITIAL_DELAY_MS = 600
 const AD_GATE_SETTLE_TIMEOUT_MS = 30_000
@@ -957,9 +978,20 @@ const wait = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms)
 /** What a continue grants, in the one materials pile this board shows. */
 const continueMaterials = CONTINUE_WOOD + Math.round(CONTINUE_STONE * STONE_FOLD)
 
+/** Deaths before the 3× offer appears. See the desktop scene's note: `runs`
+ *  is counted at run START, so the second defeat screen is the first to read 2. */
+const RESULT_TWOX_MIN_DEATHS = 2
+
 const twoXAvailable = computed(() =>
-  !twoXUsed.value && summary.value.coins > 0 && canOfferReward.value
+  !twoXUsed.value
+  && summary.value.coins > 0
+  && progress.runs.value >= RESULT_TWOX_MIN_DEATHS
+  && canOfferReward.value
 )
+
+/** The wave a continue hands the tower back at: the last one actually beaten,
+ *  which is the build phase the snapshot was taken in. Floored at 1. */
+const continueWave = computed(() => Math.max(1, summary.value.wavesCleared))
 
 const maybeShowInterstitial = async (opts: { firstIsExempt?: boolean } = {}): Promise<void> => {
   if (!isInterstitialReady.value) return
@@ -996,7 +1028,17 @@ const presentDefeat = async (): Promise<void> => {
     wave: s.wave, kills: s.kills, score: s.score, wavesCleared: s.wavesCleared,
     height: s.height, blocks: s.blocks, blocksPlaced: s.blocksPlaced
   })
-  firstRunBonusActive.value = getState<string>(DAILY_BONUS_DAY_KEY, '') !== todayKey()
+  // The board, from THIS board too. It was only ever wired on the desktop
+  // scene, so every run played on a phone — which is every run Poki serves —
+  // went unreported: the player never appeared on the leaderboard and never
+  // saw a rank.
+  //
+  // Fire-and-forget, never awaited, and deliberately AFTER `recordRunEnd` so it
+  // posts the lifetime best this run just updated rather than the one before
+  // it. Awaiting would put a captive-portal login page between the player and
+  // their result screen for the request's full 6 s timeout; `reportRun`
+  // swallows every failure by contract.
+  void reportRun(progress.bestScore.value, Math.max(s.wave, 1))
 
   await maybeShowInterstitial({ firstIsExempt: true })
   await waitForAdGateClear()
@@ -1027,12 +1069,6 @@ const onTwoX = async (): Promise<void> => {
   })
 }
 
-const consumeFirstRunBonus = (): void => {
-  if (!firstRunBonusActive.value) return
-  firstRunBonusActive.value = false
-  setState(DAILY_BONUS_DAY_KEY, todayKey())
-}
-
 const beginRun = (): void => {
   startRun()
   if (isFirstSession()) seedScriptedOpening()
@@ -1053,13 +1089,11 @@ const startFreshRun = (): void => {
 
 const onRebuild = (): void => {
   if (adInFlight.value) return
-  consumeFirstRunBonus()
   startFreshRun()
 }
 
 const onUpgrade = (): void => {
   if (adInFlight.value) return
-  consumeFirstRunBonus()
   showResult.value = false
   blueprintsIntro.value = true
   showBlueprints.value = true
@@ -1085,7 +1119,12 @@ const openBlueprints = (): void => {
 
 // Closing the blueprints after a defeat returns to the result screen.
 watch(showBlueprints, (open, wasOpen) => {
-  if (open) return
+  // The tree is FOUND the moment it opens, by whatever route — the HUD button,
+  // or the defeat screen's Upgrade button. Watching the modal rather than
+  // marking it at each call site is deliberate: there are already two ways in,
+  // and a third added later would otherwise leave the nudge bouncing at a
+  // player who is looking straight at the screen it points to.
+  if (open) { markTechFound(); return }
   blueprintsIntro.value = false
   if (wasOpen && phase.value === 'defeat') showResult.value = true
 })
@@ -1219,6 +1258,10 @@ const installBenchDriver = (): void => {
 onMounted(() => {
   void boot()
   installBenchDriver()
+  // Re-read after boot: on a platform build the cloud save may not have landed
+  // when `useTechDiscovery` first read it, and a returning player must not be
+  // told about a screen they already use.
+  refreshTechFound()
   installFullscreenWatch()
   window.addEventListener('resize', resize)
   window.addEventListener('orientationchange', onOrientationChange)
@@ -1355,7 +1398,17 @@ onUnmounted(() => {
           FHudButton(tone="slate" :aria-label="t('options.title')" @click="menuOpen = false; showOptions = true")
             svg(viewBox="0 0 24 24" fill="currentColor")
               path(d="M12 4 a1 1 0 0 1 1 1 v1.6 a6 6 0 0 1 1.8 0.7 l1.1 -1.1 a1 1 0 0 1 1.4 1.4 l -1.1 1.1 a6 6 0 0 1 0.7 1.8 H18 a1 1 0 1 1 0 2 h-1.6 a6 6 0 0 1 -0.7 1.8 l1.1 1.1 a1 1 0 0 1 -1.4 1.4 l-1.1 -1.1 a6 6 0 0 1 -1.8 0.7 V18 a1 1 0 1 1 -2 0 v -1.6 a6 6 0 0 1 -1.8 -0.7 l-1.1 1.1 a1 1 0 0 1 -1.4 -1.4 l1.1 -1.1 a6 6 0 0 1 -0.7 -1.8 H6 a1 1 0 1 1 0 -2 h1.6 a6 6 0 0 1 0.7 -1.8 L7.2 7.6 a1 1 0 0 1 1.4 -1.4 l1.1 1.1 a6 6 0 0 1 1.8 -0.7 V5 a1 1 0 0 1 1 -1 Z M12 9 a3 3 0 1 0 0 6 a3 3 0 0 0 0 -6 Z")
-          FHudButton(tone="green" :aria-label="t('tech.blueprints.title')" @click="openBlueprints")
+          //- The second half of the trail. The menu button got the player to
+          //- open the drawer; without this they are looking at three buttons
+          //- with no reason to pick this one, and the nudge dies one tap short
+          //- of the screen it exists to reach.
+          FHudButton(
+            tone="green"
+            :attention="techNudge"
+            :bounce="techNudge"
+            :aria-label="t('tech.blueprints.title')"
+            @click="openBlueprints"
+          )
             svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
               rect(x="4" y="3" width="16" height="18" rx="2")
               path(d="M8 8h8M8 12h8M8 16h5")
@@ -1392,6 +1445,7 @@ onUnmounted(() => {
           :can-repair="canRepair"
           :warnings="waveWarnings"
           :menu-open="menuOpen"
+          :menu-attention="techNudge"
           @call="onCallWave"
           @set-speed="onSetSpeed"
           @buy-speed="onBuySpeed"
@@ -1405,23 +1459,33 @@ onUnmounted(() => {
         span.drop__ribbon {{ t('result.towerFell') }}
       div.dresult
         span.dresult__wave {{ t('result.reachedWave', { n: summary.wave }) }}
+        //- The one number on this screen that is not about this run: it is
+        //- about everyone else. Drops out entirely when there is no board to
+        //- rank against, rather than leaving an empty plaque.
+        span.dresult__rank(v-if="showRank")
+          | {{ t('result.rankLabel') }} {{ rankDisplay }}
+          //- Its own element, not a leading space in the text: Pug trims the
+          //- whitespace at the head of an inline text block, so a source-level
+          //- gap silently rendered "#47of 361" in every language. The gap has
+          //- to come from CSS.
+          span.dresult__rank-note(v-if="playerTotal > 0") {{ t('result.rankOf', { n: playerTotal.toLocaleString() }) }}
         span.dresult__record(v-if="summary.wave >= bestWave && summary.wave > 0") {{ t('result.newRecord') }}
+        //- The wallet coin: this payout is added straight to the purse the
+        //- tech tree spends from, so it must not wear the run-gold ingot.
         div.dresult__coins(ref="rewardCoinRef")
-          IconGold(class="dresult__coin-icon")
+          IconCoin(class="dresult__coin-icon")
           span.dresult__coin-value +{{ summary.coins }}
         div.dresult__cta
           FRewardButton(
             v-if="twoXAvailable"
             tone="gold"
             label=""
-            :aria-label="firstRunBonusActive ? t('result.firstRunBonus') : t('result.tripleCoins')"
+            :aria-label="t('result.tripleCoins')"
             @click="onTwoX"
           )
             span.dresult__twox
-              span(v-if="firstRunBonusActive") {{ t('result.firstRunBonus') }}
-              template(v-else)
-                span {{ RESULT_COIN_MULTIPLIER }}×
-                IconCoin(class="dresult__twox-icon")
+              span {{ RESULT_COIN_MULTIPLIER }}×
+              IconCoin(class="dresult__twox-icon")
           FRewardButton(
             v-if="graceAvailable"
             tone="green"
@@ -1429,7 +1493,8 @@ onUnmounted(() => {
             @click="onContinueRun"
           )
             span.dresult__continue
-              span {{ t('result.continueRun') }}
+              GameIcon.dresult__continue-icon(name="fast-forward")
+              span {{ t('result.continueWave', { n: continueWave }) }}
               span.dresult__continue-bonus
                 span +{{ continueMaterials }}
                 IconWood.dresult__res-icon
@@ -1716,6 +1781,18 @@ onUnmounted(() => {
   font-weight: 900
   text-shadow: 2px 2px 0 #000
 
+// Gold, and a step down in size from the wave line: it is the second thing
+// read on this screen, not the first, and gold is what the rest of the game
+// uses for "this is about the wider world" (coins, records).
+.dresult__rank
+  color: #ffd93c
+  font-size: 0.95rem
+  font-weight: 800
+  text-shadow: 2px 2px 0 #000
+
+.dresult__rank-note
+  margin-left: 0.35em
+
 .dresult__record
   color: #ffd93c
   font-size: 0.8rem
@@ -1769,6 +1846,12 @@ onUnmounted(() => {
 .dresult__res-icon
   width: 1rem
   height: 1rem
+
+// Opens the continue caption in place of the words it used to spell out.
+.dresult__continue-icon
+  flex: 0 0 auto
+  width: 1.05em
+  height: 1.05em
 
 .dresult__actions
   display: flex

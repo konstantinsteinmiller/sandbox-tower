@@ -89,7 +89,6 @@ export default {
   'tips': {
     'eco': 'Lumber huts and stone pits pay you every wave. Two or three change what you can afford.',
     'buff': 'Banners boost every block they touch — and they multiply. Surround one gun instead of spreading them out.',
-    'mergeLocked': 'Buy Fusion in the tech tree: two identical weapons then fuse into one that hits three times as hard.',
     'merge': 'Two identical weapons side by side fuse into one. Stack two of those to make a 2×2.',
     'spend': 'You have coins to spend. Tech-tree ranks are permanent — they carry into every future run.',
     'branches': 'Three separate trees: the tower, the harbour, and the works. None of them needs the others.',
@@ -219,14 +218,14 @@ export default {
 
   // ─── Result / run summary ─────────────────────────────────────────────────
   'result': {
-    'towerFell': 'The Tower Fell!',
+    'towerFell': 'Destroyed!',
     'reachedWave': 'You survived to wave {n}',
     'newRecord': 'New record!',
     'upgrade': 'Upgrade!',
     'defendAgain': 'Defend again',
     'continueRun': 'Rebuild & continue',
+    'continueWave': 'Wave {n}',
     'tripleCoins': 'Triple coins',
-    'firstRunBonus': '3× — first siege today!',
     'tripleWave': '3× coins — {n}',
     'waveCleared': 'Wave {n} held!',
     'scoreLabel': 'Score',
@@ -258,7 +257,7 @@ export default {
     'spotlight': 'Spend!',
     'names': {
       'm2_lumberHut': 'Lumber Hut',
-      'unlockMerge': 'Fusion', 'forgeWelds': 'Forge Welds',
+      'forgeWelds': 'Forge Welds',
       'logistics': 'Logistics',
       'unlockCoffer': 'Coffers',
       'yields': 'Yields',
@@ -305,7 +304,6 @@ export default {
     },
     'descriptions': {
       'm2_lumberHut': 'Unlocks the Lumber Hut — pays wood after every wave.',
-      'unlockMerge': 'Two matching blocks side by side fuse into one, up to three deep.',
       'forgeWelds': 'Merged blocks produce +{n}% more per rank — damage, thorns and yield.',
       'logistics': 'Unlocks the Stone Pit — a cheap producer you can afford in the run it matters.',
       'unlockCoffer': 'Unlocks the Coffer, the only block that mints run gold.',
