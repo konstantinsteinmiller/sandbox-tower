@@ -190,6 +190,69 @@ const plattformText = computed(() => getPlattformText())
 img
   pointer-events: none
 
+// ─── Reduced HUD effects ────────────────────────────────────────────────────
+//
+// `useAdaptiveQuality` stamps `data-hud-fx="off"` on `#app-root` when measured
+// frame time says this machine cannot afford the HUD's decoration. Everything
+// dropped here shares one property: it is per-frame COMPOSITOR or PAINT work
+// that no amount of canvas tuning can reach, and that no probe in this project
+// has ever measured, because `usePerfProbe` brackets `update` + `render` inside
+// the canvas and all of this lands outside that bracket.
+//
+// What was actually on screen in the 18 fps playtest, in a wave-1 build phase
+// with four blocks and no enemies — i.e. with the canvas very nearly idle:
+//
+//   • two `backdrop-filter` elements (the control hint, the mute button) over a
+//     canvas that invalidates on every single frame. A backdrop filter forces
+//     the compositor to re-read the region behind the element and re-blur it
+//     each time that region changes, into its own render surface. On a 2-CU
+//     integrated GPU this is not a rounding error.
+//   • a keyframe animating `filter: drop-shadow()` on the HUD buttons. Filters
+//     do not composite: every frame is a full re-raster of the element plus a
+//     blur pass, on the main thread.
+//   • a keyframe animating `box-shadow` on the call-wave button, which was in
+//     its urgent state at the time. Same story — `box-shadow` is a paint
+//     property, so this repaints the button 60 times a second.
+//   • a keyframe animating `background-position` on the coin badge. Also paint.
+//
+// The animations are neutralised rather than deleted: each one is a real
+// affordance (the tech-tree button's glow is how a player finds it), so the
+// element keeps its FINAL, most-visible appearance and simply stops moving.
+// A player on a weak machine still sees a glowing tech-tree button; it just
+// does not cost them four frames a second to look at it.
+//
+// Transforms and opacity are deliberately left alone throughout: those DO
+// composite, they cost the GPU almost nothing, and stripping them would take
+// away the motion that makes the HUD readable for no measurable return.
+
+[data-hud-fx="off"]
+  // Reaches Tailwind's `backdrop-blur-*` utilities and hand-written rules alike.
+  *
+    backdrop-filter: none !important
+    -webkit-backdrop-filter: none !important
+
+  // `filter` animations: hold the lit end of the cycle, stop animating. The
+  // `.is-bounce` pairing has to be named too — it declares BOTH animations in
+  // one shorthand, so a rule that only killed `.is-attention` would leave the
+  // shorthand on the more specific selector intact.
+  .f-hud-button.is-attention,
+  .f-hud-button.is-attention.is-bounce
+    animation: none !important
+    filter: drop-shadow(0 0 8px rgba(255, 200, 0, 0.75)) !important
+
+  // `box-shadow` animation on the urgent call-wave button: hold the ring.
+  .call-wave__btn.is-urgent .call-wave__body
+    animation: none !important
+    box-shadow: 0 0 0 4px rgba(255, 210, 60, 0.55) !important
+
+  // `background-position` sweep on the coin badge — a `::before` overlay.
+  .coin-badge::before
+    animation: none !important
+
+  // The build tray's travelling gloss and the hint's breathing are composited
+  // (`translate` / `opacity`) and stay. The hint's blur is gone via the rule
+  // above, which is what actually cost anything there.
+
 // ─── Non-Latin scripts ─────────────────────────────────────────────────────
 //
 // 'Angry' is a Latin-only display face. Every non-Latin locale this game ships

@@ -62,6 +62,77 @@ Built bundle, mobile-fit board, painted art on, 4× CPU, tier mid, wave 10.
 
 ## Experiments
 
+### 2026-09-10 — Adaptive quality on the DESKTOP scene · **SHIPPED UNMEASURED**
+
+**Read this row's verdict first: nothing here has been A/B'd.** It is recorded
+as a change, not as a result. The trigger was a playtest, not a harness:
+
+```
+AMD Radeon 610M (2 CU) · ANGLE D3D11 · 8 cores · DPR 1.5 · Chrome 152
+wave 1, BUILD phase, four blocks on the board, no enemies, no particles
+  observed: 18 fps
+```
+
+The canvas is very nearly idle in that frame. That single fact is what shaped
+everything below — it rules out entity counts, particles and draw calls as the
+explanation, and points at fixed per-frame cost plus work the probe cannot see.
+
+**What was actually wrong, in order of confidence:**
+
+1. **The desktop scene had no adaptive path at all.** `initDeviceTier` /
+   `setRenderProfile` were called only from `GameSceneDrop.vue`. `GameScene.vue`
+   never called them, so `useTowerArt`'s defaults *were* its behaviour, and every
+   subtraction in the 2026-09-07 row above was gated off for it: live day/night
+   sky, mirrored tower, paper grain, per-block shine, 900 particles, DPR 2.
+2. **`resolveDeviceTier` would have said `high` anyway.** It scores a machine
+   weak only when two signals agree, and none fire on a laptop (8 cores, not
+   mobile, no Android major). It cannot see a weak GPU behind an adequate CPU,
+   which is precisely this machine.
+3. **DOM/compositor work no probe in this project has ever measured.**
+   `usePerfProbe` brackets `update` + `render` inside the canvas; all of this is
+   outside it, and all of it was on screen in that 18 fps frame:
+   `backdrop-filter` on the control hint and the mute button, over a canvas that
+   invalidates every frame; a keyframe animating `filter: drop-shadow()` on the
+   HUD buttons; one animating `box-shadow` on the urgent call-wave button; one
+   animating `background-position` on the coin badge. None of those composite.
+4. **`buildTimeLeft` was written every fixed tick at ms precision**, re-rendering
+   its consumers ~60×/s for the whole build phase.
+5. **The desktop primed all 17 monster designs on its first frame**
+   (`monsterPrimeFilter ?? allMonsterIds()`); mobile-fit filters to its roster.
+   `pump` bakes at least one frame per idle slice — and a machine at 18 fps has
+   no idle slices.
+
+**What shipped:** `useAdaptiveQuality` — a 10 s audition on measured presented-
+frame deltas, then hysteresis, stepping `high → mid → low` and applying the
+existing `PROFILES` plus a HUD-effects switch (`data-hud-fx="off"`) and, at
+`low` only, `maxOnField: 12`. Plus the two unconditional fixes (4) and (5), the
+latter via an `OffscreenCanvas` worker pool.
+
+**Costs, stated because the skill says a size regression vetoes a win:**
+
+```
+  monsterBakeWorker chunk   +70.97 kB raw / +27.0 kB gzip, lazily fetched
+```
+
+That is `monsters.ts` duplicated into the worker. It cannot be deduplicated
+without splitting the cast's metadata from its draw functions, because the main
+thread still needs both for `monsterFaces` / `paintMonsterFrame` / the fallback
+bake. If the 27 kB is judged too expensive, delete `monsterBakePool` and
+`monsterBakeWorker` — `monsterSprites` keeps its idle bake in full working
+order and nothing else changes.
+
+**What would make this a real row:** an A/B on that machine, or one like it.
+`?tier=high` vs `?tier=low` pins the tiers and stops the controller, which is
+what makes the comparison possible; `window.__quality()` reports which tier a
+session settled on and on what evidence. Until someone runs that, the honest
+claim is "the desktop can now degrade at all", not "the desktop is faster".
+
+**Open, and deliberately not guessed at:** which of the five is actually
+dominant at 18 fps. My ranking above is reasoning from the code plus the
+measured rows below it, not from a trace on the affected hardware — and the
+`bglayer` row is a standing reminder that this project has already been wrong
+once about a GPU-side claim it could not measure locally.
+
 ### 2026-09-07 — The mobile fidelity package · **KEEP**
 
 Five changes shipped together as the phone tiers' backdrop profile plus two
@@ -219,7 +290,9 @@ call, not as a measured win.
 
 | Idea | Why not yet |
 |---|---|
-| **Real-device pass** | **Every number here is a desktop proxy. Nothing in this ledger is confirmed on a phone.** This is the top of the list. |
+| **A/B the desktop adaptive package** | The 2026-09-10 row shipped on a playtest observation and code reading, with no harness run at all. `?tier=high` vs `?tier=low` on a Radeon 610M-class machine is the missing measurement. Top of the list with the row below. |
+| **Attribute the desktop 18 fps** | Which of the five causes in that row dominates is still unknown. `GameScene.vue` now feeds the adaptive sampler but still does NOT call `perf.beginFrame` / `perf.endFrame`, so the phase timers already sprinkled through `drawScene` produce nothing on the desktop scene. Wiring that bracket is a two-line change and would answer it. |
+| **Real-device pass** | **Every number here is a desktop proxy. Nothing in this ledger is confirmed on a phone.** |
 | `bglayer` on real hardware | See E2c. |
 | `enemies` phase | Still the largest phase at 5.74 ms mean, 69 ms max — the biggest remaining target by a distance. |
 | Enemy field cap (plan-1 E11) | Untouched. |

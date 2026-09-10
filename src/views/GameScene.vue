@@ -28,6 +28,11 @@ import {
   getZoom, worldToScreenX, worldToScreenY
 } from '@/use/useTowerCamera'
 import { drawScene, resetDrawnFx, setBuildOverlay } from '@/use/useTowerArt'
+import {
+  initAdaptiveQuality, sampleAdaptiveFrame, stopAdaptiveQuality
+} from '@/use/useAdaptiveQuality'
+import { PROFILES, type RenderProfile } from '@/use/useDeviceTier'
+import { perf } from '@/use/usePerfProbe'
 import { resetVfx } from '@/use/useTowerVfx'
 import { warmAudio, playFx } from '@/use/useTowerAudio'
 import useTowerProgress, { bestWave } from '@/use/useTowerProgress'
@@ -131,6 +136,33 @@ let cssW = 0
 let cssH = 0
 let dpr = 1
 
+/**
+ * ─── Adaptive quality ───────────────────────────────────────────────────────
+ *
+ * The desktop scene used to render at one fixed fidelity forever: it never
+ * called `setRenderProfile`, so `useTowerArt`'s defaults were its permanent
+ * behaviour and every subtraction the phone tiers had measured (a frozen sky, a
+ * baked sky, no water reflection, no paper grain) was gated off for it. That is
+ * fine on a discrete GPU and ruinous on a 2-CU integrated one, which is a large
+ * share of the laptops this ships to.
+ *
+ * `useAdaptiveQuality` watches real frame deltas and steps the whole package
+ * down when the machine demonstrably is not holding the target. The scene owns
+ * the two parts of a profile the renderer cannot apply for itself: the canvas
+ * backing-store resolution (`resize`) and the draw cadence (`loop`).
+ *
+ * Read per frame off a plain object, deliberately — a reactive read in the loop
+ * would be the regression this is trying to remove.
+ *
+ * Seeded with the historical desktop behaviour and replaced by
+ * `initAdaptiveQuality` below, once `resize` exists for the controller to call.
+ */
+let quality: RenderProfile = PROFILES.high
+
+/** Frames since mount, and time owed to the renderer when a draw is skipped. */
+let frameNo = 0
+let drawAccum = 0
+
 /** HUD insets fed to the camera so auto-fit never frames the tower under the
  *  top bar or behind the build tray. Measured from the real elements rather
  *  than guessed, so a wrapped title or a taller tray is accounted for. */
@@ -177,10 +209,16 @@ const showMuteButton = computed(() => !isCrazyWeb || isFullscreen.value)
 const resize = (): void => {
   const canvas = canvasRef.value
   if (!canvas) return
-  // Clamp DPR to 2: past that the pixel cost doubles again for no perceptible
-  // gain on a phone, and it is the difference between 60 fps and 40 on mid-tier
-  // Android.
-  dpr = Math.min(window.devicePixelRatio || 1, 2)
+  // Clamp DPR to the tier's cap — 2 at `high`, which is where this has always
+  // sat: past that the pixel cost doubles again for no perceptible gain, and it
+  // is the difference between 60 fps and 40 on mid-tier Android.
+  //
+  // Below `high` the cap is the single biggest lever there is, because it is
+  // quadratic: dropping a 1.5-DPR laptop to 1.0 removes 56 % of the pixels
+  // every full-screen pass has to touch, and the frame has four of those (the
+  // clear, the sky gradient, the celestial bloom, the backdrop blit) before it
+  // has drawn a single block.
+  dpr = Math.min(window.devicePixelRatio || 1, quality.dpr)
   cssW = window.innerWidth
   cssH = window.innerHeight
   canvas.width = Math.round(cssW * dpr)
@@ -193,8 +231,35 @@ const resize = (): void => {
   const insets = measureInsets()
   hudInset.value = insets
   setViewport(cssW, cssH, insets.top, insets.bottom)
-  snapToFit()
+  // Re-frame only when the VIEWPORT moved, not merely the backing store.
+  //
+  // `snapToFit` forces the camera to its auto-fit target with no animation and
+  // drops `isManual`, which is right for a window resize and wrong for a
+  // devicePixelRatio change: the adaptive controller re-sizes the canvas when a
+  // tier lowers the DPR cap, and without this guard a player who had panned or
+  // zoomed to line up a shot would have their view yanked back to centre by a
+  // decision that was supposed to be invisible.
+  if (cssW !== framedW || cssH !== framedH) {
+    framedW = cssW
+    framedH = cssH
+    snapToFit()
+  }
 }
+
+/** The viewport `snapToFit` was last run for. */
+let framedW = 0
+let framedH = 0
+
+// Started here rather than at the top of setup because a tier change calls
+// `resize` to re-size the backing store, and `resize` has to exist by then.
+// The starting profile comes back as the return value, so nothing is applied
+// through the callback before this line.
+quality = initAdaptiveQuality({
+  onProfile: (p) => {
+    quality = p
+    resize()
+  }
+})
 
 /**
  * Screen Y of the shoreline in CSS px — where the grass gives way to water.
@@ -232,14 +297,51 @@ const loop = (t: number): void => {
   const dt = lastT ? Math.min(t - lastT, 120) : 16
   lastT = t
 
+  // The probe is inert (a few branches a frame) unless `?perf=1`,
+  // `localStorage.perf` or `?bench=` is set, so this ships as-is.
+  //
+  // It was missing here, and its absence is why "what actually costs the 18 fps
+  // on that laptop" is still an open question: `drawScene` is already dotted
+  // with `perf.phase('backdrop' | 'blocks' | 'enemies' | ...)` calls, but
+  // without a frame bracket around them they accumulate into nothing. Only the
+  // mobile-fit scene ever opened one, so every phase number in PERF-LEDGER.md
+  // is a mobile-fit number. Now `?perf=1` then `__perf.report()` answers the
+  // question on whichever machine is actually slow.
+  perf.beginFrame(t)
+
   // The pause gate covers ads, hidden tabs and platform SDK pauses. The render
   // loop keeps running (so the frame under an ad isn't a frozen artefact) but
   // the simulation clock does not advance.
-  if (!isGamePaused.value && !showResult.value) step(dt)
-  if (ctx) drawScene(ctx, cssW, cssH, dt, dpr)
+  perf.phase('update')
+  const running = !isGamePaused.value && !showResult.value
+  if (running) step(dt)
+
+  // On the low tier every second frame is skipped; the simulation still steps
+  // every frame, and the renderer is handed the accumulated time so particles
+  // and animations move at the right speed rather than at half.
+  frameNo++
+  drawAccum += dt
+  if (frameNo % quality.drawEvery !== 0) {
+    perf.endFrame()
+    return
+  }
+
+  perf.phase('render')
+  if (ctx) drawScene(ctx, cssW, cssH, drawAccum, dpr)
+
+  // Fed AFTER the cadence gate and with the accumulated delta, so what the
+  // controller measures is the interval between frames the player actually
+  // saw — the thing they experience as smooth or not. Feeding it the raw RAF
+  // delta would tell it a machine drawing every second frame was managing 60.
+  //
+  // Only while running: a frame under an ad, behind the result screen or on a
+  // paused tab is cheap for reasons that say nothing about the hardware.
+  if (running) sampleAdaptiveFrame(drawAccum)
+  drawAccum = 0
 
   const sea = worldToScreenY(SEA_LEVEL)
   if (Math.abs(sea - shorelineY.value) > 0.5) shorelineY.value = sea
+  perf.endFrame()
 }
 
 // ─── Build state ────────────────────────────────────────────────────────────
@@ -2174,6 +2276,9 @@ onUnmounted(() => {
   toastRo = null
   clearLongPress()
   stopBattleMusic()
+  // Releases the scene callback as well as stopping the sampler — without it a
+  // tier change after unmount would call `resize` on a dead canvas ref.
+  stopAdaptiveQuality()
   // Module-level state: a scene that unmounts mid-tutorial must not leave the
   // next one with a frozen build clock.
   buildClockHeld.value = false

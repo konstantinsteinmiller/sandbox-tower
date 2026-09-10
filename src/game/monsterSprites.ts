@@ -2,6 +2,10 @@ import { MONSTERS, type MonsterDef } from '@/game/monsters'
 import { withHatching } from '@/game/inkArt'
 import { stripFrame } from '@/game/spriteStrip'
 import { spriteFor } from '@/game/art'
+import { bakeDesign, bakePoolAvailable, releaseBakePool } from '@/game/monsterBakePool'
+import {
+  FRAMES, PX, FRAME_H, SPRITE_S, MONSTER_FRAME_ASPECT
+} from '@/game/monsterFrameBox'
 
 /**
  * ─── Baked monster frames ───────────────────────────────────────────────────
@@ -20,92 +24,34 @@ import { spriteFor } from '@/game/art'
  *     can be played at any speed, which is what lets a fast enemy and a slow
  *     one share a body and still move at their own rates.
  *
- * Baking runs in IDLE time, not in the render loop. One frame of the heaviest
- * design costs ~10 ms — over half a frame budget — so any per-frame allowance
- * small enough to be safe would be too small to ever bake it. A wave never
- * arrives during the build phase, so the strips are always ready by the time
- * anything needs them, and a design that has not finished baking simply falls
- * back to the older procedural body instead of stalling the frame.
+ * Baking happens OFF the main thread where the browser allows it — see
+ * `monsterBakePool`. This is the one part of the game that genuinely
+ * parallelises: pure procedural drawing, no shared state, no DOM, and an answer
+ * that depends on nothing but the design id.
+ *
+ * Where a worker is not available (the GamePix single-file build inlines the
+ * bundle and has no separate chunk to fetch; jsdom has neither `Worker` nor
+ * `OffscreenCanvas`), it falls back to the original idle-time bake below. One
+ * frame of the heaviest design costs ~10 ms — over half a frame budget — so any
+ * per-frame allowance small enough to be safe would be too small to ever bake
+ * it, which is why that path uses `requestIdleCallback` rather than a slice of
+ * each frame. A wave never arrives during the build phase, so the strips are
+ * ready by the time anything needs them either way, and a design that has not
+ * finished baking simply draws the older procedural body rather than stalling.
  */
 
 /** The slice of `IdleDeadline` we use; not in every TS lib target. */
 interface IdleTime { timeRemaining: () => number }
 
-/** Frames per cycle. Sixteen is the low end of what still reads as a walk. */
-const FRAMES = 16
-
-/**
- * Baked frame WIDTH, px.
- *
- * Big enough that a unit at maximum zoom on a 3× screen is still downsampling,
- * small enough that the whole cast fits in a sane amount of canvas memory
- * (13 designs × 16 frames × 156 × 176 × 4 B ≈ 23 MB, and most runs never
- * unlock all thirteen).
- */
-const PX = 156
-
-/**
- * Baked frame HEIGHT, px.
- *
- * Taller than it is wide, for two reasons that arrived together.
- *
- * The cast is authored feet-at-+1, crown-at-−1.05, but the frame only ever had
- * 1.17 units of headroom — a margin thin enough that one design reaching for a
- * tall silhouette (Thornwick, whose canopy is the character) came out of the
- * bake with its foliage sliced flat. A contract with no slack in it is a
- * contract that gets broken silently, in a strip nobody looks at directly.
- *
- * And the origin now sits at the frame's EXACT vertical centre. The sea
- * creatures are drawn centred on the frame rather than anchored by their feet,
- * so any gap between "middle of the canvas" and "the point the artist drew
- * around" showed up as every fish floating slightly high.
- */
-const FRAME_H = 176
-
-/**
- * Character scale inside a frame.
- *
- * The drawing convention is feet at y = +1, crown at −1.05, and up to ±1.05
- * wide, so 2.25 units across the frame leaves a hair of margin for the ink to
- * bleed into without clipping. Vertically there is now real slack: half of
- * `FRAME_H` is about 1.27 units.
- */
-const SPRITE_S = PX / 2.25
-
-/** Where the character's feet sit inside a frame, in px from the top. */
-export const SPRITE_FOOT = FRAME_H / 2 + SPRITE_S
-
-/** Total character height inside a frame, in px. */
-export const SPRITE_HEIGHT = 2.05 * SPRITE_S
-
-/**
- * The two numbers above, as FRACTIONS of the frame rather than pixel counts.
- *
- * A painted strip is the bake's frame box at a different resolution — the sheet
- * the painter works on is the same box scaled up, and the slicer cuts it on the
- * same grid without trimming. So the feet line and the character height are the
- * same proportions of the frame whatever size it arrives at, and every caller
- * measures off the frame it was handed instead of off the bake's constants.
- * For a baked frame these are algebraically what the old code computed.
- */
-export const SPRITE_FOOT_R = SPRITE_FOOT / FRAME_H
-export const SPRITE_HEIGHT_R = SPRITE_HEIGHT / FRAME_H
-
-// ─── Painted strips ─────────────────────────────────────────────────────────
+// ── Frame geometry ──
 //
-// A drop-in `images/monsters/<design>.webp` is one horizontal strip covering
-// the same single locomotion cycle the bake covers, in the same frame
-// proportions. Slicing and frame counting live in `spriteStrip`, shared with
-// the siege engines, which run the identical trick on a square frame box.
-//
-// The export ships eight panels: every extra frame is another chance for a
-// painter to drift a jerkin, a snout or a limb length, and eight is the
-// shortest strip that still reads as a walk rather than a stutter.
-
-/** The frame box's width:height. A painted panel is this box, scaled up. */
-export const MONSTER_FRAME_ASPECT = PX / FRAME_H
-
-
+// Moved to its own module so `monsterBakeWorker` can share it. A worker cannot
+// import this file (it reaches `art` and `spriteStrip`, which want `Image` and
+// `document`), and two copies of the frame box is a contract nothing enforces.
+export {
+  FRAMES, PX, FRAME_H, SPRITE_S,
+  SPRITE_FOOT, SPRITE_HEIGHT, SPRITE_FOOT_R, SPRITE_HEIGHT_R, MONSTER_FRAME_ASPECT
+} from '@/game/monsterFrameBox'
 
 const CACHE = new Map<string, HTMLCanvasElement[]>()
 const DEFS = new Map<string, MonsterDef>(MONSTERS.map((m) => [m.id, m]))
@@ -114,6 +60,9 @@ let queue: string[] = []
 let building: { id: string; def: MonsterDef; frames: HTMLCanvasElement[] } | null = null
 
 let scheduled = false
+
+/** Designs currently out with a worker, so `schedule` does not re-issue them. */
+const inFlight = new Set<string>()
 
 /**
  * Ask for designs to be baked. Cheap and idempotent — safe to call every time a
@@ -129,7 +78,7 @@ export const primeMonsterSprites = (
     // `artPreload` exists to stage instead. A design whose strip has not
     // arrived simply plays the procedural bake rather than holding the game.
     if (opts.fetch !== false && DEFS.has(id)) spriteFor('monster', id)
-    if (CACHE.has(id) || queue.includes(id) || building?.id === id) continue
+    if (CACHE.has(id) || queue.includes(id) || inFlight.has(id) || building?.id === id) continue
     if (DEFS.has(id)) queue.push(id)
   }
   schedule()
@@ -220,8 +169,72 @@ const pump = (deadline?: IdleTime): void => {
   schedule()
 }
 
+/**
+ * Adopt a worker's frames into the cache.
+ *
+ * The bitmaps are blitted into ordinary canvases rather than kept as
+ * `ImageBitmap`s, because `monsterFrame` hands its result to drawing code typed
+ * on `HTMLCanvasElement` and shared with the painted-strip path, which really
+ * does produce canvases. Widening that whole chain to `CanvasImageSource` would
+ * be a larger and riskier edit than this blit is expensive: a blit of an
+ * already-decoded bitmap is a fraction of a millisecond, against the ~10 ms the
+ * procedural draw it replaces used to cost — the expensive half is what moved
+ * off the thread, and that is the half that mattered.
+ *
+ * The bitmaps are closed explicitly. They are transferred, so nothing else
+ * holds them, and leaving seventeen designs' worth to a GC that has no idea how
+ * much native memory they pin is how a 4 GB machine starts swapping.
+ */
+const adoptFrames = (bitmaps: ImageBitmap[]): HTMLCanvasElement[] => {
+  const frames: HTMLCanvasElement[] = []
+  for (const bmp of bitmaps) {
+    const c = document.createElement('canvas')
+    c.width = PX
+    c.height = FRAME_H
+    c.getContext('2d')?.drawImage(bmp, 0, 0)
+    bmp.close()
+    frames.push(c)
+  }
+  return frames
+}
+
+/**
+ * Hand the whole queue to the worker pool.
+ *
+ * Everything at once, deliberately: a worker processes its messages serially,
+ * so the pool is its own queue and an in-flight limit here would only add
+ * bookkeeping. Seventeen designs across two or three workers is a handful each.
+ *
+ * Returns false when there is no pool, which is the signal to use the idle bake.
+ */
+const dispatchToPool = (): boolean => {
+  if (!bakePoolAvailable()) return false
+  while (queue.length > 0) {
+    const id = queue.shift()!
+    if (CACHE.has(id) || inFlight.has(id)) continue
+    inFlight.add(id)
+    bakeDesign(id)
+      .then((bitmaps) => { CACHE.set(id, adoptFrames(bitmaps)) })
+      .catch(() => {
+        // Always "bake it yourself", never "this design is broken" — put it
+        // back and let `schedule` pick whichever path is still working.
+        if (!CACHE.has(id)) queue.push(id)
+      })
+      .finally(() => {
+        inFlight.delete(id)
+        if (queue.length > 0 || building) schedule()
+        else if (inFlight.size === 0) releaseBakePool()
+      })
+  }
+  return true
+}
+
 const schedule = (): void => {
-  if (scheduled || (queue.length === 0 && !building)) return
+  if (queue.length === 0 && !building) return
+  // The pool takes the whole queue and needs no scheduling of its own; only
+  // the fallback pump has to be spaced out across idle slices.
+  if (!building && dispatchToPool()) return
+  if (scheduled) return
   scheduled = true
   const ric = (globalThis as { requestIdleCallback?: (cb: (d: IdleTime) => void, o?: { timeout: number }) => void })
     .requestIdleCallback

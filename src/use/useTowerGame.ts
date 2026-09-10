@@ -416,6 +416,60 @@ const isBuildClockHeld = (): boolean =>
   buildClockHeld.value
   || (wave.value === 0 && R().waves.firstBuildMs > 0 && awaitingFirstInteraction.value)
 
+/**
+ * How coarsely the build clock is published to the HUD, ms.
+ *
+ * `buildDeadline` moves every fixed tick, i.e. sixty times a second. Writing
+ * that straight into a ref made every consumer of `buildTimeLeft` re-render at
+ * 60 Hz for the whole build phase — the call-wave button and the early-call
+ * bonus badge, on every device, while the canvas was already the thing under
+ * pressure. Nothing on screen can show more than tenths, so the ref moves in
+ * tenths and the DOM does a tenth of the work.
+ *
+ * The clock the GAME reads is still `buildDeadline` itself, to the millisecond:
+ * `callWave` derives the early-call bonus from it directly, so the payout is
+ * not quantised along with the display. See `publishBuildClock`.
+ */
+const BUILD_CLOCK_STEP_MS = 100
+
+/**
+ * Mirror `buildDeadline` into the HUD ref, on the step above.
+ *
+ * Zero is published exactly rather than rounded to it: the button's "call now"
+ * state and the auto-call both key off the floor, and a clock that stopped at
+ * 40 ms would leave the label reading 0:01 while the wave was already coming.
+ */
+const publishBuildClock = (): void => {
+  const left = Math.max(0, buildDeadline)
+  const next = left <= 0 ? 0 : Math.round(left / BUILD_CLOCK_STEP_MS) * BUILD_CLOCK_STEP_MS
+  if (buildTimeLeft.value !== next) buildTimeLeft.value = next
+}
+
+/**
+ * Runtime ceiling on enemies alive at once, or null for the mode's own.
+ *
+ * Set by the adaptive quality controller (`useAdaptiveQuality`) when measured
+ * frame time says the machine cannot carry a full field. It NARROWS the mode's
+ * rule and never widens it — a board that already caps at ten does not get
+ * twelve because a desktop tier said so.
+ *
+ * This is a real change to the game the player is playing, not a fidelity cut:
+ * the wave still arrives in full, but it arrives in smaller groups, which makes
+ * the fight slower and slightly easier. It is deliberately confined to the
+ * lowest tier, where the alternative is a slideshow.
+ */
+let enemyFieldCapOverride: number | null = null
+
+export const setEnemyFieldCap = (cap: number | null): void => {
+  enemyFieldCapOverride = cap === null || cap <= 0 ? null : cap
+}
+
+/** The cap actually in force: the tighter of the mode's rule and the override. */
+const enemyFieldCap = (): number => {
+  const rule = R().enemies.maxOnField
+  return enemyFieldCapOverride === null ? rule : Math.min(rule, enemyFieldCapOverride)
+}
+
 export const blockCount = ref(0)
 export const towerHeight = ref(0)
 /** 1× / 2× battle-speed toggle (reference image 3). Build phase is unaffected. */
@@ -3675,7 +3729,11 @@ export const callWave = (): void => {
   enemiesLeft.value = plan.total
   // The unused build time becomes a coin bonus, so an early call is a real
   // decision rather than a dead button.
-  pendingBonus = earlyCallBonus(buildTimeLeft.value)
+  //
+  // Off `buildDeadline`, not off the ref: the ref is the HUD's copy and moves
+  // in 100 ms steps (see `publishBuildClock`), and a payout must not be
+  // quantised by a display concern.
+  pendingBonus = earlyCallBonus(Math.max(0, buildDeadline))
   phase.value = 'battle'
   lastWaveReward.value = null
   pushFx({ kind: 'waveStart', x: 0, y: 0, wave: next, boss: plan.boss })
@@ -3783,7 +3841,7 @@ const stepSpawns = (dt: number): void => {
   // A mode may cap what is on the field at once; the rest wait in the queue.
   // The flush respects the cap too — releasing everything onto a five-column
   // board at once is the exact pile-up the cap exists to prevent.
-  const cap = R().enemies.maxOnField
+  const cap = enemyFieldCap()
   let live = cap === Infinity ? 0 : enemies.reduce((n, e) => n + (e.dying > 0 ? 0 : 1), 0)
   while (spawnCursor < plan.orders.length
     && live < cap
@@ -4382,7 +4440,7 @@ const fixedStep = (dt: number): void => {
   if (phase.value === 'build') {
     if (!isBuildClockHeld()) {
       buildDeadline -= dt
-      buildTimeLeft.value = Math.max(0, buildDeadline)
+      publishBuildClock()
       if (buildDeadline <= 0) callWave()
     }
     // Turrets still cool down and debris still settles between waves, so the

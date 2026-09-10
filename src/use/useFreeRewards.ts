@@ -26,8 +26,20 @@ import { computed } from 'vue'
 import { getState, setState } from '@/use/useTowerState'
 import { FREE_REWARDS_KEY } from '@/keys'
 
+/**
+ * Whether the house pays for anyone's first rewarded activations at all.
+ *
+ * `VITE_APP_FREE_REWARDS=false` turns the allowance off for a build, which is
+ * what a monetization demo or an end-to-end check of a portal's rewarded
+ * integration needs — otherwise the first two taps of a fresh profile never
+ * reach the SDK and the integration looks broken. Unset reads as ON: the
+ * onboarding behaviour is the default, and a `.env` that predates this flag
+ * should not silently start showing ads to new players.
+ */
+export const FREE_REWARDS_ENABLED = import.meta.env.VITE_APP_FREE_REWARDS !== 'false'
+
 /** How many rewarded activations are on the house, per player, ever. */
-export const FREE_REWARDS = 2
+export const FREE_REWARDS = FREE_REWARDS_ENABLED ? 2 : 0
 
 /**
  * How many have been spent.
