@@ -344,6 +344,51 @@ Not asset slots. Listed so nobody commissions art for them by mistake.
 | H8 | Build sockets and the ghost piece | `drawBuildOverlay` |
 | H9 | Block pictograms | `src/game/blockGlyph.ts` — shared by the tray and the inspector |
 
+## I. Merged tiers and the chest wing — probed only once LISTED
+
+These are slots for paintings that do not exist yet, so the renderer does not
+probe them by default (a guaranteed 404 per slot per session on a portal). A
+file is adopted by listing its id in `src/game/paintedArt.ts` —
+`PAINTED_TIER_FIXTURES` or `PAINTED_PROPS` — and `tests/game/paintedArt.test.ts`
+fails until the list and `public/images/` agree, in both directions.
+
+**Merged weapons** — `/public/images/fixtures/<weapon>-t2.webp`, `-t3.webp` ·
+512 × 512 panel, the plain fixture's box · authored at rest, level, pointing
+RIGHT, exactly like the plain fixture (the game rotates, recoils and mirrors it
+the same way). Reference: `art-sheets/fixture-<weapon>-t<N>.png`, the drawn
+twin / triple battery. Attach the plain painting too — it is the design.
+
+| # | Paths | Tier 2 — a TWIN, steel with green trim (`#46d86a`) | Tier 3 — a TRIPLE battery, blue trim (`#3fa2ff`), faint glow inside the outline | Priority |
+|---|---|---|---|---|
+| I1 | `cannon-t2`, `cannon-t3` | two barrels, one stacked above and behind | three stacked, the front one in the middle | P1 |
+| I2 | `archer-t2`, `archer-t3` | two drawn bows, the second behind and higher | a stepped rank of three | P1 |
+| I3 | `bombard-t2`, `bombard-t3` | two hooped bombards side by side | three, the front one in the middle | P2 |
+| I4 | `tesla-t2`, `tesla-t3` | two coils, the rear one shorter | three, the middle tallest | P2 |
+| I5 | `mortar-t2`, `mortar-t3` | two tubes on one bed | three tubes on one bed | P3 |
+| I6 | `frost-t2`, `frost-t3` | two crystal clusters | three, the middle tallest | P3 |
+
+Cannon and archer first: they are the two weapons every run starts with, so
+theirs are the merged guns most players will ever see. Tier 4 and deeper reuse
+the tier-3 painting. With a painting in place the game draws it **instead of**
+the composited copies — no rear-rank shade, no colour wash — and still lays a
+lighter tier rim and the tier-3 glow on top, so neither belongs in the paint.
+
+**The flying chest's wing** — `/public/images/props/chest-wing.webp` · I7 · P1
+once the flying chest ships.
+
+| Contract | Value |
+|---|---|
+| Canvas | 512 × 512, magenta ground, never trimmed on the way back in |
+| What | ONE feathered wing — the chest's **RIGHT** wing. The component mirrors it for the left. |
+| Pivot (the shoulder, where it meets the chest) | **12 % from the left, 70 % from the top** of the canvas |
+| Rest pose | leading edge ~25° above horizontal, spreading RIGHT and UP; tips to ~94 % of the width, top within ~8 % of the top edge, nothing below ~88 % of the height, nothing left of the pivot |
+| Scale | canvas at the same scale as `images/icons/chest.webp` (512) — scale the two together |
+| Style | cream-white feathers, grey-brown shadow side, flight-feather tips in the lock plate's gold, a strong warm-brown ink contour all round |
+
+The same numbers live in code as `CHEST_WING_BOX` (`src/game/paintedArt.ts`),
+which is what the flapping rotates about; `propArt(CHEST_WING_ID)` returns the
+decoded wing or null, and the component draws its own wing when it is null.
+
 ## Summary
 
 | Category | Files | P0 | P1 | P2 | P3 |
@@ -354,7 +399,8 @@ Not asset slots. Listed so nobody commissions art for them by mistake.
 | D. Allies | 1 | 0 | 1 | 0 | 0 |
 | E. Projectiles | 5 | 0 | 0 | 4 | 1 |
 | F. Background | 12 | 0 | 0 | 0 | 12 |
-| **Total optional** | **52** | **8** | **12** | **19** | **13** |
+| I. Merged tiers + chest wing | 13 | 0 | 5 | 4 | 4 |
+| **Total optional** | **65** | **8** | **17** | **23** | **17** |
 
 A minimal pass that visibly lifts the game is **the eight P0 files**: Gate, Wood
 Crate, Stone Block, the Archery and Cannon platforms, Grunt, Runner and Golem.

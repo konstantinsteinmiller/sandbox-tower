@@ -4,6 +4,7 @@ import IconGold from '@/components/icons/IconGold.vue'
 import IconStone from '@/components/icons/IconStone.vue'
 import IconWood from '@/components/icons/IconWood.vue'
 import { resourceFloats, FLOAT_LIFE_MS, type ResourceFloatId } from '@/use/useResourceFloats'
+import { resourceBlink, isBlinking } from '@/use/useResourceBlink'
 
 /**
  * Top-centre resource readout: wood, stone and the run's gold (reference
@@ -74,6 +75,17 @@ const goldFloats = floatsFor('gold')
  * leaves an invisible node sitting over the bar.
  */
 const floatVars = { '--float-life': `${FLOAT_LIFE_MS}ms` }
+
+/**
+ * The refusal blink (`useResourceBlink`): which piles the player just failed to
+ * pay with. Each pile's icon and number are keyed on its refusal counter, so a
+ * second refusal remounts them and the blink starts over instead of stacking.
+ */
+const blink = computed(() => resourceBlink.value)
+const denied = computed(() => {
+  void resourceBlink.value
+  return { wood: isBlinking('wood'), stone: isBlinking('stone'), coins: isBlinking('coins') }
+})
 </script>
 
 <template lang="pug">
@@ -81,8 +93,13 @@ const floatVars = { '--float-life': `${FLOAT_LIFE_MS}ms` }
     span.resource-bar__shadow(aria-hidden="true")
     div.resource-bar__body
       div.resource-bar__item
-        IconWood.resource-bar__icon
-        span.resource-bar__value(:class="{ pop: woodPop }") {{ wood }}
+        //- The icon and the number, keyed on this pile's refusal counter: a
+        //- purchase refused for want of wood remounts them and the red-white
+        //- blink runs from its first frame. The floats stay outside the key, so
+        //- a refusal never cuts a payout short.
+        span.res-deny(:key="'w' + blink.wood.n" :class="{ 'is-denied': denied.wood }" data-res="wood")
+          IconWood.resource-bar__icon.res-deny__icon
+          span.resource-bar__value.res-deny__value(:class="{ pop: woodPop }") {{ wood }}
         //- Payout floats rise out of here into the figure above them. Purely
         //- decorative — the number they announce is already on screen — so they
         //- are hidden from assistive tech rather than read out twice.
@@ -94,8 +111,9 @@ const floatVars = { '--float-life': `${FLOAT_LIFE_MS}ms` }
           ) +{{ f.amount }}
 
       div.resource-bar__item
-        IconStone.resource-bar__icon
-        span.resource-bar__value(:class="{ pop: stonePop }") {{ stone }}
+        span.res-deny(:key="'s' + blink.stone.n" :class="{ 'is-denied': denied.stone }" data-res="stone")
+          IconStone.resource-bar__icon.res-deny__icon
+          span.resource-bar__value.res-deny__value(:class="{ pop: stonePop }") {{ stone }}
         div.resource-bar__floats(aria-hidden="true" :style="floatVars")
           span.resource-bar__float.is-stone(
             v-for="(f, i) in stoneFloats"
@@ -104,8 +122,9 @@ const floatVars = { '--float-life': `${FLOAT_LIFE_MS}ms` }
           ) +{{ f.amount }}
 
       div.resource-bar__item.resource-bar__item--coins
-        IconGold.resource-bar__icon
-        span.resource-bar__value(class="is-gold" :class="{ pop: coinPop }") {{ coins }}
+        span.res-deny(:key="'c' + blink.coins.n" :class="{ 'is-denied': denied.coins }" data-res="coins")
+          IconGold.resource-bar__icon.res-deny__icon
+          span.resource-bar__value.res-deny__value(class="is-gold" :class="{ pop: coinPop }") {{ coins }}
         div.resource-bar__floats(aria-hidden="true" :style="floatVars")
           span.resource-bar__float.is-gold(
             v-for="(f, i) in goldFloats"
@@ -115,6 +134,8 @@ const floatVars = { '--float-life': `${FLOAT_LIFE_MS}ms` }
 </template>
 
 <style scoped lang="sass">
+@use './denyBlink'
+
 .resource-bar
   position: relative
   pointer-events: none

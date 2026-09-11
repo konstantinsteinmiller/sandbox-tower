@@ -484,6 +484,13 @@ export interface Projectile {
   /** Source block, for attributing kills to the right turret (VFX + stats). */
   sourceUid: number
   /**
+   * Merge tier of the gun that fired it, 1 for anything unmerged (and for
+   * everything hostile). Read only by the renderer: a merged gun's round is
+   * drawn bigger and haloed in the tier's colour, so the extra damage is
+   * visible in flight rather than only on the target's health bar.
+   */
+  tier?: number
+  /**
    * Dropped BY an enemy at the tower, rather than fired at one.
    *
    * A hostile round damages blocks and is ignored by the tower's own collision

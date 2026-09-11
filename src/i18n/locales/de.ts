@@ -11,6 +11,14 @@ export default {
   'crazyGamesOnly': 'Dieses Spiel ist nur verfügbar auf',
 
   // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'gift': {
+    'free': 'Gratis',
+    'tile': 'Gratis: {name}, Stufe {n}. Antippen, dann aufs Feld tippen, um es zu platzieren',
+    'pair': 'Gratis: ein Paar {name}. Antippen, dann aufs Feld tippen, um es zu platzieren',
+    'chest': 'Fliegende Truhe: antippen zum Öffnen',
+    'firstClear': 'Welle {n} geschafft! Ein Geschenk für dich'
+  },
+
   'mobile': {
     'rotatePortrait': 'Halte dein Handy aufrecht, um zu spielen',
     'columnFull': 'Spalte voll',

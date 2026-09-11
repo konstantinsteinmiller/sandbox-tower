@@ -11,6 +11,14 @@ export default {
   'crazyGamesOnly': 'Este juego solo está disponible en',
 
   // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'gift': {
+    'free': 'Gratis',
+    'tile': '{name} gratis, nivel {n}: tócalo y luego toca el tablero para colocarlo',
+    'pair': 'Pareja de {name} gratis: tócala y luego toca el tablero para colocarla',
+    'chest': 'Cofre volador: tócalo para abrirlo',
+    'firstClear': '¡Oleada {n} superada! Un regalo para ti'
+  },
+
   'mobile': {
     'rotatePortrait': 'Sostén el móvil en vertical para jugar',
     'columnFull': 'Columna llena',

@@ -11,6 +11,14 @@ export default {
   'crazyGamesOnly': 'このゲームは以下でのみプレイできます：',
 
   // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'gift': {
+    'free': '無料',
+    'tile': '無料の{name}（レベル{n}）：タップしてから盤面をタップして置こう',
+    'pair': '無料の{name}ペア：タップしてから盤面をタップして置こう',
+    'chest': '空飛ぶ宝箱：タップして開けよう',
+    'firstClear': 'ウェーブ{n}クリア！プレゼントだよ'
+  },
+
   'mobile': {
     'rotatePortrait': '縦向きに持ってプレイしてください',
     'columnFull': '列がいっぱいです',

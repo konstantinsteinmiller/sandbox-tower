@@ -42,12 +42,20 @@ interface Props {
   /** Hide the per-tile swap buttons. Set while the tutorial is teaching with a
    *  specific piece, which a reroll would take out of the player's hand. */
   hideReroll?: boolean
+  /**
+   * The player has gone a while without building while something here is
+   * affordable (`useIdleNudge`): pulse the tiles they CAN pay for. The dimmed
+   * ones stay still — a nudge towards a piece they cannot buy is an
+   * instruction they cannot follow.
+   */
+  nudge?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   enhanced: () => [],
   rerollSeconds: () => [],
-  hideReroll: false
+  hideReroll: false,
+  nudge: false
 })
 
 /** Seconds left on `slot`, or 0 when it is ready to swap. */
@@ -300,7 +308,7 @@ const infoEntry = computed(() => {
       div.build-tray__slot(v-for="e in entries" :key="e.slot" :data-slot="e.slot")
         button.build-tray__tile(
           type="button"
-          :class="{ 'is-selected': selected === e.slot, 'is-poor': !e.affordable, 'is-enhanced': e.enhanced }"
+          :class="{ 'is-selected': selected === e.slot, 'is-poor': !e.affordable, 'is-enhanced': e.enhanced, 'is-nudge': nudge && e.affordable }"
           :style="{ '--tile-w': tileSize + 'px' }"
           :aria-label="e.name"
           @click="onTile(e.slot)"
@@ -443,6 +451,44 @@ const infoEntry = computed(() => {
     .build-tray__body
       border-color: #7fe0ff
       box-shadow: 0 0 0 2px rgba(127, 224, 255, 0.55), 0 0 14px rgba(127, 224, 255, 0.6)
+
+  // The idle nudge: a slow swell, and a ring breathing out of the thumbnail.
+  // On `scale` and a pseudo-element rather than `transform` / `box-shadow`, so
+  // it composes with the selected lift and the reinforced glow instead of
+  // overwriting them.
+  &.is-nudge
+    animation: build-tray-nudge 1.1s ease-in-out infinite
+
+    .build-tray__body::after
+      content: ''
+      position: absolute
+      inset: -4px
+      border: 2px solid rgba(127, 224, 255, 0.9)
+      border-radius: clamp(0.35rem, 1.7vw, 0.6rem)
+      pointer-events: none
+      animation: build-tray-nudge-ring 1.1s ease-out infinite
+
+@keyframes build-tray-nudge
+  0%, 100%
+    scale: 1
+  45%
+    scale: 1.08
+
+@keyframes build-tray-nudge-ring
+  0%
+    opacity: 0.95
+    scale: 1
+  100%
+    opacity: 0
+    scale: 1.26
+
+@media (prefers-reduced-motion: reduce)
+  .build-tray__tile.is-nudge
+    animation: none
+
+    .build-tray__body::after
+      animation: none
+      opacity: 0.85
 
 .build-tray__shadow
   position: absolute

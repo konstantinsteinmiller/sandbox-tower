@@ -11,6 +11,14 @@ export default {
   'crazyGamesOnly': 'Trò chơi này chỉ có trên',
 
   // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'gift': {
+    'free': 'Miễn phí',
+    'tile': '{name} miễn phí, cấp {n}: chạm vào, rồi chạm lên bàn để đặt',
+    'pair': 'Cặp {name} miễn phí: chạm vào, rồi chạm lên bàn để đặt',
+    'chest': 'Rương bay: chạm để mở',
+    'firstClear': 'Qua đợt {n}! Quà cho bạn'
+  },
+
   'mobile': {
     'rotatePortrait': 'Cầm điện thoại theo chiều dọc để chơi',
     'columnFull': 'Cột đã đầy',

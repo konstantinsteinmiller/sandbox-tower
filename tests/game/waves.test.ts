@@ -223,3 +223,35 @@ describe('air and sea pressure ramps', () => {
     }
   })
 })
+
+// ─── The desktop director, pinned ───────────────────────────────────────────
+//
+// The phone board moved its opening through OPTIONS on the director — its own
+// air curve, a flyer floor, its own first-session table — and every one of
+// those defaults to the desktop's old behaviour. "Defaults to" is not a
+// guarantee anyone checks, and the director is a greedy spend over exact cost
+// boundaries: one budget computed as `(air − bomb) + bomb` instead of `air`
+// moves a grunt from one wave to the next and nothing else in the suite
+// notices. These are the budgets the desktop's waves actually spend, verified
+// byte-identical to the director as it stood before the options existed.
+describe('desktop director is unchanged by the mode options', () => {
+  const spent = (d: number, firstRun: boolean): number[] =>
+    Array.from({ length: 30 }, (_, i) =>
+      planWave(i + 1, d, firstRun).orders.reduce((s, o) => s + ENEMY_DEFS[o.typeId]!.cost, 0))
+
+  it('spends exactly what it always has, wave by wave', () => {
+    expect(spent(1, false)).toEqual([
+      60, 90, 120, 179, 223, 254, 261, 302, 323, 427, 384, 397, 426, 479, 500,
+      532, 587, 632, 659, 579, 714, 760, 741, 828, 852, 909, 981, 1001, 1033, 855
+    ])
+    expect(spent(1.5, false)).toEqual([
+      90, 130, 183, 255, 320, 374, 395, 452, 489, 529, 600, 646, 688, 759, 807,
+      821, 907, 920, 1004, 796, 1158, 1190, 1262, 1300, 1349, 1419, 1475, 1492, 1589, 1181
+    ])
+    // A first session with a weak tower: the 60/80 % opening discount.
+    expect(spent(0.7, true)).toEqual([
+      20, 50, 84, 125, 166, 188, 180, 209, 232, 352, 283, 248, 306, 311, 320,
+      389, 380, 418, 431, 461, 481, 491, 507, 560, 609, 643, 630, 659, 712, 612
+    ])
+  })
+})

@@ -1,14 +1,22 @@
 # Per-cell prompts — one object per generation
 
-Generated from the manifest — do not hand-edit, re-export instead.
+Generated from `src/game/artSheet.ts` — do not hand-edit. Run `pnpm art:prompts`
+(or export from the `/art-sheets` bench) after changing the manifest.
 
 Attach `art-sheets/cell-<id>.png` and paste the matching block below.
 There is no grid to preserve here, which is the whole point: three sheet
 and strip passes each lost the lattice a different way, and not one of
 them lost the art.
 
-# gate — gate base — SLICE THIS  (cell-block-gate-body.png)
+Copy only the fenced block. The `##` heading is for you, not the model: it
+names the image the block belongs to (the reference to attach, and the name
+to save the return under) and, after the arrow, where the slice lands under
+`public/`. `pnpm art:desk` finds any block by sprite name, copies reference
+and prompt in one go, and files, slices and compresses the return.
 
+## gate — gate base — SLICE THIS  (cell-block-gate-body.png → images/blocks/gate.webp)
+
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -80,11 +88,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# wood — timber base — SLICE THIS  (cell-block-wood-body.png)
+## wood — timber base — SLICE THIS  (cell-block-wood-body.png → images/blocks/timber.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -156,11 +166,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# brace — braced base — SLICE THIS  (cell-block-brace-body.png)
+## brace — braced base — SLICE THIS  (cell-block-brace-body.png → images/blocks/braced.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -232,11 +244,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# stone — masonry base — SLICE THIS  (cell-block-stone-body.png)
+## stone — masonry base — SLICE THIS  (cell-block-stone-body.png → images/blocks/masonry.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -308,11 +322,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# mortar — metal base — SLICE THIS  (cell-block-mortar-body.png)
+## mortar — metal base — SLICE THIS  (cell-block-mortar-body.png → images/blocks/metal.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -384,11 +400,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# banner — heraldry base — SLICE THIS  (cell-block-banner-body.png)
+## banner — heraldry base — SLICE THIS  (cell-block-banner-body.png → images/blocks/heraldry.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -460,11 +478,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# obelisk — arcane base — SLICE THIS  (cell-block-obelisk-body.png)
+## obelisk — arcane base — SLICE THIS  (cell-block-obelisk-body.png → images/blocks/arcane.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -536,11 +556,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# grunt — grumpling · 0.62c  (cell-enemy-grunt.png)
+## grunt — grumpling · 0.62c  (cell-enemy-grunt.png → images/enemies/grunt.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -597,11 +619,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# runner — cinderhound · 0.55c  (cell-enemy-runner.png)
+## runner — cinderhound · 0.55c  (cell-enemy-runner.png → images/enemies/runner.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -658,11 +682,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# slinger — bonecap · 0.6c  (cell-enemy-slinger.png)
+## slinger — bonecap · 0.6c  (cell-enemy-slinger.png → images/enemies/slinger.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -719,11 +745,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# brute — snaggletusk · 0.85c  (cell-enemy-brute.png)
+## brute — snaggletusk · 0.85c  (cell-enemy-brute.png → images/enemies/brute.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -780,11 +808,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# bomber — blorp · 0.66c  (cell-enemy-bomber.png)
+## bomber — blorp · 0.66c  (cell-enemy-bomber.png → images/enemies/bomber.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -841,11 +871,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# bat — nibbler · 0.5c  (cell-enemy-bat.png)
+## bat — nibbler · 0.5c  (cell-enemy-bat.png → images/enemies/bat.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -902,11 +934,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# bulwark — marrowknight · 0.78c  (cell-enemy-bulwark.png)
+## bulwark — marrowknight · 0.78c  (cell-enemy-bulwark.png → images/enemies/bulwark.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -963,11 +997,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# wyvern — skewer · 0.8c  (cell-enemy-wyvern.png)
+## wyvern — skewer · 0.8c  (cell-enemy-wyvern.png → images/enemies/wyvern.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1024,11 +1060,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# bombardier — gloomcrow · 0.82c  (cell-enemy-bombardier.png)
+## bombardier — gloomcrow · 0.82c  (cell-enemy-bombardier.png → images/enemies/bombardier.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1085,11 +1123,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# firebug — dustmoth · 0.9c  (cell-enemy-firebug.png)
+## firebug — dustmoth · 0.9c  (cell-enemy-firebug.png → images/enemies/firebug.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1146,11 +1186,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# eel — sliverfin · 0.85c  (cell-enemy-eel.png)
+## eel — sliverfin · 0.85c  (cell-enemy-eel.png → images/enemies/eel.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1207,11 +1249,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# shark — gnashfin · 1c  (cell-enemy-shark.png)
+## shark — gnashfin · 1c  (cell-enemy-shark.png → images/enemies/shark.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1268,11 +1312,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# kraken — brinemaw · 1.25c  (cell-enemy-kraken.png)
+## kraken — brinemaw · 1.25c  (cell-enemy-kraken.png → images/enemies/kraken.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1329,11 +1375,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# seadrake — tidewyrm · 1.4c  (cell-enemy-seadrake.png)
+## seadrake — tidewyrm · 1.4c  (cell-enemy-seadrake.png → images/enemies/seadrake.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1390,11 +1438,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# golem — thornwick · 1.45c  (cell-enemy-golem.png)
+## golem — thornwick · 1.45c  (cell-enemy-golem.png → images/enemies/golem.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1451,11 +1501,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# ram — 1.15c  (cell-siege-ram.png)
+## ram — 1.15c  (cell-siege-ram.png → images/enemies/ram.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1512,11 +1564,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# ballista — 1.2c  (cell-siege-ballista.png)
+## ballista — 1.2c  (cell-siege-ballista.png → images/enemies/ballista.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1573,11 +1627,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# catapult — 1.45c  (cell-siege-catapult.png)
+## catapult — 1.45c  (cell-siege-catapult.png → images/enemies/catapult.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1634,11 +1690,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# siegeTower — 1.05c  (cell-siege-siegeTower.png)
+## siegeTower — 1.05c  (cell-siege-siegeTower.png → images/enemies/siegeTower.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1695,11 +1753,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# trebuchet — 1.7c  (cell-siege-trebuchet.png)
+## trebuchet — 1.7c  (cell-siege-trebuchet.png → images/enemies/trebuchet.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1756,11 +1816,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# ironRam — 1.35c  (cell-siege-ironRam.png)
+## ironRam — 1.35c  (cell-siege-ironRam.png → images/enemies/ironRam.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1817,11 +1879,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# arrow — round  (cell-projectile-bolt.png)
+## arrow — round  (cell-projectile-bolt.png → images/rounds/bolt.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1878,11 +1942,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# quarrel — round  (cell-projectile-quarrel.png)
+## quarrel — round  (cell-projectile-quarrel.png → images/rounds/quarrel.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -1939,11 +2005,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# coin — shipped bitmap  (cell-ui-coin.png)
+## coin — shipped bitmap  (cell-ui-coin.png → images/props/coin_128x128.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -2000,11 +2068,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# movie — rewarded button  (cell-ui-movie.png)
+## movie — rewarded button  (cell-ui-movie.png → images/icons/movie_128x96.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -2061,11 +2131,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# ribbon — result screen  (cell-ui-ribbon.png)
+## ribbon — result screen  (cell-ui-ribbon.png → images/bg/parchment-ribbon_553x188.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -2122,11 +2194,13 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
 
 ---
 
-# logo — splash  (cell-ui-logo.png)
+## logo — splash  (cell-ui-logo.png → images/logo/logo_256x256.webp)
 
+```text
 Repaint this single game sprite.
 
 BACKGROUND — read this before anything else. It matters more than the style.
@@ -2183,3 +2257,4 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```

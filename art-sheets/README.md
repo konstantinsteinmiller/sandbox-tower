@@ -50,8 +50,8 @@ miscount, and the model's whole resolution budget goes to one asset instead of
 an eighth of it. More generations, but every one usable.
 
 **Row strips.** `strip-<sheet>-r<N>.png`, one row at 256 px a cell, prompts in
-`PROMPTS.md`. Good for a fast style test across eight related things at once —
-just expect to check the alignment.
+`PROMPTS-STRIPS.md`. Good for a fast style test across eight related things at
+once — just expect to check the alignment.
 
 **Whole sheets.** `sheet-<name>.png`. An overview, and the quickest way to judge
 a style direction across the whole cast.
@@ -63,7 +63,10 @@ a style direction across the whole cast.
 | `cell-<id>.png` | **One object, 512 px.** The most reliable thing to repaint. |
 | `PROMPTS-CELLS.md` | One generated prompt per object. |
 | `strip-<sheet>-r<N>.png` | One row, 256 px cells. |
-| `PROMPTS.md` | One generated prompt per strip, naming every cell. |
+| `PROMPTS-STRIPS.md` | One generated prompt per strip, naming every cell. |
+| `PROMPTS-WALKS.md`, `PROMPTS-SCENERY.md` | Walk cycles, engines, hulls, fixtures; the landscape bands and HUD icons. |
+| `PAINT-STATUS.md` | Which sheets are painted, sliced, still outstanding, or painted from a drawing that has since moved. A report — `pnpm art:prompts` rewrites it. |
+| `painted/.sliced.json` | The slicer's receipt: the reference revision each painting was cut against. |
 | `sheet-<name>.png` | The whole sheet, 128 px cells, transparent. |
 | `sheet-<name>@2x.png` | Same layout at 256 px cells. |
 | `sheet-<name>-key.png` | Human reference: labels, `cN rN` coords, cyan border on every cell with a drop-in target. |
@@ -239,12 +242,28 @@ always selected as a whole strip, and matching is exact — a selector that hits
 nothing fails the run rather than quietly writing everything.
 
 Each sliceable cell is cut, encoded as WebP and written to its `target` under
-`public/`. Output edge defaults to the painted cell size — slice the `@2x` sheet
-and blocks land at 256 × 256, which is what `art-todo.md` recommends.
+`public/`. A cell keeps its painted size (at most 512) — slice the `@2x` sheet
+and blocks land at 256 × 256, which is what `art-todo.md` recommends. **Walk
+strips and single-image sheets (monsters, engines, arms, hulls, fixtures) are
+written at most 256 px tall** — the payload rule every shipped strip already
+follows. The fixtures on disk today are 640 × 640 and the siege chassis
+360 × 360, so a re-slice brings them down to 256; `--size <px>` is the one-run
+exception if one of them turns out soft on screen.
 
 Useful flags: `--sheet <id>` if the filename is unrecognisable, `--size <px>` to
 force the output edge, `--out <dir>` to write somewhere other than `public/`,
-`--quality 0-1` for the WebP encoder.
+`--quality 0-1` for the WebP encoder, `--no-fit` when the DRAWING is the thing
+that is off (a part tiny in its own cell) and registering onto it would shrink a
+good painting.
+
+**The receipt.** Every painting that is cut leaves a line in
+`painted/.sliced.json`: the revision of the reference it was cut against, and
+the painting's own hash. When the bench re-draws a reference after it was
+painted, the slicer **refuses** that painting — slicing it would put the old
+silhouette back over the corrected drawing. Repaint it, or pass `--stale-ok` if
+the change was cosmetic. A painting whose drawing was re-cut goes to
+`painted/stale/` (never deleted — delete its sliced `.webp` files instead, so
+the renderer falls back to the corrected drawing).
 
 **Set your image tool's aspect ratio to 1:1.** Two separate single-cell returns
 came back at exactly 1024x559 — that is a tool default overriding the prompt,
@@ -275,6 +294,33 @@ What the slicer does for you:
 * **Squares up a single-cell image** whatever shape it arrives in — see the
   aspect note above.
 
+**2b · Compress what it wrote.** The slicer encodes WebP at q0.92, well above
+what the art needs. `pnpm compress:images` runs `scripts/compress-images.mjs`
+over `public/images`, searching each file for the smallest encode that still
+clears measured quality floors, and keeps every original under `public-backup/`
+(never inside `public/` — Vite ships whatever is in there). After a re-slice,
+compress only the files the slicer just rewrote, from themselves:
+
+```
+node scripts/compress-images.mjs public/images --backup-dir public-backup --fresh \
+     --only public/images/monsters/grumpling.webp
+```
+
+Without `--fresh` a re-cut file that already has a backup is skipped (shipped
+uncompressed), and `--force` would compress the OLD backup back over the new
+art. The Art Desk does this for you on every slice. `pnpm compress-folder <dir>
+--dry-run` prints the plan and scores without writing; `pnpm compress-bench`
+re-derives the settings, and `docs/IMAGE-COMPRESSION-BENCH.md` has the numbers
+behind the defaults.
+
+**2c · Check it landed.** `pnpm art:status` lists, per folder, which drop-ins are
+on disk and which are still drawn — a miss is silent in the game by design —
+plus files that ship without any manifest target pointing at them.
+`pnpm art:measure cells` measures every sliced strip against the box the bench
+recorded for its drawing (oversize, undersize, off-centre, fixtures judged by
+area as the slicer fits them); `pnpm art:measure strips public/images/monsters`
+finds walk frames the key ate. Then look at `/#/playground` with the art flag.
+
 **3 · Turn the art on with the feature flag:**
 
 | | |
@@ -303,12 +349,72 @@ be adopted one file at a time.
 > a 404 storm, while a URL param still lets art be switched on for a look and
 > straight back off, live, with no rebuild.
 
+## Art that does not exist yet — merged tiers and the chest wing
+
+Two kinds of slot are for paintings nobody has made yet, so the game does
+**not** probe them until they are listed — a probe for a file that is not there
+is a 404, and a portal's QA console reads each one as a broken build.
+
+* **Merged weapons** — `fixture-<weapon>-t2.png` and `-t3.png` for cannon,
+  archer, bombard, mortar, tesla and frost (prompts in `PROMPTS-WALKS.md`).
+  The reference is the procedural twin / triple battery the game shows today;
+  attach the plain painting (`public/images/fixtures/<weapon>.webp`) as well,
+  because it is the design. Returns land at
+  `public/images/fixtures/<weapon>-t2.webp` / `-t3.webp`; tiers 4 and up reuse
+  the t3 painting. The game lays the tier rim (lighter) and the tier-3 glow on
+  top at run time, so neither belongs in the painting.
+* **The chest wing** — `prop-chest-wing` (prompt in `PROMPTS-SCENERY.md`, no
+  reference image: attach `public/images/icons/chest.webp`). One RIGHT wing on
+  a 512 × 512 canvas, root at 12 % from the left and 70 % from the top — the
+  component flaps it by rotating about that point, so the prompt pins it.
+  Lands at `public/images/props/chest-wing.webp`.
+
+After slicing, **list the id** in `src/game/paintedArt.ts` —
+`PAINTED_TIER_FIXTURES` (`'cannon-t2'`) or `PAINTED_PROPS` (`'chest-wing'`).
+`tests/game/paintedArt.test.ts` fails until you do, and fails again if an id is
+listed with no file behind it.
+
+## The Art Desk — the loop without the busywork
+
+```
+pnpm art:desk
+```
+
+A local page (127.0.0.1 only) over the same files: search any sheet by sprite
+name, **Copy image, then prompt** (key <kbd>b</kbd>) and paste twice at Gemini,
+press Gemini's download button — the desk files the download from `~/Downloads`
+under the right name in `painted/`, slices it and compresses exactly what was
+cut. Dropping or pasting an image onto a job does the same. Its status column is
+`PAINT-STATUS.md`, recomputed live; reference-only strips are marked `–` and
+never queued.
+
+Or queue every **To paint** job and let it drive gemini.google.com in its own
+Chrome window (`~/.art-desk/gemini-chrome`, shared by every project), 90–150 s
+apart and capped at 40 a day. Sign in once with **Sign in** — Google refuses a
+sign-in in a window with a debugging port, so that one opens plain; close it
+afterwards. A painting it replaces goes to `painted/replaced/` (git-ignored),
+never deleted. Settings go in an optional `art-desk.config.json` at the repo root
+(see the header of `tools/art-desk/config.mjs`).
+
 ## Regenerating
+
+**Only the prompt text changed** (a blurb, a clause, a new manifest entry):
+
+```
+pnpm art:prompts            # the four PROMPTS-*.md + PAINT-STATUS.md, no browser
+pnpm art:prompts --check    # exit 1 if a document is out of date
+```
+
+Both routes render through `promptDocs()` in `src/game/artSheet.ts`, so they
+write the same bytes, and `tests/game/artPromptDocs.test.ts` proves every block
+parses back out exactly as the desk will send it.
+
+**The drawing changed** — re-export the references:
 
 ```
 pnpm dev
 open http://localhost:2050/#/art-sheets
-click "Export all sheets"
+click "Export all sheets"          # or, with the dev server up: pnpm art:export
 ```
 
 Every animated thing is frozen at a fixed phase, so a re-export is

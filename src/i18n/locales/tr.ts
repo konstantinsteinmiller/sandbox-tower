@@ -11,6 +11,14 @@ export default {
   'crazyGamesOnly': 'Bu oyun yalnızca şurada mevcut:',
 
   // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'gift': {
+    'free': 'Bedava',
+    'tile': 'Bedava {name}, seviye {n}: dokun, sonra yerleştirmek için tahtaya dokun',
+    'pair': 'Bedava bir çift {name}: dokun, sonra yerleştirmek için tahtaya dokun',
+    'chest': 'Uçan sandık: açmak için dokun',
+    'firstClear': '{n}. dalga geçildi! Sana bir hediye'
+  },
+
   'mobile': {
     'rotatePortrait': 'Oynamak için telefonunu dik tut',
     'columnFull': 'Sütun dolu',

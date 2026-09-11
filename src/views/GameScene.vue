@@ -20,8 +20,10 @@ import useTowerGame, {
   RANGE_BUFF_MUL, effectiveRangeMul,
   halfWidthAt, UPPER_HALF_WIDTH, WATER_ROW, speedBuffLeft, grantSpeedBuff, graceAvailable,
   continueRun, isFirstSession, seedScriptedOpening, buildClockHeld,
-  repairAll, repairAllPlan, canRepairAll, seedTutorialRankGold
+  repairAll, repairAllPlan, canRepairAll, seedTutorialRankGold, missingFor
 } from '@/use/useTowerGame'
+import { denyPurchase } from '@/use/useResourceBlink'
+import { idleNudge, noteBuildAction, useIdleNudge } from '@/use/useIdleNudge'
 import {
   setViewport, snapToFit, screenToCell, panBy, zoomAt,
   beginPinch, updatePinch, endPinch, recenter, isManual,
@@ -86,6 +88,7 @@ import ControlHint, { type HintId } from '@/components/game/ControlHint.vue'
 import WaveClearToast from '@/components/game/WaveClearToast.vue'
 import TutorialOverlay, { type TutorialStep } from '@/components/game/TutorialOverlay.vue'
 import MergeGuide from '@/components/game/MergeGuide.vue'
+import MergePowerDemo from '@/components/game/MergePowerDemo.vue'
 import TrapTutorial from '@/components/game/TrapTutorial.vue'
 import RepairAllButton from '@/components/game/RepairAllButton.vue'
 import FHudButton from '@/components/atoms/FHudButton.vue'
@@ -96,6 +99,8 @@ import FButton from '@/components/atoms/FButton.vue'
 import FRewardButton from '@/components/atoms/FRewardButton.vue'
 import CoinBadge from '@/components/organisms/CoinBadge.vue'
 import TreasureChest from '@/components/organisms/TreasureChest.vue'
+import FlyingChest from '@/components/game/FlyingChest.vue'
+import GiftTile from '@/components/game/GiftTile.vue'
 import DailyRewards from '@/components/organisms/DailyRewards.vue'
 import AdRewardButton from '@/components/organisms/AdRewardButton.vue'
 import BattlePass from '@/components/organisms/BattlePass.vue'
@@ -634,13 +639,19 @@ const tryPlace = (c: number, r: number): void => {
   const shapeId = selectedShape.value
   if (slot == null || !shapeId) return
 
-  if (!canPlaceShapeAt(shapeId, c, r, selectedRot.value) || !canAffordShape(shapeId)) {
+  // A price the player cannot meet is refused OUT LOUD, and before the cell is
+  // even looked at: the short piles blink in the resource bar and a heavier
+  // knock plays (`useResourceBlink`). An illegal cell and an empty purse are
+  // different problems with different fixes, so they get different answers.
+  if (denyPurchase(missingFor(shapeId))) return
+  if (!canPlaceShapeAt(shapeId, c, r, selectedRot.value)) {
     // A short negative click is better feedback than silence — it confirms the
     // tap registered and the placement was rejected, not missed.
     playSound('obstacle-hit', 0.03)
     return
   }
   if (!placeShape(slot, c, r, selectedRot.value)) return
+  noteBuildAction()
 
   // Captured BEFORE the beat is completed — completing it moves the index, so
   // afterwards there is no way to tell that this placement was the taught one.
@@ -662,11 +673,17 @@ const tryPlace = (c: number, r: number): void => {
     // are worse with a piece stuck under the cursor.
     selectedSlot.value = null
   } else {
-    // The slot has already rerolled to a new piece. Keep it armed only if the
-    // replacement is affordable — otherwise the player would be left holding a
-    // shape they cannot place, with the ghost stuck red under their finger.
-    const next = offers.value[slot]
-    if (!next || !canAffordShape(next)) selectedSlot.value = null
+    // The slot has already rerolled to a new piece, and it STAYS armed even
+    // when that piece is unaffordable.
+    //
+    // It used to disarm, so the player would not be left holding a shape they
+    // could not place with its ghost stuck red under the pointer. But a player
+    // who has just spent their last wood carries on clicking where they are
+    // building, and with nothing armed each click quietly inspected a block
+    // instead — no placement, and no word about why. Armed, the red ghost now
+    // has an explanation the moment they click (the refusal blink above), and
+    // once a kill's payout lands the same click places the piece.
+    if (!offers.value[slot]) selectedSlot.value = null
   }
   if (phase.value === 'build') saveRunSnapshot()
 }
@@ -680,8 +697,26 @@ const onSelectSlot = (slot: number | null): void => {
     // up, but the beat's contract is "you armed the archer", not "you armed
     // something".
     if (slot === TUTORIAL_SLOT) completeTutorialStep('pick')
+    // Picking a piece the player cannot pay for still arms it — the tray has
+    // always let them look at what they are saving for — but the pick itself
+    // is told what is missing, by click or by number key alike.
+    const shapeId = offers.value[slot]
+    if (shapeId) denyPurchase(missingFor(shapeId))
   }
 }
+
+// ─── Idle nudge ─────────────────────────────────────────────────────────────
+//
+// Fifteen seconds of nothing built while something in the hand is affordable,
+// and the affordable tiles pulse until the next placement (`useIdleNudge`).
+// The clock only runs while the game is actually in front of the player —
+// tutorial finished, no card, demo, modal or ad — so it measures their
+// idleness, not the time the game spent waiting on something else.
+useIdleNudge({
+  eligible: () => tutorialOver.value && isLiveGameplay.value && !isGamePaused.value
+    && !showMergeGuide.value && !showMergePower.value && !showTrap.value,
+  anyAffordable: () => offers.value.some((id) => canAffordShape(id))
+})
 
 // ─── Control hints ──────────────────────────────────────────────────────────
 //
@@ -1145,10 +1180,12 @@ watch(lastWaveReward, async (r) => {
   // and playing them under an ad spends them on a screen nobody is looking at.
   // Wallet coins are absent on purpose — those already fly to the badge in the
   // corner via `coinPayout`, and a second readout of the same coins would say
-  // the wave paid twice.
-  pushResourceFloat('wood', r.wood)
-  pushResourceFloat('stone', r.stone)
-  pushResourceFloat('gold', r.gold)
+  // the wave paid twice. The same logic now covers the materials: most of them
+  // were paid kill by kill and announced on each kill, so only what landed AT
+  // the clear rises into the bar here.
+  pushResourceFloat('wood', r.atClear.wood)
+  pushResourceFloat('stone', r.atClear.stone)
+  pushResourceFloat('gold', r.atClear.gold)
 })
 
 // ─── First-stage tutorial ───────────────────────────────────────────────────
@@ -1200,9 +1237,14 @@ watch(lastWaveReward, async (r) => {
  * the moment, and explaining a payoff to somebody who has not had it is the
  * kind of tutorial beat players skip past and resent — `advanceTutorial` steps
  * over it in that case.
+ *
+ * `mergePower` follows the ladder: six seconds of `MergePowerDemo`, the same
+ * monster shot by a plain cannon (−10 %) and then a tier 3 (−75 %). The ladder
+ * shows that welds keep going; players still stopped at tier 2, because
+ * nothing showed them what the next weld is FOR.
  */
 const TUTORIAL_STEPS: TutorialStep[] = [
-  'pick', 'place', 'mergeGuide', 'inspectMerged', 'rankUp', 'call'
+  'pick', 'place', 'mergeGuide', 'mergePower', 'inspectMerged', 'rankUp', 'call'
 ]
 
 /**
@@ -1213,7 +1255,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
  * nothing worth inspecting and nothing to rank. Showing any one of them to that
  * player is a beat about a thing that did not happen.
  */
-const MERGE_BEATS = new Set<TutorialStep>(['mergeGuide', 'inspectMerged', 'rankUp'])
+const MERGE_BEATS = new Set<TutorialStep>(['mergeGuide', 'mergePower', 'inspectMerged', 'rankUp'])
 
 /**
  * The piece the tutorial teaches with, dealt into the weapon slot.
@@ -1254,6 +1296,15 @@ const inFirstStage = computed(() =>
   && !showResult.value
   && !isAnyModalOpen.value
 )
+
+/**
+ * The tutorial is behind this RUN: finished, or past the wave its coach marks
+ * can show on. The flying chest and the idle nudge wait on this rather than on
+ * `tutorialDone` alone, so a tutorial that is abandoned rather than finished
+ * does not also withhold them — the phone board's is, for every player a blind
+ * playtest watched, and both boards read the same signal.
+ */
+const tutorialOver = computed(() => tutorialDone.value || wave.value > 1)
 
 const tutorialStep = computed<TutorialStep | null>(() => {
   if (!inFirstStage.value) return null
@@ -1448,11 +1499,12 @@ const measureTutorialTarget = (): void => {
   }
   if (step === 'call') { tutorialRect.value = fromEl('.call-wave__btn'); return }
 
-  // The pictogram beat owns the whole screen through `MergeGuide`. A coach mark
-  // underneath it would cut a hole in a card that has nothing behind it worth
-  // reaching, so this step deliberately measures nothing and the overlay's
-  // no-hole rule renders it away.
-  if (step === 'mergeGuide') { tutorialRect.value = null; return }
+  // The pictogram beat owns the whole screen through `MergeGuide`, and the
+  // power demo after it through `MergePowerDemo`. A coach mark underneath
+  // either would cut a hole in a card that has nothing behind it worth
+  // reaching, so these steps deliberately measure nothing and the overlay's
+  // no-hole rule renders them away.
+  if (step === 'mergeGuide' || step === 'mergePower') { tutorialRect.value = null; return }
 
   // The weld itself, projected from world space — the hole has to cover BOTH
   // its cells or the arrow points at a block whose left half is the only live
@@ -1523,7 +1575,7 @@ watch(tutorialStep, (step) => {
   // piece in hand a tap on the battlefield BUILDS, so the player told to tap
   // their new weld would drop a crate on it instead and the beat could never be
   // completed.
-  if (step === 'mergeGuide' || step === 'inspectMerged') selectedSlot.value = null
+  if (step === 'mergeGuide' || step === 'mergePower' || step === 'inspectMerged') selectedSlot.value = null
 
   // The tutorial buys the rank it is about to teach — see `seedTutorialRankGold`
   // for why the first run cannot afford its own lesson. A zero back means there
@@ -1569,6 +1621,20 @@ const onMergeGuideContinue = (): void => {
   if (forcedMerge.value) { forcedMerge.value = false; return }
   setState(MERGE_GUIDE_KEY, true)
   completeTutorialStep('mergeGuide')
+}
+
+// ─── The merge power demo ───────────────────────────────────────────────────
+//
+// Straight after the ladder, and on the same terms: a beat of the tutorial, so
+// the build countdown stays held while it plays (`buildClockHeld`), and part of
+// the merge arc, so a first run that fused nothing never sees it.
+
+const forcedPower = ref(false)
+const showMergePower = computed(() => forcedPower.value || tutorialStep.value === 'mergePower')
+
+const onMergePowerContinue = (): void => {
+  if (forcedPower.value) { forcedPower.value = false; return }
+  completeTutorialStep('mergePower')
 }
 
 // ─── The collapse-trap demonstration ────────────────────────────────────────
@@ -1659,14 +1725,16 @@ const onRepairAll = (): void => {
 // portal shell, which is exactly where a dev-only switch cannot reach.
 //
 //   ?tut=merge   the merge ladder, now
+//   ?tut=power   the merge power demo, now
 //   ?tut=trap    the collapse demo, now
-//   ?tut=reset   forget both, so the next run teaches them again
+//   ?tut=reset   forget all of it, so the next run teaches it again
 //
 // The keyboard shortcuts (Shift+M / Shift+T / Shift+N) are DEV only — a stray
 // modifier chord in a shipped build is a bug report nobody can reproduce.
 
 const replayTutorial = (what: TutorialCheat): void => {
   if (what === 'merge') { forcedMerge.value = true; return }
+  if (what === 'power') { forcedPower.value = true; return }
   if (what === 'trap') { showTrap.value = true; return }
   setState(MERGE_GUIDE_KEY, false)
   setState(TRAP_TUTORIAL_KEY, false)
@@ -1839,6 +1907,27 @@ const onEnhancedHand = async (): Promise<void> => {
     selectedSlot.value = null
     playSound('level-up', 0.07)
   })
+}
+
+// ─── Flying chest and gift pieces ───────────────────────────────────────────
+//
+// A chest once a wave, from the moment the tutorial ends; tapping it queues a
+// free welded piece, which waits in the gift tile over the hand (see
+// `useGifts`). Both are self-contained — this scene only says when they may
+// run, and puts down whatever it was holding when a gift is picked up.
+
+const chestReady = computed(() => tutorialOver.value && !showResult.value && phase.value !== 'defeat')
+const chestPaused = computed(() =>
+  showResult.value || showMergeGuide.value || showMergePower.value || showTrap.value
+)
+const giftDisabled = computed(() =>
+  showResult.value || phase.value === 'defeat' || tutorialStep.value !== null
+)
+
+const onGiftArmed = (): void => {
+  selectedSlot.value = null
+  inspected.value = null
+  arrowRainArmed.value = false
 }
 
 /**
@@ -2103,6 +2192,7 @@ const onKey = (e: KeyboardEvent): void => {
   // the `import.meta.env.DEV` literal, so a portal build has no chord at all.
   if (import.meta.env.DEV && e.shiftKey) {
     if (e.code === 'KeyM') { e.preventDefault(); replayTutorial('merge'); return }
+    if (e.code === 'KeyP') { e.preventDefault(); replayTutorial('power'); return }
     if (e.code === 'KeyT') { e.preventDefault(); replayTutorial('trap'); return }
     if (e.code === 'KeyN') { e.preventDefault(); replayTutorial('reset'); return }
   }
@@ -2303,6 +2393,15 @@ onUnmounted(() => {
     //- ── HUD overlay ───────────────────────────────────────────────────────
     //- Non-interactive by default; individual controls opt back in.
     div.scene__hud
+      //- The flying chest crosses the sky once a wave. First in the HUD, so
+      //- every panel and button after it paints over it rather than under.
+      FlyingChest(
+        :tutorial-done="tutorialOver"
+        :ready="chestReady"
+        :paused="chestPaused"
+        :wave="wave"
+        :phase="phase"
+      )
       //- The game's premise, said once, in the biggest type on the screen.
       //- First-time players only, and gone on their first touch — see
       //- `showIncoming`.
@@ -2410,6 +2509,14 @@ onUnmounted(() => {
             //- quit rather than the moment they adapt. It takes a row of its
             //- own so the two answers sit directly underneath the problem.
             div.scene__reach-hint(v-if="outOfReachNow") {{ t('allies.outOfReachHint') }}
+            //- A gift a chest or a first clear paid out, waiting to be placed.
+            GiftTile(
+              variant="footprint"
+              :canvas="canvasRef"
+              :slot-armed="selectedSlot != null"
+              :disabled="giftDisabled"
+              @armed="onGiftArmed"
+            )
             FRewardButton(
               v-if="enhancedHandOffered"
               tone="gold"
@@ -2483,6 +2590,7 @@ onUnmounted(() => {
             :coins="runCoins"
             :reroll-seconds="rerollReadyIn"
             :hide-reroll="tutorialStep !== null"
+            :nudge="idleNudge"
             @select="onSelectSlot"
             @reroll="onReroll"
           )
@@ -2706,6 +2814,13 @@ onUnmounted(() => {
     MergeGuide(
       :model-value="showMergeGuide"
       @continue="onMergeGuideContinue"
+    )
+
+    //- Six seconds after the ladder: a plain cannon against a tier 3, one
+    //- health bar between them. A tutorial beat, so the countdown stays held.
+    MergePowerDemo(
+      :model-value="showMergePower"
+      @continue="onMergePowerContinue"
     )
 
     //- The collapse trap, once, in the beat between the first death's ad break

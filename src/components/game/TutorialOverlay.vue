@@ -37,9 +37,12 @@ import { computed, ref, onMounted, onUnmounted } from 'vue'
  * renders nothing for it, by the same no-hole-no-overlay rule every other step
  * obeys. It lives in the union anyway so the scene's step list stays one typed
  * sequence rather than a sequence plus a special case beside it.
+ *
+ * `mergePower` follows it and is the same kind of beat: the six-second
+ * `MergePowerDemo` owns the screen, and this component renders nothing.
  */
 export type TutorialStep =
-  'pick' | 'place' | 'mergeGuide' | 'inspectMerged' | 'rankUp' | 'call' | 'drop' | 'merge'
+  'pick' | 'place' | 'mergeGuide' | 'mergePower' | 'inspectMerged' | 'rankUp' | 'call' | 'drop' | 'merge'
 
 interface Props {
   /** Which step is live, or null when the tutorial is finished/never started. */
@@ -58,7 +61,7 @@ const props = defineProps<Props>()
  * is on a poll, and one stale rect surviving a step change would cut a hole in
  * a card with nothing reachable behind it and dim the card itself.
  */
-const CARD_STEPS = new Set<TutorialStep>(['mergeGuide'])
+const CARD_STEPS = new Set<TutorialStep>(['mergeGuide', 'mergePower'])
 
 /** Padding around the highlighted element, so the hole never crops it. */
 const PAD = 10

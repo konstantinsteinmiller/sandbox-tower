@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import {
+  previewDropMerge,
   phase, wave, wood, runCoins, enemiesLeft, buildTimeLeft, gameSpeed,
   lastWaveReward, isBossIncoming, towerVersion, waveVersion,
   currentHoardTier, getBlocks, getTowerBlocks, getEnemies, offers, offerEnhanced,
@@ -11,8 +12,10 @@ import {
   manualReroll, canManualReroll, dealEnhancedOffers, speedBuffLeft, grantSpeedBuff,
   graceAvailable, continueRun, isFirstSession, seedScriptedOpening, applyRules,
   dropOffer, canDropAt, columnTop, repairAll, repairAllCost, canRepairAll, canAffordShape, sellBlock,
-  blockCount, CONTINUE_WOOD, CONTINUE_STONE
+  blockCount, CONTINUE_WOOD, CONTINUE_STONE, missingFor
 } from '@/use/useTowerGame'
+import { denyPurchase } from '@/use/useResourceBlink'
+import { idleNudge, noteBuildAction, useIdleNudge } from '@/use/useIdleNudge'
 import {
   setViewport, setFixedFrame, clearFixedFrame, screenToWorldX, screenToWorldY,
   worldToScreenX, worldToScreenY, getZoom, viewRect
@@ -75,6 +78,7 @@ import ControlHint, { type HintId } from '@/components/game/ControlHint.vue'
 import WaveClearToast from '@/components/game/WaveClearToast.vue'
 import TutorialOverlay, { type TutorialStep } from '@/components/game/TutorialOverlay.vue'
 import MergeGuide from '@/components/game/MergeGuide.vue'
+import MergePowerDemo from '@/components/game/MergePowerDemo.vue'
 import { readTutorialCheat, type TutorialCheat } from '@/use/useTutorialCheat'
 import IncomingBanner from '@/components/game/IncomingBanner.vue'
 import FReward from '@/components/atoms/FReward.vue'
@@ -84,6 +88,8 @@ import FMuteButton from '@/components/atoms/FMuteButton.vue'
 import FHudButton from '@/components/atoms/FHudButton.vue'
 import MissionsModal from '@/components/organisms/MissionsModal.vue'
 import TreasureChest from '@/components/organisms/TreasureChest.vue'
+import FlyingChest from '@/components/game/FlyingChest.vue'
+import GiftTile from '@/components/game/GiftTile.vue'
 import OptionsModal from '@/components/organisms/OptionsModal.vue'
 import IconCoin from '@/components/icons/IconCoin.vue'
 import GameIcon from '@/components/icons/GameIcon.vue'
@@ -367,7 +373,8 @@ const loop = (t: number): void => {
   // The pause gate covers ads, hidden tabs and platform pauses; the rotate
   // overlay and the result screen hold the clock as well.
   perf.phase('update')
-  if (!isGamePaused.value && !showResult.value && !rotateBlocked.value && !showMergeGuide.value) {
+  if (!isGamePaused.value && !showResult.value && !rotateBlocked.value
+    && !showMergeGuide.value && !showMergePower.value) {
     if (benchStep) benchStep(dt)
     step(dt)
   }
@@ -431,6 +438,11 @@ const columnAt = (clientX: number): number | null => {
 }
 
 const tryDrop = (slot: number, c: number): void => {
+  // A piece the player cannot pay for is refused OUT LOUD, in the place the
+  // answer lives: the short piles blink in the strip and a knock plays. See
+  // `useResourceBlink` for why a silent no was the bug.
+  const shapeId = offers.value[slot]
+  if (shapeId && denyPurchase(missingFor(shapeId))) return
   if (!dropOffer(slot, c)) {
     playSound('obstacle-hit', 0.03)
     return
@@ -438,17 +450,43 @@ const tryDrop = (slot: number, c: number): void => {
   playFx('uiTap')
   markHintDone('dropBlock')
   completeTutorialStep('drop')
-  // Keep the slot armed only while the piece that refilled it is affordable;
-  // otherwise the player would be holding something they cannot drop.
-  const next = offers.value[slot]
-  if (!next || !canAffordShape(next)) selectedSlot.value = null
+  noteBuildAction()
+  // The slot STAYS armed, even when the piece that refilled it is unaffordable.
+  //
+  // It used to disarm, on the reasoning that the player would otherwise be
+  // holding something they could not drop. What that produced was a player
+  // who had just run out of materials hammering the column they were building,
+  // every tap now doing nothing and saying nothing — nothing was armed any
+  // more. Armed, the next tap is refused loudly, and once a kill's payout
+  // lands the same tap drops the piece, which is what the hammering meant.
+  if (!offers.value[slot]) selectedSlot.value = null
 }
 
 const onSelectSlot = (slot: number | null): void => {
   selectedSlot.value = slot
   sellTarget.value = null
-  if (slot != null) playFx('uiTap')
+  if (slot == null) return
+  // Armed even when it cannot be paid for yet (see `tryDrop`) — but the tap
+  // that armed it is told why it will not go in, rather than finding out on
+  // the column.
+  const shapeId = offers.value[slot]
+  if (shapeId && denyPurchase(missingFor(shapeId))) return
+  playFx('uiTap')
 }
+
+// ─── Idle nudge ─────────────────────────────────────────────────────────────
+//
+// Fifteen seconds of nothing built while something in the hand is affordable,
+// and the affordable tiles pulse until the next drop (`useIdleNudge`). The
+// clock only runs while the game is actually in front of the player — the
+// tutorial finished, no card, modal, ad, rotate prompt or open menu — so it
+// measures their idleness, not the time the game spent waiting on something
+// else.
+useIdleNudge({
+  eligible: () => tutorialOver.value && isLiveGameplay.value
+    && !isGamePaused.value && !menuOpen.value,
+  anyAffordable: () => offers.value.some((id) => canAffordShape(id))
+})
 
 // The tray reports a PRESS; whether it was a tap (arm the piece) or a drag
 // (carry it to a column) is decided here from how far the finger travels.
@@ -497,7 +535,8 @@ const onTilePress = (slot: number, e: PointerEvent): void => {
 //
 // With a piece armed, the board is one big target: press anywhere on it and
 // the column under the finger lights, lift and the piece drops there. With
-// nothing armed, holding on a block opens the sell bubble.
+// nothing armed — or with a piece armed that cannot be paid for — holding on a
+// block opens the sell bubble.
 
 const LONG_PRESS_MS = 450
 let pressing = false
@@ -513,6 +552,28 @@ const blockAtScreen = (clientX: number, clientY: number): Block | null => {
   const c = Math.round(screenToWorldX(clientX))
   const r = Math.floor(screenToWorldY(clientY))
   return getBlocks().get(`${c},${r}`) ?? null
+}
+
+/**
+ * Set when a long-press opened the sell bubble, so the lift that ends that same
+ * press is not ALSO read as a drop into the column it happened over — which it
+ * could be now that a long-press can fire with a piece in hand (see
+ * `onCanvasDown`).
+ */
+let sellPressFired = false
+
+/** Start the long-press that opens the sell bubble on the block under `x, y`. */
+const armSellPress = (x: number, y: number): void => {
+  const b = blockAtScreen(x, y)
+  if (!b || b.typeId === GATE_ID) return
+  longPressTimer = setTimeout(() => {
+    longPressTimer = null
+    if (pressMoved) return
+    sellPressFired = true
+    armedColumn.value = null
+    sellTarget.value = b
+    playSound('modal-open', 0.05)
+  }, LONG_PRESS_MS)
 }
 
 // ─── Pinch ──────────────────────────────────────────────────────────────────
@@ -554,21 +615,22 @@ const onCanvasDown = (e: PointerEvent): void => {
   pressing = true
   pressStart = { x: e.clientX, y: e.clientY }
   pressMoved = false
+  sellPressFired = false
   clearLongPress()
+  sellTarget.value = null
 
   if (selectedSlot.value != null) {
     armedColumn.value = columnAt(e.clientX)
+    // A piece in hand the player cannot pay for stays armed (see `tryDrop`),
+    // and it must not take the board's other gesture away with it: selling a
+    // block is how a broke player gets back to affording that piece, so a
+    // long-press on a block still opens the bubble. A quick tap is still a
+    // drop attempt — and still refused out loud.
+    const held = offers.value[selectedSlot.value]
+    if (held && !canAffordShape(held)) armSellPress(e.clientX, e.clientY)
     return
   }
-  sellTarget.value = null
-  const b = blockAtScreen(e.clientX, e.clientY)
-  if (!b || b.typeId === GATE_ID) return
-  longPressTimer = setTimeout(() => {
-    longPressTimer = null
-    if (pressMoved) return
-    sellTarget.value = b
-    playSound('modal-open', 0.05)
-  }, LONG_PRESS_MS)
+  armSellPress(e.clientX, e.clientY)
 }
 
 const onCanvasMove = (e: PointerEvent): void => {
@@ -600,6 +662,13 @@ const onCanvasUp = (e: PointerEvent): void => {
   }
   if (!pressing) return
   pressing = false
+  // This press became a long-press that opened the sell bubble; lifting the
+  // finger is the end of that gesture, not a drop.
+  if (sellPressFired) {
+    sellPressFired = false
+    armedColumn.value = null
+    return
+  }
   if (selectedSlot.value == null) return
   const c = e.type === 'pointercancel' ? null : (armedColumn.value ?? columnAt(e.clientX))
   armedColumn.value = null
@@ -635,7 +704,8 @@ const sellBubbleStyle = computed(() => {
 })
 
 /**
- * Where a piece in hand would come to rest, column by column.
+ * Where a piece in hand would come to rest, column by column — and what it
+ * would weld into there (`previewDropMerge`).
  *
  * Only ever a board's width of entries (five), recomputed when the hand, the
  * tower or the phase changes — the renderer holds the array and reads it every
@@ -646,19 +716,42 @@ const dropGuidesFor = (shapeId: string | undefined): DropGuide[] => {
   const cells = cellsOf(shapeId)
   const guides: DropGuide[] = []
   for (let c = -BOARD_HALF_WIDTH; c <= BOARD_HALF_WIDTH; c++) {
+    const valid = canDropAt(c, cells)
     guides.push({
       c,
       r: Math.min(BOARD_MAX_ROW, columnTop(c) + 1),
-      valid: canDropAt(c, cells)
+      valid,
+      merges: valid ? previewDropMerge(shapeId, c) : []
     })
   }
   return guides
 }
 
+/** The piece in hand, as a shape id. */
+const armedShape = computed(() =>
+  selectedSlot.value != null ? offers.value[selectedSlot.value] : undefined
+)
+
+/**
+ * The guides, cached against what they depend on: the piece in hand, the tower
+ * and the phase.
+ *
+ * A computed rather than part of the overlay watcher, because that watcher also
+ * fires on every column a dragging finger crosses, and none of that changes
+ * where anything lands. The hand is read through `offers`, so a slot that stays
+ * armed across a drop picks up the piece that refilled it — and `columnTop`
+ * counts the piece still falling, which the preview lands first.
+ */
+const dropGuides = computed(() => {
+  void towerVersion.value
+  void phase.value
+  return dropGuidesFor(armedShape.value)
+})
+
 // The overlay is the renderer's copy of the input state.
-watch([selectedSlot, armedColumn, towerVersion, phase], () => {
+watch([armedShape, armedColumn, dropGuides, phase], () => {
   const c = armedColumn.value
-  const id = selectedSlot.value != null ? offers.value[selectedSlot.value] : undefined
+  const id = armedShape.value
   setBuildOverlay({
     selectedShape: null,
     slots: [],
@@ -666,7 +759,7 @@ watch([selectedSlot, armedColumn, towerVersion, phase], () => {
     dropColumn: c,
     dropValid: c != null && canDropAt(c, cellsOf(id)),
     dropRows: BOARD_MAX_ROW,
-    dropGuides: dropGuidesFor(id),
+    dropGuides: dropGuides.value,
     hoverC: c,
     hoverR: c != null ? Math.min(BOARD_MAX_ROW, columnTop(c) + 1) : null
   })
@@ -855,9 +948,10 @@ watch(wave, (w) => {
 // as done. What the beat taught is now taught by the game: the wave comes, and
 // the button is there for the waves after it.
 //
-// The pictogram is the third beat, and the LAST one — where the desktop board
-// hands off to its Call Wave coach mark, this one has no wave to call, so the
-// ladder is the note the tutorial ends on.
+// The pictogram is the third beat, and the power demo the fourth and LAST —
+// where the desktop board hands off to its Call Wave coach mark, this one has
+// no wave to call, so the tutorial ends on the reason to keep merging: the same
+// monster, shot by a plain cannon and then by a tier 3.
 //
 // It carries the `cell` ladder, not the desktop's. A weld here collapses back
 // into ONE cell whatever its tier (`mergeArt: 'cell'`, `maxMergeTier:
@@ -865,7 +959,7 @@ watch(wave, (w) => {
 // promise this board never keeps — and on five columns the belief the player
 // actually needs is the opposite one: that a single cell is worth stacking
 // twins into, because the frontage never grows however deep the gun goes.
-const TUTORIAL_STEPS: TutorialStep[] = ['drop', 'merge', 'mergeGuide']
+const TUTORIAL_STEPS: TutorialStep[] = ['drop', 'merge', 'mergeGuide', 'mergePower']
 const tutorialDone = ref(getState<boolean>(M2_TUTORIAL_KEY, false) === true)
 const tutorialIndex = ref(0)
 const tutorialRect = ref<{ x: number; y: number; w: number; h: number } | null>(null)
@@ -874,13 +968,32 @@ let tutorialTimer = 0
 
 const inFirstStage = computed(() =>
   !tutorialDone.value
-  && wave.value <= 1
+  // Through wave 2, not just wave 1. This board does not hold the clock for
+  // the coach marks — a held clock over a merge beat whose partner a bat has
+  // just eaten would never release — so the lesson simply ends when its stage
+  // does. With the short early breaks wave 2 now arrives about ten seconds in,
+  // which is a tight window for two beats; one more wave of room costs nothing,
+  // since the fort holds wave 2 by itself.
+  && wave.value <= 2
   && !showResult.value
   && !isAnyModalOpen.value
   // A rotate prompt owns the whole screen; a spotlight measured behind it
   // points at wherever the board happened to be before the turn.
   && !rotateBlocked.value
 )
+
+/**
+ * The tutorial is behind this RUN: finished for good, or past the last wave its
+ * coach marks can show on (`inFirstStage` above lets go after wave 2 without
+ * marking the tutorial done).
+ *
+ * The flying chest and the idle nudge wait on THIS, not on `tutorialDone`. A
+ * blind playtest (2026-09-11) had no phone player finish the drop beat, so
+ * anything gated on the tutorial's completion was something no phone player
+ * would ever meet. Past wave 2 the coach marks cannot come back this run, which
+ * is the one thing those two features need to know.
+ */
+const tutorialOver = computed(() => tutorialDone.value || wave.value > 2)
 
 /**
  * Show the game's premise over the opening frame.
@@ -907,9 +1020,9 @@ const tutorialDropColumn = (): number => {
 const measureTutorialTarget = (): void => {
   const step = tutorialStep.value
   if (!step) { tutorialRect.value = null; return }
-  // The pictogram beat owns the whole screen through `MergeGuide`; a hole cut
-  // in a card with nothing reachable behind it is a dim layer over a dim layer.
-  if (step === 'mergeGuide') { tutorialRect.value = null; return }
+  // The pictogram and the demo each own the whole screen; a hole cut in a card
+  // with nothing reachable behind it is a dim layer over a dim layer.
+  if (step === 'mergeGuide' || step === 'mergePower') { tutorialRect.value = null; return }
   const cell = getZoom()
   if (step === 'call') {
     const el = document.querySelector('.call-wave__btn')
@@ -980,15 +1093,32 @@ const onMergeGuideContinue = (): void => {
   completeTutorialStep('mergeGuide')
 }
 
+// ─── The merge power demo ───────────────────────────────────────────────────
+//
+// The ladder says welds keep going; this says why anyone would want them to.
+// Six seconds, straight after the ladder: one plain cannon takes a tenth off a
+// monster, the tier-3 one takes three quarters. It holds the wave clock exactly
+// as the ladder does (see the loop and `isLiveGameplay`).
+
+const forcedPower = ref(false)
+const showMergePower = computed(() => forcedPower.value || tutorialStep.value === 'mergePower')
+
+const onMergePowerContinue = (): void => {
+  if (forcedPower.value) { forcedPower.value = false; return }
+  completeTutorialStep('mergePower')
+}
+
 // ─── Tutorial replay ────────────────────────────────────────────────────────
 //
-// `?tut=merge` shows the ladder now, `?tut=reset` forgets the tutorial so the
-// next run teaches it again. `trap` belongs to the desktop board — the collapse
-// trick is a thing you do to a cantilevered tower, and this board has columns —
-// so it is accepted and ignored rather than special-cased at the parser.
+// `?tut=merge` shows the ladder now, `?tut=power` the power demo, `?tut=reset`
+// forgets the tutorial so the next run teaches it again. `trap` belongs to the
+// desktop board — the collapse trick is a thing you do to a cantilevered tower,
+// and this board has columns — so it is accepted and ignored rather than
+// special-cased at the parser.
 
 const replayTutorial = (what: TutorialCheat): void => {
   if (what === 'merge') { forcedMerge.value = true; return }
+  if (what === 'power') { forcedPower.value = true; return }
   if (what !== 'reset') return
   setState(M2_TUTORIAL_KEY, false)
   tutorialDone.value = false
@@ -1233,6 +1363,27 @@ const onEnhancedHand = async (): Promise<void> => {
   })
 }
 
+// ─── Flying chest and gift pieces ───────────────────────────────────────────
+//
+// A chest once a wave, from the moment the tutorial ends; tapping it queues a
+// free welded piece, which waits in the gift tile beside the hand (see
+// `useGifts`). Both are self-contained — this scene only says when they may
+// run, and stands its own hand down when a gift is picked up.
+
+const chestReady = computed(() => tutorialOver.value && !showResult.value && phase.value !== 'defeat')
+const chestPaused = computed(() =>
+  showResult.value || rotateBlocked.value || showMergeGuide.value || showMergePower.value
+)
+const giftDisabled = computed(() =>
+  showResult.value || phase.value === 'defeat' || tutorialStep.value !== null
+)
+
+const onGiftArmed = (): void => {
+  selectedSlot.value = null
+  armedColumn.value = null
+  sellTarget.value = null
+}
+
 // ─── Keyboard (a phone with a keyboard is still a phone) ────────────────────
 
 const onKey = (e: KeyboardEvent): void => {
@@ -1266,6 +1417,7 @@ const isLiveGameplay = computed(
     && !isAdShowing.value
     && !rotateBlocked.value
     && !showMergeGuide.value
+    && !showMergePower.value
 )
 watch(isLiveGameplay, syncGameplayLifecycle, { immediate: true })
 
@@ -1413,6 +1565,17 @@ onUnmounted(() => {
       )
 
       div.drop__mid
+        //- The flying chest crosses the sky band, once a wave. Under every
+        //- other overlay in this band, so it never flies over a bubble or a
+        //- toast the player is reading.
+        FlyingChest(
+          :tutorial-done="tutorialOver"
+          :ready="chestReady"
+          :paused="chestPaused"
+          :wave="wave"
+          :phase="phase"
+        )
+
         //- Zoom, top-right of the playfield: how much of the approach the
         //- player wants to see. The recentre button only exists while the
         //- view is away from the fit, exactly as on the desktop scene.
@@ -1448,8 +1611,16 @@ onUnmounted(() => {
           span.drop__bubble-name {{ t(`blocks.names.${sellTarget.typeId}`) }}
           button.drop__bubble-sell(type="button" @click="onSell") {{ t('blocks.sell') }}
 
-        //- Rewarded perk, floating just above the hand.
+        //- Rewarded perk, floating just above the hand — and beside it the gift
+        //- a chest or a first clear paid out, waiting to be dropped.
         div.drop__perks
+          GiftTile(
+            variant="cell"
+            :canvas="canvasRef"
+            :slot-armed="selectedSlot != null"
+            :disabled="giftDisabled"
+            @armed="onGiftArmed"
+          )
           FRewardButton(
             v-if="enhancedHandOffered"
             tone="gold"
@@ -1496,6 +1667,7 @@ onUnmounted(() => {
           :in-battle="phase === 'battle'"
           :volley-charge="arrowRainCharge"
           :volley-waves-left="arrowRainWavesLeft"
+          :nudge="idleNudge"
           @press="onTilePress"
           @reroll="onReroll"
           @volley="onVolley"
@@ -1597,6 +1769,14 @@ onUnmounted(() => {
       variant="cell"
       :model-value="showMergeGuide"
       @continue="onMergeGuideContinue"
+    )
+
+    //- Six seconds, after the ladder: a plain cannon against a tier 3, one
+    //- health bar between them. Holds the clock like the ladder.
+    MergePowerDemo(
+      variant="cell"
+      :model-value="showMergePower"
+      @continue="onMergePowerContinue"
     )
 
     OptionsModal(:is-open="showOptions" @close="showOptions = false")

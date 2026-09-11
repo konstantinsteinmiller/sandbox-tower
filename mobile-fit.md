@@ -922,3 +922,78 @@ category before falling back to the UA heuristic.
 - Air units spawn **above the board** (`y = maxRow + 3.5`, dir toward the
   Gate) rather than off a flank, so the two rows of sky are the air lane.
 - Bomber altitude is 1.6 rows (the desktop's 3.2 leaves the frame).
+
+### 11.5 Early-hook pass (2026-09-11)
+
+Players were leaving 20-40 s in. A headless probe of a first session on a
+390 px phone at the opening zoom (±5.2 cells visible) showed why:
+
+- **Wave 1's only grunt was shot dead off-screen at 2.2 s.** The fort's
+  cannon (range 8.5) out-ranges a frame barely five cells either side of the
+  Gate, and enemies were placed two cells *outside* it. The first monster on
+  screen appeared at **15.3 s**, after a 10 s countdown. A player who builds
+  normally saw their first monster at **27-28 s** and 1-2 s of monsters in the
+  whole first minute — the stronger tower killed everything unseen.
+- `airFromWave: 4` did nothing: the bat's own `minWave` is 9, so waves 4-8 had
+  no flyers (~9 % of units over waves 1-16 were air).
+
+What changed (rule-set fields, desktop values unchanged and pinned):
+
+- `enemies.spawnAt: 'viewEdge'` — walkers stand just inside the frame's side
+  edge and divers drop in from the visible top (under the HUD strip), wherever
+  the zoom has put them; never closer than 1.5 cells to the board.
+- `waves.earlyBuildMs: [4000, 6000, 8000]` — short breaks after waves 1-3.
+- `waves.firstRunScale: [1, 1]` — no first-session discount (wave 1 is a grunt
+  and a bat instead of one grunt).
+- `waves.airShare: { base 0.28, slope 0.02, cap 0.45 }` from wave 2, a
+  preview bat on waves 1-3 (the early slice is too small to buy one); bat
+  unlocked at 2, wyvern 11, firebug added at 15 (preview at 13). A
+  one-flyer-per-wave floor was tried and removed: it only bites on waves the
+  director has trimmed for a struggling tower, and average-player 5-minute
+  survival fell to 3 in 8 with deaths inside the three-minute window.
+- The tutorial now stays up through wave 2 (the next wave arrives ~10 s in).
+- `MergePowerDemo` — six seconds after the merge ladder, on both boards: the
+  same monster shot by a tier 1 (−10 %) and a tier 3 (−75 %).
+- Merged weapons are drawn as twin (tier 2) and triple (tier 3+) batteries,
+  tier-coloured, and tier plates / merge bursts / shots use a colour ladder
+  (`src/game/tierStyle.ts`).
+
+Measured after (same probe, 12 seeds): first monster on screen at **0 s**;
+~25 s of monsters on screen in the first minute; 30 % of units are flyers.
+Trade-offs: a zero-input player (tutorial drops only) now dies at 128 s /
+wave 7 (was 185 s / wave 8), and an average-policy player survives 5 minutes
+in 10/12 seeds (was 12/12; the two losses at 238 s / wave 11 and 292 s /
+wave 13). Slower walkers, a gentler HP slope and a smaller air share were all
+probed as compensation and none beat this beyond seed noise. `CUM_KILLS
+.dropmerge` and `data/leaderboard-seed.json` were re-measured for the new mix.
+
+### 11.6 Economy, chest and feedback pass (2026-09-11, both boards)
+
+- **Per-kill rewards** (`killShareOf` in `waves.ts`, `killEnemy`/`completeWave`):
+  a wave's wood/stone reward is priced at `callWave` and paid per kill —
+  kill i pays `floor(T·(i+1)/N) − floor(T·i/N)` — with any remainder settled
+  at the clear, so the total is exact. Hut/coffer yields, repairs, the volley
+  charge, the flawless streak and WALLET coins stay at the clear (outcome-
+  dependent, or a save write per enemy). `lastWaveReward` still reports the
+  wave total; `atClear` is what landed at the clear.
+- **Can't-afford feedback** (`missingFor`, `useResourceBlink`): a refused
+  purchase knocks (`obstacle-hit`, pitched down, throttled) and blinks each
+  missing resource red↔white for 1.5 s. A piece now stays armed when its refill
+  is unaffordable, so further taps fail loudly instead of silently.
+- **Idle nudge** (`useIdleNudge`): 15 s of live, affordable idling pulses the
+  affordable tray tiles until the next placement.
+- **Merge preview** (phone, `previewDropMerge` / `previewGiftDrop`): a held
+  piece shows the tier it would weld into, cascades included, on the cell the
+  weld ends in. Desktop ghost not done (rectangle welds; a wrong preview is
+  worse than none).
+- **Flying chest + gifts** (`FlyingChest.vue`, `GiftTile.vue`, `useGifts.ts`):
+  one chest per wave from the moment the tutorial is over for the run (see
+  `tutorialOver` — finished, OR past the waves its coach marks can show on,
+  because the 2026-09-11 blind playtest had no phone player finish the drop
+  beat). Tapping it queues a free welded tesla/frost/mortar (tier 2, ~10 %
+  tier 3) or an obelisk pair; a one-time tier-2 cannon on the first clear of
+  wave 3. Gifts persist per board (`ts_gifts` / `ts_m2_gifts`).
+- **Painted tier art hooks** (`paintedArt.ts`): `<weapon>-t2/-t3` fixture
+  paintings and `props/chest-wing` are allowlisted drop-ins; sheets + prompts in
+  `art-sheets/` and `art-todo.md` §I. Nothing painted yet.
+- Phone break after wave 1 is 4 s (`earlyBuildMs: [4000, 6000, 8000]`).

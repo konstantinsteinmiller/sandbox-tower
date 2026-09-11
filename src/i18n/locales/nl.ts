@@ -11,6 +11,14 @@ export default {
   'crazyGamesOnly': 'Dit spel is alleen beschikbaar op',
 
   // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'gift': {
+    'free': 'Gratis',
+    'tile': 'Gratis {name}, niveau {n}: tik erop en tik dan op het veld om het te plaatsen',
+    'pair': 'Gratis paar {name}: tik erop en tik dan op het veld om het te plaatsen',
+    'chest': 'Vliegende kist: tik om hem te openen',
+    'firstClear': 'Golf {n} gehaald! Een cadeau voor jou'
+  },
+
   'mobile': {
     'rotatePortrait': 'Houd je telefoon rechtop om te spelen',
     'columnFull': 'Kolom vol',

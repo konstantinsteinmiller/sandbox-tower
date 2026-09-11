@@ -20,9 +20,9 @@
  * same answer.
  */
 
-export type TutorialCheat = 'merge' | 'trap' | 'reset'
+export type TutorialCheat = 'merge' | 'power' | 'trap' | 'reset'
 
-const CHEATS: readonly string[] = ['merge', 'trap', 'reset']
+const CHEATS: readonly string[] = ['merge', 'power', 'trap', 'reset']
 
 export const parseTutorialCheat = (query: string): TutorialCheat | null => {
   const v = new URLSearchParams(query).get('tut')

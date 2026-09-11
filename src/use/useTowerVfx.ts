@@ -31,7 +31,9 @@ export type FxEvent =
   | { kind: 'muzzle'; x: number; y: number; angle: number; palette: string; weapon: string }
   | { kind: 'lightning'; x: number; y: number; points: number[] }
   | { kind: 'enemyHit'; x: number; y: number; amount: number; gore: string; dir: number }
-  | { kind: 'enemyDie'; x: number; y: number; palette: string; coins: number; boss: boolean }
+  /** `wood` / `stone` are the kill's cut of the wave's materials, paid on the
+   *  spot (see `killShare` in the simulation); absent or 0 when it paid none. */
+  | { kind: 'enemyDie'; x: number; y: number; palette: string; coins: number; boss: boolean; wood?: number; stone?: number }
   | { kind: 'enemyAttack'; x: number; y: number; tx: number; ty: number; ranged: boolean; gore: string }
   | { kind: 'collapse'; x: number; y: number; count: number }
   | { kind: 'waveStart'; x: number; y: number; wave: number; boss: boolean }

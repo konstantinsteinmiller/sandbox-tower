@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import IconWood from '@/components/icons/IconWood.vue'
 import IconGold from '@/components/icons/IconGold.vue'
 import CoinBadge from '@/components/organisms/CoinBadge.vue'
+import { resourceBlink, isBlinking } from '@/use/useResourceBlink'
 
 /**
  * The one-row HUD strip at the top of the portrait board.
@@ -36,6 +37,18 @@ const { t } = useI18n()
 
 const isRecord = computed(() => props.wave > 0 && props.wave >= props.bestWave)
 
+/**
+ * The refusal blink (`useResourceBlink`). This board folds stone into wood, so
+ * a refused piece is only ever short of `wood` — the materials pile — or of
+ * `coins`, the gold; the sim never names a `stone` this strip has no icon for.
+ * Keyed on the refusal counter so a second refusal restarts the blink.
+ */
+const blink = computed(() => resourceBlink.value)
+const denied = computed(() => {
+  void resourceBlink.value
+  return { wood: isBlinking('wood'), coins: isBlinking('coins') }
+})
+
 const coinBadgeRef = ref<InstanceType<typeof CoinBadge> | null>(null)
 /** The wallet's element, for coin-fly animations to land on. */
 const coinEl = computed<HTMLElement | null>(() => coinBadgeRef.value?.rootEl ?? null)
@@ -53,15 +66,19 @@ defineExpose({ coinEl })
           span.strip__value.is-enemies {{ enemiesLeft }}
     div.strip__right
       span.strip__res
-        IconWood.strip__icon
-        span.strip__num {{ materials }}
+        span.res-deny(:key="'w' + blink.wood.n" :class="{ 'is-denied': denied.wood }" data-res="wood")
+          IconWood.strip__icon.res-deny__icon
+          span.strip__num.res-deny__value {{ materials }}
       span.strip__res
-        IconGold.strip__icon
-        span.strip__num.is-gold {{ gold }}
+        span.res-deny(:key="'c' + blink.coins.n" :class="{ 'is-denied': denied.coins }" data-res="coins")
+          IconGold.strip__icon.res-deny__icon
+          span.strip__num.is-gold.res-deny__value {{ gold }}
       CoinBadge.strip__wallet(ref="coinBadgeRef")
 </template>
 
 <style scoped lang="sass">
+@use '../../components/game/denyBlink'
+
 .strip
   display: flex
   align-items: center

@@ -24,10 +24,11 @@ import TutorialOverlay, { type TutorialStep } from '@/components/game/TutorialOv
 const RECT = { x: 200, y: 300, w: 80, h: 60 }
 const STEPS: TutorialStep[] = ['pick', 'place', 'inspectMerged', 'rankUp', 'call', 'drop', 'merge']
 
-/** The pictogram beat hands the screen to `MergeGuide` and has nothing to point
- *  at, so rule 3 above applies to it in the strongest form: it must render
- *  nothing here even when the scene happens to be holding a stale rect. */
-const CARD_STEPS: TutorialStep[] = ['mergeGuide']
+/** The pictogram beat hands the screen to `MergeGuide`, and the power demo to
+ *  `MergePowerDemo`; neither has anything to point at, so rule 3 above applies
+ *  to them in the strongest form: they must render nothing here even when the
+ *  scene happens to be holding a stale rect. */
+const CARD_STEPS: TutorialStep[] = ['mergeGuide', 'mergePower']
 
 const overlay = (step: TutorialStep | null, target: typeof RECT | null) =>
   mount(TutorialOverlay, { props: { step, target } })

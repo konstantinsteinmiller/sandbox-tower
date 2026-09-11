@@ -103,6 +103,19 @@ export const AD_COOLDOWN_KEY = 'ts_ad_cooldown'
 /** How many of the house's free rewarded grants this player has spent. */
 export const FREE_REWARDS_KEY = 'ts_free_rewards'
 
+// ─── Gift pieces (the flying chest, the first-clear present) ────────────────
+//
+// One of each per board, like the run itself: a gift is a piece for THIS
+// siege, and a tier-2 mortar won on the phone has no business turning up in
+// the tower game. See `src/use/useGifts.ts`.
+
+/** Gifts won but not yet placed in the run in progress: `Gift[]`. */
+export const GIFTS_KEY = 'ts_gifts'
+export const M2_GIFTS_KEY = 'ts_m2_gifts'
+/** The one-time present for clearing wave 3 has been given. */
+export const FIRST_CLEAR_GIFT_KEY = 'ts_first_clear_gift'
+export const M2_FIRST_CLEAR_GIFT_KEY = 'ts_m2_first_clear_gift'
+
 // ─── Onboarding / one-shot UI nudges ────────────────────────────────────────
 
 /** First-run onboarding consumed flag (true once the first run finishes). */

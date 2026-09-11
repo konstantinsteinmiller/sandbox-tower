@@ -12,6 +12,7 @@ import {
   MAX_BLOCK_LEVEL, blockUpgradeCost, upgradePowerMul, upgradeArmorBonus,
   tierOf, mergePowerMul
 } from '@/game/blocks'
+import { tierStyle } from '@/game/tierStyle'
 import {
   damageMul, fireRateMul, splashMul, thornsMul, armorBonus,
   buffPowerMul, economyMul, availableBlocks,
@@ -105,6 +106,12 @@ const live = computed(() => {
 
 const level = computed(() => live.value?.level ?? 0)
 const isMaxLevel = computed(() => level.value >= MAX_BLOCK_LEVEL)
+
+/** The merge chip wears the weld's tier colour — the same one as its plate. */
+const mergeTagStyle = computed(() => {
+  const ts = tierStyle(live.value?.tier ?? 2)
+  return { '--tier-rgb': ts.rgb.join(', '), '--tier-text': ts.plateTop }
+})
 
 interface Row { key: string; value: string; boosted?: boolean }
 
@@ -291,7 +298,7 @@ const refund = computed(() =>
         //- Why this block's numbers are above the printed base. Chips rather
         //- than prose: the card is read mid-siege with a wave incoming.
         div.inspector__tags(v-if="live?.enhanced || live?.roof || level > 0 || (live?.tier ?? 1) > 1")
-          span.inspector__tag.is-merge(v-if="(live?.tier ?? 1) > 1")
+          span.inspector__tag.is-merge(v-if="(live?.tier ?? 1) > 1" :style="mergeTagStyle")
             | {{ t('blocks.mergeTier', { n: live?.tier ?? 1 }) }}
             //- Pure geometry — no words to translate, and the only honest way
             //- to say "this one is long" vs "this one is square".
@@ -517,10 +524,13 @@ const refund = computed(() =>
     background-color: rgba(224, 87, 77, 0.18)
     border: 1px solid rgba(224, 87, 77, 0.6)
     color: #ff9a92
+  // In the tier's own colour (`tierStyle`), so the chip on the card and the
+  // plate on the block are visibly the same thing. The rgb triplet arrives as
+  // a custom property; the pale gold is only the fallback.
   &.is-merge
-    background-color: rgba(255, 240, 168, 0.22)
-    border: 1px solid rgba(255, 240, 168, 0.75)
-    color: #fff0a8
+    background-color: rgba(var(--tier-rgb, 255, 240, 168), 0.22)
+    border: 1px solid rgba(var(--tier-rgb, 255, 240, 168), 0.8)
+    color: var(--tier-text, #fff0a8)
 
 .inspector__span
   opacity: 0.75

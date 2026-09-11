@@ -16,6 +16,15 @@ export default {
 
   // ─── HUD ──────────────────────────────────────────────────────────────────
   // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  // ─── Gift pieces: the flying chest and the first-clear present ──────────
+  'gift': {
+    'free': 'Free',
+    'tile': 'Free {name}, tier {n}: tap it, then tap the board to place it',
+    'pair': 'Free pair of {name}: tap it, then tap the board to place it',
+    'chest': 'Flying chest: tap to open it',
+    'firstClear': 'Wave {n} cleared! A gift for you'
+  },
+
   'mobile': {
     'rotatePortrait': 'Hold your phone upright to play',
     'columnFull': 'Column full',

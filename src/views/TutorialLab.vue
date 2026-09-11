@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import MergeGuide from '@/components/game/MergeGuide.vue'
+import MergePowerDemo from '@/components/game/MergePowerDemo.vue'
 import TrapTutorial from '@/components/game/TrapTutorial.vue'
 import { getState, setState } from '@/use/useTowerState'
 import { MERGE_GUIDE_KEY, TRAP_TUTORIAL_KEY, TUTORIAL_KEY } from '@/keys'
@@ -8,11 +9,11 @@ import { MERGE_GUIDE_KEY, TRAP_TUTORIAL_KEY, TUTORIAL_KEY } from '@/keys'
 /**
  * ─── Tutorial lab ───────────────────────────────────────────────────────────
  *
- * Both teaching cards on one screen, on demand.
+ * Every teaching card on one screen, on demand.
  *
  * They exist because each of them fires ONCE, on a moment that cannot be
- * re-entered: the merge ladder on the first fusion of a first run, the collapse
- * demo on the first death this save has ever had. Checking either one meant
+ * re-entered: the merge ladder and the power demo on the first fusion of a
+ * first run, the collapse demo on the first death this save has ever had. Checking either one meant
  * wiping the save and replaying the opening — which is how a full-screen card
  * ships with its layout broken in landscape, or with a loop that never finishes
  * its last beat. Nobody looks at a once-ever screen twice unless looking is
@@ -28,6 +29,7 @@ import { MERGE_GUIDE_KEY, TRAP_TUTORIAL_KEY, TUTORIAL_KEY } from '@/keys'
  */
 
 const merge = ref(false)
+const power = ref(false)
 const trap = ref(false)
 
 /**
@@ -89,6 +91,8 @@ const frame = ref<(typeof FRAMES)[number]>(FRAMES[0])
       div.lab__group
         button.lab__btn(type="button" @click="variant = 'footprint'; merge = true") Merge ladder · tower
         button.lab__btn(type="button" @click="variant = 'cell'; merge = true") Merge ladder · phone
+        button.lab__btn(type="button" @click="variant = 'footprint'; power = true") Merge power · tower
+        button.lab__btn(type="button" @click="variant = 'cell'; power = true") Merge power · phone
         button.lab__btn(type="button" @click="trap = true") Collapse trap
 
       div.lab__group
@@ -116,8 +120,9 @@ const frame = ref<(typeof FRAMES)[number]>(FRAMES[0])
       :class="{ 'is-framed': frame.w > 0 }"
       :style="frame.w > 0 ? { width: frame.w + 'px', height: frame.h + 'px' } : undefined"
     )
-      div.lab__hint(v-if="!merge && !trap") Pick a card above. Click it to dismiss, the way a player does.
+      div.lab__hint(v-if="!merge && !power && !trap") Pick a card above. Click it to dismiss, the way a player does.
       MergeGuide(v-model="merge" :variant="variant" @continue="merge = false")
+      MergePowerDemo(v-model="power" :variant="variant" @continue="power = false")
       TrapTutorial(v-model="trap" @continue="trap = false")
 </template>
 

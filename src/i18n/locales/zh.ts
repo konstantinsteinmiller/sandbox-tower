@@ -11,6 +11,14 @@ export default {
   'crazyGamesOnly': '本游戏仅在以下平台提供：',
 
   // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'gift': {
+    'free': '免费',
+    'tile': '免费的{name}（{n}级）：点它，再点棋盘放下',
+    'pair': '免费的一对{name}：点它，再点棋盘放下',
+    'chest': '飞行宝箱：点击打开',
+    'firstClear': '第{n}波通过！送你一份礼物'
+  },
+
   'mobile': {
     'rotatePortrait': '请竖持手机进行游戏',
     'columnFull': '此列已满',

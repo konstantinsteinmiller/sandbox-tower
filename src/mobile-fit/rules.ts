@@ -72,23 +72,55 @@ export const DROPMERGE_RULES: RuleSet = {
     bomberAltitude: 1.6,
     speedMul: 0.8,
     airSpawn: 'top',
+    // Just inside the frame, wherever the zoom has put its edge. Placed two
+    // cells OFF it, as the desktop does, the opening wave's only grunt was shot
+    // dead by the fort's cannon (range 8.5) before it ever reached a frame
+    // barely five cells either side of the Gate — measured, a first session's
+    // first monster came on screen fifteen seconds in, after the first wave had
+    // already been won unseen. Players were leaving in that window.
+    spawnAt: 'viewEdge',
     minWaveOverride: DROPMERGE_MIN_WAVE
   },
   waves: {
-    // 0.5, not the 0.4 the plan started from: with the first session's own
-    // 60 % opening discount on top, wave 1 was a single grunt — an empty
-    // first minute rather than a gentle one. Half the desktop's budget lands
-    // three grunts on a normal wave 1 and one on the very first.
+    // 0.5, not the 0.4 the plan started from: at 0.4 the opening waves were a
+    // grunt or two — an empty first minute rather than a gentle one. Half the
+    // desktop's budget lands two grunts and the preview bat on wave 1.
     budgetMul: 0.5,
     buildMs: 10_000,
+    // Short breaks between the first waves. Building carries on DURING a wave
+    // on this board, so the build phase buys nothing a player needs early on —
+    // and two ten-second countdowns inside the first forty seconds were two
+    // stretches of empty field exactly where first sessions were ending.
+    // Four seconds after wave 1: the starter fort's gun holds waves 1 and 2 on
+    // its own, so the only thing a longer gap buys there is waiting.
+    earlyBuildMs: [4_000, 6_000, 8_000],
+    // No first-session discount. The budget is already halved, and the old
+    // 60 % opening made wave 1 a single grunt — the fort killed it off-screen
+    // and the first wave was over before it had begun. Undiscounted it is a
+    // grunt or two and a bat (the preview) against a fort that cannot lose
+    // them: busy, not dangerous.
+    firstRunScale: [1, 1],
+    // The sky is most of a portrait screen, and the one lane the whole board
+    // can see coming — so it carries far more of each wave than on the
+    // desktop: 28 % from wave 2, climbing to 45 %. Every gun but the bombard
+    // shoots up, so it is pressure the hand can always answer.
+    //
+    // NOT with a guaranteed flyer per wave on top. That was tried: a share of a
+    // small wave comes to less than a bat, so a floor only ever bites on small
+    // waves — and a wave is small mostly because the director is trimming it
+    // for a tower that is struggling. It handed a wall-skipping flyer to
+    // exactly that player, and measured, an average player's 5-minute survival
+    // fell from 10 in 12 to 3 in 8, with deaths inside the three-minute window.
+    airShare: { base: 0.28, slope: 0.02, cap: 0.45 },
     // ZERO, where the desktop board waits three seconds for the player's first
     // gesture.
     //
     // A five-column board with nothing on it is not a calm opening, it is a
     // game that has not started: there is no tower to admire, no lane to read
     // and nothing coming, so the first thing the player does is wait. Wave 1
-    // here is one grunt against a fort that already stands — the threat IS the
-    // introduction, and it should be walking in by the time the loader clears.
+    // here is a handful of monsters against a fort that already stands — the
+    // threat IS the introduction, and it should be on screen by the time the
+    // loader clears.
     //
     // A zero window also means the opening does not wait on the gesture gate
     // (see `isBuildClockHeld`). The gesture still gates what the PORTAL is
@@ -99,7 +131,10 @@ export const DROPMERGE_RULES: RuleSet = {
     flushAtMs: 45_000,
     bossEvery: 8,
     bossBudget: 0.5,
-    airFromWave: 4,
+    // Was 4, and did nothing: the bat's own `minWave` is 9, so the air pool
+    // was empty until then and waves 4-8 fielded no flyers at all. The roster
+    // now unlocks the bat at 2 (`DROPMERGE_MIN_WAVE`) to match.
+    airFromWave: 2,
     seaFromWave: null,
     siegeFromWave: null,
     previews: DROPMERGE_PREVIEWS,

@@ -5,6 +5,7 @@ import {
   artSettled, artOverridesEnabled, sceneArtWants, spriteFor,
   BLOCK_ART_BASES, type ArtWant
 } from '@/game/art'
+import { PAINTED_PROPS, PAINTED_TIER_FIXTURES } from '@/game/paintedArt'
 
 /**
  * ─── Staged art loading ─────────────────────────────────────────────────────
@@ -174,6 +175,13 @@ export const preloadRemainingArt = async (): Promise<void> => {
     for (const id of SHIPS) spriteFor('ship', id, 'low')
     for (const id of ROUNDS) spriteFor('round', id, 'low')
     spriteFor('ally', 'cavalry', 'low')
+    // Painted merged tiers and props, and ONLY the ones that exist — every
+    // id in these lists has a file behind it (`paintedArt.ts`), so this can
+    // never be a 404. Here rather than on first sight because a painting that
+    // decodes mid-wave re-bakes every sprite on the board; on an idle slot it
+    // is usually in before the player's first weld.
+    for (const id of PAINTED_TIER_FIXTURES) spriteFor('fixture', id, 'low')
+    for (const id of PAINTED_PROPS) spriteFor('prop', id, 'low')
   }
   const idle = (globalThis as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number })
     .requestIdleCallback

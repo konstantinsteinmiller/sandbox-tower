@@ -21,8 +21,13 @@ own prompt in `../PROMPTS-CELLS.md`. Three sheet and strip passes each lost the
 grid a different way — drifted, squashed, and once by inventing a ninth object
 in an eight-cell row. A single object has no grid to lose.
 
-Strips (`strip-<id>-rN.png`, prompts in `../PROMPTS.md`) are still good for a
-fast style test across eight related things at once.
+Strips (`strip-<id>-rN.png`, prompts in `../PROMPTS-STRIPS.md`) are still good
+for a fast style test across eight related things at once.
+
+`.sliced.json` is the slicer's receipt — which reference revision each painting
+was cut against. `stale/` holds paintings of drawings that have since been
+re-cut, and `replaced/` the ones the Art Desk swapped out; the slicer reads only
+this top level, so neither is ever cut by accident.
 
 ## Enemies are walk cycles, not stills
 

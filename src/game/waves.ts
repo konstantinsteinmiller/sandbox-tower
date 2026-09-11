@@ -66,9 +66,17 @@ export const waveBudget = (wave: number, difficulty = 1): number =>
  * follows.
  *
  *   w1 → 0.6    w2 → 0.8    w3+ → 1
+ *
+ * A mode may bring its own table (`RuleSet.waves.firstRunScale`). The phone
+ * board brings no discount at all: its budget is already halved, and a
+ * discounted wave 1 there was ONE grunt, shot dead before it reached the
+ * screen — an opening with nothing in it is not gentle, it is empty.
  */
-export const firstRunBudgetScale = (wave: number): number =>
-  wave <= 1 ? 0.6 : wave === 2 ? 0.8 : 1
+const FIRST_RUN_SCALE: ReadonlyArray<number> = [0.6, 0.8]
+
+export const firstRunBudgetScale = (
+  wave: number, table: ReadonlyArray<number> = FIRST_RUN_SCALE
+): number => table[Math.max(1, wave) - 1] ?? 1
 
 /**
  * How much tougher one individual enemy is at `wave` than at wave 1.
@@ -121,10 +129,18 @@ export const SPAWN_FLUSH_AT_MS = 96_000
  * making anti-air the only thing that matters.
  *
  *   w<9 → 0    w9 → 0.10   w14 → 0.20   w20 → 0.32   w25+ → 0.35 (cap)
+ *
+ * That is the desktop's curve. A mode may bring its own (`RuleSet.waves
+ * .airShare`): the phone board's sky is most of its screen, so there the
+ * flyers are a large share from the second wave on.
  */
-export const airShare = (wave: number, from = 9): number => {
+export interface AirCurve { base: number; slope: number; cap: number }
+
+const DESKTOP_AIR: AirCurve = { base: 0.1, slope: 0.022, cap: 0.35 }
+
+export const airShare = (wave: number, from = 9, curve: AirCurve = DESKTOP_AIR): number => {
   if (wave < from) return 0
-  return Math.min(0.35, 0.1 + (wave - from) * 0.022)
+  return Math.min(curve.cap, curve.base + (wave - from) * curve.slope)
 }
 
 /**
@@ -312,6 +328,25 @@ export const waveReward = (wave: number): { coins: number; wood: number; stone: 
 })
 
 /**
+ * The `i`-th kill's cut of a wave reward worth `total`, split over `n` kills.
+ *
+ * The wave's materials are paid a kill at a time (see `killShare` in the
+ * simulation) — so a player five wood short of the next piece gets it from the
+ * next grunt, not from a wave clear a minute away. That only works if the
+ * split is EXACT: kill `i` pays `floor(total·(i+1)/n) − floor(total·i/n)`, and
+ * the `n` cuts telescope to `total` — never a unit lost to rounding, never a
+ * unit printed by it. The odd units are spread through the wave rather than
+ * piled onto the first or the last kill: 10 wood over 4 kills pays 2, 3, 2, 3.
+ *
+ * Kills past `n`, and anything not positive, pay nothing here. Whatever the
+ * kills did not collect is settled when the wave completes.
+ */
+export const killShareOf = (total: number, n: number, i: number): number => {
+  if (!(total > 0) || !(n > 0) || i < 0 || i >= n) return 0
+  return Math.floor((total * (i + 1)) / n) - Math.floor((total * i) / n)
+}
+
+/**
  * Build the full spawn schedule for a wave.
  *
  * Greedy weighted sampling: each candidate's weight favours types introduced
@@ -336,6 +371,8 @@ export interface WaveRuleOpts {
   roster?: ReadonlySet<string> | null
   minWaveOverride?: Readonly<Record<string, number>>
   airFromWave?: number
+  airShare?: AirCurve
+  firstRunScale?: ReadonlyArray<number>
   seaFromWave?: number | null
   siegeFromWave?: number | null
   previews?: PreviewTable
@@ -358,7 +395,7 @@ export const planWave = (
   const totalBudget = waveBudget(wave, difficulty)
     * (opts.budgetMul ?? 1)
     * (boss ? (opts.bossBudget ?? 0.6) : 1)
-    * (firstRun ? firstRunBudgetScale(wave) : 1)
+    * (firstRun ? firstRunBudgetScale(wave, opts.firstRunScale) : 1)
 
   // Guard against a pathological pool (shouldn't happen — grunt is minWave 1).
   if (pool.length === 0) {
@@ -436,7 +473,7 @@ export const planWave = (
   const groundPool = pool.filter((d) => d.movement === 'ground' && !d.siege)
 
   const airFrom = opts.airFromWave ?? 9
-  const airBudget = airPool.length > 0 ? budget * airShare(wave, airFrom) : 0
+  const airBudget = airPool.length > 0 ? budget * airShare(wave, airFrom, opts.airShare) : 0
   const seaBudget = seaPool.length > 0 && opts.seaFromWave !== null
     ? budget * seaShare(wave, opts.seaFromWave ?? 12)
     : 0

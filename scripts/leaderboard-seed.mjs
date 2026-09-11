@@ -57,9 +57,9 @@ export const SEED_FILE = resolve(
 //   • the best reach 40+                →  1.2 %, with #1 on stage MAX_STAGE
 //
 // Stage 1-2 being SMALL is the deliberate part. A first stage nobody survives
-// would put the mode at 1, and this game's opening wave is one grunt against a
-// fort that already stands — players who leave that early left the page, they
-// did not lose.
+// would put the mode at 1, and this game's opening wave is a handful of
+// monsters against a fort that already stands — players who leave that early
+// left the page, they did not lose.
 
 /** Best-stage shares for stages 1-10, authored outright. Stage `s` is index
  *  `s - 1`. */
@@ -166,10 +166,10 @@ export const CUM_KILLS = {
   ],
   /** The portrait Drop & Merge scene — `DROPMERGE_RULES`, half the budget. */
   dropmerge: [
-    0, 3, 7, 13, 21, 30, 39, 47, 56, 62, 69, 76, 88, 98, 109, 121, 132, 147,
-    158, 182, 199, 222, 240, 258, 279, 303, 329, 355, 385, 413, 443, 469, 486,
-    515, 543, 579, 609, 640, 670, 698, 719, 754, 797, 839, 878, 919, 960, 1004,
-    1029
+    0, 3, 6, 11, 17, 24, 31, 39, 48, 56, 63, 70, 79, 88, 98, 110, 123, 138,
+    148, 169, 183, 202, 219, 236, 255, 276, 301, 326, 355, 381, 410, 435, 452,
+    478, 506, 541, 568, 600, 627, 651, 670, 705, 748, 785, 822, 861, 898, 938,
+    963
   ]
 }
 
@@ -178,7 +178,7 @@ export const CUM_KILLS = {
  *
  * Poki's traffic is overwhelmingly mobile and the two scenes are split by
  * device, so three quarters of the board is Drop & Merge. It matters because
- * the two price a stage very differently — stage 20 is 199 kills on the phone
+ * the two price a stage very differently — stage 20 is 183 kills on the phone
  * and 381 on the desktop — and a board built from one curve alone would rank
  * the other device's players against a population that does not exist.
  */

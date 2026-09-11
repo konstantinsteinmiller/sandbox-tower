@@ -1,13 +1,21 @@
 # Per-strip prompts
 
-Generated from the manifest — do not hand-edit, re-export instead.
+Generated from `src/game/artSheet.ts` — do not hand-edit. Run `pnpm art:prompts`
+(or export from the `/art-sheets` bench) after changing the manifest.
 
 One strip per generation. Attach `art-sheets/strip-<id>.png` and paste the
 matching block below. Every cell is named, because the first whole-sheet
 pass inferred subjects from pixels and turned the gold mine into a bow.
 
-# Blocks — assembled, body, glyph — row 0  (strip-blocks-r0.png)
+Copy only the fenced block. The `##` heading is for you, not the model: it
+names the image the block belongs to (the reference to attach, and the name
+to save the return under) and, after the arrow, where the slice lands under
+`public/`. `pnpm art:desk` finds any block by sprite name, copies reference
+and prompt in one go, and files, slices and compresses the return.
 
+## Blocks — assembled, body, glyph — row 0  (strip-blocks-r0.png)
+
+```text
 Repaint this strip of 8 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -71,11 +79,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Blocks — assembled, body, glyph — row 1  (strip-blocks-r1.png)
+## Blocks — assembled, body, glyph — row 1  (strip-blocks-r1.png)
 
+```text
 Repaint this strip of 8 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -139,11 +149,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Blocks — assembled, body, glyph — row 2  (strip-blocks-r2.png)
+## Blocks — assembled, body, glyph — row 2  (strip-blocks-r2.png)
 
+```text
 Repaint this strip of 8 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -192,11 +204,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Blocks — assembled, body, glyph — row 3  (strip-blocks-r3.png)
+## Blocks — assembled, body, glyph — row 3  (strip-blocks-r3.png)
 
+```text
 Repaint this strip of 8 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -260,11 +274,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Blocks — assembled, body, glyph — row 4  (strip-blocks-r4.png)
+## Blocks — assembled, body, glyph — row 4  (strip-blocks-r4.png)
 
+```text
 Repaint this strip of 8 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -328,11 +344,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Blocks — assembled, body, glyph — row 5  (strip-blocks-r5.png)
+## Blocks — assembled, body, glyph — row 5  (strip-blocks-r5.png)
 
+```text
 Repaint this strip of 8 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -381,11 +399,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Blocks — assembled, body, glyph — row 6  (strip-blocks-r6.png)
+## Blocks — assembled, body, glyph — row 6  (strip-blocks-r6.png)
 
+```text
 Repaint this strip of 8 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -445,11 +465,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Blocks — assembled, body, glyph — row 7  (strip-blocks-r7.png)
+## Blocks — assembled, body, glyph — row 7  (strip-blocks-r7.png)
 
+```text
 Repaint this strip of 8 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -509,11 +531,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Blocks — assembled, body, glyph — row 8  (strip-blocks-r8.png)
+## Blocks — assembled, body, glyph — row 8  (strip-blocks-r8.png)
 
+```text
 Repaint this strip of 8 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -558,11 +582,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Merged blocks — tier I / II / III — row 0  (strip-merged-r0.png)
+## Merged blocks — tier I / II / III — row 0  (strip-merged-r0.png)
 
+```text
 Repaint this strip of 9 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -610,11 +636,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 2304 x 256 pixels — 9 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Merged blocks — tier I / II / III — row 1  (strip-merged-r1.png)
+## Merged blocks — tier I / II / III — row 1  (strip-merged-r1.png)
 
+```text
 Repaint this strip of 9 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -662,11 +690,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 2304 x 256 pixels — 9 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Merged blocks — tier I / II / III — row 2  (strip-merged-r2.png)
+## Merged blocks — tier I / II / III — row 2  (strip-merged-r2.png)
 
+```text
 Repaint this strip of 9 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -714,11 +744,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 2304 x 256 pixels — 9 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Enemies — land, air and sea — row 0  (strip-enemies-r0.png)
+## Enemies — land, air and sea — row 0  (strip-enemies-r0.png)
 
+```text
 Repaint this strip of 6 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -763,11 +795,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 1536 x 256 pixels — 6 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Enemies — land, air and sea — row 1  (strip-enemies-r1.png)
+## Enemies — land, air and sea — row 1  (strip-enemies-r1.png)
 
+```text
 Repaint this strip of 6 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -812,11 +846,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 1536 x 256 pixels — 6 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Enemies — land, air and sea — row 2  (strip-enemies-r2.png)
+## Enemies — land, air and sea — row 2  (strip-enemies-r2.png)
 
+```text
 Repaint this strip of 6 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -860,11 +896,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 1536 x 256 pixels — 6 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Siege engines — row 0  (strip-siege-r0.png)
+## Siege engines — row 0  (strip-siege-r0.png)
 
+```text
 Repaint this strip of 3 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -906,11 +944,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 768 x 256 pixels — 3 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Siege engines — row 1  (strip-siege-r1.png)
+## Siege engines — row 1  (strip-siege-r1.png)
 
+```text
 Repaint this strip of 3 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -952,11 +992,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 768 x 256 pixels — 3 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Ally and projectiles — row 0  (strip-allies-r0.png)
+## Ally and projectiles — row 0  (strip-allies-r0.png)
 
+```text
 Repaint this strip of 8 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -1003,11 +1045,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Props, sky bodies and shipped UI — row 0  (strip-props-r0.png)
+## Props, sky bodies and shipped UI — row 0  (strip-props-r0.png)
 
+```text
 Repaint this strip of 6 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -1052,11 +1096,13 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 1536 x 256 pixels — 6 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```
 
 ---
 
-# Props, sky bodies and shipped UI — row 1  (strip-props-r1.png)
+## Props, sky bodies and shipped UI — row 1  (strip-props-r1.png)
 
+```text
 Repaint this strip of 6 square game sprites.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -1097,3 +1143,4 @@ checkerboard in as if it were art. The magenta is keyed out automatically
 on the way back in, so no object may contain magenta or hot pink.
 
 OUTPUT: exactly 1536 x 256 pixels — 6 squares of 256 x 256 in a single row. Every object stays in its own square, at the same position and the same size, and the squares must stay SQUARE — do not letterbox, crop, pad or change the strip proportions. Do not add, remove, reorder, resize or re-centre anything, and put no labels, numbers or captions anywhere in the image.
+```

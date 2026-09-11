@@ -11,6 +11,14 @@ export default {
   'crazyGamesOnly': 'Ce jeu est uniquement disponible sur',
 
   // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'gift': {
+    'free': 'Gratuit',
+    'tile': '{name} gratuit, niveau {n} : touche-le, puis touche le plateau pour le placer',
+    'pair': 'Paire de {name} gratuite : touche-la, puis touche le plateau pour la placer',
+    'chest': 'Coffre volant : touche-le pour l’ouvrir',
+    'firstClear': 'Vague {n} terminée ! Un cadeau pour toi'
+  },
+
   'mobile': {
     'rotatePortrait': 'Tenez votre téléphone à la verticale pour jouer',
     'columnFull': 'Colonne pleine',

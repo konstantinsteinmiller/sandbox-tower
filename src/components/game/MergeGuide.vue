@@ -26,7 +26,7 @@ import { useI18n } from 'vue-i18n'
 import { isMobileLandscape, isShortViewport } from '@/use/useUser'
 import { onArtChanged } from '@/game/art'
 import {
-  paintWorldBlock, paintLiveFixture, paintTierPlate, fixtureSpanForTier
+  paintWorldBlock, paintLiveFixture, paintTierPlate, fixtureSpanForTier, fixtureSpanForCellTier
 } from '@/use/useTowerArt'
 
 /**
@@ -247,14 +247,19 @@ const drawRungBlock = (
   paintWorldBlock(ctx, BLOCK_ID, 0, 0, face)
   ctx.restore()
 
-  // `mergeArtSpan` answers 1 for every tier when the ruleset says `mergeArt:
-  // 'cell'`, so a card drawn for that board has to as well — a gun that spilled
-  // over its cell here would be advertising a block the board never builds.
-  const span = props.variant === 'cell' ? 1 : fixtureSpanForTier(cells.tier)
+  // `mergeArtSpan` answers the cell ladder's small per-tier growth when the
+  // ruleset says `mergeArt: 'cell'`, so a card drawn for that board has to as
+  // well — a gun that spilled further here would be advertising a block the
+  // board never builds.
+  const span = props.variant === 'cell'
+    ? fixtureSpanForCellTier(cells.tier)
+    : fixtureSpanForTier(cells.tier)
   const cx = leftX + fw / 2
   const cy = topY + fh / 2
   const fy = cy - cell * (Math.max(0, (span - cells.h) / 2) * 0.6)
-  paintLiveFixture(ctx, BLOCK_ID, cx, fy, cell * span, { aim, t: tMs, uid, col: 1 })
+  // With the tier, so each rung shows the gun that tier actually fields — the
+  // twin, then the triple battery — in its colour.
+  paintLiveFixture(ctx, BLOCK_ID, cx, fy, cell * span, { aim, t: tMs, uid, col: 1, tier: cells.tier })
 
   if (cells.tier > 1) {
     paintTierPlate(ctx, cells.tier, leftX + fw - cell * 0.2, topY + cell * 0.17, cell)

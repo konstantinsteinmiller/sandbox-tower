@@ -184,10 +184,29 @@ describe('opening wave — Drop & Merge', () => {
     expect(g.wave.value).toBe(1)
   })
 
-  it('gives every wave after it the full build window', async () => {
+  // The breaks between the first waves are short, then the full ten seconds.
+  // Building carries on during a wave on this board, so an early build phase
+  // buys nothing — and two ten-second countdowns inside the first forty
+  // seconds were two stretches of empty field exactly where first sessions
+  // were ending. Pinned as literals: an assertion that read the rule back
+  // would pass for any value, including the ten seconds it replaced.
+  it('breaks for 4 s, 6 s and 8 s after waves 1-3, then the full window', async () => {
     const { g } = await loadDrop()
-    clearOneWave(g)
-    expect(g.wave.value).toBe(1)
-    expect(g.buildTimeLeft.value).toBe(10_000)
+    const breaks: number[] = []
+    for (let w = 1; w <= 5; w++) {
+      clearOneWave(g)
+      expect(g.wave.value).toBe(w)
+      breaks.push(g.buildTimeLeft.value)
+    }
+    expect(breaks).toEqual([4_000, 6_000, 8_000, 10_000, 10_000])
+  })
+
+  it('leaves the desktop board with its full window after every wave', async () => {
+    const { g } = await loadGame()
+    g.startRun()
+    for (let w = 1; w <= 3; w++) {
+      clearOneWave(g)
+      expect(g.buildTimeLeft.value).toBe(15_000)
+    }
   })
 })

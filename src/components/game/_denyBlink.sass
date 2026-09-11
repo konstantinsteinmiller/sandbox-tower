@@ -1,0 +1,104 @@
+// ─── The refusal blink ──────────────────────────────────────────────────────
+//
+// Shared by the desktop's `ResourceBar` and the phone's `TopStrip`, so "you
+// cannot pay for that" looks the same on both boards. See `useResourceBlink`
+// for when it fires and why only the SHORT piles blink.
+//
+// `@use`d into each bar's scoped block rather than made global: the classes
+// only ever sit on those two bars' own elements, and a scoped copy cannot leak
+// onto anything else that happens to be called `.res-deny`.
+//
+// Markup contract, per pile:
+//
+//   span.res-deny(:key="…the pile's refusal counter…" :class="{ 'is-denied': … }")
+//     <icon>.res-deny__icon
+//     span.res-deny__value
+//
+// The KEY is what restarts the animation on a second refusal — the bar mounts a
+// fresh element and the keyframes run again from their first frame.
+
+// Flat silhouettes, so the flip is a hard two-colour strobe rather than a
+// tint the painted glyph's own colours can soak up. Red is reached from black:
+// `brightness(0)` erases the glyph's palette, and the rest is the standard
+// black → pure red chain.
+$deny-red: brightness(0) saturate(100%) invert(16%) sepia(99%) saturate(7404%) hue-rotate(4deg) brightness(97%) contrast(118%)
+$deny-white: brightness(0) invert(1)
+
+.res-deny
+  display: inline-flex
+  align-items: center
+  // The wrapper sits where the bar's icon and number used to sit side by side,
+  // so it takes over the bar's own spacing between them.
+  gap: inherit
+
+// 1.5 s, and it is `BLINK_MS` in `useResourceBlink` — the bar's blink state
+// says "still blinking" for exactly as long as this runs.
+.res-deny.is-denied
+  animation: res-deny-shake 1.5s linear
+
+  .res-deny__icon
+    animation: res-deny-flash 1.5s steps(1, end)
+
+  .res-deny__value
+    animation: res-deny-text 1.5s steps(1, end)
+
+// Twelve 125 ms frames: six red, six white, alternating. Hard switches (the
+// `steps(1, end)` above holds each frame until the next) — a fade between the
+// two reads as a glow, and this has to read as an alarm.
+@keyframes res-deny-flash
+  0%, 16.66%, 33.33%, 50%, 66.66%, 83.33%
+    filter: $deny-red drop-shadow(0 0 5px rgba(255, 30, 30, 0.95))
+  8.33%, 25%, 41.66%, 58.33%, 75%, 91.66%
+    filter: $deny-white drop-shadow(0 0 5px rgba(255, 255, 255, 0.95))
+
+@keyframes res-deny-text
+  0%, 16.66%, 33.33%, 50%, 66.66%, 83.33%
+    color: #ff2e2e
+  8.33%, 25%, 41.66%, 58.33%, 75%, 91.66%
+    color: #ffffff
+
+// A hard jolt on the first frames, then still: the flashing carries the rest.
+// `translate` / `scale`, never `transform`, so it composes with whatever the
+// bar's own layout puts on the element.
+@keyframes res-deny-shake
+  0%
+    scale: 1.24
+    translate: 0 0
+  6%
+    translate: -0.16rem 0
+  12%
+    translate: 0.16rem 0
+  18%
+    translate: -0.12rem 0
+  24%
+    scale: 1.1
+    translate: 0.12rem 0
+  30%
+    translate: -0.06rem 0
+  36%, 100%
+    scale: 1
+    translate: 0 0
+
+// Less motion asked for: no jolt, and half the flash rate — the colour change
+// is the message, so it stays, but at a pace nobody has to look away from.
+@media (prefers-reduced-motion: reduce)
+  .res-deny.is-denied
+    animation: none
+
+    .res-deny__icon
+      animation: res-deny-flash-slow 1.5s steps(1, end)
+
+    .res-deny__value
+      animation: res-deny-text-slow 1.5s steps(1, end)
+
+  @keyframes res-deny-flash-slow
+    0%, 33.33%, 66.66%
+      filter: $deny-red
+    16.66%, 50%, 83.33%
+      filter: $deny-white
+
+  @keyframes res-deny-text-slow
+    0%, 33.33%, 66.66%
+      color: #ff2e2e
+    16.66%, 50%, 83.33%
+      color: #ffffff

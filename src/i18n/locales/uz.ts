@@ -11,6 +11,14 @@ export default {
   'crazyGamesOnly': 'Bu o‘yin faqat quyidagi joyda mavjud:',
 
   // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'gift': {
+    'free': 'Bepul',
+    'tile': 'Bepul {name}, {n}-daraja: bosing, keyin joylash uchun maydonni bosing',
+    'pair': 'Bepul juft {name}: bosing, keyin joylash uchun maydonni bosing',
+    'chest': 'Uchar sandiq: ochish uchun bosing',
+    'firstClear': '{n}-to‘lqin yengildi! Senga sovg‘a'
+  },
+
   'mobile': {
     'rotatePortrait': 'O‘ynash uchun telefonni tik tuting',
     'columnFull': 'Ustun to‘la',

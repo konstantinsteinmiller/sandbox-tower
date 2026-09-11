@@ -2,6 +2,10 @@ import { BLOCK_DEFS, blockDef, canMergeType, isShip } from '@/game/blocks'
 import { PALETTES, paletteFor, blockArtBase } from '@/game/art'
 import { ENEMY_DEFS } from '@/game/enemies'
 import { MONSTERS } from '@/game/monsters'
+import { tierStyle } from '@/game/tierStyle'
+import {
+  TIER_ART_WEAPONS, tierFixtureId, CHEST_WING_BOX
+} from '@/game/paintedArt'
 import type { ProjectileKind } from '@/game/types'
 
 /**
@@ -972,7 +976,7 @@ export const promptForCell = (s: SingleSpec): string => {
       + 'do not crop any part of it.'
 
   return [
-    `# ${c.label} — ${c.sub}  (${s.file}.png)`,
+    `# ${c.label} — ${c.sub}  (${s.file}.png${c.target ? ` → ${c.target}` : ''})`,
     '',
     'Repaint this single game sprite.',
     '',
@@ -1044,8 +1048,27 @@ export interface SceneryAsset {
    * this for free from the seam rule; anything else has to be told.
    */
   bleed?: boolean
+  /**
+   * The prompt's opening line, for an asset that is not scenery at all.
+   *
+   * Everything on this list used to be the landscape, and the prompt still
+   * opens "paint one background element". A sprite that is part of a moving
+   * thing is not one, and a model told it is paints it as backdrop.
+   */
+  lead?: string
+  /**
+   * Where the object sits in its frame, for an asset whose position is part of
+   * the contract rather than a composition choice.
+   *
+   * Replaces the default "one object, centred in the frame" — which is exactly
+   * wrong for something the game rotates about a point in its own canvas.
+   */
+  placement?: string
   blurb: string
 }
+
+/** A fraction of a frame as a percentage a painter can check by eye. */
+const pct = (f: number): string => `${Math.round(f * 100)}%`
 
 export const SCENERY: SceneryAsset[] = [
   {
@@ -1140,6 +1163,42 @@ export const SCENERY: SceneryAsset[] = [
     id: 'icon-chest', file: 'icon-chest', target: 'images/icons/chest.webp',
     w: 512, h: 512, tileable: false, bg: 'magenta',
     blurb: 'The daily TREASURE CHEST icon: a small, sturdy, CLOSED wooden chest seen straight on from the front — a domed lid, two dark iron bands running across the body, and a gold lock plate with a keyhole centred on the front. Warm timber browns, dark iron, one warm gold accent. It sits in the HUD at about 50 px and is the thing a player taps for their free coins, so it should look inviting and full: bold shapes, strong silhouette, no fine detail. The lid stays SHUT — the game plays the opening itself. Keep it ONE compact closed shape, with no dangling straps, no key, no spilled coins, no ground and no shadow beneath it: a cooldown shade is masked to this silhouette, so anything detached from the body becomes a floating fleck. It must not be mistakable for the gold resource icon at a glance — that one is the coins, this one is the box they came in.'
+  },
+  {
+    // The flying chest's WING. One wing, not a winged chest: the chest is the
+    // painted icon above, and the component flaps each wing by rotating it
+    // about its root — which a chest with wings painted on could never do.
+    // Mirrored for the left side, so there is one file.
+    //
+    // A prop, not a lattice cell, because there is no drawing to register it
+    // against — the drawn fallback lives in the component, not the renderer —
+    // so where the root sits is stated in numbers (`CHEST_WING_BOX`), the same
+    // numbers the component rotates about. Scenery is never trimmed on the way
+    // back in, which is what keeps those fractions true after slicing.
+    id: 'prop-chest-wing', file: 'prop-chest-wing', target: 'images/props/chest-wing.webp',
+    w: CHEST_WING_BOX.w, h: CHEST_WING_BOX.h, tileable: false, bg: 'magenta',
+    lead: 'Paint ONE game sprite — a single wing — for a cozy medieval-fantasy '
+      + 'tower-defence game. Attach `images/icons/chest.webp` with this prompt: the '
+      + 'wing belongs to that chest and has to look painted by the same hand.',
+    placement: [
+      'PLACEMENT IS THE CONTRACT — the game flaps this wing by ROTATING it about',
+      'its root, so the root has to be exactly where this says, and the wing',
+      'must not be centred.',
+      `· The ROOT of the wing — the shoulder, where it meets the chest — sits ${pct(CHEST_WING_BOX.pivotX)}`,
+      `  of the way in from the LEFT edge and ${pct(CHEST_WING_BOX.pivotY)} of the way down from the TOP.`,
+      '  Make it a compact rounded root of small covert feathers, as if it comes',
+      '  out of the chest’s side.',
+      '· From the root the wing spreads out to the RIGHT and UP: its leading edge',
+      `  rises at about ${CHEST_WING_BOX.restDeg}° above horizontal, the longest flight feathers reach`,
+      '  about 94% of the way to the right edge, and the top of the wing comes',
+      '  within about 8% of the top edge.',
+      '· NOTHING of the wing lies to the LEFT of the root, and nothing hangs',
+      '  below about 88% of the height — the trailing feathers sweep back and',
+      '  down to the right, not down past the root.',
+      '· It is the RIGHT wing. Do not mirror it and do not paint a pair: the game',
+      '  mirrors this one for the other side.'
+    ].join('\n'),
+    blurb: 'The WING of a flying treasure chest — ONE feathered bird wing, spread wide as if in the middle of a wingbeat. Soft layered feathers: small rounded coverts near the root, long flight feathers fanning out along the trailing edge. Warm cream-white feathers with a soft grey-brown shadow side, and the tips of the long flight feathers edged in the same warm GOLD as the chest’s lock plate, so the wing and the chest read as one magical object. The same hand-inked warm-brown contour as the chest, with a strong ink line all the way round the outside — the feathers are pale, and that line is what separates them from the background. It is drawn small in game, about the height of the chest itself, so keep it to bold overlapping feather shapes rather than fine barbs. No chest, no body, no bird, no arm bone sticking out, no glow, no sparkles, no motion lines.'
   }
 ]
 
@@ -1225,6 +1284,16 @@ export interface WalkSpec {
   panelH: number
   w: number
   h: number
+  /**
+   * A MERGED weapon's sheet: which weapon, at which tier.
+   *
+   * Only the tier fixtures carry these. Their id (`cannon-t2`) is not a block
+   * type anything can draw, so the bench needs the weapon to paint and the
+   * tier to paint it at — the twin or triple battery `paintFixtureBattery`
+   * lays out — and the prompt needs the weapon for its colours.
+   */
+  fixtureType?: string
+  fixtureTier?: number
 }
 
 /**
@@ -1691,10 +1760,153 @@ const fixtureSheet = (e: { id: string; name: string; blurb: string }): WalkSpec 
 
 const fixtureSheets: WalkSpec[] = FIXTURE_WEAPONS.map(fixtureSheet)
 
+/**
+ * The merged weapons — each weapon's tier 2 and tier 3, painted outright.
+ *
+ * Until these are painted the game composites a merged gun out of copies of
+ * the plain painting (`paintTieredFixture`): a twin at tier 2, a triple battery
+ * from tier 3. That reads, but it is three pastes of one picture. A painting of
+ * the battery itself replaces the copies whole.
+ *
+ * The reference is that composite as DRAWN — the copies at their offsets, the
+ * rear rank shaded, no mount — on the same 512 box as the plain fixture, so a
+ * return drops onto the same rectangle and the slicer fits it the same way.
+ * It leaves out the tier rim, wash and glow on purpose: the game lays those on
+ * over the painting too, and a reference that showed them would be painted in
+ * and then drawn a second time on top.
+ *
+ * The words say what the reference cannot: that this is the SAME weapon
+ * doubled rather than a new one, which colour the tier is, and that it has to
+ * read as more gun at forty pixels.
+ */
+const TIER_FIXTURES: Record<(typeof TIER_ART_WEAPONS)[number], { name: string; twin: string; triple: string }> = {
+  cannon: {
+    name: 'Cannon',
+    twin: 'TWO cast-iron cannon barrels lying dead level and pointing RIGHT, '
+      + 'stacked like a double-barrelled gun: one just ABOVE and a little behind '
+      + 'the other, each with its own fat breech and cascabel at the left end, '
+      + 'its own reinforcing rings and muzzle swell. The upper, rear barrel is '
+      + 'set back a hair to the LEFT and a tone darker.',
+    triple: 'THREE cast-iron cannon barrels in a tight stacked battery, all dead '
+      + 'level and pointing RIGHT: one above, one below, and the FRONT one in the '
+      + 'middle between them, nearest the eye and a touch further forward. The '
+      + 'two outer barrels are set back to the LEFT and a tone darker.'
+  },
+  archer: {
+    name: 'Archery bow',
+    twin: 'TWO war bows at full draw, level and pointing RIGHT, the second '
+      + 'standing just BEHIND the first — offset to the LEFT and a little '
+      + 'higher, a tone darker — each with its own nocked arrow, so the pair '
+      + 'reads as a volley rather than one tall bow.',
+    triple: 'THREE war bows in a stepped rank, all at full draw, level and '
+      + 'pointing RIGHT: the rearmost furthest LEFT and highest, the middle one '
+      + 'below it, the front one nearest the eye — each with its own nocked '
+      + 'arrow, the rear two a tone darker.'
+  },
+  mortar: {
+    name: 'Mortar',
+    twin: 'TWO squat siege mortar tubes standing side by side on one bed, both '
+      + 'at the same steep lobbing angle, mouths up and to the RIGHT: the rear '
+      + 'tube to the LEFT, slightly smaller and a tone darker, the front tube '
+      + 'overlapping it.',
+    triple: 'THREE squat siege mortar tubes on one bed, all at the same steep '
+      + 'lobbing angle, mouths up and to the RIGHT: a front tube in the middle, '
+      + 'and one either side of it set back, slightly smaller and a tone darker.'
+  },
+  bombard: {
+    name: 'Bombard',
+    twin: 'TWO stubby wrought-iron bombards standing side by side, both at the '
+      + 'same steep angle, mouths up and to the RIGHT, each bound with hoops '
+      + 'along its whole length: the rear one to the LEFT, slightly smaller and '
+      + 'a tone darker.',
+    triple: 'THREE stubby hooped bombards side by side, all at the same steep '
+      + 'angle, mouths up and to the RIGHT: a front one in the middle, one either '
+      + 'side of it set back, slightly smaller and a tone darker.'
+  },
+  tesla: {
+    name: 'Arc coil',
+    twin: 'TWO lightning coils standing upright side by side, each an iron post '
+      + 'wound with copper wire under a polished ball terminal, on ceramic '
+      + 'insulators: the rear coil to the LEFT, shorter and a tone darker.',
+    triple: 'THREE lightning coils standing upright: a tall one in the middle and '
+      + 'a shorter one either side of it, set back and a tone darker — each wound '
+      + 'with copper wire under its own ball terminal.'
+  },
+  frost: {
+    name: 'Frost emitter',
+    twin: 'TWO clusters of pale blue ice crystals growing side by side from a '
+      + 'rimed iron socket, the rear cluster to the LEFT, smaller and a tone '
+      + 'darker.',
+    triple: 'THREE clusters of pale blue ice crystals from one rimed iron '
+      + 'socket: the tallest in the middle, a smaller one either side of it set '
+      + 'back and a tone darker.'
+  }
+}
+
+const tierFixtureSheets: WalkSpec[] = TIER_ART_WEAPONS.flatMap((type) =>
+  [2, 3].map((tier): WalkSpec => {
+    const t = TIER_FIXTURES[type]
+    const id = tierFixtureId(type, tier)
+    return {
+      ...fixtureSheet({
+        id,
+        name: `${t.name} — tier ${tier} ${tier === 2 ? 'twin' : 'battery'}`,
+        blurb: `${tier === 2 ? t.twin : t.triple} NOTHING else — no carriage, `
+          + 'no block, no crew, no smoke, no ammunition.'
+      }),
+      fixtureType: type,
+      fixtureTier: tier
+    }
+  }))
+
 export const WALKS: WalkSpec[] = [
   ...monsterWalks, ...allyWalks, ...siegeWalks, ...siegeArms, ...shipHulls,
-  ...fixtureSheets
+  ...fixtureSheets, ...tierFixtureSheets
 ]
+
+/**
+ * What a merged weapon's prompt adds to a plain fixture's.
+ *
+ * Three things the reference cannot say. That it is the SAME weapon doubled,
+ * with the plain painting as its design — a model shown two barrels will
+ * otherwise design a new gun with two barrels. Which colour the tier is, taken
+ * from the ladder the plate and the rim use, so "the green one" is green
+ * everywhere it appears. And that the extra barrels have to survive forty
+ * pixels, which is what the whole tier art exists to say.
+ */
+const tierLines = (w: WalkSpec): string[] => {
+  if (!w.fixtureType || !w.fixtureTier) return []
+  const tier = w.fixtureTier
+  const ts = tierStyle(tier)
+  const n = tier === 2 ? 'TWO' : 'THREE'
+  return [
+    '',
+    `THIS IS A MERGED WEAPON — tier ${tier}: the SAME weapon as the plain`,
+    `\`images/fixtures/${w.fixtureType}.webp\`, welded into ${n}. Attach that`,
+    'painting as well as the reference: it is the design. Same materials, same',
+    `ink, same proportions, same wear — ${tier === 2 ? 'doubled' : 'tripled'}, not redesigned. The`,
+    'reference shows exactly where each copy sits and which one is in front.',
+    '',
+    `THE TIER COLOUR IS ${tier === 2 ? 'GREEN' : 'BLUE'}, around ${ts.hex}. Put it in`,
+    tier === 2
+      ? 'the TRIM: green enamel bands and fittings on the steel — steel with green'
+      : 'the TRIM: blue enamel bands and fittings on the steel, and a FAINT cool',
+    tier === 2
+      ? 'accents. The body stays iron, timber or crystal, so it is still THIS'
+      : 'glow kept INSIDE the metal’s own outline. The body stays iron, timber or',
+    tier === 2
+      ? 'weapon. This one accent may be brighter than the rest of the palette —'
+      : 'crystal, so it is still THIS weapon. This one accent may be brighter than',
+    tier === 2
+      ? 'it is how a player tells a tier 2 from a plain gun at a glance.'
+      : 'the palette — it is how a player tells a tier 3 from a tier 2 at a glance.',
+    '',
+    `IT HAS TO READ AS ${n} AT 40 PX. Keep a clear gap or step between the`,
+    'copies, a strong ink line round each one, and every muzzle, limb or',
+    'terminal separately visible. Two barrels painted into one fat barrel is',
+    'the one way this fails that looks fine at full size.'
+  ]
+}
 
 /**
  * A ready-to-paste prompt for one walk cycle.
@@ -1715,7 +1927,7 @@ export const promptForWalk = (w: WalkSpec): string => {
   // are none — it is all about size and placement in the frame.
   if (w.frames === 1) {
     return [
-      `# ${w.id} — ${w.name}  (${w.target})`,
+      `# ${w.id} — ${w.name}  (${w.file}.png → ${w.target})`,
       '',
       `Repaint ONE ${w.kind === 'ship' ? 'ship' : machine ? 'machine' : 'character'},`
       + ` in a single ${w.w === w.h ? 'square' : 'landscape'} image.`,
@@ -1723,6 +1935,7 @@ export const promptForWalk = (w: WalkSpec): string => {
       'position it is drawn at. Match both.',
       '',
       `WHAT IT IS: ${w.name} — ${w.tagline}`,
+      ...tierLines(w),
       // A hull carries its own livery colour — the blue skiff, the red
       // longship, the yellow galley — and that colour is how a player tells
       // three brown boats apart at harbour scale.
@@ -1735,10 +1948,12 @@ export const promptForWalk = (w: WalkSpec): string => {
       // on pale timber, all but invisible from two feet away. The drawn one
       // never had the problem because it is iron and dark oiled wood over the
       // same crate.
-      ...(w.kind === 'fixture' && paletteLine(w.id)
+      // A merged tier sits on its WEAPON's block, so it reads its colours
+      // from there — `cannon-t2` has no palette of its own.
+      ...(w.kind === 'fixture' && paletteLine(w.fixtureType ?? w.id)
         ? ['',
           'IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted',
-          `around ${paletteFor(w.id).mid} and its neighbouring tones, so do NOT`,
+          `around ${paletteFor(w.fixtureType ?? w.id).mid} and its neighbouring tones, so do NOT`,
           'paint this part in those colours: pick materials that separate from',
           'them — cold iron and steel, dark oiled',
           'timber, blackened rope, a cool shadow side — and keep the ink line',
@@ -1844,7 +2059,7 @@ export const promptForWalk = (w: WalkSpec): string => {
   // to repeat it.
   if (w.kind === 'siegeArm') {
     return [
-      `# ${w.id} — ${w.name}  (${w.target})`,
+      `# ${w.id} — ${w.name}  (${w.file}.png → ${w.target})`,
       '',
       'WHAT COMES BACK IS A SPRITE SHEET, NOT A PICTURE OF A MACHINE.',
       `One landscape image, ${w.w} x ${w.h} pixels — twice as wide as it is tall —`,
@@ -1977,7 +2192,7 @@ export const promptForWalk = (w: WalkSpec): string => {
       : 'the SAME creature at a different moment of one step'
 
   return [
-    `# ${w.id} — ${w.name}  (${w.target})`,
+    `# ${w.id} — ${w.name}  (${w.file}.png → ${w.target})`,
     '',
     `Repaint a ${CYCLE}. The attached sheet is ${w.cols} columns x ${w.rows} rows`,
     `= EXACTLY ${w.frames} panels, read left to right along the top row and then the`,
@@ -2065,11 +2280,14 @@ export const promptForWalk = (w: WalkSpec): string => {
 
 /** A ready-to-paste prompt for one scenery asset. */
 export const promptForScenery = (a: SceneryAsset): string => [
-  `# ${a.id}  (${a.target})`,
+  `# ${a.id}  (${a.file}.png → ${a.target})`,
   '',
-  `Paint one background element for a cozy medieval-fantasy tower-defence game.`,
+  a.lead ?? `Paint one background element for a cozy medieval-fantasy tower-defence game.`,
   '',
-  STYLE,
+  // A placed asset takes the style block that never says "fill the frame":
+  // a model that reads it enlarges the drawing until the placement is gone,
+  // which is the lesson `STYLE_PART` records.
+  a.placement ? STYLE_PART : STYLE,
   '',
   `WHAT IT IS: ${a.blurb}`,
   '',
@@ -2100,8 +2318,99 @@ export const promptForScenery = (a: SceneryAsset): string => [
         + 'small inside its frame is shipped small with the empty border baked in,\n'
         + 'and it appears in the game as a shrunken version of itself surrounded by\n'
         + 'dead space. Let the artwork run off every edge rather than leave a border.'
-      : 'One object, centred in the frame.',
+      : a.placement ?? 'One object, centred in the frame.',
   '',
   `OUTPUT: exactly ${a.w} x ${a.h} pixels. If your tool has an aspect-ratio`,
   `control, set it to match. No labels, captions or watermarks.`
 ].join('\n')
+
+// ─── The prompt documents ───────────────────────────────────────────────────
+//
+// The four `PROMPTS-*.md` files are rendered HERE, not in the bench, so two
+// routes produce the same bytes: the `/art-sheets` bench writes them on export,
+// and `pnpm art:prompts` writes them from plain Node with no browser. The Art
+// Desk (`tools/art-desk/`) sends what it parses back out of these files, so if
+// the routes could disagree, its queue would paint from text nobody wrote.
+//
+// Every prompt is FENCED: a markdown preview puts a copy button on a fence, so
+// one click takes the whole prompt instead of a drag-select through 80 lines.
+// The heading stays OUTSIDE the fence — it is the operator's line, not the
+// model's — and its last parenthesis, `(<reference>.png[ → <target>])`, is the
+// contract the desk ties a block to its image by.
+
+/** A fence longer than any backtick run in the body, so it can never close early. */
+const fenceFor = (body: string): string => {
+  let longest = 0
+  for (const run of body.match(/`+/g) ?? []) longest = Math.max(longest, run.length)
+  return '`'.repeat(Math.max(3, longest + 1))
+}
+
+/** A builder's `# Title\n\n<prompt>` → a `## Title` heading over a fenced `text` block. */
+export const promptBlock = (text: string): string => {
+  const cut = text.indexOf('\n')
+  const heading = (cut < 0 ? text : text.slice(0, cut)).replace(/^#+\s*/, '')
+  const body = (cut < 0 ? '' : text.slice(cut + 1)).replace(/^\n+/, '')
+  const fence = fenceFor(body)
+  return [`## ${heading}`, '', `${fence}text`, body, fence].join('\n')
+}
+
+const promptDoc = (title: string, intro: string[], prompts: string[]): string => [
+  `# ${title}`,
+  '',
+  'Generated from `src/game/artSheet.ts` — do not hand-edit. Run `pnpm art:prompts`',
+  '(or export from the `/art-sheets` bench) after changing the manifest.',
+  '',
+  ...intro,
+  '',
+  'Copy only the fenced block. The `##` heading is for you, not the model: it',
+  'names the image the block belongs to (the reference to attach, and the name',
+  'to save the return under) and, after the arrow, where the slice lands under',
+  '`public/`. `pnpm art:desk` finds any block by sprite name, copies reference',
+  'and prompt in one go, and files, slices and compresses the return.',
+  '',
+  prompts.map(promptBlock).join('\n\n---\n\n'),
+  ''
+].join('\n')
+
+/** Every prompt document, by file name under `art-sheets/`. */
+export const promptDocs = (): Record<string, string> => ({
+  'PROMPTS-CELLS.md': promptDoc('Per-cell prompts — one object per generation', [
+    'Attach `art-sheets/cell-<id>.png` and paste the matching block below.',
+    'There is no grid to preserve here, which is the whole point: three sheet',
+    'and strip passes each lost the lattice a different way, and not one of',
+    'them lost the art.'
+  ], SINGLES.map((s) => promptForCell(s))),
+
+  'PROMPTS-STRIPS.md': promptDoc('Per-strip prompts', [
+    'One strip per generation. Attach `art-sheets/strip-<id>.png` and paste the',
+    'matching block below. Every cell is named, because the first whole-sheet',
+    'pass inferred subjects from pixels and turned the gold mine into a bow.'
+  ], ALL_STRIPS.map((s) => promptFor(s))),
+
+  // The landscape has no reference render: a mountain range is a repeating
+  // band, not a lattice cell, so these go out as prompts alone.
+  'PROMPTS-SCENERY.md': promptDoc('Scenery prompts — the landscape', [
+    'These are NOT on the 128 lattice and have no reference image. Attach one',
+    'of your finished BLOCK bitmaps as a style reference alongside the prompt,',
+    'so the landscape is painted by the same hand as the tower standing on it.',
+    '',
+    'Drop results in `art-sheets/painted/`, named after the file in each',
+    'heading (e.g. `bg-mountains-far.png`), then run `pnpm slice-sheets`.'
+  ], SCENERY.map((a) => promptForScenery(a))),
+
+  // One sheet per monster design: the walk cycle the battlefield actually
+  // plays, which a single still cannot replace without freezing the unit.
+  'PROMPTS-WALKS.md': promptDoc('Walk-cycle prompts — one monster design per generation', [
+    'Attach the reference named in each heading — `walk-<id>.png` for a cycle,',
+    '`siege-<id>.png` and `arm-<id>.png` for an engine, `hull-<id>.png` for a',
+    'ship, `fixture-<id>.png` for a weapon — and paste the block beside it. A',
+    'merged tier (`fixture-cannon-t2.png`) also wants the plain painting',
+    '(`public/images/fixtures/cannon.webp`) attached: it is the design.',
+    'Most of these are a grid of panels showing ONE subject through ONE cycle,',
+    'and the whole job is that it comes back as one subject and not eight.',
+    '',
+    'Drop results in `art-sheets/painted/`, keeping the `walk-<id>` in the name,',
+    'then run `pnpm slice-sheets`. The slicer cuts the grid by proportion, so an',
+    'off-size return is fine as long as the panels are where the grid says.'
+  ], WALKS.map((w) => promptForWalk(w)))
+})

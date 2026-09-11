@@ -11,6 +11,14 @@ export default {
   'crazyGamesOnly': 'Gim ini hanya tersedia di',
 
   // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'gift': {
+    'free': 'Gratis',
+    'tile': '{name} gratis, tingkat {n}: ketuk, lalu ketuk papan untuk memasangnya',
+    'pair': 'Sepasang {name} gratis: ketuk, lalu ketuk papan untuk memasangnya',
+    'chest': 'Peti terbang: ketuk untuk membukanya',
+    'firstClear': 'Gelombang {n} selesai! Hadiah untukmu'
+  },
+
   'mobile': {
     'rotatePortrait': 'Pegang ponsel secara tegak untuk bermain',
     'columnFull': 'Kolom penuh',

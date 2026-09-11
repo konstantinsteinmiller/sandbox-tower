@@ -113,11 +113,15 @@ const cumulativeKills = (rules: RuleSet, upTo: number): number[] => {
   const cum = [0]
   let total = 0
   for (let wave = 1; wave <= upTo; wave++) {
+    // Every option `useTowerGame.waveOpts` hands the director — a field left
+    // out here measures a different director from the one the game runs.
     const plan = planWave(wave, 1, false, {
       budgetMul: w.budgetMul,
       roster: rules.enemies.roster,
       minWaveOverride: rules.enemies.minWaveOverride,
       airFromWave: w.airFromWave,
+      airShare: w.airShare,
+      firstRunScale: w.firstRunScale,
       seaFromWave: w.seaFromWave,
       siegeFromWave: w.siegeFromWave,
       previews: w.previews,

@@ -324,7 +324,11 @@ const publishSpan = (): void => {
   // animation.
   const hNow = viewW / 2 / zoom
   const hEnd = viewW / 2 / tzoom
-  setViewSpan(Math.min(x - hNow, tx - hEnd), Math.max(x + hNow, tx + hEnd))
+  // The top is what the player can SEE: the HUD strip covers the canvas's upper
+  // edge, and a diver dropped in behind it would arrive as unseen as one placed
+  // off-screen. Only the fixed mobile frame spawns from here.
+  const top = y + (viewH / 2 - insetTop) / zoom
+  setViewSpan(Math.min(x - hNow, tx - hEnd), Math.max(x + hNow, tx + hEnd), top)
 }
 
 /** Force the camera to its auto-fit target with no animation. Used on scene

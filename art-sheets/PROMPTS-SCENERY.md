@@ -1,6 +1,7 @@
 # Scenery prompts — the landscape
 
-Generated from the manifest — do not hand-edit, re-export instead.
+Generated from `src/game/artSheet.ts` — do not hand-edit. Run `pnpm art:prompts`
+(or export from the `/art-sheets` bench) after changing the manifest.
 
 These are NOT on the 128 lattice and have no reference image. Attach one
 of your finished BLOCK bitmaps as a style reference alongside the prompt,
@@ -9,8 +10,15 @@ so the landscape is painted by the same hand as the tower standing on it.
 Drop results in `art-sheets/painted/`, named after the file in each
 heading (e.g. `bg-mountains-far.png`), then run `pnpm slice-sheets`.
 
-# sun  (images/bg/sun.webp)
+Copy only the fenced block. The `##` heading is for you, not the model: it
+names the image the block belongs to (the reference to attach, and the name
+to save the return under) and, after the arrow, where the slice lands under
+`public/`. `pnpm art:desk` finds any block by sprite name, copies reference
+and prompt in one go, and files, slices and compresses the return.
 
+## sun  (bg-sun.png → images/bg/sun.webp)
+
+```text
 Paint one background element for a cozy medieval-fantasy tower-defence game.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -61,11 +69,13 @@ One object, centred in the frame.
 
 OUTPUT: exactly 512 x 512 pixels. If your tool has an aspect-ratio
 control, set it to match. No labels, captions or watermarks.
+```
 
 ---
 
-# moon  (images/bg/moon.webp)
+## moon  (bg-moon.png → images/bg/moon.webp)
 
+```text
 Paint one background element for a cozy medieval-fantasy tower-defence game.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -116,11 +126,13 @@ One object, centred in the frame.
 
 OUTPUT: exactly 512 x 512 pixels. If your tool has an aspect-ratio
 control, set it to match. No labels, captions or watermarks.
+```
 
 ---
 
-# conifer  (images/bg/conifer.webp)
+## conifer  (bg-conifer.png → images/bg/conifer.webp)
 
+```text
 Paint one background element for a cozy medieval-fantasy tower-defence game.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -171,11 +183,13 @@ One object, centred in the frame.
 
 OUTPUT: exactly 384 x 512 pixels. If your tool has an aspect-ratio
 control, set it to match. No labels, captions or watermarks.
+```
 
 ---
 
-# broadleaf  (images/bg/broadleaf.webp)
+## broadleaf  (bg-broadleaf.png → images/bg/broadleaf.webp)
 
+```text
 Paint one background element for a cozy medieval-fantasy tower-defence game.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -226,11 +240,13 @@ One object, centred in the frame.
 
 OUTPUT: exactly 384 x 512 pixels. If your tool has an aspect-ratio
 control, set it to match. No labels, captions or watermarks.
+```
 
 ---
 
-# mountains-far  (images/bg/mountains-far.webp)
+## mountains-far  (bg-mountains-far.png → images/bg/mountains-far.webp)
 
+```text
 Paint one background element for a cozy medieval-fantasy tower-defence game.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -278,11 +294,13 @@ vignette or fade at either side. It does NOT need to tile vertically.
 
 OUTPUT: exactly 1536 x 512 pixels. If your tool has an aspect-ratio
 control, set it to match. No labels, captions or watermarks.
+```
 
 ---
 
-# mountains-near  (images/bg/mountains-near.webp)
+## mountains-near  (bg-mountains-near.png → images/bg/mountains-near.webp)
 
+```text
 Paint one background element for a cozy medieval-fantasy tower-defence game.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -330,11 +348,13 @@ vignette or fade at either side. It does NOT need to tile vertically.
 
 OUTPUT: exactly 1536 x 512 pixels. If your tool has an aspect-ratio
 control, set it to match. No labels, captions or watermarks.
+```
 
 ---
 
-# grass  (images/bg/grass.webp)
+## grass  (bg-grass.png → images/bg/grass.webp)
 
+```text
 Paint one background element for a cozy medieval-fantasy tower-defence game.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -376,11 +396,13 @@ vignette or fade at either side. It does NOT need to tile vertically.
 
 OUTPUT: exactly 1024 x 128 pixels. If your tool has an aspect-ratio
 control, set it to match. No labels, captions or watermarks.
+```
 
 ---
 
-# water  (images/bg/water.webp)
+## water  (bg-water.png → images/bg/water.webp)
 
+```text
 Paint one background element for a cozy medieval-fantasy tower-defence game.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -422,11 +444,13 @@ vignette or fade at either side. It does NOT need to tile vertically.
 
 OUTPUT: exactly 1024 x 512 pixels. If your tool has an aspect-ratio
 control, set it to match. No labels, captions or watermarks.
+```
 
 ---
 
-# roof  (images/bg/roof.webp)
+## roof  (bg-roof.png → images/bg/roof.webp)
 
+```text
 Paint one background element for a cozy medieval-fantasy tower-defence game.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -477,11 +501,13 @@ One object, centred in the frame.
 
 OUTPUT: exactly 512 x 384 pixels. If your tool has an aspect-ratio
 control, set it to match. No labels, captions or watermarks.
+```
 
 ---
 
-# icon-wood  (images/icons/wood.webp)
+## icon-wood  (icon-wood.png → images/icons/wood.webp)
 
+```text
 Paint one background element for a cozy medieval-fantasy tower-defence game.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -532,11 +558,13 @@ One object, centred in the frame.
 
 OUTPUT: exactly 512 x 512 pixels. If your tool has an aspect-ratio
 control, set it to match. No labels, captions or watermarks.
+```
 
 ---
 
-# icon-stone  (images/icons/stone.webp)
+## icon-stone  (icon-stone.png → images/icons/stone.webp)
 
+```text
 Paint one background element for a cozy medieval-fantasy tower-defence game.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -587,11 +615,13 @@ One object, centred in the frame.
 
 OUTPUT: exactly 512 x 512 pixels. If your tool has an aspect-ratio
 control, set it to match. No labels, captions or watermarks.
+```
 
 ---
 
-# icon-gold  (images/icons/gold.webp)
+## icon-gold  (icon-gold.png → images/icons/gold.webp)
 
+```text
 Paint one background element for a cozy medieval-fantasy tower-defence game.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -642,11 +672,13 @@ One object, centred in the frame.
 
 OUTPUT: exactly 512 x 512 pixels. If your tool has an aspect-ratio
 control, set it to match. No labels, captions or watermarks.
+```
 
 ---
 
-# ribbon  (images/bg/ribbon.webp)
+## ribbon  (bg-ribbon.png → images/bg/ribbon.webp)
 
+```text
 Paint one background element for a cozy medieval-fantasy tower-defence game.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -703,11 +735,13 @@ dead space. Let the artwork run off every edge rather than leave a border.
 
 OUTPUT: exactly 1280 x 256 pixels. If your tool has an aspect-ratio
 control, set it to match. No labels, captions or watermarks.
+```
 
 ---
 
-# icon-chest  (images/icons/chest.webp)
+## icon-chest  (icon-chest.png → images/icons/chest.webp)
 
+```text
 Paint one background element for a cozy medieval-fantasy tower-defence game.
 
 STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
@@ -758,3 +792,76 @@ One object, centred in the frame.
 
 OUTPUT: exactly 512 x 512 pixels. If your tool has an aspect-ratio
 control, set it to match. No labels, captions or watermarks.
+```
+
+---
+
+## prop-chest-wing  (prop-chest-wing.png → images/props/chest-wing.webp)
+
+```text
+Paint ONE game sprite — a single wing — for a cozy medieval-fantasy tower-defence game. Attach `images/icons/chest.webp` with this prompt: the wing belongs to that chest and has to look painted by the same hand.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+WHAT IT IS: The WING of a flying treasure chest — ONE feathered bird wing, spread wide as if in the middle of a wingbeat. Soft layered feathers: small rounded coverts near the root, long flight feathers fanning out along the trailing edge. Warm cream-white feathers with a soft grey-brown shadow side, and the tips of the long flight feathers edged in the same warm GOLD as the chest’s lock plate, so the wing and the chest read as one magical object. The same hand-inked warm-brown contour as the chest, with a strong ink line all the way round the outside — the feathers are pale, and that line is what separates them from the background. It is drawn small in game, about the height of the chest itself, so keep it to bold overlapping feather shapes rather than fine barbs. No chest, no body, no bird, no arm bone sticking out, no glow, no sparkles, no motion lines.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+PLACEMENT IS THE CONTRACT — the game flaps this wing by ROTATING it about
+its root, so the root has to be exactly where this says, and the wing
+must not be centred.
+· The ROOT of the wing — the shoulder, where it meets the chest — sits 12%
+  of the way in from the LEFT edge and 70% of the way down from the TOP.
+  Make it a compact rounded root of small covert feathers, as if it comes
+  out of the chest’s side.
+· From the root the wing spreads out to the RIGHT and UP: its leading edge
+  rises at about 25° above horizontal, the longest flight feathers reach
+  about 94% of the way to the right edge, and the top of the wing comes
+  within about 8% of the top edge.
+· NOTHING of the wing lies to the LEFT of the root, and nothing hangs
+  below about 88% of the height — the trailing feathers sweep back and
+  down to the right, not down past the root.
+· It is the RIGHT wing. Do not mirror it and do not paint a pair: the game
+  mirrors this one for the other side.
+
+OUTPUT: exactly 512 x 512 pixels. If your tool has an aspect-ratio
+control, set it to match. No labels, captions or watermarks.
+```

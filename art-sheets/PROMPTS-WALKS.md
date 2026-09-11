@@ -1,10 +1,13 @@
 # Walk-cycle prompts — one monster design per generation
 
-Generated from the manifest — do not hand-edit, re-export instead.
+Generated from `src/game/artSheet.ts` — do not hand-edit. Run `pnpm art:prompts`
+(or export from the `/art-sheets` bench) after changing the manifest.
 
-Attach the reference named in each block — `walk-<id>.png` for a cycle,
+Attach the reference named in each heading — `walk-<id>.png` for a cycle,
 `siege-<id>.png` and `arm-<id>.png` for an engine, `hull-<id>.png` for a
-ship — and paste the block beside it.
+ship, `fixture-<id>.png` for a weapon — and paste the block beside it. A
+merged tier (`fixture-cannon-t2.png`) also wants the plain painting
+(`public/images/fixtures/cannon.webp`) attached: it is the design.
 Most of these are a grid of panels showing ONE subject through ONE cycle,
 and the whole job is that it comes back as one subject and not eight.
 
@@ -12,8 +15,15 @@ Drop results in `art-sheets/painted/`, keeping the `walk-<id>` in the name,
 then run `pnpm slice-sheets`. The slicer cuts the grid by proportion, so an
 off-size return is fine as long as the panels are where the grid says.
 
-# grumpling — Grumpling  (images/monsters/grumpling.webp)
+Copy only the fenced block. The `##` heading is for you, not the model: it
+names the image the block belongs to (the reference to attach, and the name
+to save the return under) and, after the arrow, where the slice lands under
+`public/`. `pnpm art:desk` finds any block by sprite name, copies reference
+and prompt in one go, and files, slices and compresses the return.
 
+## grumpling — Grumpling  (walk-grumpling.png → images/monsters/grumpling.webp)
+
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -98,11 +108,13 @@ between panels the creature bobs when it walks.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# bonecap — Bonecap  (images/monsters/bonecap.webp)
+## bonecap — Bonecap  (walk-bonecap.png → images/monsters/bonecap.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -187,11 +199,13 @@ between panels the creature bobs when it walks.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# snaggletusk — Snaggletusk  (images/monsters/snaggletusk.webp)
+## snaggletusk — Snaggletusk  (walk-snaggletusk.png → images/monsters/snaggletusk.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -276,11 +290,13 @@ between panels the creature bobs when it walks.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# wispling — Wispling  (images/monsters/wispling.webp)
+## wispling — Wispling  (walk-wispling.png → images/monsters/wispling.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -365,11 +381,13 @@ between panels the creature bobs when it walks.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# marrowknight — Marrow Knight  (images/monsters/marrowknight.webp)
+## marrowknight — Marrow Knight  (walk-marrowknight.png → images/monsters/marrowknight.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -454,11 +472,13 @@ between panels the creature bobs when it walks.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# nibbler — Nibbler  (images/monsters/nibbler.webp)
+## nibbler — Nibbler  (walk-nibbler.png → images/monsters/nibbler.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -543,11 +563,13 @@ between panels the creature bobs when it walks.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# cinderhound — Cinderhound  (images/monsters/cinderhound.webp)
+## cinderhound — Cinderhound  (walk-cinderhound.png → images/monsters/cinderhound.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -632,11 +654,13 @@ between panels the creature bobs when it walks.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# blorp — Blorp  (images/monsters/blorp.webp)
+## blorp — Blorp  (walk-blorp.png → images/monsters/blorp.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -721,11 +745,13 @@ between panels the creature bobs when it walks.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# thornwick — Thornwick  (images/monsters/thornwick.webp)
+## thornwick — Thornwick  (walk-thornwick.png → images/monsters/thornwick.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -810,11 +836,13 @@ between panels the creature bobs when it walks.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# rattlejack — Rattlejack  (images/monsters/rattlejack.webp)
+## rattlejack — Rattlejack  (walk-rattlejack.png → images/monsters/rattlejack.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -899,11 +927,13 @@ between panels the creature bobs when it walks.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# dustmoth — Dustmoth  (images/monsters/dustmoth.webp)
+## dustmoth — Dustmoth  (walk-dustmoth.png → images/monsters/dustmoth.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -988,11 +1018,13 @@ between panels the creature bobs when it walks.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# skewer — Skewer  (images/monsters/skewer.webp)
+## skewer — Skewer  (walk-skewer.png → images/monsters/skewer.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -1077,11 +1109,13 @@ between panels the creature bobs when it walks.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# gloomcrow — Gloomcrow  (images/monsters/gloomcrow.webp)
+## gloomcrow — Gloomcrow  (walk-gloomcrow.png → images/monsters/gloomcrow.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -1166,11 +1200,13 @@ between panels the creature bobs when it walks.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# sliverfin — Sliverfin  (images/monsters/sliverfin.webp)
+## sliverfin — Sliverfin  (walk-sliverfin.png → images/monsters/sliverfin.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -1254,11 +1290,13 @@ keep it centred vertically in the panel exactly as the reference has it.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# gnashfin — Gnashfin  (images/monsters/gnashfin.webp)
+## gnashfin — Gnashfin  (walk-gnashfin.png → images/monsters/gnashfin.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -1342,11 +1380,13 @@ keep it centred vertically in the panel exactly as the reference has it.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# tidewyrm — Tidewyrm  (images/monsters/tidewyrm.webp)
+## tidewyrm — Tidewyrm  (walk-tidewyrm.png → images/monsters/tidewyrm.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -1430,11 +1470,13 @@ keep it centred vertically in the panel exactly as the reference has it.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# brinemaw — Brinemaw  (images/monsters/brinemaw.webp)
+## brinemaw — Brinemaw  (walk-brinemaw.png → images/monsters/brinemaw.webp)
 
+```text
 Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME creature at a different moment of one step.
@@ -1518,11 +1560,13 @@ keep it centred vertically in the panel exactly as the reference has it.
 
 OUTPUT: one image, 1280 x 720 pixels (16:9). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# cavalry — Cavalry  (images/allies/cavalry.webp)
+## cavalry — Cavalry  (walk-cavalry.png → images/allies/cavalry.webp)
 
+```text
 Repaint a GALLOP CYCLE. The attached sheet is 4 columns x 2 rows
 = EXACTLY 8 panels, read left to right along the top row and then the
 bottom row. Every panel is the SAME horse and rider at a different moment of ONE gallop stride.
@@ -1611,11 +1655,13 @@ between panels the rider bobs when it gallops.
 
 OUTPUT: one image, 1440 x 720 pixels (2:1). If your
 tool has an aspect-ratio control, set it to match. No labels or watermarks.
+```
 
 ---
 
-# ballista — Bolt Thrower  (images/siege/ballista.webp)
+## ballista — Bolt Thrower  (siege-ballista.png → images/siege/ballista.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -1682,11 +1728,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 768 x 768 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# catapult — Catapult  (images/siege/catapult.webp)
+## catapult — Catapult  (siege-catapult.png → images/siege/catapult.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -1753,11 +1801,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 768 x 768 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# trebuchet — Trebuchet  (images/siege/trebuchet.webp)
+## trebuchet — Trebuchet  (siege-trebuchet.png → images/siege/trebuchet.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -1824,11 +1874,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 768 x 768 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# ram — Battering Ram  (images/siege/ram.webp)
+## ram — Battering Ram  (siege-ram.png → images/siege/ram.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -1895,11 +1947,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 768 x 768 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# ironRam — Iron Ram  (images/siege/ironRam.webp)
+## ironRam — Iron Ram  (siege-ironRam.png → images/siege/ironRam.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -1966,11 +2020,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 768 x 768 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# siegeTower — Siege Tower  (images/siege/siegeTower.webp)
+## siegeTower — Siege Tower  (siege-siegeTower.png → images/siege/siegeTower.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -2037,11 +2093,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 768 x 768 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# ballista — Bolt Thrower arm  (images/siege-arms/ballista.webp)
+## ballista — Bolt Thrower arm  (arm-ballista.png → images/siege-arms/ballista.webp)
 
+```text
 WHAT COMES BACK IS A SPRITE SHEET, NOT A PICTURE OF A MACHINE.
 One landscape image, 1440 x 720 pixels — twice as wide as it is tall —
 holding 8 SEPARATE small drawings laid out 4 across and 2
@@ -2183,11 +2241,13 @@ BEFORE YOU CALL IT FINISHED, count and check:
 OUTPUT: one image, 1440 x 720 pixels (2:1, landscape). If your tool
 has an aspect-ratio control, set it to 2:1 — a square return crushes the
 grid and cannot be cut. No labels, captions, numbers or watermarks.
+```
 
 ---
 
-# catapult — Catapult arm  (images/siege-arms/catapult.webp)
+## catapult — Catapult arm  (arm-catapult.png → images/siege-arms/catapult.webp)
 
+```text
 WHAT COMES BACK IS A SPRITE SHEET, NOT A PICTURE OF A MACHINE.
 One landscape image, 1440 x 720 pixels — twice as wide as it is tall —
 holding 8 SEPARATE small drawings laid out 4 across and 2
@@ -2329,11 +2389,13 @@ BEFORE YOU CALL IT FINISHED, count and check:
 OUTPUT: one image, 1440 x 720 pixels (2:1, landscape). If your tool
 has an aspect-ratio control, set it to 2:1 — a square return crushes the
 grid and cannot be cut. No labels, captions, numbers or watermarks.
+```
 
 ---
 
-# trebuchet — Trebuchet arm  (images/siege-arms/trebuchet.webp)
+## trebuchet — Trebuchet arm  (arm-trebuchet.png → images/siege-arms/trebuchet.webp)
 
+```text
 WHAT COMES BACK IS A SPRITE SHEET, NOT A PICTURE OF A MACHINE.
 One landscape image, 1440 x 720 pixels — twice as wide as it is tall —
 holding 8 SEPARATE small drawings laid out 4 across and 2
@@ -2475,11 +2537,13 @@ BEFORE YOU CALL IT FINISHED, count and check:
 OUTPUT: one image, 1440 x 720 pixels (2:1, landscape). If your tool
 has an aspect-ratio control, set it to 2:1 — a square return crushes the
 grid and cannot be cut. No labels, captions, numbers or watermarks.
+```
 
 ---
 
-# skiff — Skiff hull  (images/ships/skiff.webp)
+## skiff — Skiff hull  (hull-skiff.png → images/ships/skiff.webp)
 
+```text
 Repaint ONE ship, in a single landscape image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -2559,11 +2623,13 @@ OUTPUT: one image, exactly 960 x 732 pixels — landscape, and NOT square.
 If your tool has an aspect-ratio control, set it to match: a square
 return squashes the hull and puts the waterline in the wrong place.
 No labels, captions or watermarks.
+```
 
 ---
 
-# longship — Longship hull  (images/ships/longship.webp)
+## longship — Longship hull  (hull-longship.png → images/ships/longship.webp)
 
+```text
 Repaint ONE ship, in a single landscape image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -2643,11 +2709,13 @@ OUTPUT: one image, exactly 960 x 732 pixels — landscape, and NOT square.
 If your tool has an aspect-ratio control, set it to match: a square
 return squashes the hull and puts the waterline in the wrong place.
 No labels, captions or watermarks.
+```
 
 ---
 
-# galley — War Galley hull  (images/ships/galley.webp)
+## galley — War Galley hull  (hull-galley.png → images/ships/galley.webp)
 
+```text
 Repaint ONE ship, in a single landscape image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -2727,11 +2795,13 @@ OUTPUT: one image, exactly 960 x 732 pixels — landscape, and NOT square.
 If your tool has an aspect-ratio control, set it to match: a square
 return squashes the hull and puts the waterline in the wrong place.
 No labels, captions or watermarks.
+```
 
 ---
 
-# cannon — Cannon barrel  (images/fixtures/cannon.webp)
+## cannon — Cannon barrel  (fixture-cannon.png → images/fixtures/cannon.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -2826,11 +2896,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# archer — Archery bow  (images/fixtures/archer.webp)
+## archer — Archery bow  (fixture-archer.png → images/fixtures/archer.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -2925,11 +2997,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# mortar — Mortar tube  (images/fixtures/mortar.webp)
+## mortar — Mortar tube  (fixture-mortar.png → images/fixtures/mortar.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -3024,11 +3098,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# bombard — Bombard barrel  (images/fixtures/bombard.webp)
+## bombard — Bombard barrel  (fixture-bombard.png → images/fixtures/bombard.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -3123,11 +3199,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# tesla — Arc coil  (images/fixtures/tesla.webp)
+## tesla — Arc coil  (fixture-tesla.png → images/fixtures/tesla.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -3222,11 +3300,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# frost — Frost emitter  (images/fixtures/frost.webp)
+## frost — Frost emitter  (fixture-frost.png → images/fixtures/frost.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -3321,11 +3401,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# stonepit — Stone pit heap  (images/fixtures/stonepit.webp)
+## stonepit — Stone pit heap  (fixture-stonepit.png → images/fixtures/stonepit.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -3411,11 +3493,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# banner — Hanging banner  (images/fixtures/banner.webp)
+## banner — Hanging banner  (fixture-banner.png → images/fixtures/banner.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -3510,11 +3594,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# obelisk — Arcane spire  (images/fixtures/obelisk.webp)
+## obelisk — Arcane spire  (fixture-obelisk.png → images/fixtures/obelisk.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -3609,11 +3695,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# lumberHut — Lumber hut roof  (images/fixtures/lumberHut.webp)
+## lumberHut — Lumber hut roof  (fixture-lumberHut.png → images/fixtures/lumberHut.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -3699,11 +3787,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# coffer — Open coffer  (images/fixtures/coffer.webp)
+## coffer — Open coffer  (fixture-coffer.png → images/fixtures/coffer.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -3789,11 +3879,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# repair — Repair crane  (images/fixtures/repair.webp)
+## repair — Repair crane  (fixture-repair.png → images/fixtures/repair.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -3888,11 +3980,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
 
 ---
 
-# spikes — Iron spikes  (images/fixtures/spikes.webp)
+## spikes — Iron spikes  (fixture-spikes.png → images/fixtures/spikes.webp)
 
+```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
@@ -3987,3 +4081,1420 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 
 OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
 No labels, captions or watermarks.
+```
+
+---
+
+## cannon-t2 — Cannon — tier 2 twin  (fixture-cannon-t2.png → images/fixtures/cannon-t2.webp)
+
+```text
+Repaint ONE machine, in a single square image.
+The attached reference is exactly what to paint, at exactly the size and
+position it is drawn at. Match both.
+
+WHAT IT IS: Cannon — tier 2 twin — TWO cast-iron cannon barrels lying dead level and pointing RIGHT, stacked like a double-barrelled gun: one just ABOVE and a little behind the other, each with its own fat breech and cascabel at the left end, its own reinforcing rings and muzzle swell. The upper, rear barrel is set back a hair to the LEFT and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+
+THIS IS A MERGED WEAPON — tier 2: the SAME weapon as the plain
+`images/fixtures/cannon.webp`, welded into TWO. Attach that
+painting as well as the reference: it is the design. Same materials, same
+ink, same proportions, same wear — doubled, not redesigned. The
+reference shows exactly where each copy sits and which one is in front.
+
+THE TIER COLOUR IS GREEN, around #46d86a. Put it in
+the TRIM: green enamel bands and fittings on the steel — steel with green
+accents. The body stays iron, timber or crystal, so it is still THIS
+weapon. This one accent may be brighter than the rest of the palette —
+it is how a player tells a tier 2 from a plain gun at a glance.
+
+IT HAS TO READ AS TWO AT 40 PX. Keep a clear gap or step between the
+copies, a strong ink line round each one, and every muzzle, limb or
+terminal separately visible. Two barrels painted into one fat barrel is
+the one way this fails that looks fine at full size.
+
+IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
+around #565c64 and its neighbouring tones, so do NOT
+paint this part in those colours: pick materials that separate from
+them — cold iron and steel, dark oiled
+timber, blackened rope, a cool shadow side — and keep the ink line
+strong enough to hold the shape on its own. A part in the same hue and
+the same value as the block underneath disappears into it, which is
+the one way this drawing can fail that looks fine on its own sheet.
+
+THIS IS ONE PART OF A BLOCK, ON ITS OWN. In the game it is painted on
+top of a block that is already there, so the block must not be here:
+no crate, no stone face, no wall, no ground, no shadow. Draw only the
+part itself, floating on the magenta exactly where the reference has
+it — where it sits in the frame is where it bolts on.
+
+DRAW IT AT REST, level and pointing RIGHT, exactly as the reference
+has it. The game turns it to its own firing angle out of this one
+picture, so do not draw it already aimed, angled, tilted or
+mid-swing, and add no motion blur, sparks, smoke or muzzle flash: a
+tilt painted in here is a tilt the game adds its own on top of.
+
+KEEP ANY GLOW TIGHT. A halo, aura or bloom spreading out into the
+background is measured as part of the object when the return is fitted
+back onto the reference — a wide aura therefore comes back as a tiny
+crystal inside a huge smear. It also cannot be keyed: soft light over
+magenta turns pink rather than transparent. Any glow belongs inside
+the shape’s own outline, or within a hair of it.
+
+DRAW ONLY WHAT THE REFERENCE SHOWS. The moving weapon — the arm, the bow,
+the counterweight, the sling — is painted separately and animated on top of
+this in the game. If you add one here the machine ends up with two.
+Anything the reference DOES show, including ammunition stacked on the bed,
+stays.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+SIZE AND PLACEMENT — this is the part that goes wrong.
+Do not enlarge it to fill the frame. The reference leaves air around the
+machine on every side and that air is not waste — it
+is where the parts that animate get drawn. Keep the subject the same
+fraction of the frame that the reference has it, and standing on the same
+line: the wheels and feet must sit at the same height from the bottom edge.
+· It faces RIGHT in the reference. Keep that direction.
+· Do not rotate it or change the viewing angle.
+· No cast shadow on the ground. The game draws its own.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
+No labels, captions or watermarks.
+```
+
+---
+
+## cannon-t3 — Cannon — tier 3 battery  (fixture-cannon-t3.png → images/fixtures/cannon-t3.webp)
+
+```text
+Repaint ONE machine, in a single square image.
+The attached reference is exactly what to paint, at exactly the size and
+position it is drawn at. Match both.
+
+WHAT IT IS: Cannon — tier 3 battery — THREE cast-iron cannon barrels in a tight stacked battery, all dead level and pointing RIGHT: one above, one below, and the FRONT one in the middle between them, nearest the eye and a touch further forward. The two outer barrels are set back to the LEFT and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+
+THIS IS A MERGED WEAPON — tier 3: the SAME weapon as the plain
+`images/fixtures/cannon.webp`, welded into THREE. Attach that
+painting as well as the reference: it is the design. Same materials, same
+ink, same proportions, same wear — tripled, not redesigned. The
+reference shows exactly where each copy sits and which one is in front.
+
+THE TIER COLOUR IS BLUE, around #3fa2ff. Put it in
+the TRIM: blue enamel bands and fittings on the steel, and a FAINT cool
+glow kept INSIDE the metal’s own outline. The body stays iron, timber or
+crystal, so it is still THIS weapon. This one accent may be brighter than
+the palette — it is how a player tells a tier 3 from a tier 2 at a glance.
+
+IT HAS TO READ AS THREE AT 40 PX. Keep a clear gap or step between the
+copies, a strong ink line round each one, and every muzzle, limb or
+terminal separately visible. Two barrels painted into one fat barrel is
+the one way this fails that looks fine at full size.
+
+IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
+around #565c64 and its neighbouring tones, so do NOT
+paint this part in those colours: pick materials that separate from
+them — cold iron and steel, dark oiled
+timber, blackened rope, a cool shadow side — and keep the ink line
+strong enough to hold the shape on its own. A part in the same hue and
+the same value as the block underneath disappears into it, which is
+the one way this drawing can fail that looks fine on its own sheet.
+
+THIS IS ONE PART OF A BLOCK, ON ITS OWN. In the game it is painted on
+top of a block that is already there, so the block must not be here:
+no crate, no stone face, no wall, no ground, no shadow. Draw only the
+part itself, floating on the magenta exactly where the reference has
+it — where it sits in the frame is where it bolts on.
+
+DRAW IT AT REST, level and pointing RIGHT, exactly as the reference
+has it. The game turns it to its own firing angle out of this one
+picture, so do not draw it already aimed, angled, tilted or
+mid-swing, and add no motion blur, sparks, smoke or muzzle flash: a
+tilt painted in here is a tilt the game adds its own on top of.
+
+KEEP ANY GLOW TIGHT. A halo, aura or bloom spreading out into the
+background is measured as part of the object when the return is fitted
+back onto the reference — a wide aura therefore comes back as a tiny
+crystal inside a huge smear. It also cannot be keyed: soft light over
+magenta turns pink rather than transparent. Any glow belongs inside
+the shape’s own outline, or within a hair of it.
+
+DRAW ONLY WHAT THE REFERENCE SHOWS. The moving weapon — the arm, the bow,
+the counterweight, the sling — is painted separately and animated on top of
+this in the game. If you add one here the machine ends up with two.
+Anything the reference DOES show, including ammunition stacked on the bed,
+stays.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+SIZE AND PLACEMENT — this is the part that goes wrong.
+Do not enlarge it to fill the frame. The reference leaves air around the
+machine on every side and that air is not waste — it
+is where the parts that animate get drawn. Keep the subject the same
+fraction of the frame that the reference has it, and standing on the same
+line: the wheels and feet must sit at the same height from the bottom edge.
+· It faces RIGHT in the reference. Keep that direction.
+· Do not rotate it or change the viewing angle.
+· No cast shadow on the ground. The game draws its own.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
+No labels, captions or watermarks.
+```
+
+---
+
+## archer-t2 — Archery bow — tier 2 twin  (fixture-archer-t2.png → images/fixtures/archer-t2.webp)
+
+```text
+Repaint ONE machine, in a single square image.
+The attached reference is exactly what to paint, at exactly the size and
+position it is drawn at. Match both.
+
+WHAT IT IS: Archery bow — tier 2 twin — TWO war bows at full draw, level and pointing RIGHT, the second standing just BEHIND the first — offset to the LEFT and a little higher, a tone darker — each with its own nocked arrow, so the pair reads as a volley rather than one tall bow. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+
+THIS IS A MERGED WEAPON — tier 2: the SAME weapon as the plain
+`images/fixtures/archer.webp`, welded into TWO. Attach that
+painting as well as the reference: it is the design. Same materials, same
+ink, same proportions, same wear — doubled, not redesigned. The
+reference shows exactly where each copy sits and which one is in front.
+
+THE TIER COLOUR IS GREEN, around #46d86a. Put it in
+the TRIM: green enamel bands and fittings on the steel — steel with green
+accents. The body stays iron, timber or crystal, so it is still THIS
+weapon. This one accent may be brighter than the rest of the palette —
+it is how a player tells a tier 2 from a plain gun at a glance.
+
+IT HAS TO READ AS TWO AT 40 PX. Keep a clear gap or step between the
+copies, a strong ink line round each one, and every muzzle, limb or
+terminal separately visible. Two barrels painted into one fat barrel is
+the one way this fails that looks fine at full size.
+
+IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
+around #8a6a3a and its neighbouring tones, so do NOT
+paint this part in those colours: pick materials that separate from
+them — cold iron and steel, dark oiled
+timber, blackened rope, a cool shadow side — and keep the ink line
+strong enough to hold the shape on its own. A part in the same hue and
+the same value as the block underneath disappears into it, which is
+the one way this drawing can fail that looks fine on its own sheet.
+
+THIS IS ONE PART OF A BLOCK, ON ITS OWN. In the game it is painted on
+top of a block that is already there, so the block must not be here:
+no crate, no stone face, no wall, no ground, no shadow. Draw only the
+part itself, floating on the magenta exactly where the reference has
+it — where it sits in the frame is where it bolts on.
+
+DRAW IT AT REST, level and pointing RIGHT, exactly as the reference
+has it. The game turns it to its own firing angle out of this one
+picture, so do not draw it already aimed, angled, tilted or
+mid-swing, and add no motion blur, sparks, smoke or muzzle flash: a
+tilt painted in here is a tilt the game adds its own on top of.
+
+KEEP ANY GLOW TIGHT. A halo, aura or bloom spreading out into the
+background is measured as part of the object when the return is fitted
+back onto the reference — a wide aura therefore comes back as a tiny
+crystal inside a huge smear. It also cannot be keyed: soft light over
+magenta turns pink rather than transparent. Any glow belongs inside
+the shape’s own outline, or within a hair of it.
+
+DRAW ONLY WHAT THE REFERENCE SHOWS. The moving weapon — the arm, the bow,
+the counterweight, the sling — is painted separately and animated on top of
+this in the game. If you add one here the machine ends up with two.
+Anything the reference DOES show, including ammunition stacked on the bed,
+stays.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+SIZE AND PLACEMENT — this is the part that goes wrong.
+Do not enlarge it to fill the frame. The reference leaves air around the
+machine on every side and that air is not waste — it
+is where the parts that animate get drawn. Keep the subject the same
+fraction of the frame that the reference has it, and standing on the same
+line: the wheels and feet must sit at the same height from the bottom edge.
+· It faces RIGHT in the reference. Keep that direction.
+· Do not rotate it or change the viewing angle.
+· No cast shadow on the ground. The game draws its own.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
+No labels, captions or watermarks.
+```
+
+---
+
+## archer-t3 — Archery bow — tier 3 battery  (fixture-archer-t3.png → images/fixtures/archer-t3.webp)
+
+```text
+Repaint ONE machine, in a single square image.
+The attached reference is exactly what to paint, at exactly the size and
+position it is drawn at. Match both.
+
+WHAT IT IS: Archery bow — tier 3 battery — THREE war bows in a stepped rank, all at full draw, level and pointing RIGHT: the rearmost furthest LEFT and highest, the middle one below it, the front one nearest the eye — each with its own nocked arrow, the rear two a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+
+THIS IS A MERGED WEAPON — tier 3: the SAME weapon as the plain
+`images/fixtures/archer.webp`, welded into THREE. Attach that
+painting as well as the reference: it is the design. Same materials, same
+ink, same proportions, same wear — tripled, not redesigned. The
+reference shows exactly where each copy sits and which one is in front.
+
+THE TIER COLOUR IS BLUE, around #3fa2ff. Put it in
+the TRIM: blue enamel bands and fittings on the steel, and a FAINT cool
+glow kept INSIDE the metal’s own outline. The body stays iron, timber or
+crystal, so it is still THIS weapon. This one accent may be brighter than
+the palette — it is how a player tells a tier 3 from a tier 2 at a glance.
+
+IT HAS TO READ AS THREE AT 40 PX. Keep a clear gap or step between the
+copies, a strong ink line round each one, and every muzzle, limb or
+terminal separately visible. Two barrels painted into one fat barrel is
+the one way this fails that looks fine at full size.
+
+IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
+around #8a6a3a and its neighbouring tones, so do NOT
+paint this part in those colours: pick materials that separate from
+them — cold iron and steel, dark oiled
+timber, blackened rope, a cool shadow side — and keep the ink line
+strong enough to hold the shape on its own. A part in the same hue and
+the same value as the block underneath disappears into it, which is
+the one way this drawing can fail that looks fine on its own sheet.
+
+THIS IS ONE PART OF A BLOCK, ON ITS OWN. In the game it is painted on
+top of a block that is already there, so the block must not be here:
+no crate, no stone face, no wall, no ground, no shadow. Draw only the
+part itself, floating on the magenta exactly where the reference has
+it — where it sits in the frame is where it bolts on.
+
+DRAW IT AT REST, level and pointing RIGHT, exactly as the reference
+has it. The game turns it to its own firing angle out of this one
+picture, so do not draw it already aimed, angled, tilted or
+mid-swing, and add no motion blur, sparks, smoke or muzzle flash: a
+tilt painted in here is a tilt the game adds its own on top of.
+
+KEEP ANY GLOW TIGHT. A halo, aura or bloom spreading out into the
+background is measured as part of the object when the return is fitted
+back onto the reference — a wide aura therefore comes back as a tiny
+crystal inside a huge smear. It also cannot be keyed: soft light over
+magenta turns pink rather than transparent. Any glow belongs inside
+the shape’s own outline, or within a hair of it.
+
+DRAW ONLY WHAT THE REFERENCE SHOWS. The moving weapon — the arm, the bow,
+the counterweight, the sling — is painted separately and animated on top of
+this in the game. If you add one here the machine ends up with two.
+Anything the reference DOES show, including ammunition stacked on the bed,
+stays.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+SIZE AND PLACEMENT — this is the part that goes wrong.
+Do not enlarge it to fill the frame. The reference leaves air around the
+machine on every side and that air is not waste — it
+is where the parts that animate get drawn. Keep the subject the same
+fraction of the frame that the reference has it, and standing on the same
+line: the wheels and feet must sit at the same height from the bottom edge.
+· It faces RIGHT in the reference. Keep that direction.
+· Do not rotate it or change the viewing angle.
+· No cast shadow on the ground. The game draws its own.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
+No labels, captions or watermarks.
+```
+
+---
+
+## bombard-t2 — Bombard — tier 2 twin  (fixture-bombard-t2.png → images/fixtures/bombard-t2.webp)
+
+```text
+Repaint ONE machine, in a single square image.
+The attached reference is exactly what to paint, at exactly the size and
+position it is drawn at. Match both.
+
+WHAT IT IS: Bombard — tier 2 twin — TWO stubby wrought-iron bombards standing side by side, both at the same steep angle, mouths up and to the RIGHT, each bound with hoops along its whole length: the rear one to the LEFT, slightly smaller and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+
+THIS IS A MERGED WEAPON — tier 2: the SAME weapon as the plain
+`images/fixtures/bombard.webp`, welded into TWO. Attach that
+painting as well as the reference: it is the design. Same materials, same
+ink, same proportions, same wear — doubled, not redesigned. The
+reference shows exactly where each copy sits and which one is in front.
+
+THE TIER COLOUR IS GREEN, around #46d86a. Put it in
+the TRIM: green enamel bands and fittings on the steel — steel with green
+accents. The body stays iron, timber or crystal, so it is still THIS
+weapon. This one accent may be brighter than the rest of the palette —
+it is how a player tells a tier 2 from a plain gun at a glance.
+
+IT HAS TO READ AS TWO AT 40 PX. Keep a clear gap or step between the
+copies, a strong ink line round each one, and every muzzle, limb or
+terminal separately visible. Two barrels painted into one fat barrel is
+the one way this fails that looks fine at full size.
+
+IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
+around #5c564e and its neighbouring tones, so do NOT
+paint this part in those colours: pick materials that separate from
+them — cold iron and steel, dark oiled
+timber, blackened rope, a cool shadow side — and keep the ink line
+strong enough to hold the shape on its own. A part in the same hue and
+the same value as the block underneath disappears into it, which is
+the one way this drawing can fail that looks fine on its own sheet.
+
+THIS IS ONE PART OF A BLOCK, ON ITS OWN. In the game it is painted on
+top of a block that is already there, so the block must not be here:
+no crate, no stone face, no wall, no ground, no shadow. Draw only the
+part itself, floating on the magenta exactly where the reference has
+it — where it sits in the frame is where it bolts on.
+
+DRAW IT AT REST, level and pointing RIGHT, exactly as the reference
+has it. The game turns it to its own firing angle out of this one
+picture, so do not draw it already aimed, angled, tilted or
+mid-swing, and add no motion blur, sparks, smoke or muzzle flash: a
+tilt painted in here is a tilt the game adds its own on top of.
+
+KEEP ANY GLOW TIGHT. A halo, aura or bloom spreading out into the
+background is measured as part of the object when the return is fitted
+back onto the reference — a wide aura therefore comes back as a tiny
+crystal inside a huge smear. It also cannot be keyed: soft light over
+magenta turns pink rather than transparent. Any glow belongs inside
+the shape’s own outline, or within a hair of it.
+
+DRAW ONLY WHAT THE REFERENCE SHOWS. The moving weapon — the arm, the bow,
+the counterweight, the sling — is painted separately and animated on top of
+this in the game. If you add one here the machine ends up with two.
+Anything the reference DOES show, including ammunition stacked on the bed,
+stays.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+SIZE AND PLACEMENT — this is the part that goes wrong.
+Do not enlarge it to fill the frame. The reference leaves air around the
+machine on every side and that air is not waste — it
+is where the parts that animate get drawn. Keep the subject the same
+fraction of the frame that the reference has it, and standing on the same
+line: the wheels and feet must sit at the same height from the bottom edge.
+· It faces RIGHT in the reference. Keep that direction.
+· Do not rotate it or change the viewing angle.
+· No cast shadow on the ground. The game draws its own.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
+No labels, captions or watermarks.
+```
+
+---
+
+## bombard-t3 — Bombard — tier 3 battery  (fixture-bombard-t3.png → images/fixtures/bombard-t3.webp)
+
+```text
+Repaint ONE machine, in a single square image.
+The attached reference is exactly what to paint, at exactly the size and
+position it is drawn at. Match both.
+
+WHAT IT IS: Bombard — tier 3 battery — THREE stubby hooped bombards side by side, all at the same steep angle, mouths up and to the RIGHT: a front one in the middle, one either side of it set back, slightly smaller and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+
+THIS IS A MERGED WEAPON — tier 3: the SAME weapon as the plain
+`images/fixtures/bombard.webp`, welded into THREE. Attach that
+painting as well as the reference: it is the design. Same materials, same
+ink, same proportions, same wear — tripled, not redesigned. The
+reference shows exactly where each copy sits and which one is in front.
+
+THE TIER COLOUR IS BLUE, around #3fa2ff. Put it in
+the TRIM: blue enamel bands and fittings on the steel, and a FAINT cool
+glow kept INSIDE the metal’s own outline. The body stays iron, timber or
+crystal, so it is still THIS weapon. This one accent may be brighter than
+the palette — it is how a player tells a tier 3 from a tier 2 at a glance.
+
+IT HAS TO READ AS THREE AT 40 PX. Keep a clear gap or step between the
+copies, a strong ink line round each one, and every muzzle, limb or
+terminal separately visible. Two barrels painted into one fat barrel is
+the one way this fails that looks fine at full size.
+
+IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
+around #5c564e and its neighbouring tones, so do NOT
+paint this part in those colours: pick materials that separate from
+them — cold iron and steel, dark oiled
+timber, blackened rope, a cool shadow side — and keep the ink line
+strong enough to hold the shape on its own. A part in the same hue and
+the same value as the block underneath disappears into it, which is
+the one way this drawing can fail that looks fine on its own sheet.
+
+THIS IS ONE PART OF A BLOCK, ON ITS OWN. In the game it is painted on
+top of a block that is already there, so the block must not be here:
+no crate, no stone face, no wall, no ground, no shadow. Draw only the
+part itself, floating on the magenta exactly where the reference has
+it — where it sits in the frame is where it bolts on.
+
+DRAW IT AT REST, level and pointing RIGHT, exactly as the reference
+has it. The game turns it to its own firing angle out of this one
+picture, so do not draw it already aimed, angled, tilted or
+mid-swing, and add no motion blur, sparks, smoke or muzzle flash: a
+tilt painted in here is a tilt the game adds its own on top of.
+
+KEEP ANY GLOW TIGHT. A halo, aura or bloom spreading out into the
+background is measured as part of the object when the return is fitted
+back onto the reference — a wide aura therefore comes back as a tiny
+crystal inside a huge smear. It also cannot be keyed: soft light over
+magenta turns pink rather than transparent. Any glow belongs inside
+the shape’s own outline, or within a hair of it.
+
+DRAW ONLY WHAT THE REFERENCE SHOWS. The moving weapon — the arm, the bow,
+the counterweight, the sling — is painted separately and animated on top of
+this in the game. If you add one here the machine ends up with two.
+Anything the reference DOES show, including ammunition stacked on the bed,
+stays.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+SIZE AND PLACEMENT — this is the part that goes wrong.
+Do not enlarge it to fill the frame. The reference leaves air around the
+machine on every side and that air is not waste — it
+is where the parts that animate get drawn. Keep the subject the same
+fraction of the frame that the reference has it, and standing on the same
+line: the wheels and feet must sit at the same height from the bottom edge.
+· It faces RIGHT in the reference. Keep that direction.
+· Do not rotate it or change the viewing angle.
+· No cast shadow on the ground. The game draws its own.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
+No labels, captions or watermarks.
+```
+
+---
+
+## mortar-t2 — Mortar — tier 2 twin  (fixture-mortar-t2.png → images/fixtures/mortar-t2.webp)
+
+```text
+Repaint ONE machine, in a single square image.
+The attached reference is exactly what to paint, at exactly the size and
+position it is drawn at. Match both.
+
+WHAT IT IS: Mortar — tier 2 twin — TWO squat siege mortar tubes standing side by side on one bed, both at the same steep lobbing angle, mouths up and to the RIGHT: the rear tube to the LEFT, slightly smaller and a tone darker, the front tube overlapping it. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+
+THIS IS A MERGED WEAPON — tier 2: the SAME weapon as the plain
+`images/fixtures/mortar.webp`, welded into TWO. Attach that
+painting as well as the reference: it is the design. Same materials, same
+ink, same proportions, same wear — doubled, not redesigned. The
+reference shows exactly where each copy sits and which one is in front.
+
+THE TIER COLOUR IS GREEN, around #46d86a. Put it in
+the TRIM: green enamel bands and fittings on the steel — steel with green
+accents. The body stays iron, timber or crystal, so it is still THIS
+weapon. This one accent may be brighter than the rest of the palette —
+it is how a player tells a tier 2 from a plain gun at a glance.
+
+IT HAS TO READ AS TWO AT 40 PX. Keep a clear gap or step between the
+copies, a strong ink line round each one, and every muzzle, limb or
+terminal separately visible. Two barrels painted into one fat barrel is
+the one way this fails that looks fine at full size.
+
+IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
+around #5f5f6e and its neighbouring tones, so do NOT
+paint this part in those colours: pick materials that separate from
+them — cold iron and steel, dark oiled
+timber, blackened rope, a cool shadow side — and keep the ink line
+strong enough to hold the shape on its own. A part in the same hue and
+the same value as the block underneath disappears into it, which is
+the one way this drawing can fail that looks fine on its own sheet.
+
+THIS IS ONE PART OF A BLOCK, ON ITS OWN. In the game it is painted on
+top of a block that is already there, so the block must not be here:
+no crate, no stone face, no wall, no ground, no shadow. Draw only the
+part itself, floating on the magenta exactly where the reference has
+it — where it sits in the frame is where it bolts on.
+
+DRAW IT AT REST, level and pointing RIGHT, exactly as the reference
+has it. The game turns it to its own firing angle out of this one
+picture, so do not draw it already aimed, angled, tilted or
+mid-swing, and add no motion blur, sparks, smoke or muzzle flash: a
+tilt painted in here is a tilt the game adds its own on top of.
+
+KEEP ANY GLOW TIGHT. A halo, aura or bloom spreading out into the
+background is measured as part of the object when the return is fitted
+back onto the reference — a wide aura therefore comes back as a tiny
+crystal inside a huge smear. It also cannot be keyed: soft light over
+magenta turns pink rather than transparent. Any glow belongs inside
+the shape’s own outline, or within a hair of it.
+
+DRAW ONLY WHAT THE REFERENCE SHOWS. The moving weapon — the arm, the bow,
+the counterweight, the sling — is painted separately and animated on top of
+this in the game. If you add one here the machine ends up with two.
+Anything the reference DOES show, including ammunition stacked on the bed,
+stays.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+SIZE AND PLACEMENT — this is the part that goes wrong.
+Do not enlarge it to fill the frame. The reference leaves air around the
+machine on every side and that air is not waste — it
+is where the parts that animate get drawn. Keep the subject the same
+fraction of the frame that the reference has it, and standing on the same
+line: the wheels and feet must sit at the same height from the bottom edge.
+· It faces RIGHT in the reference. Keep that direction.
+· Do not rotate it or change the viewing angle.
+· No cast shadow on the ground. The game draws its own.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
+No labels, captions or watermarks.
+```
+
+---
+
+## mortar-t3 — Mortar — tier 3 battery  (fixture-mortar-t3.png → images/fixtures/mortar-t3.webp)
+
+```text
+Repaint ONE machine, in a single square image.
+The attached reference is exactly what to paint, at exactly the size and
+position it is drawn at. Match both.
+
+WHAT IT IS: Mortar — tier 3 battery — THREE squat siege mortar tubes on one bed, all at the same steep lobbing angle, mouths up and to the RIGHT: a front tube in the middle, and one either side of it set back, slightly smaller and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+
+THIS IS A MERGED WEAPON — tier 3: the SAME weapon as the plain
+`images/fixtures/mortar.webp`, welded into THREE. Attach that
+painting as well as the reference: it is the design. Same materials, same
+ink, same proportions, same wear — tripled, not redesigned. The
+reference shows exactly where each copy sits and which one is in front.
+
+THE TIER COLOUR IS BLUE, around #3fa2ff. Put it in
+the TRIM: blue enamel bands and fittings on the steel, and a FAINT cool
+glow kept INSIDE the metal’s own outline. The body stays iron, timber or
+crystal, so it is still THIS weapon. This one accent may be brighter than
+the palette — it is how a player tells a tier 3 from a tier 2 at a glance.
+
+IT HAS TO READ AS THREE AT 40 PX. Keep a clear gap or step between the
+copies, a strong ink line round each one, and every muzzle, limb or
+terminal separately visible. Two barrels painted into one fat barrel is
+the one way this fails that looks fine at full size.
+
+IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
+around #5f5f6e and its neighbouring tones, so do NOT
+paint this part in those colours: pick materials that separate from
+them — cold iron and steel, dark oiled
+timber, blackened rope, a cool shadow side — and keep the ink line
+strong enough to hold the shape on its own. A part in the same hue and
+the same value as the block underneath disappears into it, which is
+the one way this drawing can fail that looks fine on its own sheet.
+
+THIS IS ONE PART OF A BLOCK, ON ITS OWN. In the game it is painted on
+top of a block that is already there, so the block must not be here:
+no crate, no stone face, no wall, no ground, no shadow. Draw only the
+part itself, floating on the magenta exactly where the reference has
+it — where it sits in the frame is where it bolts on.
+
+DRAW IT AT REST, level and pointing RIGHT, exactly as the reference
+has it. The game turns it to its own firing angle out of this one
+picture, so do not draw it already aimed, angled, tilted or
+mid-swing, and add no motion blur, sparks, smoke or muzzle flash: a
+tilt painted in here is a tilt the game adds its own on top of.
+
+KEEP ANY GLOW TIGHT. A halo, aura or bloom spreading out into the
+background is measured as part of the object when the return is fitted
+back onto the reference — a wide aura therefore comes back as a tiny
+crystal inside a huge smear. It also cannot be keyed: soft light over
+magenta turns pink rather than transparent. Any glow belongs inside
+the shape’s own outline, or within a hair of it.
+
+DRAW ONLY WHAT THE REFERENCE SHOWS. The moving weapon — the arm, the bow,
+the counterweight, the sling — is painted separately and animated on top of
+this in the game. If you add one here the machine ends up with two.
+Anything the reference DOES show, including ammunition stacked on the bed,
+stays.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+SIZE AND PLACEMENT — this is the part that goes wrong.
+Do not enlarge it to fill the frame. The reference leaves air around the
+machine on every side and that air is not waste — it
+is where the parts that animate get drawn. Keep the subject the same
+fraction of the frame that the reference has it, and standing on the same
+line: the wheels and feet must sit at the same height from the bottom edge.
+· It faces RIGHT in the reference. Keep that direction.
+· Do not rotate it or change the viewing angle.
+· No cast shadow on the ground. The game draws its own.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
+No labels, captions or watermarks.
+```
+
+---
+
+## tesla-t2 — Arc coil — tier 2 twin  (fixture-tesla-t2.png → images/fixtures/tesla-t2.webp)
+
+```text
+Repaint ONE machine, in a single square image.
+The attached reference is exactly what to paint, at exactly the size and
+position it is drawn at. Match both.
+
+WHAT IT IS: Arc coil — tier 2 twin — TWO lightning coils standing upright side by side, each an iron post wound with copper wire under a polished ball terminal, on ceramic insulators: the rear coil to the LEFT, shorter and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+
+THIS IS A MERGED WEAPON — tier 2: the SAME weapon as the plain
+`images/fixtures/tesla.webp`, welded into TWO. Attach that
+painting as well as the reference: it is the design. Same materials, same
+ink, same proportions, same wear — doubled, not redesigned. The
+reference shows exactly where each copy sits and which one is in front.
+
+THE TIER COLOUR IS GREEN, around #46d86a. Put it in
+the TRIM: green enamel bands and fittings on the steel — steel with green
+accents. The body stays iron, timber or crystal, so it is still THIS
+weapon. This one accent may be brighter than the rest of the palette —
+it is how a player tells a tier 2 from a plain gun at a glance.
+
+IT HAS TO READ AS TWO AT 40 PX. Keep a clear gap or step between the
+copies, a strong ink line round each one, and every muzzle, limb or
+terminal separately visible. Two barrels painted into one fat barrel is
+the one way this fails that looks fine at full size.
+
+IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
+around #33507a and its neighbouring tones, so do NOT
+paint this part in those colours: pick materials that separate from
+them — cold iron and steel, dark oiled
+timber, blackened rope, a cool shadow side — and keep the ink line
+strong enough to hold the shape on its own. A part in the same hue and
+the same value as the block underneath disappears into it, which is
+the one way this drawing can fail that looks fine on its own sheet.
+
+THIS IS ONE PART OF A BLOCK, ON ITS OWN. In the game it is painted on
+top of a block that is already there, so the block must not be here:
+no crate, no stone face, no wall, no ground, no shadow. Draw only the
+part itself, floating on the magenta exactly where the reference has
+it — where it sits in the frame is where it bolts on.
+
+DRAW IT AT REST, level and pointing RIGHT, exactly as the reference
+has it. The game turns it to its own firing angle out of this one
+picture, so do not draw it already aimed, angled, tilted or
+mid-swing, and add no motion blur, sparks, smoke or muzzle flash: a
+tilt painted in here is a tilt the game adds its own on top of.
+
+KEEP ANY GLOW TIGHT. A halo, aura or bloom spreading out into the
+background is measured as part of the object when the return is fitted
+back onto the reference — a wide aura therefore comes back as a tiny
+crystal inside a huge smear. It also cannot be keyed: soft light over
+magenta turns pink rather than transparent. Any glow belongs inside
+the shape’s own outline, or within a hair of it.
+
+DRAW ONLY WHAT THE REFERENCE SHOWS. The moving weapon — the arm, the bow,
+the counterweight, the sling — is painted separately and animated on top of
+this in the game. If you add one here the machine ends up with two.
+Anything the reference DOES show, including ammunition stacked on the bed,
+stays.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+SIZE AND PLACEMENT — this is the part that goes wrong.
+Do not enlarge it to fill the frame. The reference leaves air around the
+machine on every side and that air is not waste — it
+is where the parts that animate get drawn. Keep the subject the same
+fraction of the frame that the reference has it, and standing on the same
+line: the wheels and feet must sit at the same height from the bottom edge.
+· It faces RIGHT in the reference. Keep that direction.
+· Do not rotate it or change the viewing angle.
+· No cast shadow on the ground. The game draws its own.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
+No labels, captions or watermarks.
+```
+
+---
+
+## tesla-t3 — Arc coil — tier 3 battery  (fixture-tesla-t3.png → images/fixtures/tesla-t3.webp)
+
+```text
+Repaint ONE machine, in a single square image.
+The attached reference is exactly what to paint, at exactly the size and
+position it is drawn at. Match both.
+
+WHAT IT IS: Arc coil — tier 3 battery — THREE lightning coils standing upright: a tall one in the middle and a shorter one either side of it, set back and a tone darker — each wound with copper wire under its own ball terminal. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+
+THIS IS A MERGED WEAPON — tier 3: the SAME weapon as the plain
+`images/fixtures/tesla.webp`, welded into THREE. Attach that
+painting as well as the reference: it is the design. Same materials, same
+ink, same proportions, same wear — tripled, not redesigned. The
+reference shows exactly where each copy sits and which one is in front.
+
+THE TIER COLOUR IS BLUE, around #3fa2ff. Put it in
+the TRIM: blue enamel bands and fittings on the steel, and a FAINT cool
+glow kept INSIDE the metal’s own outline. The body stays iron, timber or
+crystal, so it is still THIS weapon. This one accent may be brighter than
+the palette — it is how a player tells a tier 3 from a tier 2 at a glance.
+
+IT HAS TO READ AS THREE AT 40 PX. Keep a clear gap or step between the
+copies, a strong ink line round each one, and every muzzle, limb or
+terminal separately visible. Two barrels painted into one fat barrel is
+the one way this fails that looks fine at full size.
+
+IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
+around #33507a and its neighbouring tones, so do NOT
+paint this part in those colours: pick materials that separate from
+them — cold iron and steel, dark oiled
+timber, blackened rope, a cool shadow side — and keep the ink line
+strong enough to hold the shape on its own. A part in the same hue and
+the same value as the block underneath disappears into it, which is
+the one way this drawing can fail that looks fine on its own sheet.
+
+THIS IS ONE PART OF A BLOCK, ON ITS OWN. In the game it is painted on
+top of a block that is already there, so the block must not be here:
+no crate, no stone face, no wall, no ground, no shadow. Draw only the
+part itself, floating on the magenta exactly where the reference has
+it — where it sits in the frame is where it bolts on.
+
+DRAW IT AT REST, level and pointing RIGHT, exactly as the reference
+has it. The game turns it to its own firing angle out of this one
+picture, so do not draw it already aimed, angled, tilted or
+mid-swing, and add no motion blur, sparks, smoke or muzzle flash: a
+tilt painted in here is a tilt the game adds its own on top of.
+
+KEEP ANY GLOW TIGHT. A halo, aura or bloom spreading out into the
+background is measured as part of the object when the return is fitted
+back onto the reference — a wide aura therefore comes back as a tiny
+crystal inside a huge smear. It also cannot be keyed: soft light over
+magenta turns pink rather than transparent. Any glow belongs inside
+the shape’s own outline, or within a hair of it.
+
+DRAW ONLY WHAT THE REFERENCE SHOWS. The moving weapon — the arm, the bow,
+the counterweight, the sling — is painted separately and animated on top of
+this in the game. If you add one here the machine ends up with two.
+Anything the reference DOES show, including ammunition stacked on the bed,
+stays.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+SIZE AND PLACEMENT — this is the part that goes wrong.
+Do not enlarge it to fill the frame. The reference leaves air around the
+machine on every side and that air is not waste — it
+is where the parts that animate get drawn. Keep the subject the same
+fraction of the frame that the reference has it, and standing on the same
+line: the wheels and feet must sit at the same height from the bottom edge.
+· It faces RIGHT in the reference. Keep that direction.
+· Do not rotate it or change the viewing angle.
+· No cast shadow on the ground. The game draws its own.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
+No labels, captions or watermarks.
+```
+
+---
+
+## frost-t2 — Frost emitter — tier 2 twin  (fixture-frost-t2.png → images/fixtures/frost-t2.webp)
+
+```text
+Repaint ONE machine, in a single square image.
+The attached reference is exactly what to paint, at exactly the size and
+position it is drawn at. Match both.
+
+WHAT IT IS: Frost emitter — tier 2 twin — TWO clusters of pale blue ice crystals growing side by side from a rimed iron socket, the rear cluster to the LEFT, smaller and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+
+THIS IS A MERGED WEAPON — tier 2: the SAME weapon as the plain
+`images/fixtures/frost.webp`, welded into TWO. Attach that
+painting as well as the reference: it is the design. Same materials, same
+ink, same proportions, same wear — doubled, not redesigned. The
+reference shows exactly where each copy sits and which one is in front.
+
+THE TIER COLOUR IS GREEN, around #46d86a. Put it in
+the TRIM: green enamel bands and fittings on the steel — steel with green
+accents. The body stays iron, timber or crystal, so it is still THIS
+weapon. This one accent may be brighter than the rest of the palette —
+it is how a player tells a tier 2 from a plain gun at a glance.
+
+IT HAS TO READ AS TWO AT 40 PX. Keep a clear gap or step between the
+copies, a strong ink line round each one, and every muzzle, limb or
+terminal separately visible. Two barrels painted into one fat barrel is
+the one way this fails that looks fine at full size.
+
+IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
+around #356577 and its neighbouring tones, so do NOT
+paint this part in those colours: pick materials that separate from
+them — cold iron and steel, dark oiled
+timber, blackened rope, a cool shadow side — and keep the ink line
+strong enough to hold the shape on its own. A part in the same hue and
+the same value as the block underneath disappears into it, which is
+the one way this drawing can fail that looks fine on its own sheet.
+
+THIS IS ONE PART OF A BLOCK, ON ITS OWN. In the game it is painted on
+top of a block that is already there, so the block must not be here:
+no crate, no stone face, no wall, no ground, no shadow. Draw only the
+part itself, floating on the magenta exactly where the reference has
+it — where it sits in the frame is where it bolts on.
+
+DRAW IT AT REST, level and pointing RIGHT, exactly as the reference
+has it. The game turns it to its own firing angle out of this one
+picture, so do not draw it already aimed, angled, tilted or
+mid-swing, and add no motion blur, sparks, smoke or muzzle flash: a
+tilt painted in here is a tilt the game adds its own on top of.
+
+KEEP ANY GLOW TIGHT. A halo, aura or bloom spreading out into the
+background is measured as part of the object when the return is fitted
+back onto the reference — a wide aura therefore comes back as a tiny
+crystal inside a huge smear. It also cannot be keyed: soft light over
+magenta turns pink rather than transparent. Any glow belongs inside
+the shape’s own outline, or within a hair of it.
+
+DRAW ONLY WHAT THE REFERENCE SHOWS. The moving weapon — the arm, the bow,
+the counterweight, the sling — is painted separately and animated on top of
+this in the game. If you add one here the machine ends up with two.
+Anything the reference DOES show, including ammunition stacked on the bed,
+stays.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+SIZE AND PLACEMENT — this is the part that goes wrong.
+Do not enlarge it to fill the frame. The reference leaves air around the
+machine on every side and that air is not waste — it
+is where the parts that animate get drawn. Keep the subject the same
+fraction of the frame that the reference has it, and standing on the same
+line: the wheels and feet must sit at the same height from the bottom edge.
+· It faces RIGHT in the reference. Keep that direction.
+· Do not rotate it or change the viewing angle.
+· No cast shadow on the ground. The game draws its own.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
+No labels, captions or watermarks.
+```
+
+---
+
+## frost-t3 — Frost emitter — tier 3 battery  (fixture-frost-t3.png → images/fixtures/frost-t3.webp)
+
+```text
+Repaint ONE machine, in a single square image.
+The attached reference is exactly what to paint, at exactly the size and
+position it is drawn at. Match both.
+
+WHAT IT IS: Frost emitter — tier 3 battery — THREE clusters of pale blue ice crystals from one rimed iron socket: the tallest in the middle, a smaller one either side of it set back and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+
+THIS IS A MERGED WEAPON — tier 3: the SAME weapon as the plain
+`images/fixtures/frost.webp`, welded into THREE. Attach that
+painting as well as the reference: it is the design. Same materials, same
+ink, same proportions, same wear — tripled, not redesigned. The
+reference shows exactly where each copy sits and which one is in front.
+
+THE TIER COLOUR IS BLUE, around #3fa2ff. Put it in
+the TRIM: blue enamel bands and fittings on the steel, and a FAINT cool
+glow kept INSIDE the metal’s own outline. The body stays iron, timber or
+crystal, so it is still THIS weapon. This one accent may be brighter than
+the palette — it is how a player tells a tier 3 from a tier 2 at a glance.
+
+IT HAS TO READ AS THREE AT 40 PX. Keep a clear gap or step between the
+copies, a strong ink line round each one, and every muzzle, limb or
+terminal separately visible. Two barrels painted into one fat barrel is
+the one way this fails that looks fine at full size.
+
+IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
+around #356577 and its neighbouring tones, so do NOT
+paint this part in those colours: pick materials that separate from
+them — cold iron and steel, dark oiled
+timber, blackened rope, a cool shadow side — and keep the ink line
+strong enough to hold the shape on its own. A part in the same hue and
+the same value as the block underneath disappears into it, which is
+the one way this drawing can fail that looks fine on its own sheet.
+
+THIS IS ONE PART OF A BLOCK, ON ITS OWN. In the game it is painted on
+top of a block that is already there, so the block must not be here:
+no crate, no stone face, no wall, no ground, no shadow. Draw only the
+part itself, floating on the magenta exactly where the reference has
+it — where it sits in the frame is where it bolts on.
+
+DRAW IT AT REST, level and pointing RIGHT, exactly as the reference
+has it. The game turns it to its own firing angle out of this one
+picture, so do not draw it already aimed, angled, tilted or
+mid-swing, and add no motion blur, sparks, smoke or muzzle flash: a
+tilt painted in here is a tilt the game adds its own on top of.
+
+KEEP ANY GLOW TIGHT. A halo, aura or bloom spreading out into the
+background is measured as part of the object when the return is fitted
+back onto the reference — a wide aura therefore comes back as a tiny
+crystal inside a huge smear. It also cannot be keyed: soft light over
+magenta turns pink rather than transparent. Any glow belongs inside
+the shape’s own outline, or within a hair of it.
+
+DRAW ONLY WHAT THE REFERENCE SHOWS. The moving weapon — the arm, the bow,
+the counterweight, the sling — is painted separately and animated on top of
+this in the game. If you add one here the machine ends up with two.
+Anything the reference DOES show, including ammunition stacked on the bed,
+stays.
+
+STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
+storybook or a hand-painted board game. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
+  sketchy and uneven, with the line weight varying like a real pen. The
+  drawing should look drawn, with the linework still showing.
+· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
+  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
+  specular highlights, no rendered 3D volume.
+· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
+  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
+· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
+  paper tooth belongs to the OBJECT itself — never paint a sheet of
+  paper, a parchment card or a cream backdrop behind it.
+· Honest, slightly naive craft — charming rather than slick.
+
+AVOID — this is exactly how earlier attempts went wrong:
+· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
+  smooth 3D-rendered shading, no bevelled plastic edges.
+· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
+· NO heavy uniform black outlines and no hard cel-shaded banding.
+· NO cold grey, gritty, weathered-industrial or grimdark look.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+SIZE AND PLACEMENT — this is the part that goes wrong.
+Do not enlarge it to fill the frame. The reference leaves air around the
+machine on every side and that air is not waste — it
+is where the parts that animate get drawn. Keep the subject the same
+fraction of the frame that the reference has it, and standing on the same
+line: the wheels and feet must sit at the same height from the bottom edge.
+· It faces RIGHT in the reference. Keep that direction.
+· Do not rotate it or change the viewing angle.
+· No cast shadow on the ground. The game draws its own.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· The object itself must contain no magenta or hot pink.
+
+OUTPUT: one image, exactly 512 x 512 pixels (square, 1:1).
+No labels, captions or watermarks.
+```

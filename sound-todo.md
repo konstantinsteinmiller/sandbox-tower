@@ -161,6 +161,7 @@ read better with its own voice.
 | B10 | `ramImpact` | A battering ram connects with the Gate | `hit` | P2 | A boom you feel — the Gate is the loss condition. |
 | B11 | `repair` | A repair bay patches its neighbours | *silent* | P3 | A short mechanical ratchet at the wave boundary. |
 | B12 | `economyYield` | Sawmill / quarry / mint pay out | *silent* | P3 | A soft chime per resource type. |
+| B13 | `denied` | A piece the player cannot pay for is dropped, placed or picked (`denyPurchase` in `useResourceBlink.ts`) | `obstacle-hit` at 0.05, pitched to 0.72 | **P0** | "Not enough" — a short, low, two-note *nuh-uh* buzz, unmistakably different from the illegal-cell click. It fires in bursts (a player hammering a column), so it is throttled to one every 260 ms and must stay short (< 0.2 s) and non-grating on repeat. Drop it in as `denied.ogg` and swap the `playSound` call in `playDenied`. |
 
 ## C. UI — already shipped
 
@@ -174,7 +175,8 @@ read better with its own voice.
 | C6 | — | `level-up.ogg` | 0.07 | Tech node bought, reinforced hand claimed, 3× coins claimed |
 | C7 | — | `reward-continue.ogg` | 0.06 | Claiming a reward |
 | C8 | — | `barricade.ogg` | 0.04 | Reroll used, cavalry summoned |
-| C9 | — | `obstacle-hit.ogg` | 0.03 | Rejected placement, unaffordable purchase |
+| C9 | — | `obstacle-hit.ogg` | 0.03 | Rejected placement (illegal cell) |
+| C10 | — | `obstacle-hit.ogg` @ pitch 0.72 | 0.05 | Unaffordable piece refused — stand-in for B13 `denied`, paired with the resource bar's red-white blink |
 
 ## D. Music
 

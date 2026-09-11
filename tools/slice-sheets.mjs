@@ -11,6 +11,11 @@
  *   pnpm slice-sheets --dry                # print the plan, write nothing
  *   pnpm slice-sheets --only icon-chest    # write that one file, touch nothing else
  *
+ * Every frame is written at most 256 px tall unless `--size` says otherwise,
+ * and each painting that is cut leaves a line in `painted/.sliced.json` — the
+ * receipt that refuses a painting of a drawing that has since been re-cut
+ * (`--stale-ok` overrides). Both are described where they are defined below.
+ *
  * WHY IT DRIVES A BROWSER
  *
  * The renderer only ever probes for `.webp`, and Node has no image encoder in
@@ -29,6 +34,7 @@
  * aspect ratio does not match the index is REJECTED rather than best-guessed.
  */
 import { spawn } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import {
   mkdtempSync, rmSync, readFileSync, writeFileSync, mkdirSync,
   existsSync, readdirSync, statSync
@@ -83,6 +89,7 @@ const num = (name, fallback) => {
 }
 
 const DRY = flag('--dry')
+const STALE_OK = flag('--stale-ok')
 
 /**
  * Which cells this run is allowed to write, or an empty list for all of them.
@@ -130,17 +137,43 @@ const selects = (cell) => {
 const OUT_ROOT = resolve(ROOT, opts['--out'] ?? 'public')
 const QUALITY = num('--quality', 0.92)
 const FORCE_SHEET = opts['--sheet'] ?? null
-const FORCE_SIZE = num('--size', null)
+
+/**
+ * The cap on a frame's height, px — 256 unless `--size` says otherwise.
+ *
+ * 256 is where the payload and the eye agreed in every project so far: monster
+ * strips at 341 px per frame, for creatures drawn at a fraction of that on a
+ * phone, were 1.9 MB of a 4.2 MB payload, and 256 took the whole set to 2.2 MB
+ * with nothing visibly lost. So it is the DEFAULT, not a flag remembered on a
+ * good day. Three things bend it:
+ *
+ *   · the manifest's own `maxEdge` (if the index carries one) can only LOWER
+ *     it — a coin is 20 px in play, and 256 of it is payload;
+ *   · a sheet that ships resized copies (`extra` in the index) keeps whatever
+ *     its biggest copy needs, because an extra is cut from the master and a
+ *     512 PWA icon upsampled from a 256 master is a blurred icon;
+ *   · an explicit `--size` FORCES the edge for one run, manifest or not;
+ *   · a sheet the index marks `exact` is written at its manifest size whatever
+ *     else is asked — the file is read at that size by something outside the
+ *     game (a PWA manifest and its 512 icon).
+ */
+const DEFAULT_EDGE = 256
+const SIZE = num('--size', DEFAULT_EDGE)
+const SIZE_FORCED = opts['--size'] != null
+const edgeCap = (sheet) => {
+  const manifest = sheet.maxEdge ?? (sheet.frames === 1 ? 640 : 384)
+  const cap = sheet.exact ? manifest : SIZE_FORCED ? SIZE : Math.min(SIZE, manifest)
+  return Math.max(cap, ...(sheet.extra ?? []).map((ex) => ex.size ?? 0))
+}
 
 /**
  * How tall one frame of a walk strip is written, in px.
  *
  * Never larger than the painting actually came back at — upsampling a return
- * buys file size and no detail — and never larger than the cap: 384 for a
- * cycle, 640 for a single, or whatever `--size` says.
+ * buys file size and no detail — and never larger than the cap above.
  */
 const walkEdge = (sheet, cell, sy) =>
-  Math.min(FORCE_SIZE ?? (sheet.frames === 1 ? 640 : 384), Math.round(cell.h * sy))
+  Math.min(edgeCap(sheet), Math.round(cell.h * sy))
 // Accept a walk sheet whose grid came back with a different number of panels,
 // treating what arrived as one cycle. Only honoured when it matches what the
 // detector actually measured, so it cannot be used to force a bad cut.
@@ -148,6 +181,11 @@ const FRAMES_OVERRIDE = num('--frames', null)
 const NO_CHROMA = flag('--no-chroma')
 const NO_TRIM = flag('--no-trim')
 const NO_AUTO_BG = flag('--no-auto-bg')
+// Cut the panels where they landed, without registering them onto the box the
+// bench measured on the DRAWING. For the case where the drawing is the thing
+// that is wrong (a part that is tiny in its own cell), so normalising onto it
+// shrinks a good painting. `measure-art.py` is how you tell which it was.
+const NO_FIT = flag('--no-fit')
 // How to square up a single-cell image that did not come back square.
 const FIT = opts['--fit'] ?? 'squash'
 if (!['squash', 'crop'].includes(FIT)) {
@@ -166,7 +204,11 @@ Slice repainted contact sheets back into drop-in bitmaps.
                    allies, props) or a row strip (blocks-r1, enemies-r0, …).
                    Otherwise inferred from the filename, then from the aspect ratio.
   --out <dir>      Where targets are written, relative to the repo. Default: public
-  --size <px>      Force the output edge, in px. Default: the painted cell size.
+  --size <px>      Force a frame's height, in px, for this run. Default: 256 for
+                   walk strips and single-frame sheets, lowered to the sheet's
+                   own cap where the index carries a smaller one, raised to the
+                   biggest resized copy it ships. Cells keep their painted size
+                   (at most 512) unless this is given.
   --quality <0-1>  WebP quality. Default: 0.92
   --no-chroma      Keep a magenta background instead of keying it out.
   --no-auto-bg     Do not flood-fill a uniform background away. Auto-removal
@@ -175,6 +217,9 @@ Slice repainted contact sheets back into drop-in bitmaps.
   --no-trim        Keep a block's margin instead of cropping it back to its own
                    edges. Blocks must reach all four sides or they tile with a
                    seam, so this is on by default for images/blocks/ targets.
+  --no-fit         Do not normalise a panel onto the reference's measured box.
+                   For when the DRAWING is the thing that is off, not the
+                   painting.
   --fit squash|crop  How to square up a single-cell image that came back
                    non-square. squash (default) keeps every feature and
                    distorts; crop keeps proportions and loses the edges.
@@ -190,6 +235,10 @@ Slice repainted contact sheets back into drop-in bitmaps.
                    chest); matches are exact, and a run that selects nothing
                    fails rather than writing everything.
   --dry            Print the plan and write nothing.
+  --stale-ok       Slice a painting even though its reference was redrawn since it
+                   was painted. Off by default: the receipt in
+                   painted/.sliced.json is what stops a re-cut drawing quietly
+                   being overwritten by a painting of the old one.
 `)
   process.exit(0)
 }
@@ -397,6 +446,86 @@ const safeTarget = (target) => {
   return rel && !rel.startsWith('..') && !rel.startsWith(sep) ? full : null
 }
 
+// ─── The receipt: what each painting was cut against ────────────────────────
+//
+// A painting is a snapshot of a DRAWING, and the drawing moves. In glyphyx the
+// Bow was re-cut after its stones were painted, and the next slice anybody ran
+// — for an unrelated sheet — would have re-installed twelve stones carrying
+// the old silhouette over the corrected one, silently.
+//
+// So a successful slice leaves `painted/.sliced.json`: per painting, the
+// REVISION of the reference it was cut against (first 12 hex of a sha1 over
+// the clean sheet) and the painting's OWN hash. When the reference has changed
+// since, that painting is refused (`--stale-ok` overrides). The painting's
+// hash is what lets a re-roll saved under the old name through: a line only
+// ever describes the bytes it was written for. Without it every fresh repaint
+// of a re-cut drawing was refused as "redrawn after this was painted".
+//
+// A line is written only once that painting's files are on disk — a painting
+// refused for its grid must not read as sliced — and a scenery band, which has
+// no reference to hash, gets one too with `rev: null`, so "painted and cut" is
+// knowable for it as well.
+//
+// No receipt (a fresh clone, a first run) refuses nothing — a checkout
+// rewrites mtimes, so an older-looking file is a warning, not a verdict.
+// `tools/art-prompts.mjs` and the Art Desk read the same file for their status.
+
+const RECEIPT = join(PAINTED, '.sliced.json')
+const receipt = (() => {
+  try {
+    const r = JSON.parse(readFileSync(RECEIPT, 'utf-8'))
+    return r && typeof r === 'object' ? (r.files ?? {}) : {}
+  } catch {
+    // Missing or corrupt: a receipt only ever ADDS a refusal, so the safe
+    // failure is to behave as if nothing had been sliced yet.
+    return {}
+  }
+})()
+const receiptNext = { ...receipt }
+let receiptChanged = false
+
+/** The clean reference a painting was made from, if it is still on disk. */
+const referenceOf = (sheet) => {
+  const stem = sheet.stems?.[0]
+  if (!stem) return null
+  for (const p of [join(ROOT, 'art-sheets', `${stem}.png`), join(ROOT, 'art-sheets', 'singles', `${stem}.png`)]) {
+    if (existsSync(p)) return p
+  }
+  return null
+}
+
+const revOf = (file) => createHash('sha1').update(readFileSync(file)).digest('hex').slice(0, 12)
+
+/** `{ ok }` to go ahead, `{ ok: false, why }` to refuse; a `warn` either way. */
+const freshness = (file, sheet) => {
+  const own = revOf(file)
+  const ref = referenceOf(sheet)
+  if (!ref) return { ok: true, rev: null, own }
+  const rev = revOf(ref)
+  let seen = receipt[basename(file)]
+  // The same NAME with different bytes is a new painting the old line says
+  // nothing about. Lines written before `painting` was recorded stay strict.
+  if (seen?.painting && seen.painting !== own) seen = undefined
+  if (seen?.rev && seen.rev !== rev) {
+    return {
+      ok: false,
+      rev,
+      own,
+      why: `the reference was REDRAWN after this was painted (${seen.rev} → ${rev}).`
+        + `\n    ${relative(ROOT, ref)} is not the picture this file was painted over any more.`
+        + '\n    Repaint it from the new sheet, or pass --stale-ok to cut it anyway.'
+    }
+  }
+  if (!seen && statSync(ref).mtimeMs > statSync(file).mtimeMs + 60_000) {
+    return {
+      ok: true, rev, own,
+      warn: `no receipt for this one yet, and ${basename(ref)} is newer than it.`
+        + ' If the drawing changed since it was painted, this cuts the OLD one — check it, or repaint.'
+    }
+  }
+  return { ok: true, rev, own }
+}
+
 let written = 0
 let skipped = 0
 let failed = 0
@@ -462,6 +591,17 @@ try {
       failed++
       continue
     }
+
+    // A painting of a drawing that has since moved is not this drawing's
+    // painting — see "The receipt" above.
+    const fresh = freshness(file, sheet)
+    if (!fresh.ok && !STALE_OK) {
+      console.error(`\n✗ ${basename(file)} — ${fresh.why}`)
+      failed++
+      continue
+    }
+    if (!fresh.ok) console.warn(`\n  ! ${basename(file)} — ${fresh.why.split('\n')[0]} Slicing anyway (--stale-ok).`)
+    if (fresh.warn) console.warn(`  ! ${fresh.warn}`)
 
     // The sheet may come back at a different resolution than it left at, which
     // is fine and expected. What is NOT fine is a different SHAPE: that means
@@ -797,7 +937,7 @@ try {
         : sheet.kind === 'walk'
           ? walkEdge(sheet, c, sy)
           : undefined,
-      out: FORCE_SIZE ?? (sheet.kind === 'cell'
+      out: SIZE_FORCED ? SIZE : (sheet.kind === 'cell'
         ? Math.min(512, Math.round(Math.max(c.w * sx, c.h * sy)))
         : Math.round(c.w * sx))
     }))
@@ -808,7 +948,7 @@ try {
         const plan = ${JSON.stringify(plan)};
         const q = ${QUALITY};
         const CHROMA = ${chroma && sheet.bg !== 'opaque'};
-        const FIT_REF = ${JSON.stringify(sheet.fit ?? null)};
+        const FIT_REF = ${JSON.stringify(NO_FIT ? null : (sheet.fit ?? null))};
         const FIT_TIGHT = ${sheet.tight ? 'true' : 'false'};
         const ANCHOR_REF = ${JSON.stringify(sheet.anchor ?? 'feet')};
         const out = [];
@@ -1440,6 +1580,7 @@ try {
       throw new Error(cut.exceptionDetails.exception?.description ?? 'slice failed')
     }
 
+    const writtenBefore = written
     for (const r of JSON.parse(cut.result.value)) {
       if (r.empty) {
         console.log(`  · ${r.id.padEnd(26)} empty cell, skipped`)
@@ -1560,6 +1701,20 @@ try {
       }
       written++
     }
+
+    // The receipt records what was actually cut, so a dry run — or a painting
+    // that produced nothing — leaves it alone. See "The receipt" above.
+    if (!DRY && written > writtenBefore) {
+      receiptNext[basename(file)] = {
+        sheet: sheet.id, rev: fresh.rev, painting: fresh.own, at: new Date().toISOString()
+      }
+      receiptChanged = true
+    }
+  }
+
+  if (receiptChanged) {
+    mkdirSync(PAINTED, { recursive: true })
+    writeFileSync(RECEIPT, `${JSON.stringify({ note: 'written by tools/slice-sheets.mjs — the reference revision each painting was cut against', files: receiptNext }, null, 2)}\n`, 'utf-8')
   }
 
   // A selector that matched nothing means the run did nothing, and a run that

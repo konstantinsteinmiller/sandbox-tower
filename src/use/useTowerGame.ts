@@ -17,7 +17,7 @@ import {
 } from '@/game/shapes'
 import { SEA_SWIM_Y, SEA_STRIKE_Y } from '@/game/world'
 import {
-  planWave, earlyCallBonus, waveReward, isBossWave, enemyHpScale, type WaveRuleOpts
+  planWave, earlyCallBonus, waveReward, killShareOf, isBossWave, enemyHpScale, type WaveRuleOpts
 } from '@/game/waves'
 import {
   FlawlessTracker, adaptiveFactor, clampDifficulty, hoardFactor, hoardTier, towerPower,
@@ -50,8 +50,14 @@ import { awaitingFirstInteraction } from '@/use/useFirstInteraction'
 
 const R = (): RuleSet => activeRules.current
 
-/** The director options the active rules translate to. */
-const waveOpts = (): WaveRuleOpts => {
+/**
+ * The director options the active rules translate to.
+ *
+ * Exported so a test can plan a wave with EXACTLY what the game hands the
+ * director — an options bag rebuilt by hand in a test drifts the first time a
+ * rule is added and still passes, measuring a director nobody plays.
+ */
+export const waveOpts = (): WaveRuleOpts => {
   const w = R().waves
   const e = R().enemies
   return {
@@ -59,6 +65,8 @@ const waveOpts = (): WaveRuleOpts => {
     roster: e.roster,
     minWaveOverride: e.minWaveOverride,
     airFromWave: w.airFromWave,
+    airShare: w.airShare,
+    firstRunScale: w.firstRunScale,
     seaFromWave: w.seaFromWave,
     siegeFromWave: w.siegeFromWave,
     previews: w.previews,
@@ -167,12 +175,29 @@ const SPAWN_MAX_REACH = 26
  */
 let viewLeft: number | undefined
 let viewRight: number | undefined
+/** The highest world row the player can see — under the HUD, not the canvas
+ *  edge. Only `spawnAt: 'viewEdge'` reads it, to drop divers in from there. */
+let viewTop: number | undefined
 
-export const setViewSpan = (l: number, r: number): void => {
+export const setViewSpan = (l: number, r: number, top?: number): void => {
   if (!Number.isFinite(l) || !Number.isFinite(r) || r - l < 1) return
   viewLeft = l
   viewRight = r
+  viewTop = top !== undefined && Number.isFinite(top) ? top : undefined
 }
+
+/**
+ * How far inside the frame's edge a `viewEdge` spawn stands, as a share of the
+ * enemy's own size. Enough of the body is on screen on its first frame that it
+ * reads as "just arrived", while the rest still being cut off by the edge says
+ * it came from somewhere rather than materialising.
+ */
+const VIEW_EDGE_INSET = 0.3
+/** A `viewEdge` walker never starts closer than this to the board's edge, in
+ *  cells — at the tightest zoom the frame's edge is barely past the wall. */
+const VIEW_EDGE_MIN_GAP = 1.5
+/** ...and a diver never starts lower than this above the tower's crown. */
+const VIEW_EDGE_MIN_SKY = 2
 /** Gravity for ballistic shells and falling debris, cells/s². */
 const GRAVITY = 26
 /** A falling block is destroyed once it has dropped this far. */
@@ -268,10 +293,11 @@ const acquireProjectile = (): Projectile => {
       // live. `'arrow'` is not a `ProjectileKind`; `'bolt'` is the arrow one.
       uid: 0, kind: 'bolt', x: 0, y: 0, vx: 0, vy: 0, damage: 0, splash: 0,
       ballistic: false, targetUid: -1, life: 0, slowPct: 0, slowMs: 0,
-      sourceUid: -1, hostile: false, burnMs: undefined, burnDps: undefined, trail: []
+      sourceUid: -1, hostile: false, burnMs: undefined, burnDps: undefined, trail: [], tier: 1
     }
   }
   p.trail.length = 0
+  p.tier = 1
   p.hostile = false
   p.burnMs = undefined
   p.burnDps = undefined
@@ -396,7 +422,9 @@ export const buildClockHeld = ref(false)
  * `firstBuildMs` in the rule set for why that one is short.
  */
 const buildWindowMs = (): number =>
-  wave.value === 0 ? R().waves.firstBuildMs : R().waves.buildMs
+  wave.value === 0
+    ? R().waves.firstBuildMs
+    : R().waves.earlyBuildMs[wave.value - 1] ?? R().waves.buildMs
 
 /**
  * Is the build countdown standing still?
@@ -649,6 +677,14 @@ export const lastWaveReward = shallowRef<{
   gold: number
   bonusPct: number
   tally: KillTally
+  /**
+   * Of the above, what landed AT the clear: the economy blocks' yield and
+   * whatever the kills left of the base materials. The rest was paid kill by
+   * kill and announced on each kill as it happened, so a "+n" rising into the
+   * bar at the clear should say this much, not the whole — or the wave would
+   * read as paying twice.
+   */
+  atClear: { wood: number; stone: number; gold: number }
 } | null>(null)
 
 /**
@@ -1097,6 +1133,29 @@ export const canPlaceShapeAt = (
 export const canAffordShape = (shapeId: string): boolean => {
   const cost = priceOf(shapeCost(shapeId))
   return wood.value >= cost.wood && stone.value >= cost.stone && runCoins.value >= cost.coins
+}
+
+/** A pile a build price is paid from. `wood` is also the phone board's single
+ *  "materials" pile once stone is folded into it. */
+export type BuildResource = 'wood' | 'stone' | 'coins'
+
+/**
+ * Which piles the player is SHORT of for `shapeId`, in the resource bar's order.
+ * Empty when they can pay.
+ *
+ * Priced through the active rules, so on a board that folds stone into wood a
+ * stone-costed piece comes back short of `wood` — the one materials pile that
+ * board shows — and never of a `stone` it has no readout for. The HUD blinks
+ * exactly the icons named here, so a pile the player cannot see must never be
+ * one of them.
+ */
+export const missingFor = (shapeId: string): BuildResource[] => {
+  const cost = priceOf(shapeCost(shapeId))
+  const out: BuildResource[] = []
+  if (wood.value < cost.wood) out.push('wood')
+  if (stone.value < cost.stone) out.push('stone')
+  if (runCoins.value < cost.coins) out.push('coins')
+  return out
 }
 
 /**
@@ -2323,6 +2382,225 @@ const landingRowFor = (c: number, fromRow: number, w = 1): number => {
   return 0
 }
 
+// ─── Merge preview ──────────────────────────────────────────────────────────
+//
+// What a drop WOULD weld into, before it is made.
+//
+// Players weld once — the tutorial makes them — and then stop at tier 2. The
+// second weld is the one nobody finds, because nothing on the board says that a
+// tier 2 standing beside a column of twins is one drop from a tier 3: the only
+// way to learn a cascade was to cause one by accident. So the drop guides show
+// the outcome of every column BEFORE the tap — the tier it ends at, where the
+// weld comes to rest — and "stack twins, the gun gets bigger and changes
+// colour" is something the player can read off the board instead of stumbling
+// into.
+//
+// It is the landing merge run on a PRIVATE copy of the board, and it has to be
+// that rule and no other: a preview that promises a tier 3 and delivers a tier 2
+// is worse than no preview. So it walks the same steps the real drop takes —
+// pieces already in the air land first, the new piece lands bottom cell first,
+// every landing welds through `R().mergeDirs` with `canMergeBlocks` and the
+// older block surviving, and any block a sideways weld leaves hanging settles
+// and welds in its turn — against a copy, touching nothing the tower owns.
+// `tests/mobile-fit/mergePreview.test.ts` holds it to the real outcome.
+
+/** One weld a drop would cause: the block it ends as, and where. */
+export interface DropMergePreview {
+  /** The cell the weld comes to rest in — the SURVIVOR's, not the drop's. */
+  c: number
+  r: number
+  typeId: string
+  /** The tier it ends at. */
+  tier: number
+}
+
+/** A block on the preview's private board. */
+interface PreviewBlock {
+  uid: number
+  c: number
+  r: number
+  w: number
+  h: number
+  typeId: string
+  tier: number
+  /** Still on the board (a weld's absorbed half is not). */
+  alive: boolean
+  /** Placed, as opposed to still in the air. */
+  placed: boolean
+  /** Welds on landing — the real rule only welds a GENTLE landing. */
+  gentle: boolean
+  /** The row it falls from while in the air. */
+  fromRow: number
+  /** How high it is right now while in the air — what orders the landings. */
+  pos: number
+}
+
+/**
+ * Every weld dropping `shapeId` into column `c` would cause, strongest first.
+ *
+ * Empty when the drop welds nothing, when the column cannot take the piece, or
+ * on a board that does not merge by landing. Reports each block whose tier the
+ * drop RAISES — the piece's own weld, the cascade it sets off, and anything a
+ * settle it causes welds on the way down — measured against where the board
+ * would stand anyway once the pieces already in the air have landed, so a weld
+ * that was going to happen regardless is not credited to this drop.
+ *
+ * Pure: reads the tower, the debris and the uid counter, writes nothing. The
+ * dropped cells take the uids the real drop would hand them, because which of
+ * two twins survives a weld is decided by age.
+ */
+export const previewDropMerge = (shapeId: string, c: number): DropMergePreview[] => {
+  const def = SHAPE_BY_ID[shapeId]
+  if (!def) return []
+  const cells = [...def.cells].sort((a, b) => a[1] - b[1])
+  if (cells.some(([dx]) => dx !== 0)) return []
+  return previewColumnDrop(c, cells.map(([, , typeId]) => ({ typeId, tier: 1 })))
+}
+
+/**
+ * The same preview for a GIFT: the one pre-welded cell `dropGiftCell` drops.
+ *
+ * A gift lands already at its tier, so it only reports a weld when it RAISES
+ * something — a tier-2 cannon gift dropped onto a standing tier-2 cannon
+ * previews as the tier 3 it will become.
+ */
+export const previewGiftDrop = (typeId: string, tier: number, c: number): DropMergePreview[] =>
+  previewColumnDrop(c, [{ typeId, tier: Math.max(1, tier) }])
+
+/** The shared body: `drop` lands bottom cell first into column `c`. */
+const previewColumnDrop = (
+  c: number, drop: ReadonlyArray<{ typeId: string; tier: number }>
+): DropMergePreview[] => {
+  const rules = R()
+  if (rules.merge !== 'landing') return []
+  if (!canDropAt(c, drop.length)) return []
+
+  const board = new Map<string, PreviewBlock>()
+  const all: PreviewBlock[] = []
+  const put = (b: PreviewBlock): void => {
+    for (let dx = 0; dx < b.w; dx++) for (let dy = 0; dy < b.h; dy++) board.set(key(b.c + dx, b.r + dy), b)
+    b.placed = true
+  }
+  const lift = (b: PreviewBlock): void => {
+    for (let dx = 0; dx < b.w; dx++) {
+      for (let dy = 0; dy < b.h; dy++) {
+        const k = key(b.c + dx, b.r + dy)
+        if (board.get(k) === b) board.delete(k)
+      }
+    }
+    b.placed = false
+  }
+  const copy = (b: Block, gentle: boolean, fromRow: number, pos: number): PreviewBlock => ({
+    uid: b.uid, c: b.c, r: b.r, w: spanW(b), h: spanH(b), typeId: b.typeId,
+    tier: tierOf(b.tier), alive: true, placed: false, gentle, fromRow, pos
+  })
+
+  for (const b of towerBlocks()) {
+    const v = copy(b, false, b.r, b.r)
+    all.push(v)
+    put(v)
+  }
+
+  // `landingRowFor`, on the copy.
+  const landingRow = (col: number, fromRow: number, w: number): number => {
+    for (let r = fromRow - 1; r >= 0; r--) {
+      for (let dx = 0; dx < w; dx++) if (board.has(key(col + dx, r))) return r + 1
+    }
+    return 0
+  }
+
+  // `mergeOnLanding`, on the copy — the same scan order, the same survivor.
+  const weld = (landed: PreviewBlock): void => {
+    let b = landed
+    for (;;) {
+      let other: PreviewBlock | undefined
+      for (const [dx, dy] of rules.mergeDirs) {
+        const n = board.get(key(b.c + dx, b.r + dy))
+        if (!n || n === b || n.typeId === GATE_ID) continue
+        if (!canMergeBlocks(b, n, rules.mergeTypes, rules.maxMergeTier)) continue
+        other = n
+        break
+      }
+      if (!other) return
+      const keep = other.uid < b.uid ? other : b
+      const gone = keep === other ? b : other
+      lift(gone)
+      gone.alive = false
+      keep.tier += 1
+      b = keep
+    }
+  }
+
+  // `settleColumns`, on the copy: bottom up, so a stack over a gap is let go
+  // from its lowest block and everything above finds the cell under it empty.
+  const settle = (): PreviewBlock[] => {
+    const standing = all.filter((b) => b.alive && b.placed).sort((a, b) => a.r - b.r)
+    const fell: PreviewBlock[] = []
+    for (const b of standing) {
+      if (b.r <= 0 || b.typeId === GATE_ID) continue
+      let supported = false
+      for (let dx = 0; dx < b.w; dx++) {
+        if (board.has(key(b.c + dx, b.r - 1))) { supported = true; break }
+      }
+      if (supported) continue
+      lift(b)
+      b.fromRow = b.r
+      b.pos = b.r
+      b.gentle = rules.fall.gentleSettle
+      fell.push(b)
+    }
+    return fell
+  }
+
+  // Land everything in the air, lowest first, settling after each landing —
+  // `stepDebris` resolves a tick's landings bottom-up and settles once at the
+  // end of it, and on a board with nothing else moving the order is the same.
+  const land = (falling: PreviewBlock[]): void => {
+    const queue = falling.slice()
+    while (queue.length > 0) {
+      queue.sort((a, b) => a.pos - b.pos)
+      const b = queue.shift()!
+      b.r = landingRow(b.c, b.fromRow, b.w)
+      put(b)
+      if (b.gentle) weld(b)
+      queue.push(...settle())
+    }
+  }
+
+  // Pieces already in the air are part of the board this drop will meet.
+  const inFlight: PreviewBlock[] = []
+  for (const d of debris) {
+    const f = d.falling
+    if (!f) continue
+    const v = copy(d, f.gentle === true, f.fromRow ?? d.r, d.r + f.dy)
+    all.push(v)
+    inFlight.push(v)
+  }
+  land(inFlight)
+
+  const before = new Map<number, number>()
+  for (const b of all) if (b.alive) before.set(b.uid, b.tier)
+
+  // The drop itself: bottom cell first, one row apart, with the next uids.
+  const from = Math.min(rules.board.maxRow, 40) + 2
+  const dropped = drop.map(({ typeId, tier }, i): PreviewBlock => ({
+    uid: uidCounter + i, c, r: from + i, w: 1, h: 1, typeId,
+    tier, alive: true, placed: false, gentle: true, fromRow: from + i, pos: from + i
+  }))
+  // A dropped cell is measured against the tier it ARRIVES at: a tier-2 gift
+  // that lands and welds nothing has not been raised to anything.
+  for (const d of dropped) before.set(d.uid, d.tier)
+  all.push(...dropped)
+  land(dropped)
+
+  const out: DropMergePreview[] = []
+  for (const b of all) {
+    if (!b.alive || !b.placed || b.typeId === GATE_ID) continue
+    if (b.tier > (before.get(b.uid) ?? 1)) out.push({ c: b.c, r: b.r, typeId: b.typeId, tier: b.tier })
+  }
+  return out.sort((a, b) => b.tier - a.tier)
+}
+
 // ─── Damage ─────────────────────────────────────────────────────────────────
 
 const damageBlock = (b: Block, amount: number, fromY?: number): void => {
@@ -2452,7 +2730,18 @@ const killEnemy = (e: Enemy): void => {
   const drop = Math.max(1, Math.round(def.coins * mCoinDrop))
   runCoins.value += drop
   runCoinsEarned.value += drop
-  pushFx({ kind: 'enemyDie', x: e.x, y: e.y, palette: def.palette, coins: drop, boss: !!def.boss })
+  // And the kill's cut of the wave's materials — see `killShare`.
+  const cut = payKillShare()
+  pushFx({
+    kind: 'enemyDie', x: e.x, y: e.y, palette: def.palette, coins: drop, boss: !!def.boss,
+    wood: cut.wood, stone: cut.stone
+  })
+}
+
+/** Test seam: hit an enemy through the real damage path, so a kill it causes
+ *  is paid exactly as a kill in play is — the mirror of `damageBlockForTest`. */
+export const damageEnemyForTest = (e: Enemy, amount: number): void => {
+  damageEnemy(e, amount, e.x)
 }
 
 // ─── Enemy AI ───────────────────────────────────────────────────────────────
@@ -3326,6 +3615,7 @@ const fireDirect = (
   shot.slowPct = slowPct
   shot.slowMs = slowMs
   shot.sourceUid = b.uid
+  shot.tier = tierOf(b.tier)
   projectiles.push(shot)
 }
 
@@ -3360,6 +3650,7 @@ const fireShell = (b: Block, target: Enemy, damage: number, splash: number): voi
   shell.slowPct = 0
   shell.slowMs = 0
   shell.sourceUid = b.uid
+  shell.tier = tierOf(b.tier)
   projectiles.push(shell)
 }
 
@@ -3734,12 +4025,102 @@ export const callWave = (): void => {
   // in 100 ms steps (see `publishBuildClock`), and a payout must not be
   // quantised by a display concern.
   pendingBonus = earlyCallBonus(Math.max(0, buildDeadline))
+  // Priced NOW, with the bonus just earned, and then paid out a kill at a time.
+  killShare = openKillShare(next, plan.total)
   phase.value = 'battle'
   lastWaveReward.value = null
   pushFx({ kind: 'waveStart', x: 0, y: 0, wave: next, boss: plan.boss })
 }
 
 let pendingBonus = 1
+
+// ─── The wave's materials, a kill at a time ─────────────────────────────────
+//
+// The wave's wood and stone used to arrive in one lump when the field cleared.
+// That is a minute, sometimes two, of a player five wood short of the piece
+// they want, staring at a purse that will not move while their tower is being
+// chewed — and a player watched hammering an unaffordable column had simply
+// not understood that the money was coming later. So the lump is split across
+// the wave's own enemies and each kill pays its cut the moment it dies: the
+// purse moves in step with the fighting, and a gun bought mid-wave out of the
+// wave's own kills is the loop working.
+//
+// WHAT MOVED, AND WHAT DID NOT. Only the part of the payout that is fully known
+// when the wave is called:
+//
+//   · the base materials (`waveReward`), times the tech yield, the early-call
+//     bonus and the mode's `rewardMul` — every one of those is fixed at the
+//     call, so pricing it there pays exactly what the clear would have;
+//   · run gold was never part of it: a kill already drops its own.
+//
+// Everything that depends on how the wave ENDED stays at the boundary: what
+// the economy blocks yield (a hut built mid-wave or burnt down before the end
+// changes it), the repairs, the arrow-rain charge and the flawless streak. So
+// do the WALLET coins — the tech-tree currency — which persist to the save
+// (a write per kill would be a cloud-save call per grunt on the portals that
+// mirror it), fly to the badge as the wave's own "you were paid" beat, and are
+// what the rewarded ×3 multiplies.
+//
+// EXACT. `killShareOf` splits each total over `plan.total` enemies so the cuts
+// sum to the total to the unit, and `completeWave` settles whatever the kills
+// did not collect — an enemy removed some other way, a wave cleared by a
+// debug jump — so the wave never pays a unit less, or more, than it used to.
+//
+// Never persisted, and it does not need to be: the run snapshot is only ever
+// written in a build phase, so a reload mid-wave resumes from the purse as it
+// stood BEFORE the wave, and the replayed wave pays its cuts again from
+// scratch. Nothing paid mid-wave can be banked twice.
+
+interface KillShare {
+  /** The wave's base materials, as the clear would have paid them. */
+  wood: number
+  stone: number
+  /** Kills the totals are split over — the planned enemy count. */
+  n: number
+  /** Cuts paid so far, and what they came to. */
+  paid: number
+  paidWood: number
+  paidStone: number
+}
+
+let killShare: KillShare | null = null
+
+/** The wave's base materials, priced with everything known at the call. */
+const openKillShare = (waveNo: number, n: number): KillShare => {
+  const base = waveReward(waveNo)
+  const matMul = waveRewardMul.value * pendingBonus * R().waves.rewardMul
+  let woodTotal = Math.round(base.wood * matMul)
+  let stoneTotal = Math.round(base.stone * matMul)
+  // One materials pile where the mode folds stone into wood — folded here,
+  // once, so every cut is paid in the currency the HUD shows.
+  const fold = R().blocks.foldStoneIntoWood
+  if (fold !== null) {
+    woodTotal += Math.round(stoneTotal * fold)
+    stoneTotal = 0
+  }
+  return { wood: woodTotal, stone: stoneTotal, n: Math.max(0, n), paid: 0, paidWood: 0, paidStone: 0 }
+}
+
+/**
+ * Pay the next kill's cut of the wave's materials. Returns what it paid, so
+ * the death can say so where it happened.
+ */
+const payKillShare = (): { wood: number; stone: number } => {
+  const s = killShare
+  if (!s || s.paid >= s.n) return { wood: 0, stone: 0 }
+  const woodCut = killShareOf(s.wood, s.n, s.paid)
+  const stoneCut = killShareOf(s.stone, s.n, s.paid)
+  s.paid++
+  s.paidWood += woodCut
+  s.paidStone += stoneCut
+  wood.value += woodCut
+  stone.value += stoneCut
+  return { wood: woodCut, stone: stoneCut }
+}
+
+/** What the current wave's kills have paid so far — for tests. */
+export const killSharePaid = (): { wood: number; stone: number; kills: number } =>
+  ({ wood: killShare?.paidWood ?? 0, stone: killShare?.paidStone ?? 0, kills: killShare?.paid ?? 0 })
 
 /** Has the build phase already floored the purse? See `ensureAffordableWeapon`. */
 let reliefGiven = false
@@ -3781,9 +4162,23 @@ const spawnEnemy = (typeId: string, side: 1 | -1): void => {
   // tower-relative margin IS the answer, unchanged from before.
   const offL = viewLeft === undefined ? nearL : viewLeft - SPAWN_OFFSCREEN
   const offR = viewRight === undefined ? nearR : viewRight + SPAWN_OFFSCREEN
-  const edge = side === 1
-    ? Math.max(bounds.minC - SPAWN_MAX_REACH, Math.min(nearL, offL))
-    : Math.min(bounds.maxC + SPAWN_MAX_REACH, Math.max(nearR, offR))
+  // A mode that would rather the player SEE the arrival than watch it walk on
+  // stands the enemy just inside the frame's edge instead — wherever the zoom
+  // currently puts that edge. See `RuleSet.enemies.spawnAt`.
+  const atViewEdge = R().enemies.spawnAt === 'viewEdge' && viewLeft !== undefined && viewRight !== undefined
+  const inset = def.scale * VIEW_EDGE_INSET
+  // Measured from the BOARD's edge as well as the tower's: an empty outer
+  // column is still board, and a walker must not start standing in it.
+  const boardHalf = Math.max(0, halfWidthAt(0))
+  const edge = atViewEdge
+    ? side === 1
+      ? Math.max(bounds.minC - SPAWN_MAX_REACH,
+        Math.min(Math.min(bounds.minC, -boardHalf) - VIEW_EDGE_MIN_GAP, viewLeft! + inset))
+      : Math.min(bounds.maxC + SPAWN_MAX_REACH,
+        Math.max(Math.max(bounds.maxC, boardHalf) + VIEW_EDGE_MIN_GAP, viewRight! - inset))
+    : side === 1
+      ? Math.max(bounds.minC - SPAWN_MAX_REACH, Math.min(nearL, offL))
+      : Math.min(bounds.maxC + SPAWN_MAX_REACH, Math.max(nearR, offR))
   // The FULL wave scalar, not just the user's difficulty setting. This line
   // used to read `difficultyFactor()` alone, which meant the adaptive
   // difficulty — the whole system that measures the player's tower and prices
@@ -3798,10 +4193,16 @@ const spawnEnemy = (typeId: string, side: 1 | -1): void => {
   // Divers may enter from the TOP of the frame instead of the flanks — on the
   // portrait board the sky above the tower is the air lane.
   const fromTop = R().enemies.airSpawn === 'top' && def.movement === 'air' && !def.bombRun
+  // From the top edge of what the player can see, when the mode asks for it —
+  // zoomed out, that is high above the board and the diver is in view for its
+  // whole descent; zoomed in, it is just over the crown.
+  const topY = atViewEdge && viewTop !== undefined
+    ? Math.max(crownRow() + 1 + VIEW_EDGE_MIN_SKY, Math.min(40, viewTop - inset))
+    : Math.min(R().board.maxRow, 40) + 3.5
   const spawnY = def.bombRun
     ? crownRow() + 1 + altitude
     : fromTop
-      ? Math.min(R().board.maxRow, 40) + 3.5
+      ? topY
       : def.movement === 'air'
         ? 2.4 + Math.random() * 2.2
         : def.movement === 'sea'
@@ -3921,6 +4322,7 @@ export const debugSetWave = (n: number): void => {
   repairedSinceMeasure = 0
   lastWaveReward.value = null
   pendingBonus = 1
+  killShare = null
 
   phase.value = 'build'
   buildTimeLeft.value = buildWindowMs()
@@ -3938,12 +4340,16 @@ export const debugSetWave = (n: number): void => {
 const completeWave = (): void => {
   const base = waveReward(wave.value)
   const mul = waveRewardMul.value * pendingBonus
-  // Materials scale with the mode; coins never do — the wallet is shared.
-  const matMul = mul * R().waves.rewardMul
 
   let coins = Math.round(base.coins * mul)
-  let gainedWood = Math.round(base.wood * matMul)
-  let gainedStone = Math.round(base.stone * matMul)
+  // The base materials were priced at the call and paid kill by kill (see
+  // `killShare`). What is left of them lands now: the cuts of any enemy that
+  // never died to the tower, and the whole of it for a wave nobody fought.
+  // Materials scale with the mode; coins never do — the wallet is shared.
+  const share = killShare ?? openKillShare(wave.value, 0)
+  killShare = null
+  let gainedWood = share.wood - share.paidWood
+  let gainedStone = share.stone - share.paidStone
   /** Run gold minted by coffers. Kill drops are added as they happen. */
   let gainedGold = 0
 
@@ -4006,7 +4412,8 @@ const completeWave = (): void => {
   clearRangeBuff()
   unreachableSiege.value = 0
 
-  // One materials pile where the mode folds stone into wood.
+  // One materials pile where the mode folds stone into wood. The kill cuts were
+  // folded when they were priced; this folds what the economy blocks made.
   const fold = R().blocks.foldStoneIntoWood
   if (fold !== null) {
     gainedWood += Math.round(gainedStone * fold)
@@ -4037,11 +4444,14 @@ const completeWave = (): void => {
   lastWaveReward.value = {
     wave: wave.value,
     coins,
-    wood: gainedWood,
-    stone: gainedStone,
+    // The wave's WHOLE payout, kill cuts included — what it paid, not what
+    // happened to land on the last frame.
+    wood: share.paidWood + gainedWood,
+    stone: share.paidStone + gainedStone,
     gold: gainedGold,
     bonusPct: Math.round((pendingBonus - 1) * 100),
-    tally: { ...killsByType.value }
+    tally: { ...killsByType.value },
+    atClear: { wood: gainedWood, stone: gainedStone, gold: gainedGold }
   }
 
   phase.value = 'build'
@@ -4201,6 +4611,7 @@ const spawnGate = (hp?: number, level = 0): void => {
 
 /** Begin a brand-new siege. */
 export const startRun = (): void => {
+  for (const fn of runStartHooks) fn()
   clock = 0
   accumulator = 0
   clearWorld()
@@ -4219,6 +4630,7 @@ export const startRun = (): void => {
   blocksPlacedThisRun = 0
   wavesClearedThisRun = 0
   pendingBonus = 1
+  killShare = null
   // The streak penalty is earned within a run and dies with it — carrying a
   // trebled wave 1 into a fresh attempt would be indefensible.
   flawless.reset()
@@ -4279,6 +4691,100 @@ export const seedScriptedOpening = (): boolean => {
   return true
 }
 
+// ─── Gift pieces ────────────────────────────────────────────────────────────
+//
+// A piece the player did not pay for: the flying chest's prize and the
+// first-clear present. `src/use/useGifts.ts` owns the queue, the odds, the
+// footprint search and the persistence; what lives HERE is only the part that
+// has to touch the grid — a block that arrives ALREADY WELDED, at no cost,
+// through the same spawn, merge and landing paths a bought piece takes, so a
+// gifted tier 2 means exactly what a merged tier 2 means.
+
+/**
+ * Put a gift down on the tower board with its bottom-left cell at `(c, r)`.
+ *
+ * `fused`: ONE block of `tier` covering the whole `w × h` footprint — what a
+ * weld of that many twins would have made. Otherwise `w × h` plain blocks side
+ * by side, for a type this board never fuses (the obelisk on the tower board:
+ * a buff is not a weapon, and a fused obelisk is a rule the player would never
+ * meet anywhere else).
+ *
+ * Legality is the caller's — it is checked against the footprint with
+ * `canPlaceShapeAt`, the same rule a bought piece obeys. This only refuses what
+ * would corrupt the grid.
+ */
+export const spawnGiftBlocks = (
+  typeId: string, tier: number, c: number, r: number, w: number, h: number, fused: boolean
+): boolean => {
+  if (phase.value === 'defeat' || !BLOCK_DEFS[typeId]) return false
+  for (let dx = 0; dx < w; dx++) {
+    for (let dy = 0; dy < h; dy++) if (blocks.has(key(c + dx, r + dy))) return false
+  }
+  const palette = blockDef(typeId).palette
+  if (fused) {
+    const b = spawnBlock(typeId, c, r, false, undefined, false, 0, Math.max(1, tier), w, h)
+    // The merge burst, not the placement puff: the thing that arrived is a
+    // weld, and the burst is what says "×3" in the tier's colour.
+    pushFx({ kind: 'merge', x: centreX(b), y: centreY(b), tier: tierOf(b.tier), palette })
+    // A gift set down beside its twin fuses like anything else would.
+    mergeAt(b.c, b.r)
+  } else {
+    for (let dx = 0; dx < w; dx++) {
+      for (let dy = 0; dy < h; dy++) spawnBlock(typeId, c + dx, r + dy)
+    }
+    pushFx({ kind: 'place', x: c + (w - 1) / 2, y: r + h / 2, palette })
+  }
+  blocksPlacedThisRun += w * h
+  syncTowerStats()
+  if (phase.value === 'build') saveRunSnapshot()
+  return true
+}
+
+/**
+ * Drop a gift into column `c` of the drop board: one cell, already at `tier`.
+ *
+ * A weld on that board always collapses into ONE cell, so a gifted tier 2 is a
+ * single pre-fused block — it falls, lands and joins the tower exactly as a
+ * bought piece does (`stepDebris`), and if it comes to rest on a twin of its
+ * own tier the landing merge takes it a tier further, as it would any block.
+ */
+export const dropGiftCell = (typeId: string, tier: number, c: number): boolean => {
+  if (phase.value === 'defeat' || !BLOCK_DEFS[typeId] || !canDropAt(c, 1)) return false
+  const b = spawnFallingBlock(typeId, c, Math.min(R().board.maxRow, 40) + 2)
+  b.tier = Math.max(1, tier)
+  b.maxHp = maxHpFor(typeId, false, false, 0, b.tier)
+  b.hp = b.maxHp
+  blocksPlacedThisRun += 1
+  return true
+}
+
+/**
+ * Called at the top of every `startRun`: a brand-new siege, not a resumed one.
+ *
+ * A registry rather than a direct call so the gift queue — which lives in its
+ * own module and imports this one — can hear about it without this module
+ * importing it back.
+ */
+const runStartHooks = new Set<() => void>()
+
+export const onRunStart = (fn: () => void): (() => void) => {
+  runStartHooks.add(fn)
+  return () => { runStartHooks.delete(fn) }
+}
+
+/**
+ * Out-of-band "launch a flying chest now" cue (QA), a counter the chest
+ * component watches.
+ *
+ * Here rather than beside the chest because this module is what the cheat
+ * build hands the console as `window.__tower`: `__tower.requestFlyingChest()`
+ * is the whole QA interface. A counter, not a boolean, so two requests are two
+ * launches.
+ */
+export const flyingChestRequests = ref(0)
+
+export const requestFlyingChest = (): void => { flyingChestRequests.value += 1 }
+
 /** Restore the persisted siege. Returns false when there is nothing to resume,
  *  so the caller can fall back to `startRun()`. */
 export const resumeRun = (): boolean => {
@@ -4314,6 +4820,7 @@ export const resumeRun = (): boolean => {
   // snapshot knows the wave it stopped on, so restore the count from it.
   wavesClearedThisRun = Math.max(0, (Number(snap.wave) || 1) - 1)
   pendingBonus = 1
+  killShare = null
 
   let gateRestored = false
   for (const tuple of snap.blocks) {

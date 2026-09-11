@@ -11,6 +11,14 @@ export default {
   'crazyGamesOnly': '이 게임은 다음에서만 이용할 수 있습니다:',
 
   // ─── Mobile-fit game (Drop & Merge) ───────────────────────────────────────
+  'gift': {
+    'free': '무료',
+    'tile': '무료 {name}, {n}단계: 탭한 다음 보드를 탭해서 놓으세요',
+    'pair': '무료 {name} 한 쌍: 탭한 다음 보드를 탭해서 놓으세요',
+    'chest': '날아다니는 상자: 탭해서 열기',
+    'firstClear': '{n}웨이브 클리어! 선물이에요'
+  },
+
   'mobile': {
     'rotatePortrait': '세로로 들고 플레이하세요',
     'columnFull': '열이 가득 찼습니다',

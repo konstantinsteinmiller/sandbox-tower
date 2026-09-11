@@ -27,6 +27,7 @@ export type SupportRule = 'graph' | 'column'
 export type MergeRule = 'adjacency' | 'landing' | 'off'
 export type MergeTypes = 'weapons' | 'all'
 export type AirSpawn = 'sides' | 'top'
+export type SpawnAt = 'offscreen' | 'viewEdge'
 export type OfferLane = ShapeDef['lane'] | 'any'
 
 export interface RuleSet {
@@ -108,12 +109,46 @@ export interface RuleSet {
     /** Ground travel speed multiplier. */
     speedMul: number
     airSpawn: AirSpawn
+    /**
+     * Where an enemy is put on the field.
+     *
+     * `offscreen` — two cells past the edge of the frame, so the entrance is a
+     * walk-on (the desktop, whose camera frames a whole tower and its lane).
+     *
+     * `viewEdge` — just INSIDE the frame's own edge, wherever the player's zoom
+     * has put that edge: the sides for walkers, the top for divers. On a phone
+     * the frame is barely wider than the board, the guns outrange it, and an
+     * enemy placed off-screen was routinely shot dead before it had ever been
+     * on screen at all — the opening wave cleared without the player seeing a
+     * single monster. There, being SEEN is worth more than the walk-on.
+     */
+    spawnAt: SpawnAt
     /** Per-enemy `minWave` replacements. */
     minWaveOverride: Readonly<Record<string, number>>
   }
   waves: {
     budgetMul: number
     buildMs: number
+    /**
+     * Build windows after the first few waves, in order — the window after
+     * wave 1, after wave 2, … — before `buildMs` takes over. Empty for "always
+     * `buildMs`".
+     *
+     * The early waves are the ones a tower was already built to hold, so the
+     * full window there is a countdown over an empty field, and it lands
+     * exactly where a new player is deciding whether to stay.
+     */
+    earlyBuildMs: ReadonlyArray<number>
+    /**
+     * Budget scale for a first session's opening waves — wave 1, wave 2, … —
+     * and 1 past the end. See `firstRunBudgetScale`.
+     */
+    firstRunScale: ReadonlyArray<number>
+    /**
+     * The flyers' share of a wave, from `airFromWave`: `base`, growing by
+     * `slope` a wave, never past `cap`. See `airShare`.
+     */
+    airShare: { base: number; slope: number; cap: number }
     /**
      * The build window before the OPENING wave, which is a different problem
      * from every wave after it.
@@ -197,11 +232,15 @@ export const DESKTOP_RULES: RuleSet = {
     bomberAltitude: null,
     speedMul: 1,
     airSpawn: 'sides',
+    spawnAt: 'offscreen',
     minWaveOverride: {}
   },
   waves: {
     budgetMul: 1,
     buildMs: 15_000,
+    earlyBuildMs: [],
+    firstRunScale: [0.6, 0.8],
+    airShare: { base: 0.1, slope: 0.022, cap: 0.35 },
     firstBuildMs: 3_000,
     spawnWindowMs: 82_000,
     flushAtMs: 96_000,

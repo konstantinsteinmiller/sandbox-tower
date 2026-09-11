@@ -29,9 +29,16 @@ interface Props {
   /** 0..1 — how much of the volley's charge is banked. */
   volleyCharge: number
   volleyWavesLeft: number
+  /**
+   * The player has gone a while without building while something here is
+   * affordable (`useIdleNudge`): pulse the tiles they CAN pay for. Never the
+   * grey ones — pointing at a piece they cannot buy is an instruction they
+   * cannot follow.
+   */
+  nudge?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { nudge: false })
 
 const emit = defineEmits<{
   (e: 'press', slot: number, ev: PointerEvent): void
@@ -92,7 +99,7 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
     div.tray__slot(v-for="e in entries" :key="e.slot")
       button.tray__tile(
         type="button"
-        :class="{ 'is-selected': selected === e.slot, 'is-poor': !e.affordable, 'is-enhanced': e.enhanced }"
+        :class="{ 'is-selected': selected === e.slot, 'is-poor': !e.affordable, 'is-enhanced': e.enhanced, 'is-nudge': nudge && e.affordable }"
         :aria-label="e.name"
         @pointerdown.prevent="emit('press', e.slot, $event)"
       )
@@ -165,6 +172,46 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
   &.is-enhanced
     border-color: #ffd54a
     box-shadow: 0 0 0 1px rgba(255, 213, 74, 0.5), 0 0 10px rgba(255, 190, 40, 0.45)
+
+  // The idle nudge: a slow swell and a ring breathing out of the tile. On
+  // `scale` and a pseudo-element, never `transform` or `box-shadow`, so it
+  // rides on top of the selected lift and the reinforced glow instead of
+  // fighting them for the same property.
+  &.is-nudge
+    animation: tray-nudge 1.1s ease-in-out infinite
+
+    &::after
+      content: ''
+      position: absolute
+      inset: -3px
+      border: 2px solid rgba(127, 224, 255, 0.9)
+      border-radius: 0.75rem
+      pointer-events: none
+      animation: tray-nudge-ring 1.1s ease-out infinite
+
+@keyframes tray-nudge
+  0%, 100%
+    scale: 1
+  45%
+    scale: 1.09
+
+@keyframes tray-nudge-ring
+  0%
+    opacity: 0.95
+    scale: 1
+  100%
+    opacity: 0
+    scale: 1.28
+
+// Still asked for: keep the ring, lose the swell, so the tile is marked
+// without anything moving.
+@media (prefers-reduced-motion: reduce)
+  .tray__tile.is-nudge
+    animation: none
+
+    &::after
+      animation: none
+      opacity: 0.85
 
 .tray__body
   display: flex

@@ -77,8 +77,17 @@ describe('DESKTOP_RULES reproduces the pre-seam constants', () => {
     expect(d.enemies.maxOnField).toBe(Infinity)
     expect(d.enemies.speedMul).toBe(1)
     expect(d.enemies.airSpawn).toBe('sides')
+    // Walk-on entrances, two cells past the frame. Only the phone board stands
+    // its enemies inside the frame's edge.
+    expect(d.enemies.spawnAt).toBe('offscreen')
     expect(d.waves.budgetMul).toBe(1)
     expect(d.waves.buildMs).toBe(15_000)
+    // The three levers the phone board moved for its opening, at the values the
+    // desktop has always had: no early breaks, the 60/80 % first-session
+    // discount, and the air curve from `airShare`'s own table.
+    expect(d.waves.earlyBuildMs).toEqual([])
+    expect(d.waves.firstRunScale).toEqual([0.6, 0.8])
+    expect(d.waves.airShare).toEqual({ base: 0.1, slope: 0.022, cap: 0.35 })
     // The opening is its own window: short, and started by the player's first
     // gesture rather than by the page loading. Zero on the phone board, which
     // calls its wave as soon as the game has loaded. See `openingWave.test.ts`.

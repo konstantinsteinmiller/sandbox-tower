@@ -356,6 +356,71 @@ describe('enemies', () => {
     expect(Math.abs(grunt!.x)).toBeGreaterThanOrEqual(6)
   })
 
+  // Placed two cells OFF the frame, as the desktop places them, the opening
+  // wave was shot dead by the fort's cannon (range 8.5) before it ever reached
+  // a frame barely five cells either side of the Gate: a first session's first
+  // monster came on screen fifteen seconds in. Here an enemy stands just inside
+  // whatever the zoom currently shows.
+  it('stands walkers just inside the edge of the frame, wherever the zoom puts it', async () => {
+    const { game } = await load()
+    const { enemyDef } = await import('@/game/enemies')
+    const inset = enemyDef('grunt').scale * 0.3
+    game.setViewSpan(-5.2, 5.2, 12)
+    game.debugSpawn(['grunt', 'grunt'])
+    const [left, right] = game.getEnemies()
+    expect(left!.x).toBeCloseTo(-5.2 + inset, 6)
+    expect(right!.x).toBeCloseTo(5.2 - inset, 6)
+    // On screen from the first frame: its centre is inside the frame.
+    expect(Math.abs(left!.x)).toBeLessThan(5.2)
+
+    // Zoomed further out, the same entrance is further out — it follows the
+    // frame, not the tower.
+    game.setViewSpan(-8, 8, 16)
+    game.debugSpawn(['grunt'])
+    expect(game.getEnemies()[2]!.x).toBeCloseTo(-8 + inset, 6)
+  })
+
+  it('never stands a walker closer than a cell and a half to the board', async () => {
+    const { game, BOARD_HALF_WIDTH } = await load()
+    // Tighter than the fit ever gets: the frame's edge is barely past the wall.
+    game.setViewSpan(-2.8, 2.8, 9)
+    game.debugSpawn(['grunt', 'grunt'])
+    for (const e of game.getEnemies()) {
+      expect(Math.abs(e.x)).toBeGreaterThanOrEqual(BOARD_HALF_WIDTH + 1.5 - 1e-9)
+    }
+  })
+
+  it('drops divers in from the top of what the player can see', async () => {
+    const { game, BOARD_MAX_ROW } = await load()
+    const { enemyDef } = await import('@/game/enemies')
+    const inset = enemyDef('bat').scale * 0.3
+    game.setViewSpan(-5.2, 5.2, 12)
+    game.debugSpawn(['bat'])
+    expect(game.getEnemies()[0]!.y).toBeCloseTo(12 - inset, 6)
+    game.setViewSpan(-8, 8, 17)
+    game.debugSpawn(['bat'])
+    expect(game.getEnemies()[1]!.y).toBeCloseTo(17 - inset, 6)
+
+    // Zoomed in over a full column, the top of the frame is inside the
+    // tower's own sky — a diver still starts two rows clear of the crown.
+    rich(game)
+    for (let r = 0; r <= BOARD_MAX_ROW; r++) game.placeBlock('stone', 2, r)
+    game.setViewSpan(-3.8, 3.8, 7.5)
+    game.debugSpawn(['bat'])
+    expect(game.getEnemies()[2]!.y).toBeGreaterThanOrEqual(BOARD_MAX_ROW + 1 + 2 - 1e-9)
+  })
+
+  it('leaves the desktop its walk-on entrances, two cells past the frame', async () => {
+    vi.resetModules()
+    localStorage.clear()
+    const game = await import('@/use/useTowerGame')
+    game.startRun()
+    game.buildClockHeld.value = true
+    game.setViewSpan(-5, 5, 12)
+    game.debugSpawn(['grunt'])
+    expect(game.getEnemies()[0]!.x).toBeCloseTo(-7, 6)
+  })
+
   it('never fields more than ten at once', async () => {
     const { game } = await load()
     rich(game)
@@ -380,6 +445,59 @@ describe('enemies', () => {
       const plan = game.previewNextWave()
       for (const o of plan.orders) expect(rules.enemies.roster!.has(o.typeId)).toBe(true)
     }
+  })
+})
+
+// ─── The sky ────────────────────────────────────────────────────────────────
+//
+// A portrait screen is mostly sky, and on this board it is the lane the whole
+// frame can see coming. It used to carry almost nothing: `airFromWave` was 4,
+// but the bat's own `minWave` is 9 and the roster did not override it, so the
+// air pool was empty and waves 4-8 fielded no flyers at all.
+
+describe('the sky', () => {
+  // Planned at difficulty 1 — a tower on the curve — with exactly the options
+  // the game hands the director (`waveOpts`). A tower well BELOW the curve gets
+  // smaller waves, and a small wave's air slice may buy no bat at all; that is
+  // the director easing off a struggling player, and it is left alone on
+  // purpose (see the note on `airShare` in the rules).
+  const director = async () => {
+    const { game } = await load()
+    const { planWave, countAir } = await import('@/game/waves')
+    const opts = game.waveOpts()
+    return { plan: (w: number) => planWave(w, 1, false, opts), countAir }
+  }
+
+  it('fields flyers on every one of the first eight waves', async () => {
+    const { plan, countAir } = await director()
+    for (let w = 1; w <= 8; w++) {
+      expect(countAir(plan(w)), `wave ${w}`).toBeGreaterThan(0)
+    }
+  })
+
+  it('gives flyers at least a quarter of the first sixteen waves', async () => {
+    const { plan, countAir } = await director()
+    let air = 0
+    let all = 0
+    for (let w = 1; w <= 16; w++) {
+      const p = plan(w)
+      air += countAir(p)
+      all += p.total
+    }
+    // Measured at 30 % when this was written; the desktop-era mix was ~9 %.
+    expect(air / all).toBeGreaterThanOrEqual(0.25)
+  })
+
+  it('opens with something to watch: wave 1 is more than one monster, and one of them flies', async () => {
+    const { game } = await load()
+    const { countAir } = await import('@/game/waves')
+    // Against the fort a first session actually starts with. The old 60 %
+    // opening against it was ONE grunt, shot dead before it reached the frame.
+    expect(game.seedScriptedOpening()).toBe(true)
+    const plan = game.previewNextWave()
+    expect(plan.wave).toBe(1)
+    expect(plan.total).toBeGreaterThanOrEqual(2)
+    expect(countAir(plan)).toBeGreaterThanOrEqual(1)
   })
 })
 

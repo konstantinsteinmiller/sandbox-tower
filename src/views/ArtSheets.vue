@@ -2,10 +2,9 @@
 import { ref, onMounted } from 'vue'
 import {
   SHEETS, CELL, EXPORT_SCALES, sheetRows,
-  ALL_STRIPS, STRIP_SCALE, promptFor,
-  SINGLES, SINGLE_SIZE, promptForCell,
-  SCENERY, promptForScenery,
-  WALKS, promptForWalk,
+  ALL_STRIPS, STRIP_SCALE,
+  SINGLES, SINGLE_SIZE,
+  SCENERY, WALKS, promptDocs,
   type SheetSpec, type SheetCell, type StripSpec, type SingleSpec, type WalkSpec
 } from '@/game/artSheet'
 import { blockDef, isShip } from '@/game/blocks'
@@ -18,7 +17,7 @@ import { drawSiegeMachine } from '@/game/siegeArt'
 import { drawCavalry, CAVALRY_CYCLE_MS } from '@/game/cavalryArt'
 import { SHIP_ART, SHIP_DRAFT } from '@/game/shipArt'
 import {
-  paintBlockBody, paintBlockFixture, paintShipBlock, fixtureSpanForTier,
+  paintBlockBody, paintBlockFixture, paintFixtureBattery, paintShipBlock, fixtureSpanForTier,
   FIXTURE_BOX,
   paintTierPlate, paintProjectile, paintTree, celestialDisc, SIEGE_ART_BOX,
   ALLY_ART_BOX
@@ -445,6 +444,31 @@ const unionBox = (
   return x1 < 0 ? null : { x0, y0, x1, y1 }
 }
 
+/**
+ * A fixture sheet's reference, into one panel whose origin `c` is at.
+ *
+ * The panel is the fixture's own sprite box, and the pose is the one the
+ * runtime turns FROM: clock zero, lane zero, aim zero, no recoil. Anything else
+ * bakes half a swing into the still and the game then adds the other half on
+ * top of it.
+ *
+ * A merged tier's sheet draws the BATTERY instead — the copies at their
+ * offsets, rear rank shaded — which is what its painting replaces. Called for
+ * the magenta sheet and for the transparent probe alike, so the fit is
+ * measured off exactly what the painter was shown.
+ */
+const paintFixtureRef = (c: CanvasRenderingContext2D, walk: WalkSpec): void => {
+  const s = walk.panelW / FIXTURE_BOX
+  if (walk.fixtureType && walk.fixtureTier) {
+    paintFixtureBattery(c, walk.fixtureType, walk.panelW / 2, walk.panelH / 2, s, walk.fixtureTier)
+    return
+  }
+  paintBlockFixture(
+    c, walk.id, walk.panelW / 2, walk.panelH / 2, s,
+    { aim: 0, recoil: 0, t: 0, seed: 0, layer: 'weapon' }
+  )
+}
+
 const renderWalk = (walk: WalkSpec): HTMLCanvasElement => {
   const cv = document.createElement('canvas')
   cv.width = walk.w
@@ -479,15 +503,7 @@ const renderWalk = (walk: WalkSpec): HTMLCanvasElement => {
       }
       ctx.restore()
     } else if (walk.kind === 'fixture') {
-      // The panel is the fixture's own sprite box, and the pose is the one
-      // the runtime turns FROM: clock zero, lane zero, aim zero, no recoil.
-      // Anything else bakes half a swing into the still and the game then
-      // adds the other half on top of it.
-      paintBlockFixture(
-        ctx, walk.id, walk.panelW / 2, walk.panelH / 2,
-        walk.panelW / FIXTURE_BOX,
-        { aim: 0, recoil: 0, t: 0, seed: 0, layer: 'weapon' }
-      )
+      paintFixtureRef(ctx, walk)
     } else if (walk.kind === 'ship') {
       // The panel IS `SHIP_ART`, the rectangle a painted hull is blitted back
       // into, so the return needs no fit step. `drawShip` applies its own draft before clipping, so that is
@@ -547,15 +563,7 @@ const renderWalk = (walk: WalkSpec): HTMLCanvasElement => {
       }
       pc.restore()
     } else if (walk.kind === 'fixture') {
-      // The panel is the fixture's own sprite box, and the pose is the one
-      // the runtime turns FROM: clock zero, lane zero, aim zero, no recoil.
-      // Anything else bakes half a swing into the still and the game then
-      // adds the other half on top of it.
-      paintBlockFixture(
-        pc, walk.id, walk.panelW / 2, walk.panelH / 2,
-        walk.panelW / FIXTURE_BOX,
-        { aim: 0, recoil: 0, t: 0, seed: 0, layer: 'weapon' }
-      )
+      paintFixtureRef(pc, walk)
     } else if (walk.kind === 'ship') {
       // The panel IS `SHIP_ART`, the rectangle a painted hull is blitted back
       // into, so the return needs no fit step. `drawShip` applies its own draft before clipping, so that is
@@ -859,63 +867,12 @@ const exportAll = async (): Promise<void> => {
       await save(`${strip.file}.png`, { dataUrl: renderStrip(strip).toDataURL('image/png') })
     }
 
-    await save('PROMPTS.md', {
-      text: [
-        '# Per-strip prompts',
-        '',
-        'Generated from the manifest — do not hand-edit, re-export instead.',
-        '',
-        'One strip per generation. Attach `art-sheets/strip-<id>.png` and paste the',
-        'matching block below. Every cell is named, because the first whole-sheet',
-        'pass inferred subjects from pixels and turned the gold mine into a bow.',
-        '',
-        ALL_STRIPS.map((s) => promptFor(s)).join('\n\n---\n\n'),
-        ''
-      ].join('\n')
-    })
-
     // One image per object. No lattice, so nothing can drift out of one.
     for (const single of SINGLES) {
       status.value = `rendering ${single.file}`
       await new Promise((r) => requestAnimationFrame(r))
       await save(`${single.file}.png`, { dataUrl: renderSingle(single).toDataURL('image/png') })
     }
-
-    await save('PROMPTS-CELLS.md', {
-      text: [
-        '# Per-cell prompts — one object per generation',
-        '',
-        'Generated from the manifest — do not hand-edit, re-export instead.',
-        '',
-        'Attach `art-sheets/cell-<id>.png` and paste the matching block below.',
-        'There is no grid to preserve here, which is the whole point: three sheet',
-        'and strip passes each lost the lattice a different way, and not one of',
-        'them lost the art.',
-        '',
-        SINGLES.map((s) => promptForCell(s)).join('\n\n---\n\n'),
-        ''
-      ].join('\n')
-    })
-
-    // The landscape has no reference render: a mountain range is a repeating
-    // band, not a lattice cell, so these go out as prompts alone.
-    await save('PROMPTS-SCENERY.md', {
-      text: [
-        '# Scenery prompts — the landscape',
-        '',
-        'Generated from the manifest — do not hand-edit, re-export instead.',
-        '',
-        'These are NOT on the 128 lattice and have no reference image. Attach one',
-        'of your finished BLOCK bitmaps as a style reference alongside the prompt,',
-        'so the landscape is painted by the same hand as the tower standing on it.',
-        '',
-        'Drop results in `art-sheets/painted/`, named after the file in each',
-        'heading (e.g. `bg-mountains-far.png`), then run `pnpm slice-sheets`.',
-        '',
-        SCENERY.map((a) => promptForScenery(a)).join('\n\n---\n\n'),
-        ''
-      ].join('\n')
-    })
 
     // One sheet per monster design: the walk cycle the battlefield actually
     // plays, which a single still cannot replace without freezing the unit.
@@ -925,29 +882,13 @@ const exportAll = async (): Promise<void> => {
       await save(`${walk.file}.png`, { dataUrl: renderWalk(walk).toDataURL('image/png') })
     }
 
-    await save('PROMPTS-WALKS.md', {
-      text: [
-        '# Walk-cycle prompts — one monster design per generation',
-        '',
-        'Generated from the manifest — do not hand-edit, re-export instead.',
-        '',
-        'Attach the reference named in each block — `walk-<id>.png` for a cycle,',
-        '`siege-<id>.png` and `arm-<id>.png` for an engine, `hull-<id>.png` for a',
-        'ship — and paste the block beside it.',
-        'Most of these are a grid of panels showing ONE subject through ONE cycle,',
-        'and the whole job is that it comes back as one subject and not eight.',
-        '',
-        'Drop results in `art-sheets/painted/`, keeping the `walk-<id>` in the name,',
-        'then run `pnpm slice-sheets`. The slicer cuts the grid by proportion, so an',
-        'off-size return is fine as long as the panels are where the grid says.',
-        '',
-        WALKS.map((w) => promptForWalk(w)).join('\n\n---\n\n'),
-        ''
-      ].join('\n')
-    })
+    // The prompt text belongs to the manifest, which renders it identically for
+    // `pnpm art:prompts` — the Art Desk sends what it parses back out of these.
+    const docs = promptDocs()
+    for (const [name, text] of Object.entries(docs)) await save(name, { text })
 
     await save('sheet-index.json', { text: JSON.stringify(buildIndex(), null, 2) + '\n' })
-    status.value = `wrote ${SHEETS.length * 3 + ALL_STRIPS.length + SINGLES.length + WALKS.length + 5} files to art-sheets/`
+    status.value = `wrote ${SHEETS.length * 3 + ALL_STRIPS.length + SINGLES.length + WALKS.length + Object.keys(docs).length + 1} files to art-sheets/`
   } catch (e) {
     status.value = `FAILED — ${(e as Error).message}`
   } finally {
