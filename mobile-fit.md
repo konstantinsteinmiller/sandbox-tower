@@ -207,7 +207,7 @@ Counted from the source, not the docs:
 |---|---|---|
 | Block types | 20 (3 are hulls on the water row) | Keep 8–10 |
 | Authored shapes | 52 + crate-ladder variants; up to 4 cells; rotation ×4; roofs | ≤ 3 cells, pre-rotated, no roofs |
-| Offer slots | 5, lane-locked, per-slot 5 s reroll, reinforced hand | 3 |
+| Offer slots | 5, lane-locked, per-slot 3 s reroll, reinforced hand | 3 |
 | Structural rules | Gate-flood support, orphan fall with fall damage, crush, boss knockback, roofs seal columns, foundation cap vs free upper floors | Keep collapse + crush; drop overhang freedom |
 | Merge | Adjacency fusion into rectangles, tiers 1–3, output ×3 / HP ×2 per tier, tech-gated | P1: off. P2: **the core** (landing merge) |
 | Buffs | Banner / obelisk multiplicative adjacency auras, `rallyCry` scaling | Off |
@@ -446,7 +446,7 @@ keeping Proposal 1's input problem.
 |---|---|
 | Blocks: wood, brace, stone, archer, cannon, bombard, tesla, spikes, lumber hut | mortar, frost, repair, banner, obelisk, stonepit, coffer, skiff/longship/galley |
 | Shapes ≤ 3 cells: mono, dominoes (h/v), L/J in all four turns as separate ids, archer perch, cannon mount, 2-wide spikes | 4-cell pieces, roofed pieces, rotation, crate variants beyond brace/spikes |
-| Offer lanes structure / weapon / any; per-slot reroll (5 s); reinforced hand | Support lane, 5th slot |
+| Offer lanes structure / weapon / any; per-slot reroll (3 s); reinforced hand | Support lane, 5th slot |
 | Enemies: grunt, runner, slinger, brute, bomber (suicide), bat, bulwark, wyvern, golem | Bombardier, firebug (bomb runs need sky above a 6-row board), eel/shark/kraken/seadrake (no water row), all six siege engines, cavalry |
 | Adaptive difficulty, flawless streak, hoard tax (thresholds halved), previews (bats at 3–4), boss every 10 | Range boost (no standoff engines), speed 3× rung |
 | Inspector: Repair, Upgrade (5 ranks), Sell | Fortify, merge, buffs |
@@ -590,8 +590,8 @@ Max 10 on the field.
 * One active: **Volley** (Arrow Rain auto-aimed at the denser flank), charged
   by cleared waves. Rewarded: reinforced next-three-drops, 3× wave coins,
   continue, a single 2× speed.
-* Repair all (gold) between waves instead of a per-block inspector; long-press
-  a block → Sell.
+* Repair all (gold) between waves; tap a block → its card (rank up with run
+  gold, sell) — piece in hand or not (§11.9).
 
 ### 6.5 HUD (portrait)
 
@@ -825,7 +825,7 @@ category before falling back to the UA heuristic.
   and the Gate carries a bar on the block itself) / `DropTray` / `WaveBar` /
   `RotateOverlay` / `BlueprintsModal`; tap-to-arm + tap-column and
   drag-to-column drops;
-  long-press sell bubble; hints; three-beat tutorial (drop → merge → call);
+  tap-a-block card (rank up / sell); hints; three-beat tutorial (drop → merge → call);
   result flow and rewarded perks via the shared composables.
 - **Column guides**: arming a piece lights every column it could go to —
   alternating bands with a hairline down each side, and a dashed outline on
@@ -952,10 +952,16 @@ What changed (rule-set fields, desktop values unchanged and pinned):
   director has trimmed for a struggling tower, and average-player 5-minute
   survival fell to 3 in 8 with deaths inside the three-minute window.
 - The tutorial now stays up through wave 2 (the next wave arrives ~10 s in).
-- `MergePowerDemo` — six seconds after the merge ladder, on both boards: the
-  same monster shot by a tier 1 (−10 %) and a tier 3 (−75 %).
-- Merged weapons are drawn as twin (tier 2) and triple (tier 3+) batteries,
-  tier-coloured, and tier plates / merge bursts / shots use a colour ladder
+- `MergePowerDemo` — four seconds after the merge ladder, on both boards: a
+  tier-1 and a tier-3 cannon side by side, two volleys each in step at their
+  own grumpling (−10 % / −75 % a shot); the tier 3's grumpling dies on the
+  second volley while the other is still walking in at 80 %.
+- Merged weapons are drawn as ONE bigger gun per tier (a weld is one block, so
+  it carries one gun — the twin/triple batteries this first shipped with read
+  as "two cannons in one box"): a step per tier on the one-cell board
+  (`fixtureSpanForCellTier` 1.2 / 1.28 / 1.34) and, on the tower, the
+  footprint's short side plus `gunGrowthFor` along a wide weld's long side.
+  Tier-coloured, and tier plates / merge bursts / shots use a colour ladder
   (`src/game/tierStyle.ts`).
 
 Measured after (same probe, 12 seeds): first monster on screen at **0 s**;
@@ -987,13 +993,134 @@ probed as compensation and none beat this beyond seed noise. `CUM_KILLS
   weld ends in. Desktop ghost not done (rectangle welds; a wrong preview is
   worse than none).
 - **Flying chest + gifts** (`FlyingChest.vue`, `GiftTile.vue`, `useGifts.ts`):
-  one chest per wave from the moment the tutorial is over for the run (see
-  `tutorialOver` — finished, OR past the waves its coach marks can show on,
-  because the 2026-09-11 blind playtest had no phone player finish the drop
-  beat). Tapping it queues a free welded tesla/frost/mortar (tier 2, ~10 %
-  tier 3) or an obelisk pair; a one-time tier-2 cannon on the first clear of
+  one chest 5 s after the tutorial is over for the run (see `tutorialOver` —
+  finished, OR past the waves its coach marks can show on, because the
+  2026-09-11 blind playtest had no phone player finish the drop beat), then one
+  every 45 s of unpaused play. Tapping it queues a welded tesla/frost/mortar
+  (tier 2, ~10 % tier 3) or an obelisk pair — free the first time a chest is
+  ever opened on the board, half price (`giftPrice`) every time after; a one-time tier-2 cannon on the first clear of
   wave 3. Gifts persist per board (`ts_gifts` / `ts_m2_gifts`).
 - **Painted tier art hooks** (`paintedArt.ts`): `<weapon>-t2/-t3` fixture
   paintings and `props/chest-wing` are allowlisted drop-ins; sheets + prompts in
   `art-sheets/` and `art-todo.md` §I. Nothing painted yet.
 - Phone break after wave 1 is 4 s (`earlyBuildMs: [4000, 6000, 8000]`).
+
+### 11.7 Show-don't-tell pass (2026-09-11, after the blind playtest)
+
+Follows `docs/playtests/2026-09-11-blind/`. No new copy anywhere; every fix
+is a pictogram, a glow or the mechanic played out.
+
+- **First lesson, shown** (`DropDemo.vue`, `coachMarks.ts`, `TutorialOverlay`
+  `passage` prop): the drop beat cuts a second live window over the armed tray
+  card, loops a ghost of the piece travelling into the lit column, and accepts
+  the drag as well as the tap. Any drop sets `ts_m2_drop_learned`; a stage that
+  ends unfinished after a drop retires the coach marks for good. The merge
+  ladder + power demo play on the player's first real weld if this board has
+  not shown them (`ts_m2_merge_guide`). An armed piece ghosts at every open
+  column's landing cell, solid under a pressed finger.
+- **Blueprints on the bar** (`WaveBar.vue`): out of the `…` drawer, green chip
+  with the affordable badge. The track now opens on Foundations
+  (`m2_foundations` → `m2_sharpBolts` → `m2_brace` …); an owned card always
+  counts as unlocked, so older saves never see a paid card padlocked.
+- **First HP rank is +50 %** on both boards (`firstPct` on the `blockHp`
+  effect, `firstCost` 20 on the phone card so it lands with the wave-2 clear),
+  then the normal step. Balance not re-simulated; seed board not re-measured.
+- **Stage-2 spotlight**: `PointerArrow` + gold aura on the tree button while
+  `techNudge` (held back here while a coach mark is up), and on the Foundations
+  buy button inside the tree until it is bought once.
+- **Missions**: badge = claimable count; gold glow only when every unclaimed
+  mission is claimable; a second button top-left of the playfield while
+  anything is claimable.
+- **Merged weapons are one gun** that grows with tier (§11.5 updated).
+- **World cues** (`useWorldCues.ts`): lost-block ghosts, a gate-hit edge wash,
+  a crossed-out crosshair over enemies nothing can reach, and the Volley pulses
+  when it is the answer.
+- **Defeat screen**: the tech-tree glyph instead of the cart, a replay arrow,
+  NEW RECORD beside the wave, a "1×" token on the revive.
+
+### 11.8 Rerun follow-ups (2026-09-11, both boards)
+
+Follows `docs/playtests/2026-09-11-rerun/`. Still no new copy.
+
+- **Gate health bar** (desktop `WaveHud`): a red segmented meter with 25/50/75
+  ticks and a pale damage trail, so it cannot read as wave progress.
+- **Gate hits** (`useWorldCues` `gatePopScale` / `gateBlinkWhite` /
+  `gateBlinkRed`): white-red strobe plus a ~12 % cartoon hop with overshoot,
+  re-armed at most every ~340 ms; reduced motion gets one red wash, no hop.
+- **Kill cam** (`KillCam.vue`, `killingBlow` in `useTowerGame`): the sim holds
+  for 3 s on the unit that struck the last blow — spotlight, gold ring, a crown
+  — then the ad / defeat screen. Attribution: melee, splash, suicide and hostile
+  rounds (`Projectile.byEnemy`) set `blowBy`; a blow with no attacker falls back
+  to the last Gate attacker, then the nearest enemy. Effects keep time during
+  the hold so the collapse dust clears off the killer.
+- **Gift in hand**: legal sockets drawn while armed (`giftAnchors`), a refused
+  tap flashes them green (the drop board flashes its landing cells) and keeps
+  the gift armed.
+- **Missions**: slot 0 is always "survive to wave 2" (40 coins); the other two
+  come from coins / kills / blocks. Fixed a signed-shift bug that dealt
+  `undefined` targets on about half of all days.
+- **Upgrade screen intro**: its first card on the first open from anywhere
+  (`ts_tech_intro_p1` / `ts_m2_tech_intro_p1`); the rest after a defeat.
+- **Reinforced Hand** (coin-priced builds): first tap flips the hand gold in
+  place and turns the button into a tick; second tap pays; 4 s or a phase
+  change cancels. The payout now reinforces the current hand in place instead
+  of re-dealing it.
+- **Revive button**: `RebuiltGlyph` — the painted Gate springing up inside a
+  rewind arrow, replacing the fast-forward mark testers read as "skip".
+- **3× switch**: a "30 🪙" chip on the rung whenever the next tap charges, and
+  a bar draining the paid time while the buff runs (desktop only; the phone
+  switch has no 3×).
+
+### 11.9 Hand, block card and chest economy (2026-09-12, both boards)
+
+Follows a session of the phone build played on a real device. No new copy but
+the three `gift.*` keys below (added to all 21 locales).
+
+- **Drag actually looks like a drag** (`GameSceneDrop`): the piece a drag is
+  carrying now rides just above the finger (`.drop__carry`), the tile takes an
+  explicit `setPointerCapture` so a mouse behaves like a touch, `DropTray`'s
+  tile cancels its own `touchstart` as well as setting `touch-action: none`
+  (a page-level overscroll that claims the gesture ends it in a
+  `pointercancel` halfway up the screen), and letting go back over the tray
+  puts the piece down instead of dropping it into whatever column the finger
+  was level with. The gesture always worked; nothing on screen moved with the
+  finger, so players copied the drop beat's demo, saw nothing, and went back
+  to tapping.
+- **Block card** (`src/mobile-fit/components/BlockCard.vue`): a TAP on a block
+  opens it — armed or not — with the block's rank pips, what the next rank
+  buys (HP, and damage for a gun), Upgrade (run gold) and Sell. Long-press
+  still opens it without waiting for the lift; the coach marks teaching the
+  drop keep every tap in their column a drop. This is the phone board's first
+  gold sink: `upgradeBlock` was always board-agnostic, but nothing on this
+  board could reach it, and the hand re-arming after every drop meant the old
+  long-press sell almost never fired. The inspected block is ringed on the
+  board (the range ring's selection outline now draws for any inspected block,
+  not only guns).
+- **Chest schedule** (`FlyingChest`): one chest five seconds after the chest
+  becomes possible, then one every 45 s of unpaused play measured from the
+  moment the last one left the sky; a grounded chest (full gift tray) retries
+  in 10 s. It was one per WAVE, which put three or four chests in a first
+  minute. The `tutorialDone` and `phase` props are gone — `ready` already
+  carries both.
+- **Chest economy** (`useGifts`): the first chest a player ever opens on a
+  board still pays out FREE; every chest after it is a HALF-PRICE BUY
+  (`giftPrice` = half of building the weld's cells one at a time, so a tier 3
+  costs twice a tier 2). The tile shows the bill and a `-50%` badge, and a
+  short purse is refused out loud like any other piece. The first-clear
+  present stays free. Persisted per board (`ts_first_chest_gift` /
+  `ts_m2_first_chest_gift`); a gift saved by an older build is honoured as
+  free.
+- **Merge power demo** (`MergePowerDemo`): six seconds instead of four (the
+  last four are the verdict held on screen), health bars at twice the size,
+  pinned over each half above the grumpling, framed in a small red-to-gold
+  glow, notched at the quarters — and each hit leaves a DAMAGE TRAIL: the
+  chunk it took stays white for a blink, then gold, then drains onto the new
+  health. Taps are ignored until 3 s so the kill and its drain are both seen.
+- **Reroll cooldown**: 5 s → 3 s per slot, both boards.
+- **Tier rim**: the tier colour round a merged weapon's fixture is one CSS
+  pixel at every size (it grew with the gun: three pixels and more on a phone,
+  which read as a sticker over the inked art). The wash, the plate and the
+  tier-3 glow still carry the tier.
+- **Gate repair** (`repairBlock`): re-syncs the Gate's HP refs, so a Gate
+  patched in the build phase updates the wave badge's health bar at once
+  instead of at the next wave's sync.

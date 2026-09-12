@@ -26,7 +26,7 @@ import { useI18n } from 'vue-i18n'
 import { isMobileLandscape, isShortViewport } from '@/use/useUser'
 import { onArtChanged } from '@/game/art'
 import {
-  paintWorldBlock, paintLiveFixture, paintTierPlate, fixtureSpanForTier, fixtureSpanForCellTier
+  paintWorldBlock, paintLiveFixture, paintTierPlate, gunSpanForTier, fixtureSpanForCellTier
 } from '@/use/useTowerArt'
 
 /**
@@ -56,7 +56,7 @@ import {
  *      screen and it reuses a key that already exists in every locale.
  *   2. **It is drawn by the BATTLEFIELD'S painters, at the battlefield's
  *      arithmetic** — `paintWorldBlock`, `paintLiveFixture`, `paintTierPlate`
- *      and the same `fixtureSpanForTier` / footprint-centre / plate-corner
+ *      and the same `gunSpanForTier` / footprint-centre / plate-corner
  *      maths `drawBlock` and `drawBlockOverlays` use. A promise drawn from a
  *      private copy of the geometry is a promise about a different game: retune
  *      the merged art and a lookalike quietly starts lying about the reward,
@@ -225,8 +225,9 @@ const goldFill = (
  *     transform; that lands the identical
  *     `drawImage(blockFace(id, 0, max(fw, fh)), …, fw, fh)`.
  *   - ONE gun for the whole span, centred on the footprint, sized by
- *     `fixtureSpanForTier` and lifted by only what overhangs the underside —
- *     the `* 0.6` is the battlefield's, not a number that looked right here.
+ *     `gunSpanForTier` (the weapon's `fixtureArtSpan` on the canonical
+ *     footprint) and lifted by only what overhangs the underside — the `* 0.6`
+ *     is the battlefield's, not a number that looked right here.
  *   - the plate is riveted INSIDE the top-right corner at the same two offsets,
  *     so how deep a weld goes reads the same here as it does in the tower.
  */
@@ -253,12 +254,12 @@ const drawRungBlock = (
   // board never builds.
   const span = props.variant === 'cell'
     ? fixtureSpanForCellTier(cells.tier)
-    : fixtureSpanForTier(cells.tier)
+    : gunSpanForTier(cells.tier)
   const cx = leftX + fw / 2
   const cy = topY + fh / 2
   const fy = cy - cell * (Math.max(0, (span - cells.h) / 2) * 0.6)
-  // With the tier, so each rung shows the gun that tier actually fields — the
-  // twin, then the triple battery — in its colour.
+  // With the tier, so each rung shows the gun that tier actually fields — one
+  // gun, heavier at every rung — in its colour.
   paintLiveFixture(ctx, BLOCK_ID, cx, fy, cell * span, { aim, t: tMs, uid, col: 1, tier: cells.tier })
 
   if (cells.tier > 1) {

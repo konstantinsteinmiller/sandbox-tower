@@ -15,6 +15,9 @@ export default {
     'free': 'Gratis',
     'tile': '{name} gratis, livello {n}: toccalo, poi tocca il campo per piazzarlo',
     'pair': 'Coppia di {name} gratis: toccala, poi tocca il campo per piazzarla',
+    'tilePaid': '{name}, livello {n}, a metà prezzo: toccalo, poi tocca il campo per piazzarlo',
+    'pairPaid': 'Coppia di {name} a metà prezzo: toccala, poi tocca il campo per piazzarla',
+    'discount': '-{n}%',
     'chest': 'Forziere volante: toccalo per aprirlo',
     'firstClear': 'Ondata {n} superata! Un regalo per te'
   },

@@ -65,7 +65,7 @@ describe('DESKTOP_RULES reproduces the pre-seam constants', () => {
     expect(d.offers.weaponSlot).toBe(1)
     expect(d.offers.supportSlot).toBe(4)
     expect(d.offers.rotation).toBe(true)
-    expect(d.offers.rerollMs).toBe(5_000)
+    expect(d.offers.rerollMs).toBe(3_000)
     expect(d.offers.unlockRerollSlots).toEqual([2, 3])
     expect(d.blocks).toEqual({ catalogue: null, foldStoneIntoWood: null })
   })

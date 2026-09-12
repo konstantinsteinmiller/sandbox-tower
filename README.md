@@ -188,6 +188,24 @@ pnpm build:yandex
 Each mode reads its `.env.<platform>` file, DCEs the other platforms' SDK glue,
 and emits a per-platform CSP.
 
+## Store media
+
+```bash
+pnpm preview:video                       # every format — 14 clips, ~70 min
+pnpm preview:video --formats crazygames  # one deliverable
+```
+
+Scripted preview clips and trailers, recorded out of the running game on a
+virtual clock rather than screen-captured: a success and a fail cut for each of
+four shapes (a 10 s pair, a 30 s "pure gameplay" pair, CrazyGames' 16 s
+1920x1080 + 1080x1620, and Poki's 5 s 1080x1080 at 60 fps). Portrait records the
+phone board, landscape and square the desktop tower. Every clip is a CLEAN
+FEED — no HUD, no canvas text, and `?clean=1` switches off the interface the
+renderer paints (`src/game/cleanFeed.ts`, DEV only).
+
+Upload the `high/` file; `lossless/` is an archival master most players'
+browsers cannot play. See [`tools/preview-video/README.md`](./tools/preview-video/README.md).
+
 ## Docs
 
 | File | Contents |

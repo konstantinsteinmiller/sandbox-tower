@@ -2,11 +2,12 @@ import { describe, expect, it, vi } from 'vitest'
 
 // ─── Gift pieces ────────────────────────────────────────────────────────────
 //
-// A gift is a FREE piece that arrives already welded: the flying chest's prize
-// and the one-time present for clearing wave 3. What has to hold, on both
-// boards: it costs nothing, it lands as the weld it claims to be, it obeys the
-// placement rules a bought piece does, it survives a reload but not a new run,
-// and the present is given exactly once.
+// A gift is a piece that arrives already welded: the flying chest's prize and
+// the one-time present for clearing wave 3. What has to hold, on both boards:
+// it lands as the weld it claims to be, it obeys the placement rules a bought
+// piece does, it is FREE only where it is meant to be (the present, and the
+// first chest a player ever opens) and half price otherwise, it survives a
+// reload but not a new run, and the present is given exactly once.
 
 const TICK = 1000 / 60
 
@@ -27,6 +28,17 @@ const load = async (mode: 'tower' | 'drop' = 'tower', keepStorage = false) => {
 const purse = (game: Awaited<ReturnType<typeof load>>['game']) =>
   [game.wood.value, game.stone.value, game.runCoins.value]
 
+/** Enough of everything that a gift's price is never what refuses it. */
+const stock = (game: Awaited<ReturnType<typeof load>>['game']): void => {
+  game.wood.value = 9_999
+  game.stone.value = 9_999
+  game.runCoins.value = 9_999
+}
+
+/** A free gift — what the present and the first chest ever opened pay out. */
+const freeGift = (typeId: string, tier = 2) =>
+  ({ typeId, tier, source: 'chest' as const, free: true })
+
 /** Call a wave and hold the field clear until the sim is back in build. */
 const clearWave = (game: Awaited<ReturnType<typeof load>>['game']): void => {
   game.callWave()
@@ -38,11 +50,47 @@ const clearWave = (game: Awaited<ReturnType<typeof load>>['game']): void => {
   throw new Error('wave never cleared')
 }
 
-describe('a gift on the tower board', () => {
-  it('lands as ONE tier-2 weld over two cells, and costs nothing', async () => {
+// The green sockets a gift in hand shows — the same flash a hand piece gets.
+describe('where a gift can go', () => {
+  it('lists the sockets it would take, and every one it lists does take it', async () => {
     const { game, gifts } = await load()
     game.startRun()
-    expect(gifts.grantGift({ typeId: 'tesla', tier: 2, source: 'chest' })).toBe(true)
+    stock(game)
+    gifts.grantGift({ typeId: 'tesla', tier: 2, source: 'chest' })
+    const anchors = gifts.giftAnchors(gifts.gifts.value[0]!)
+    expect(anchors.length).toBeGreaterThan(0)
+    // Beside the Gate on the ground; never over it.
+    expect(anchors).toContainEqual([1, 0])
+    expect(anchors).not.toContainEqual([0, 0])
+    expect(anchors).not.toContainEqual([-1, 0])
+    const [c, r] = anchors[anchors.length - 1]!
+    expect(gifts.placeGiftAt(c, r)).toBe(true)
+    expect(game.getBlocks().get(`${c},${r}`)?.typeId).toBe('tesla')
+  })
+
+  it('grows with the tower', async () => {
+    const { game, gifts } = await load()
+    game.startRun()
+    gifts.grantGift({ typeId: 'tesla', tier: 2, source: 'chest' })
+    const before = gifts.giftAnchors(gifts.gifts.value[0]!)
+    game.wood.value = 500
+    game.stone.value = 500
+    expect(game.placeBlock('wood', 1, 0)).toBeTruthy()
+    expect(game.placeBlock('wood', 2, 0)).toBeTruthy()
+    const after = gifts.giftAnchors(gifts.gifts.value[0]!)
+    // The row the two crates made is now a floor to stand a gift on…
+    expect(after).toContainEqual([1, 1])
+    expect(before).not.toContainEqual([1, 1])
+    // …and the ground they took is no longer offered.
+    expect(after).not.toContainEqual([1, 0])
+  })
+})
+
+describe('a gift on the tower board', () => {
+  it('lands as ONE tier-2 weld over two cells, and a free one costs nothing', async () => {
+    const { game, gifts } = await load()
+    game.startRun()
+    expect(gifts.grantGift(freeGift('tesla'))).toBe(true)
     const before = purse(game)
     expect(gifts.placeGiftAt(1, 0)).toBe(true)
     const b = game.getBlocks().get('1,0')!
@@ -59,6 +107,7 @@ describe('a gift on the tower board', () => {
   it('lands the jackpot as the 2×2 tier 3', async () => {
     const { game, gifts } = await load()
     game.startRun()
+    stock(game)
     gifts.grantGift({ typeId: 'mortar', tier: 3, source: 'chest' })
     expect(gifts.placeGiftAt(1, 0)).toBe(true)
     const b = game.getBlocks().get('1,0')!
@@ -73,6 +122,7 @@ describe('a gift on the tower board', () => {
     // The ground ends at the foundation's edge; tapping the last cell cannot
     // start a flat pair there, so the pair ends on it instead.
     const edge = game.halfWidthAt(0)
+    stock(game)
     gifts.grantGift({ typeId: 'frost', tier: 2, source: 'chest' })
     expect(gifts.placeGiftAt(edge, 0)).toBe(true)
     const b = game.getBlocks().get(`${edge},0`)!
@@ -84,6 +134,7 @@ describe('a gift on the tower board', () => {
     const { game, gifts } = await load()
     game.startRun()
     // An obelisk is a buff, not a weapon, and the tower welds weapons only.
+    stock(game)
     gifts.grantGift({ typeId: 'obelisk', tier: 2, source: 'chest' })
     expect(gifts.placeGiftAt(1, 0)).toBe(true)
     const a = game.getBlocks().get('1,0')!
@@ -110,7 +161,7 @@ describe('a gift on the drop board', () => {
     const { game, gifts } = await load('drop')
     game.startRun()
     game.buildClockHeld.value = true
-    gifts.grantGift({ typeId: 'frost', tier: 2, source: 'chest' })
+    gifts.grantGift(freeGift('frost'))
     const before = purse(game)
     expect(gifts.dropGiftAt(2)).toBe(true)
     for (let i = 0; i < 400 && game.getDebris().length > 0; i++) game.step(TICK)
@@ -129,6 +180,80 @@ describe('a gift on the drop board', () => {
     gifts.grantGift({ typeId: 'tesla', tier: 3, source: 'chest' })
     expect(gifts.dropGiftAt(9)).toBe(false)
     expect(gifts.gifts.value).toHaveLength(1)
+  })
+})
+
+describe('what a gift costs', () => {
+  it('prices a chest piece at half of building its cells the long way', async () => {
+    const { game, gifts } = await load()
+    game.startRun()
+    const one = game.priceOfBlock('tesla')
+    // A tier 2 is two of the block, a tier 3 four — halved.
+    expect(gifts.giftPrice({ typeId: 'tesla', tier: 2, source: 'chest' })).toEqual({
+      wood: Math.ceil(one.wood), stone: Math.ceil(one.stone), coins: Math.ceil(one.coins)
+    })
+    expect(gifts.giftPrice({ typeId: 'tesla', tier: 3, source: 'chest' })).toEqual({
+      wood: Math.ceil(one.wood * 2), stone: Math.ceil(one.stone * 2), coins: Math.ceil(one.coins * 2)
+    })
+    // Free is free, whatever the block.
+    expect(gifts.giftPrice(freeGift('tesla', 3))).toEqual({ wood: 0, stone: 0, coins: 0 })
+  })
+
+  it('charges the purse when a paid gift is placed', async () => {
+    const { game, gifts } = await load()
+    game.startRun()
+    stock(game)
+    const gift = { typeId: 'tesla', tier: 2, source: 'chest' as const }
+    gifts.grantGift(gift)
+    const price = gifts.giftPrice(gift)
+    const before = purse(game)
+    expect(gifts.placeGiftAt(1, 0)).toBe(true)
+    expect(purse(game)).toEqual([
+      before[0]! - price.wood, before[1]! - price.stone, before[2]! - price.coins
+    ])
+  })
+
+  it('refuses a gift the purse cannot pay for, and keeps it in hand', async () => {
+    const { game, gifts } = await load()
+    game.startRun()
+    game.wood.value = 0
+    game.stone.value = 0
+    game.runCoins.value = 0
+    const gift = { typeId: 'tesla', tier: 2, source: 'chest' as const }
+    gifts.grantGift(gift)
+    expect(gifts.missingForGift(gift).length).toBeGreaterThan(0)
+    expect(gifts.placeGiftAt(1, 0)).toBe(false)
+    expect(gifts.gifts.value).toHaveLength(1)
+    // Nothing landed.
+    expect(game.getBlocks().get('1,0')).toBeUndefined()
+  })
+
+  it('gives the first chest ever opened away, and sells every one after', async () => {
+    const { game, gifts, state, keys } = await load()
+    game.startRun()
+    const prize = { typeId: 'frost', tier: 2, source: 'chest' as const }
+
+    expect(gifts.chestFreebieSpent()).toBe(false)
+    expect(gifts.grantChestGift(prize)).toBe(true)
+    expect(gifts.gifts.value[0]!.free).toBe(true)
+    expect(state.getState(keys.FIRST_CHEST_KEY)).toBe(true)
+
+    expect(gifts.grantChestGift(prize)).toBe(true)
+    expect(gifts.gifts.value[1]!.free).toBe(false)
+
+    // And the freebie is spent for good — a new run does not restore it.
+    game.startRun()
+    expect(gifts.chestFreebieSpent()).toBe(true)
+    expect(gifts.grantChestGift(prize)).toBe(true)
+    expect(gifts.gifts.value[0]!.free).toBe(false)
+  })
+
+  it('keeps each board its own freebie', async () => {
+    const { game, gifts, state, keys } = await load('drop')
+    game.startRun()
+    gifts.grantChestGift({ typeId: 'frost', tier: 2, source: 'chest' })
+    expect(state.getState(keys.M2_FIRST_CHEST_KEY)).toBe(true)
+    expect(state.getState(keys.FIRST_CHEST_KEY)).toBeUndefined()
   })
 })
 
@@ -222,7 +347,9 @@ describe('the first-clear present', () => {
 
     clearWave(game)
     expect(game.wave.value).toBe(3)
-    expect(gifts.gifts.value).toEqual([{ typeId: 'cannon', tier: 2, source: 'firstClear' }])
+    expect(gifts.gifts.value).toEqual([
+      { typeId: 'cannon', tier: 2, source: 'firstClear', free: true }
+    ])
     expect(state.getState(keys.FIRST_CLEAR_GIFT_KEY)).toBe(true)
 
     // Wave 4, and a whole new run's wave 3: nothing more.

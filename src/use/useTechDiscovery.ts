@@ -3,6 +3,8 @@ import { flushPersist, getState, setState } from '@/use/useTowerState'
 import { M2_TECH_KEY, TECH_FOUND_KEY, TECH_KEY, TECH_SPOTLIGHT_KEY } from '@/keys'
 import { wave } from '@/use/useTowerGame'
 import { totalWaves } from '@/use/useTowerProgress'
+import { firstHpNodeId } from '@/game/tech'
+import type { TechNode } from '@/game/types'
 
 /**
  * ─── "There is a tech tree" ─────────────────────────────────────────────────
@@ -102,9 +104,44 @@ export const markTechFound = (): void => {
  *
  * Either way it stops the moment the tree is opened, and never returns.
  */
+export const reachedStageTwo: ComputedRef<boolean> = computed(
+  () => wave.value >= 2 || totalWaves.value >= 1
+)
+
+/**
+ * The HUD nudge: stage 2 reached and the tree never opened. Drives the gold
+ * aura, the hop and the pointing arrow on the tech button (desktop) and the
+ * Blueprints button (phone bottom bar).
+ */
 export const techNudge: ComputedRef<boolean> = computed(
-  () => !found.value && (wave.value >= 2 || totalWaves.value >= 1)
+  () => !found.value && reachedStageTwo.value
 )
 
 /** For tests and debug overlays; the UI has no business reading this directly. */
 export const techFound: ComputedRef<boolean> = computed(() => found.value)
+
+/**
+ * ─── "Buy this one first" ──────────────────────────────────────────────────
+ *
+ * The HUD nudge gets the player INTO the tree; this is what they meet there.
+ * From stage 2 on, a tree nothing has been bought in points at its first HP
+ * card with the same gold glow and arrow, until that card is bought once. Its
+ * first rank is front-loaded (+50 % block HP, see `firstPct`), so the one
+ * purchase the game asks for is one whose effect a player can see.
+ *
+ * "Nothing bought on this board" keeps it off anyone who has already chosen a
+ * first upgrade — including a phone save from before the strip was re-ordered
+ * that owns Sharp Bolts but not the card now in front of it.
+ *
+ * A function over the tree and a level reader rather than a computed, because
+ * each board's modal reads its own tree; called inside a component's computed
+ * it tracks `reachedStageTwo` and the levels like any other dependency.
+ */
+export const shouldSpotlightFirstUpgrade = (
+  nodes: ReadonlyArray<TechNode>, levelOf: (id: string) => number
+): boolean => {
+  if (!reachedStageTwo.value) return false
+  const id = firstHpNodeId(nodes)
+  if (!id || levelOf(id) > 0) return false
+  return !nodes.some((n) => levelOf(n.id) > 0)
+}

@@ -1,7 +1,8 @@
 import { blockDef, GATE_ID, isShip, tierOf } from '@/game/blocks'
+import { CLEAN_FEED } from '@/game/cleanFeed'
 import { rulesNow } from '@/game/rules'
 import { tierStyle, TIER_RUNGS } from '@/game/tierStyle'
-import { tierFixtureArt, tierFixtureId } from '@/game/paintedArt'
+import { TIER_ART_WEAPONS, tierFixtureArt, tierFixtureId } from '@/game/paintedArt'
 import { enemyDef } from '@/game/enemies'
 import {
   themedPalette, spriteFor, withAlpha, mixHex, onArtChanged, type Palette
@@ -151,7 +152,7 @@ const tileBand = (
 
 const SCENERY_INK = 'rgba(59,42,33,0.55)'
 const SCENERY_INK_SOFT = 'rgba(59,42,33,0.32)'
-import { rotatedShape } from '@/game/shapes'
+import { rotatedShape, SHAPE_BY_ID } from '@/game/shapes'
 import { drawSiegeMachine } from '@/game/siegeArt'
 import { drawShip, type ShipLayer } from '@/game/shipArt'
 import { drawCavalry, cavalryCycle01, drawCavalryDust } from '@/game/cavalryArt'
@@ -175,6 +176,11 @@ import { override } from '@/use/perfVariants'
 import { perf } from '@/use/usePerfProbe'
 import { useScreenshake } from '@/use/useScreenshake'
 import { playFx } from '@/use/useTowerAudio'
+import {
+  noteLostBlock, lostMarkSlots, lostMarkFade, noteGateHit, gateAlarm, vignette,
+  rejectFlash, rejectShake, isStranded, prefersReducedMotion,
+  gatePopScale, gateBlinkWhite, gateBlinkRed
+} from '@/use/useWorldCues'
 
 /**
  * ─── Renderer ───────────────────────────────────────────────────────────────
@@ -1541,8 +1547,10 @@ const getFixtureSprite = (b: Block, s: number, t: number): FixtureSprite | null 
  * One copy of a fixture into `g`, whose origin is the sprite's top-left.
  *
  * `ox, oy` shift it in the GUN'S OWN frame — along the barrel and across it —
- * and `k` scales it, both in units of the fixture scale. A plain fixture is the
- * one copy at (0, 0, 1); a merged battery is several (see `BATTERY`).
+ * and `k` scales it, both in units of the fixture scale. Every fixture on the
+ * battlefield is the one copy at (0, 0, 1), merged or not: a merged gun grows
+ * through the span it is baked at (see `fixtureArtSpan`), never through more
+ * copies of itself.
  *
  * `artId` names the painting `gun` is, for its size and placement knobs: a
  * painted merged tier (`cannon-t2`) may carry its own, and falls back to its
@@ -1605,77 +1613,59 @@ const paintOneGun = (
 // A tier-3 gun hits nine times as hard as the one it was welded from, and it
 // looked exactly like it: the same barrel with a small grey "III" in the
 // corner. Players read the plate as a label, not as a reason — and stopped
-// welding at tier 2. So a merged weapon now LOOKS like more gun:
+// welding at tier 2. So a merged weapon LOOKS like more gun.
 //
-//   · tier 2 is a TWIN — two barrels, two bows, two coils — and tier 3 and up a
-//     triple battery, the rear pieces set back and shaded so the front one
-//     still reads as the gun;
-//   · the whole battery is washed in the tier's colour and outlined in it, so
-//     "the green one" and "the blue one" are how a player tells them apart
-//     from across the board;
+// It is still ONE gun. For a while it was a twin at tier 2 and a triple
+// battery from tier 3 — copies of the barrel side by side on one mount — and a
+// player looking at a block reasonably asked how one box can hold two cannons:
+// the weld made one block, so the picture has to be one weapon. What a weld
+// buys is a BIGGER gun of the same design:
+//
+//   · it grows with the weld — through the span it is baked at, which is the
+//     footprint's short side on the tower plus a bonus along the long side of
+//     a wide weld (`gunGrowthFor`), and a step per tier on the one-cell board
+//     (`fixtureSpanForCellTier`) — so tier 2 is visibly heavier than tier 1
+//     and tier 3 heavier again, without a barrel swallowing the neighbours;
+//   · it is washed in the tier's colour and outlined in it, so "the green one"
+//     and "the blue one" are how a player tells them apart across the board;
 //   · from tier 3 a soft glow of the same colour sits behind it.
 //
-// Every one of these goes into the same cached sprite the plain gun does, so a
-// merged weapon costs nothing per frame beyond a plain one — the extra work is
-// paid once per bake. And because it is built from whichever copy of the gun is
-// in force, a PAINTED cannon becomes a painted twin with no new art.
+// All of it goes into the same cached sprite the plain gun does, one bake per
+// (type, tier, scale bucket), so a merged weapon costs nothing per frame
+// beyond a plain one. And because it is built from whichever copy of the gun
+// is in force, a PAINTED cannon grows and takes its tier colour with no new
+// art.
 //
-// A composite, though, is three pastes of one painting, not a painting of three
-// guns. So each weapon's tier 2 and tier 3 may also be painted outright
-// (`tierFixtureArt`, `src/game/paintedArt.ts`), and a painting replaces the
-// copies whole: one image, no rear-rank shade and no colour wash — the painter
-// was asked for the tier's colour and has put it in — with a lighter rim, so a
-// painted blue gun and a composited one still read as the same rung of the
-// ladder. With no painting on disk nothing here changes.
+// Each weapon's tier 2 and tier 3 may also be painted outright
+// (`tierFixtureArt`, `src/game/paintedArt.ts`) — the same gun forged heavier,
+// in the tier's trim — and a painting replaces the drawn one whole: no colour
+// wash, since the painter was asked for the tier's colour and has put it in,
+// and a lighter rim, so a painted blue gun and a drawn one still read as the
+// same rung of the ladder. With no painting on disk nothing here changes.
 
-/** A copy of the gun in a battery: offset along / across the barrel, scale. */
-type BatteryCopy = readonly [ox: number, oy: number, k: number]
+/** The weapons a weld grows. Everything else keeps the plain fixture's size. */
+const TIERED_WEAPONS: ReadonlySet<string> = new Set<string>(TIER_ART_WEAPONS)
+
+/** Extra size for a gun on a weld WIDER than it is tall — 2×1, 4×2. */
+export const GUN_GROWTH_WIDE = 1.3
+/** The same for a TALLER-than-wide weld — 1×2, 2×4 — kept gentler, because
+ *  the barrel points sideways and the room beside a tall weld is one column. */
+export const GUN_GROWTH_TALL = 1.15
 
 /**
- * How each kind of weapon doubles and triples. The LAST copy is the front one;
- * everything before it is drawn first and shaded as the rear rank.
+ * How much a merged WEAPON outgrows the span its footprint's short side gives
+ * it, on the tower (`mergeArt: 'footprint'`).
  *
- * Offsets are in the gun's own frame. A cannon's twin sits ACROSS its barrel,
- * so the pair reads as a double-barrel; a bow's sits BEHIND it, because two
- * bows side by side along their limbs would read as one tall bow. Lobbers and
- * coils do not rotate, so their copies stand side by side.
+ * The short side is what keeps a gun inside its block, and it only widens
+ * every OTHER tier — 2×1 at tier 2 is as short as a single cell, so a tier-2
+ * gun sized off it alone was a tier 1 with a green rim. A wide weld has a whole
+ * extra cell along the barrel's own axis, and that is the room this spends:
+ * at 1.3 a 2×1's cannon reaches 0.82 of a cell from its centre, inside the
+ * one cell either side it stands on, while its wheels stay above the block's
+ * underside. A square weld already grew both axes and gets nothing more.
  */
-const BATTERY: Record<string, { twin: readonly BatteryCopy[]; triple: readonly BatteryCopy[] }> = {
-  bore: {
-    twin: [[-0.05, -0.13, 0.94], [0, 0.07, 1]],
-    triple: [[-0.07, -0.2, 0.9], [-0.07, 0.2, 0.9], [0.02, 0, 1]]
-  },
-  bow: {
-    twin: [[-0.14, -0.05, 0.92], [0.03, 0.02, 1]],
-    triple: [[-0.24, -0.08, 0.86], [-0.11, 0.07, 0.93], [0.03, 0, 1]]
-  },
-  tube: {
-    twin: [[-0.14, 0.02, 0.92], [0.1, 0, 1]],
-    triple: [[-0.24, 0.04, 0.86], [0.24, 0.04, 0.86], [0, 0, 1]]
-  },
-  coil: {
-    twin: [[-0.17, 0.04, 0.84], [0.1, 0, 1]],
-    triple: [[-0.26, 0.06, 0.8], [0.26, 0.06, 0.8], [0, 0, 1]]
-  }
-}
-
-const BATTERY_KIND: Readonly<Record<string, keyof typeof BATTERY>> = {
-  cannon: 'bore',
-  archer: 'bow',
-  mortar: 'tube',
-  bombard: 'tube',
-  tesla: 'coil',
-  frost: 'coil'
-}
-
-const SINGLE: readonly BatteryCopy[] = [[0, 0, 1]]
-
-/** The copies a fixture of `type` fields at `tier`. Non-weapons stay single. */
-export const batteryFor = (type: string, tier: number): readonly BatteryCopy[] => {
-  const kind = BATTERY_KIND[type]
-  if (!kind || tier <= 1) return SINGLE
-  return tier === 2 ? BATTERY[kind]!.twin : BATTERY[kind]!.triple
-}
+export const gunGrowthFor = (w: number, h: number): number =>
+  w > h ? GUN_GROWTH_WIDE : h > w ? GUN_GROWTH_TALL : 1
 
 /** Eight directions, for the rim: the silhouette stamped around itself. */
 const RIM_TAPS: ReadonlyArray<readonly [number, number]> = [
@@ -1683,7 +1673,7 @@ const RIM_TAPS: ReadonlyArray<readonly [number, number]> = [
 ]
 
 /**
- * Two scratch canvases for the tiered bake: the battery, and its silhouette.
+ * Two scratch canvases for the tiered bake: the gun, and its silhouette.
  * Grown on demand and never shrunk; only the top-left `w × h` is used.
  */
 let tierScratchA: HTMLCanvasElement | null = null
@@ -1721,37 +1711,24 @@ const paintTieredFixture = (
   // who never welds never fetches it.
   const painting = tierFixtureArt(type, tier)
 
-  // ── The battery ──
+  // ── The gun ──
+  //
+  // ONE gun, painted exactly as the plain fixture is — the sprite's scale is
+  // already the merged span, so a bigger weld hands this a bigger `scale` and
+  // the gun grows without a second barrel ever going on.
   a.setTransform(1, 0, 0, 1, 0, 0)
   a.globalCompositeOperation = 'source-over'
   a.globalAlpha = 1
   a.clearRect(0, 0, pw, ph)
   a.setTransform(ss, 0, 0, ss, 0, 0)
   if (painting) {
-    // The whole battery is ONE painting, authored at rest and pointing right
-    // like the plain fixture, so it takes the plain fixture's aim, recoil and
-    // mirroring — and nothing else. No copies, no rear-rank shade and no wash:
-    // those are how a composite fakes what the painter was asked to paint.
+    // The tier's own painting, authored at rest and pointing right like the
+    // plain fixture, so it takes the plain fixture's aim, recoil and
+    // mirroring — and no wash: the painter has put the tier's colour in.
     paintOneGun(a, painting, e.box, type, aimed, side, scale, clock, 0, 0, 1, 'all',
       tierFixtureId(type, tier))
   } else {
-    const copies = batteryFor(type, tier)
-    for (let i = 0; i < copies.length; i++) {
-      const front = i === copies.length - 1
-      if (front && copies.length > 1) {
-        // Shade the rear rank BEFORE the front gun goes on: `source-atop` only
-        // touches pixels already there, which at this moment are exactly the
-        // pieces standing behind it.
-        a.globalCompositeOperation = 'source-atop'
-        a.fillStyle = 'rgba(10, 14, 24, 0.32)'
-        a.fillRect(0, 0, e.box, e.box)
-        a.globalCompositeOperation = 'source-over'
-      }
-      const [ox, oy, k] = copies[i]!
-      // Only the front piece keeps its carriage or parapet — one mount, many
-      // barrels, is what a battery is.
-      paintOneGun(a, gun, e.box, type, aimed, side, scale, clock, ox, oy, k, front ? 'all' : 'weapon')
-    }
+    paintOneGun(a, gun, e.box, type, aimed, side, scale, clock, 0, 0, 1, 'all')
     // The tier's colour washed over the metal, lightly: enough that the gun
     // itself is "the blue one", not so much that it stops being iron.
     a.globalCompositeOperation = 'source-atop'
@@ -1782,11 +1759,19 @@ const paintTieredFixture = (
     g.arc(c, c, scale * 0.62, 0, TAU)
     g.fill()
   }
-  // Over a painting the rim is thinner and see-through: the painting already
-  // says "blue" in its own trim, and a full-strength outline on top of inked
-  // art reads as a sticker. It stays at all so that a painted tier and a
+  // ONE CSS pixel, at every size. The sprite's units are CSS px (its context
+  // is pre-scaled by the DPR), so `d = 1` is a hairline on any screen.
+  //
+  // It used to grow with the gun — 4.5 % of the scale, three pixels and more
+  // on a phone cell — and a band that thick in a flat tier colour round an
+  // inked, hand-painted gun read as a sticker stuck on the art rather than as
+  // part of it. The tier is still said three other ways: the wash on the metal,
+  // the plate in the corner, and (from tier 3) the glow behind.
+  //
+  // Over a painting it is see-through as well: the painting already says
+  // "blue" in its own trim. It stays at all so that a painted tier and a
   // composited one are visibly the same rung.
-  const d = painting ? Math.max(0.6, scale * 0.03) : Math.max(0.75, scale * 0.045)
+  const d = 1
   g.globalAlpha = painting ? PAINTED_TIER_RIM_ALPHA : 1
   for (const [tx, ty] of RIM_TAPS) {
     g.drawImage(b.canvas, 0, 0, pw, ph, tx * d, ty * d, e.box, e.box)
@@ -1796,20 +1781,28 @@ const paintTieredFixture = (
 }
 
 /**
- * The DRAWN battery for a merged weapon, for the art-sheet bench.
+ * The DRAWN gun for a merged weapon, for the art-sheet bench.
  *
- * This is the reference a tier painting is registered against: the copies at
- * their offsets, the rear rank shaded, the weapon layer only (no carriage, no
- * parapet — the mount is never painted). It deliberately leaves out the rim,
- * the wash and the glow. Those are laid on at run time over a painting too,
- * and a reference that showed them would be painted in and then drawn again on
- * top — a double outline on every merged gun.
+ * This is the reference a tier painting is registered against: ONE gun, in the
+ * plain fixture's own box and pose, the weapon layer only (no carriage, no
+ * parapet — the mount is never painted). The same outline as the plain
+ * fixture's reference, on purpose: the game grows a merged gun by the span it
+ * bakes it at, painted or drawn, so a tier painting that filled more of the
+ * box than the plain one would be grown twice. The painting makes it HEAVIER
+ * inside that outline — the prompt says how.
+ *
+ * It deliberately leaves out the rim, the wash and the glow. Those are laid on
+ * at run time over a painting too, and a reference that showed them would be
+ * painted in and then drawn again on top — a double outline on every merged
+ * gun.
  *
  * Authored the way every fixture sheet is: aim zero, no recoil, clock zero.
+ * `tier` is kept for the bench's call sites; the outline does not change with
+ * it.
  */
-export const paintFixtureBattery = (
+export const paintTierFixture = (
   ctx: CanvasRenderingContext2D, typeId: string,
-  cx: number, cy: number, s: number, tier: number
+  cx: number, cy: number, s: number, _tier: number
 ): void => {
   const px = fixtureProxy as unknown as { typeId: string; aim: number; recoil: number; uid: number; c: number }
   px.typeId = typeId
@@ -1819,31 +1812,9 @@ export const paintFixtureBattery = (
   px.c = 0
   const aimed = AIMED_FIXTURES.has(typeId)
   const box = s * FIXTURE_BOX
-  const copies = batteryFor(typeId, tier)
-  if (copies.length > 1) {
-    // The rear rank goes through a scratch layer so its shade lands on it
-    // alone — `source-atop` on the caller's canvas would darken whatever the
-    // bench had already painted there as well.
-    const side = Math.max(1, Math.ceil(box))
-    const { a } = tierScratch(side, side)
-    a.setTransform(1, 0, 0, 1, 0, 0)
-    a.globalCompositeOperation = 'source-over'
-    a.globalAlpha = 1
-    a.clearRect(0, 0, side, side)
-    for (let i = 0; i < copies.length - 1; i++) {
-      const [ox, oy, k] = copies[i]!
-      paintOneGun(a, null, box, typeId, aimed, 0, s, 0, ox, oy, k, 'weapon')
-    }
-    a.globalCompositeOperation = 'source-atop'
-    a.fillStyle = 'rgba(10, 14, 24, 0.32)'
-    a.fillRect(0, 0, side, side)
-    a.globalCompositeOperation = 'source-over'
-    ctx.drawImage(a.canvas, 0, 0, side, side, cx - box / 2, cy - box / 2, side, side)
-  }
-  const [ox, oy, k] = copies[copies.length - 1]!
   ctx.save()
   ctx.translate(cx - box / 2, cy - box / 2)
-  paintOneGun(ctx, null, box, typeId, aimed, 0, s, 0, ox, oy, k, 'weapon')
+  paintOneGun(ctx, null, box, typeId, aimed, 0, s, 0, 0, 0, 1, 'weapon')
   ctx.restore()
 }
 
@@ -2935,6 +2906,9 @@ const drawHpBar = (
   ctx: CanvasRenderingContext2D, cx: number, cy: number,
   w: number, h: number, frac: number, boss = false
 ): void => {
+  // A damage bar is interface, not battlefield — gated here rather than at the
+  // seven call sites (see `src/game/cleanFeed.ts`).
+  if (CLEAN_FEED) return
   const x = cx - w / 2
   ctx.fillStyle = 'rgba(0,0,0,0.62)'
   roundRect(ctx, x - 1, cy - 1, w + 2, h + 2, h)
@@ -4037,6 +4011,8 @@ const consumeFx = (ev: FxEvent): void => {
       }
       triggerShake('small')
       playFx('shatter')
+      // Leave a ghost where it stood — see `drawLostMarks`.
+      if (ev.w) noteLostBlock(ev.x, ev.y, ev.w, ev.h ?? 1, performance.now())
       break
     }
     case 'explosion': {
@@ -4690,6 +4666,10 @@ const consumeFx = (ev: FxEvent): void => {
       screenFlash = Math.max(screenFlash, 0.7)
       triggerShake('big')
       playFx('gateFell')
+      break
+    }
+    case 'gateHit': {
+      noteGateHit(ev.side, performance.now())
       break
     }
   }
@@ -6018,6 +5998,17 @@ export interface BuildOverlay {
    * Every column the piece in hand could go to. Empty when nothing is armed.
    */
   dropGuides: ReadonlyArray<DropGuide>
+  /**
+   * The piece in hand on the drop board, as a shape id, or null.
+   *
+   * Drawn as a ghost in the cell it would land in — faint in every open
+   * column, solid in the one under the finger. Without it an armed board only
+   * showed WHERE: lit columns and empty dashed cells, never WHAT. A blind
+   * playtest (2026-09-11) had two players read "tap the board" as "attack
+   * that monster", spending a piece on every tap without seeing one leave the
+   * hand. Null on the desktop board, which has its own ghost.
+   */
+  dropShape: string | null
   /** Ground units still walking in beyond each edge of the frame. */
   edgeLeft: number
   edgeRight: number
@@ -6026,7 +6017,8 @@ export interface BuildOverlay {
 let overlay: BuildOverlay = {
   selectedShape: null, selectedRot: 0, hoverC: null, hoverR: null, hoverValid: false,
   slots: [], inspectC: null, inspectR: null, aimX: null, aimRadius: 4,
-  dropColumn: null, dropValid: false, dropRows: 0, dropGuides: [], edgeLeft: 0, edgeRight: 0
+  dropColumn: null, dropValid: false, dropRows: 0, dropGuides: [], dropShape: null,
+  edgeLeft: 0, edgeRight: 0
 }
 
 export const setBuildOverlay = (next: Partial<BuildOverlay>): void => {
@@ -6137,6 +6129,31 @@ const drawGhostCell = (
   blitFixture(ctx, ghostProxy, cx, cy, size, t)
 }
 
+/**
+ * The drop board's piece in hand, standing in the cell it would land in.
+ *
+ * A drop piece is one column wide, so its cells stack straight up from the
+ * landing row — bottom cell first, exactly as `dropOffer` releases them.
+ * Cells past the board's ceiling are left out rather than drawn into the sky.
+ * Reads the shape's own cell list (no copy), so a frame of ghosts allocates
+ * nothing.
+ */
+const drawDropGhost = (
+  ctx: CanvasRenderingContext2D, shapeId: string, c: number, r: number,
+  zoom: number, t: number, alpha: number
+): void => {
+  const def = SHAPE_BY_ID[shapeId]
+  if (!def) return
+  ctx.save()
+  ctx.globalAlpha = alpha
+  for (const [, dy, typeId] of def.cells) {
+    const rr = r + dy
+    if (rr > overlay.dropRows) continue
+    drawGhostCell(ctx, typeId, worldToScreenX(c), worldToScreenY(rr + 0.5), zoom, c, t)
+  }
+  ctx.restore()
+}
+
 /** Stand-in Block for a merge preview's upgraded gun: the fields `blitFixture`
  *  and `mergeArtSpan` read. Reused — painting is synchronous. */
 const previewProxy = {
@@ -6147,7 +6164,7 @@ const previewProxy = {
  * What a drop would weld into, drawn over the block it would weld INTO.
  *
  * The block as it stands is veiled, and the gun it would become is drawn over
- * it — the twin or the triple battery, in its tier's colour — with that
+ * it — one bigger gun, in its tier's colour — with that
  * colour's outline round the cell and its plate in the corner, exactly where
  * the real plate will be riveted. A chevron runs from the cell the piece lands
  * in to the cell the weld comes to rest in, because a sideways weld or a
@@ -6272,8 +6289,21 @@ const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
   if (overlay.dropGuides.length > 0) {
     const gTop = worldToScreenY(overlay.dropRows + 1)
     const gGround = worldToScreenY(0)
+    // A refused drop (a full column, an empty purse): every column that WOULD
+    // take the piece flashes its landing cell green — the drop board's "not
+    // there; here", the same answer the tower board's sockets give.
+    const refusedDrop = rejectFlash(performance.now())
     ctx.save()
     for (const g of overlay.dropGuides) {
+      if (refusedDrop > 0.01 && g.valid) {
+        const beat = prefersReducedMotion() ? 1 : 0.75 + 0.25 * Math.sin(t / 70)
+        const fl = worldToScreenX(g.c - 0.5)
+        const fy = worldToScreenY(g.r + 1)
+        roundRect(ctx, fl + zoom * 0.04, fy + zoom * 0.04, zoom * 0.92, zoom * 0.92, zoom * 0.14)
+        ctx.fillStyle = `rgba(94,240,138,${0.34 * refusedDrop * beat})`
+        ctx.fill()
+        strokeTwoTone(ctx, Math.max(2, zoom * 0.06), `rgba(4,26,10,${0.6 * refusedDrop})`, `rgba(140,255,170,${refusedDrop})`)
+      }
       const gl = worldToScreenX(g.c - 0.5)
       ctx.fillStyle = g.valid
         ? `rgba(150,215,255,${Math.abs(g.c) % 2 === 1 ? 0.055 : 0.11})`
@@ -6301,6 +6331,11 @@ const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
       roundRect(ctx, gl + zoom * 0.09, gy + zoom * 0.09, zoom * 0.82, zoom * 0.82, zoom * 0.13)
       ctx.stroke()
       ctx.setLineDash([])
+      // What would land there, faintly — the piece itself, not just its slot.
+      // A column that welds shows the weld instead (the preview below).
+      if (overlay.dropShape && !weld) {
+        drawDropGhost(ctx, overlay.dropShape, g.c, g.r, zoom, t, 0.26 + pulse * 0.08)
+      }
     }
     ctx.restore()
   }
@@ -6319,6 +6354,16 @@ const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
       ? `rgba(120,220,255,${0.1 + pulse * 0.06})`
       : `rgba(255,90,90,${0.12 + pulse * 0.06})`
     ctx.fillRect(l, top, zoom, ground - top)
+    // The piece under the finger, at full strength in the cell it will take,
+    // BEFORE the finger lifts: pressing the board says "this piece, here". A
+    // weld is already drawn as its preview below, so it is not doubled here.
+    if (overlay.dropShape && overlay.dropValid && overlay.hoverR != null) {
+      let welds = false
+      for (const g of overlay.dropGuides) {
+        if (g.c === c) { welds = (g.merges?.length ?? 0) > 0; break }
+      }
+      if (!welds) drawDropGhost(ctx, overlay.dropShape, c, overlay.hoverR, zoom, t, 0.78)
+    }
     if (overlay.hoverR != null) {
       ctx.lineWidth = Math.max(2, zoom * 0.06)
       ctx.strokeStyle = overlay.dropValid ? '#5ef08a' : '#ff5a5a'
@@ -6387,6 +6432,22 @@ const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
         `rgba(214,248,255,${(0.88 + pulse * 0.12) * near})`
       )
     }
+
+    // A refused click: every legal anchor flashes green at full strength, the
+    // falloff suspended — "not there; HERE". The answer to a refusal is where
+    // the piece CAN go, and that is exactly the list these sockets already are.
+    const refused = rejectFlash(performance.now())
+    if (refused > 0.01) {
+      const beat = prefersReducedMotion() ? 1 : 0.75 + 0.25 * Math.sin(t / 70)
+      for (const [c, r] of overlay.slots) {
+        const x = worldToScreenX(c - 0.5)
+        const y = worldToScreenY(r + 1)
+        roundRect(ctx, x, y, zoom, zoom, zoom * 0.12)
+        ctx.fillStyle = `rgba(94,240,138,${0.3 * refused * beat})`
+        ctx.fill()
+        strokeTwoTone(ctx, stroke * 1.3, `rgba(4,26,10,${0.6 * refused})`, `rgba(140,255,170,${refused})`)
+      }
+    }
   }
 
   // Cells already sealed by a gable somewhere in the standing tower.
@@ -6410,6 +6471,13 @@ const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
       }
     }
   }
+
+  // A refused ghost shakes its head (a tenth of a cell of jitter for half a
+  // second, none under reduced motion), so the red outline reads as "no" and
+  // never as a block that landed. The translate covers the ghost, its verdict
+  // outline and its seal marks alike.
+  ctx.save()
+  ctx.translate(rejectShake(performance.now()) * zoom, 0)
 
   // Ghost preview — the WHOLE shape, drawn from the anchor under the pointer,
   // so the player sees the exact footprint they are committing to.
@@ -6453,6 +6521,7 @@ const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
       drawSealMark(ctx, cx, cy, zoom, 0.75 + pulse * 0.25)
     })
   }
+  ctx.restore()
 
   // ── Arrow Rain's beaten zone ──
   //
@@ -6567,10 +6636,16 @@ const drawBuildOverlay = (ctx: CanvasRenderingContext2D, t: number): void => {
       // art out — the ring is what carries the read.
       ctx.fillStyle = 'rgba(120,220,255,0.07)'
       region(); ctx.closePath(); ctx.fill()
-      // Selection ring on the block itself, backed the same way. It sits on
-      // pale stone and painted crates rather than on sky, so it was never as
-      // badly off as the range ring — but a selection that half-disappears
-      // against a light block is the same bug one step smaller.
+    }
+    // Selection ring on the block itself, backed the same way. It sits on
+    // pale stone and painted crates rather than on sky, so it was never as
+    // badly off as the range ring — but a selection that half-disappears
+    // against a light block is the same bug one step smaller.
+    //
+    // On EVERY inspected block, not only guns: a wall or a gate being upgraded
+    // has a card open over it too, and without the ring nothing on the board
+    // said which block the card was about.
+    if (b) {
       const sw = Math.max(2, zoom * 0.06)
       const sx = worldToScreenX(b.c - 0.5)
       const sy = worldToScreenY(b.r + spanH(b))
@@ -6608,6 +6683,22 @@ const mergeArtSpan = (b: Block): number => {
   // short side it overflows by the same tenth at every tier, which is the
   // "too much cannon for the carriage" read the merged art is going for.
   return 1.1 * Math.min(spanW(b), spanH(b))
+}
+
+/**
+ * The span a block's FIXTURE is drawn at: `mergeArtSpan`, plus the extra a
+ * merged WEAPON gets on a weld that is longer one way than the other
+ * (`gunGrowthFor`). That extra is what a tier-2 gun on a 2×1 is made of — it
+ * is the one gun growing into its weld instead of a second barrel beside it.
+ *
+ * Only weapons, and only on the tower: support fixtures were never doubled and
+ * keep their size, ships draw their own hull off `mergeArtSpan`, and the
+ * one-cell board's per-tier step is already in `fixtureSpanForCellTier`.
+ */
+const fixtureArtSpan = (b: Block): number => {
+  const span = mergeArtSpan(b)
+  if (span === 1 || rulesNow().mergeArt === 'cell' || !TIERED_WEAPONS.has(b.typeId)) return span
+  return span * gunGrowthFor(spanW(b), spanH(b))
 }
 
 /**
@@ -6714,6 +6805,10 @@ const tierPlate = (tier: number, size: number): PlateSprite => {
 const drawTierPlate = (
   ctx: CanvasRenderingContext2D, tier: number, bx: number, by: number, size: number
 ): void => {
+  // The plate is a badge with a NUMBER on it. The recorder's canvas-text gate
+  // takes the digit and would leave the badge behind it — so the whole plate
+  // goes, and a weld reads by its size and its tier colour, as it does anyway.
+  if (CLEAN_FEED) return
   const s = tierPlate(tier, size)
   ctx.drawImage(s.cv, bx - s.ox, by - s.oy, s.w, s.h)
 }
@@ -6786,9 +6881,22 @@ const drawBlock = (ctx: CanvasRenderingContext2D, b: Block, t: number, fallOffse
     sy = 1 - (1 - e) * 0.3
   }
 
+  // The Gate, struck: a cartoon hop and a white/red blink (`useWorldCues`).
+  // Page clock, like every world cue — the run clock resets per run.
+  const isGateBody = b.typeId === GATE_ID && fallOffset === 0
+  const cueNow = isGateBody ? performance.now() : 0
+  const gatePop = isGateBody ? gatePopScale(cueNow) : 1
+
   ctx.save()
   ctx.translate(cx, cy)
   if (fallRot !== 0) ctx.rotate(fallRot)
+  if (gatePop !== 1) {
+    // About the BASE, not the centre, so the Gate hops up off the ground
+    // instead of sinking into it; a touch wider than tall, like a squash.
+    ctx.translate(0, fh / 2)
+    ctx.scale(1 + (gatePop - 1) * 1.1, 1 + (gatePop - 1) * 0.9)
+    ctx.translate(0, -fh / 2)
+  }
   ctx.scale(sx, sy)
 
   // A hull is not a cube of material: it has its own module, it is clipped at
@@ -6822,6 +6930,7 @@ const drawBlock = (ctx: CanvasRenderingContext2D, b: Block, t: number, fallOffse
   // for the size it is actually drawn at, not upscaled from a 1-cell bake.
   const sprite = blockFace(b.typeId, damageStage(b), Math.max(fw, fh))
   ctx.drawImage(sprite, -fw / 2, -fh / 2, fw, fh)
+  if (isGateBody) drawGateBlink(ctx, fw, fh, size, cueNow)
 
   // Reinforced blocks: a gold rim plus a shine that sweeps across the face.
   // The sweep is phase-offset per cell so a wall of them shimmers rather than
@@ -6938,11 +7047,11 @@ const drawBlockOverlays = (ctx: CanvasRenderingContext2D, b: Block, t: number): 
   //
   // The lift is only what the art overflows below the footprint's underside: a
   // 2.2-cell gun on a 2×2 bastion barely spills at all and sits dead centre,
-  // while the same gun on a one-cell-tall 4×1 battery would otherwise have half
-  // its carriage buried in the ground.
+  // while a big gun on a one-cell-tall 4×1 weld would otherwise have half its
+  // carriage buried in the ground.
   //
   // Blitted from a cached sprite rather than re-drawn — see the fixture cache.
-  const artSpan = mergeArtSpan(b)
+  const artSpan = fixtureArtSpan(b)
   {
     const fs = size * artSpan
     const fy = cy - size * (Math.max(0, (artSpan - ch) / 2) * 0.6)
@@ -7017,48 +7126,183 @@ const drawBlockOverlays = (ctx: CanvasRenderingContext2D, b: Block, t: number): 
     drawHpBar(ctx, cx, cy - fh / 2 - size * 0.1, fw * 0.72, Math.max(2, size * 0.07),
       b.hp / b.maxHp, b.typeId === GATE_ID)
   }
+  if (b.typeId === GATE_ID) drawGateAlarm(ctx, cx, cy, fw, fh, size, performance.now())
 
   // ── Merge tier ──
   if (tierOf(b.tier) > 1) {
     drawTierPlate(ctx, tierOf(b.tier), cx + fw / 2 - size * 0.2, cy - fh / 2 + size * 0.17, size)
   }
 
-  // Upgrade rank — one gold chevron per rank bought with run gold.
-  //
-  // Stacked in the bottom-left corner rather than written as a number: at 20 px
-  // a cell no digit is legible, but "how many notches" is, and that is the only
-  // question the marker has to answer from across the tower.
+  // Upgrade rank, in the bottom-left corner — see `rankInsignia`.
   const rank = b.level ?? 0
-  if (rank > 0) {
-    ctx.save()
-    ctx.translate(cx - fw / 2 + size * 0.14, cy + fh / 2 - size * 0.14)
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
-    const w = size * 0.11
+  if (rank > 0) drawRankInsignia(ctx, rank, cx - fw / 2 + size * 0.14, cy + fh / 2 - size * 0.14, size)
+}
+
+// ─── Rank insignia ──────────────────────────────────────────────────────────
+//
+// A block's rank, bought with run gold, worn like a soldier's: one, two and
+// three CHEVRONS, then a LIEUTENANT'S STAR, then a MAJOR'S LAUREL WREATH around
+// the star. Stacking a fourth and fifth chevron made the top ranks look like
+// more of the same — five notches is just a taller pile than three — when the
+// last two are the most expensive purchases on the block. A new SHAPE says a
+// new standing; a playtest's first question about a star was what it took to
+// get one.
+//
+// Pictures rather than numbers: at 20 px a cell no digit is legible, but a
+// notch count, a star and a wreath all are, from across the tower.
+
+export type RankInsignia =
+  | { kind: 'chevrons'; n: number }
+  | { kind: 'star' }
+  | { kind: 'wreath' }
+
+/** What rank `rank` wears, or null for an unranked block. */
+export const rankInsignia = (rank: number): RankInsignia | null => {
+  if (rank <= 0) return null
+  if (rank <= 3) return { kind: 'chevrons', n: rank }
+  return rank === 4 ? { kind: 'star' } : { kind: 'wreath' }
+}
+
+/**
+ * The insignia's box around its anchor, in cells: `left`/`top` are how far the
+ * box reaches left of and above the anchor. Wide and tall enough for a wreath
+ * — the biggest of them — with its outline.
+ */
+const RANK_BOX = { left: 0.26, top: 0.46, w: 0.64, h: 0.62 } as const
+/** Baked at this cell size and scaled on the blit — one bitmap per rank for
+ *  the life of the page, never a re-bake while the desktop camera zooms. */
+const RANK_BAKE_PX = 96
+const rankCache = new Map<string, HTMLCanvasElement>()
+
+const INSIGNIA_INK = 'rgba(0,0,0,0.75)'
+const INSIGNIA_GOLD = '#ffd93c'
+
+/** A five-point star centred on (x, y), outer radius `r`. */
+const starPath = (c: CanvasRenderingContext2D, x: number, y: number, r: number): void => {
+  c.beginPath()
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5
+    const rr = i % 2 === 0 ? r : r * 0.42
+    const px = x + Math.cos(a) * rr
+    const py = y + Math.sin(a) * rr
+    if (i === 0) c.moveTo(px, py)
+    else c.lineTo(px, py)
+  }
+  c.closePath()
+}
+
+/** A gold star with a dark keyline under it, as the chevrons have. */
+const paintStar = (c: CanvasRenderingContext2D, x: number, y: number, r: number, s: number): void => {
+  starPath(c, x, y, r)
+  c.lineJoin = 'round'
+  c.strokeStyle = INSIGNIA_INK
+  c.lineWidth = s * 0.07
+  c.stroke()
+  const g = c.createLinearGradient(x, y - r, x, y + r)
+  g.addColorStop(0, '#fff4b0')
+  g.addColorStop(0.5, INSIGNIA_GOLD)
+  g.addColorStop(1, '#c98a12')
+  c.fillStyle = g
+  c.fill()
+}
+
+/** Paint `rank`'s insignia around the anchor at (0, 0), cell size `s`. */
+const paintRankInsignia = (c: CanvasRenderingContext2D, rank: number, s: number): void => {
+  const ins = rankInsignia(rank)
+  if (!ins) return
+  c.lineCap = 'round'
+  c.lineJoin = 'round'
+  if (ins.kind === 'chevrons') {
     // Separated from the block behind it by a dark UNDER-STROKE, not by a
-    // shadow. `shadowBlur` is the single most expensive thing a 2D canvas can
-    // be asked for — it forces the rasteriser to blur an offscreen copy of the
-    // path — and this ran once per upgraded block, so a late tower paid for a
-    // few hundred blur passes a frame to outline a shape eleven pixels wide.
-    // Stroking the same path twice, fat and dark then thin and gold, is the
-    // same read for two ordinary strokes.
-    for (const [colour, width] of [
-      ['rgba(0,0,0,0.75)', Math.max(2, size * 0.105)],
-      ['#ffd93c', Math.max(1, size * 0.055)]
-    ] as const) {
-      ctx.strokeStyle = colour
-      ctx.lineWidth = width
-      for (let i = 0; i < rank; i++) {
-        const y = -i * size * 0.11
-        ctx.beginPath()
-        ctx.moveTo(-w, y)
-        ctx.lineTo(0, y - w * 0.8)
-        ctx.lineTo(w, y)
-        ctx.stroke()
+    // shadow — `shadowBlur` is the most expensive thing a 2D canvas can be
+    // asked for. Fat and dark, then thin and gold: the same read for two
+    // ordinary strokes.
+    const w = s * 0.11
+    for (const [colour, width] of [[INSIGNIA_INK, s * 0.105], [INSIGNIA_GOLD, s * 0.055]] as const) {
+      c.strokeStyle = colour
+      c.lineWidth = width
+      for (let i = 0; i < ins.n; i++) {
+        const y = -i * s * 0.11
+        c.beginPath()
+        c.moveTo(-w, y)
+        c.lineTo(0, y - w * 0.8)
+        c.lineTo(w, y)
+        c.stroke()
       }
     }
-    ctx.restore()
+    return
   }
+  // Star and wreath share a centre a little up and in from the corner, so the
+  // insignia grows out of the same spot the chevrons stacked from.
+  const x = s * 0.05
+  const y = -s * 0.15
+  if (ins.kind === 'star') {
+    paintStar(c, x, y, s * 0.16, s)
+    return
+  }
+  // The wreath: two laurel branches rising from a knot under the star and
+  // curving up either side of it, leaves pointing along the branch. Drawn in
+  // two passes like everything else here — every leaf's dark keyline first,
+  // then every leaf's gold — so the branch reads as one inked shape.
+  const R = s * 0.2
+  const leaves: Array<[number, number, number]> = []
+  for (const side of [-1, 1]) {
+    for (let i = 0; i < 5; i++) {
+      // From the knot at the bottom (a = 90°) up to the top (a ≈ -40° / 220°).
+      const k = (i + 0.6) / 5.4
+      const a = Math.PI / 2 - side * k * (Math.PI * 0.78)
+      const lx = x + Math.cos(a) * R
+      const ly = y + Math.sin(a) * R
+      // Along the branch, tipped outward.
+      const tangent = a - side * Math.PI / 2
+      leaves.push([lx, ly, tangent + side * 0.45])
+    }
+  }
+  const leaf = (lx: number, ly: number, rot: number, grow: number): void => {
+    c.beginPath()
+    c.ellipse(lx, ly, s * 0.058 + grow, s * 0.028 + grow, rot, 0, Math.PI * 2)
+  }
+  c.fillStyle = INSIGNIA_INK
+  for (const [lx, ly, rot] of leaves) { leaf(lx, ly, rot, s * 0.022); c.fill() }
+  c.fillStyle = INSIGNIA_GOLD
+  for (const [lx, ly, rot] of leaves) { leaf(lx, ly, rot, 0); c.fill() }
+  // The knot the two branches are tied with.
+  c.beginPath()
+  c.arc(x, y + R, s * 0.04, 0, Math.PI * 2)
+  c.fillStyle = INSIGNIA_INK
+  c.fill()
+  c.beginPath()
+  c.arc(x, y + R, s * 0.022, 0, Math.PI * 2)
+  c.fillStyle = INSIGNIA_GOLD
+  c.fill()
+  // And the lieutenant's star it was earned on top of, held inside it.
+  paintStar(c, x, y - s * 0.01, s * 0.105, s)
+}
+
+const rankSprite = (rank: number): HTMLCanvasElement => {
+  const ss = Math.min(2, Math.max(1, tintDpr || 1))
+  const key = `${rank}|${ss}`
+  const hit = rankCache.get(key)
+  if (hit) return hit
+  const P = RANK_BAKE_PX
+  const cv = document.createElement('canvas')
+  cv.width = Math.max(1, Math.round(RANK_BOX.w * P * ss))
+  cv.height = Math.max(1, Math.round(RANK_BOX.h * P * ss))
+  const c = cv.getContext('2d')!
+  c.scale(ss, ss)
+  c.translate(RANK_BOX.left * P, RANK_BOX.top * P)
+  paintRankInsignia(c, rank, P)
+  rankCache.set(key, cv)
+  return cv
+}
+
+/** Blit `rank`'s insignia with its anchor at (ax, ay), for cell size `size`. */
+const drawRankInsignia = (
+  ctx: CanvasRenderingContext2D, rank: number, ax: number, ay: number, size: number
+): void => {
+  if (rank <= 0) return
+  const sp = rankSprite(Math.min(rank, 5))
+  ctx.drawImage(sp, ax - RANK_BOX.left * size, ay - RANK_BOX.top * size, RANK_BOX.w * size, RANK_BOX.h * size)
 }
 
 // ─── Reflection ─────────────────────────────────────────────────────────────
@@ -7328,6 +7572,12 @@ export const drawScene = (
     drawBlockOverlays(ctx, b, t)
   }
 
+  // 7b-iii. Ghosts of blocks that just died, where they stood — under the
+  // enemies, so whatever broke through is drawn in front of the gap it made.
+  // Cues run on the page clock, not the run clock (see `useWorldCues`).
+  const cueNow = performance.now()
+  if (!CLEAN_FEED) drawLostMarks(ctx, zoom, cueNow)
+
   perf.phase('enemies')
   // 7c. Everything else in front.
   for (const e of enemies) {
@@ -7361,11 +7611,19 @@ export const drawScene = (
   drawParticles(ctx, worldToScreenX, worldToScreenY, zoom)
 
   // 10. Floating combat text.
-  drawFloatingTexts(ctx, zoom)
+  //
+  // The recorder no-ops `fillText`, so a clean feed would draw nothing here
+  // anyway — skipped outright so it does not pay for the stroke-then-fill pass
+  // per number on a 900-frame capture.
+  if (!CLEAN_FEED) drawFloatingTexts(ctx, zoom)
+
+  // 10a. "Nothing can reach it" marks, over the enemies they are about.
+  if (!CLEAN_FEED) drawStrandedMarks(ctx, enemies, zoom, cueNow)
 
   perf.phase('overlay')
-  // 11. Build UI.
-  if (phase.value !== 'defeat') drawBuildOverlay(ctx, t)
+  // 11. Build UI — the placement grid, the ghost cell, the drop ghost, the
+  // merge preview and the off-screen edge arrows. All interface.
+  if (phase.value !== 'defeat' && !CLEAN_FEED) drawBuildOverlay(ctx, t)
 
   // Full-screen flash for lightning / wave start / gate fall.
   if (screenFlash > 0.01) {
@@ -7382,8 +7640,197 @@ export const drawScene = (
     ctx.fillRect(0, 0, w, h)
   }
 
+  // The Gate is being hit: a red wash on the edge the blow came from.
+  drawGateVignette(ctx, w, h, cueNow)
+
   lastFrame = t
   void lastFrame
+}
+
+// ─── World cues ─────────────────────────────────────────────────────────────
+//
+// What the battlefield SHOWS so nothing has to be said (state and timing live
+// in `useWorldCues`; see there for why each exists). All four are cheap by
+// construction: a handful of path ops each, nothing cached, nothing allocated
+// except the two edge gradients and only on the frames a vignette is up.
+
+/**
+ * A ghost of every block that died in the last ~1.2 s, standing where it stood.
+ *
+ * Dashed and red, with a crack through it: BROKEN, not merely gone — the debris
+ * the shatter throws is spectacular and over in half a second, and a player who
+ * was looking at the other side of the tower came back to a gap and no idea
+ * what used to fill it.
+ */
+const drawLostMarks = (ctx: CanvasRenderingContext2D, zoom: number, now: number): void => {
+  const rect = viewRect()
+  const lw = Math.max(1.5, zoom * 0.045)
+  for (const m of lostMarkSlots()) {
+    const a = lostMarkFade(m, now)
+    if (a <= 0) continue
+    if (m.x + m.w / 2 < rect.l - 1 || m.x - m.w / 2 > rect.r + 1) continue
+    const l = worldToScreenX(m.x - m.w / 2)
+    const top = worldToScreenY(m.y + m.h / 2)
+    const w = m.w * zoom
+    const h = m.h * zoom
+    ctx.save()
+    ctx.globalAlpha = a
+    roundRect(ctx, l + 1, top + 1, w - 2, h - 2, zoom * 0.12)
+    ctx.fillStyle = 'rgba(255,70,56,0.16)'
+    ctx.fill()
+    ctx.setLineDash([zoom * 0.16, zoom * 0.1])
+    strokeTwoTone(ctx, lw, 'rgba(24,4,4,0.6)', 'rgba(255,104,88,0.95)')
+    ctx.setLineDash([])
+    ctx.beginPath()
+    ctx.moveTo(l + w * 0.22, top + h * 0.12)
+    ctx.lineTo(l + w * 0.48, top + h * 0.44)
+    ctx.lineTo(l + w * 0.36, top + h * 0.58)
+    ctx.lineTo(l + w * 0.74, top + h * 0.9)
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    strokeTwoTone(ctx, Math.max(1.2, zoom * 0.03), 'rgba(24,4,4,0.45)', 'rgba(255,138,118,0.9)')
+    ctx.restore()
+  }
+}
+
+/**
+ * The Gate's blink when struck: sharp white and red over its body, drawn in
+ * the body's own (hopping) transform so the flash moves with it. A rounded
+ * rect is the silhouette — the Gate's face fills its cell.
+ */
+const drawGateBlink = (
+  ctx: CanvasRenderingContext2D, fw: number, fh: number, size: number, now: number
+): void => {
+  const white = gateBlinkWhite(now)
+  const red = gateBlinkRed(now)
+  if (white <= 0.01 && red <= 0.01) return
+  ctx.save()
+  roundRect(ctx, -fw / 2, -fh / 2, fw, fh, size * 0.1)
+  if (white > 0.01) {
+    ctx.globalAlpha = white
+    ctx.fillStyle = '#ffffff'
+    ctx.fill()
+  }
+  if (red > 0.01) {
+    ctx.globalAlpha = red
+    ctx.fillStyle = '#ff2626'
+    ctx.fill()
+  }
+  ctx.restore()
+}
+
+/**
+ * The Gate while blows are landing on it: a red outline round its footprint and
+ * a red ring round its health bar, beating in time — "this is where you lose".
+ * Called from `drawBlockOverlays` with the Gate's own geometry. Under reduced
+ * motion the beat stops and the outline simply holds.
+ */
+const drawGateAlarm = (
+  ctx: CanvasRenderingContext2D, cx: number, cy: number,
+  fw: number, fh: number, size: number, now: number
+): void => {
+  // Half of it rings the health BAR, which a clean feed has already taken away
+  // — left on, it is a rectangle beating around nothing.
+  if (CLEAN_FEED) return
+  const k = gateAlarm(now)
+  if (k <= 0) return
+  const beat = prefersReducedMotion() ? 1 : 0.6 + 0.4 * Math.sin(now / 95)
+  const a = Math.min(1, k * 1.4) * beat
+  const pad = size * 0.06
+  ctx.save()
+  roundRect(ctx, cx - fw / 2 - pad, cy - fh / 2 - pad, fw + pad * 2, fh + pad * 2, size * 0.16)
+  strokeTwoTone(ctx, Math.max(1.5, size * 0.05), `rgba(40,4,4,${0.55 * a})`, `rgba(255,72,60,${0.95 * a})`)
+  const bw = fw * 0.72
+  const bh = Math.max(2, size * 0.07)
+  const by = cy - fh / 2 - size * 0.1
+  roundRect(ctx, cx - bw / 2 - 3, by - 3, bw + 6, bh + 6, bh)
+  ctx.lineWidth = Math.max(1.5, size * 0.035)
+  ctx.strokeStyle = `rgba(255,90,70,${0.9 * a})`
+  ctx.stroke()
+  ctx.restore()
+}
+
+/**
+ * A red wash on the screen edge the Gate's latest blow came from — the phone
+ * has no Gate bar in its HUD at all, and on either board the Gate is often
+ * off the middle of the player's attention when it starts losing. A blow with
+ * no side (a bomb, a fire) washes both edges at a lower strength.
+ */
+const drawGateVignette = (ctx: CanvasRenderingContext2D, w: number, h: number, now: number): void => {
+  const both = vignette(0, now) * 0.6
+  const left = Math.max(vignette(-1, now), both)
+  const right = Math.max(vignette(1, now), both)
+  if (left <= 0.01 && right <= 0.01) return
+  const band = Math.max(40, Math.min(w * 0.2, h * 0.35))
+  if (left > 0.01) {
+    const g = ctx.createLinearGradient(0, 0, band, 0)
+    g.addColorStop(0, `rgba(214,28,28,${0.34 * left})`)
+    g.addColorStop(1, 'rgba(214,28,28,0)')
+    ctx.fillStyle = g
+    ctx.fillRect(0, 0, band, h)
+  }
+  if (right > 0.01) {
+    const g = ctx.createLinearGradient(w, 0, w - band, 0)
+    g.addColorStop(0, `rgba(214,28,28,${0.34 * right})`)
+    g.addColorStop(1, 'rgba(214,28,28,0)')
+    ctx.fillStyle = g
+    ctx.fillRect(w - band, 0, band, h)
+  }
+}
+
+/**
+ * The "nothing can reach it" mark: a crosshair with a red slash through it.
+ *
+ * Drawn on its own dark disc because it has to hold over sky, snow and water
+ * at every hour of the day cycle — the same reason the build marks are
+ * two-tone.
+ */
+const drawNoReachGlyph = (ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number): void => {
+  ctx.save()
+  ctx.beginPath()
+  ctx.arc(cx, cy, r * 1.3, 0, TAU)
+  ctx.fillStyle = 'rgba(10,14,26,0.72)'
+  ctx.fill()
+  ctx.lineCap = 'round'
+  ctx.lineWidth = Math.max(1.5, r * 0.18)
+  ctx.strokeStyle = '#f4e8e2'
+  ctx.beginPath()
+  ctx.arc(cx, cy, r * 0.72, 0, TAU)
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.moveTo(cx, cy - r * 1.05); ctx.lineTo(cx, cy - r * 0.42)
+  ctx.moveTo(cx, cy + r * 0.42); ctx.lineTo(cx, cy + r * 1.05)
+  ctx.moveTo(cx - r * 1.05, cy); ctx.lineTo(cx - r * 0.42, cy)
+  ctx.moveTo(cx + r * 0.42, cy); ctx.lineTo(cx + r * 1.05, cy)
+  ctx.stroke()
+  ctx.lineWidth = Math.max(2, r * 0.26)
+  ctx.strokeStyle = '#ff4a42'
+  ctx.beginPath()
+  ctx.moveTo(cx - r * 0.9, cy + r * 0.9)
+  ctx.lineTo(cx + r * 0.9, cy - r * 0.9)
+  ctx.stroke()
+  ctx.restore()
+}
+
+/**
+ * The mark over every engaged enemy no gun on the tower can hit (the reach
+ * scan's list — see `scanUnreachable`). A fight that cannot end reads as a
+ * frozen game; a crossed-out crosshair over the enemy says "your guns cannot
+ * touch this" in the one place the player is already looking.
+ */
+const drawStrandedMarks = (
+  ctx: CanvasRenderingContext2D, enemies: readonly Enemy[], zoom: number, now: number
+): void => {
+  if (phase.value !== 'battle') return
+  const rect = viewRect()
+  const bob = prefersReducedMotion() ? 0 : Math.sin(now / 260)
+  const r = Math.max(7, zoom * 0.2) * (1 + 0.05 * bob)
+  for (const e of enemies) {
+    if (e.dying > 0 || !isStranded(e.uid)) continue
+    if (e.x < rect.l - 1 || e.x > rect.r + 1) continue
+    const s = enemyDef(e.typeId).scale * zoom
+    drawNoReachGlyph(ctx, worldToScreenX(e.x), worldToScreenY(e.y) - s * 1.02 - r, r)
+  }
 }
 
 const drawFloatingTexts = (ctx: CanvasRenderingContext2D, zoom: number): void => {
@@ -7568,16 +8015,37 @@ export const fixtureSpanForTier = (tier: number): number =>
   tier <= 1 ? 1 : 1.1 * Math.pow(2, Math.floor((tier - 1) / 2))
 
 /**
+ * How big a merged WEAPON is drawn, in cells, on the canonical footprint of a
+ * tier — `fixtureArtSpan` for a block the art tools and the teaching cards do
+ * not have. The canonical ladder widens first (1×1, 2×1, 2×2, 4×2, 4×4), so
+ * every even tier is a wide weld and takes the wide growth:
+ *
+ *   tier   1     2      3     4      5
+ *   span   1     1.43   2.2   2.86   4.4
+ *
+ * Strictly bigger at every rung, which the twin-and-triple composite it
+ * replaces only managed by adding barrels.
+ */
+export const gunSpanForTier = (tier: number): number =>
+  fixtureSpanForTier(tier) * (tier >= 2 && tier % 2 === 0 ? GUN_GROWTH_WIDE : 1)
+
+/**
  * The same, on a board whose welds stay in ONE cell (`mergeArt: 'cell'`).
  *
  * There is no footprint to grow into, so the gun used to stay exactly the size
  * of an unmerged one at every tier — a tier-5 weld looked like a tier 1 with a
- * sticker on it. It now grows a step per tier and stops at 1.3: past that it
- * spills far enough over its neighbours to hide the blocks beside it, which on
- * a five-column board is a fifth of the tower.
+ * sticker on it. It grows a step per tier and stops at 1.34.
+ *
+ * The steps are sized against the neighbours, not the gun: a cannon's muzzle
+ * reaches 0.57 of its span from the cell's centre, so at 1.34 it spills a
+ * quarter of a cell into the next column when it fires sideways — what the
+ * triple battery at 1.3 used to spill, now with half its bulk across the
+ * barrel. Past that it hides the blocks beside it, which on a five-column board
+ * is a fifth of the tower. Tier 2 at 1.2 is the smallest step that still reads
+ * as a heavier gun and not the same one.
  */
 export const fixtureSpanForCellTier = (tier: number): number =>
-  tier <= 1 ? 1 : tier === 2 ? 1.12 : tier === 3 ? 1.22 : 1.3
+  tier <= 1 ? 1 : tier === 2 ? 1.2 : tier === 3 ? 1.28 : 1.34
 
 /** The riveted steel plate that says how deep a weld goes. */
 export const paintTierPlate = (

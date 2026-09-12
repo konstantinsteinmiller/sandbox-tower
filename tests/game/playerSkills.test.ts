@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ENEMY_DEFS } from '@/game/enemies'
+import { GATE_ID } from '@/game/blocks'
 
 // The simulation is a module-level singleton (project convention), so each test
 // re-imports it fresh to get a clean tower.
@@ -103,6 +104,18 @@ describe('field repair', () => {
     g.runCoins.value = g.repairCostAt(1, 0) - 1
     expect(g.canRepairBlock(1, 0)).toBe(false)
     expect(g.repairBlock(1, 0)).toBe(false)
+  })
+
+  it('shows a patched Gate on the wave badge at once, not at the next wave', async () => {
+    const g = await stocked()
+    const gate = [...g.getBlocks().values()].find((b) => b.typeId === GATE_ID)!
+    gate.hp = Math.round(gate.maxHp / 2)
+    // A rank on the Gate re-reads its refs, so the badge now shows the wound.
+    expect(g.upgradeBlock(gate.c, gate.r)).toBe(true)
+    expect(g.gateHpPct.value).toBeLessThan(1)
+
+    expect(g.repairBlock(gate.c, gate.r)).toBe(true)
+    expect(g.gateHpPct.value).toBe(1)
   })
 })
 

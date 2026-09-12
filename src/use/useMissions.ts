@@ -73,18 +73,42 @@ const hashStr = (s: string): number => {
   return h >>> 0
 }
 
+/**
+ * The day's first goal: survive to wave 2 — finishable inside the first
+ * minute of anyone's first siege.
+ *
+ * The 2026-09-11 rerun: the missions button only surfaces once something is
+ * claimable, and with 60 kills or 15 blocks as the easiest goal that was wave
+ * 8-10. "A player who dies before wave 8 never sees this hook." A goal that
+ * lands on the second wave clear puts the badge, the corner button and the
+ * coin shower in front of every player while they are still deciding whether
+ * to stay — and returning players get a small daily hello for playing at all.
+ */
+const STARTER: Readonly<Mission> = { type: 'waves', target: 2, progress: 0, reward: 40, claimed: false }
+/** What the other two slots draw from. The longer `waves` goals (5/8/12)
+ *  stay defined — older saves may still hold one — but are no longer dealt. */
+const DAILY_TYPES: MissionType[] = ['coins', 'kills', 'blocks']
+
 /** Build the day's three missions deterministically from the date string, so
  *  the same day always shows the same goals (even across reloads / devices). */
 const generateMissions = (day: string): Mission[] => {
   const seed = hashStr(day)
-  // Pick 3 distinct types: drop one type based on the seed.
-  const dropped = ALL_TYPES[seed % ALL_TYPES.length]!
-  const types = ALL_TYPES.filter((t) => t !== dropped)
-  return types.map((type, i) => {
-    const def = MISSION_DEFS[type]
-    const target = def.targets[(seed >> (i * 3)) % def.targets.length]!
-    return { type, target, progress: 0, reward: def.reward, claimed: false }
-  })
+  // The starter, then two of the three daily types: drop one by the seed.
+  const dropped = DAILY_TYPES[seed % DAILY_TYPES.length]!
+  const types = DAILY_TYPES.filter((t) => t !== dropped)
+  return [
+    { ...STARTER },
+    ...types.map((type, i) => {
+      const def = MISSION_DEFS[type]
+      // `>>>`, not `>>`: the seed is an unsigned 32-bit hash, and a signed
+      // shift turns every seed past 2^31 negative — a negative index, an
+      // `undefined` target, and a goal reading "0/undefined" that could never
+      // be claimed (until a reload's sanitiser papered over it). About half of
+      // all days.
+      const target = def.targets[(seed >>> (i * 3)) % def.targets.length]!
+      return { type, target, progress: 0, reward: def.reward, claimed: false }
+    })
+  ]
 }
 
 const loadState = (): MissionState => {
@@ -140,6 +164,21 @@ const persist = (): void => {
 export const claimableMissionCount = computed(
   () => state.value.missions.filter((m) => !m.claimed && m.progress >= m.target).length
 )
+
+/**
+ * Every mission still standing is ready to claim.
+ *
+ * This, not "any is ready", is what earns the button its gold glow. A badge
+ * answers "how many can I take?"; the glow answers "is it worth opening NOW?",
+ * and the honest yes is when opening the panel empties it. A glow that lit on
+ * the first of three would sit there all session beside two goals the player
+ * cannot finish yet — the same "always on, so ignored" trap the tray nudge
+ * avoids. False once everything has been claimed: nothing left, nothing to say.
+ */
+export const allRemainingClaimable = computed(() => {
+  const open = state.value.missions.filter((m) => !m.claimed)
+  return open.length > 0 && open.every((m) => m.progress >= m.target)
+})
 
 const useMissions = () => {
   const { addCoins } = useTowerEconomy()
@@ -213,7 +252,7 @@ const useMissions = () => {
     return true
   }
 
-  return { missions, recordRun, claim, claimableMissionCount }
+  return { missions, recordRun, claim, claimableMissionCount, allRemainingClaimable }
 }
 
 export default useMissions

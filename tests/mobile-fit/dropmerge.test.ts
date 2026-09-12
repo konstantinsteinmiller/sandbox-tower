@@ -568,6 +568,8 @@ describe('blueprints', () => {
     const progressMod = await import('@/use/useTowerProgress')
     const progress = progressMod.default()
     progress.coins.value = 500_000
+    // Sharp Bolts sits behind Foundations since the strip was re-ordered.
+    expect(progress.buyTech('m2_foundations')).toBe(true)
     // Five was the ceiling; the twelfth rank proves the ladder is open.
     for (let i = 1; i <= 12; i++) {
       expect(progress.buyTech('m2_sharpBolts')).toBe(true)
@@ -584,14 +586,22 @@ describe('blueprints', () => {
     const state = await import('@/use/useTowerState')
     const progress = progressMod.default()
     progress.coins.value = 500
+    // Foundations leads the strip; everything else waits its turn.
+    expect(progress.isUnlocked('m2_foundations')).toBe(true)
+    expect(progress.isUnlocked('m2_sharpBolts')).toBe(false)
+    expect(progress.buyTech('m2_sharpBolts')).toBe(false)
+    expect(progress.buyTech('m2_foundations')).toBe(true)
+    expect(progress.levelOf('m2_foundations')).toBe(1)
+    // The first rank is front-loaded: +50 % block HP on its own.
+    expect(progressMod.blockHpMul.value).toBeCloseTo(1.5)
     expect(progress.isUnlocked('m2_sharpBolts')).toBe(true)
     expect(progress.isUnlocked('m2_brace')).toBe(false)
-    expect(progress.buyTech('m2_brace')).toBe(false)
     expect(progress.buyTech('m2_sharpBolts')).toBe(true)
-    expect(progress.levelOf('m2_sharpBolts')).toBe(1)
     expect(progressMod.damageMul.value).toBeCloseTo(1.08)
     expect(progress.isUnlocked('m2_brace')).toBe(true)
-    expect(state.getState<{ levels: Record<string, number> }>('ts_m2_tech')?.levels.m2_sharpBolts).toBe(1)
+    const levels = state.getState<{ levels: Record<string, number> }>('ts_m2_tech')?.levels
+    expect(levels?.m2_foundations).toBe(1)
+    expect(levels?.m2_sharpBolts).toBe(1)
     expect(state.getState('ts_tech')).toBeUndefined()
     void game
   })

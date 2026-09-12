@@ -15,6 +15,9 @@ export default {
     'free': 'Gratis',
     'tile': 'Gratis: {name}, Stufe {n}. Antippen, dann aufs Feld tippen, um es zu platzieren',
     'pair': 'Gratis: ein Paar {name}. Antippen, dann aufs Feld tippen, um es zu platzieren',
+    'tilePaid': '{name}, Stufe {n}, zum halben Preis. Antippen, dann aufs Feld tippen, um es zu platzieren',
+    'pairPaid': 'Ein Paar {name} zum halben Preis. Antippen, dann aufs Feld tippen, um es zu platzieren',
+    'discount': '-{n} %',
     'chest': 'Fliegende Truhe: antippen zum Öffnen',
     'firstClear': 'Welle {n} geschafft! Ein Geschenk für dich'
   },

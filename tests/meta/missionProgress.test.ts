@@ -146,3 +146,105 @@ describe('mission progress is credited in deltas', () => {
     expect(m.missions.value[idx]!.progress).toBe(7)
   })
 })
+
+/**
+ * The day's first goal is always "hold two waves", so every player meets the
+ * badge, the corner button and the coin shower inside their first siege —
+ * the rerun found the easiest goal otherwise landed around wave 8-10.
+ */
+describe('the starter goal', () => {
+  it('leads every day\'s list, and is the day\'s only waves goal', async () => {
+    for (const day of ['2026-01-05T12:00:00.000Z', '2026-03-17T08:00:00.000Z', '2026-09-11T20:00:00.000Z', '2027-02-28T23:30:00.000Z']) {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date(day))
+      vi.resetModules()
+      localStorage.clear()
+      const mod = await import('@/use/useMissions')
+      const list = mod.default().missions.value
+      expect(list, day).toHaveLength(3)
+      expect(list[0], day).toMatchObject({ type: 'waves', target: 2, progress: 0, claimed: false })
+      expect(list.filter((x) => x.type === 'waves'), day).toHaveLength(1)
+      expect(new Set(list.map((x) => x.type)).size, day).toBe(3)
+    }
+  })
+
+  it('deals every goal a real target, every day', async () => {
+    // A signed shift on the day's hash dealt `undefined` targets on about half
+    // of all days (2026-09-11 among them): "0/undefined", never claimable.
+    const start = Date.UTC(2026, 0, 1)
+    for (let d = 0; d < 120; d++) {
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date(start + d * 86_400_000 + 12 * 3_600_000))
+      vi.resetModules()
+      localStorage.clear()
+      const mod = await import('@/use/useMissions')
+      for (const x of mod.default().missions.value) {
+        expect(Number.isFinite(x.target) && x.target > 0, `${new Date(start + d * 86_400_000).toISOString().slice(0, 10)} ${x.type}`).toBe(true)
+      }
+    }
+  })
+
+  it('is ready to claim on the second wave, not before', async () => {
+    const m = await load()
+    m.recordRun(run({ waves: 1 }))
+    expect(m.claimableMissionCount.value).toBe(0)
+    m.recordRun(run({ waves: 2 }))
+    expect(m.claimableMissionCount.value).toBe(1)
+    expect(m.claim(0)).toBe(true)
+  })
+})
+
+/**
+ * The badge counts what can be claimed; the gold glow is stricter — it lights
+ * only when EVERY mission still standing is ready, i.e. when opening the panel
+ * would empty it. The phone's corner button follows the count.
+ */
+describe('the collect signals', () => {
+  const targetOf = (m: Awaited<ReturnType<typeof load>>, type: string): number =>
+    m.missions.value.find((x) => x.type === type)!.target
+  const indexOf = (m: Awaited<ReturnType<typeof load>>, type: string): number =>
+    m.missions.value.findIndex((x) => x.type === type)
+
+  it('counts every ready goal but glows only when none is left unfinished', async () => {
+    const m = await load()
+    expect(m.claimableMissionCount.value).toBe(0)
+    expect(m.allRemainingClaimable.value).toBe(false)
+
+    m.recordRun(run({ kills: targetOf(m, 'kills') }))
+    expect(m.claimableMissionCount.value).toBe(1)
+    expect(m.allRemainingClaimable.value).toBe(false)
+
+    m.recordRun(run({
+      kills: targetOf(m, 'kills'),
+      coins: targetOf(m, 'coins'),
+      waves: targetOf(m, 'waves')
+    }))
+    expect(m.claimableMissionCount.value).toBe(3)
+    expect(m.allRemainingClaimable.value).toBe(true)
+  })
+
+  it('judges "remaining" after claims, and goes dark once nothing is left', async () => {
+    const m = await load()
+    m.recordRun(run({ kills: targetOf(m, 'kills'), coins: targetOf(m, 'coins') }))
+    expect(m.allRemainingClaimable.value).toBe(false)
+
+    expect(m.claim(indexOf(m, 'kills'))).toBe(true)
+    expect(m.claim(indexOf(m, 'coins'))).toBe(true)
+    // The one goal still standing is unfinished: nothing to collect, no glow.
+    expect(m.claimableMissionCount.value).toBe(0)
+    expect(m.allRemainingClaimable.value).toBe(false)
+
+    m.recordRun(run({
+      kills: targetOf(m, 'kills'),
+      coins: targetOf(m, 'coins'),
+      waves: targetOf(m, 'waves')
+    }))
+    // Now the last one is ready, and it is everything that remains.
+    expect(m.claimableMissionCount.value).toBe(1)
+    expect(m.allRemainingClaimable.value).toBe(true)
+
+    expect(m.claim(indexOf(m, 'waves'))).toBe(true)
+    expect(m.claimableMissionCount.value).toBe(0)
+    expect(m.allRemainingClaimable.value).toBe(false)
+  })
+})

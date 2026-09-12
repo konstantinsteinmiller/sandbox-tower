@@ -183,27 +183,29 @@ describe('the build hand', () => {
     expect(g.rerollReadyIn.value[2]).toBe(0)
   })
 
-  it('recharges a slot after its five seconds elapse', async () => {
+  it('recharges a slot after its three seconds elapse', async () => {
     const g = await loadGame()
     g.startRun()
     g.manualReroll(0)
     expect(g.canManualReroll(0)).toBe(false)
-    // Four seconds in: still cooling.
-    for (let i = 0; i < 240; i++) g.step(16.67)
+    // Two and a half seconds in: still cooling.
+    for (let i = 0; i < 150; i++) g.step(16.67)
     expect(g.canManualReroll(0)).toBe(false)
-    // Past five: ready again.
-    for (let i = 0; i < 120; i++) g.step(16.67)
+    // Past three: ready again.
+    for (let i = 0; i < 60; i++) g.step(16.67)
     expect(g.canManualReroll(0)).toBe(true)
     expect(g.rerollReadyIn.value[0]).toBe(0)
   })
 
-  it('deals a full hand of reinforced shapes', async () => {
+  it('reinforces the hand in place — the pieces the preview showed', async () => {
     const g = await loadGame()
     g.startRun()
     expect(g.offerEnhanced.value.some(Boolean)).toBe(false)
+    const before = g.offers.value.slice()
     g.dealEnhancedOffers()
     expect(g.offerEnhanced.value.every(Boolean)).toBe(true)
     expect(g.offers.value).toHaveLength(OFFER_SLOTS)
+    expect(g.offers.value).toEqual(before)
   })
 })
 

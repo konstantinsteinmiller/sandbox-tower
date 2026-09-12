@@ -6,12 +6,16 @@ import FButton from '@/components/atoms/FButton.vue'
 import IconCoin from '@/components/icons/IconCoin.vue'
 import TechIcon from '@/components/game/TechIcon.vue'
 import BlockTile from '@/components/game/BlockTile.vue'
-import { TECH_NODES, TECH_BOUNDS, TECH_BY_ID, isUnlockNode } from '@/game/tech'
+import PointerArrow from '@/components/game/PointerArrow.vue'
+import {
+  TECH_NODES, TECH_BOUNDS, TECH_BY_ID, isUnlockNode, effectTotal, nextRankGain, firstHpNodeId
+} from '@/game/tech'
+import { shouldSpotlightFirstUpgrade } from '@/use/useTechDiscovery'
 import useTowerProgress from '@/use/useTowerProgress'
 import useSounds from '@/use/useSound'
 import { playFx } from '@/use/useTowerAudio'
 import { coins } from '@/use/useTowerEconomy'
-import { TECH_INTRO_KEY } from '@/keys'
+import { TECH_INTRO_KEY, TECH_INTRO_P1_KEY } from '@/keys'
 import { getState, setState } from '@/use/useTowerState'
 
 /**
@@ -57,18 +61,35 @@ const progress = useTowerProgress()
 const INTRO_STEPS = 3
 const introStep = ref(0)
 const introOpen = ref(false)
+/** Only the first card this time (a mid-run first open). */
+const introFirstOnly = ref(false)
 
-const startIntro = (): void => {
+/**
+ * The first card on the first open, from ANYWHERE.
+ *
+ * The 2026-09-11 rerun: "upgrades are permanent" still first appeared after a
+ * death, because the intro only ran from the defeat screen — and the players
+ * who most needed it were buying ranks mid-run without knowing they kept them.
+ * A mid-run first open now shows that one card (the other two are about
+ * spending coins from a finished siege, which is the defeat screen's moment);
+ * the full intro then picks up at its second card when the tree is next
+ * opened from a defeat.
+ */
+const startIntro = (fromDefeat: boolean): void => {
   if (getState<boolean>(TECH_INTRO_KEY, false)) return
-  introStep.value = 0
+  const firstSeen = getState<boolean>(TECH_INTRO_P1_KEY, false)
+  if (!fromDefeat && firstSeen) return
+  introFirstOnly.value = !fromDefeat
+  introStep.value = fromDefeat && firstSeen ? 1 : 0
   introOpen.value = true
 }
 
 const advanceIntro = (): void => {
   playFx('uiTap')
-  if (introStep.value < INTRO_STEPS - 1) { introStep.value++; return }
+  if (introStep.value === 0) setState(TECH_INTRO_P1_KEY, true)
+  if (!introFirstOnly.value && introStep.value < INTRO_STEPS - 1) { introStep.value++; return }
   introOpen.value = false
-  setState(TECH_INTRO_KEY, true)
+  if (!introFirstOnly.value) setState(TECH_INTRO_KEY, true)
 }
 
 // ─── Board geometry ─────────────────────────────────────────────────────────
@@ -283,7 +304,7 @@ watch(model, async (open) => {
   await nextTick()
   resetView()
   selected.value = 'foundations'
-  if (props.intro) startIntro()
+  startIntro(!!props.intro)
 })
 onUnmounted(() => {
   pointers.clear()
@@ -363,18 +384,22 @@ const sell = (): void => {
 const nodeLabel = (id: string): string => t(`tech.names.${id}`)
 
 /**
- * What one rank of a node is worth, read from the node itself.
+ * What the NEXT rank of a node is worth, read from the node itself.
  *
  * The descriptions used to carry this number as prose, and every one of them
  * had drifted away from the data by a rebalance or two — the Stone Stockpile
  * advertised +18 while the tree granted +14. Feeding the real figure through
- * `{n}` means the copy cannot lie again, in any language.
+ * `{n}` means the copy cannot lie again, in any language. It is the next
+ * rank's gain rather than a flat per-rank figure because a node may front-load
+ * its first rank: Foundations reads +50 % unbought and +6 % after.
  */
 const perRank = (id: string): { n: number; pct: boolean } | null => {
-  const e = TECH_BY_ID[id]?.effect as { pct?: number; add?: number } | undefined
-  if (!e) return null
-  if (e.pct !== undefined) return { n: e.pct, pct: true }
-  if (e.add !== undefined) return { n: e.add, pct: false }
+  const effect = TECH_BY_ID[id]?.effect
+  const e = effect as { pct?: number; add?: number } | undefined
+  if (!effect || !e) return null
+  const n = nextRankGain(effect, progress.levelOf(id))
+  if (e.pct !== undefined) return { n, pct: true }
+  if (e.add !== undefined) return { n, pct: false }
   return null
 }
 
@@ -391,11 +416,26 @@ const nodeDesc = (id: string): string => {
  * spent on nothing.
  */
 const nodeTotal = (id: string, level: number): string | null => {
+  const effect = TECH_BY_ID[id]?.effect
   const per = perRank(id)
-  if (!per || level <= 0) return null
-  const total = Math.round(per.n * level * 100) / 100
+  if (!effect || !per || level <= 0) return null
+  const total = Math.round(effectTotal(effect, level) * 100) / 100
   return per.pct ? `+${total}%` : `+${total}`
 }
+
+// ─── First-upgrade spotlight ────────────────────────────────────────────────
+//
+// From stage 2, a tree nothing has been bought in points at Foundations — the
+// card whose first rank is +50 % block HP — with a gold glow and the yellow
+// arrow, until it is bought once (`shouldSpotlightFirstUpgrade`). It waits for
+// the first-death intro to finish: that dims the whole modal, and an arrow
+// under a dim sheet is an arrow pointing at nothing.
+
+const FIRST_HP = firstHpNodeId(TECH_NODES) ?? 'foundations'
+
+const spotlightFirst = computed(() =>
+  !introOpen.value && shouldSpotlightFirstUpgrade(TECH_NODES, progress.levelOf)
+)
 </script>
 
 <template lang="pug">
@@ -434,11 +474,19 @@ const nodeTotal = (id: string, level: number): string | null => {
             v-for="node in TECH_NODES"
             :key="node.id"
             type="button"
-            :class="[`is-${stateOf(node.id)}`, { 'is-selected': selected === node.id }]"
+            :class="[`is-${stateOf(node.id)}`, { 'is-selected': selected === node.id, 'is-spotlight': spotlightFirst && node.id === FIRST_HP }]"
             :style="{ left: nodeX(node.col) + 'px', top: nodeY(node.tier) + 'px' }"
             :aria-label="nodeLabel(node.id)"
             @click="onNodeClick(node.id)"
           )
+            //- Leads the eye back to the card when the player has wandered off
+            //- to another node; once it is selected the arrow moves to its buy
+            //- button below. Left of the root, where tier 0 has no neighbour.
+            PointerArrow(
+              v-if="spotlightFirst && node.id === FIRST_HP && selected !== FIRST_HP"
+              side="left"
+              :length="2.2"
+            )
             span.tech__node-body
               span.tech__node-glyph
                 TechIcon(:icon="node.icon")
@@ -468,16 +516,27 @@ const nodeTotal = (id: string, level: number): string | null => {
             span.tech__detail-status(v-if="selectedDetail.state === 'maxed'") {{ t('tech.maxed') }}
             span.tech__detail-status.is-locked(v-else-if="selectedDetail.state === 'locked'")
               | {{ t('tech.requires', { n: selectedDetail.missing.map(nodeLabel).join(', ') }) }}
-            FButton(
+            //- The buy button sits in a wrapper so the first-upgrade spotlight
+            //- can glow around it and hang its arrow off its left edge — the
+            //- empty half of this row while the card is unowned.
+            span.tech__buy-wrap(
               v-else
-              size="sm"
-              :type="selectedDetail.state === 'affordable' ? 'primary' : 'secondary'"
-              :is-disabled="selectedDetail.state !== 'affordable'"
-              @click="buy"
+              :class="{ 'is-spotlight': spotlightFirst && selectedDetail.id === FIRST_HP }"
             )
-              span.tech__buy
-                IconCoin(class="tech__buy-icon")
-                | {{ selectedDetail.cost }}
+              PointerArrow(
+                v-if="spotlightFirst && selectedDetail.id === FIRST_HP"
+                side="left"
+                :length="2.2"
+              )
+              FButton(
+                size="sm"
+                :type="selectedDetail.state === 'affordable' ? 'primary' : 'secondary'"
+                :is-disabled="selectedDetail.state !== 'affordable'"
+                @click="buy"
+              )
+                span.tech__buy
+                  IconCoin(class="tech__buy-icon")
+                  | {{ selectedDetail.cost }}
 
             //- Sell one rank back. Hidden entirely on an unowned node rather than
             //- shown disabled: a refund button on something never bought is noise.
@@ -530,12 +589,12 @@ const nodeTotal = (id: string, level: number): string | null => {
           div.tech-intro__card(:class="`is-step${introStep}`")
             p.tech-intro__text {{ t(`tech.intro${introStep + 1}`) }}
             div.tech-intro__foot
-              span.tech-intro__dots
+              span.tech-intro__dots(v-if="!introFirstOnly")
                 i.tech-intro__dot(
                   v-for="i in 3" :key="i" :class="{ 'is-on': i - 1 === introStep }"
                 )
               button.tech-intro__go(type="button" @click.stop="advanceIntro")
-                | {{ introStep < 2 ? t('tech.introNext') : t('tech.introDone') }}
+                | {{ introStep < 2 && !introFirstOnly ? t('tech.introNext') : t('tech.introDone') }}
 </template>
 
 <style scoped lang="sass">
@@ -975,6 +1034,35 @@ const nodeTotal = (id: string, level: number): string | null => {
   display: inline-flex
   align-items: center
   gap: 0.3em
+
+// ── First-upgrade spotlight ─────────────────────────────────────────────────
+// The same gold as the coach mark's ring, pulsing on the buy button and on the
+// card itself, so the arrow and the glow read as one instruction.
+
+.tech__buy-wrap
+  position: relative
+  display: inline-flex
+  border-radius: 0.6rem
+
+  &.is-spotlight
+    animation: tech-spotlight 1.5s ease-in-out infinite
+
+.tech__node.is-spotlight .tech__node-body
+  border-color: #ffd93c
+  animation: tech-spotlight 1.5s ease-in-out infinite
+
+@keyframes tech-spotlight
+  0%, 100%
+    box-shadow: 0 0 0 3px rgba(255, 214, 80, 0.25), 0 0 12px rgba(255, 200, 60, 0.35)
+  50%
+    box-shadow: 0 0 0 5px rgba(255, 214, 80, 0.55), 0 0 26px rgba(255, 200, 60, 0.8)
+
+// Motion off, glow on: the gold ring alone still says which card.
+@media (prefers-reduced-motion: reduce)
+  .tech__buy-wrap.is-spotlight,
+  .tech__node.is-spotlight .tech__node-body
+    animation: none
+    box-shadow: 0 0 0 4px rgba(255, 214, 80, 0.5), 0 0 18px rgba(255, 200, 60, 0.6)
 
 .tech__buy-icon
   width: 1em

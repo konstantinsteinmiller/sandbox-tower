@@ -15,6 +15,9 @@ export default {
     'free': 'Gratis',
     'tile': '{name} gratis, nivel {n}: tócalo y luego toca el tablero para colocarlo',
     'pair': 'Pareja de {name} gratis: tócala y luego toca el tablero para colocarla',
+    'tilePaid': '{name}, nivel {n}, a mitad de precio: tócalo y luego toca el tablero para colocarlo',
+    'pairPaid': 'Pareja de {name} a mitad de precio: tócala y luego toca el tablero para colocarla',
+    'discount': '-{n} %',
     'chest': 'Cofre volador: tócalo para abrirlo',
     'firstClear': '¡Oleada {n} superada! Un regalo para ti'
   },

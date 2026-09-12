@@ -27,37 +27,52 @@ import { UNCAPPED } from '@/game/tech'
 // at rank 20 against Sharp Bolts' 5,850, because armour is the one that keeps
 // paying on every wave. A mobile run pays out at `rewardMul 0.6`, so these are
 // dearer in practice than the same numbers on the desktop tree.
+//
+// ── Foundations leads (2026-09-11) ──
+//
+// The strip used to open on Sharp Bolts, with the HP card third behind it and
+// the brace. It opens on Foundations now, because that is the card the stage-2
+// spotlight points a new player at, and its first rank is front-loaded to +50 %
+// block HP — the upgrade whose effect a player can actually watch. Its first
+// rank is priced at 20 (`firstCost`) rather than the half-price 25 so it lands
+// with the wave-2 clear: waves pay the wallet 6 + 3·wave coins (the mode's
+// `rewardMul` scales materials, never coins), so 9 + 12 = 21 is in hand the
+// first build phase the spotlight is up. Ranks 2+ still come off `costBase`.
+//
+// A save from before the swap can own Sharp Bolts or the brace without this
+// card. `isUnlocked` treats an owned card as open whatever its prerequisites,
+// so nothing a player paid for turns into a padlock.
 
 export const TECH_NODES_DROPMERGE: ReadonlyArray<TechNode> = [
   {
-    id: 'm2_sharpBolts',
+    id: 'm2_foundations',
     tier: 0, col: 0, maxLevel: UNCAPPED,
-    costBase: 40, costGrowth: 1.3,
+    costBase: 50, costGrowth: 1.28, firstCost: 20,
     requires: [],
+    effect: { kind: 'blockHp', pct: 8, firstPct: 50 },
+    icon: 'blockHp'
+  },
+  {
+    id: 'm2_sharpBolts',
+    tier: 1, col: 0, maxLevel: UNCAPPED,
+    costBase: 40, costGrowth: 1.3,
+    requires: ['m2_foundations'],
     effect: { kind: 'damage', pct: 8 },
     icon: 'damage'
   },
   {
     id: 'm2_brace',
-    tier: 1, col: 0, maxLevel: 1,
+    tier: 2, col: 0, maxLevel: 1,
     costBase: 60, costGrowth: 1,
     requires: ['m2_sharpBolts'],
     effect: { kind: 'unlock', blockId: 'brace' },
     icon: 'brace'
   },
   {
-    id: 'm2_foundations',
-    tier: 2, col: 0, maxLevel: UNCAPPED,
-    costBase: 50, costGrowth: 1.28,
-    requires: ['m2_brace'],
-    effect: { kind: 'blockHp', pct: 8 },
-    icon: 'blockHp'
-  },
-  {
     id: 'm2_bombard',
     tier: 3, col: 0, maxLevel: 1,
     costBase: 170, costGrowth: 1,
-    requires: ['m2_foundations'],
+    requires: ['m2_brace'],
     effect: { kind: 'unlock', blockId: 'bombard' },
     icon: 'bombard'
   },

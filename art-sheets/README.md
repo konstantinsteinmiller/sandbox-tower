@@ -357,9 +357,10 @@ is a 404, and a portal's QA console reads each one as a broken build.
 
 * **Merged weapons** — `fixture-<weapon>-t2.png` and `-t3.png` for cannon,
   archer, bombard, mortar, tesla and frost (prompts in `PROMPTS-WALKS.md`).
-  The reference is the procedural twin / triple battery the game shows today;
-  attach the plain painting (`public/images/fixtures/<weapon>.webp`) as well,
-  because it is the design. Returns land at
+  ONE heavier gun per tier, in the plain gun's outline — the game grows a
+  merged gun by the weld's span itself. The reference is the weapon's drawn
+  gun; attach the plain painting (`public/images/fixtures/<weapon>.webp`) as
+  well, because it is the design. Returns land at
   `public/images/fixtures/<weapon>-t2.webp` / `-t3.webp`; tiers 4 and up reuse
   the t3 painting. The game lays the tier rim (lighter) and the tier-3 glow on
   top at run time, so neither belongs in the painting.

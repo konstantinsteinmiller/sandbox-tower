@@ -163,7 +163,12 @@ const styleVars = computed(() => ({
     span.f-button__body
       //- Classic top shine.
       span.f-button__shine(aria-hidden="true")
-      GameIcon.f-button__icon(v-if="icon && (iconOnly || iconPosition === 'left')" :name="icon")
+      //- A glyph that is not in the shared set — the tech tree's own painted
+      //- diamond, say — rides in the same sized box a `GameIcon` would, so an
+      //- icon-only button looks like every other icon-only button.
+      span.f-button__icon(v-if="$slots.icon && iconOnly" aria-hidden="true")
+        slot(name="icon")
+      GameIcon.f-button__icon(v-else-if="icon && (iconOnly || iconPosition === 'left')" :name="icon")
       span.f-button__text(v-if="!iconOnly")
         slot {{ label }}
       GameIcon.f-button__icon(v-if="icon && !iconOnly && iconPosition === 'right'" :name="icon")
@@ -222,6 +227,18 @@ const styleVars = computed(() => ({
   flex-shrink: 0
   width: calc(var(--fbtn-font) * 1.3)
   height: calc(var(--fbtn-font) * 1.3)
+
+// The slotted-glyph box is a span, which ignores width and height until it is
+// told it is a box. Its content fills it.
+span.f-button__icon
+  position: relative
+  display: inline-flex
+  align-items: center
+  justify-content: center
+
+  :slotted(*)
+    width: 100%
+    height: 100%
 
 .f-button__text + .f-button__icon,
 .f-button__icon + .f-button__text

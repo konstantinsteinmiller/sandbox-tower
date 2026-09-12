@@ -40,6 +40,7 @@
     "leaderboard:seed": "node scripts/leaderboard-seed.mjs",
     "perf:preview": "vite build && vite preview --port 4177 --strictPort",
     "perf:ab": "node tools/perf-ab.mjs --url http://localhost:4177/index.html --gpu --reps 5 --frames 1800 --warmframes 240 --throttle 4 --viewport 412x915x2 --seed 7 --tier mid --wave 10 --warmup 1",
+    "preview:video": "node tools/preview-video/record.mjs",
     "perf:profile-build": "vite build --minify false --outDir dist-prof",
     "perf:profile": "node tools/perf-profile.mjs --url http://localhost:4178/index.html --gpu --throttle 4 --wave 10 --tier mid"
   },
@@ -64,6 +65,7 @@
     "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.8.1",
     "autoprefixer": "^10.4.27",
+    "ffmpeg-static": "^5.3.0",
     "jsdom": "^28.1.0",
     "npm-run-all2": "^8.0.4",
     "playwright-core": "^1.63.0",
@@ -83,5 +85,11 @@
   },
   "engines": {
     "node": "^25.5.0 || >=22.12.0"
+  },
+  "pnpm": {
+    "//": "ffmpeg-static IS a postinstall download — blocked by default, the binary is absent and `pnpm preview:video` fails on a null path.",
+    "onlyBuiltDependencies": [
+      "ffmpeg-static"
+    ]
   }
 }

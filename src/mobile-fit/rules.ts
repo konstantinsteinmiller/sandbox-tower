@@ -60,7 +60,7 @@ export const DROPMERGE_RULES: RuleSet = {
     supportSlot: null,
     pool: PIECE_DEFS,
     rotation: false,
-    rerollMs: 5_000,
+    rerollMs: 3_000,
     unlockRerollSlots: [2]
   },
   blocks: { catalogue: DROPMERGE_BLOCKS, foldStoneIntoWood: STONE_FOLD },

@@ -15,6 +15,9 @@ export default {
     'free': 'Gratis',
     'tile': '{name} gratis, tingkat {n}: ketuk, lalu ketuk papan untuk memasangnya',
     'pair': 'Sepasang {name} gratis: ketuk, lalu ketuk papan untuk memasangnya',
+    'tilePaid': '{name}, tingkat {n}, setengah harga: ketuk, lalu ketuk papan untuk memasangnya',
+    'pairPaid': 'Sepasang {name} setengah harga: ketuk, lalu ketuk papan untuk memasangnya',
+    'discount': '-{n}%',
     'chest': 'Peti terbang: ketuk untuk membukanya',
     'firstClear': 'Gelombang {n} selesai! Hadiah untukmu'
   },

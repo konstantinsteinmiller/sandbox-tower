@@ -1289,8 +1289,8 @@ export interface WalkSpec {
    *
    * Only the tier fixtures carry these. Their id (`cannon-t2`) is not a block
    * type anything can draw, so the bench needs the weapon to paint and the
-   * tier to paint it at — the twin or triple battery `paintFixtureBattery`
-   * lays out — and the prompt needs the weapon for its colours.
+   * tier the painting is for (`paintTierFixture` draws the weapon's one gun
+   * as the reference) — and the prompt needs the weapon for its colours.
    */
   fixtureType?: string
   fixtureTier?: number
@@ -1763,83 +1763,79 @@ const fixtureSheets: WalkSpec[] = FIXTURE_WEAPONS.map(fixtureSheet)
 /**
  * The merged weapons — each weapon's tier 2 and tier 3, painted outright.
  *
- * Until these are painted the game composites a merged gun out of copies of
- * the plain painting (`paintTieredFixture`): a twin at tier 2, a triple battery
- * from tier 3. That reads, but it is three pastes of one picture. A painting of
- * the battery itself replaces the copies whole.
+ * Until these are painted the game draws a merged gun from the plain painting
+ * (`paintTieredFixture`): the same ONE gun, grown by the weld's span and
+ * washed in the tier's colour. That reads, but it is the plain gun enlarged. A
+ * painting of the heavier gun itself replaces it whole.
  *
- * The reference is that composite as DRAWN — the copies at their offsets, the
- * rear rank shaded, no mount — on the same 512 box as the plain fixture, so a
- * return drops onto the same rectangle and the slicer fits it the same way.
- * It leaves out the tier rim, wash and glow on purpose: the game lays those on
- * over the painting too, and a reference that showed them would be painted in
- * and then drawn a second time on top.
+ * The reference is the weapon's one gun as DRAWN — no mount, the plain
+ * fixture's outline — on the same 512 box as the plain fixture, so a return
+ * drops onto the same rectangle and the slicer fits it the same way. The game
+ * grows a merged gun by itself, so the painting keeps that outline and puts the
+ * extra weight inside it. The reference leaves out the tier rim, wash and glow
+ * on purpose: the game lays those on over the painting too, and a reference
+ * that showed them would be painted in and then drawn a second time on top.
  *
- * The words say what the reference cannot: that this is the SAME weapon
- * doubled rather than a new one, which colour the tier is, and that it has to
- * read as more gun at forty pixels.
+ * The words say what the reference cannot: that this is the SAME weapon forged
+ * heavier — ONE of it, never a pair or a rank — which colour the tier is, and
+ * that it has to read as a heavier gun at forty pixels.
  */
-const TIER_FIXTURES: Record<(typeof TIER_ART_WEAPONS)[number], { name: string; twin: string; triple: string }> = {
+const TIER_FIXTURES: Record<(typeof TIER_ART_WEAPONS)[number], { name: string; t2: string; t3: string }> = {
   cannon: {
     name: 'Cannon',
-    twin: 'TWO cast-iron cannon barrels lying dead level and pointing RIGHT, '
-      + 'stacked like a double-barrelled gun: one just ABOVE and a little behind '
-      + 'the other, each with its own fat breech and cascabel at the left end, '
-      + 'its own reinforcing rings and muzzle swell. The upper, rear barrel is '
-      + 'set back a hair to the LEFT and a tone darker.',
-    triple: 'THREE cast-iron cannon barrels in a tight stacked battery, all dead '
-      + 'level and pointing RIGHT: one above, one below, and the FRONT one in the '
-      + 'middle between them, nearest the eye and a touch further forward. The '
-      + 'two outer barrels are set back to the LEFT and a tone darker.'
+    t2: 'ONE cast-iron cannon barrel lying dead level and pointing RIGHT — the '
+      + 'plain cannon forged HEAVIER: a thicker tube with a third reinforcing '
+      + 'ring, a bigger breech and cascabel at the left end, a fatter muzzle '
+      + 'swell. One barrel, one bore.',
+    t3: 'ONE cast-iron cannon barrel lying dead level and pointing RIGHT — the '
+      + 'plain cannon forged heavier again: the thickest tube, banded along its '
+      + 'whole length, a massive breech and a flared, lipped muzzle. One barrel, '
+      + 'one bore.'
   },
   archer: {
     name: 'Archery bow',
-    twin: 'TWO war bows at full draw, level and pointing RIGHT, the second '
-      + 'standing just BEHIND the first — offset to the LEFT and a little '
-      + 'higher, a tone darker — each with its own nocked arrow, so the pair '
-      + 'reads as a volley rather than one tall bow.',
-    triple: 'THREE war bows in a stepped rank, all at full draw, level and '
-      + 'pointing RIGHT: the rearmost furthest LEFT and highest, the middle one '
-      + 'below it, the front one nearest the eye — each with its own nocked '
-      + 'arrow, the rear two a tone darker.'
+    t2: 'ONE war bow at full draw, level and pointing RIGHT — the plain bow '
+      + 'made HEAVIER: thicker, deeper recurved limbs with horn tips, a doubled '
+      + 'string, a heavier arrow nocked. One bow.',
+    t3: 'ONE great war bow at full draw, level and pointing RIGHT — heavier '
+      + 'again: massive laminated limbs bound in metal at the grip and tips, a '
+      + 'thick doubled string, a long heavy bolt nocked. One bow.'
   },
   mortar: {
     name: 'Mortar',
-    twin: 'TWO squat siege mortar tubes standing side by side on one bed, both '
-      + 'at the same steep lobbing angle, mouths up and to the RIGHT: the rear '
-      + 'tube to the LEFT, slightly smaller and a tone darker, the front tube '
-      + 'overlapping it.',
-    triple: 'THREE squat siege mortar tubes on one bed, all at the same steep '
-      + 'lobbing angle, mouths up and to the RIGHT: a front tube in the middle, '
-      + 'and one either side of it set back, slightly smaller and a tone darker.'
+    t2: 'ONE squat siege mortar tube at its steep lobbing angle, mouth up and '
+      + 'to the RIGHT — the plain mortar cast HEAVIER: a thicker, wider tube, an '
+      + 'extra reinforcing band, a heavier lip. One tube.',
+    t3: 'ONE siege mortar tube at the same steep lobbing angle, mouth up and to '
+      + 'the RIGHT — heavier again: the widest bore, heavy bands along its whole '
+      + 'length and a thick flared lip. One tube.'
   },
   bombard: {
     name: 'Bombard',
-    twin: 'TWO stubby wrought-iron bombards standing side by side, both at the '
-      + 'same steep angle, mouths up and to the RIGHT, each bound with hoops '
-      + 'along its whole length: the rear one to the LEFT, slightly smaller and '
-      + 'a tone darker.',
-    triple: 'THREE stubby hooped bombards side by side, all at the same steep '
-      + 'angle, mouths up and to the RIGHT: a front one in the middle, one either '
-      + 'side of it set back, slightly smaller and a tone darker.'
+    t2: 'ONE stubby wrought-iron bombard at its steep angle, mouth up and to the '
+      + 'RIGHT, bound with hoops along its whole length — the plain bombard '
+      + 'forged HEAVIER: thicker hoops, a wider mouth. One barrel.',
+    t3: 'ONE stubby hooped bombard at the same steep angle, mouth up and to the '
+      + 'RIGHT — heavier again: a massive barrel, doubled hoops at the mouth, '
+      + 'the widest bore. One barrel.'
   },
   tesla: {
     name: 'Arc coil',
-    twin: 'TWO lightning coils standing upright side by side, each an iron post '
-      + 'wound with copper wire under a polished ball terminal, on ceramic '
-      + 'insulators: the rear coil to the LEFT, shorter and a tone darker.',
-    triple: 'THREE lightning coils standing upright: a tall one in the middle and '
-      + 'a shorter one either side of it, set back and a tone darker — each wound '
-      + 'with copper wire under its own ball terminal.'
+    t2: 'ONE lightning coil standing upright — the plain coil built BIGGER: a '
+      + 'thicker iron post wound with more copper wire, an extra ceramic '
+      + 'insulator, a larger polished ball terminal. One coil.',
+    t3: 'ONE lightning coil standing upright — bigger again: a heavy post under '
+      + 'dense copper windings, a stack of insulators, a large ball terminal '
+      + 'ringed by a copper corona ring. One coil.'
   },
   frost: {
     name: 'Frost emitter',
-    twin: 'TWO clusters of pale blue ice crystals growing side by side from a '
-      + 'rimed iron socket, the rear cluster to the LEFT, smaller and a tone '
-      + 'darker.',
-    triple: 'THREE clusters of pale blue ice crystals from one rimed iron '
-      + 'socket: the tallest in the middle, a smaller one either side of it set '
-      + 'back and a tone darker.'
+    t2: 'ONE cluster of pale blue ice crystals growing from a rimed iron socket '
+      + '— the plain emitter grown BIGGER: more and longer crystals, a heavier '
+      + 'socket. One cluster.',
+    t3: 'ONE great cluster of pale blue ice crystals from a heavy rimed iron '
+      + 'socket — bigger again: tall faceted spires and a crown of smaller '
+      + 'shards. One cluster.'
   }
 }
 
@@ -1850,8 +1846,8 @@ const tierFixtureSheets: WalkSpec[] = TIER_ART_WEAPONS.flatMap((type) =>
     return {
       ...fixtureSheet({
         id,
-        name: `${t.name} — tier ${tier} ${tier === 2 ? 'twin' : 'battery'}`,
-        blurb: `${tier === 2 ? t.twin : t.triple} NOTHING else — no carriage, `
+        name: `${t.name} — tier ${tier}`,
+        blurb: `${tier === 2 ? t.t2 : t.t3} NOTHING else — no carriage, `
           + 'no block, no crew, no smoke, no ammunition.'
       }),
       fixtureType: type,
@@ -1867,25 +1863,32 @@ export const WALKS: WalkSpec[] = [
 /**
  * What a merged weapon's prompt adds to a plain fixture's.
  *
- * Three things the reference cannot say. That it is the SAME weapon doubled,
- * with the plain painting as its design — a model shown two barrels will
- * otherwise design a new gun with two barrels. Which colour the tier is, taken
- * from the ladder the plate and the rim use, so "the green one" is green
- * everywhere it appears. And that the extra barrels have to survive forty
- * pixels, which is what the whole tier art exists to say.
+ * Four things the reference cannot say. That it is the SAME weapon forged
+ * heavier, with the plain painting as its design — and ONE of it: a weld makes
+ * one block, so a model that paints a pair or a rank has painted a block the
+ * game does not have. That it keeps the plain gun's size and place, because
+ * the game grows a merged gun itself and a bigger painting would be grown
+ * twice. Which colour the tier is, taken from the ladder the plate and the rim
+ * use, so "the green one" is green everywhere it appears. And that the extra
+ * weight has to survive forty pixels, which is what the whole tier art exists
+ * to say.
  */
 const tierLines = (w: WalkSpec): string[] => {
   if (!w.fixtureType || !w.fixtureTier) return []
   const tier = w.fixtureTier
   const ts = tierStyle(tier)
-  const n = tier === 2 ? 'TWO' : 'THREE'
   return [
     '',
     `THIS IS A MERGED WEAPON — tier ${tier}: the SAME weapon as the plain`,
-    `\`images/fixtures/${w.fixtureType}.webp\`, welded into ${n}. Attach that`,
+    `\`images/fixtures/${w.fixtureType}.webp\`, forged ${tier === 2 ? 'heavier' : 'heavier again'}. Attach that`,
     'painting as well as the reference: it is the design. Same materials, same',
-    `ink, same proportions, same wear — ${tier === 2 ? 'doubled' : 'tripled'}, not redesigned. The`,
-    'reference shows exactly where each copy sits and which one is in front.',
+    'ink, same wear — and ONE weapon, never two or three side by side. A weld',
+    'makes one block, so it carries one gun.',
+    '',
+    'KEEP ITS SIZE AND ITS PLACE. The reference is the plain gun’s own outline,',
+    'and the game makes a merged gun bigger by itself; a painting that fills',
+    'more of the frame gets grown twice. Put the extra weight INSIDE that',
+    'outline: thicker metal, more bands, a bigger breech, limb or terminal.',
     '',
     `THE TIER COLOUR IS ${tier === 2 ? 'GREEN' : 'BLUE'}, around ${ts.hex}. Put it in`,
     tier === 2
@@ -1901,10 +1904,10 @@ const tierLines = (w: WalkSpec): string[] => {
       ? 'it is how a player tells a tier 2 from a plain gun at a glance.'
       : 'the palette — it is how a player tells a tier 3 from a tier 2 at a glance.',
     '',
-    `IT HAS TO READ AS ${n} AT 40 PX. Keep a clear gap or step between the`,
-    'copies, a strong ink line round each one, and every muzzle, limb or',
-    'terminal separately visible. Two barrels painted into one fat barrel is',
-    'the one way this fails that looks fine at full size.'
+    'IT HAS TO READ AS ONE HEAVIER GUN AT 40 PX. Chunky bands and fittings in',
+    'the tier colour and a strong ink line round one clear silhouette. Fine',
+    'engraving that only shows at full size is the one way this fails that',
+    'looks fine at full size.'
   ]
 }
 

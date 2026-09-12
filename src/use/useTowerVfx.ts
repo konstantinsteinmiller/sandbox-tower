@@ -20,7 +20,13 @@ export type FxEvent =
   | { kind: 'place'; x: number; y: number; palette: string }
   | { kind: 'sell'; x: number; y: number }
   | { kind: 'blockHit'; x: number; y: number; amount: number }
-  | { kind: 'shatter'; x: number; y: number; palette: string }
+  /** `w` / `h` are the dead block's footprint in cells, so the renderer can
+   *  leave a ghost of it where it stood. Absent for anything that is not a
+   *  tower block. */
+  | { kind: 'shatter'; x: number; y: number; palette: string; w?: number; h?: number }
+  /** The Gate took a blow. `side` is where it came from: -1 left, 1 right, 0
+   *  from above or from no side at all (a bomb, a fire, a blast). */
+  | { kind: 'gateHit'; x: number; y: number; side: -1 | 0 | 1 }
   /** `kindOf` is the round that detonated, so a frost shell does not bloom
    *  orange. Omitted for demolition charges, which are always fire. */
   | { kind: 'explosion'; x: number; y: number; radius: number; kindOf?: string }

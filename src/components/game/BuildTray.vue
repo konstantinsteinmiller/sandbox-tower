@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import IconGold from '@/components/icons/IconGold.vue'
 import IconStone from '@/components/icons/IconStone.vue'
@@ -49,14 +49,46 @@ interface Props {
    * instruction they cannot follow.
    */
   nudge?: boolean
+  /**
+   * A won piece is waiting: slot 0 shows the scene's `gift` slot (the gift
+   * tile, handed this tray's tile size) in place of its offer until the gift
+   * is placed. Slot 0 is the structure lane — walls — so borrowing it takes
+   * nothing from the hand the player will miss, and the wall is still dealt
+   * underneath for when the gift is gone.
+   */
+  giftFirst?: boolean
+  /**
+   * Bumped by the scene the moment the reinforced hand is actually PAID for.
+   *
+   * The purchase had no moment of its own: on the coin-priced builds the first
+   * tap previews the hand — the cards flip gold there and then — so the tap
+   * that spends the coins changed nothing on screen, and the player who paid
+   * reported the hand "looked identical". A counter rather than a boolean, so
+   * paying twice in a row plays twice.
+   */
+  paidAt?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
   enhanced: () => [],
   rerollSeconds: () => [],
   hideReroll: false,
-  nudge: false
+  nudge: false,
+  giftFirst: false,
+  paidAt: 0
 })
+
+/** True for one beat after the hand is paid for — the cards spark and their
+ *  numbers pop in, so the spend has something to point at. */
+const justPaid = ref(false)
+let paidTimer = 0
+watch(() => props.paidAt, (at) => {
+  if (!at) return
+  justPaid.value = true
+  window.clearTimeout(paidTimer)
+  paidTimer = window.setTimeout(() => { justPaid.value = false }, 1_100)
+})
+onUnmounted(() => window.clearTimeout(paidTimer))
 
 /** Seconds left on `slot`, or 0 when it is ready to swap. */
 const coolingFor = (slot: number): number => props.rerollSeconds[slot] ?? 0
@@ -162,6 +194,20 @@ interface Entry {
   /** Reinforced AND carrying a gun — the case where the damage bonus applies
    *  and is worth advertising on the tile itself. */
   weaponBoost: boolean
+  /**
+   * What the reinforced hand bought, ON the card: "+75% / +50%", or "+75%" for
+   * a piece with no gun to improve.
+   *
+   * Numbers, not adjectives, and on every reinforced card rather than only on
+   * the guns. The 2026-09-11 rerun found the purchase unreadable from either
+   * side of it: D1 never tapped the button at all, so it read as a label; P10
+   * saw the tick and the gold borders and never learned what they meant; and
+   * P6 — who paid — reported that "the hand looked identical", because the
+   * preview had already turned the cards gold on the first tap and the payment
+   * added nothing a player could point at. A gold glow says "better"; it does
+   * not say better by how much, and only the guns were saying even that.
+   */
+  boostChip: string | null
   /** Translated display name, derived from the piece's dominant block type. */
   name: string
 }
@@ -182,6 +228,11 @@ const entries = computed<Entry[]>(() =>
       weaponBoost:
         props.enhanced[slot] === true
         && shapeBlockTypes(shapeId).some((id) => !!blockDef(id).weapon),
+      boostChip: props.enhanced[slot] !== true
+        ? null
+        : shapeBlockTypes(shapeId).some((id) => !!blockDef(id).weapon)
+          ? `+${enhancedHpPct}% / +${enhancedDmgPct}%`
+          : `+${enhancedHpPct}%`,
       // Shape ids (`w1`, `cannonMount`, `sL`) are NOT block ids, so they have
       // no `blocks.names.*` entry — feeding one straight to `t()` leaked the
       // raw key into the button's accessible name. The dominant block type is
@@ -305,11 +356,20 @@ const infoEntry = computed(() => {
       //- `data-slot` is the tutorial's handle on ONE offer. Its first beat cuts
       //- a hole over a single tile — the free archer it deals into the weapon
       //- slot — so it needs to address that tile and no other.
-      div.build-tray__slot(v-for="e in entries" :key="e.slot" :data-slot="e.slot")
+      //- The gift, standing in slot 0 while it waits — at this tray's own tile
+      //- size, so the hand stays one row of equal tiles.
+      div.build-tray__slot(v-if="giftFirst" data-slot="gift")
+        slot(name="gift" :size="tileSize")
+      div.build-tray__slot(
+        v-for="e in entries"
+        v-show="!(giftFirst && e.slot === 0)"
+        :key="e.slot"
+        :data-slot="e.slot"
+      )
         button.build-tray__tile(
           type="button"
-          :class="{ 'is-selected': selected === e.slot, 'is-poor': !e.affordable, 'is-enhanced': e.enhanced, 'is-nudge': nudge && e.affordable }"
-          :style="{ '--tile-w': tileSize + 'px' }"
+          :class="{ 'is-selected': selected === e.slot, 'is-poor': !e.affordable, 'is-enhanced': e.enhanced, 'is-nudge': nudge && e.affordable, 'is-paid': justPaid && e.enhanced }"
+          :style="{ '--tile-w': tileSize + 'px', '--slot': e.slot }"
           :aria-label="e.name"
           @click="onTile(e.slot)"
           @pointerenter="openInfo(e.slot)"
@@ -327,9 +387,14 @@ const infoEntry = computed(() => {
             //- Roofed pieces cap their column for good, so they are flagged on
             //- the tile itself rather than only in the info box.
             span.build-tray__roof-badge(v-if="e.roof") ⌂
-            //- What the rewarded video actually bought, in a number. A gold
-            //- glow alone says "better" without saying how much better.
-            span.build-tray__dmg-badge(v-if="e.weaponBoost") +{{ enhancedDmgPct }}%
+            //- What the rewarded video actually bought, in numbers, on every
+            //- reinforced card — HP first because every piece gets it, damage
+            //- after it where there is a gun to improve. The full sentence is
+            //- on the chip's title for anyone who wants the words.
+            span.build-tray__dmg-badge(
+              v-if="e.boostChip"
+              :title="t('blocks.enhancedNote', { hp: enhancedHpPct, dmg: enhancedDmgPct })"
+            ) {{ e.boostChip }}
           //- Price chips. Only the resources the shape actually costs are shown,
           //- so a wood-only piece never displays a misleading "0 stone". A piece
           //- can carry all three at once, which is why the row is width-capped
@@ -519,6 +584,26 @@ const infoEntry = computed(() => {
 .build-tray__tile.is-enhanced .build-tray__body
   border-color: #ffd54a
   box-shadow: 0 0 0 1px rgba(255, 213, 74, 0.5), 0 0 10px rgba(255, 190, 40, 0.45)
+  // The moment a tile turns gold it FLIPS: edge-on, then back with the gold
+  // side up, one card after another. It is the reinforced-hand preview (the
+  // button's first tap) and the payout both, so what the coins buy is shown
+  // on the pieces themselves. On `rotate`, clear of the tile's `transform`.
+  animation: tray-flip-gold 460ms cubic-bezier(0.3, 1.4, 0.5, 1) calc(var(--slot, 0) * 80ms) both
+
+@keyframes tray-flip-gold
+  0%, 49.9%
+    border-color: #24345a
+    box-shadow: none
+  0%
+    rotate: y 0deg
+  50%
+    rotate: y 90deg
+  100%
+    rotate: y 0deg
+
+@media (prefers-reduced-motion: reduce)
+  .build-tray__tile.is-enhanced .build-tray__body
+    animation: none
 
 .build-tray__shine
   position: absolute
@@ -549,6 +634,43 @@ const infoEntry = computed(() => {
     animation: none
     opacity: 0.35
     translate: 190% 0
+
+// ─── The payment's own moment ───────────────────────────────────────────────
+//
+// The gold flip above belongs to the PREVIEW — on a coin-priced build it has
+// already played by the time the player pays, so the tap that actually spent
+// the coins had nothing to show for itself and the hand "looked identical".
+// Paying now sparks each card and pops its numbers in, one after another down
+// the row, so the spend lands on the pieces it bought.
+.build-tray__tile.is-paid .build-tray__body
+  animation: tray-paid-spark 620ms ease-out calc(var(--slot, 0) * 70ms) both
+
+.build-tray__tile.is-paid .build-tray__dmg-badge
+  animation: tray-chip-pop 520ms cubic-bezier(0.2, 1.5, 0.4, 1) calc(var(--slot, 0) * 70ms + 90ms) both
+
+@keyframes tray-paid-spark
+  0%
+    box-shadow: 0 0 0 1px rgba(255, 213, 74, 0.5), 0 0 10px rgba(255, 190, 40, 0.45)
+  35%
+    box-shadow: 0 0 0 3px rgba(255, 243, 196, 0.95), 0 0 26px 6px rgba(255, 205, 70, 0.85)
+  100%
+    box-shadow: 0 0 0 1px rgba(255, 213, 74, 0.5), 0 0 10px rgba(255, 190, 40, 0.45)
+
+@keyframes tray-chip-pop
+  0%
+    opacity: 0
+    scale: 0.4
+  60%
+    opacity: 1
+    scale: 1.35
+  100%
+    opacity: 1
+    scale: 1
+
+@media (prefers-reduced-motion: reduce)
+  .build-tray__tile.is-paid .build-tray__body,
+  .build-tray__tile.is-paid .build-tray__dmg-badge
+    animation: none
 
 // ─── Reroll pip ─────────────────────────────────────────────────────────────
 

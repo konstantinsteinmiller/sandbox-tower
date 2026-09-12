@@ -15,6 +15,9 @@ export default {
     'free': 'Za darmo',
     'tile': 'Darmowe: {name}, poziom {n}. Stuknij, a potem stuknij planszę, aby postawić',
     'pair': 'Darmowa para: {name}. Stuknij, a potem stuknij planszę, aby postawić',
+    'tilePaid': '{name}, poziom {n}, za pół ceny. Stuknij, a potem stuknij planszę, aby postawić',
+    'pairPaid': 'Para {name} za pół ceny. Stuknij, a potem stuknij planszę, aby postawić',
+    'discount': '-{n}%',
     'chest': 'Latająca skrzynia: stuknij, aby otworzyć',
     'firstClear': 'Fala {n} pokonana! Prezent dla ciebie'
   },

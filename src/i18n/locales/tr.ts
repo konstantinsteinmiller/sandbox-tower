@@ -15,6 +15,9 @@ export default {
     'free': 'Bedava',
     'tile': 'Bedava {name}, seviye {n}: dokun, sonra yerleştirmek için tahtaya dokun',
     'pair': 'Bedava bir çift {name}: dokun, sonra yerleştirmek için tahtaya dokun',
+    'tilePaid': '{name}, seviye {n}, yarı fiyatına: dokun, sonra yerleştirmek için tahtaya dokun',
+    'pairPaid': 'Yarı fiyatına bir çift {name}: dokun, sonra yerleştirmek için tahtaya dokun',
+    'discount': '%{n} indirim',
     'chest': 'Uçan sandık: açmak için dokun',
     'firstClear': '{n}. dalga geçildi! Sana bir hediye'
   },

@@ -15,6 +15,9 @@ export default {
     'free': 'Bepul',
     'tile': 'Bepul {name}, {n}-daraja: bosing, keyin joylash uchun maydonni bosing',
     'pair': 'Bepul juft {name}: bosing, keyin joylash uchun maydonni bosing',
+    'tilePaid': '{name}, {n}-daraja, yarim narxda: bosing, keyin joylash uchun maydonni bosing',
+    'pairPaid': 'Yarim narxda juft {name}: bosing, keyin joylash uchun maydonni bosing',
+    'discount': '-{n}%',
     'chest': 'Uchar sandiq: ochish uchun bosing',
     'firstClear': '{n}-to‘lqin yengildi! Senga sovg‘a'
   },

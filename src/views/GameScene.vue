@@ -24,6 +24,7 @@ import useTowerGame, {
 } from '@/use/useTowerGame'
 import { denyPurchase } from '@/use/useResourceBlink'
 import { idleNudge, noteBuildAction, useIdleNudge } from '@/use/useIdleNudge'
+import { requestRejectFlash, strandedCount } from '@/use/useWorldCues'
 import {
   setViewport, snapToFit, screenToCell, panBy, zoomAt,
   beginPinch, updatePinch, endPinch, recenter, isManual,
@@ -46,13 +47,14 @@ import useTowerEconomy from '@/use/useTowerEconomy'
 import useMissions, { beginMissionRun } from '@/use/useMissions'
 import useAchievements from '@/use/useAchievements'
 import useBattlePass from '@/use/useBattlePass'
-import { isShip, blockDef, tierOf } from '@/game/blocks'
+import { isShip, blockDef, tierOf, GATE_ID } from '@/game/blocks'
 import { OFFER_SLOTS, WEAPON_SLOT, canRotateShape, normRot, rotatedShape } from '@/game/shapes'
 import { ENEMY_DEFS } from '@/game/enemies'
 import {
   earlyCallBonus, countSiege, countOutranged, deepestStandoff
 } from '@/game/waves'
 import { SEA_LEVEL } from '@/game/world'
+import { CLEAN_FEED } from '@/game/cleanFeed'
 import type { Block } from '@/game/types'
 
 import { getState, setState } from '@/use/useTowerState'
@@ -71,7 +73,7 @@ import { spawnCoinExplosion } from '@/use/useCoinExplosion'
 import { pushResourceFloat, clearResourceFloats } from '@/use/useResourceFloats'
 import { isInterstitialReady, showMidgameAd } from '@/use/useAds'
 import {
-  claimReward, canOfferReward, adInFlight, isRewardGated,
+  claimReward, canOfferReward, adInFlight, isRewardGated, isRewardCoinPriced,
   canShowInterstitial, markInterstitialShown
 } from '@/use/useAdGate'
 import { signalGameplayLoaded } from '@/use/useCrazyGames'
@@ -89,18 +91,20 @@ import WaveClearToast from '@/components/game/WaveClearToast.vue'
 import TutorialOverlay, { type TutorialStep } from '@/components/game/TutorialOverlay.vue'
 import MergeGuide from '@/components/game/MergeGuide.vue'
 import MergePowerDemo from '@/components/game/MergePowerDemo.vue'
+import TutorialHand from '@/components/game/TutorialHand.vue'
+import { useAutoHand, type HandPoint } from '@/use/useAutoHand'
 import TrapTutorial from '@/components/game/TrapTutorial.vue'
 import RepairAllButton from '@/components/game/RepairAllButton.vue'
 import FHudButton from '@/components/atoms/FHudButton.vue'
 import FHudBadge from '@/components/atoms/FHudBadge.vue'
 import FMuteButton from '@/components/atoms/FMuteButton.vue'
 import FReward from '@/components/atoms/FReward.vue'
-import FButton from '@/components/atoms/FButton.vue'
 import FRewardButton from '@/components/atoms/FRewardButton.vue'
 import CoinBadge from '@/components/organisms/CoinBadge.vue'
 import TreasureChest from '@/components/organisms/TreasureChest.vue'
 import FlyingChest from '@/components/game/FlyingChest.vue'
 import GiftTile from '@/components/game/GiftTile.vue'
+import { nextGift, reloadGifts } from '@/use/useGifts'
 import DailyRewards from '@/components/organisms/DailyRewards.vue'
 import AdRewardButton from '@/components/organisms/AdRewardButton.vue'
 import BattlePass from '@/components/organisms/BattlePass.vue'
@@ -111,11 +115,16 @@ import TechTreeModal from '@/components/organisms/TechTreeModal.vue'
 import { markTechFound, refreshTechFound, techNudge } from '@/use/useTechDiscovery'
 import IconCoin from '@/components/icons/IconCoin.vue'
 import TechTreeGlyph from '@/components/icons/TechTreeGlyph.vue'
+import PointerArrow from '@/components/game/PointerArrow.vue'
 import GameIcon from '@/components/icons/GameIcon.vue'
+import RebuiltGlyph from '@/components/game/RebuiltGlyph.vue'
 import IncomingBanner from '@/components/game/IncomingBanner.vue'
 import IconStone from '@/components/icons/IconStone.vue'
 import IconWood from '@/components/icons/IconWood.vue'
 import IconMovie from '@/components/icons/IconMovie.vue'
+import ResultTip from '@/components/game/ResultTip.vue'
+import ResultUpgradeButton from '@/components/game/ResultUpgradeButton.vue'
+import { isTipUsable } from '@/game/deathTips'
 
 const { t } = useI18n()
 void useTowerGame // the composable surface is imported directly above
@@ -172,6 +181,12 @@ let drawAccum = 0
  *  top bar or behind the build tray. Measured from the real elements rather
  *  than guessed, so a wrapped title or a taller tray is accounted for. */
 const measureInsets = (): { top: number; bottom: number } => {
+  // A clean feed has no HUD to keep clear of — but it still HAS one, because
+  // the recorder hides it with `visibility: hidden` and every box survives. So
+  // the measurement would reserve a top bar and a build tray that are not on
+  // screen, and the tower would sit high with an empty band under it. Frame it
+  // in the whole viewport instead. (`src/game/cleanFeed.ts`; DEV only.)
+  if (CLEAN_FEED) return { top: 0, bottom: 0 }
   if (isMobileLandscape.value) {
     return { top: (topBarRef.value?.getBoundingClientRect().height ?? 0) + 8, bottom: 8 }
   }
@@ -318,7 +333,10 @@ const loop = (t: number): void => {
   // loop keeps running (so the frame under an ad isn't a frozen artefact) but
   // the simulation clock does not advance.
   perf.phase('update')
-  const running = !isGamePaused.value && !showResult.value
+  // The result screen holds the simulation still while the player reads it.
+  // A clean feed has no result screen on it, so that hold is invisible — and a
+  // clip whose last seconds are a frozen board is dead air. Recording only.
+  const running = !isGamePaused.value && (CLEAN_FEED || !showResult.value)
   if (running) step(dt)
 
   // On the low tier every second frame is skipped; the simulation still steps
@@ -332,6 +350,9 @@ const loop = (t: number): void => {
   }
 
   perf.phase('render')
+  // Drawn even when the simulation is held (see `running`): the effects keep
+  // their own time, so the Gate's collapse throws its dust and lets it settle
+  // rather than freezing mid-burst behind the result screen.
   if (ctx) drawScene(ctx, cssW, cssH, drawAccum, dpr)
 
   // Fed AFTER the cadence gate and with the accumulated delta, so what the
@@ -648,6 +669,13 @@ const tryPlace = (c: number, r: number): void => {
     // A short negative click is better feedback than silence — it confirms the
     // tap registered and the placement was rejected, not missed.
     playSound('obstacle-hit', 0.03)
+    // …but a sound is no answer to a muted player, and the blind playtest read
+    // the red ghost left behind as a block that had landed and then vanished.
+    // So the refusal is SHOWN: the ghost shakes where it was refused and every
+    // legal anchor for this piece flashes green — "not there; here". A touch
+    // has no hover, so the tapped cell becomes the ghost's cell first.
+    hoverCell.value = { c, r }
+    requestRejectFlash()
     return
   }
   if (!placeShape(slot, c, r, selectedRot.value)) return
@@ -689,6 +717,7 @@ const tryPlace = (c: number, r: number): void => {
 }
 
 const onSelectSlot = (slot: number | null): void => {
+  cancelHandPreview()
   selectedSlot.value = slot
   inspected.value = null
   if (slot != null) {
@@ -970,12 +999,30 @@ const pickDeathTip = (): string | null => {
   if (progress.affordableCount.value > 0) eligible.push('spend')
   eligible.push('branches', 'shape', 'gold')
 
-  if (eligible.length === 0) return null
-  const id = eligible[tipCursor.value % eligible.length]!
+  // Only advice the next run can act on. A tip about producers the player has
+  // no way to place yet read, in the 2026-09-11 blind playtest, as "you lost
+  // because of something we never showed you" — see `deathTips.ts` for which
+  // tips wait on which blocks.
+  const usable = eligible.filter((id) => isTipUsable(id, progress.availableBlocks.value))
+  if (usable.length === 0) return null
+  const id = usable[tipCursor.value % usable.length]!
   tipCursor.value = (tipCursor.value + 1) % 1000
   setState(TIP_CURSOR_KEY, tipCursor.value)
   return id
 }
+
+// ─── The kill cam is gone ───────────────────────────────────────────────────
+//
+// The Gate used to fall into a three-second held frame on the unit that struck
+// the last blow, crowned by a spotlight, before the result screen. It was built
+// to answer "what killed me" for the blind playtest's agent testers, who cannot
+// see the battlefield except in screenshots — and for a human it is three
+// seconds of not being allowed to press anything at the exact moment they have
+// decided whether to go again. The board itself already shows who was standing
+// on the Gate when it went.
+//
+// `killingBlow` stays in the simulation: it is cheap, and it is what a QA
+// session or another harness reads to answer the same question out of band.
 
 const presentDefeat = async (): Promise<void> => {
   const s = runSummary()
@@ -1238,13 +1285,20 @@ watch(lastWaveReward, async (r) => {
  * kind of tutorial beat players skip past and resent — `advanceTutorial` steps
  * over it in that case.
  *
- * `mergePower` follows the ladder: six seconds of `MergePowerDemo`, the same
- * monster shot by a plain cannon (−10 %) and then a tier 3 (−75 %). The ladder
- * shows that welds keep going; players still stopped at tier 2, because
- * nothing showed them what the next weld is FOR.
+ * `mergePower` follows the ladder: four seconds of `MergePowerDemo`, a plain
+ * cannon and a tier 3 side by side, each firing twice at its own grumpling —
+ * −10 % a shot on one side, −75 % on the other, which is dead before the other
+ * has lost a quarter. The ladder shows that welds keep going; players still
+ * stopped at tier 2, because nothing showed them what the next weld is FOR.
+ *
+ * `rankGate` follows the cannon's rank: the automatic hand takes over, taps the
+ * Gate and presses its upgrade once (see `runGateDemo`). A playtester found
+ * this on their own — the Gate is the one block whose loss ends the run, and a
+ * rank on it is the cheapest insurance the game sells — and almost nobody else
+ * ever does, because nothing suggests the Gate is a block like the others.
  */
 const TUTORIAL_STEPS: TutorialStep[] = [
-  'pick', 'place', 'mergeGuide', 'mergePower', 'inspectMerged', 'rankUp', 'call'
+  'pick', 'place', 'mergeGuide', 'mergePower', 'inspectMerged', 'rankUp', 'rankGate', 'call'
 ]
 
 /**
@@ -1529,6 +1583,10 @@ const measureTutorialTarget = (): void => {
   // player in a normal game for a frame rather than under a holeless dim.
   if (step === 'rankUp') { tutorialRect.value = fromEl('.inspector__upgrade'); return }
 
+  // The automatic hand plays this one — no hole, no arrow; its own layer holds
+  // the player's input while it demonstrates (see `runGateDemo`).
+  if (step === 'rankGate') { tutorialRect.value = null; return }
+
   // A beat that cannot be performed must not be forced. The cannon is 25 wood
   // and 10 stone against a 120/40 opening purse, so this is only reachable by a
   // resumed run that spent itself down while the overlay had nothing to point
@@ -1560,6 +1618,17 @@ let tutorialTimer = 0
 // the temporal dead zone. The first measurement happens on mount instead, by
 // which time every ref exists and the layout is real.
 watch(tutorialStep, (step) => {
+  // The automatic hand only ever plays inside its own beat. Anything that takes
+  // the beat away — a modal over the tutorial, the result screen — stops it
+  // where it is; the beat coming back plays it again from the top.
+  if (step !== 'rankGate') autoHand.cancel()
+  if (step === 'rankGate') {
+    selectedSlot.value = null
+    measureTutorialTarget()
+    void runGateDemo()
+    return
+  }
+
   // Re-armed on the beat rather than only at boot: a tech unlock rerolls two
   // slots mid-run, and the hand has to still hold the piece the arrow is
   // pointing at.
@@ -1813,6 +1882,89 @@ const onUpgradeInspected = (): void => {
   playSound('level-up', 0.05)
 }
 
+// ─── The Gate's rank, shown by the automatic hand ───────────────────────────
+//
+// The beat after the cannon's rank. The player has just pressed Upgrade on the
+// weld; the hand takes over from that button, taps the Gate — the inspector
+// opens on it, exactly as the player's own tap would — and presses its Upgrade
+// once. Then the card closes and the Call Wave beat starts. About three
+// seconds, and every tap in it is a real one: the Gate really gains the rank.
+//
+// Paid for like the cannon's lesson (`seedTutorialRankGold`): the purse is
+// topped UP to the price, so the player finishes the beat where they started.
+
+const autoHand = useAutoHand()
+
+const gateBlock = (): Block | null => {
+  for (const b of getTowerBlocks().values()) if (b.typeId === GATE_ID) return b
+  return null
+}
+
+/** The Gate's centre on screen — its whole footprint, however it was built. */
+const gateOnScreen = (): HandPoint | null => {
+  const g = gateBlock()
+  if (!g) return null
+  return {
+    x: worldToScreenX(g.c - 0.5 + spanW(g) / 2),
+    y: worldToScreenY(g.r + spanH(g) / 2)
+  }
+}
+
+/** The inspector's Upgrade button, once the panel has laid itself out. */
+const upgradeButtonOnScreen = (): HandPoint | null => {
+  const el = document.querySelector('.inspector__upgrade')
+  const r = el?.getBoundingClientRect()
+  return r && r.width > 0 ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null
+}
+
+const runGateDemo = async (): Promise<void> => {
+  const gate = gateBlock()
+  // Nothing to show — no Gate, or already at the top rank: the beat retires,
+  // as the cannon's does when there is nothing to rank.
+  if (!gate || seedTutorialRankGold(gate.c, gate.r) <= 0) {
+    completeTutorialStep('rankGate')
+    return
+  }
+  // From the button the player just pressed; from the lower middle when the
+  // panel has already gone.
+  const start = upgradeButtonOnScreen()
+    ?? { x: window.innerWidth * 0.5, y: window.innerHeight * 0.72 }
+  const outcome = await autoHand.run([
+    { kind: 'wait', ms: 350 },
+    { kind: 'move', to: gateOnScreen, ms: 650 },
+    {
+      kind: 'press',
+      ms: 180,
+      then: () => {
+        const g = gateBlock()
+        if (!g) return
+        inspected.value = g
+        playSound('modal-open', 0.05)
+      }
+    },
+    // The panel re-renders for the Gate before the hand goes looking for its
+    // button.
+    { kind: 'wait', ms: 420 },
+    { kind: 'move', to: upgradeButtonOnScreen, ms: 550 },
+    {
+      kind: 'press',
+      ms: 180,
+      then: () => {
+        const g = gateBlock()
+        if (g && upgradeBlock(g.c, g.r)) playSound('level-up', 0.05)
+      }
+    },
+    // Long enough to see the Gate's numbers move on the card.
+    { kind: 'wait', ms: 800 }
+  ], start)
+  // Cancelled: the beat was taken away and will play again when it returns.
+  if (outcome === 'cancelled') return
+  // Done — or a target that never appeared, which must not strand a tutorial
+  // that has no Skip button: either way the lesson is over.
+  inspected.value = null
+  completeTutorialStep('rankGate')
+}
+
 /** Convert a standing wall into a spiked one. */
 /**
  * Patch the inspected block back to full for run gold.
@@ -1898,6 +2050,20 @@ const onSetSpeed = (n: number): void => {
  */
 const onEnhancedHand = async (): Promise<void> => {
   if (adInFlight.value) return
+  // Where the price is wallet coins, the first tap only SHOWS the purchase:
+  // the hand flips gold in place (with the +damage badges a reinforced piece
+  // really gets) and the button turns into a tick beside its price. The second
+  // tap pays. A rerun tester tapped this once out of curiosity and lost 30 of
+  // their 36 coins to an effect they never saw; a video build needs no second
+  // tap, the movie badge already says what tapping does.
+  if (isRewardCoinPriced && !handPreview.value) {
+    handPreview.value = true
+    playSound('modal-open', 0.04, 1.2)
+    window.clearTimeout(handPreviewTimer)
+    handPreviewTimer = window.setTimeout(cancelHandPreview, HAND_PREVIEW_MS)
+    return
+  }
+  cancelHandPreview()
   // The wallet price where no video plays is charged by `claimReward` itself,
   // at the same rate as every other perk — see `REWARD_COIN_COST`. It used to
   // be a bespoke 20 run-coins here, which meant this one button was priced in a
@@ -1906,15 +2072,35 @@ const onEnhancedHand = async (): Promise<void> => {
     dealEnhancedOffers()
     selectedSlot.value = null
     playSound('level-up', 0.07)
+    // The spend gets a beat of its own on the cards it bought — see the tray's
+    // `paidAt`. Without it, a coin-priced purchase changed nothing on screen:
+    // the preview had already turned the hand gold on the first tap.
+    handPaidAt.value = Date.now()
   })
 }
 
+/** When the reinforced hand was last PAID for (not previewed). */
+const handPaidAt = ref(0)
+
+/** The reinforced hand's preview-then-confirm (coin-priced builds only). */
+const HAND_PREVIEW_MS = 4000
+const handPreview = ref(false)
+let handPreviewTimer = 0
+const cancelHandPreview = (): void => {
+  window.clearTimeout(handPreviewTimer)
+  handPreview.value = false
+}
+/** What the tray draws: the whole hand gold while it is being previewed. */
+const trayEnhanced = computed(() => (handPreview.value ? offers.value.map(() => true) : offerEnhanced.value))
+watch(phase, (p) => { if (p !== 'build') cancelHandPreview() })
+
 // ─── Flying chest and gift pieces ───────────────────────────────────────────
 //
-// A chest once a wave, from the moment the tutorial ends; tapping it queues a
-// free welded piece, which waits in the gift tile over the hand (see
-// `useGifts`). Both are self-contained — this scene only says when they may
-// run, and puts down whatever it was holding when a gift is picked up.
+// One chest five seconds after the tutorial is behind the player and one
+// every forty-five seconds after that; tapping it queues a welded piece, which
+// waits in the hand's first slot (see `useGifts` and BuildTray's `giftFirst`)
+// — free the first time a chest is ever opened, half price after. Both are self-contained — this scene only says when
+// they may run, and puts down whatever it was holding when a gift is picked up.
 
 const chestReady = computed(() => tutorialOver.value && !showResult.value && phase.value !== 'defeat')
 const chestPaused = computed(() =>
@@ -1923,6 +2109,18 @@ const chestPaused = computed(() =>
 const giftDisabled = computed(() =>
   showResult.value || phase.value === 'defeat' || tutorialStep.value !== null
 )
+
+/**
+ * A gift is waiting and on offer: it borrows the hand's FIRST slot — the
+ * structure lane, walls only — until it is placed (BuildTray's `giftFirst`).
+ */
+const giftFirst = computed(() => !!nextGift.value && !giftDisabled.value)
+const giftTileRef = ref<InstanceType<typeof GiftTile> | null>(null)
+
+// The wall armed in slot 0 is UNDER the gift once the gift takes the slot;
+// left armed, the next click on the board would build a piece the player can
+// no longer see in their hand.
+watch(giftFirst, (on) => { if (on && selectedSlot.value === 0) selectedSlot.value = null })
 
 const onGiftArmed = (): void => {
   selectedSlot.value = null
@@ -2146,7 +2344,7 @@ const waveWarnings = computed<{ id: string; n: number; m?: number }[]>(() => {
  * Trade one offered shape for a new draw.
  *
  * Without this a run could deadlock into four unaffordable or useless offers;
- * the five-second per-slot cooldown is what stops it becoming a free "reroll
+ * the three-second per-slot cooldown is what stops it becoming a free "reroll
  * until perfect" without punishing the rest of the hand for one bad piece.
  */
 const onReroll = (slot: number): void => {
@@ -2219,9 +2417,12 @@ const onKey = (e: KeyboardEvent): void => {
     if (ROTATE_LEFT_KEYS.has(e.code)) { e.preventDefault(); rotateBy(-1); return }
     if (ROTATE_RIGHT_KEYS.has(e.code)) { e.preventDefault(); rotateBy(1); return }
   }
-  // 1-4 arm the matching offer slot — the desktop speed-build path.
+  // 1-4 arm the matching offer slot — the desktop speed-build path. "1" is the
+  // gift while one is standing in the first slot.
   const digit = Number(e.key)
-  if (Number.isInteger(digit) && digit >= 1 && digit <= OFFER_SLOTS) {
+  if (digit === 1 && giftFirst.value) {
+    giftTileRef.value?.arm()
+  } else if (Number.isInteger(digit) && digit >= 1 && digit <= OFFER_SLOTS) {
     onSelectSlot(digit - 1)
   }
 }
@@ -2297,6 +2498,9 @@ let insetTimer = 0
 onMounted(() => {
   void boot()
   installFullscreenWatch()
+  // The gift tile only exists while a gift is showing now, so the queue a late
+  // cloud hydrate brings is read here rather than by the tile on its mount.
+  reloadGifts()
   // Re-read after boot: on a platform build the cloud save may not have landed
   // when `useTechDiscovery` first read it, and a returning player must not be
   // told about a screen they already use.
@@ -2352,6 +2556,8 @@ onMounted(() => {
 
 onUnmounted(() => {
   cancelAnimationFrame(rafId)
+  // A hand mid-demo would otherwise fire its last tap into a scene that is gone.
+  autoHand.cancel()
   // The defeat flow is parked on this promise. Leaving it unresolved keeps
   // `presentDefeat` alive on a scene that no longer exists, and the result
   // screen it was about to show never gets its turn.
@@ -2393,14 +2599,12 @@ onUnmounted(() => {
     //- ── HUD overlay ───────────────────────────────────────────────────────
     //- Non-interactive by default; individual controls opt back in.
     div.scene__hud
-      //- The flying chest crosses the sky once a wave. First in the HUD, so
+      //- The flying chest crosses the sky on its own timer. First in the HUD, so
       //- every panel and button after it paints over it rather than under.
       FlyingChest(
-        :tutorial-done="tutorialOver"
         :ready="chestReady"
         :paused="chestPaused"
         :wave="wave"
-        :phase="phase"
       )
       //- The game's premise, said once, in the biggest type on the screen.
       //- First-time players only, and gone on their first touch — see
@@ -2509,19 +2713,15 @@ onUnmounted(() => {
             //- quit rather than the moment they adapt. It takes a row of its
             //- own so the two answers sit directly underneath the problem.
             div.scene__reach-hint(v-if="outOfReachNow") {{ t('allies.outOfReachHint') }}
-            //- A gift a chest or a first clear paid out, waiting to be placed.
-            GiftTile(
-              variant="footprint"
-              :canvas="canvasRef"
-              :slot-armed="selectedSlot != null"
-              :disabled="giftDisabled"
-              @armed="onGiftArmed"
-            )
+            //- Previewing: a tick beside the price — "yes, pay for this".
             FRewardButton(
               v-if="enhancedHandOffered"
               tone="gold"
               size="sm"
+              :class="{ 'is-confirming': handPreview }"
               :label="t('blocks.enhancedHand')"
+              :icon="handPreview ? 'check' : undefined"
+              :icon-only="handPreview"
               @click="onEnhancedHand"
             )
             //- Reach extension. Offered only on the wave that needs it — see
@@ -2584,16 +2784,31 @@ onUnmounted(() => {
           BuildTray(
             :selected="selectedSlot"
             :offers="offers"
-            :enhanced="offerEnhanced"
+            :enhanced="trayEnhanced"
             :wood="wood"
             :stone="stone"
             :coins="runCoins"
             :reroll-seconds="rerollReadyIn"
             :hide-reroll="tutorialStep !== null"
             :nudge="idleNudge"
+            :gift-first="giftFirst"
+            :paid-at="handPaidAt"
             @select="onSelectSlot"
             @reroll="onReroll"
           )
+            //- The gift a chest or a first clear paid out, standing in the first
+            //- slot at the tray's own tile size until it is placed.
+            template(#gift="{ size }")
+              GiftTile(
+                ref="giftTileRef"
+                variant="footprint"
+                in-tray
+                :size="size"
+                :canvas="canvasRef"
+                :slot-armed="selectedSlot != null"
+                :disabled="giftDisabled"
+                @armed="onGiftArmed"
+              )
 
         //- Tech tree, themes, and the wave control.
         div.scene__right
@@ -2603,7 +2818,7 @@ onUnmounted(() => {
             //- the next second, so it sits first along the thumb's path.
             button.scene__rain(
               type="button"
-              :class="{ 'is-ready': arrowRainReady, 'is-armed': arrowRainArmed }"
+              :class="{ 'is-ready': arrowRainReady, 'is-armed': arrowRainArmed, 'is-urgent': arrowRainReady && !arrowRainArmed && phase === 'battle' && strandedCount > 0 }"
               :aria-label="t('hud.arrowRain')"
               :title="t('hud.arrowRain')"
               @click="onArrowRain"
@@ -2623,7 +2838,11 @@ onUnmounted(() => {
               FHudBadge(v-if="!arrowRainReady" tone="red") {{ arrowRainWavesLeft }}
 
             div.scene__tech-wrap
-              span.scene__spotlight(v-if="showTechSpotlight") {{ t('tech.spotlight') }}
+              //- Stage 2 onward, until the tree is first opened: the arrow says
+              //- "press this" without a word. It takes the pill's slot above the
+              //- chip, so the pill waits — one pointer at a time.
+              PointerArrow(v-if="techNudge" side="top")
+              span.scene__spotlight(v-else-if="showTechSpotlight") {{ t('tech.spotlight') }}
               //- Two reasons this button can be lit, and they arrive in the
               //- opposite order to the one you would guess: the DISCOVERY
               //- nudge fires first (wave 1, before the player can afford
@@ -2692,14 +2911,17 @@ onUnmounted(() => {
         //- stacking them there pushed the two most important buttons off the
         //- bottom. The long axis is the one with room; this spends it.
         div.result__info
+          //- The record rides WITH the wave, because the wave is what it is a
+          //- record of. It used to hang beside the coin payout, and in the
+          //- 2026-09-11 blind playtest two testers read "NEW RECORD! +223" as a
+          //- record score of 223 — the number beside it was coins.
           div.result__headline
             span.result__wave {{ t('result.reachedWave', { n: summary.wave }) }}
-
-          //- The record sits BESIDE the payout rather than on a line of its
-          //- own. `rewardCoinRef` stays wrapped tightly around the coin so the
-          //- payout explosion still originates on the coin, not the whole row.
-          div.result__payout
             span.result__record(v-if="summary.wave >= bestWave && summary.wave > 0") {{ t('result.newRecord') }}
+
+          //- `rewardCoinRef` stays wrapped tightly around the coin so the payout
+          //- explosion still originates on the coin, not the whole row.
+          div.result__payout
             //- The wallet coin, not the gold ingot: `grantRunCoins` pays this
             //- straight into the purse the tech tree spends from, so the glyph
             //- has to be the one on the coin badge it flies to.
@@ -2724,13 +2946,9 @@ onUnmounted(() => {
 
           //- One line about whatever this run did without. It closes the
           //- numbers column because that is the order the player reads in —
-          //- what happened, then why, then what to do about it.
-          div.result__tip(v-if="deathTip")
-            svg.result__tip-icon(viewBox="0 0 24 24" fill="currentColor" aria-hidden="true")
-              path(d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z")
-              rect(x="9" y="18.5" width="6" height="1.8" rx="0.9")
-              rect(x="10" y="21" width="4" height="1.6" rx="0.8")
-            span.result__tip-text {{ t(`tips.${deathTip}`) }}
+          //- what happened, then why, then what to do about it. The blocks it
+          //- names ride beside it as their tray tiles (see `ResultTip`).
+          ResultTip(v-if="deathTip" :tip-id="deathTip")
 
         div.result__cta
           //- 2× rewarded video.
@@ -2763,13 +2981,24 @@ onUnmounted(() => {
             //- offer, and they have to be ON the button rather than discovered
             //- after the ad has already played.
             span.result__continue
-              GameIcon.result__continue-icon(name="fast-forward")
-              span {{ t('result.continueWave', { n: continueWave }) }}
-              span.result__continue-bonus
-                span +{{ CONTINUE_WOOD }}
-                IconWood.result__res-icon
-                span +{{ CONTINUE_STONE }}
-                IconStone.result__res-icon
+              //- The picture carries the offer: rubble standing back up as a
+              //- tower, large, left of everything else. See RebuiltGlyph — a
+              //- small mark beside a big "+100 +100" is why this button was
+              //- read as a wave reward to claim.
+              RebuiltGlyph.result__continue-pic
+              span.result__continue-text
+                span.result__continue-wave {{ t('result.continueWave', { n: continueWave }) }}
+                //- The materials, demoted to a line underneath: they are what
+                //- comes WITH the rebuild, not what the button is.
+                span.result__continue-bonus
+                  span +{{ CONTINUE_WOOD }}
+                  IconWood.result__res-icon
+                  span +{{ CONTINUE_STONE }}
+                  IconStone.result__res-icon
+              //- Its terms, as a token rather than a sentence: once per run.
+              //- The blind playtest saw it appear once and never again and read
+              //- that as a bug; the token says so before it is spent.
+              span.result__once(aria-hidden="true") 1×
 
           //- The two CTAs from reference image 2.
           div.result__actions
@@ -2777,23 +3006,20 @@ onUnmounted(() => {
             //- `result.defendAgain` are NOT dead keys: they moved from being
             //- read on screen to being read aloud, as the accessible name of
             //- an icon-only control. Do not prune them.
-            FButton(
-              size="md"
-              icon="shop"
-              icon-only
-              :aria-label="t('result.upgrade')"
-              :is-disabled="adInFlight"
-              @click="onUpgrade"
-            )
+            //-
+            //- The upgrade door wears the HUD tech button's own glyph — the cart
+            //- it used to wear read as a store — see `ResultUpgradeButton`.
+            ResultUpgradeButton(:is-disabled="adInFlight" @click="onUpgrade")
             //- No movie badge: restarting is the way OUT of a finished run, and
             //- a player who cannot get past it because an ad will not fill is
             //- stuck on the defeat screen. `free` keeps the reward-button
             //- styling and disabled handling while dropping the video
-            //- affordance.
+            //- affordance. A replay arrow, not skip-forward: this is "go
+            //- again", and the skip mark read as "skip this screen".
             FRewardButton(
               tone="blue"
               free
-              icon="skip-forward"
+              icon="replay"
               icon-only
               :label="t('result.defendAgain')"
               @click="onRebuild"
@@ -2808,6 +3034,10 @@ onUnmounted(() => {
       :target="tutorialRect"
     )
 
+    //- The automatic hand: the Gate's rank, shown rather than pointed at. Its
+    //- own layer holds input while it plays (see `runGateDemo`).
+    TutorialHand(:hand="autoHand.hand")
+
     //- The merge ladder, on the frame the player's first fusion landed. Its own
     //- beat of the tutorial sequence, so the build countdown stays held while it
     //- is up (see `buildClockHeld`) and the wave cannot fire out from under it.
@@ -2816,8 +3046,8 @@ onUnmounted(() => {
       @continue="onMergeGuideContinue"
     )
 
-    //- Six seconds after the ladder: a plain cannon against a tier 3, one
-    //- health bar between them. A tutorial beat, so the countdown stays held.
+    //- Four seconds after the ladder: a plain cannon and a tier 3 side by side,
+    //- one grumpling each. A tutorial beat, so the countdown stays held.
     MergePowerDemo(
       :model-value="showMergePower"
       @continue="onMergePowerContinue"
@@ -3103,6 +3333,25 @@ onUnmounted(() => {
   justify-content: center
   gap: clamp(0.2rem, 1.2vw, 0.45rem)
   max-width: 100%
+
+// The reinforced hand's second tap: the tiles below have just flipped gold and
+// this tick is what pays for them. It breathes so it reads as waiting on the
+// player, not as done.
+.scene__tray-perks .is-confirming
+  animation: perk-confirm 0.9s ease-in-out infinite
+
+@keyframes perk-confirm
+  0%, 100%
+    scale: 1
+    filter: drop-shadow(0 0 0 rgba(255, 213, 74, 0))
+  50%
+    scale: 1.08
+    filter: drop-shadow(0 0 8px rgba(255, 213, 74, 0.95))
+
+@media (prefers-reduced-motion: reduce)
+  .scene__tray-perks .is-confirming
+    animation: none
+    filter: drop-shadow(0 0 6px rgba(255, 213, 74, 0.9))
 
 // ─── Cavalry ────────────────────────────────────────────────────────────────
 
@@ -3394,6 +3643,13 @@ onUnmounted(() => {
   &.is-armed
     animation: rain-armed 0.7s ease-in-out infinite
 
+  // Urgent: an enemy stands where no gun on the tower reaches (the crossed-out
+  // crosshair over it on the field), and this is the answer that does. Beats
+  // harder than the armed pulse — it is asking to be pressed, not saying it
+  // has been.
+  &.is-urgent
+    animation: rain-urgent 0.9s ease-in-out infinite
+
 .scene__rain-icon
   position: relative
   z-index: 1
@@ -3421,6 +3677,20 @@ onUnmounted(() => {
     box-shadow: 0 0 0 0 rgba(255, 224, 120, 0)
   50%
     box-shadow: 0 0 0 5px rgba(255, 224, 120, 0.6)
+
+@keyframes rain-urgent
+  0%, 100%
+    box-shadow: 0 0 0 0 rgba(255, 96, 64, 0)
+    scale: 1
+  45%
+    box-shadow: 0 0 0 6px rgba(255, 96, 64, 0.7), 0 0 16px rgba(255, 190, 40, 0.7)
+    scale: 1.08
+
+// The ring stays, the swell goes.
+@media (prefers-reduced-motion: reduce)
+  .scene__rain.is-urgent
+    animation: none
+    box-shadow: 0 0 0 4px rgba(255, 96, 64, 0.75)
 
 .scene__tech-wrap
   position: relative
@@ -3542,11 +3812,14 @@ onUnmounted(() => {
 .result__cta
   display: contents
 
+// The wave line and its record on one row when they fit, the record wrapping
+// under the wave when a long translation does not leave room beside it.
 .result__headline
   display: flex
-  flex-direction: column
+  flex-wrap: wrap
   align-items: center
-  gap: 0.15rem
+  justify-content: center
+  gap: 0.15rem 0.55rem
 
 .result__wave
   color: #fff
@@ -3557,28 +3830,25 @@ onUnmounted(() => {
   text-shadow: 3px 3px 0 #000
 
 .result__payout
-  // `1fr auto 1fr`, so the coin stays centred on the SCREEN and the record
-  // hangs off its left rather than shoving it sideways. Same reasoning as the
-  // bottom bar's tray column.
-  display: grid
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr)
-  align-items: center
-  gap: clamp(0.35rem, 2vw, 0.8rem)
+  display: flex
+  justify-content: center
   width: 100%
 
+// A gold plaque on the wave it belongs to.
 .result__record
-  grid-column: 1
-  justify-self: end
-  text-align: right
+  padding: 0.1em 0.55em
+  border-radius: 999px
+  border: 2px solid rgba(255, 217, 60, 0.75)
+  background: rgba(60, 40, 0, 0.45)
   color: #ffd93c
   font-weight: 900
   text-transform: uppercase
-  font-size: clamp(0.65rem, 3vw, 0.95rem)
+  white-space: nowrap
+  font-size: clamp(0.62rem, 2.8vw, 0.9rem)
   text-shadow: 2px 2px 0 #000
   animation: spotlight-pulse 1.1s ease-in-out infinite
 
 .result__coins
-  grid-column: 2
   display: flex
   align-items: center
   gap: 0.4rem
@@ -3651,42 +3921,7 @@ onUnmounted(() => {
   text-overflow: ellipsis
   max-width: 100%
 
-// ─── Death-screen tip ───────────────────────────────────────────────────────
-//
-// One line, and it must never be the reason a CTA moves. It is capped in height
-// and scrolls internally past that cap, so a long translation cannot grow the
-// dialog: German and Vietnamese run ~40 % longer than English here, which is
-// exactly the width at which a "one line" tip quietly becomes three.
-
-.result__tip
-  display: flex
-  align-items: center
-  gap: clamp(0.35rem, 2vw, 0.6rem)
-  width: 100%
-  padding: clamp(0.28rem, 1.5vw, 0.5rem) clamp(0.45rem, 2.6vw, 0.8rem)
-  border-radius: 0.7rem
-  background: rgba(8, 14, 28, 0.5)
-  box-shadow: inset 0 0 0 2px rgba(255, 214, 92, 0.22)
-
-.result__tip-icon
-  flex: 0 0 auto
-  width: clamp(0.9rem, 4vw, 1.25rem)
-  height: clamp(0.9rem, 4vw, 1.25rem)
-  color: #ffd35c
-  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.6))
-
-.result__tip-text
-  min-width: 0
-  color: rgba(226, 236, 255, 0.94)
-  font-weight: 700
-  line-height: 1.28
-  font-size: clamp(0.56rem, 2.6vw, 0.8rem)
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.55)
-  // Three lines is the ceiling. Past that the tip scrolls rather than pushing
-  // the buttons below it down the screen.
-  max-height: 3.9em
-  overflow-y: auto
-  overscroll-behavior: contain
+// The death-screen tip lives in `ResultTip.vue`, height caps and all.
 
 .result__twox
   display: inline-flex
@@ -3709,9 +3944,23 @@ onUnmounted(() => {
 .result__continue
   display: inline-flex
   align-items: center
-  flex-wrap: wrap
   justify-content: center
-  gap: 0.15em 0.5em
+  gap: 0.55em
+
+.result__continue-pic
+  // Big enough to be a picture rather than a bullet — this is the only thing
+  // on the button that says what it does.
+  font-size: 1.9em
+
+.result__continue-text
+  display: inline-flex
+  flex-direction: column
+  align-items: flex-start
+  gap: 0.05em
+  line-height: 1.15
+
+.result__continue-wave
+  font-weight: 900
 
 // The materials a grace continue pays out, riding beside the button's label.
 //
@@ -3723,25 +3972,43 @@ onUnmounted(() => {
   display: inline-flex
   align-items: center
   gap: 0.3em
-  font-weight: 900
+  // A "+" line under the wave, not the headline. At the same weight and size
+  // as the caption it outshouted it: the rerun's D1 read the whole row as a
+  // reward to claim rather than as a rebuild to buy.
+  font-size: 0.78em
+  font-weight: 700
+  opacity: 0.9
   font-variant-numeric: tabular-nums
   white-space: nowrap
 
 .result__res-icon
   flex: 0 0 auto
-  width: 1.35em
-  height: 1.35em
+  width: 1.2em
+  height: 1.2em
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45))
 
-// The fast-forward mark that opens the caption. It replaces the words "Rebuild
-// & continue", which wrapped onto two lines in German and Vietnamese and made
-// the button the tallest control on the screen. Sized off the label rather
-// than fixed, so it tracks the button's own type scale.
-.result__continue-icon
-  flex: 0 0 auto
-  width: 1.15em
-  height: 1.15em
-  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45))
+// "Once per run", as a token pinned to the button's corner. Absolute against
+// the reward button's body, which is the nearest positioned box; it has to
+// overhang the edge to read as a tag ON the offer rather than part of its copy.
+.result__once
+  position: absolute
+  top: -0.65em
+  right: -0.55em
+  display: inline-grid
+  place-items: center
+  min-width: 1.85em
+  height: 1.85em
+  padding: 0 0.3em
+  border: 2px solid #0f1a30
+  border-radius: 999px
+  background-image: linear-gradient(to bottom, #fff3b0, #ffc83d)
+  box-shadow: 0 2px 0 #0f1a30
+  color: #3a2400
+  font-size: 0.62em
+  font-weight: 900
+  line-height: 1
+  text-shadow: none
+  pointer-events: none
 
 .result__actions
   display: flex
@@ -3797,20 +4064,7 @@ onUnmounted(() => {
   .result__stat-note
     font-size: 0.55rem
 
-  // The tip has the least claim on the scarce axis, so it takes the tightest
-  // treatment and a two-line ceiling instead of three.
-  .result__tip
-    padding: 0.12rem 0.5rem
-    border-radius: 0.5rem
-    gap: 0.35rem
-
-  .result__tip-icon
-    width: 0.85rem
-    height: 0.85rem
-
-  .result__tip-text
-    font-size: clamp(0.5rem, 2.2vh, 0.66rem)
-    max-height: 2.6em
+  // (The tip's own short-viewport treatment lives in `ResultTip.vue`.)
 
 // ── Two columns ──
 //

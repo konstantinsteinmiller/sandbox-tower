@@ -28,7 +28,19 @@ const i18n = createI18n({
   locale: 'en',
   missingWarn: false,
   fallbackWarn: false,
-  messages: { en: { gift: { free: 'Free', tile: 'Free {name}', pair: 'Pair {name}', firstClear: 'Wave {n}' } } }
+  messages: {
+    en: {
+      gift: {
+        free: 'Free',
+        tile: 'Free {name}',
+        pair: 'Pair {name}',
+        tilePaid: '{name}, half price',
+        pairPaid: 'Pair {name}, half price',
+        discount: '-{n}%',
+        firstClear: 'Wave {n}'
+      }
+    }
+  }
 })
 
 const pointer = (type: string, x: number, y: number, id = 1): MouseEvent => {
@@ -47,6 +59,11 @@ const setup = async (variant: 'cell' | 'footprint') => {
   }
   game.startRun()
   game.buildClockHeld.value = true
+  // A chest piece past the player's first costs half of building its cells
+  // (`giftPrice`); these are gesture tests, so the purse never refuses one.
+  game.wood.value = 9_999
+  game.stone.value = 9_999
+  game.runCoins.value = 9_999
   const gifts = await import('@/use/useGifts')
   const canvas = document.createElement('canvas')
   document.body.appendChild(canvas)
@@ -109,6 +126,33 @@ describe('gift tile', () => {
     w.unmount()
   })
 
+  it('refuses a gift the purse cannot pay for, and keeps it in hand', async () => {
+    const { w, game, gifts, canvas } = await setup('footprint')
+    gifts.grantGift({ typeId: 'tesla', tier: 2, source: 'chest' })
+    game.wood.value = 0
+    game.stone.value = 0
+    game.runCoins.value = 0
+    await w.vm.$nextTick()
+    // The tile shows a price rather than FREE, and the tap that would place
+    // it is refused — the piece stays on the tray for when the payout lands.
+    expect(w.find('.gift__free.is-price').exists()).toBe(true)
+    await tapTile(w)
+    tapBoard(canvas, 240, 390)
+    await w.vm.$nextTick()
+    expect(game.getBlocks().has('1,0')).toBe(false)
+    expect(gifts.gifts.value).toHaveLength(1)
+    w.unmount()
+  })
+
+  it('says FREE on a free gift and nothing about a discount', async () => {
+    const { w, gifts } = await setup('footprint')
+    gifts.grantGift({ typeId: 'tesla', tier: 2, source: 'chest', free: true })
+    await w.vm.$nextTick()
+    expect(w.find('.gift__free').text()).toBe('Free')
+    expect(w.find('.gift__off').exists()).toBe(false)
+    w.unmount()
+  })
+
   it('leaves a drag on the board to the scene', async () => {
     const { w, game, gifts, canvas } = await setup('footprint')
     gifts.grantGift({ typeId: 'tesla', tier: 2, source: 'chest' })
@@ -151,6 +195,40 @@ describe('gift tile', () => {
     for (let i = 0; i < 400 && game.getDebris().length > 0; i++) game.step(1000 / 60)
     expect(game.getBlocks().get('-2,0')?.typeId).toBe('frost')
     expect(game.getBlocks().get('-2,0')?.tier).toBe(2)
+    w.unmount()
+  })
+
+  // The reported bug: a gift won while the tile was disabled (a result screen,
+  // a tutorial card) showed up as a gold FREE tile with nothing in it. The tile
+  // is v-if'd on disabled, so its canvas mounted when disabled fell — and only
+  // a change of GIFT used to repaint it.
+  it('paints the piece when the tile appears after being disabled', async () => {
+    const { w, gifts } = await setup('cell')
+    await w.setProps({ disabled: true })
+    gifts.grantGift({ typeId: 'tesla', tier: 2, source: 'chest' })
+    await w.vm.$nextTick()
+    expect(w.find('canvas.gift__art').exists()).toBe(false)
+
+    const spy = vi.spyOn(HTMLCanvasElement.prototype, 'getContext')
+    await w.setProps({ disabled: false })
+    await w.vm.$nextTick()
+    await w.vm.$nextTick()
+    expect(w.find('canvas.gift__art').exists()).toBe(true)
+    // `paint` asks the tile's canvas for its context; nothing else does.
+    const painted = spy.mock.contexts.some((el) => (el as Element).classList?.contains('gift__art'))
+    expect(painted).toBe(true)
+    spy.mockRestore()
+    w.unmount()
+  })
+
+  it('sizes its preview to the tray it stands in', async () => {
+    const { w, gifts } = await setup('footprint')
+    gifts.grantGift({ typeId: 'frost', tier: 2, source: 'chest' })
+    await w.setProps({ inTray: true, size: 64 })
+    await w.vm.$nextTick()
+    expect(w.find('.gift').classes()).toContain('is-tray')
+    const tile = w.find('.gift__tile').element as HTMLElement
+    expect(tile.style.getPropertyValue('--gift-art')).toBe('64px')
     w.unmount()
   })
 })

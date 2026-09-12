@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { GAME_SPEEDS, needsSpeedBuff } from '@/use/useTowerGame'
+import { GAME_SPEEDS, needsSpeedBuff, SPEED_BUFF_MS } from '@/use/useTowerGame'
 import { useI18n } from 'vue-i18n'
 import { prependBaseUrl } from '@/utils/function'
 import {
@@ -107,6 +107,19 @@ const showMovie = computed(() => isRewardGated && !buffOwned.value)
 const showPrice = computed(() => !isRewardGated && !buffOwned.value)
 const tooPoor = computed(() => showPrice.value && walletCoins.value < REWARD_COIN_COST)
 
+/**
+ * How much of the paid time is left, 0-1, drawn as a bar draining under the
+ * paid rung.
+ *
+ * The rerun: a tester bought 3× at 90 s without noticing (the rung showed a
+ * coin but not an amount), toggled it freely for five minutes, then was
+ * charged again and read it as "it used to be free". Now the price is a chip
+ * with the number on it whenever the next tap will charge, and while the buff
+ * runs this bar shows it is paid time that is running out. The buff can stack
+ * to two buys; the bar reads the first one's worth as full.
+ */
+const buffFrac = computed(() => Math.min(1, props.speedBuffLeft / SPEED_BUFF_MS))
+
 /** A gated build with no ad ready — or an empty wallet — cannot honour it. */
 const offerDisabled = computed(
   () => adInFlight.value || tooPoor.value || !canOfferReward.value
@@ -172,7 +185,18 @@ const onSpeed = (n: number): void => {
             alt=""
             draggable="false"
           )
-          IconCoin.speed-switch__coin(v-else-if="needsSpeedBuff(n) && showPrice")
+          //- The coin price, as a chip pinned to the rung's corner so the
+          //- tightest row in the HUD does not widen: the amount, then the coin.
+          //- It pops back in the moment the paid time runs out.
+          Transition(name="speed-price")
+            span.speed-switch__price(v-if="needsSpeedBuff(n) && showPrice" aria-hidden="true")
+              | {{ REWARD_COIN_COST }}
+              IconCoin.speed-switch__coin
+          span.speed-switch__left(
+            v-if="needsSpeedBuff(n) && buffOwned"
+            aria-hidden="true"
+            :style="{ '--left': buffFrac }"
+          )
 
 </template>
 
@@ -298,6 +322,7 @@ const onSpeed = (n: number): void => {
   background-image: linear-gradient(to bottom, #46536f, #2a3348)
 
 .speed-switch__seg
+  position: relative
   display: inline-flex
   align-items: center
   justify-content: center
@@ -360,9 +385,73 @@ const onSpeed = (n: number): void => {
 
 .speed-switch__coin
   flex: 0 0 auto
-  width: clamp(0.75rem, 3.2vw, 1rem)
-  height: clamp(0.75rem, 3.2vw, 1rem)
+  width: 1.1em
+  height: 1.1em
   pointer-events: none
+
+// The coin price, as a token overhanging the rung's top corner — the same
+// place and treatment as the "1×" token on the revive button, so a price reads
+// as a tag ON the rung rather than part of its label.
+.speed-switch__price
+  position: absolute
+  top: -0.7em
+  right: -0.35em
+  z-index: 1
+  display: inline-flex
+  align-items: center
+  gap: 0.12em
+  padding: 0.05em 0.3em 0.05em 0.35em
+  border: 1.5px solid #0f1a30
+  border-radius: 999px
+  background-image: linear-gradient(to bottom, #3a4a6e, #1c2640)
+  color: #fff
+  font-weight: 900
+  font-variant-numeric: tabular-nums
+  font-size: clamp(0.5rem, 2.2vw, 0.66rem)
+  line-height: 1.2
+  text-shadow: 1px 1px 0 #000
+  white-space: nowrap
+  pointer-events: none
+
+.speed-price-enter-active
+  animation: speed-price-pop 420ms cubic-bezier(0.3, 1.6, 0.5, 1)
+
+@keyframes speed-price-pop
+  0%
+    scale: 0
+  60%
+    scale: 1.35
+  100%
+    scale: 1
+
+// Paid time left: a gold bar under the rung that drains to nothing, at which
+// point the price chip comes back.
+.speed-switch__left
+  position: absolute
+  left: 22%
+  right: 22%
+  bottom: 2px
+  height: 3px
+  border-radius: 999px
+  background-color: rgba(0, 0, 0, 0.35)
+  pointer-events: none
+
+  &::after
+    content: ''
+    position: absolute
+    inset: 0
+    border-radius: inherit
+    background-color: #ffe27a
+    transform-origin: left center
+    scale: var(--left, 1) 1
+    transition: scale 400ms linear
+
+.speed-switch__seg.is-active .speed-switch__left::after
+  background-color: #7a4a00
+
+@media (prefers-reduced-motion: reduce)
+  .speed-price-enter-active
+    animation: none
 
 // Something is pointing at this button and waiting. Whole-button bounce rather
 // than the urgent glow: it has to be legible as THE thing to press with the

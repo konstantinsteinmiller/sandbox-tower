@@ -258,10 +258,20 @@ const persistTech = (): void => setState(R().tech.stateKey, tech.value)
 export default function useTowerProgress() {
   const { coins, spendCoins, addCoins } = useTowerEconomy()
 
-  /** A node is visible+purchasable once every prerequisite has ≥ 1 level. */
+  /**
+   * A node is visible+purchasable once every prerequisite has ≥ 1 level — or
+   * once the player owns it at all.
+   *
+   * The second clause is for saves made before a tree was re-ordered. The phone
+   * strip moved its HP card to the front on 2026-09-11, so a player can own
+   * Sharp Bolts without the card that now precedes it; the card they paid for
+   * must not turn into a padlock. On a tree nobody has re-ordered the clause
+   * never bites: `sellBlockers` refuses the sale that would orphan a node.
+   */
   const isUnlocked = (id: string): boolean => {
     const node = nodeOf(id)
     if (!node) return false
+    if (levelOf(id) > 0) return true
     return node.requires.every((req) => levelOf(req) > 0)
   }
 

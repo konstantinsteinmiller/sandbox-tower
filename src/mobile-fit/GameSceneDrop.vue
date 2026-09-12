@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, shallowRef, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import {
@@ -12,10 +12,12 @@ import {
   manualReroll, canManualReroll, dealEnhancedOffers, speedBuffLeft, grantSpeedBuff,
   graceAvailable, continueRun, isFirstSession, seedScriptedOpening, applyRules,
   dropOffer, canDropAt, columnTop, repairAll, repairAllCost, canRepairAll, canAffordShape, sellBlock,
+  upgradeBlock, upgradeCostAt,
   blockCount, CONTINUE_WOOD, CONTINUE_STONE, missingFor
 } from '@/use/useTowerGame'
 import { denyPurchase } from '@/use/useResourceBlink'
 import { idleNudge, noteBuildAction, useIdleNudge } from '@/use/useIdleNudge'
+import { isStranded, requestRejectFlash, strandedCount } from '@/use/useWorldCues'
 import {
   setViewport, setFixedFrame, clearFixedFrame, screenToWorldX, screenToWorldY,
   worldToScreenX, worldToScreenY, getZoom, viewRect
@@ -33,6 +35,7 @@ import useMissions, { beginMissionRun } from '@/use/useMissions'
 import useAchievements from '@/use/useAchievements'
 import useBattlePass from '@/use/useBattlePass'
 import { blockDef, GATE_ID } from '@/game/blocks'
+import { CLEAN_FEED } from '@/game/cleanFeed'
 import { ENEMY_DEFS, enemyDef } from '@/game/enemies'
 import { SHAPE_BY_ID } from '@/game/shapes'
 import { earlyCallBonus } from '@/game/waves'
@@ -40,7 +43,7 @@ import { spriteFor } from '@/game/art'
 import type { Block } from '@/game/types'
 
 import { getState, setState } from '@/use/useTowerState'
-import { M2_ONBOARDED_KEY, M2_TUTORIAL_KEY } from '@/keys'
+import { M2_DROP_LEARNED_KEY, M2_MERGE_GUIDE_KEY, M2_ONBOARDED_KEY, M2_TUTORIAL_KEY } from '@/keys'
 import useSounds, { useMusic } from '@/use/useSound'
 import { useScreenshake } from '@/use/useScreenshake'
 import { isGamePaused, isAdShowing, acquireAppPause } from '@/use/useGamePause'
@@ -49,7 +52,8 @@ import { isFullscreen, installFullscreenWatch } from '@/use/useFullscreen'
 import { spawnCoinExplosion } from '@/use/useCoinExplosion'
 import { isInterstitialReady, showMidgameAd } from '@/use/useAds'
 import {
-  claimReward, canOfferReward, adInFlight, canShowInterstitial, markInterstitialShown
+  claimReward, canOfferReward, adInFlight, isRewardCoinPriced, canShowInterstitial,
+  markInterstitialShown
 } from '@/use/useAdGate'
 import { signalGameplayLoaded } from '@/use/useCrazyGames'
 import { syncGameplayLifecycle } from '@/use/useGameplayLifecycle'
@@ -67,9 +71,15 @@ import {
 } from './rules'
 import { DROPMERGE_ROSTER } from './roster'
 import { PIECE_BLOCK_IDS } from './pieces'
+import {
+  COACH_MARK_LAST_WAVE, WELD_AFTER_DROP_MS, firstBeatIndex, mergeLessonSeenFromSave,
+  shouldOpenMergeLesson, shouldReplayDropLesson, shouldRetireCoachMarks
+} from './coachMarks'
 
 import TopStrip from './components/TopStrip.vue'
 import DropTray from './components/DropTray.vue'
+import BlockCard from './components/BlockCard.vue'
+import ShapeTile from '@/components/game/ShapeTile.vue'
 import WaveBar from './components/WaveBar.vue'
 import BlueprintsModal from './components/BlueprintsModal.vue'
 import { markTechFound, refreshTechFound, techNudge } from '@/use/useTechDiscovery'
@@ -77,12 +87,13 @@ import RotateOverlay from './components/RotateOverlay.vue'
 import ControlHint, { type HintId } from '@/components/game/ControlHint.vue'
 import WaveClearToast from '@/components/game/WaveClearToast.vue'
 import TutorialOverlay, { type TutorialStep } from '@/components/game/TutorialOverlay.vue'
+import type { DimBox } from '@/components/game/dimRects'
+import DropDemo from './components/DropDemo.vue'
 import MergeGuide from '@/components/game/MergeGuide.vue'
 import MergePowerDemo from '@/components/game/MergePowerDemo.vue'
 import { readTutorialCheat, type TutorialCheat } from '@/use/useTutorialCheat'
 import IncomingBanner from '@/components/game/IncomingBanner.vue'
 import FReward from '@/components/atoms/FReward.vue'
-import FButton from '@/components/atoms/FButton.vue'
 import FRewardButton from '@/components/atoms/FRewardButton.vue'
 import FMuteButton from '@/components/atoms/FMuteButton.vue'
 import FHudButton from '@/components/atoms/FHudButton.vue'
@@ -90,10 +101,13 @@ import MissionsModal from '@/components/organisms/MissionsModal.vue'
 import TreasureChest from '@/components/organisms/TreasureChest.vue'
 import FlyingChest from '@/components/game/FlyingChest.vue'
 import GiftTile from '@/components/game/GiftTile.vue'
+import { nextGift, reloadGifts } from '@/use/useGifts'
 import OptionsModal from '@/components/organisms/OptionsModal.vue'
 import IconCoin from '@/components/icons/IconCoin.vue'
 import GameIcon from '@/components/icons/GameIcon.vue'
+import RebuiltGlyph from '@/components/game/RebuiltGlyph.vue'
 import IconWood from '@/components/icons/IconWood.vue'
+import ResultUpgradeButton from '@/components/game/ResultUpgradeButton.vue'
 
 /**
  * ─── Drop & Merge Siege — the portrait phone scene ──────────────────────────
@@ -167,11 +181,20 @@ const stripEl = (): HTMLElement | null => (stripRef.value?.$el as HTMLElement | 
  */
 const layoutFrame = (): void => {
   if (cssW <= 0 || cssH <= 0) return
-  const top = stripEl()?.getBoundingClientRect().bottom ?? 0
-  const bottom = bottomRef.value?.getBoundingClientRect().top ?? cssH
+  // A clean feed has no strip and no tray on screen, but both still have their
+  // boxes (the recorder hides the HUD with `visibility: hidden`, so nothing
+  // reflows mid-take). Measuring them would park the board in a band with dead
+  // space above and below it; the whole screen is the free band instead.
+  // `src/game/cleanFeed.ts` — DEV only, and false in every portal build.
+  const top = CLEAN_FEED ? 0 : (stripEl()?.getBoundingClientRect().bottom ?? 0)
+  const bottom = CLEAN_FEED ? cssH : (bottomRef.value?.getBoundingClientRect().top ?? cssH)
   const freeH = Math.max(120, bottom - top)
   const cols = BOARD_HALF_WIDTH * 2 + 1 + LANE_CELLS * 2
-  let sky = SKY_ROWS
+  // One row of sky in a clean feed rather than two. With the HUD gone the
+  // frame is the whole screen, and two rows of empty sky over a board that
+  // rarely fills its own seven rows leaves the game sitting small in the
+  // bottom third of a preview clip. Recording only — see `src/game/cleanFeed.ts`.
+  let sky = CLEAN_FEED ? 1 : SKY_ROWS
   let rows = BOARD_MAX_ROW + 1 + GROUND_ROWS + sky
   let cell = Math.min((cssW - 16) / cols, freeH / rows)
   if (cell < 40 && sky > 1) {
@@ -373,8 +396,12 @@ const loop = (t: number): void => {
   // The pause gate covers ads, hidden tabs and platform pauses; the rotate
   // overlay and the result screen hold the clock as well.
   perf.phase('update')
-  if (!isGamePaused.value && !showResult.value && !rotateBlocked.value
-    && !showMergeGuide.value && !showMergePower.value) {
+  // In a clean feed the result screen and the teaching cards are hidden — but
+  // each of them HOLDS THE CLOCK, and a held clock in a recording is a frozen
+  // frame nobody can explain. Recording only.
+  if (!isGamePaused.value && !rotateBlocked.value
+    && (CLEAN_FEED || (!showResult.value && !showMergeGuide.value
+      && !showMergePower.value))) {
     if (benchStep) benchStep(dt)
     step(dt)
   }
@@ -390,6 +417,8 @@ const loop = (t: number): void => {
   if (ctx) {
     updateEdgeArrows()
     perf.phase('render')
+    // Drawn even when the simulation is held: the effects keep their own
+    // time, so the Gate's collapse dust settles (see the desktop scene).
     drawScene(ctx, cssW, cssH, drawAccum, dpr)
   }
   drawAccum = 0
@@ -416,8 +445,15 @@ watch(rotateBlocked, (blocked) => {
 const selectedSlot = ref<number | null>(null)
 /** Column the pointer is over while a piece is armed, or null. */
 const armedColumn = ref<number | null>(null)
-/** The block a long-press opened the sell bubble on. */
-const sellTarget = ref<Block | null>(null)
+/**
+ * The block whose card is open (`BlockCard`: rank up, sell), or null.
+ *
+ * Shallow: the simulation's blocks are plain objects it mutates in place, and a
+ * deep ref would hand the card a reactive proxy of one — compared against the
+ * simulation's own object it is never `===`, and the card's numbers are kept
+ * fresh by `towerVersion` anyway.
+ */
+const inspected = shallowRef<Block | null>(null)
 
 // Declared up here, ahead of every computed that reads them: `watch()` evaluates
 // its source the moment it is created, and the tutorial's watcher reads
@@ -438,6 +474,9 @@ const columnAt = (clientX: number): number | null => {
 }
 
 const tryDrop = (slot: number, c: number): void => {
+  // Whatever happens next, the player has aimed at the board — the lesson has
+  // been understood and the ghost gets out of the way.
+  cancelDropNudge()
   // A piece the player cannot pay for is refused OUT LOUD, in the place the
   // answer lives: the short piles blink in the strip and a knock plays. See
   // `useResourceBlink` for why a silent no was the bug.
@@ -445,10 +484,17 @@ const tryDrop = (slot: number, c: number): void => {
   if (shapeId && denyPurchase(missingFor(shapeId))) return
   if (!dropOffer(slot, c)) {
     playSound('obstacle-hit', 0.03)
+    // Shown as well as heard: every column that would take the piece flashes
+    // its landing cell green (`drawBuildOverlay`).
+    requestRejectFlash()
     return
   }
   playFx('uiTap')
   markHintDone('dropBlock')
+  // ANY drop teaches the drop — this column or another, a tap or a drag. The
+  // beat only asks for the gesture; the lit column is a suggestion.
+  learnDrop()
+  lastDropAt = performance.now()
   completeTutorialStep('drop')
   noteBuildAction()
   // The slot STAYS armed, even when the piece that refilled it is unaffordable.
@@ -463,8 +509,34 @@ const tryDrop = (slot: number, c: number): void => {
 }
 
 const onSelectSlot = (slot: number | null): void => {
+  cancelHandPreview()
+  // TRAY TAPS WITH NO BOARD TOUCH BETWEEN THEM: a player who has not
+  // understood where the first tap sent the piece.
+  //
+  // Measured, 2026-09-11: P10 tapped the lit card three times, then spent
+  // about seventy seconds tapping tray cards before it tried the lane at 83 s
+  // — and credited the merge chart that eventually followed to "tapping the
+  // tower". Every one of those taps armed or disarmed a card and answered with
+  // nothing, because from the tray's point of view nothing was wrong.
+  //
+  // Counted rather than triggered on the second tap, because one tap to change
+  // your mind about which piece to hold is an ordinary thing to do and must
+  // not be nagged at. Three is the count that playtest actually produced.
+  //
+  // And the answer is the lesson, not a rule: the ghost lifts off the card the
+  // player pressed and rides into a column it would really land in, with the
+  // landing cells flashing under it. Shown, never performed — a tray tap that
+  // silently dropped the piece would put pieces where players did not mean them.
+  trayTapsSincePlay++
+  const lesson = shouldReplayDropLesson({
+    taps: trayTapsSincePlay,
+    armed: slot != null,
+    step: tutorialStep.value
+  })
+  if (lesson && slot != null) showDropNudge(slot)
+  else hideDropNudge()
   selectedSlot.value = slot
-  sellTarget.value = null
+  inspected.value = null
   if (slot == null) return
   // Armed even when it cannot be paid for yet (see `tryDrop`) — but the tap
   // that armed it is told why it will not go in, rather than finding out on
@@ -494,38 +566,89 @@ const DRAG_SLOP_PX = 10
 let dragSlot: number | null = null
 let dragStart = { x: 0, y: 0 }
 let dragMoved = false
+/**
+ * A finger is on the tray or the board. The drop demo stands down while one
+ * is — a ghost gliding across the screen under the player's own drag is two
+ * pieces moving where there should be one.
+ */
+const handDown = ref(false)
+
+/**
+ * The piece being carried, drawn under the finger — viewport px, or null.
+ *
+ * The drag always worked, but nothing MOVED: the card stayed in the tray and
+ * the only answer to the finger was a faint column tint on the board. The drop
+ * beat's demo shows a piece riding the finger up into the column, so a player
+ * who copied it and saw nothing follow them concluded that dragging was not a
+ * thing this game does, and went back to tapping. The carried piece is the
+ * demo's ghost made real.
+ */
+const dragGhost = ref<{ x: number; y: number } | null>(null)
+const dragGhostStyle = computed(() => {
+  const g = dragGhost.value
+  return g ? { left: `${Math.round(g.x)}px`, top: `${Math.round(g.y)}px` } : undefined
+})
+
+/** Is the finger back over the tray? Letting go there puts the piece back
+ *  instead of dropping it into whichever column it happens to be level with. */
+const overTray = (clientY: number): boolean => {
+  const top = bottomRef.value?.getBoundingClientRect().top
+  return top != null && top > 0 && clientY >= top
+}
 
 const onDragMove = (e: PointerEvent): void => {
   if (dragSlot == null) return
   if (!dragMoved && Math.hypot(e.clientX - dragStart.x, e.clientY - dragStart.y) > DRAG_SLOP_PX) {
     dragMoved = true
+    // A drag IS the gesture the ghost was demonstrating.
+    cancelDropNudge()
     selectedSlot.value = dragSlot
-    sellTarget.value = null
+    inspected.value = null
   }
-  if (dragMoved) armedColumn.value = columnAt(e.clientX)
+  if (!dragMoved) return
+  dragGhost.value = { x: e.clientX, y: e.clientY }
+  armedColumn.value = overTray(e.clientY) ? null : columnAt(e.clientX)
 }
 
-const onDragEnd = (e: PointerEvent): void => {
+const endDrag = (): void => {
   window.removeEventListener('pointermove', onDragMove)
   window.removeEventListener('pointerup', onDragEnd)
   window.removeEventListener('pointercancel', onDragEnd)
-  const slot = dragSlot
   dragSlot = null
+  dragGhost.value = null
+  handDown.value = false
+}
+
+const onDragEnd = (e: PointerEvent): void => {
+  const slot = dragSlot
+  endDrag()
   if (slot == null) return
+  // While a coach mark is teaching with this card, the card stays in the hand
+  // whatever the gesture did: toggling it out would leave the lit column with
+  // nothing to drop, and the beat with no way to be finished.
+  const teaching = tutorialStep.value === 'drop' || tutorialStep.value === 'merge'
   if (!dragMoved) {
-    onSelectSlot(selectedSlot.value === slot ? null : slot)
+    onSelectSlot(selectedSlot.value === slot && !teaching ? null : slot)
     return
   }
-  const c = e.type === 'pointercancel' ? null : columnAt(e.clientX)
+  // A cancel is the browser taking the gesture over, not the player letting
+  // go somewhere — nothing is dropped on it.
+  const c = e.type === 'pointercancel' || overTray(e.clientY) ? null : columnAt(e.clientX)
   armedColumn.value = null
   if (c != null) tryDrop(slot, c)
-  else selectedSlot.value = null
+  else if (!teaching) selectedSlot.value = null
 }
 
 const onTilePress = (slot: number, e: PointerEvent): void => {
   dragSlot = slot
   dragStart = { x: e.clientX, y: e.clientY }
   dragMoved = false
+  handDown.value = true
+  // Captured to the card for the whole gesture, mouse as well as touch (touch
+  // captures implicitly; a mouse does not), so the lift is always delivered
+  // however far the finger travelled and whatever it crossed on the way.
+  const tile = (e.target as Element | null)?.closest?.('button')
+  try { tile?.setPointerCapture(e.pointerId) } catch { /* ignore */ }
   window.addEventListener('pointermove', onDragMove)
   window.addEventListener('pointerup', onDragEnd)
   window.addEventListener('pointercancel', onDragEnd)
@@ -533,16 +656,32 @@ const onTilePress = (slot: number, e: PointerEvent): void => {
 
 // ─── Canvas pointer ─────────────────────────────────────────────────────────
 //
-// With a piece armed, the board is one big target: press anywhere on it and
-// the column under the finger lights, lift and the piece drops there. With
-// nothing armed — or with a piece armed that cannot be paid for — holding on a
-// block opens the sell bubble.
+// A TAP ON A BLOCK is the block's: it opens its card (`BlockCard` — rank it up,
+// sell it), whether or not a piece is in hand. Everywhere else, a piece in
+// hand owns the board: press on open sky or ground and the column under the
+// finger lights, lift and the piece drops there — and a press that SLIDES is
+// aiming, wherever it started, blocks included. The piece stays in hand while
+// a card is open, so the next tap on open space still drops it.
+//
+// It used to be that a piece in hand owned every tap, blocks and all, and the
+// only way to a block was a long-press with nothing armed. The hand re-arms
+// after every drop, so "nothing armed" almost never happened: a player could
+// not sell the piece they had just dropped by mistake — the one undo a merge
+// board has — and ranks, the run's gold sink, had no door at all.
+//
+// The coach marks teaching the drop are the exception: in their lit column
+// every tap drops. The merge beat's column is the fort's own, and its lesson
+// is precisely "drop the twin ON the block".
+//
+// Holding on a block opens the same card without waiting for the lift.
 
 const LONG_PRESS_MS = 450
 let pressing = false
 let pressStart = { x: 0, y: 0 }
 let pressMoved = false
 let longPressTimer: ReturnType<typeof setTimeout> | null = null
+/** The block this press started on, when a tap there would open its card. */
+let pressBlock: Block | null = null
 
 const clearLongPress = (): void => {
   if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null }
@@ -554,25 +693,31 @@ const blockAtScreen = (clientX: number, clientY: number): Block | null => {
   return getBlocks().get(`${c},${r}`) ?? null
 }
 
-/**
- * Set when a long-press opened the sell bubble, so the lift that ends that same
- * press is not ALSO read as a drop into the column it happened over — which it
- * could be now that a long-press can fire with a piece in hand (see
- * `onCanvasDown`).
- */
-let sellPressFired = false
+/** A coach mark is teaching the drop, and every tap in its column is one. */
+const teachingDrop = (): boolean =>
+  tutorialStep.value === 'drop' || tutorialStep.value === 'merge'
 
-/** Start the long-press that opens the sell bubble on the block under `x, y`. */
-const armSellPress = (x: number, y: number): void => {
-  const b = blockAtScreen(x, y)
-  if (!b || b.typeId === GATE_ID) return
+/**
+ * Set when a long-press opened the card, so the lift that ends that same press
+ * is not ALSO read as a tap — or as a drop into the column it happened over.
+ */
+let inspectPressFired = false
+
+/** Open the card on `b`. The piece in hand, if any, stays there. */
+const inspectBlock = (b: Block): void => {
+  armedColumn.value = null
+  const same = inspected.value?.uid === b.uid
+  inspected.value = b
+  if (!same) playSound('modal-open', 0.05)
+}
+
+/** Start the long-press that opens the card on `b`. */
+const armInspectPress = (b: Block): void => {
   longPressTimer = setTimeout(() => {
     longPressTimer = null
     if (pressMoved) return
-    sellPressFired = true
-    armedColumn.value = null
-    sellTarget.value = b
-    playSound('modal-open', 0.05)
+    inspectPressFired = true
+    inspectBlock(b)
   }, LONG_PRESS_MS)
 }
 
@@ -580,7 +725,7 @@ const armSellPress = (x: number, y: number): void => {
 //
 // Two fingers on the board is always a zoom, never a drop. The second finger
 // therefore CANCELS whatever the first one had started — an armed column, a
-// long-press heading for the sell bubble — and `pinched` keeps the release
+// long-press heading for the block card — and `pinched` keeps the release
 // from being read as a tap once the fingers come off, which would otherwise
 // drop a piece into whichever column the last finger happened to leave from.
 
@@ -596,7 +741,8 @@ const pinchSpan = (): number => {
 
 const beginPinchGesture = (): void => {
   clearLongPress()
-  sellTarget.value = null
+  pressBlock = null
+  inspected.value = null
   armedColumn.value = null
   pinchStartDist = Math.max(1, pinchSpan())
   pinchStartZoom = zoomLevel.value
@@ -608,6 +754,10 @@ const onCanvasDown = (e: PointerEvent): void => {
   e.preventDefault()
   try { canvasRef.value?.setPointerCapture(e.pointerId) } catch { /* ignore */ }
   touches.set(e.pointerId, { x: e.clientX, y: e.clientY })
+  handDown.value = true
+  // A finger on the BOARD is the thing the ghost was asking for, whatever it
+  // goes on to do there.
+  cancelDropNudge()
   if (touches.size >= 2) {
     beginPinchGesture()
     return
@@ -615,22 +765,19 @@ const onCanvasDown = (e: PointerEvent): void => {
   pressing = true
   pressStart = { x: e.clientX, y: e.clientY }
   pressMoved = false
-  sellPressFired = false
+  inspectPressFired = false
   clearLongPress()
-  sellTarget.value = null
 
-  if (selectedSlot.value != null) {
-    armedColumn.value = columnAt(e.clientX)
-    // A piece in hand the player cannot pay for stays armed (see `tryDrop`),
-    // and it must not take the board's other gesture away with it: selling a
-    // block is how a broke player gets back to affording that piece, so a
-    // long-press on a block still opens the bubble. A quick tap is still a
-    // drop attempt — and still refused out loud.
-    const held = offers.value[selectedSlot.value]
-    if (held && !canAffordShape(held)) armSellPress(e.clientX, e.clientY)
+  const b = teachingDrop() ? null : blockAtScreen(e.clientX, e.clientY)
+  pressBlock = b
+  // A press anywhere else closes the card; a press on its own block leaves it
+  // up, so tapping the block again does not blink it shut and open again.
+  if (inspected.value && inspected.value.uid !== b?.uid) inspected.value = null
+  if (b) {
+    armInspectPress(b)
     return
   }
-  armSellPress(e.clientX, e.clientY)
+  if (selectedSlot.value != null) armedColumn.value = columnAt(e.clientX)
 }
 
 const onCanvasMove = (e: PointerEvent): void => {
@@ -645,11 +792,15 @@ const onCanvasMove = (e: PointerEvent): void => {
     pressMoved = true
     clearLongPress()
   }
-  if (selectedSlot.value != null) armedColumn.value = columnAt(e.clientX)
+  // A slide with a piece in hand is aiming, even one that started on a block.
+  if (selectedSlot.value != null && (pressMoved || !pressBlock) && !inspectPressFired) {
+    armedColumn.value = columnAt(e.clientX)
+  }
 }
 
 const onCanvasUp = (e: PointerEvent): void => {
   touches.delete(e.pointerId)
+  if (touches.size === 0) handDown.value = false
   clearLongPress()
   // The last finger of a pinch closes the gesture; the piece stays in the hand.
   if (pinched) {
@@ -662,22 +813,35 @@ const onCanvasUp = (e: PointerEvent): void => {
   }
   if (!pressing) return
   pressing = false
-  // This press became a long-press that opened the sell bubble; lifting the
-  // finger is the end of that gesture, not a drop.
-  if (sellPressFired) {
-    sellPressFired = false
+  const b = pressBlock
+  pressBlock = null
+  // This press became a long-press that opened the card; lifting the finger
+  // is the end of that gesture, not a tap and not a drop.
+  if (inspectPressFired) {
+    inspectPressFired = false
     armedColumn.value = null
     return
   }
+  if (e.type === 'pointercancel') {
+    armedColumn.value = null
+    return
+  }
+  // A tap on a block opens its card, piece in hand or not.
+  if (b && !pressMoved) {
+    inspectBlock(b)
+    return
+  }
   if (selectedSlot.value == null) return
-  const c = e.type === 'pointercancel' ? null : (armedColumn.value ?? columnAt(e.clientX))
+  const c = armedColumn.value ?? columnAt(e.clientX)
   armedColumn.value = null
   if (c != null) tryDrop(selectedSlot.value, c)
 }
 
-const onSell = (): void => {
-  const b = sellTarget.value
-  sellTarget.value = null
+/** Sell the block the card is open on. The card closes either way — after a
+ *  sale there is no block left for it to be about. */
+const onSellInspected = (): void => {
+  const b = inspected.value
+  inspected.value = null
   if (!b) return
   if (!sellBlock(b.c, b.r)) {
     playSound('obstacle-hit', 0.03)
@@ -687,20 +851,64 @@ const onSell = (): void => {
 }
 
 /**
- * Where the sell bubble sits: above the block.
+ * Buy one rank on the block the card is open on.
+ *
+ * The card stays OPEN: the purchase's only feedback is its numbers moving and
+ * the rank pip lighting, and closing over that moment throws it away. Short of
+ * gold, the press is refused the way a piece is — the gold pile blinks and a
+ * knock plays (`useResourceBlink`) — rather than by a dead button.
+ */
+const onUpgradeInspected = (): void => {
+  const b = inspected.value
+  if (!b) return
+  const cost = upgradeCostAt(b.c, b.r)
+  if (!Number.isFinite(cost)) return
+  if (denyPurchase(runCoins.value < cost ? ['coins'] : [])) return
+  if (!upgradeBlock(b.c, b.r)) {
+    playSound('obstacle-hit', 0.03)
+    return
+  }
+  playSound('level-up', 0.05)
+  noteBuildAction()
+}
+
+/** The card's rough size, for keeping it on screen before it has laid out. */
+const CARD_W = 152
+const CARD_H = 170
+
+/**
+ * Where the card sits: above the block, or below it when the block is too
+ * near the top of the band for the card to fit — and slid sideways so a block
+ * in an edge column does not push half the card off the screen.
  *
  * The overlays live inside the band BELOW the top strip, so a viewport
  * coordinate has the strip's height subtracted. Placed at the viewport value
- * the bubble sat one strip lower — over the block itself — and the finger
- * lifting off a long-press landed on the Sell button it had just opened.
+ * the card sat one strip lower — over the block itself — and the finger
+ * lifting off a long-press landed on the button it had just opened.
  */
-const sellBubbleStyle = computed(() => {
-  const b = sellTarget.value
+const cardStyle = computed(() => {
+  const b = inspected.value
   void towerVersion.value
   if (!b) return {}
-  const x = worldToScreenX(b.c)
-  const y = worldToScreenY(b.r + 1) - 8 - band.value.top
-  return { left: `${Math.round(x)}px`, top: `${Math.round(y)}px` }
+  const vw = typeof window === 'undefined' ? 390 : window.innerWidth
+  const half = CARD_W / 2 + 8
+  const x = Math.max(half, Math.min(vw - half, worldToScreenX(b.c)))
+  const above = worldToScreenY(b.r + 1) - 8 - band.value.top
+  if (above >= CARD_H) {
+    return { left: `${Math.round(x)}px`, top: `${Math.round(above)}px`, translate: '-50% -100%' }
+  }
+  const below = worldToScreenY(b.r) + 8 - band.value.top
+  return { left: `${Math.round(x)}px`, top: `${Math.round(below)}px`, translate: '-50% 0' }
+})
+
+// The card follows its block: closed the moment the block is gone — destroyed,
+// sold, or welded into its twin — and ringed on the board while it is up.
+watch(towerVersion, () => {
+  const b = inspected.value
+  if (b && getBlocks().get(`${b.c},${b.r}`)?.uid !== b.uid) inspected.value = null
+})
+watch(inspected, (b) => {
+  setBuildOverlay({ inspectC: b?.c ?? null, inspectR: b?.r ?? null })
 })
 
 /**
@@ -760,6 +968,9 @@ watch([armedShape, armedColumn, dropGuides, phase], () => {
     dropValid: c != null && canDropAt(c, cellsOf(id)),
     dropRows: BOARD_MAX_ROW,
     dropGuides: dropGuides.value,
+    // WHAT would drop, drawn in the cell it would take: faint in every open
+    // column, solid under the finger before it lifts (see `BuildOverlay`).
+    dropShape: id ?? null,
     hoverC: c,
     hoverR: c != null ? Math.min(BOARD_MAX_ROW, columnTop(c) + 1) : null
   })
@@ -790,12 +1001,41 @@ const denserFlank = (): number => {
   return side * Math.max(BOARD_HALF_WIDTH + 1.5, Math.min(outer + 2, Math.abs(mean)))
 }
 
+/**
+ * Where the enemies nothing on the board can reach are standing, if there are
+ * any — the flank the volley should come down on instead of the denser one.
+ *
+ * While such an enemy is on the field the Volley pulses as ITS answer (and the
+ * enemy wears a crossed-out crosshair, see `useWorldCues`), so the volley has
+ * to keep that promise: aiming at the bigger crowd on the other flank would
+ * teach the player the pulse was lying.
+ */
+const strandedFlank = (): number | null => {
+  let sum = 0
+  let n = 0
+  for (const e of getEnemies()) {
+    if (e.dying > 0 || !isStranded(e.uid)) continue
+    sum += e.x
+    n++
+  }
+  if (n === 0) return null
+  const mean = sum / n
+  const side = mean < 0 ? -1 : 1
+  return side * Math.max(BOARD_HALF_WIDTH + 1.5, Math.min(BOARD_HALF_WIDTH + 4.5, Math.abs(mean)))
+}
+
+/** An enemy stands where nothing reaches it and the Volley is loaded: pulse the
+ *  Volley, because it is the one thing on the board that does reach. */
+const volleyUrgent = computed(() =>
+  arrowRainReady.value && phase.value === 'battle' && strandedCount.value > 0
+)
+
 const onVolley = (): void => {
   if (!arrowRainReady.value || phase.value !== 'battle') {
     playSound('obstacle-hit', 0.03)
     return
   }
-  if (!callArrowRain(denserFlank())) {
+  if (!callArrowRain(strandedFlank() ?? denserFlank())) {
     playSound('obstacle-hit', 0.03)
     return
   }
@@ -862,7 +1102,7 @@ const callBonusPct = computed(() =>
 const onCallWave = (): void => {
   markHintDone('callWave')
   selectedSlot.value = null
-  sellTarget.value = null
+  inspected.value = null
   callWave()
 }
 
@@ -937,8 +1177,10 @@ watch(wave, (w) => {
 //
 // Wordless and unskippable, like the desktop board's — it starts on the first
 // frame with no offer to accept, carries no copy and no buttons, and each beat
-// ends only when the player performs it. Everything outside the lit column is
-// inert while it is up, so there is nothing else to do but the lesson.
+// ends only when the player performs it. Everything outside the lit column and
+// the armed card is inert while it is up, so there is nothing else to do but
+// the lesson — and `DropDemo` plays that lesson for them on a loop, since a
+// lit column alone never said what it was lit FOR.
 //
 // There is no third "call the wave" beat here, unlike the desktop board. This
 // one calls its own opening wave the moment the game has loaded, so the wave is
@@ -961,8 +1203,27 @@ watch(wave, (w) => {
 // twins into, because the frontage never grows however deep the gun goes.
 const TUTORIAL_STEPS: TutorialStep[] = ['drop', 'merge', 'mergeGuide', 'mergePower']
 const tutorialDone = ref(getState<boolean>(M2_TUTORIAL_KEY, false) === true)
-const tutorialIndex = ref(0)
-const tutorialRect = ref<{ x: number; y: number; w: number; h: number } | null>(null)
+
+/**
+ * Has this player ever dropped a piece on this board? Set by the first drop of
+ * any kind — see `tryDrop` — and never unset (short of the `?tut=reset`
+ * hatch). A player who has done it is never walked through it again: a reload
+ * or a new run starts the coach marks at the merge beat, and a stage that ends
+ * with them unfinished retires them (the watcher below).
+ */
+const dropLearned = ref(getState<boolean>(M2_DROP_LEARNED_KEY, false) === true)
+const learnDrop = (): void => {
+  if (dropLearned.value) return
+  dropLearned.value = true
+  setState(M2_DROP_LEARNED_KEY, true)
+}
+
+const tutorialIndex = ref(firstBeatIndex(dropLearned.value, tutorialDone.value))
+const tutorialRect = ref<DimBox | null>(null)
+/** The drop beats' second window: the armed tray card (`TutorialOverlay`). */
+const tutorialPassage = ref<DimBox | null>(null)
+/** The cell the lesson's piece would land in — where the demo's ghost settles. */
+const tutorialLanding = ref<DimBox | null>(null)
 const tutorialTick = ref(0)
 let tutorialTimer = 0
 
@@ -974,7 +1235,7 @@ const inFirstStage = computed(() =>
   // does. With the short early breaks wave 2 now arrives about ten seconds in,
   // which is a tight window for two beats; one more wave of room costs nothing,
   // since the fort holds wave 2 by itself.
-  && wave.value <= 2
+  && wave.value <= COACH_MARK_LAST_WAVE
   && !showResult.value
   && !isAnyModalOpen.value
   // A rotate prompt owns the whole screen; a spotlight measured behind it
@@ -993,7 +1254,7 @@ const inFirstStage = computed(() =>
  * would ever meet. Past wave 2 the coach marks cannot come back this run, which
  * is the one thing those two features need to know.
  */
-const tutorialOver = computed(() => tutorialDone.value || wave.value > 2)
+const tutorialOver = computed(() => tutorialDone.value || wave.value > COACH_MARK_LAST_WAVE)
 
 /**
  * Show the game's premise over the opening frame.
@@ -1010,6 +1271,13 @@ const tutorialStep = computed<TutorialStep | null>(() => {
   return TUTORIAL_STEPS[tutorialIndex.value] ?? null
 })
 
+/**
+ * The Blueprints button's stage-2 nudge, held back while a coach mark is up.
+ * This board keeps its coach marks through wave 2 — the same wave `techNudge`
+ * starts on — and two yellow arrows on one screen point at nothing.
+ */
+const blueprintsNudge = computed(() => techNudge.value && tutorialStep.value === null)
+
 /** The first empty column beside the fort, for the drop beat. */
 const tutorialDropColumn = (): number => {
   void towerVersion.value
@@ -1017,8 +1285,107 @@ const tutorialDropColumn = (): number => {
   return 2
 }
 
+/** Same rect, to the pixel? The poll re-measures four times a second and a
+ *  fresh object every time would re-render the overlay and the demo for
+ *  nothing. */
+const sameBox = (a: DimBox | null, b: DimBox | null): boolean =>
+  a === b || (!!a && !!b && a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h)
+
+const setBox = (target: { value: DimBox | null }, next: DimBox | null): void => {
+  if (!sameBox(target.value, next)) target.value = next
+}
+
+/** The tray card in `slot`, on screen, or null while the tray is not laid out. */
+const trayTileRect = (slot: number | null): DimBox | null => {
+  if (slot == null) return null
+  const el = bottomRef.value?.querySelectorAll<HTMLElement>('.tray__tile')[slot]
+  const b = el?.getBoundingClientRect()
+  if (!b || b.width <= 0) return null
+  return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) }
+}
+
+/** The cell a piece dropped into column `c` would come to rest in, on screen. */
+const landingRect = (c: number): DimBox => {
+  const cell = getZoom()
+  const r = Math.min(BOARD_MAX_ROW, columnTop(c) + 1)
+  return {
+    x: Math.round(worldToScreenX(c - 0.5)),
+    y: Math.round(worldToScreenY(r + 1)),
+    w: Math.round(cell),
+    h: Math.round(cell)
+  }
+}
+
+// ─── "Now tap a column", shown on demand ────────────────────────────────────
+//
+// The same ghost the coach marks use (`DropDemo`), played once outside them —
+// see `onSelectSlot` for the moment it answers. It exists because the arm-then-
+// tap gesture has no feedback of its own: an armed card looks exactly like an
+// armed card whether the player understood where the next tap goes or not.
+
+/** The one-shot replay: the card it lifts off, and the cell it lands in. */
+const dropNudge = ref<{ shapeId: string; from: DimBox; to: DimBox } | null>(null)
+let dropNudgeTimer = 0
+/** Tray taps since the player last touched the BOARD — see `onSelectSlot`. */
+let trayTapsSincePlay = 0
+
+/** Take the ghost off the screen. Leaves the tap count alone — a player who
+ *  disarms a card and arms another is still tapping the tray. */
+const hideDropNudge = (): void => {
+  if (dropNudgeTimer) { clearTimeout(dropNudgeTimer); dropNudgeTimer = 0 }
+  if (dropNudge.value) dropNudge.value = null
+}
+
+/** The player touched the BOARD: the lesson is answered and the count starts
+ *  again from there. */
+const cancelDropNudge = (): void => {
+  trayTapsSincePlay = 0
+  hideDropNudge()
+}
+
+/**
+ * Where the ghost goes: the deepest weld the piece could make, and failing
+ * that the emptiest legal column. The same reading the guides already draw, so
+ * the demo points at a cell the board is lighting anyway rather than at a
+ * column of its own choosing.
+ */
+const nudgeColumn = (shapeId: string): number | null => {
+  let best: { c: number; score: number } | null = null
+  for (const g of dropGuidesFor(shapeId)) {
+    if (!g.valid) continue
+    const score = (g.merges?.[0]?.tier ?? 0) * 10 + (BOARD_MAX_ROW - g.r)
+    if (!best || score > best.score) best = { c: g.c, score }
+  }
+  return best?.c ?? null
+}
+
+const showDropNudge = (slot: number): void => {
+  const shapeId = offers.value[slot]
+  const from = trayTileRect(slot)
+  if (!shapeId || !from) return
+  const c = nudgeColumn(shapeId)
+  if (c == null) return
+  hideDropNudge()
+  // Counted from here: the lesson has been given once, so the next one needs
+  // another three unanswered taps rather than following on the next one.
+  trayTapsSincePlay = 0
+  dropNudge.value = { shapeId, from, to: landingRect(c) }
+  // The board answers in the same beat: every column that would take the piece
+  // flashes its landing cell (`drawBuildOverlay`'s refused-drop flash — "not
+  // there; HERE", which is exactly what a tap on the tray meant).
+  requestRejectFlash()
+  // Two loops of the ghost and it stands down. The player is being shown
+  // something, not held up by it.
+  dropNudgeTimer = window.setTimeout(hideDropNudge, 5_200)
+}
+
 const measureTutorialTarget = (): void => {
   const step = tutorialStep.value
+  const teaching = step === 'drop' || step === 'merge'
+  if (!teaching) {
+    setBox(tutorialPassage, null)
+    setBox(tutorialLanding, null)
+  }
   if (!step) { tutorialRect.value = null; return }
   // The pictogram and the demo each own the whole screen; a hole cut in a card
   // with nothing reachable behind it is a dim layer over a dim layer.
@@ -1033,20 +1400,48 @@ const measureTutorialTarget = (): void => {
   // The drop and merge beats cut the hole over the WHOLE column: the dim layer
   // blocks every touch outside it, and a column is tapped anywhere along its
   // height. The piece itself is armed for the player when the beat starts
-  // (see the watcher below), so the tray need not be reachable.
+  // (see the watcher below) — and its tray card gets a window of its own, so
+  // pressing it and dragging it up works too. That is the gesture every phone
+  // player in the 2026-09-11 blind playtest reached for first, and under the
+  // single-hole overlay it went dead against the dim.
   const c = step === 'drop' ? tutorialDropColumn() : 0
-  tutorialRect.value = {
+  setBox(tutorialRect, {
     x: worldToScreenX(c - 0.5),
     y: worldToScreenY(BOARD_MAX_ROW + 1),
     w: cell,
     h: cell * (BOARD_MAX_ROW + 1)
-  }
+  })
+  setBox(tutorialPassage, trayTileRect(selectedSlot.value))
+  setBox(tutorialLanding, landingRect(c))
 }
 
-/** Persist it. The only caller is the last beat completing. */
+/**
+ * Play the drop for the player, until they play it themselves.
+ *
+ * Only on the beats that hand the player a piece, only once both ends of the
+ * trip are measured, and never under a finger — see `DropDemo`.
+ */
+const demoVisible = computed(() =>
+  (tutorialStep.value === 'drop' || tutorialStep.value === 'merge')
+  && tutorialRect.value != null
+  && tutorialPassage.value != null
+  && tutorialLanding.value != null
+  && armedShape.value != null
+  && !handDown.value
+)
+
+/**
+ * Persist it. Called by the last beat completing — or by a stage that ended
+ * with the beats unfinished after the player had dropped something (the
+ * retire watcher below), or by the merge lesson arriving by its own door.
+ */
 const finishTutorial = (): void => {
   tutorialDone.value = true
   setState(M2_TUTORIAL_KEY, true)
+  // Retiring early can leave the merge cards unshown. Say so in the save, so
+  // the next boot does not read this as an old save that finished the whole
+  // sequence (a done tutorial with no merge flag at all means exactly that).
+  if (!mergeLessonSeen.value) setState(M2_MERGE_GUIDE_KEY, false)
 }
 
 const advanceTutorial = (): void => {
@@ -1057,6 +1452,15 @@ const advanceTutorial = (): void => {
 const completeTutorialStep = (step: TutorialStep): void => {
   if (tutorialStep.value !== step) return
   advanceTutorial()
+}
+
+/** The merge beat's piece: a twin of the fort's cannon, in hand. */
+const armMergePiece = (): void => {
+  if (!offers.value.some((id) => id === 'b_cannon')) {
+    offers.value = offers.value.map((id, i) => (i === 1 ? 'b_cannon' : id))
+  }
+  const at = offers.value.indexOf('b_cannon')
+  if (selectedSlot.value !== at) selectedSlot.value = at
 }
 
 // Each beat arms the piece it is about to teach with, so the only thing left
@@ -1073,40 +1477,138 @@ watch(tutorialStep, (step) => {
     selectedSlot.value = 0
     return
   }
-  if (step !== 'merge') return
-  if (!offers.value.some((id) => id === 'b_cannon')) {
-    offers.value = offers.value.map((id, i) => (i === 1 ? 'b_cannon' : id))
-  }
-  selectedSlot.value = offers.value.indexOf('b_cannon')
+  if (step === 'merge') armMergePiece()
 }, { immediate: true })
 watch(merged, (m) => { if (m) completeTutorialStep('merge') })
+
+// The card has a window of its own now, so the cannon can be carried somewhere
+// other than onto its twin — and a merge beat whose hand no longer holds a
+// cannon could never be finished. Deal it again.
+watch(offers, () => {
+  if (tutorialStep.value === 'merge' && armedShape.value !== 'b_cannon') armMergePiece()
+}, { deep: true })
 
 // ─── The merge pictogram ────────────────────────────────────────────────────
 
 /** Open exactly while its beat is live. `forcedMerge` is the replay hatch,
  *  kept as a separate OR so a replay cannot resurrect the coach marks. */
 const forcedMerge = ref(false)
-const showMergeGuide = computed(() => forcedMerge.value || tutorialStep.value === 'mergeGuide')
+
+// The ladder and the demo are beats of the coach-mark sequence, and a
+// sequence that retires early (see `dropLearned`) never reaches them. So they
+// also have a door of their own: the first weld the player's own drop makes on
+// this board, if they have not been shown the pair here yet. They hold the
+// clock exactly as they do as beats — `showMergeGuide`/`showMergePower` are
+// what the loop and `isLiveGameplay` read.
+const savedMergeGuide = getState<boolean | null>(M2_MERGE_GUIDE_KEY, null)
+/**
+ * The pair has been shown on this board. A save with the tutorial done and no
+ * flag at all finished the whole sequence before this flag existed, so it saw
+ * both cards; an early retirement writes an explicit `false` (`finishTutorial`)
+ * so the two cases can be told apart.
+ */
+const mergeLessonSeen = ref(mergeLessonSeenFromSave(savedMergeGuide, tutorialDone.value))
+const lessonMerge = ref(false)
+const lessonPower = ref(false)
+const markMergeLessonSeen = (): void => {
+  mergeLessonSeen.value = true
+  setState(M2_MERGE_GUIDE_KEY, true)
+}
+
+const showMergeGuide = computed(() =>
+  forcedMerge.value || lessonMerge.value || tutorialStep.value === 'mergeGuide'
+)
 
 const onMergeGuideContinue = (): void => {
   if (forcedMerge.value) { forcedMerge.value = false; return }
+  if (lessonMerge.value) {
+    lessonMerge.value = false
+    lessonPower.value = true
+    return
+  }
   completeTutorialStep('mergeGuide')
 }
 
 // ─── The merge power demo ───────────────────────────────────────────────────
 //
 // The ladder says welds keep going; this says why anyone would want them to.
-// Six seconds, straight after the ladder: one plain cannon takes a tenth off a
-// monster, the tier-3 one takes three quarters. It holds the wave clock exactly
-// as the ladder does (see the loop and `isLiveGameplay`).
+// Four seconds, straight after the ladder: a plain cannon and a tier-3 one side
+// by side, two volleys each at their own grumpling — one grumpling is left with
+// most of its bar, the other is gone. It holds the wave clock exactly as the
+// ladder does (see the loop and `isLiveGameplay`).
 
 const forcedPower = ref(false)
-const showMergePower = computed(() => forcedPower.value || tutorialStep.value === 'mergePower')
+const showMergePower = computed(() =>
+  forcedPower.value || lessonPower.value || tutorialStep.value === 'mergePower'
+)
 
 const onMergePowerContinue = (): void => {
   if (forcedPower.value) { forcedPower.value = false; return }
+  markMergeLessonSeen()
+  if (lessonPower.value) {
+    lessonPower.value = false
+    // The lesson came by its own door: whatever the coach marks still had to
+    // say has been said, by the player's own drop and weld.
+    if (!tutorialDone.value && dropLearned.value) finishTutorial()
+    return
+  }
   completeTutorialStep('mergePower')
 }
+
+// ─── Spotting the player's own weld ─────────────────────────────────────────
+
+/** `performance.now()` of the player's last successful drop (`tryDrop`). */
+let lastDropAt = -Infinity
+
+/**
+ * How deep the tower's welds go, summed: every weld deepens one block by one
+ * tier, so this rises by exactly one per weld, cascades included — and falls
+ * only when a welded block is lost.
+ */
+const weldDepth = computed(() => {
+  void towerVersion.value
+  let depth = 0
+  for (const b of getTowerBlocks().values()) depth += Math.max(0, (b.tier ?? 1) - 1)
+  return depth
+})
+
+// Only a weld the player's own drop made opens the lesson — see
+// `shouldOpenMergeLesson` for what else holds it back.
+watch(weldDepth, (now, before) => {
+  // The merge beat is performed by a weld — ANY weld the player's drop makes.
+  // `merged` above only flips once per board, so a run that already had a
+  // welded block standing could never have finished the beat by it.
+  if (now > before && tutorialStep.value === 'merge'
+    && performance.now() - lastDropAt <= WELD_AFTER_DROP_MS) {
+    completeTutorialStep('merge')
+    return
+  }
+  if (!shouldOpenMergeLesson({
+    depthNow: now,
+    depthBefore: before,
+    seen: mergeLessonSeen.value,
+    msSinceDrop: performance.now() - lastDropAt,
+    cardUp: showMergeGuide.value || showMergePower.value || showResult.value,
+    step: tutorialStep.value
+  })) return
+  lessonMerge.value = true
+})
+
+// ─── Retiring the coach marks ───────────────────────────────────────────────
+//
+// They used to re-arm on every run until all four beats had been performed in
+// one sitting, and the stage lets go of them after wave 2 without recording
+// anything — so a player who had built thirty blocks by their own route met
+// the dimmed screen and the dead tray again on every new run and every reload.
+// Now a stage that ends with them unfinished retires them for good, as long
+// as the player has dropped something at least once: the drop is learned, and
+// the merge cards still have their own door (above). A player who never
+// dropped anything is shown the drop beat again next run.
+watch([wave, dropLearned], ([w, learned]) => {
+  if (shouldRetireCoachMarks({ tutorialDone: tutorialDone.value, dropLearned: learned, wave: w })) {
+    finishTutorial()
+  }
+}, { immediate: true })
 
 // ─── Tutorial replay ────────────────────────────────────────────────────────
 //
@@ -1121,7 +1623,11 @@ const replayTutorial = (what: TutorialCheat): void => {
   if (what === 'power') { forcedPower.value = true; return }
   if (what !== 'reset') return
   setState(M2_TUTORIAL_KEY, false)
+  setState(M2_DROP_LEARNED_KEY, false)
+  setState(M2_MERGE_GUIDE_KEY, false)
   tutorialDone.value = false
+  dropLearned.value = false
+  mergeLessonSeen.value = false
   tutorialIndex.value = 0
 }
 
@@ -1194,12 +1700,19 @@ const feedMissions = (): void => {
   recordRun({ waves: s.wavesCleared, kills: s.kills, coins: s.coinsEarned, height: s.height, blocks: s.blocksPlaced })
 }
 
+// ─── The kill cam is gone ───────────────────────────────────────────────────
+//
+// It held the board for three seconds on the unit that struck the Gate's last
+// blow. That answered "what killed me" for the blind playtest's agent testers;
+// for a human it is three seconds of a dead screen at the exact moment they
+// are deciding whether to go again. See the desktop scene's note.
+
 const presentDefeat = async (): Promise<void> => {
   const s = runSummary()
   summary.value = s
   twoXUsed.value = false
   selectedSlot.value = null
-  sellTarget.value = null
+  inspected.value = null
   stopBattleMusic()
 
   const run = { waves: s.wavesCleared, kills: s.kills, coins: s.coinsEarned, height: s.height, blocks: s.blocksPlaced }
@@ -1260,7 +1773,7 @@ const startFreshRun = (): void => {
   beginMissionRun()
   showResult.value = false
   selectedSlot.value = null
-  sellTarget.value = null
+  inspected.value = null
   resetVfx()
   resetDrawnFx()
   beginRun()
@@ -1287,7 +1800,7 @@ const onContinueRun = async (): Promise<void> => {
     if (!continueRun()) return
     showResult.value = false
     selectedSlot.value = null
-    sellTarget.value = null
+    inspected.value = null
     resetVfx()
     resetDrawnFx()
     playSound('level-up', 0.07)
@@ -1315,7 +1828,7 @@ watch(phase, (p, prev) => {
   if (p === 'defeat' && prev !== 'defeat') void presentDefeat()
   if (p === 'battle' && prev === 'build') {
     startBattleMusic()
-    sellTarget.value = null
+    inspected.value = null
   }
 })
 
@@ -1354,21 +1867,52 @@ const enhancedHandOffered = computed(() =>
   phase.value === 'build' && !offerEnhanced.value.some(Boolean)
 )
 
+// Coin-priced builds preview before they charge: the first tap flips the hand
+// gold in place and turns the button into a tick, the second tap pays. See the
+// desktop scene's `onEnhancedHand` for the rerun finding behind it.
+const HAND_PREVIEW_MS = 4000
+const handPreview = ref(false)
+let handPreviewTimer = 0
+const cancelHandPreview = (): void => {
+  window.clearTimeout(handPreviewTimer)
+  handPreview.value = false
+}
+const trayEnhanced = computed(() => (handPreview.value ? offers.value.map(() => true) : offerEnhanced.value))
+watch(phase, (p) => { if (p !== 'build') cancelHandPreview() })
+
 const onEnhancedHand = async (): Promise<void> => {
   if (adInFlight.value) return
+  if (isRewardCoinPriced && !handPreview.value) {
+    handPreview.value = true
+    playSound('modal-open', 0.04, 1.2)
+    window.clearTimeout(handPreviewTimer)
+    handPreviewTimer = window.setTimeout(cancelHandPreview, HAND_PREVIEW_MS)
+    return
+  }
+  cancelHandPreview()
   await claimReward(() => {
     dealEnhancedOffers()
     selectedSlot.value = null
     playSound('level-up', 0.07)
+    // The spend gets a beat of its own on the cards it bought (`DropTray`'s
+    // `paidAt`): the preview has already turned them gold, so without it the
+    // tap that pays changes nothing on screen.
+    handPaidAt.value = Date.now()
   })
 }
 
+/** When the reinforced hand was last PAID for (not previewed). */
+const handPaidAt = ref(0)
+
 // ─── Flying chest and gift pieces ───────────────────────────────────────────
 //
-// A chest once a wave, from the moment the tutorial ends; tapping it queues a
-// free welded piece, which waits in the gift tile beside the hand (see
-// `useGifts`). Both are self-contained — this scene only says when they may
-// run, and stands its own hand down when a gift is picked up.
+// One chest five seconds after the tutorial is behind the player and one
+// every forty-five seconds after that; tapping it queues a welded piece, which
+// waits in the hand's FIRST slot (see `useGifts` and DropTray's `giftFirst`)
+// until it is dropped — free the first time a chest is ever opened, half price
+// after. Both are self-contained — this
+// scene only says when they may run, and stands its own hand down when a gift
+// is picked up.
 
 const chestReady = computed(() => tutorialOver.value && !showResult.value && phase.value !== 'defeat')
 const chestPaused = computed(() =>
@@ -1378,10 +1922,19 @@ const giftDisabled = computed(() =>
   showResult.value || phase.value === 'defeat' || tutorialStep.value !== null
 )
 
+/** A gift is waiting and on offer: it borrows the first slot of the hand. */
+const giftFirst = computed(() => !!nextGift.value && !giftDisabled.value)
+const giftTileRef = ref<InstanceType<typeof GiftTile> | null>(null)
+
+// The wall armed in slot 0 is UNDER the gift once the gift takes the slot.
+// Left armed, the next tap on the board would drop a piece the player can no
+// longer see in their hand.
+watch(giftFirst, (on) => { if (on && selectedSlot.value === 0) selectedSlot.value = null })
+
 const onGiftArmed = (): void => {
   selectedSlot.value = null
   armedColumn.value = null
-  sellTarget.value = null
+  inspected.value = null
 }
 
 // ─── Keyboard (a phone with a keyboard is still a phone) ────────────────────
@@ -1389,7 +1942,7 @@ const onGiftArmed = (): void => {
 const onKey = (e: KeyboardEvent): void => {
   const tgt = e.target
   if (tgt instanceof HTMLElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(tgt.tagName)) return
-  if (e.code === 'Escape') { selectedSlot.value = null; sellTarget.value = null; return }
+  if (e.code === 'Escape') { selectedSlot.value = null; inspected.value = null; return }
   if (e.repeat) return
   if ((e.code === 'Space' || e.code === 'Enter') && phase.value === 'build' && !showResult.value) {
     e.preventDefault()
@@ -1397,6 +1950,8 @@ const onKey = (e: KeyboardEvent): void => {
     return
   }
   const digit = Number(e.key)
+  // "1" is the first slot — which is the gift while one is waiting there.
+  if (digit === 1 && giftFirst.value) { giftTileRef.value?.arm(); return }
   if (Number.isInteger(digit) && digit >= 1 && digit <= offers.value.length) onSelectSlot(digit - 1)
 }
 
@@ -1477,6 +2032,10 @@ const installBenchDriver = (): void => {
 onMounted(() => {
   void boot()
   installBenchDriver()
+  // The gift tile used to mount with the scene and re-read the queue itself;
+  // now it only exists while a gift is showing, so a queue that arrives with a
+  // late cloud hydrate is read here instead.
+  reloadGifts()
   // Re-read after boot: on a platform build the cloud save may not have landed
   // when `useTechDiscovery` first read it, and a returning player must not be
   // told about a screen they already use.
@@ -1524,13 +2083,14 @@ onUnmounted(() => {
   clearInterval(layoutTimer)
   clearInterval(tutorialTimer)
   clearLongPress()
+  cancelDropNudge()
   releaseRotatePause?.()
   clearFixedFrame()
   stopBattleMusic()
   saveRunSnapshot()
   // The overlay is a module singleton shared with the desktop scene: leave
   // none of this board's columns behind in it.
-  setBuildOverlay({ dropColumn: null, dropGuides: [], dropRows: 0, edgeLeft: 0, edgeRight: 0 })
+  setBuildOverlay({ dropColumn: null, dropGuides: [], dropShape: null, dropRows: 0, edgeLeft: 0, edgeRight: 0 })
 })
 </script>
 
@@ -1565,16 +2125,27 @@ onUnmounted(() => {
       )
 
       div.drop__mid
-        //- The flying chest crosses the sky band, once a wave. Under every
+        //- The flying chest crosses the sky band on its own timer. Under every
         //- other overlay in this band, so it never flies over a bubble or a
         //- toast the player is reading.
         FlyingChest(
-          :tutorial-done="tutorialOver"
           :ready="chestReady"
           :paused="chestPaused"
           :wave="wave"
-          :phase="phase"
         )
+
+        //- Daily missions, out of the drawer while there is something to
+        //- collect: top-left of the playfield, the one corner nothing else
+        //- claims (zoom holds the right, the hint the centre, the chest flies
+        //- under it). It turns up on the wave clear that finishes a goal and
+        //- leaves once everything collectable is collected. The drawer copy
+        //- stays for the player who goes looking.
+        div.drop__corner-missions
+          MissionsModal(
+            only-when-claimable
+            @opened="feedMissions"
+            @coins-awarded="fireCoinExplosion"
+          )
 
         //- Zoom, top-right of the playfield: how much of the approach the
         //- player wants to see. The recentre button only exists while the
@@ -1606,26 +2177,27 @@ onUnmounted(() => {
         div.drop__toast(:style="{ top: toastTop + 'px' }")
           WaveClearToast(:reward="toastHeld ? null : lastWaveReward" @triple="onTripleWave")
 
-        //- Long-press sell bubble, anchored above the block.
-        div.drop__bubble(v-if="sellTarget" :style="sellBubbleStyle")
-          span.drop__bubble-name {{ t(`blocks.names.${sellTarget.typeId}`) }}
-          button.drop__bubble-sell(type="button" @click="onSell") {{ t('blocks.sell') }}
-
-        //- Rewarded perk, floating just above the hand — and beside it the gift
-        //- a chest or a first clear paid out, waiting to be dropped.
-        div.drop__perks
-          GiftTile(
-            variant="cell"
-            :canvas="canvasRef"
-            :slot-armed="selectedSlot != null"
-            :disabled="giftDisabled"
-            @armed="onGiftArmed"
+        //- The tapped block's card — rank it up, sell it — anchored on the
+        //- block.
+        div.drop__card(v-if="inspected" :style="cardStyle")
+          BlockCard(
+            :block="inspected"
+            @upgrade="onUpgradeInspected"
+            @sell="onSellInspected"
+            @close="inspected = null"
           )
+
+        //- Rewarded perk, floating just above the hand. (The gift a chest or a
+        //- first clear paid out waits IN the hand — the tray's first slot.)
+        div.drop__perks
           FRewardButton(
             v-if="enhancedHandOffered"
             tone="gold"
             size="sm"
+            :class="{ 'is-confirming': handPreview }"
             :label="t('blocks.enhancedHand')"
+            :icon="handPreview ? 'check' : undefined"
+            :icon-only="handPreview"
             @click="onEnhancedHand"
           )
 
@@ -1636,29 +2208,16 @@ onUnmounted(() => {
           FHudButton(tone="slate" :aria-label="t('options.title')" @click="menuOpen = false; showOptions = true")
             svg(viewBox="0 0 24 24" fill="currentColor")
               path(d="M12 4 a1 1 0 0 1 1 1 v1.6 a6 6 0 0 1 1.8 0.7 l1.1 -1.1 a1 1 0 0 1 1.4 1.4 l -1.1 1.1 a6 6 0 0 1 0.7 1.8 H18 a1 1 0 1 1 0 2 h-1.6 a6 6 0 0 1 -0.7 1.8 l1.1 1.1 a1 1 0 0 1 -1.4 1.4 l-1.1 -1.1 a6 6 0 0 1 -1.8 0.7 V18 a1 1 0 1 1 -2 0 v -1.6 a6 6 0 0 1 -1.8 -0.7 l-1.1 1.1 a1 1 0 0 1 -1.4 -1.4 l1.1 -1.1 a6 6 0 0 1 -0.7 -1.8 H6 a1 1 0 1 1 0 -2 h1.6 a6 6 0 0 1 0.7 -1.8 L7.2 7.6 a1 1 0 0 1 1.4 -1.4 l1.1 1.1 a6 6 0 0 1 1.8 -0.7 V5 a1 1 0 0 1 1 -1 Z M12 9 a3 3 0 1 0 0 6 a3 3 0 0 0 0 -6 Z")
-          //- The second half of the trail. The menu button got the player to
-          //- open the drawer; without this they are looking at three buttons
-          //- with no reason to pick this one, and the nudge dies one tap short
-          //- of the screen it exists to reach.
-          FHudButton(
-            tone="green"
-            :attention="techNudge"
-            :bounce="techNudge"
-            :aria-label="t('tech.blueprints.title')"
-            @click="openBlueprints"
-          )
-            svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
-              rect(x="4" y="3" width="16" height="18" rx="2")
-              path(d="M8 8h8M8 12h8M8 16h5")
-            template(#badge)
-              span.drop__badge(v-if="progress.affordableCount.value > 0") {{ progress.affordableCount.value }}
+          //- Blueprints is not in here any more: it lives in the bottom bar
+          //- beside this drawer's button (see WaveBar), so the tree is one tap
+          //- from anywhere instead of two taps behind a "…".
           MissionsModal(@opened="feedMissions" @coins-awarded="fireCoinExplosion")
           TreasureChest(:target-el="coinEl")
 
-      div.drop__bottom(ref="bottomRef")
+      div.drop__bottom(ref="bottomRef" :class="{ 'is-volley-urgent': volleyUrgent }")
         DropTray(
           :offers="offers"
-          :enhanced="offerEnhanced"
+          :enhanced="trayEnhanced"
           :selected="selectedSlot"
           :materials="wood"
           :gold="runCoins"
@@ -1668,10 +2227,25 @@ onUnmounted(() => {
           :volley-charge="arrowRainCharge"
           :volley-waves-left="arrowRainWavesLeft"
           :nudge="idleNudge"
+          :gift-first="giftFirst"
+          :paid-at="handPaidAt"
           @press="onTilePress"
           @reroll="onReroll"
           @volley="onVolley"
         )
+          //- The gift a chest or a first clear paid out, standing in the first
+          //- slot until it is dropped.
+          template(#gift)
+            GiftTile(
+              ref="giftTileRef"
+              variant="cell"
+              in-tray
+              :size="52"
+              :canvas="canvasRef"
+              :slot-armed="selectedSlot != null"
+              :disabled="giftDisabled"
+              @armed="onGiftArmed"
+            )
         WaveBar(
           :phase="phase"
           :time-left="buildTimeLeft"
@@ -1684,12 +2258,14 @@ onUnmounted(() => {
           :can-repair="canRepair"
           :warnings="waveWarnings"
           :menu-open="menuOpen"
-          :menu-attention="techNudge"
+          :blueprints-affordable="progress.affordableCount.value"
+          :blueprints-attention="blueprintsNudge"
           @call="onCallWave"
           @set-speed="onSetSpeed"
           @buy-speed="onBuySpeed"
           @repair-all="onRepairAll"
           @menu="menuOpen = !menuOpen"
+          @blueprints="openBlueprints"
         )
 
     //- ── Defeat screen ─────────────────────────────────────────────────────
@@ -1697,7 +2273,11 @@ onUnmounted(() => {
       template(#ribbon)
         span.drop__ribbon {{ t('result.towerFell') }}
       div.dresult
-        span.dresult__wave {{ t('result.reachedWave', { n: summary.wave }) }}
+        //- The record rides with the wave it is a record of — it used to sit
+        //- directly over the coin payout, where it read as a record score.
+        div.dresult__headline
+          span.dresult__wave {{ t('result.reachedWave', { n: summary.wave }) }}
+          span.dresult__record(v-if="summary.wave >= bestWave && summary.wave > 0") {{ t('result.newRecord') }}
         //- The one number on this screen that is not about this run: it is
         //- about everyone else. Drops out entirely when there is no board to
         //- rank against, rather than leaving an empty plaque.
@@ -1708,7 +2288,6 @@ onUnmounted(() => {
           //- gap silently rendered "#47of 361" in every language. The gap has
           //- to come from CSS.
           span.dresult__rank-note(v-if="playerTotal > 0") {{ t('result.rankOf', { n: playerTotal.toLocaleString() }) }}
-        span.dresult__record(v-if="summary.wave >= bestWave && summary.wave > 0") {{ t('result.newRecord') }}
         //- The wallet coin: this payout is added straight to the purse the
         //- tech tree spends from, so it must not wear the run-gold ingot.
         div.dresult__coins(ref="rewardCoinRef")
@@ -1732,36 +2311,63 @@ onUnmounted(() => {
             @click="onContinueRun"
           )
             span.dresult__continue
-              GameIcon.dresult__continue-icon(name="fast-forward")
-              span {{ t('result.continueWave', { n: continueWave }) }}
-              span.dresult__continue-bonus
-                span +{{ continueMaterials }}
-                IconWood.dresult__res-icon
+              //- Rubble standing back up as a tower, large and first — the
+              //- offer as a picture. See the desktop scene's note and
+              //- RebuiltGlyph.
+              RebuiltGlyph.dresult__continue-pic
+              span.dresult__continue-text
+                span.dresult__continue-wave {{ t('result.continueWave', { n: continueWave }) }}
+                span.dresult__continue-bonus
+                  span +{{ continueMaterials }}
+                  IconWood.dresult__res-icon
+              //- Once per run, said as a token. See the desktop scene's note.
+              span.dresult__once(aria-hidden="true") 1×
           div.dresult__actions
             //- Glyphs, not captions — and the two i18n keys live on as the
-            //- accessible names. See the desktop scene's note.
-            FButton(
-              size="md"
-              icon="shop"
-              icon-only
-              :aria-label="t('result.upgrade')"
-              :is-disabled="adInFlight"
-              @click="onUpgrade"
-            )
+            //- accessible names. See the desktop scene's note: the upgrade door
+            //- is the Blueprints glyph now (the cart read as a store), and
+            //- restarting is a replay arrow rather than skip-forward.
+            ResultUpgradeButton(:is-disabled="adInFlight" @click="onUpgrade")
             FRewardButton(
               tone="blue"
               free
-              icon="skip-forward"
+              icon="replay"
               icon-only
               :label="t('result.defendAgain')"
               @click="onRebuild"
             )
 
     //- No handlers: it emits nothing, because there is nothing on it to press.
+    //- On the drop beats the armed tray card gets a window of its own, so the
+    //- press-and-drag every first-timer reaches for works too.
     TutorialOverlay(
       :step="tutorialStep"
       :target="tutorialRect"
+      :passage="tutorialPassage"
     )
+
+    //- The lesson, played for the player until they play it: the card's piece
+    //- rides a finger up into the lit column. Inert and wordless.
+    DropDemo(
+      v-if="demoVisible"
+      :shape-id="armedShape ?? null"
+      :from="tutorialPassage"
+      :to="tutorialLanding"
+    )
+
+    //- The same lesson, replayed once for a player who armed a card and then
+    //- tapped the tray again instead of a column (`showDropNudge`).
+    DropDemo(
+      v-else-if="dropNudge"
+      :shape-id="dropNudge.shapeId"
+      :from="dropNudge.from"
+      :to="dropNudge.to"
+    )
+
+    //- The piece a drag is carrying, riding just above the finger so the thumb
+    //- does not cover it. Over the coach-mark dim, and inert.
+    div.drop__carry(v-if="dragGhost && armedShape" aria-hidden="true" :style="dragGhostStyle")
+      ShapeTile(:shape-id="armedShape" :size="52")
 
     //- The merge ladder, in its one-cell form. Holds the wave clock while it is
     //- up — see `isLiveGameplay`.
@@ -1771,8 +2377,8 @@ onUnmounted(() => {
       @continue="onMergeGuideContinue"
     )
 
-    //- Six seconds, after the ladder: a plain cannon against a tier 3, one
-    //- health bar between them. Holds the clock like the ladder.
+    //- Four seconds, after the ladder: a plain cannon and a tier 3 side by
+    //- side, one grumpling each. Holds the clock like the ladder.
     MergePowerDemo(
       variant="cell"
       :model-value="showMergePower"
@@ -1921,47 +2527,39 @@ onUnmounted(() => {
   translate: -50% 0
   pointer-events: none
 
+// Mirrors the zoom rail's inset on the other side. The wrapper is empty (and
+// takes no taps) whenever there is nothing to collect.
+.drop__corner-missions
+  position: absolute
+  top: 0.5rem
+  left: calc(0.4rem + env(safe-area-inset-left, 0px))
+  pointer-events: auto
+
 .drop__toast
   position: absolute
   left: 50%
   translate: -50% 0
   pointer-events: none
 
-.drop__bubble
+// The carried piece. Fixed, because it follows a viewport coordinate across
+// every band of the screen; over the coach-mark dim (40) and the drop demo
+// (41), so it is the one thing moving during the drop beat.
+.drop__carry
+  position: fixed
+  z-index: 42
+  width: 52px
+  height: 52px
+  margin: -70px 0 0 -26px
+  opacity: 0.92
+  pointer-events: none
+  filter: drop-shadow(0 0 10px rgba(127, 224, 255, 0.85)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5))
+
+// Placed by `cardStyle`, which also picks the side of the block it hangs on
+// (its `translate`).
+.drop__card
   position: absolute
-  translate: -50% -100%
-  display: flex
-  flex-direction: column
-  align-items: center
-  gap: 0.25rem
-  padding: 0.35rem 0.5rem
-  border: 2px solid #7fe0ff
-  border-radius: 0.6rem
-  background-image: linear-gradient(to bottom, rgba(28, 44, 82, 0.98), rgba(14, 24, 46, 0.98))
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55)
+  z-index: 2
   pointer-events: auto
-
-.drop__bubble-name
-  color: #fff
-  font-size: 0.7rem
-  font-weight: 900
-  text-transform: uppercase
-  white-space: nowrap
-
-.drop__bubble-sell
-  min-width: 4rem
-  min-height: 2.25rem
-  padding: 0.25rem 0.75rem
-  border: 2px solid #0f1a30
-  border-radius: 0.5rem
-  background-image: linear-gradient(to bottom, #ff8a8a, #c62f2f)
-  color: #fff
-  font-size: 0.8rem
-  font-weight: 900
-  text-transform: uppercase
-  cursor: pointer
-  touch-action: manipulation
-  -webkit-tap-highlight-color: transparent
 
 .drop__perks
   position: absolute
@@ -1971,6 +2569,23 @@ onUnmounted(() => {
   display: flex
   gap: 0.35rem
   pointer-events: auto
+
+// The reinforced hand waiting on its second tap (see the desktop scene).
+.drop__perks .is-confirming
+  animation: perk-confirm 0.9s ease-in-out infinite
+
+@keyframes perk-confirm
+  0%, 100%
+    scale: 1
+    filter: drop-shadow(0 0 0 rgba(255, 213, 74, 0))
+  50%
+    scale: 1.08
+    filter: drop-shadow(0 0 8px rgba(255, 213, 74, 0.95))
+
+@media (prefers-reduced-motion: reduce)
+  .drop__perks .is-confirming
+    animation: none
+    filter: drop-shadow(0 0 6px rgba(255, 213, 74, 0.9))
 
 .drop__menu-backdrop
   position: fixed
@@ -1994,19 +2609,6 @@ onUnmounted(() => {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55)
   pointer-events: auto
 
-.drop__badge
-  display: inline-flex
-  align-items: center
-  justify-content: center
-  min-width: 1.1rem
-  height: 1.1rem
-  padding: 0 0.25em
-  border-radius: 999px
-  background-color: #c62f2f
-  color: #fff
-  font-size: 0.6rem
-  font-weight: 900
-
 .drop__bottom
   position: relative
   display: flex
@@ -2016,6 +2618,26 @@ onUnmounted(() => {
 
   > *
     pointer-events: auto
+
+  // The Volley as the answer to an enemy nothing else reaches. Styled from here
+  // rather than inside the tray, which only knows "ready" and has no business
+  // knowing why it is urgent.
+  &.is-volley-urgent :deep(.tray__volley.is-ready)
+    animation: drop-volley-urgent 0.9s ease-in-out infinite
+
+@keyframes drop-volley-urgent
+  0%, 100%
+    box-shadow: 0 0 12px rgba(255, 190, 40, 0.5), 0 0 0 0 rgba(255, 96, 64, 0)
+    scale: 1
+  45%
+    box-shadow: 0 0 18px rgba(255, 190, 40, 0.8), 0 0 0 5px rgba(255, 96, 64, 0.75)
+    scale: 1.08
+
+// The ring stays, the swell goes.
+@media (prefers-reduced-motion: reduce)
+  .drop__bottom.is-volley-urgent :deep(.tray__volley.is-ready)
+    animation: none
+    box-shadow: 0 0 12px rgba(255, 190, 40, 0.5), 0 0 0 4px rgba(255, 96, 64, 0.8)
 
 .drop__ribbon
   color: #fff
@@ -2029,6 +2651,15 @@ onUnmounted(() => {
   align-items: center
   gap: 0.5rem
   width: 100%
+
+// The wave and its record on one row when they fit; the record wraps under the
+// wave when a long translation does not leave room beside it.
+.dresult__headline
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  justify-content: center
+  gap: 0.2rem 0.45rem
 
 .dresult__wave
   color: #fff
@@ -2048,11 +2679,18 @@ onUnmounted(() => {
 .dresult__rank-note
   margin-left: 0.35em
 
+// A gold plaque on the wave it belongs to.
 .dresult__record
+  padding: 0.05em 0.5em
+  border-radius: 999px
+  border: 2px solid rgba(255, 217, 60, 0.75)
+  background: rgba(60, 40, 0, 0.45)
   color: #ffd93c
   font-size: 0.8rem
   font-weight: 900
   text-transform: uppercase
+  white-space: nowrap
+  text-shadow: 1px 1px 0 #000
 
 .dresult__coins
   display: flex
@@ -2090,23 +2728,55 @@ onUnmounted(() => {
 .dresult__continue
   display: inline-flex
   align-items: center
-  gap: 0.4rem
+  gap: 0.5rem
+
+.dresult__continue-pic
+  font-size: 1.9em
+
+.dresult__continue-text
+  display: inline-flex
+  flex-direction: column
+  align-items: flex-start
+  gap: 0.05rem
+  line-height: 1.15
+
+.dresult__continue-wave
+  font-weight: 900
 
 .dresult__continue-bonus
   display: inline-flex
   align-items: center
   gap: 0.15rem
-  font-size: 0.8rem
+  // Under the wave, and quieter than it: the materials are what comes WITH
+  // the rebuild, not what the button is.
+  font-size: 0.72rem
+  opacity: 0.9
 
 .dresult__res-icon
   width: 1rem
   height: 1rem
 
-// Opens the continue caption in place of the words it used to spell out.
-.dresult__continue-icon
-  flex: 0 0 auto
-  width: 1.05em
-  height: 1.05em
+// "Once per run", pinned to the button's corner — see the desktop scene's
+// `.result__once`, which this matches.
+.dresult__once
+  position: absolute
+  top: -0.65em
+  right: -0.55em
+  display: inline-grid
+  place-items: center
+  min-width: 1.85em
+  height: 1.85em
+  padding: 0 0.3em
+  border: 2px solid #0f1a30
+  border-radius: 999px
+  background-image: linear-gradient(to bottom, #fff3b0, #ffc83d)
+  box-shadow: 0 2px 0 #0f1a30
+  color: #3a2400
+  font-size: 0.62em
+  font-weight: 900
+  line-height: 1
+  text-shadow: none
+  pointer-events: none
 
 .dresult__actions
   display: flex

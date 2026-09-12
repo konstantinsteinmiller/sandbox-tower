@@ -4085,20 +4085,25 @@ No labels, captions or watermarks.
 
 ---
 
-## cannon-t2 — Cannon — tier 2 twin  (fixture-cannon-t2.png → images/fixtures/cannon-t2.webp)
+## cannon-t2 — Cannon — tier 2  (fixture-cannon-t2.png → images/fixtures/cannon-t2.webp)
 
 ```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
 
-WHAT IT IS: Cannon — tier 2 twin — TWO cast-iron cannon barrels lying dead level and pointing RIGHT, stacked like a double-barrelled gun: one just ABOVE and a little behind the other, each with its own fat breech and cascabel at the left end, its own reinforcing rings and muzzle swell. The upper, rear barrel is set back a hair to the LEFT and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+WHAT IT IS: Cannon — tier 2 — ONE cast-iron cannon barrel lying dead level and pointing RIGHT — the plain cannon forged HEAVIER: a thicker tube with a third reinforcing ring, a bigger breech and cascabel at the left end, a fatter muzzle swell. One barrel, one bore. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
 
 THIS IS A MERGED WEAPON — tier 2: the SAME weapon as the plain
-`images/fixtures/cannon.webp`, welded into TWO. Attach that
+`images/fixtures/cannon.webp`, forged heavier. Attach that
 painting as well as the reference: it is the design. Same materials, same
-ink, same proportions, same wear — doubled, not redesigned. The
-reference shows exactly where each copy sits and which one is in front.
+ink, same wear — and ONE weapon, never two or three side by side. A weld
+makes one block, so it carries one gun.
+
+KEEP ITS SIZE AND ITS PLACE. The reference is the plain gun’s own outline,
+and the game makes a merged gun bigger by itself; a painting that fills
+more of the frame gets grown twice. Put the extra weight INSIDE that
+outline: thicker metal, more bands, a bigger breech, limb or terminal.
 
 THE TIER COLOUR IS GREEN, around #46d86a. Put it in
 the TRIM: green enamel bands and fittings on the steel — steel with green
@@ -4106,10 +4111,10 @@ accents. The body stays iron, timber or crystal, so it is still THIS
 weapon. This one accent may be brighter than the rest of the palette —
 it is how a player tells a tier 2 from a plain gun at a glance.
 
-IT HAS TO READ AS TWO AT 40 PX. Keep a clear gap or step between the
-copies, a strong ink line round each one, and every muzzle, limb or
-terminal separately visible. Two barrels painted into one fat barrel is
-the one way this fails that looks fine at full size.
+IT HAS TO READ AS ONE HEAVIER GUN AT 40 PX. Chunky bands and fittings in
+the tier colour and a strong ink line round one clear silhouette. Fine
+engraving that only shows at full size is the one way this fails that
+looks fine at full size.
 
 IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
 around #565c64 and its neighbouring tones, so do NOT
@@ -4203,20 +4208,25 @@ No labels, captions or watermarks.
 
 ---
 
-## cannon-t3 — Cannon — tier 3 battery  (fixture-cannon-t3.png → images/fixtures/cannon-t3.webp)
+## cannon-t3 — Cannon — tier 3  (fixture-cannon-t3.png → images/fixtures/cannon-t3.webp)
 
 ```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
 
-WHAT IT IS: Cannon — tier 3 battery — THREE cast-iron cannon barrels in a tight stacked battery, all dead level and pointing RIGHT: one above, one below, and the FRONT one in the middle between them, nearest the eye and a touch further forward. The two outer barrels are set back to the LEFT and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+WHAT IT IS: Cannon — tier 3 — ONE cast-iron cannon barrel lying dead level and pointing RIGHT — the plain cannon forged heavier again: the thickest tube, banded along its whole length, a massive breech and a flared, lipped muzzle. One barrel, one bore. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
 
 THIS IS A MERGED WEAPON — tier 3: the SAME weapon as the plain
-`images/fixtures/cannon.webp`, welded into THREE. Attach that
+`images/fixtures/cannon.webp`, forged heavier again. Attach that
 painting as well as the reference: it is the design. Same materials, same
-ink, same proportions, same wear — tripled, not redesigned. The
-reference shows exactly where each copy sits and which one is in front.
+ink, same wear — and ONE weapon, never two or three side by side. A weld
+makes one block, so it carries one gun.
+
+KEEP ITS SIZE AND ITS PLACE. The reference is the plain gun’s own outline,
+and the game makes a merged gun bigger by itself; a painting that fills
+more of the frame gets grown twice. Put the extra weight INSIDE that
+outline: thicker metal, more bands, a bigger breech, limb or terminal.
 
 THE TIER COLOUR IS BLUE, around #3fa2ff. Put it in
 the TRIM: blue enamel bands and fittings on the steel, and a FAINT cool
@@ -4224,10 +4234,10 @@ glow kept INSIDE the metal’s own outline. The body stays iron, timber or
 crystal, so it is still THIS weapon. This one accent may be brighter than
 the palette — it is how a player tells a tier 3 from a tier 2 at a glance.
 
-IT HAS TO READ AS THREE AT 40 PX. Keep a clear gap or step between the
-copies, a strong ink line round each one, and every muzzle, limb or
-terminal separately visible. Two barrels painted into one fat barrel is
-the one way this fails that looks fine at full size.
+IT HAS TO READ AS ONE HEAVIER GUN AT 40 PX. Chunky bands and fittings in
+the tier colour and a strong ink line round one clear silhouette. Fine
+engraving that only shows at full size is the one way this fails that
+looks fine at full size.
 
 IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
 around #565c64 and its neighbouring tones, so do NOT
@@ -4321,20 +4331,25 @@ No labels, captions or watermarks.
 
 ---
 
-## archer-t2 — Archery bow — tier 2 twin  (fixture-archer-t2.png → images/fixtures/archer-t2.webp)
+## archer-t2 — Archery bow — tier 2  (fixture-archer-t2.png → images/fixtures/archer-t2.webp)
 
 ```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
 
-WHAT IT IS: Archery bow — tier 2 twin — TWO war bows at full draw, level and pointing RIGHT, the second standing just BEHIND the first — offset to the LEFT and a little higher, a tone darker — each with its own nocked arrow, so the pair reads as a volley rather than one tall bow. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+WHAT IT IS: Archery bow — tier 2 — ONE war bow at full draw, level and pointing RIGHT — the plain bow made HEAVIER: thicker, deeper recurved limbs with horn tips, a doubled string, a heavier arrow nocked. One bow. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
 
 THIS IS A MERGED WEAPON — tier 2: the SAME weapon as the plain
-`images/fixtures/archer.webp`, welded into TWO. Attach that
+`images/fixtures/archer.webp`, forged heavier. Attach that
 painting as well as the reference: it is the design. Same materials, same
-ink, same proportions, same wear — doubled, not redesigned. The
-reference shows exactly where each copy sits and which one is in front.
+ink, same wear — and ONE weapon, never two or three side by side. A weld
+makes one block, so it carries one gun.
+
+KEEP ITS SIZE AND ITS PLACE. The reference is the plain gun’s own outline,
+and the game makes a merged gun bigger by itself; a painting that fills
+more of the frame gets grown twice. Put the extra weight INSIDE that
+outline: thicker metal, more bands, a bigger breech, limb or terminal.
 
 THE TIER COLOUR IS GREEN, around #46d86a. Put it in
 the TRIM: green enamel bands and fittings on the steel — steel with green
@@ -4342,10 +4357,10 @@ accents. The body stays iron, timber or crystal, so it is still THIS
 weapon. This one accent may be brighter than the rest of the palette —
 it is how a player tells a tier 2 from a plain gun at a glance.
 
-IT HAS TO READ AS TWO AT 40 PX. Keep a clear gap or step between the
-copies, a strong ink line round each one, and every muzzle, limb or
-terminal separately visible. Two barrels painted into one fat barrel is
-the one way this fails that looks fine at full size.
+IT HAS TO READ AS ONE HEAVIER GUN AT 40 PX. Chunky bands and fittings in
+the tier colour and a strong ink line round one clear silhouette. Fine
+engraving that only shows at full size is the one way this fails that
+looks fine at full size.
 
 IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
 around #8a6a3a and its neighbouring tones, so do NOT
@@ -4439,20 +4454,25 @@ No labels, captions or watermarks.
 
 ---
 
-## archer-t3 — Archery bow — tier 3 battery  (fixture-archer-t3.png → images/fixtures/archer-t3.webp)
+## archer-t3 — Archery bow — tier 3  (fixture-archer-t3.png → images/fixtures/archer-t3.webp)
 
 ```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
 
-WHAT IT IS: Archery bow — tier 3 battery — THREE war bows in a stepped rank, all at full draw, level and pointing RIGHT: the rearmost furthest LEFT and highest, the middle one below it, the front one nearest the eye — each with its own nocked arrow, the rear two a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+WHAT IT IS: Archery bow — tier 3 — ONE great war bow at full draw, level and pointing RIGHT — heavier again: massive laminated limbs bound in metal at the grip and tips, a thick doubled string, a long heavy bolt nocked. One bow. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
 
 THIS IS A MERGED WEAPON — tier 3: the SAME weapon as the plain
-`images/fixtures/archer.webp`, welded into THREE. Attach that
+`images/fixtures/archer.webp`, forged heavier again. Attach that
 painting as well as the reference: it is the design. Same materials, same
-ink, same proportions, same wear — tripled, not redesigned. The
-reference shows exactly where each copy sits and which one is in front.
+ink, same wear — and ONE weapon, never two or three side by side. A weld
+makes one block, so it carries one gun.
+
+KEEP ITS SIZE AND ITS PLACE. The reference is the plain gun’s own outline,
+and the game makes a merged gun bigger by itself; a painting that fills
+more of the frame gets grown twice. Put the extra weight INSIDE that
+outline: thicker metal, more bands, a bigger breech, limb or terminal.
 
 THE TIER COLOUR IS BLUE, around #3fa2ff. Put it in
 the TRIM: blue enamel bands and fittings on the steel, and a FAINT cool
@@ -4460,10 +4480,10 @@ glow kept INSIDE the metal’s own outline. The body stays iron, timber or
 crystal, so it is still THIS weapon. This one accent may be brighter than
 the palette — it is how a player tells a tier 3 from a tier 2 at a glance.
 
-IT HAS TO READ AS THREE AT 40 PX. Keep a clear gap or step between the
-copies, a strong ink line round each one, and every muzzle, limb or
-terminal separately visible. Two barrels painted into one fat barrel is
-the one way this fails that looks fine at full size.
+IT HAS TO READ AS ONE HEAVIER GUN AT 40 PX. Chunky bands and fittings in
+the tier colour and a strong ink line round one clear silhouette. Fine
+engraving that only shows at full size is the one way this fails that
+looks fine at full size.
 
 IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
 around #8a6a3a and its neighbouring tones, so do NOT
@@ -4557,20 +4577,25 @@ No labels, captions or watermarks.
 
 ---
 
-## bombard-t2 — Bombard — tier 2 twin  (fixture-bombard-t2.png → images/fixtures/bombard-t2.webp)
+## bombard-t2 — Bombard — tier 2  (fixture-bombard-t2.png → images/fixtures/bombard-t2.webp)
 
 ```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
 
-WHAT IT IS: Bombard — tier 2 twin — TWO stubby wrought-iron bombards standing side by side, both at the same steep angle, mouths up and to the RIGHT, each bound with hoops along its whole length: the rear one to the LEFT, slightly smaller and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+WHAT IT IS: Bombard — tier 2 — ONE stubby wrought-iron bombard at its steep angle, mouth up and to the RIGHT, bound with hoops along its whole length — the plain bombard forged HEAVIER: thicker hoops, a wider mouth. One barrel. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
 
 THIS IS A MERGED WEAPON — tier 2: the SAME weapon as the plain
-`images/fixtures/bombard.webp`, welded into TWO. Attach that
+`images/fixtures/bombard.webp`, forged heavier. Attach that
 painting as well as the reference: it is the design. Same materials, same
-ink, same proportions, same wear — doubled, not redesigned. The
-reference shows exactly where each copy sits and which one is in front.
+ink, same wear — and ONE weapon, never two or three side by side. A weld
+makes one block, so it carries one gun.
+
+KEEP ITS SIZE AND ITS PLACE. The reference is the plain gun’s own outline,
+and the game makes a merged gun bigger by itself; a painting that fills
+more of the frame gets grown twice. Put the extra weight INSIDE that
+outline: thicker metal, more bands, a bigger breech, limb or terminal.
 
 THE TIER COLOUR IS GREEN, around #46d86a. Put it in
 the TRIM: green enamel bands and fittings on the steel — steel with green
@@ -4578,10 +4603,10 @@ accents. The body stays iron, timber or crystal, so it is still THIS
 weapon. This one accent may be brighter than the rest of the palette —
 it is how a player tells a tier 2 from a plain gun at a glance.
 
-IT HAS TO READ AS TWO AT 40 PX. Keep a clear gap or step between the
-copies, a strong ink line round each one, and every muzzle, limb or
-terminal separately visible. Two barrels painted into one fat barrel is
-the one way this fails that looks fine at full size.
+IT HAS TO READ AS ONE HEAVIER GUN AT 40 PX. Chunky bands and fittings in
+the tier colour and a strong ink line round one clear silhouette. Fine
+engraving that only shows at full size is the one way this fails that
+looks fine at full size.
 
 IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
 around #5c564e and its neighbouring tones, so do NOT
@@ -4675,20 +4700,25 @@ No labels, captions or watermarks.
 
 ---
 
-## bombard-t3 — Bombard — tier 3 battery  (fixture-bombard-t3.png → images/fixtures/bombard-t3.webp)
+## bombard-t3 — Bombard — tier 3  (fixture-bombard-t3.png → images/fixtures/bombard-t3.webp)
 
 ```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
 
-WHAT IT IS: Bombard — tier 3 battery — THREE stubby hooped bombards side by side, all at the same steep angle, mouths up and to the RIGHT: a front one in the middle, one either side of it set back, slightly smaller and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+WHAT IT IS: Bombard — tier 3 — ONE stubby hooped bombard at the same steep angle, mouth up and to the RIGHT — heavier again: a massive barrel, doubled hoops at the mouth, the widest bore. One barrel. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
 
 THIS IS A MERGED WEAPON — tier 3: the SAME weapon as the plain
-`images/fixtures/bombard.webp`, welded into THREE. Attach that
+`images/fixtures/bombard.webp`, forged heavier again. Attach that
 painting as well as the reference: it is the design. Same materials, same
-ink, same proportions, same wear — tripled, not redesigned. The
-reference shows exactly where each copy sits and which one is in front.
+ink, same wear — and ONE weapon, never two or three side by side. A weld
+makes one block, so it carries one gun.
+
+KEEP ITS SIZE AND ITS PLACE. The reference is the plain gun’s own outline,
+and the game makes a merged gun bigger by itself; a painting that fills
+more of the frame gets grown twice. Put the extra weight INSIDE that
+outline: thicker metal, more bands, a bigger breech, limb or terminal.
 
 THE TIER COLOUR IS BLUE, around #3fa2ff. Put it in
 the TRIM: blue enamel bands and fittings on the steel, and a FAINT cool
@@ -4696,10 +4726,10 @@ glow kept INSIDE the metal’s own outline. The body stays iron, timber or
 crystal, so it is still THIS weapon. This one accent may be brighter than
 the palette — it is how a player tells a tier 3 from a tier 2 at a glance.
 
-IT HAS TO READ AS THREE AT 40 PX. Keep a clear gap or step between the
-copies, a strong ink line round each one, and every muzzle, limb or
-terminal separately visible. Two barrels painted into one fat barrel is
-the one way this fails that looks fine at full size.
+IT HAS TO READ AS ONE HEAVIER GUN AT 40 PX. Chunky bands and fittings in
+the tier colour and a strong ink line round one clear silhouette. Fine
+engraving that only shows at full size is the one way this fails that
+looks fine at full size.
 
 IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
 around #5c564e and its neighbouring tones, so do NOT
@@ -4793,20 +4823,25 @@ No labels, captions or watermarks.
 
 ---
 
-## mortar-t2 — Mortar — tier 2 twin  (fixture-mortar-t2.png → images/fixtures/mortar-t2.webp)
+## mortar-t2 — Mortar — tier 2  (fixture-mortar-t2.png → images/fixtures/mortar-t2.webp)
 
 ```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
 
-WHAT IT IS: Mortar — tier 2 twin — TWO squat siege mortar tubes standing side by side on one bed, both at the same steep lobbing angle, mouths up and to the RIGHT: the rear tube to the LEFT, slightly smaller and a tone darker, the front tube overlapping it. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+WHAT IT IS: Mortar — tier 2 — ONE squat siege mortar tube at its steep lobbing angle, mouth up and to the RIGHT — the plain mortar cast HEAVIER: a thicker, wider tube, an extra reinforcing band, a heavier lip. One tube. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
 
 THIS IS A MERGED WEAPON — tier 2: the SAME weapon as the plain
-`images/fixtures/mortar.webp`, welded into TWO. Attach that
+`images/fixtures/mortar.webp`, forged heavier. Attach that
 painting as well as the reference: it is the design. Same materials, same
-ink, same proportions, same wear — doubled, not redesigned. The
-reference shows exactly where each copy sits and which one is in front.
+ink, same wear — and ONE weapon, never two or three side by side. A weld
+makes one block, so it carries one gun.
+
+KEEP ITS SIZE AND ITS PLACE. The reference is the plain gun’s own outline,
+and the game makes a merged gun bigger by itself; a painting that fills
+more of the frame gets grown twice. Put the extra weight INSIDE that
+outline: thicker metal, more bands, a bigger breech, limb or terminal.
 
 THE TIER COLOUR IS GREEN, around #46d86a. Put it in
 the TRIM: green enamel bands and fittings on the steel — steel with green
@@ -4814,10 +4849,10 @@ accents. The body stays iron, timber or crystal, so it is still THIS
 weapon. This one accent may be brighter than the rest of the palette —
 it is how a player tells a tier 2 from a plain gun at a glance.
 
-IT HAS TO READ AS TWO AT 40 PX. Keep a clear gap or step between the
-copies, a strong ink line round each one, and every muzzle, limb or
-terminal separately visible. Two barrels painted into one fat barrel is
-the one way this fails that looks fine at full size.
+IT HAS TO READ AS ONE HEAVIER GUN AT 40 PX. Chunky bands and fittings in
+the tier colour and a strong ink line round one clear silhouette. Fine
+engraving that only shows at full size is the one way this fails that
+looks fine at full size.
 
 IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
 around #5f5f6e and its neighbouring tones, so do NOT
@@ -4911,20 +4946,25 @@ No labels, captions or watermarks.
 
 ---
 
-## mortar-t3 — Mortar — tier 3 battery  (fixture-mortar-t3.png → images/fixtures/mortar-t3.webp)
+## mortar-t3 — Mortar — tier 3  (fixture-mortar-t3.png → images/fixtures/mortar-t3.webp)
 
 ```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
 
-WHAT IT IS: Mortar — tier 3 battery — THREE squat siege mortar tubes on one bed, all at the same steep lobbing angle, mouths up and to the RIGHT: a front tube in the middle, and one either side of it set back, slightly smaller and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+WHAT IT IS: Mortar — tier 3 — ONE siege mortar tube at the same steep lobbing angle, mouth up and to the RIGHT — heavier again: the widest bore, heavy bands along its whole length and a thick flared lip. One tube. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
 
 THIS IS A MERGED WEAPON — tier 3: the SAME weapon as the plain
-`images/fixtures/mortar.webp`, welded into THREE. Attach that
+`images/fixtures/mortar.webp`, forged heavier again. Attach that
 painting as well as the reference: it is the design. Same materials, same
-ink, same proportions, same wear — tripled, not redesigned. The
-reference shows exactly where each copy sits and which one is in front.
+ink, same wear — and ONE weapon, never two or three side by side. A weld
+makes one block, so it carries one gun.
+
+KEEP ITS SIZE AND ITS PLACE. The reference is the plain gun’s own outline,
+and the game makes a merged gun bigger by itself; a painting that fills
+more of the frame gets grown twice. Put the extra weight INSIDE that
+outline: thicker metal, more bands, a bigger breech, limb or terminal.
 
 THE TIER COLOUR IS BLUE, around #3fa2ff. Put it in
 the TRIM: blue enamel bands and fittings on the steel, and a FAINT cool
@@ -4932,10 +4972,10 @@ glow kept INSIDE the metal’s own outline. The body stays iron, timber or
 crystal, so it is still THIS weapon. This one accent may be brighter than
 the palette — it is how a player tells a tier 3 from a tier 2 at a glance.
 
-IT HAS TO READ AS THREE AT 40 PX. Keep a clear gap or step between the
-copies, a strong ink line round each one, and every muzzle, limb or
-terminal separately visible. Two barrels painted into one fat barrel is
-the one way this fails that looks fine at full size.
+IT HAS TO READ AS ONE HEAVIER GUN AT 40 PX. Chunky bands and fittings in
+the tier colour and a strong ink line round one clear silhouette. Fine
+engraving that only shows at full size is the one way this fails that
+looks fine at full size.
 
 IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
 around #5f5f6e and its neighbouring tones, so do NOT
@@ -5029,20 +5069,25 @@ No labels, captions or watermarks.
 
 ---
 
-## tesla-t2 — Arc coil — tier 2 twin  (fixture-tesla-t2.png → images/fixtures/tesla-t2.webp)
+## tesla-t2 — Arc coil — tier 2  (fixture-tesla-t2.png → images/fixtures/tesla-t2.webp)
 
 ```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
 
-WHAT IT IS: Arc coil — tier 2 twin — TWO lightning coils standing upright side by side, each an iron post wound with copper wire under a polished ball terminal, on ceramic insulators: the rear coil to the LEFT, shorter and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+WHAT IT IS: Arc coil — tier 2 — ONE lightning coil standing upright — the plain coil built BIGGER: a thicker iron post wound with more copper wire, an extra ceramic insulator, a larger polished ball terminal. One coil. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
 
 THIS IS A MERGED WEAPON — tier 2: the SAME weapon as the plain
-`images/fixtures/tesla.webp`, welded into TWO. Attach that
+`images/fixtures/tesla.webp`, forged heavier. Attach that
 painting as well as the reference: it is the design. Same materials, same
-ink, same proportions, same wear — doubled, not redesigned. The
-reference shows exactly where each copy sits and which one is in front.
+ink, same wear — and ONE weapon, never two or three side by side. A weld
+makes one block, so it carries one gun.
+
+KEEP ITS SIZE AND ITS PLACE. The reference is the plain gun’s own outline,
+and the game makes a merged gun bigger by itself; a painting that fills
+more of the frame gets grown twice. Put the extra weight INSIDE that
+outline: thicker metal, more bands, a bigger breech, limb or terminal.
 
 THE TIER COLOUR IS GREEN, around #46d86a. Put it in
 the TRIM: green enamel bands and fittings on the steel — steel with green
@@ -5050,10 +5095,10 @@ accents. The body stays iron, timber or crystal, so it is still THIS
 weapon. This one accent may be brighter than the rest of the palette —
 it is how a player tells a tier 2 from a plain gun at a glance.
 
-IT HAS TO READ AS TWO AT 40 PX. Keep a clear gap or step between the
-copies, a strong ink line round each one, and every muzzle, limb or
-terminal separately visible. Two barrels painted into one fat barrel is
-the one way this fails that looks fine at full size.
+IT HAS TO READ AS ONE HEAVIER GUN AT 40 PX. Chunky bands and fittings in
+the tier colour and a strong ink line round one clear silhouette. Fine
+engraving that only shows at full size is the one way this fails that
+looks fine at full size.
 
 IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
 around #33507a and its neighbouring tones, so do NOT
@@ -5147,20 +5192,25 @@ No labels, captions or watermarks.
 
 ---
 
-## tesla-t3 — Arc coil — tier 3 battery  (fixture-tesla-t3.png → images/fixtures/tesla-t3.webp)
+## tesla-t3 — Arc coil — tier 3  (fixture-tesla-t3.png → images/fixtures/tesla-t3.webp)
 
 ```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
 
-WHAT IT IS: Arc coil — tier 3 battery — THREE lightning coils standing upright: a tall one in the middle and a shorter one either side of it, set back and a tone darker — each wound with copper wire under its own ball terminal. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+WHAT IT IS: Arc coil — tier 3 — ONE lightning coil standing upright — bigger again: a heavy post under dense copper windings, a stack of insulators, a large ball terminal ringed by a copper corona ring. One coil. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
 
 THIS IS A MERGED WEAPON — tier 3: the SAME weapon as the plain
-`images/fixtures/tesla.webp`, welded into THREE. Attach that
+`images/fixtures/tesla.webp`, forged heavier again. Attach that
 painting as well as the reference: it is the design. Same materials, same
-ink, same proportions, same wear — tripled, not redesigned. The
-reference shows exactly where each copy sits and which one is in front.
+ink, same wear — and ONE weapon, never two or three side by side. A weld
+makes one block, so it carries one gun.
+
+KEEP ITS SIZE AND ITS PLACE. The reference is the plain gun’s own outline,
+and the game makes a merged gun bigger by itself; a painting that fills
+more of the frame gets grown twice. Put the extra weight INSIDE that
+outline: thicker metal, more bands, a bigger breech, limb or terminal.
 
 THE TIER COLOUR IS BLUE, around #3fa2ff. Put it in
 the TRIM: blue enamel bands and fittings on the steel, and a FAINT cool
@@ -5168,10 +5218,10 @@ glow kept INSIDE the metal’s own outline. The body stays iron, timber or
 crystal, so it is still THIS weapon. This one accent may be brighter than
 the palette — it is how a player tells a tier 3 from a tier 2 at a glance.
 
-IT HAS TO READ AS THREE AT 40 PX. Keep a clear gap or step between the
-copies, a strong ink line round each one, and every muzzle, limb or
-terminal separately visible. Two barrels painted into one fat barrel is
-the one way this fails that looks fine at full size.
+IT HAS TO READ AS ONE HEAVIER GUN AT 40 PX. Chunky bands and fittings in
+the tier colour and a strong ink line round one clear silhouette. Fine
+engraving that only shows at full size is the one way this fails that
+looks fine at full size.
 
 IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
 around #33507a and its neighbouring tones, so do NOT
@@ -5265,20 +5315,25 @@ No labels, captions or watermarks.
 
 ---
 
-## frost-t2 — Frost emitter — tier 2 twin  (fixture-frost-t2.png → images/fixtures/frost-t2.webp)
+## frost-t2 — Frost emitter — tier 2  (fixture-frost-t2.png → images/fixtures/frost-t2.webp)
 
 ```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
 
-WHAT IT IS: Frost emitter — tier 2 twin — TWO clusters of pale blue ice crystals growing side by side from a rimed iron socket, the rear cluster to the LEFT, smaller and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+WHAT IT IS: Frost emitter — tier 2 — ONE cluster of pale blue ice crystals growing from a rimed iron socket — the plain emitter grown BIGGER: more and longer crystals, a heavier socket. One cluster. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
 
 THIS IS A MERGED WEAPON — tier 2: the SAME weapon as the plain
-`images/fixtures/frost.webp`, welded into TWO. Attach that
+`images/fixtures/frost.webp`, forged heavier. Attach that
 painting as well as the reference: it is the design. Same materials, same
-ink, same proportions, same wear — doubled, not redesigned. The
-reference shows exactly where each copy sits and which one is in front.
+ink, same wear — and ONE weapon, never two or three side by side. A weld
+makes one block, so it carries one gun.
+
+KEEP ITS SIZE AND ITS PLACE. The reference is the plain gun’s own outline,
+and the game makes a merged gun bigger by itself; a painting that fills
+more of the frame gets grown twice. Put the extra weight INSIDE that
+outline: thicker metal, more bands, a bigger breech, limb or terminal.
 
 THE TIER COLOUR IS GREEN, around #46d86a. Put it in
 the TRIM: green enamel bands and fittings on the steel — steel with green
@@ -5286,10 +5341,10 @@ accents. The body stays iron, timber or crystal, so it is still THIS
 weapon. This one accent may be brighter than the rest of the palette —
 it is how a player tells a tier 2 from a plain gun at a glance.
 
-IT HAS TO READ AS TWO AT 40 PX. Keep a clear gap or step between the
-copies, a strong ink line round each one, and every muzzle, limb or
-terminal separately visible. Two barrels painted into one fat barrel is
-the one way this fails that looks fine at full size.
+IT HAS TO READ AS ONE HEAVIER GUN AT 40 PX. Chunky bands and fittings in
+the tier colour and a strong ink line round one clear silhouette. Fine
+engraving that only shows at full size is the one way this fails that
+looks fine at full size.
 
 IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
 around #356577 and its neighbouring tones, so do NOT
@@ -5383,20 +5438,25 @@ No labels, captions or watermarks.
 
 ---
 
-## frost-t3 — Frost emitter — tier 3 battery  (fixture-frost-t3.png → images/fixtures/frost-t3.webp)
+## frost-t3 — Frost emitter — tier 3  (fixture-frost-t3.png → images/fixtures/frost-t3.webp)
 
 ```text
 Repaint ONE machine, in a single square image.
 The attached reference is exactly what to paint, at exactly the size and
 position it is drawn at. Match both.
 
-WHAT IT IS: Frost emitter — tier 3 battery — THREE clusters of pale blue ice crystals from one rimed iron socket: the tallest in the middle, a smaller one either side of it set back and a tone darker. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
+WHAT IT IS: Frost emitter — tier 3 — ONE great cluster of pale blue ice crystals from a heavy rimed iron socket — bigger again: tall faceted spires and a crown of smaller shards. One cluster. NOTHING else — no carriage, no block, no crew, no smoke, no ammunition.
 
 THIS IS A MERGED WEAPON — tier 3: the SAME weapon as the plain
-`images/fixtures/frost.webp`, welded into THREE. Attach that
+`images/fixtures/frost.webp`, forged heavier again. Attach that
 painting as well as the reference: it is the design. Same materials, same
-ink, same proportions, same wear — tripled, not redesigned. The
-reference shows exactly where each copy sits and which one is in front.
+ink, same wear — and ONE weapon, never two or three side by side. A weld
+makes one block, so it carries one gun.
+
+KEEP ITS SIZE AND ITS PLACE. The reference is the plain gun’s own outline,
+and the game makes a merged gun bigger by itself; a painting that fills
+more of the frame gets grown twice. Put the extra weight INSIDE that
+outline: thicker metal, more bands, a bigger breech, limb or terminal.
 
 THE TIER COLOUR IS BLUE, around #3fa2ff. Put it in
 the TRIM: blue enamel bands and fittings on the steel, and a FAINT cool
@@ -5404,10 +5464,10 @@ glow kept INSIDE the metal’s own outline. The body stays iron, timber or
 crystal, so it is still THIS weapon. This one accent may be brighter than
 the palette — it is how a player tells a tier 3 from a tier 2 at a glance.
 
-IT HAS TO READ AS THREE AT 40 PX. Keep a clear gap or step between the
-copies, a strong ink line round each one, and every muzzle, limb or
-terminal separately visible. Two barrels painted into one fat barrel is
-the one way this fails that looks fine at full size.
+IT HAS TO READ AS ONE HEAVIER GUN AT 40 PX. Chunky bands and fittings in
+the tier colour and a strong ink line round one clear silhouette. Fine
+engraving that only shows at full size is the one way this fails that
+looks fine at full size.
 
 IT MUST READ AGAINST THE BLOCK IT SITS ON. That block is painted
 around #356577 and its neighbouring tones, so do NOT

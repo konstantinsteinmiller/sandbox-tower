@@ -21,6 +21,9 @@ export default {
     'free': 'Free',
     'tile': 'Free {name}, tier {n}: tap it, then tap the board to place it',
     'pair': 'Free pair of {name}: tap it, then tap the board to place it',
+    'tilePaid': '{name}, tier {n}, half price: tap it, then tap the board to place it',
+    'pairPaid': 'Pair of {name}, half price: tap it, then tap the board to place it',
+    'discount': '-{n}%',
     'chest': 'Flying chest: tap to open it',
     'firstClear': 'Wave {n} cleared! A gift for you'
   },

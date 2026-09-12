@@ -12,17 +12,25 @@ import { columnTop, halfWidthAt, previewGiftDrop, towerVersion } from '@/use/use
 import { noteBuildAction } from '@/use/useIdleNudge'
 import useSounds from '@/use/useSound'
 import {
-  canDropGiftAt, dropGiftAt, giftArrival, giftFuses, giftPlacementAt, giftShapeId, gifts,
-  nextGift, placeGiftAt, reloadGifts, FIRST_CLEAR_WAVE, type Gift
+  canDropGiftAt, dropGiftAt, giftAnchors, giftArrival, giftFuses, giftPlacementAt, giftPrice,
+  giftShapeId, gifts, missingForGift, nextGift, placeGiftAt, reloadGifts, CHEST_GIFT_DISCOUNT,
+  FIRST_CLEAR_WAVE, type Gift
 } from '@/use/useGifts'
+import { denyPurchase } from '@/use/useResourceBlink'
+import { requestRejectFlash } from '@/use/useWorldCues'
+import IconGold from '@/components/icons/IconGold.vue'
+import IconStone from '@/components/icons/IconStone.vue'
+import IconWood from '@/components/icons/IconWood.vue'
 
 /**
  * ─── The gift tile ──────────────────────────────────────────────────────────
  *
- * Where a won piece waits to be placed: beside the hand, gold-rimmed, FREE.
+ * Where a won piece waits to be placed: in the hand's first slot, gold-rimmed,
+ * with its price on it — FREE for the first-clear present and the first chest
+ * a player ever opens, half price for every chest after that (`giftPrice`).
  * Tap it and the board takes the next tap as the placement; or drag it straight
  * onto the board. Either way it goes through the gift's own placement rules
- * (`useGifts`) and costs nothing.
+ * (`useGifts`), which charge the bill the tile is showing.
  *
  * It owns its whole gesture — the scenes only mount it and stand their own
  * hand down when it arms (`armed`) — so neither board's placement handlers
@@ -32,7 +40,7 @@ import {
  * with a plain tap on empty ground, and the gift takes it.
  *
  * The preview is painted by the battlefield's own painters — the block face,
- * the gun in its tier's battery, the tier plate — so the tile shows the thing
+ * the gun at its tier's size and colour, the tier plate — so the tile shows the thing
  * that will land, not a symbol for it.
  */
 
@@ -46,9 +54,19 @@ interface Props {
   slotArmed?: boolean
   /** Tutorial, result screen, defeat: the tile is not on offer. */
   disabled?: boolean
+  /**
+   * Standing IN the hand's first slot rather than floating over it, at the
+   * tray's own tile size. The first slot only ever deals walls, so a won piece
+   * borrows it until it is placed and the wall comes back after — the free
+   * piece sits where every other piece is picked up, not in a row of its own
+   * the eye has to learn to check.
+   */
+  inTray?: boolean
+  /** The preview's edge, px — the tray's tile size when `inTray`. */
+  size?: number
 }
 
-const props = withDefaults(defineProps<Props>(), { slotArmed: false, disabled: false })
+const props = withDefaults(defineProps<Props>(), { slotArmed: false, disabled: false, inTray: false, size: 52 })
 
 const emit = defineEmits<{
   /** The gift is in hand — the scene disarms whatever it was holding. */
@@ -66,24 +84,35 @@ const count = computed(() => gifts.value.length)
 /** A pair of plain blocks rather than one weld — the obelisk on the tower. */
 const isPair = computed(() => !!gift.value && !giftFuses(gift.value.typeId))
 
+/**
+ * What this piece costs to set down: nothing for the first-clear present and
+ * for the first chest a player ever opens, half price for every chest after
+ * (`giftPrice`). Shown on the tile, because a piece that quietly takes wood
+ * out of the pile when it lands is a piece the player did not agree to buy.
+ */
+const price = computed(() => (gift.value ? giftPrice(gift.value) : null))
+const isFree = computed(() => gift.value?.free === true)
+const offPct = computed(() => Math.round((1 - CHEST_GIFT_DISCOUNT) * 100))
+
 const label = computed(() => {
   const g = gift.value
   if (!g) return ''
   const name = t(`blocks.names.${g.typeId}`)
-  return isPair.value ? t('gift.pair', { name }) : t('gift.tile', { name, n: g.tier })
+  if (isPair.value) return t(isFree.value ? 'gift.pair' : 'gift.pairPaid', { name })
+  return t(isFree.value ? 'gift.tile' : 'gift.tilePaid', { name, n: g.tier })
 })
 
 const rimColour = computed(() => (gift.value ? tierStyle(gift.value.tier).hex : '#ffd35c'))
 
 // ─── The preview ────────────────────────────────────────────────────────────
 
-const TILE_PX = 52
 const canvasEl = ref<HTMLCanvasElement | null>(null)
 
 const paint = (): void => {
   const cv = canvasEl.value
   const g = gift.value
   if (!cv || !g) return
+  const TILE_PX = props.size
   const dpr = Math.min(2, window.devicePixelRatio || 1)
   const px = Math.round(TILE_PX * dpr)
   if (cv.width !== px) { cv.width = px; cv.height = px }
@@ -118,7 +147,9 @@ watch(giftArrival, (a) => {
   if (!a) return
   cue.value = a.gift.source === 'firstClear'
     ? t('gift.firstClear', { n: FIRST_CLEAR_WAVE })
-    : t('gift.free')
+    : a.gift.free === true
+      ? t('gift.free')
+      : t('gift.discount', { n: Math.round((1 - CHEST_GIFT_DISCOUNT) * 100) })
   popping.value = false
   void nextTick(() => { popping.value = true })
   window.clearTimeout(cueTimer)
@@ -151,7 +182,11 @@ let hover: { x: number; y: number } | null = null
 let guideMemo: { key: string; guides: DropGuide[] } | null = null
 
 const cellGuides = (g: Gift): DropGuide[] => {
-  const key = `${towerVersion.value}|${g.typeId}|${g.tier}`
+  // The purse is part of the key: a gift the player cannot pay for yet lights
+  // no column, and the moment a kill's payout lands the columns must come
+  // back — which the tower's own version would not tell us about.
+  const payable = missingForGift(g).length === 0
+  const key = `${towerVersion.value}|${g.typeId}|${g.tier}|${payable}`
   if (guideMemo?.key === key) return guideMemo.guides
   const half = Math.max(0, halfWidthAt(0))
   const maxRow = rulesNow().board.maxRow
@@ -186,28 +221,40 @@ const publish = (): void => {
     })
     return
   }
+  const preferred = giftShapeId(g.typeId, 2, g.tier >= 3 ? 2 : 1)
   if (!hover) {
-    setBuildOverlay({ selectedShape: null, hoverC: null, hoverR: null, hoverValid: false })
+    // In hand, pointer not on the board yet: the legal sockets already show
+    // where it can go, exactly as they do for a piece from the hand.
+    setBuildOverlay({ selectedShape: preferred, selectedRot: 0, hoverC: null, hoverR: null, hoverValid: false, slots: anchorsFor(g) })
     return
   }
   const cell = screenToCell(hover.x, hover.y)
   const at = giftPlacementAt(g, cell.c, cell.r)
   // Nowhere legal under the pointer: ghost the preferred footprint in red.
   setBuildOverlay({
-    selectedShape: at ? giftShapeId(g.typeId, at.w, at.h) : giftShapeId(g.typeId, 2, g.tier >= 3 ? 2 : 1),
+    selectedShape: at ? giftShapeId(g.typeId, at.w, at.h) : preferred,
     selectedRot: 0,
     hoverC: at ? at.c : cell.c,
     hoverR: at ? at.r : cell.r,
     hoverValid: !!at,
-    slots: []
+    slots: anchorsFor(g)
   })
+}
+
+/** The gift's legal sockets, kept until the tower or the gift changes — the
+ *  scan runs a placement check per cell and `publish` runs per pointer move. */
+let anchorMemo: { key: string; anchors: Array<[number, number]> } | null = null
+const anchorsFor = (g: Gift): Array<[number, number]> => {
+  const key = `${towerVersion.value}|${g.typeId}|${g.tier}`
+  if (anchorMemo?.key !== key) anchorMemo = { key, anchors: giftAnchors(g) }
+  return anchorMemo.anchors
 }
 
 const clearOverlay = (): void => {
   if (props.variant === 'cell') {
     setBuildOverlay({ dropGuides: [], dropColumn: null, dropValid: false, hoverC: null, hoverR: null })
   } else {
-    setBuildOverlay({ selectedShape: null, hoverC: null, hoverR: null, hoverValid: false })
+    setBuildOverlay({ selectedShape: null, hoverC: null, hoverR: null, hoverValid: false, slots: [] })
   }
 }
 
@@ -232,6 +279,10 @@ const disarm = (): void => {
 const placeAt = (clientX: number, clientY: number): boolean => {
   const g = gift.value
   if (!g) return false
+  // A price the purse cannot meet is refused OUT LOUD and before the board is
+  // looked at, exactly as a piece from the hand is: the short piles blink and
+  // a knock plays. The gift stays in hand for when the payout lands.
+  if (denyPurchase(missingForGift(g))) return false
   let ok = false
   if (props.variant === 'cell') {
     const c = columnAt(clientX)
@@ -242,6 +293,13 @@ const placeAt = (clientX: number, clientY: number): boolean => {
   }
   if (!ok) {
     playSound('obstacle-hit', 0.03)
+    // Shown, not only heard: the red ghost shakes where it was refused and
+    // every legal socket (tower) or landing cell (drop board) flashes green —
+    // the same "not there; here" a piece from the hand gets. The gift stays
+    // in hand for the next try.
+    hover = { x: clientX, y: clientY }
+    publish()
+    requestRejectFlash()
     return false
   }
   playSound('reward-continue', 0.05)
@@ -292,11 +350,10 @@ const onTileUp = (e: PointerEvent): void => {
     else arm()
     return
   }
-  if (e.type !== 'pointercancel' && overCanvas(e.clientX, e.clientY)) {
-    if (!placeAt(e.clientX, e.clientY)) disarm()
-  } else {
-    disarm()
-  }
+  // A drag that lands somewhere illegal keeps the gift in hand: the refusal
+  // flash shows where it CAN go, and the next tap puts it there.
+  if (e.type !== 'pointercancel' && overCanvas(e.clientX, e.clientY)) placeAt(e.clientX, e.clientY)
+  else disarm()
 }
 
 const onTileDown = (e: PointerEvent): void => {
@@ -357,6 +414,13 @@ watch(gift, (g) => {
   if (!g) disarm()
   void nextTick(paint)
 })
+// Painted whenever the canvas itself appears, not only when the gift changes.
+// The tile is `v-if`'d on `disabled` as well as on the gift, so a gift won
+// during a result screen or a tutorial card mounted its canvas later, when
+// `disabled` fell — with nothing left to call `paint` — and the player got a
+// gold tile with FREE on it and nothing inside.
+watch(canvasEl, (el) => { if (el) paint() })
+watch(() => props.size, () => { void nextTick(paint) })
 // The scene's own overlay watchers run first on a tower change and clear the
 // guides they do not know about; this puts the gift's back.
 watch(towerVersion, () => { if (armed.value) publish() })
@@ -392,19 +456,32 @@ defineExpose({ arm, disarm, placeAt, armed })
 </script>
 
 <template lang="pug">
-  div.gift(v-if="gift && !disabled")
+  div.gift(v-if="gift && !disabled" :class="{ 'is-tray': inTray }")
     Transition(name="gift-cue")
       span.gift__cue(v-if="cue") {{ cue }}
     button.gift__tile(
       type="button"
       :class="{ 'is-armed': armed, 'is-pop': popping }"
-      :style="{ '--gift-rim': rimColour }"
+      :style="{ '--gift-rim': rimColour, '--gift-art': `${size}px` }"
       :aria-label="label"
       :aria-pressed="armed"
       @pointerdown="onTileDown"
     )
       canvas.gift__art(ref="canvasEl" aria-hidden="true")
-      span.gift__free {{ t('gift.free') }}
+      //- What it costs, on the tile: FREE, or the half price with the discount
+      //- flagged in the corner so the bill reads as the bargain it is.
+      span.gift__free(v-if="isFree || !price") {{ t('gift.free') }}
+      span.gift__free.is-price(v-else)
+        span.gift__cost(v-if="price.wood > 0")
+          IconWood.gift__res
+          | {{ price.wood }}
+        span.gift__cost(v-if="price.stone > 0")
+          IconStone.gift__res
+          | {{ price.stone }}
+        span.gift__cost(v-if="price.coins > 0")
+          IconGold.gift__res
+          | {{ price.coins }}
+      span.gift__off(v-if="!isFree") {{ t('gift.discount', { n: offPct }) }}
       span.gift__count(v-if="count > 1") {{ count }}
 </template>
 
@@ -423,8 +500,8 @@ defineExpose({ arm, disarm, placeAt, armed })
 // "merged" in one glance, and unlike anything the hand ever deals.
 .gift__tile
   position: relative
-  width: 60px
-  height: 60px
+  width: calc(var(--gift-art, 52px) + 8px)
+  height: calc(var(--gift-art, 52px) + 8px)
   padding: 3px
   border: 3px solid var(--gift-rim)
   border-radius: 12px
@@ -445,8 +522,17 @@ defineExpose({ arm, disarm, placeAt, armed })
 
 .gift__art
   display: block
-  width: 52px
-  height: 52px
+  width: var(--gift-art, 52px)
+  height: var(--gift-art, 52px)
+
+// In the hand's first slot: no row of its own to pad, and it breathes a
+// little less — it sits among the other tiles now, and a wall of motion
+// beside them would out-shout the hand it has joined.
+.gift.is-tray
+  padding-bottom: 0
+
+  .gift__tile
+    animation-duration: 1.8s
 
 .gift__free
   position: absolute
@@ -463,6 +549,39 @@ defineExpose({ arm, disarm, placeAt, armed })
   line-height: 14px
   letter-spacing: 0.04em
   text-transform: uppercase
+  white-space: nowrap
+
+// The price wears the same ribbon the FREE tag does, so the tile's shape does
+// not change when a chest stops giving pieces away.
+.gift__free.is-price
+  display: flex
+  align-items: center
+  gap: 0.3em
+  padding: 0 5px
+
+.gift__cost
+  display: inline-flex
+  align-items: center
+  gap: 0.1em
+  font-variant-numeric: tabular-nums
+
+.gift__res
+  width: 1.1em
+  height: 1.1em
+
+// The discount, top-left — the corner the count badge does not use.
+.gift__off
+  position: absolute
+  top: -8px
+  left: -8px
+  padding: 0 4px
+  border: 2px solid #2a1607
+  border-radius: 999px
+  background: #6fe08a
+  color: #06240f
+  font-size: 9px
+  font-weight: 900
+  line-height: 14px
   white-space: nowrap
 
 .gift__count

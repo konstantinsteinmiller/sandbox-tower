@@ -15,6 +15,9 @@ export default {
     'free': 'Miễn phí',
     'tile': '{name} miễn phí, cấp {n}: chạm vào, rồi chạm lên bàn để đặt',
     'pair': 'Cặp {name} miễn phí: chạm vào, rồi chạm lên bàn để đặt',
+    'tilePaid': '{name}, cấp {n}, giá một nửa: chạm vào, rồi chạm lên bàn để đặt',
+    'pairPaid': 'Cặp {name} giá một nửa: chạm vào, rồi chạm lên bàn để đặt',
+    'discount': '-{n}%',
     'chest': 'Rương bay: chạm để mở',
     'firstClear': 'Qua đợt {n}! Quà cho bạn'
   },

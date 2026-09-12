@@ -23,12 +23,18 @@ export const UNCAPPED = 9999
 
 export const TECH_NODES: ReadonlyArray<TechNode> = [
   // ── Tier 0 — the root ────────────────────────────────────────────────────
+  //
+  // The first rank is worth +50 %, every one after it +6 %. It is the purchase
+  // the game points a new player at (the stage-2 spotlight), and +6 % on a wall
+  // is a number nobody can see: the 2026-09-11 blind playtest had testers buy
+  // upgrades, die on the same wave, and conclude the tree does nothing. Half as
+  // much again on every block is a difference a player watches a wall survive.
   {
     id: 'foundations',
     tier: 0, col: 0, maxLevel: UNCAPPED,
     costBase: 40, costGrowth: 1.28,
     requires: [],
-    effect: { kind: 'blockHp', pct: 6 },
+    effect: { kind: 'blockHp', pct: 6, firstPct: 50 },
     icon: 'foundations'
   },
 
@@ -546,7 +552,9 @@ export const techCost = (
   if (!node) return Infinity
   if (level >= node.maxLevel) return Infinity
   const raw = node.costBase * Math.pow(node.costGrowth, level)
-  const priced = node.maxLevel > 1 && level === 0 ? raw * 0.5 : raw
+  const priced = level === 0 && node.firstCost !== undefined
+    ? node.firstCost
+    : node.maxLevel > 1 && level === 0 ? raw * 0.5 : raw
   // Round to something legible — exact prices past a few thousand are noise.
   if (priced < 1000) return Math.round(priced)
   if (priced < 100_000) return Math.round(priced / 10) * 10
@@ -569,6 +577,24 @@ export const TECH_BOUNDS = TECH_NODES.reduce(
   { minCol: 0, maxCol: 0, minTier: 0, maxTier: 0 }
 )
 
+/**
+ * What the first `level` ranks of an effect add up to.
+ *
+ * Every rank is worth the same `pct` / `add` — except that an effect may
+ * front-load its first rank with `firstPct`, after which it steps as usual.
+ * Still a plain sum, so the numbers stay legible ("+50 %, then +6 % a rank").
+ */
+export const effectTotal = (effect: TechEffect, level: number): number => {
+  if (level <= 0) return 0
+  const e = effect as { pct?: number; add?: number; firstPct?: number }
+  const step = e.pct ?? e.add ?? 0
+  return e.firstPct !== undefined ? e.firstPct + step * (level - 1) : step * level
+}
+
+/** What buying the NEXT rank adds — the `{n}` a card's description shows. */
+export const nextRankGain = (effect: TechEffect, level: number): number =>
+  effectTotal(effect, Math.max(0, level) + 1) - effectTotal(effect, Math.max(0, level))
+
 /** Accumulate every effect of a kind across the player's purchased levels. */
 export const sumEffect = (
   levels: Record<string, number>,
@@ -580,11 +606,19 @@ export const sumEffect = (
     if (node.effect.kind !== kind) continue
     const lvl = levels[node.id] ?? 0
     if (lvl <= 0) continue
-    const e = node.effect as { pct?: number; add?: number }
-    total += (e.pct ?? e.add ?? 0) * lvl
+    total += effectTotal(node.effect, lvl)
   }
   return total
 }
+
+/**
+ * The tree's first block-HP card: the root node that raises block HP.
+ *
+ * The one purchase the stage-2 spotlight points a new player at, on either
+ * board — `foundations` on the desktop DAG, `m2_foundations` on the phone strip.
+ */
+export const firstHpNodeId = (nodes: ReadonlyArray<TechNode> = TECH_NODES): string | undefined =>
+  nodes.find((n) => n.effect.kind === 'blockHp' && n.requires.length === 0)?.id
 
 /** Set of block ids unlocked by the player's tech levels. */
 export const unlockedBlocks = (

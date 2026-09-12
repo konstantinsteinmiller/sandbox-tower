@@ -24,7 +24,7 @@ export const GAME_ICON_NAMES = [
   // Steppers / arrows
   'plus', 'minus', 'left', 'right', 'up', 'down',
   // Game nouns
-  'coin', 'gem', 'heart', 'flask', 'wheel', 'gift', 'fullscreen', 'share',
+  'coin', 'gem', 'heart', 'flask', 'wheel', 'gift', 'fullscreen', 'share', 'crown',
   // Tools
   'repair'
 ] as const

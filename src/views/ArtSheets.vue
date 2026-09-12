@@ -17,8 +17,8 @@ import { drawSiegeMachine } from '@/game/siegeArt'
 import { drawCavalry, CAVALRY_CYCLE_MS } from '@/game/cavalryArt'
 import { SHIP_ART, SHIP_DRAFT } from '@/game/shipArt'
 import {
-  paintBlockBody, paintBlockFixture, paintFixtureBattery, paintShipBlock, fixtureSpanForTier,
-  FIXTURE_BOX,
+  paintBlockBody, paintBlockFixture, paintTierFixture, paintShipBlock, fixtureSpanForTier,
+  gunSpanForTier, FIXTURE_BOX,
   paintTierPlate, paintProjectile, paintTree, celestialDisc, SIEGE_ART_BOX,
   ALLY_ART_BOX
 } from '@/use/useTowerArt'
@@ -151,14 +151,16 @@ const paintFitted = (
  * A fused block, squared up into one cell.
  *
  * On the battlefield a merge keeps the cells its halves stood on, so a tier-3
- * is a 2x2 bastion and a tier-2 is a 2x1 battery. Squaring that into a single
+ * is a 2x2 bastion and a tier-2 is a 2x1 weld. Squaring that into a single
  * frame means the BODY can no longer carry the tier — every cell is the same
  * square — so the ratio has to be preserved on the other side of the equation:
  * the gun is drawn at its real span DIVIDED by the footprint it straddles.
  *
- * Which is why the tier-2 gun looks small. A 1.1-cell gun on a two-cell-wide
- * battery IS small, and pretending otherwise would be inventing a design the
- * game does not have.
+ * Which is why the tier-2 gun looks small. A 1.43-cell gun on a two-cell-wide
+ * weld is still narrower than the weld, and pretending otherwise would be
+ * inventing a design the game does not have. Weapons take the span the tower
+ * actually draws them at (`gunSpanForTier`); support fixtures never grow past
+ * the footprint's short side.
  */
 const footprintOf = (tier: number): number => (tier <= 1 ? 1 : 2)
 
@@ -203,7 +205,7 @@ const paintCell = (ctx: CanvasRenderingContext2D, cell: SheetCell, size: number)
     case 'blockAssembled': {
       const tier = a.tier ?? 1
       const fp = footprintOf(tier)
-      const span = fixtureSpanForTier(tier) / fp
+      const span = (blockDef(a.typeId).weapon ? gunSpanForTier(tier) : fixtureSpanForTier(tier)) / fp
 
       paintFitted(ctx, size, (c, cx, cy, k) => {
         const s = size * k
@@ -452,15 +454,16 @@ const unionBox = (
  * bakes half a swing into the still and the game then adds the other half on
  * top of it.
  *
- * A merged tier's sheet draws the BATTERY instead — the copies at their
- * offsets, rear rank shaded — which is what its painting replaces. Called for
- * the magenta sheet and for the transparent probe alike, so the fit is
- * measured off exactly what the painter was shown.
+ * A merged tier's sheet draws its WEAPON's gun (`paintTierFixture`): one gun
+ * in the plain fixture's outline, which is what its painting replaces — the
+ * game grows the painting by the weld's span itself. Called for the magenta
+ * sheet and for the transparent probe alike, so the fit is measured off exactly
+ * what the painter was shown.
  */
 const paintFixtureRef = (c: CanvasRenderingContext2D, walk: WalkSpec): void => {
   const s = walk.panelW / FIXTURE_BOX
   if (walk.fixtureType && walk.fixtureTier) {
-    paintFixtureBattery(c, walk.fixtureType, walk.panelW / 2, walk.panelH / 2, s, walk.fixtureTier)
+    paintTierFixture(c, walk.fixtureType, walk.panelW / 2, walk.panelH / 2, s, walk.fixtureTier)
     return
   }
   paintBlockFixture(

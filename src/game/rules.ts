@@ -222,7 +222,7 @@ export const DESKTOP_RULES: RuleSet = {
     supportSlot: SUPPORT_SLOT,
     pool: SHAPE_DEFS,
     rotation: true,
-    rerollMs: 5_000,
+    rerollMs: 3_000,
     unlockRerollSlots: [2, 3]
   },
   blocks: { catalogue: null, foldStoneIntoWood: null },

@@ -10,6 +10,24 @@ import IconCoin from '@/components/icons/IconCoin.vue'
 import useMissions from '@/use/useMissions'
 import useSounds from '@/use/useSound'
 
+const props = withDefaults(defineProps<{
+  /**
+   * The corner copy: the button exists only while there is something to
+   * collect, and leaves once it has all been collected.
+   *
+   * The phone keeps the missions board in its `…` drawer, and the blind
+   * playtest's five phone players claimed nothing between them — three
+   * finished missions sat there all session behind a menu none of them had a
+   * reason to open. So the phone also mounts this copy on the open playfield,
+   * where it turns up on the wave clear that finishes a goal. It stays mounted
+   * while its own panel is open, so claiming the last reward never yanks the
+   * sheet out from under the tap that emptied it.
+   */
+  onlyWhenClaimable?: boolean
+}>(), {
+  onlyWhenClaimable: false
+})
+
 const emit = defineEmits<{
   (e: 'coins-awarded', sourceEl: HTMLElement): void
   /** Fired just before the panel is shown, so the owner can flush live
@@ -20,9 +38,13 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const { playSound } = useSounds()
-const { missions, claim, claimableMissionCount } = useMissions()
+const { missions, claim, claimableMissionCount, allRemainingClaimable } = useMissions()
 
 const isOpen = ref(false)
+
+const isVisible = computed(() =>
+  !props.onlyWhenClaimable || claimableMissionCount.value > 0 || isOpen.value
+)
 
 const open = (): void => {
   // Ask for a refresh BEFORE showing, so the first frame the player sees is
@@ -78,19 +100,30 @@ const onClaim = (index: number): void => {
 </script>
 
 <template lang="pug">
-  FHudButton(
-    ref="rootEl"
-    tone="blue"
-    :attention="claimableMissionCount > 0"
-    :aria-label="t('missions.title')"
-    @click="open"
-  )
-    //- Checklist / clipboard glyph for the missions board.
-    svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white")
-      path(d="M9 3 h6 v3 h-6 z M6 5 h2 M16 5 h2 v16 h-12 v-16 h2")
-      path(d="M9 11 l1.5 1.5 L13 10 M9 16 l1.5 1.5 L13 15")
-    template(#badge)
-      FHudBadge(v-if="claimableMissionCount > 0" tone="red") {{ claimableMissionCount }}
+  //- The corner copy pops in on the wave clear that finishes a goal and out
+  //- once it has all been collected; the drawer copy never leaves, so for it
+  //- the transition is inert.
+  Transition(name="missions-pop")
+    FHudButton(
+      v-if="isVisible"
+      ref="rootEl"
+      tone="blue"
+      :attention="allRemainingClaimable"
+      :aria-label="t('missions.title')"
+      @click="open"
+    )
+      //- Checklist / clipboard glyph for the missions board.
+      svg(viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white")
+        path(d="M9 3 h6 v3 h-6 z M6 5 h2 M16 5 h2 v16 h-12 v-16 h2")
+        path(d="M9 11 l1.5 1.5 L13 10 M9 16 l1.5 1.5 L13 15")
+      template(#badge)
+        //- Keyed on the count so each newly finished goal re-mounts the badge
+        //- and it pops: the number going up is SHOWN, not just changed.
+        FHudBadge.missions-badge(
+          v-if="claimableMissionCount > 0"
+          :key="claimableMissionCount"
+          tone="red"
+        ) {{ claimableMissionCount }}
 
   FModal(v-model="isOpen" :title="t('missions.title')")
     div.flex.flex-col.gap-2.p-2
@@ -124,4 +157,41 @@ const onClaim = (index: number): void => {
 </template>
 
 <style scoped lang="sass">
+// The corner copy arriving and leaving. A spring-in scale says "this just
+// appeared for you"; the exit is a plain shrink so it never competes with the
+// coins flying out of it.
+.missions-pop-enter-active
+  transition: transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 180ms ease-out
+
+.missions-pop-leave-active
+  transition: transform 200ms ease-in, opacity 200ms ease-in
+
+.missions-pop-enter-from,
+.missions-pop-leave-to
+  transform: scale(0.4)
+  opacity: 0
+
+.missions-badge
+  animation: missions-badge-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1)
+
+@keyframes missions-badge-pop
+  0%
+    transform: scale(0.3)
+  60%
+    transform: scale(1.35)
+  100%
+    transform: scale(1)
+
+// The count still changes; it just stops jumping.
+@media (prefers-reduced-motion: reduce)
+  .missions-pop-enter-active,
+  .missions-pop-leave-active
+    transition: opacity 150ms linear
+
+  .missions-pop-enter-from,
+  .missions-pop-leave-to
+    transform: none
+
+  .missions-badge
+    animation: none
 </style>

@@ -7,23 +7,29 @@ import { isGamePaused } from '@/use/useGamePause'
 import { isAnyModalOpen } from '@/use/useModalState'
 import useSounds from '@/use/useSound'
 import { flyingChestRequests } from '@/use/useTowerGame'
-import { gifts, grantGift, rollChestGift, MAX_GIFTS, type Gift } from '@/use/useGifts'
+import { gifts, grantChestGift, rollChestGift, MAX_GIFTS, type Gift } from '@/use/useGifts'
 
 /**
  * ─── The flying chest ───────────────────────────────────────────────────────
  *
- * Once a wave a winged chest crosses the sky over the board. Tap it and it
- * opens into a GIFT PIECE — a weld of a gun the player usually does not own
- * yet (see `useGifts`). Ignore it and it flies off; there is another next wave.
+ * A winged chest crosses the sky over the board. Tap it and it opens into a
+ * GIFT PIECE — a weld of a gun the player usually does not own yet (see
+ * `useGifts`). Ignore it and it flies off; there is another along shortly.
  *
  * Ported from Merge Idle War's flying chest, where it is the most-tapped thing
  * in the game, with two changes for a tower defence:
  *
- *   · ONE PER WAVE instead of a two-minute timer. A wave is the unit a player
- *     thinks in here, and a chest that arrived mid-wave on one run and in the
- *     build phase on the next would be a slot machine rather than a rhythm.
- *   · Its FIRST flight is right after the tutorial ends — the moment the player
- *     has just been shown what a merged gun does, and can now be handed one.
+ *   · ONE EARLY, THEN ONE EVERY 45 SECONDS. The first is five seconds after
+ *     the chest becomes possible at all: its job is to tell a new player, while
+ *     they are still deciding whether to stay, that there are guns here they
+ *     have not met. After that the timer paces them.
+ *
+ *     It was one per WAVE, and that was too many: early waves are short, so a
+ *     first session met three or four chests inside the first minute and the
+ *     tower was built out of free welds before the deck had dealt twice. The
+ *     timer also makes the rhythm the same on a fast wave and a slow one.
+ *   · The clock is UNPAUSED time only, so the gap is 45 seconds of play rather
+ *     than 45 seconds of standing in a menu.
  *
  * The clock only runs while the game does. Ads, hidden tabs, modals, the result
  * screen, the rotate prompt and the tutorial's cards all hold it (`paused` plus
@@ -41,19 +47,16 @@ import { gifts, grantGift, rollChestGift, MAX_GIFTS, type Gift } from '@/use/use
  */
 
 interface Props {
-  /** The tutorial is finished. Its false → true flip — and only that one — is
-   *  what "right after the tutorial" means. */
-  tutorialDone: boolean
-  /** The chest may exist right now: tutorial finished and the run live (no
-   *  result screen, not defeated). A result screen closing onto a continued
-   *  run turns this back on without being a tutorial ending. */
+  /** The chest may exist right now: tutorial behind the player and the run
+   *  live (no result screen, not defeated). The first chest of a run is timed
+   *  from this going true. */
   ready: boolean
   /** Anything the scene knows holds play — result screen, rotate prompt,
    *  tutorial cards. The global ad / modal gates are read here directly. */
   paused?: boolean
-  /** The wave in progress — one chest per wave number. */
+  /** The wave in progress. Read only to notice a NEW RUN (the number going
+   *  backwards), which owes the player an early chest again. */
   wave: number
-  phase: 'build' | 'battle' | 'defeat'
 }
 
 const props = withDefaults(defineProps<Props>(), { paused: false })
@@ -68,12 +71,12 @@ const { playSound } = useSounds()
 /** A crossing, in unpaused milliseconds. Long enough to notice and reach with
  *  a thumb, short enough that ignoring it is a choice. */
 const FLIGHT_MS = 9_000
-/** How long after the tutorial's last card the first chest takes off. */
-const AFTER_TUTORIAL_MS = 1_200
-/** Into a wave, the chest waits a few seconds so it lands on a busy sky rather
- *  than on the wave-start banner. */
-const INTO_WAVE_MIN_MS = 3_000
-const INTO_WAVE_MAX_MS = 7_000
+/** How long after the chest becomes possible the FIRST one takes off. */
+const FIRST_MS = 5_000
+/** And how long after one leaves the sky the next one enters it. */
+const EVERY_MS = 45_000
+/** A full gift tray grounds the chest; it tries again this often. */
+const RETRY_MS = 10_000
 /** The open animation, before the chest is gone. */
 const OPEN_MS = 450
 const TICK_MS = 100
@@ -87,10 +90,11 @@ const lane = ref(0.25)
 /** +1 crosses left to right, −1 right to left. */
 const dir = ref<1 | -1>(1)
 
-/** The wave whose chest has already been launched. */
-let chestWave = -1
 /** Unpaused milliseconds until the next launch, or −1 for none scheduled. */
 let countdown = -1
+/** A chest has already flown this run, so the next one is on the long timer
+ *  rather than on the newcomer's early one. */
+let flownThisRun = false
 
 const gated = computed(() => isGamePaused.value || isAnyModalOpen.value || props.paused)
 
@@ -154,35 +158,42 @@ const stopLoop = (): void => {
   raf = 0
 }
 
-/** Gone — flown off, opened, or the run ended under it. */
+/** Gone — flown off, opened, or the run ended under it. The next one is booked
+ *  from here, so the gap is measured between chests rather than from a wave. */
 const land = (): void => {
+  const wasFlying = flying.value
   flying.value = false
   opening.value = false
   progress.value = 0
   stopLoop()
+  if (wasFlying && props.ready && countdown < 0) countdown = EVERY_MS
 }
 
 /**
  * Take off. A full gift tray grounds it — there is nowhere for the prize to
  * go — unless QA forced it, in which case it flies and pays nothing.
  */
-const launch = (force = false): void => {
-  if (flying.value) return
-  if (!force && gifts.value.length >= MAX_GIFTS) return
+const launch = (force = false): boolean => {
+  if (flying.value) return false
+  if (!force && gifts.value.length >= MAX_GIFTS) return false
   lane.value = 0.1 + Math.random() * 0.3
   dir.value = Math.random() < 0.5 ? 1 : -1
   progress.value = 0
   opening.value = false
   flying.value = true
+  flownThisRun = true
   playSound('modal-open', 0.025, 1.25)
   startLoop()
+  return true
 }
 
 const onOpen = (): void => {
   if (!flying.value || opening.value) return
   opening.value = true
   const gift = rollChestGift()
-  if (grantGift(gift)) {
+  // Free the first time a chest is ever opened on this board, half price
+  // after that (`grantChestGift`).
+  if (grantChestGift(gift)) {
     playSound('reward-continue', 0.06)
     emit('opened', gift)
   } else {
@@ -193,34 +204,29 @@ const onOpen = (): void => {
 
 // ─── Schedule ───────────────────────────────────────────────────────────────
 
-/** Book this wave's chest, if it has not had one. */
-const bookWave = (): void => {
-  if (!props.ready || flying.value || countdown >= 0) return
-  if (props.phase !== 'battle' || props.wave <= chestWave) return
-  chestWave = props.wave
-  countdown = INTO_WAVE_MIN_MS + Math.random() * (INTO_WAVE_MAX_MS - INTO_WAVE_MIN_MS)
+/** Book the next chest, unless one is already booked or in the sky. */
+const book = (ms: number): void => {
+  if (flying.value || countdown >= 0) return
+  countdown = ms
 }
 
-// The tutorial has just ended: fly now, and let this chest be this wave's.
-watch(() => props.tutorialDone, (done, was) => {
-  if (!done || was !== false) return
-  chestWave = Math.max(chestWave, props.wave)
-  countdown = AFTER_TUTORIAL_MS
-})
-
+// The chest has become possible — the tutorial is behind the player, or a
+// result screen has closed onto a live run. The first one of a run comes
+// early; after that the timer takes over where it left off.
 watch(() => props.ready, (ready) => {
-  if (ready) { bookWave(); return }
+  if (ready) { book(flownThisRun ? EVERY_MS : FIRST_MS); return }
   countdown = -1
   if (flying.value && !opening.value) land()
-})
+}, { immediate: true })
 
 // A wave number going BACKWARDS is a new run, or a continue restoring the last
-// wave beaten — either way the waves ahead are owed their chests again.
+// wave beaten — either way this player is owed an early chest again.
 watch(() => props.wave, (w, prev) => {
-  if (prev !== undefined && w < prev) chestWave = Math.min(chestWave, w)
+  if (prev === undefined || w >= prev) return
+  flownThisRun = false
+  countdown = -1
+  if (props.ready) book(FIRST_MS)
 })
-
-watch([() => props.wave, () => props.phase], bookWave, { immediate: true })
 
 // QA: `__tower.requestFlyingChest()`, or `?chest=now` on the URL.
 watch(flyingChestRequests, () => launch(true))
@@ -241,10 +247,11 @@ onMounted(() => {
   ticker = window.setInterval(() => {
     if (gated.value || flying.value || countdown < 0 || !props.ready) return
     countdown -= TICK_MS
-    if (countdown <= 0) {
-      countdown = -1
-      launch()
-    }
+    if (countdown > 0) return
+    countdown = -1
+    // A grounded chest (nowhere to put the prize) is not a chest skipped:
+    // it comes back round shortly rather than at the end of a full gap.
+    if (!launch()) countdown = RETRY_MS
   }, TICK_MS)
   if (readChestHatch()) window.setTimeout(() => launch(true), 800)
 })

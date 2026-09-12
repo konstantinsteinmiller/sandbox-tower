@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { dimAround, type DimBox } from './dimRects'
 
 /**
  * First-run coach marks — WORDLESS, and not optional.
@@ -38,17 +39,34 @@ import { computed, ref, onMounted, onUnmounted } from 'vue'
  * obeys. It lives in the union anyway so the scene's step list stays one typed
  * sequence rather than a sequence plus a special case beside it.
  *
- * `mergePower` follows it and is the same kind of beat: the six-second
+ * `mergePower` follows it and is the same kind of beat: the four-second
  * `MergePowerDemo` owns the screen, and this component renders nothing.
+ *
+ * `rankGate` is played by the automatic hand (`TutorialHand`) rather than
+ * pointed at, so the scene measures no target for it and nothing renders here.
  */
 export type TutorialStep =
-  'pick' | 'place' | 'mergeGuide' | 'mergePower' | 'inspectMerged' | 'rankUp' | 'call' | 'drop' | 'merge'
+  'pick' | 'place' | 'mergeGuide' | 'mergePower' | 'inspectMerged' | 'rankUp' | 'rankGate' | 'call'
+  | 'drop' | 'merge'
 
 interface Props {
   /** Which step is live, or null when the tutorial is finished/never started. */
   step: TutorialStep | null
   /** Screen-space rect to cut out of the dim layer. */
-  target: { x: number; y: number; w: number; h: number } | null
+  target: DimBox | null
+  /**
+   * A second live window: where the lesson's piece comes FROM.
+   *
+   * The phone board's drop beats teach "this card, into that column", and with
+   * only the column live the card was dimmed and dead — so the first thing
+   * every phone player in the 2026-09-11 blind playtest did (press the card,
+   * drag it up) did nothing, and all five read the lit column as the lane the
+   * monsters come down. With the card in its own window the natural gesture
+   * works, and the path between the two windows is what the scene's ghost
+   * demo walks. Ringed, never arrowed: the arrow still names the destination.
+   * Absent on the desktop board, which keeps its single hole exactly as it was.
+   */
+  passage?: DimBox | null
 }
 
 const props = defineProps<Props>()
@@ -84,6 +102,33 @@ const tick = ref(0)
 const onResize = (): void => { tick.value++ }
 onMounted(() => window.addEventListener('resize', onResize))
 onUnmounted(() => window.removeEventListener('resize', onResize))
+
+/** The second window, padded like the first — and only ever beside one. */
+const passageHole = computed<DimBox | null>(() => {
+  const r = props.passage
+  if (!r || !hole.value) return null
+  const pad = Math.round(PAD * 0.6)
+  return {
+    x: Math.round(r.x - pad),
+    y: Math.round(r.y - pad),
+    w: Math.round(r.w + pad * 2),
+    h: Math.round(r.h + pad * 2)
+  }
+})
+
+/**
+ * The dim around BOTH windows, when there are two. The single-hole layout
+ * below stays the four rects it always was.
+ */
+const passageDims = computed<DimBox[]>(() => {
+  void tick.value
+  const a = hole.value
+  const b = passageHole.value
+  if (!a || !b) return []
+  const vw = typeof window === 'undefined' ? 1024 : window.innerWidth
+  const vh = typeof window === 'undefined' ? 768 : window.innerHeight
+  return dimAround([a, b], vw, vh)
+})
 
 /**
  * The arrow: where it sits, how big it is, and which way it points.
@@ -148,10 +193,18 @@ const arrowStyle = computed(() => {
       //- a mask: it keeps the hole genuinely click-through on every browser,
       //- which `mask-image` does not — and it makes everything else inert,
       //- which is what forces the lesson.
-      div.tutorial__dim(:style="{ left: 0, top: 0, width: '100%', height: hole.y + 'px' }")
-      div.tutorial__dim(:style="{ left: 0, top: (hole.y + hole.h) + 'px', width: '100%', bottom: 0 }")
-      div.tutorial__dim(:style="{ left: 0, top: hole.y + 'px', width: hole.x + 'px', height: hole.h + 'px' }")
-      div.tutorial__dim(:style="{ left: (hole.x + hole.w) + 'px', top: hole.y + 'px', right: 0, height: hole.h + 'px' }")
+      template(v-if="passageHole")
+        div.tutorial__dim(
+          v-for="(d, i) in passageDims"
+          :key="i"
+          :style="{ left: d.x + 'px', top: d.y + 'px', width: d.w + 'px', height: d.h + 'px' }"
+        )
+        div.tutorial__ring.is-passage(:style="{ left: passageHole.x + 'px', top: passageHole.y + 'px', width: passageHole.w + 'px', height: passageHole.h + 'px' }")
+      template(v-else)
+        div.tutorial__dim(:style="{ left: 0, top: 0, width: '100%', height: hole.y + 'px' }")
+        div.tutorial__dim(:style="{ left: 0, top: (hole.y + hole.h) + 'px', width: '100%', bottom: 0 }")
+        div.tutorial__dim(:style="{ left: 0, top: hole.y + 'px', width: hole.x + 'px', height: hole.h + 'px' }")
+        div.tutorial__dim(:style="{ left: (hole.x + hole.w) + 'px', top: hole.y + 'px', right: 0, height: hole.h + 'px' }")
       div.tutorial__ring(:style="{ left: hole.x + 'px', top: hole.y + 'px', width: hole.w + 'px', height: hole.h + 'px' }")
 
       //- The whole instruction. Rotated about its own tip, so one shape serves
@@ -199,6 +252,12 @@ const arrowStyle = computed(() => {
     box-shadow: 0 0 0 3px rgba(255, 214, 80, 0.2), 0 0 18px rgba(255, 200, 60, 0.35)
   50%
     box-shadow: 0 0 0 6px rgba(255, 214, 80, 0.4), 0 0 30px rgba(255, 200, 60, 0.7)
+
+// The card's window: the same gold, pulsing out of step with the column's, so
+// the eye goes from one to the other rather than seeing two identical frames.
+.tutorial__ring.is-passage
+  border-width: 2px
+  animation-delay: -0.75s
 
 .tutorial__arrow
   position: absolute

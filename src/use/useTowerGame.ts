@@ -40,6 +40,7 @@ import { getState, setState, removeState } from '@/use/useTowerState'
 import { activeRules, setActiveRules, type RuleSet } from '@/game/rules'
 import { pushFx } from '@/use/useTowerVfx'
 import { awaitingFirstInteraction } from '@/use/useFirstInteraction'
+import { beginStrandedScan, endStrandedScan, markStranded } from '@/use/useWorldCues'
 
 // ─── The rules in force ─────────────────────────────────────────────────────
 //
@@ -262,6 +263,51 @@ const liveEnemy = (uid: number): Enemy | undefined => {
   return e && e.dying <= 0 ? e : undefined
 }
 
+// ─── Who struck the last blow ───────────────────────────────────────────────
+//
+// When the Gate falls, the defeat opens on a spotlight: the game holds for
+// three seconds on the unit that did it, a crown over its head. So the
+// simulation has to know who that was, and damage reaches the Gate by half a
+// dozen roads — a swing, a lance, a bomber's run, a catapult stone in flight,
+// a fire still burning. Rather than thread an attacker through every one of
+// them, the enemy-side callers set `blowBy` around the damage they deal (and a
+// hostile round carries its thrower in `byEnemy`), and `damageBlock` reads it.
+// A blow with no attacker in hand (a fire) falls back to whoever last hit the
+// Gate, then to the enemy nearest it.
+
+export interface KillingBlow {
+  /** The enemy's uid, or -1 when nobody could be named. */
+  uid: number
+  typeId: string
+  /** Where it stood when the Gate fell, world cells. */
+  x: number
+  y: number
+}
+
+/** Enemy uid dealing the damage being resolved right now; -1 for none. */
+let blowBy = -1
+/** The last enemy known to have hit the Gate this run. */
+let lastGateBlowBy = -1
+/** Set the moment the Gate falls; cleared with the world. */
+export const killingBlow: Ref<KillingBlow | null> = ref(null)
+
+const noteKillingBlow = (gate: Block): void => {
+  const gx = centreX(gate)
+  const gy = centreY(gate)
+  let e = enemiesByUid.get(blowBy >= 0 ? blowBy : lastGateBlowBy)
+  if (!e) {
+    let best = Infinity
+    for (const en of enemies) {
+      if (en.dying > 0) continue
+      const d = (en.x - gx) ** 2 + (en.y - gy) ** 2
+      if (d < best) { best = d; e = en }
+    }
+  }
+  killingBlow.value = e
+    ? { uid: e.uid, typeId: e.typeId, x: e.x, y: e.y }
+    : { uid: -1, typeId: '', x: gx, y: gy }
+}
+
 /**
  * Spent projectile carcasses, kept for reuse.
  *
@@ -293,7 +339,8 @@ const acquireProjectile = (): Projectile => {
       // live. `'arrow'` is not a `ProjectileKind`; `'bolt'` is the arrow one.
       uid: 0, kind: 'bolt', x: 0, y: 0, vx: 0, vy: 0, damage: 0, splash: 0,
       ballistic: false, targetUid: -1, life: 0, slowPct: 0, slowMs: 0,
-      sourceUid: -1, hostile: false, burnMs: undefined, burnDps: undefined, trail: [], tier: 1
+      sourceUid: -1, hostile: false, burnMs: undefined, burnDps: undefined, trail: [], tier: 1,
+      byEnemy: -1
     }
   }
   p.trail.length = 0
@@ -301,6 +348,7 @@ const acquireProjectile = (): Projectile => {
   p.hostile = false
   p.burnMs = undefined
   p.burnDps = undefined
+  p.byEnemy = -1
   return p
 }
 
@@ -603,12 +651,29 @@ const scanUnreachable = (dt: number): void => {
   if (reachScanIn > 0) return
   reachScanIn = 250
   let n = 0
+  // The same pass also lists every enemy that is ENGAGED — parked at standoff,
+  // or already hitting the tower — where no gun can answer it. Those are the
+  // fights that cannot end on their own, and a fight that cannot end reads as
+  // a frozen game; the renderer marks each one (see `useWorldCues`). Units
+  // still walking in are left out: they are out of reach only until they
+  // arrive, and marking them would put a cross over every wave's approach.
+  beginStrandedScan()
   for (const e of enemies) {
     if (e.dying > 0) continue
-    if (!enemyDef(e.typeId).siege?.standoff) continue
-    if (!isReachable(e)) n++
+    const standoff = !!enemyDef(e.typeId).siege?.standoff
+    if (!standoff && e.targetUid < 0) continue
+    if (isReachable(e)) continue
+    if (standoff) n++
+    markStranded(e.uid)
   }
+  endStrandedScan()
   if (unreachableSiege.value !== n) unreachableSiege.value = n
+}
+
+/** Forget the stranded list — the field it described is gone. */
+const clearStranded = (): void => {
+  beginStrandedScan()
+  endStrandedScan()
 }
 
 /**
@@ -1149,13 +1214,34 @@ export type BuildResource = 'wood' | 'stone' | 'coins'
  * exactly the icons named here, so a pile the player cannot see must never be
  * one of them.
  */
-export const missingFor = (shapeId: string): BuildResource[] => {
-  const cost = priceOf(shapeCost(shapeId))
+export const missingFor = (shapeId: string): BuildResource[] =>
+  missingForCost(priceOf(shapeCost(shapeId)))
+
+/** A bill already in the active rules' piles — what a gift's half price is
+ *  quoted in (`giftPrice`), and what these three helpers work on. */
+export interface BuildCost { wood: number; stone: number; coins: number }
+
+/** Which piles are short of `cost`, in the resource bar's order. */
+export const missingForCost = (cost: BuildCost): BuildResource[] => {
   const out: BuildResource[] = []
   if (wood.value < cost.wood) out.push('wood')
   if (stone.value < cost.stone) out.push('stone')
   if (runCoins.value < cost.coins) out.push('coins')
   return out
+}
+
+export const canAffordCost = (cost: BuildCost): boolean => missingForCost(cost).length === 0
+
+/** Charge `cost`, or nothing at all when a pile is short. */
+export const spendCost = (cost: BuildCost): boolean => {
+  if (!canAffordCost(cost)) return false
+  wood.value -= cost.wood
+  stone.value -= cost.stone
+  runCoins.value -= cost.coins
+  // Gold or wood just left the purse, which can put the offered gun out of
+  // reach — the same guarantee every other spend re-checks.
+  ensureAffordableWeapon()
+  return true
 }
 
 /**
@@ -1290,7 +1376,7 @@ export const rerollOffer = (slotIndex: number): void => {
 }
 
 /**
- * The player's own reroll: one independent five-second timer per slot.
+ * The player's own reroll: one independent three-second timer per slot.
  *
  * Without it a bad hand is a dead build phase — four structure pieces you can't
  * afford, or a fourth wooden domino when what you need is a gun. The cooldown
@@ -1309,11 +1395,17 @@ export const manualReroll = (slotIndex: number): boolean => {
   return true
 }
 
-/** Replace the whole hand with four ENHANCED shapes (the rewarded-ad payout). */
+/**
+ * Reinforce the hand the player is LOOKING AT (the rewarded perk's payout).
+ *
+ * In place, not a fresh deal. The coin-priced button previews the purchase by
+ * turning these very tiles gold before it charges (see the scenes'
+ * `onEnhancedHand`); a payout that then re-rolled them would have sold the
+ * player a different hand from the one it showed. The hand is always full —
+ * every placement refills its slot — so this is always a whole hand's worth.
+ */
 export const dealEnhancedOffers = (): void => {
-  offers.value = rollOffers(wave.value, availableBlocks.value, Math.random, laneCfg()).map(dealt)
   offerEnhanced.value = new Array(R().offers.slots).fill(true)
-  ensureAffordableWeapon()
 }
 
 /** Deal a fresh hand. */
@@ -1605,6 +1697,15 @@ export const sellBlock = (c: number, r: number): { wood: number; stone: number; 
   syncTowerStats()
   pushFx({ kind: 'sell', x: c, y: r + 0.5 })
   return refund
+}
+
+/** What `sellBlock` would pay for the block at `(c, r)` right now, in the
+ *  active rules' piles (stone folded into wood where the board folds it), or
+ *  null for nothing sellable there. A card quoting it quotes the real payout. */
+export const sellRefundAt = (c: number, r: number): { wood: number; stone: number; coins: number } | null => {
+  const b = blockAt(c, r)
+  if (!b || b.typeId === GATE_ID) return null
+  return priceOf(sellRefund(b.typeId, spanW(b) * spanH(b), b.level ?? 0))
 }
 
 // ─── In-run block upgrades ──────────────────────────────────────────────────
@@ -2095,6 +2196,10 @@ export const repairBlock = (c: number, r: number): boolean => {
   b.flash = 0
   // Gold just left the purse, which can put the offered gun out of reach.
   ensureAffordableWeapon()
+  // The Gate's bar in the wave badge reads these refs, not the block. Left to
+  // the next wave's sync, a Gate patched in the build phase showed its old
+  // wound on the badge until the fight it had been patched for began.
+  if (b.uid === gateUid) syncGateRefs()
   // The inspector holds a plain, non-reactive block — tell it the numbers moved.
   towerVersion.value++
   pushFx({ kind: 'repair', x: centreX(b), y: centreY(b) })
@@ -2176,7 +2281,10 @@ const removeBlock = (b: Block, violent: boolean): void => {
   if (!violent) return
 
   const def = blockDef(b.typeId)
-  pushFx({ kind: 'shatter', x: centreX(b), y: centreY(b), palette: def.palette })
+  pushFx({
+    kind: 'shatter', x: centreX(b), y: centreY(b), palette: def.palette,
+    w: spanW(b), h: spanH(b)
+  })
 
   const boom = def.utility?.deathExplosion
   if (boom) {
@@ -2603,7 +2711,7 @@ const previewColumnDrop = (
 
 // ─── Damage ─────────────────────────────────────────────────────────────────
 
-const damageBlock = (b: Block, amount: number, fromY?: number): void => {
+const damageBlock = (b: Block, amount: number, fromY?: number, fromX?: number): void => {
   // Armour is flat and floored at 1 damage, so a swarm of chip damage still
   // eventually eats a stone wall — armour buys time, never immunity. The roof's
   // divisor sits inside that same floor, for the same reason.
@@ -2613,10 +2721,22 @@ const damageBlock = (b: Block, amount: number, fromY?: number): void => {
   b.hp -= dealt
   b.flash = 1
   pushFx({ kind: 'blockHit', x: centreX(b), y: centreY(b), amount: dealt })
+  // The Gate is the one block whose hits decide the run, so it gets its own
+  // event — the renderer pulses it and the screen edge the blow came from.
+  // `fromX` is the attacker; without one (a fire, a bomb from above) the blow
+  // has no side.
+  if (b.typeId === GATE_ID) {
+    const gx = centreX(b)
+    const side = fromX === undefined || Math.abs(fromX - gx) < 0.25 ? 0 : fromX < gx ? -1 : 1
+    pushFx({ kind: 'gateHit', x: gx, y: centreY(b), side })
+    if (blowBy >= 0) lastGateBlowBy = blowBy
+  }
 
   if (b.hp > 0) return
 
   const wasGate = b.typeId === GATE_ID
+  // Name the unit before anything moves: the collapse below can kill it.
+  if (wasGate) noteKillingBlow(b)
   // One crate is enough: the streak asks for an UNTOUCHED wave, because a tower
   // that never loses a block is one the current curve cannot threaten.
   lostBlockThisWave = true
@@ -2690,8 +2810,8 @@ const damageEnemy = (e: Enemy, amount: number, fromX: number, source?: Projectil
  * the easiest to break silently, so they need to be exercisable without
  * routing damage through an enemy that has to walk there first.
  */
-export const damageBlockForTest = (b: Block, amount: number, fromY?: number): void => {
-  damageBlock(b, amount, fromY)
+export const damageBlockForTest = (b: Block, amount: number, fromY?: number, fromX?: number): void => {
+  damageBlock(b, amount, fromY, fromX)
 }
 
 /** Test seam: a blast at a world point, for checking that a merged block is
@@ -2897,6 +3017,7 @@ const dropOrdnance = (e: Enemy, def: EnemyDef, target: Block): void => {
   bomb.slowPct = 0
   bomb.slowMs = 0
   bomb.sourceUid = -1
+  bomb.byEnemy = e.uid
   bomb.hostile = true
   bomb.burnMs = run.burnMs
   bomb.burnDps = run.burnDps
@@ -2984,6 +3105,7 @@ const shootSiegeBolt = (e: Enemy, def: EnemyDef, target: Block): void => {
   bolt.slowPct = 0
   bolt.slowMs = 0
   bolt.sourceUid = -1
+  bolt.byEnemy = e.uid
   bolt.hostile = true
   bolt.burnMs = undefined
   bolt.burnDps = undefined
@@ -3024,6 +3146,7 @@ const lobSiegeStone = (e: Enemy, def: EnemyDef, target: Block): void => {
   stone.slowPct = 0
   stone.slowMs = 0
   stone.sourceUid = -1
+  stone.byEnemy = e.uid
   stone.hostile = true
   stone.burnMs = flaming ? SIEGE_BURN_MS : undefined
   stone.burnDps = flaming ? SIEGE_BURN_DPS : undefined
@@ -3142,7 +3265,9 @@ const stepEnemies = (dt: number): void => {
       e.cd -= dt
       if (e.cd <= 0) {
         e.cd = def.attackCooldownMs
-        damageBlock(target, def.damage, e.y)
+        blowBy = e.uid
+        damageBlock(target, def.damage, e.y, e.x)
+        blowBy = -1
         pushFx({
           kind: 'enemyAttack',
           x: e.x, y: e.y,
@@ -3194,9 +3319,13 @@ const stepEnemies = (dt: number): void => {
           shootSiegeBolt(e, def, target)
         } else if (splash > 0) {
           pushFx({ kind: 'explosion', x: centreX(target), y: centreY(target), radius: splash })
+          blowBy = e.uid
           damageBlocksInRadius(centreX(target), centreY(target), splash, def.damage)
+          blowBy = -1
         } else {
-          damageBlock(target, def.damage, e.y)
+          blowBy = e.uid
+          damageBlock(target, def.damage, e.y, e.x)
+          blowBy = -1
         }
         pushFx({
           kind: 'siegeShot',
@@ -3211,7 +3340,9 @@ const stepEnemies = (dt: number): void => {
       pushFx({ kind: 'explosion', x: e.x, y: e.y, radius: def.suicide.radius })
       // Bombers hit EVERY block in the blast, which is what makes them the
       // answer to a wall of cheap wood — one of them opens a real hole.
+      blowBy = e.uid
       damageBlocksInRadius(e.x, e.y, def.suicide.radius, def.suicide.damage)
+      blowBy = -1
       killEnemy(e)
       continue
     }
@@ -3219,7 +3350,9 @@ const stepEnemies = (dt: number): void => {
     e.cd -= dt
     if (e.cd <= 0) {
       e.cd = def.attackCooldownMs
-      damageBlock(target, def.damage, e.y)
+      blowBy = e.uid
+      damageBlock(target, def.damage, e.y, e.x)
+      blowBy = -1
       applyThorns(target, e)
       pushFx({
         kind: 'enemyAttack',
@@ -3323,7 +3456,7 @@ const damageBlocksInRadius = (x: number, y: number, radius: number, amount: numb
   }
   for (const b of hits) {
     if (!blocksByUid.has(b.uid)) continue // already destroyed by an earlier hit
-    damageBlock(b, amount, y)
+    damageBlock(b, amount, y, x)
   }
 }
 
@@ -3744,7 +3877,9 @@ const stepProjectiles = (dt: number): void => {
         kind: fire ? 'firebomb' : 'explosion',
         x: p.x, y: p.y, radius: Math.max(0.6, p.splash), kindOf: p.kind
       })
+      blowBy = p.byEnemy ?? -1
       damageBlocksInRadius(p.x, p.y, Math.max(0.5, p.splash), p.damage)
+      blowBy = -1
       if (p.burnMs && p.burnDps) {
         igniteBlocksInRadius(p.x, p.y, Math.max(0.5, p.splash), p.burnMs, p.burnDps)
       }
@@ -3832,7 +3967,8 @@ const stepDebris = (dt: number): void => {
       pushFx({
         kind: 'shatter',
         x: centreX(b), y: landRow + spanH(b) / 2,
-        palette: blockDef(b.typeId).palette
+        palette: blockDef(b.typeId).palette,
+        w: spanW(b), h: spanH(b)
       })
       continue
     }
@@ -4300,6 +4436,7 @@ export const debugSetWave = (n: number): void => {
   allies.length = 0
   allyCount.value = 0
   unreachableSiege.value = 0
+  clearStranded()
   clearRangeBuff()
   enemiesLeft.value = 0
   enemiesTotal.value = 0
@@ -4411,6 +4548,7 @@ const completeWave = (): void => {
   // family, which is the tech tree's job.
   clearRangeBuff()
   unreachableSiege.value = 0
+  clearStranded()
 
   // One materials pile where the mode folds stone into wood. The kill cuts were
   // folded when they were priced; this folds what the economy blocks made.
@@ -4593,6 +4731,9 @@ const clearWorld = (): void => {
   enemiesByUid.clear()
   projectiles.length = 0
   projectilePool.length = 0
+  blowBy = -1
+  lastGateBlowBy = -1
+  killingBlow.value = null
   debris.length = 0
   allies.length = 0
   allyCount.value = 0
@@ -4600,6 +4741,7 @@ const clearWorld = (): void => {
   waveClock = 0
   plan = { wave: 0, orders: [], total: 0, boss: false }
   unreachableSiege.value = 0
+  clearStranded()
   clearRangeBuff()
 }
 

@@ -80,7 +80,24 @@ export const M2_TECH_KEY = 'ts_m2_tech'
 export const M2_BEST_WAVE_KEY = 'ts_m2_best_wave'
 export const M2_ONBOARDED_KEY = 'ts_m2_onboarded'
 export const M2_TUTORIAL_KEY = 'ts_m2_tutorial'
+/**
+ * The phone board's drop has been performed at least once — any column, tap or
+ * drag. From then on the drop beat never runs again, and a stage that ends with
+ * the rest of the coach marks unfinished retires them for good instead of
+ * re-arming them on every run (see `GameSceneDrop`'s tutorial section).
+ */
+export const M2_DROP_LEARNED_KEY = 'ts_m2_drop_learned'
+/**
+ * The phone board's merge ladder and power demo have been shown. Its own flag,
+ * like the desktop's `MERGE_GUIDE_KEY`: a player whose coach marks retired
+ * before the merge arc still meets it on their first real weld.
+ */
+export const M2_MERGE_GUIDE_KEY = 'ts_m2_merge_guide'
 export const M2_TECH_INTRO_KEY = 'ts_m2_tech_intro'
+/** The Blueprints intro's FIRST card ("everything you buy here is permanent")
+ *  has been seen — shown on the first open from anywhere, not only after a
+ *  defeat. The full intro then resumes at its second card. */
+export const M2_TECH_INTRO_P1_KEY = 'ts_m2_tech_intro_p1'
 
 // ─── Retention systems ──────────────────────────────────────────────────────
 
@@ -115,6 +132,10 @@ export const M2_GIFTS_KEY = 'ts_m2_gifts'
 /** The one-time present for clearing wave 3 has been given. */
 export const FIRST_CLEAR_GIFT_KEY = 'ts_first_clear_gift'
 export const M2_FIRST_CLEAR_GIFT_KEY = 'ts_m2_first_clear_gift'
+/** A chest has paid out once on this board, so the free one is spent — every
+ *  chest after the player's first is a half-price buy (`giftPrice`). */
+export const FIRST_CHEST_KEY = 'ts_first_chest_gift'
+export const M2_FIRST_CHEST_KEY = 'ts_m2_first_chest_gift'
 
 // ─── Onboarding / one-shot UI nudges ────────────────────────────────────────
 
@@ -142,6 +163,8 @@ export const TIP_CURSOR_KEY = 'ts_tip_cursor'
  *  Separate from the spotlight: the spotlight says "there is a button", the
  *  intro says what the screen behind it is FOR. */
 export const TECH_INTRO_KEY = 'ts_tech_intro'
+/** The tech tree intro's FIRST card has been seen (see `M2_TECH_INTRO_P1_KEY`). */
+export const TECH_INTRO_P1_KEY = 'ts_tech_intro_p1'
 /** Which control hints the player has already followed (bitmask-ish string[]). */
 export const HINTS_SEEN_KEY = 'ts_hints_seen'
 /**

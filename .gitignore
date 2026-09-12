@@ -79,3 +79,7 @@ __screenshots__/
 
 # Art Desk: paintings it replaced (kept, never deleted; the slicer never reads them)
 /art-sheets/painted/replaced/
+
+# Generated preview / trailer clips (tools/preview-video). Build artifacts —
+# a lossless 1080p 30 s master runs to ~140 MB.
+/preview-videos/

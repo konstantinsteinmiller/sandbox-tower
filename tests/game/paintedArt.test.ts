@@ -174,18 +174,22 @@ const loadRenderer = async () => {
   return { images, painted, art, gameArt, drawn }
 }
 
-describe('a painted tier replaces the composite battery', () => {
-  it('composites a twin out of two copies of the plain painting when no tier is painted', async () => {
+describe('a painted tier replaces the drawn one', () => {
+  it('draws ONE copy of the plain painting at every merged tier when no tier is painted', async () => {
     const { images, art, gameArt, drawn } = await loadRenderer()
     gameArt.spriteFor('fixture', 'cannon')
     await flush()
     const plain = images.bySuffix('images/fixtures/cannon.webp')
     expect(plain).toBeDefined()
 
-    art.paintLiveFixture(recordingCtx(drawn), 'cannon', 40, 40, 40, { tier: 2 })
-    expect(drawn.filter((d) => d === plain)).toHaveLength(2)
+    // One weld is one block, so it carries one gun: grown, never doubled.
+    for (const tier of [2, 3, 6]) {
+      drawn.length = 0
+      art.paintLiveFixture(recordingCtx(drawn), 'cannon', 40, 40, 40, { tier, uid: tier })
+      expect(drawn.filter((d) => d === plain), `tier ${tier}`).toHaveLength(1)
+    }
     // Nothing went looking for a tier painting that is not listed.
-    expect(images.requested.some((u) => u.includes('-t2'))).toBe(false)
+    expect(images.requested.some((u) => u.includes('-t2') || u.includes('-t3'))).toBe(false)
   })
 
   it('draws the listed painting ONCE, and the plain one not at all', async () => {
@@ -219,14 +223,13 @@ describe('a painted tier replaces the composite battery', () => {
 })
 
 describe('the bench reference for a merged tier', () => {
-  it('lays the rear rank through one shaded layer, and a plain fixture through none', async () => {
+  it('draws one gun straight onto the sheet at every tier — no rear rank, no scratch layer', async () => {
     const { art } = await loadRenderer()
-    const once: unknown[] = []
-    art.paintFixtureBattery(recordingCtx(once), 'cannon', 256, 256, 256, 3)
-    expect(once).toHaveLength(1)
-    const none: unknown[] = []
-    art.paintFixtureBattery(recordingCtx(none), 'cannon', 256, 256, 256, 1)
-    expect(none).toHaveLength(0)
+    for (const tier of [1, 2, 3]) {
+      const blits: unknown[] = []
+      art.paintTierFixture(recordingCtx(blits), 'cannon', 256, 256, 256, tier)
+      expect(blits, `tier ${tier}`).toHaveLength(0)
+    }
   })
 })
 
@@ -251,14 +254,20 @@ describe('the art manifest carries the new sheets', () => {
     }
   })
 
-  it('writes a tier prompt that names the design, the tier colour and the 40 px test', async () => {
+  it('writes a tier prompt that names the design, ONE gun, its size, the tier colour and the 40 px test', async () => {
     const { WALKS, promptForWalk } = await import('@/game/artSheet')
     const { tierStyle } = await import('@/game/tierStyle')
     for (const tier of [2, 3]) {
-      const text = promptForWalk(WALKS.find((x) => x.id === `cannon-t${tier}`)!)
+      const walk = WALKS.find((x) => x.id === `cannon-t${tier}`)!
+      const text = promptForWalk(walk)
       expect(text).toContain('images/fixtures/cannon.webp')
       expect(text).toContain(tierStyle(tier).hex)
-      expect(text).toContain(tier === 2 ? 'TWO AT 40 PX' : 'THREE AT 40 PX')
+      expect(text).toContain('ONE HEAVIER GUN AT 40 PX')
+      expect(text).toContain('never two or three side by side')
+      expect(text).toContain('KEEP ITS SIZE AND ITS PLACE')
+      // The sheet's own name and blurb ask for one gun, not a pair or a rank.
+      expect(walk.name).not.toMatch(/twin|battery/i)
+      expect(text).not.toMatch(/\b(TWO|THREE) (cast-iron|war bows|squat|stubby|lightning|clusters)/)
       // It sits on the cannon's block, so it takes the cannon's contrast
       // clause — `cannon-t2` has no palette of its own.
       expect(text).toContain('IT MUST READ AGAINST THE BLOCK')

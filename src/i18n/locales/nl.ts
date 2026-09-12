@@ -15,6 +15,9 @@ export default {
     'free': 'Gratis',
     'tile': 'Gratis {name}, niveau {n}: tik erop en tik dan op het veld om het te plaatsen',
     'pair': 'Gratis paar {name}: tik erop en tik dan op het veld om het te plaatsen',
+    'tilePaid': '{name}, niveau {n}, voor de halve prijs: tik erop en tik dan op het veld om het te plaatsen',
+    'pairPaid': 'Paar {name} voor de halve prijs: tik erop en tik dan op het veld om het te plaatsen',
+    'discount': '-{n}%',
     'chest': 'Vliegende kist: tik om hem te openen',
     'firstClear': 'Golf {n} gehaald! Een cadeau voor jou'
   },

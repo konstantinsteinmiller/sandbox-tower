@@ -20,17 +20,19 @@ import { spriteFor } from './art'
 
 // ─── Merged-tier weapons ────────────────────────────────────────────────────
 //
-// A merged weapon is drawn as a twin (tier 2) or a triple battery (tier 3 and
-// up), built out of copies of the plain gun — see `paintTieredFixture`. That
-// works over painted art as well as drawn, but it is a composite: three pastes
-// of one painting are not a painting of three guns. These slots let a real one
-// replace it, one weapon and one tier at a time.
+// A merged weapon is ONE gun, drawn from the plain painting grown by the
+// weld's span and washed in the tier's colour — see `paintTieredFixture`. That
+// works over painted art as well as drawn, but it is the plain gun enlarged,
+// not a heavier gun. These slots let a painting of the heavier gun replace it,
+// one weapon and one tier at a time. A tier painting keeps the plain gun's
+// outline in its frame: the renderer does the growing.
 
-/** The weapons whose merged tiers can carry a painting of their own. */
+/** The weapons whose merged tiers can carry a painting of their own — and the
+ *  only fixtures a weld grows at all (`useTowerArt`'s `TIERED_WEAPONS`). */
 export const TIER_ART_WEAPONS = ['cannon', 'archer', 'bombard', 'mortar', 'tesla', 'frost'] as const
 
-/** The deepest tier with a painting of its own. Deeper welds reuse it: the
- *  procedural battery stops adding barrels at three, and so does the art. */
+/** The deepest tier with a painting of its own. Deeper welds reuse it, grown
+ *  further by their span and ringed in their own tier's colour. */
 export const TOP_PAINTED_TIER = 3
 
 /** The drop-in id for a weapon's merged tier: `cannon-t2`, `cannon-t3`. */
@@ -48,7 +50,7 @@ export const PAINTED_TIER_FIXTURES: ReadonlySet<string> = new Set<string>([])
 
 /**
  * The painting for a weapon's merged tier, when there is one and it has
- * decoded — or null, and the procedural battery is drawn instead. Tier 1 is
+ * decoded — or null, and the plain gun is grown and tinted instead. Tier 1 is
  * the plain fixture and never comes through here.
  */
 export const tierFixtureArt = (type: string, tier: number): HTMLImageElement | null => {

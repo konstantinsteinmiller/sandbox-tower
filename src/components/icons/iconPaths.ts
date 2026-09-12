@@ -291,6 +291,16 @@ export const ICON_PATHS: Record<GameIconName, string[]> = {
     'M2.85 12A2.95 2.95 0 1 1 8.75 12A2.95 2.95 0 1 1 2.85 12Z',
     'M15.25 18.8A2.95 2.95 0 1 1 21.15 18.8A2.95 2.95 0 1 1 15.25 18.8Z'
   ],
+  // Three-pointed crown: the peaks, a separate band under a punched gap (the
+  // gap is what makes it a crown and not a spiky blob at 16px), and a jewel on
+  // each point. All clockwise, so where the jewels overlap the peaks they merge.
+  'crown': [
+    'M4.1 16.6L3.3 8.4A0.9 0.9 0 0 1 4.8 7.7L8.4 11.1L11.2 6.1A0.9 0.9 0 0 1 12.8 6.1L15.6 11.1L19.2 7.7A0.9 0.9 0 0 1 20.7 8.4L19.9 16.6Z',
+    'M4.4 18.4A1 1 0 0 1 5.4 17.4L18.6 17.4A1 1 0 0 1 19.6 18.4L19.6 19.6A1 1 0 0 1 18.6 20.6L5.4 20.6A1 1 0 0 1 4.4 19.6Z',
+    'M2.4 7A1.6 1.6 0 1 1 5.6 7A1.6 1.6 0 1 1 2.4 7Z',
+    'M10.4 4.7A1.6 1.6 0 1 1 13.6 4.7A1.6 1.6 0 1 1 10.4 4.7Z',
+    'M18.4 7A1.6 1.6 0 1 1 21.6 7A1.6 1.6 0 1 1 18.4 7Z'
+  ],
 
   // ── Tools ───────────────────────────────────────────────────────────────
   //

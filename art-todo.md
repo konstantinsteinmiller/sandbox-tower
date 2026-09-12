@@ -355,23 +355,30 @@ fails until the list and `public/images/` agree, in both directions.
 **Merged weapons** — `/public/images/fixtures/<weapon>-t2.webp`, `-t3.webp` ·
 512 × 512 panel, the plain fixture's box · authored at rest, level, pointing
 RIGHT, exactly like the plain fixture (the game rotates, recoils and mirrors it
-the same way). Reference: `art-sheets/fixture-<weapon>-t<N>.png`, the drawn
-twin / triple battery. Attach the plain painting too — it is the design.
+the same way). Reference: `art-sheets/fixture-<weapon>-t<N>.png`, the weapon's
+drawn gun in the plain fixture's outline. Attach the plain painting too — it is
+the design.
 
-| # | Paths | Tier 2 — a TWIN, steel with green trim (`#46d86a`) | Tier 3 — a TRIPLE battery, blue trim (`#3fa2ff`), faint glow inside the outline | Priority |
+**ONE gun per tier, never a pair or a rank** — a weld makes one block, so it
+carries one gun (the old twin/triple batteries read as "two cannons in one
+box"). And **keep the plain gun's size and place in the frame**: the game grows
+a merged gun by the weld's span itself, so a painting that fills more of the
+panel is grown twice. The extra weight goes inside the outline.
+
+| # | Paths | Tier 2 — HEAVIER, steel with green trim (`#46d86a`) | Tier 3 — heavier again, blue trim (`#3fa2ff`), faint glow inside the outline | Priority |
 |---|---|---|---|---|
-| I1 | `cannon-t2`, `cannon-t3` | two barrels, one stacked above and behind | three stacked, the front one in the middle | P1 |
-| I2 | `archer-t2`, `archer-t3` | two drawn bows, the second behind and higher | a stepped rank of three | P1 |
-| I3 | `bombard-t2`, `bombard-t3` | two hooped bombards side by side | three, the front one in the middle | P2 |
-| I4 | `tesla-t2`, `tesla-t3` | two coils, the rear one shorter | three, the middle tallest | P2 |
-| I5 | `mortar-t2`, `mortar-t3` | two tubes on one bed | three tubes on one bed | P3 |
-| I6 | `frost-t2`, `frost-t3` | two crystal clusters | three, the middle tallest | P3 |
+| I1 | `cannon-t2`, `cannon-t3` | thicker barrel, a third ring, bigger breech | the thickest tube, banded end to end, flared muzzle | P1 |
+| I2 | `archer-t2`, `archer-t3` | deeper limbs, horn tips, doubled string | massive laminated limbs bound in metal, a heavy bolt | P1 |
+| I3 | `bombard-t2`, `bombard-t3` | thicker hoops, a wider mouth | doubled hoops at the mouth, the widest bore | P2 |
+| I4 | `tesla-t2`, `tesla-t3` | thicker post, more windings, a bigger ball | dense windings, stacked insulators, a corona ring | P2 |
+| I5 | `mortar-t2`, `mortar-t3` | wider tube, an extra band, a heavier lip | the widest bore, bands end to end | P3 |
+| I6 | `frost-t2`, `frost-t3` | more and longer crystals, a heavier socket | tall faceted spires with a crown of shards | P3 |
 
 Cannon and archer first: they are the two weapons every run starts with, so
 theirs are the merged guns most players will ever see. Tier 4 and deeper reuse
 the tier-3 painting. With a painting in place the game draws it **instead of**
-the composited copies — no rear-rank shade, no colour wash — and still lays a
-lighter tier rim and the tier-3 glow on top, so neither belongs in the paint.
+the grown plain gun — no colour wash — and still lays a lighter tier rim and
+the tier-3 glow on top, so neither belongs in the paint.
 
 **The flying chest's wing** — `/public/images/props/chest-wing.webp` · I7 · P1
 once the flying chest ships.

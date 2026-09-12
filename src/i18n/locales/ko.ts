@@ -15,6 +15,9 @@ export default {
     'free': '무료',
     'tile': '무료 {name}, {n}단계: 탭한 다음 보드를 탭해서 놓으세요',
     'pair': '무료 {name} 한 쌍: 탭한 다음 보드를 탭해서 놓으세요',
+    'tilePaid': '{name}, {n}단계, 반값: 탭한 다음 보드를 탭해서 놓으세요',
+    'pairPaid': '{name} 한 쌍 반값: 탭한 다음 보드를 탭해서 놓으세요',
+    'discount': '-{n}%',
     'chest': '날아다니는 상자: 탭해서 열기',
     'firstClear': '{n}웨이브 클리어! 선물이에요'
   },

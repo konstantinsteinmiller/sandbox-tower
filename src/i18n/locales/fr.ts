@@ -15,6 +15,9 @@ export default {
     'free': 'Gratuit',
     'tile': '{name} gratuit, niveau {n} : touche-le, puis touche le plateau pour le placer',
     'pair': 'Paire de {name} gratuite : touche-la, puis touche le plateau pour la placer',
+    'tilePaid': '{name}, niveau {n}, à moitié prix : touche-le, puis touche le plateau pour le placer',
+    'pairPaid': 'Paire de {name} à moitié prix : touche-la, puis touche le plateau pour la placer',
+    'discount': '-{n} %',
     'chest': 'Coffre volant : touche-le pour l’ouvrir',
     'firstClear': 'Vague {n} terminée ! Un cadeau pour toi'
   },

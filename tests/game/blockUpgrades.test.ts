@@ -178,3 +178,38 @@ describe('persistence', () => {
     expect(at(g, 1, 0)!.level).toBe(0)
   })
 })
+
+// ─── The Gate's rank, as the tutorial's automatic hand buys it ──────────────
+//
+// The desktop tutorial's `rankGate` beat tops the purse up to one Gate rank
+// (`seedTutorialRankGold`) and has the hand press Upgrade on it. That only
+// works if the Gate is a block the rank system treats like any other — which
+// is exactly what nobody would otherwise assume, and what the beat teaches.
+describe('the tutorial buys the Gate one rank', () => {
+  it('funds exactly one Gate rank and leaves the purse where it started', async () => {
+    const g = await loadGame()
+    g.runCoins.value = 0
+    const gate = at(g, 0, 0)!
+    expect(gate.typeId).toBe('gate')
+    const hpBefore = gate.maxHp
+
+    const price = g.seedTutorialRankGold(0, 0)
+    expect(price).toBeGreaterThan(0)
+    expect(g.runCoins.value).toBe(price)
+
+    expect(g.upgradeBlock(0, 0)).toBe(true)
+    const ranked = at(g, 0, 0)!
+    expect(ranked.level).toBe(1)
+    expect(ranked.maxHp).toBeGreaterThan(hpBefore)
+    // Paid for, not a stipend: back to what the player had.
+    expect(g.runCoins.value).toBe(0)
+  })
+
+  it('does not top the purse up past the price for a player who can already pay', async () => {
+    const g = await loadGame()
+    const price = blockUpgradeCost('gate', 0)
+    g.runCoins.value = price + 7
+    expect(g.seedTutorialRankGold(0, 0)).toBe(price)
+    expect(g.runCoins.value).toBe(price + 7)
+  })
+})

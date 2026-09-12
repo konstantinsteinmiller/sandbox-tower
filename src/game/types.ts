@@ -502,6 +502,12 @@ export interface Projectile {
   /** Hostile rounds only: burn to apply to whatever the blast catches. */
   burnMs?: number
   burnDps?: number
+  /**
+   * Hostile rounds only: uid of the enemy that threw it, -1 otherwise. Read
+   * when the round lands on the Gate — if that blow ends the run, the thrower
+   * is the one the defeat's spotlight crowns (see `killingBlow`).
+   */
+  byEnemy?: number
   /** Trail sample ring for the renderer (x,y pairs). */
   trail: number[]
 }
@@ -569,7 +575,9 @@ export type TechEffect =
   | { kind: 'range'; pct: number }
   | { kind: 'splash'; pct: number }
   | { kind: 'chain'; add: number }
-  | { kind: 'blockHp'; pct: number }
+  /** `firstPct`, when set, is what the FIRST rank grants on its own; every rank
+   *  after it adds `pct` as usual. See `effectTotal` in `@/game/tech`. */
+  | { kind: 'blockHp'; pct: number; firstPct?: number }
   | { kind: 'armor'; add: number }
   | { kind: 'gateHp'; pct: number }
   | { kind: 'startWood'; add: number }
@@ -599,6 +607,9 @@ export interface TechNode {
   maxLevel: number
   costBase: number
   costGrowth: number
+  /** Price of rank 1, overriding the half-price rule in `techCost`. Later
+   *  ranks still come off `costBase` × `costGrowth`. */
+  firstCost?: number
   /** Node ids that must have at least level 1 before this one can be bought. */
   requires: string[]
   effect: TechEffect

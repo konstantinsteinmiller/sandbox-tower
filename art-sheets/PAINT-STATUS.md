@@ -120,18 +120,18 @@ after painting or slicing anything.
 | ? | **coffer — Open coffer** | `PROMPTS-WALKS.md` | `fixture-coffer.png` (rev `a13897c06d3b`) | `fixture-coffer.jpg` painted; no receipt yet — `pnpm slice-sheets --dry` to check it |
 | ? | **repair — Repair crane** | `PROMPTS-WALKS.md` | `fixture-repair.png` (rev `f2b1d90601b1`) | `fixture-repair.jpg` painted; no receipt yet — `pnpm slice-sheets --dry` to check it |
 | ? | **spikes — Iron spikes** | `PROMPTS-WALKS.md` | `fixture-spikes.png` (rev `ee3dc167776e`) | `fixture-spikes.jpg` painted; no receipt yet — `pnpm slice-sheets --dry` to check it |
-| · | **cannon-t2 — Cannon — tier 2 twin** | `PROMPTS-WALKS.md` | `fixture-cannon-t2.png` — *missing, re-export from `/art-sheets`* | not painted yet |
-| · | **cannon-t3 — Cannon — tier 3 battery** | `PROMPTS-WALKS.md` | `fixture-cannon-t3.png` — *missing, re-export from `/art-sheets`* | not painted yet |
-| · | **archer-t2 — Archery bow — tier 2 twin** | `PROMPTS-WALKS.md` | `fixture-archer-t2.png` — *missing, re-export from `/art-sheets`* | not painted yet |
-| · | **archer-t3 — Archery bow — tier 3 battery** | `PROMPTS-WALKS.md` | `fixture-archer-t3.png` — *missing, re-export from `/art-sheets`* | not painted yet |
-| · | **bombard-t2 — Bombard — tier 2 twin** | `PROMPTS-WALKS.md` | `fixture-bombard-t2.png` — *missing, re-export from `/art-sheets`* | not painted yet |
-| · | **bombard-t3 — Bombard — tier 3 battery** | `PROMPTS-WALKS.md` | `fixture-bombard-t3.png` — *missing, re-export from `/art-sheets`* | not painted yet |
-| · | **mortar-t2 — Mortar — tier 2 twin** | `PROMPTS-WALKS.md` | `fixture-mortar-t2.png` — *missing, re-export from `/art-sheets`* | not painted yet |
-| · | **mortar-t3 — Mortar — tier 3 battery** | `PROMPTS-WALKS.md` | `fixture-mortar-t3.png` — *missing, re-export from `/art-sheets`* | not painted yet |
-| · | **tesla-t2 — Arc coil — tier 2 twin** | `PROMPTS-WALKS.md` | `fixture-tesla-t2.png` — *missing, re-export from `/art-sheets`* | not painted yet |
-| · | **tesla-t3 — Arc coil — tier 3 battery** | `PROMPTS-WALKS.md` | `fixture-tesla-t3.png` — *missing, re-export from `/art-sheets`* | not painted yet |
-| · | **frost-t2 — Frost emitter — tier 2 twin** | `PROMPTS-WALKS.md` | `fixture-frost-t2.png` — *missing, re-export from `/art-sheets`* | not painted yet |
-| · | **frost-t3 — Frost emitter — tier 3 battery** | `PROMPTS-WALKS.md` | `fixture-frost-t3.png` — *missing, re-export from `/art-sheets`* | not painted yet |
+| · | **cannon-t2 — Cannon — tier 2** | `PROMPTS-WALKS.md` | `fixture-cannon-t2.png` — *missing, re-export from `/art-sheets`* | not painted yet |
+| · | **cannon-t3 — Cannon — tier 3** | `PROMPTS-WALKS.md` | `fixture-cannon-t3.png` — *missing, re-export from `/art-sheets`* | not painted yet |
+| · | **archer-t2 — Archery bow — tier 2** | `PROMPTS-WALKS.md` | `fixture-archer-t2.png` — *missing, re-export from `/art-sheets`* | not painted yet |
+| · | **archer-t3 — Archery bow — tier 3** | `PROMPTS-WALKS.md` | `fixture-archer-t3.png` — *missing, re-export from `/art-sheets`* | not painted yet |
+| · | **bombard-t2 — Bombard — tier 2** | `PROMPTS-WALKS.md` | `fixture-bombard-t2.png` — *missing, re-export from `/art-sheets`* | not painted yet |
+| · | **bombard-t3 — Bombard — tier 3** | `PROMPTS-WALKS.md` | `fixture-bombard-t3.png` — *missing, re-export from `/art-sheets`* | not painted yet |
+| · | **mortar-t2 — Mortar — tier 2** | `PROMPTS-WALKS.md` | `fixture-mortar-t2.png` — *missing, re-export from `/art-sheets`* | not painted yet |
+| · | **mortar-t3 — Mortar — tier 3** | `PROMPTS-WALKS.md` | `fixture-mortar-t3.png` — *missing, re-export from `/art-sheets`* | not painted yet |
+| · | **tesla-t2 — Arc coil — tier 2** | `PROMPTS-WALKS.md` | `fixture-tesla-t2.png` — *missing, re-export from `/art-sheets`* | not painted yet |
+| · | **tesla-t3 — Arc coil — tier 3** | `PROMPTS-WALKS.md` | `fixture-tesla-t3.png` — *missing, re-export from `/art-sheets`* | not painted yet |
+| · | **frost-t2 — Frost emitter — tier 2** | `PROMPTS-WALKS.md` | `fixture-frost-t2.png` — *missing, re-export from `/art-sheets`* | not painted yet |
+| · | **frost-t3 — Frost emitter — tier 3** | `PROMPTS-WALKS.md` | `fixture-frost-t3.png` — *missing, re-export from `/art-sheets`* | not painted yet |
 
 ## What the marks mean
 

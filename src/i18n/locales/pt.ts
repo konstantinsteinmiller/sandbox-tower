@@ -15,6 +15,9 @@ export default {
     'free': 'Grátis',
     'tile': '{name} grátis, nível {n}: toque nele e depois no tabuleiro para colocá-lo',
     'pair': 'Par de {name} grátis: toque nele e depois no tabuleiro para colocá-lo',
+    'tilePaid': '{name}, nível {n}, pela metade do preço: toque nele e depois no tabuleiro para colocá-lo',
+    'pairPaid': 'Par de {name} pela metade do preço: toque nele e depois no tabuleiro para colocá-lo',
+    'discount': '-{n}%',
     'chest': 'Baú voador: toque para abri-lo',
     'firstClear': 'Onda {n} vencida! Um presente para você'
   },
