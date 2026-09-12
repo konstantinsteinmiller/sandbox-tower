@@ -7,7 +7,10 @@ import { isGamePaused } from '@/use/useGamePause'
 import { isAnyModalOpen } from '@/use/useModalState'
 import useSounds from '@/use/useSound'
 import { flyingChestRequests } from '@/use/useTowerGame'
-import { gifts, grantChestGift, rollChestGift, MAX_GIFTS, type Gift } from '@/use/useGifts'
+import {
+  gifts, grantChestGift, rollChestGift, chestDelivered,
+  CHEST_COIN_PRIZE, CHEST_GIFTS, MAX_GIFTS, type Gift
+} from '@/use/useGifts'
 
 /**
  * ─── The flying chest ───────────────────────────────────────────────────────
@@ -19,7 +22,7 @@ import { gifts, grantChestGift, rollChestGift, MAX_GIFTS, type Gift } from '@/us
  * Ported from Merge Idle War's flying chest, where it is the most-tapped thing
  * in the game, with two changes for a tower defence:
  *
- *   · ONE EARLY, THEN ONE EVERY 45 SECONDS. The first is five seconds after
+ *   · ONE EARLY, THEN ONE EVERY `everyMs`. The first is five seconds after
  *     the chest becomes possible at all: its job is to tell a new player, while
  *     they are still deciding whether to stay, that there are guns here they
  *     have not met. After that the timer paces them.
@@ -28,8 +31,13 @@ import { gifts, grantChestGift, rollChestGift, MAX_GIFTS, type Gift } from '@/us
  *     first session met three or four chests inside the first minute and the
  *     tower was built out of free welds before the deck had dealt twice. The
  *     timer also makes the rhythm the same on a fast wave and a slow one.
- *   · The clock is UNPAUSED time only, so the gap is 45 seconds of play rather
- *     than 45 seconds of standing in a menu.
+ *
+ *     The gap is PER BOARD (see `everyMs`): 45 s on the phone, two minutes on
+ *     the desktop, where the same rate read as constant traffic across a sky
+ *     that already carries the flyers, the bombers and every shot arcing over
+ *     the tower.
+ *   · The clock is UNPAUSED time only, so the gap is that much time OF PLAY
+ *     rather than that much time standing in a menu.
  *
  * The clock only runs while the game does. Ads, hidden tabs, modals, the result
  * screen, the rotate prompt and the tutorial's cards all hold it (`paused` plus
@@ -57,12 +65,29 @@ interface Props {
   /** The wave in progress. Read only to notice a NEW RUN (the number going
    *  backwards), which owes the player an early chest again. */
   wave: number
+  /**
+   * Unpaused milliseconds between one chest leaving the sky and the next
+   * entering it. Defaults to the phone board's cadence.
+   *
+   * Per board, because the two boards spend a minute very differently. The
+   * phone's wave is short and its screen is mostly sky, so a chest every 45 s
+   * is punctuation; the desktop's wave is long and its sky is full of flyers,
+   * bombers and arcs, and at the same rate the chest read as constant traffic
+   * — the desktop passes two minutes.
+   */
+  everyMs?: number
 }
 
-const props = withDefaults(defineProps<Props>(), { paused: false })
+const props = withDefaults(defineProps<Props>(), { paused: false, everyMs: 45_000 })
 
 const emit = defineEmits<{
   (e: 'opened', gift: Gift): void
+  /**
+   * The chest has introduced everything it carries this run and paid coins
+   * instead. The scene banks them and bursts them out of `el` toward its coin
+   * badge — the chest cannot reach either from here.
+   */
+  (e: 'coins', payload: { amount: number; el: HTMLElement | null }): void
 }>()
 
 const { t } = useI18n()
@@ -73,8 +98,6 @@ const { playSound } = useSounds()
 const FLIGHT_MS = 9_000
 /** How long after the chest becomes possible the FIRST one takes off. */
 const FIRST_MS = 5_000
-/** And how long after one leaves the sky the next one enters it. */
-const EVERY_MS = 45_000
 /** A full gift tray grounds the chest; it tries again this often. */
 const RETRY_MS = 10_000
 /** The open animation, before the chest is gone. */
@@ -166,7 +189,7 @@ const land = (): void => {
   opening.value = false
   progress.value = 0
   stopLoop()
-  if (wasFlying && props.ready && countdown < 0) countdown = EVERY_MS
+  if (wasFlying && props.ready && countdown < 0) countdown = props.everyMs
 }
 
 /**
@@ -175,7 +198,10 @@ const land = (): void => {
  */
 const launch = (force = false): boolean => {
   if (flying.value) return false
-  if (!force && gifts.value.length >= MAX_GIFTS) return false
+  // A full tray grounds a chest that is carrying a PIECE — the prize would
+  // have nowhere to go. Once the run's inventory is spent the prize is coins,
+  // which always have somewhere to go, so it flies regardless.
+  if (!force && gifts.value.length >= MAX_GIFTS && chestDelivered().size < CHEST_GIFTS.length) return false
   lane.value = 0.1 + Math.random() * 0.3
   dir.value = Math.random() < 0.5 ? 1 : -1
   progress.value = 0
@@ -187,10 +213,24 @@ const launch = (force = false): boolean => {
   return true
 }
 
-const onOpen = (): void => {
+const onOpen = (event: PointerEvent): void => {
   if (!flying.value || opening.value) return
   opening.value = true
   const gift = rollChestGift()
+  if (gift === null) {
+    // Everything it carries has been introduced this run, so there is nothing
+    // left to teach and the chest stops handing out guns: it pays coins.
+    // Opening one still has to be WORTH the tap, and a prize that keeps
+    // arriving after the lesson is over is how a tower ends up built out of
+    // presents (see `rollChestGift`).
+    playSound('reward-continue', 0.06)
+    emit('coins', {
+      amount: CHEST_COIN_PRIZE,
+      el: (event.currentTarget as HTMLElement | null) ?? null
+    })
+    window.setTimeout(land, OPEN_MS)
+    return
+  }
   // Free the first time a chest is ever opened on this board, half price
   // after that (`grantChestGift`).
   if (grantChestGift(gift)) {
@@ -214,7 +254,7 @@ const book = (ms: number): void => {
 // result screen has closed onto a live run. The first one of a run comes
 // early; after that the timer takes over where it left off.
 watch(() => props.ready, (ready) => {
-  if (ready) { book(flownThisRun ? EVERY_MS : FIRST_MS); return }
+  if (ready) { book(flownThisRun ? props.everyMs : FIRST_MS); return }
   countdown = -1
   if (flying.value && !opening.value) land()
 }, { immediate: true })
@@ -284,7 +324,7 @@ defineExpose({ launch, onOpen })
       :class="{ 'is-open': opening, 'is-held': gated }"
       :style="flightStyle"
       :aria-label="t('gift.chest')"
-      @pointerdown.stop.prevent="onOpen"
+      @pointerdown.stop.prevent="onOpen($event)"
     )
       span.fchest__glow
       //- Wings behind the chest, each flapping about its own shoulder. The left

@@ -4863,10 +4863,12 @@ export const spawnGiftBlocks = (
     for (let dy = 0; dy < h; dy++) if (blocks.has(key(c + dx, r + dy))) return false
   }
   const palette = blockDef(typeId).palette
-  if (fused) {
+  // A WELD arrived, so the merge burst announces it. A tier-1 gift is one
+  // ordinary cell — the chest's prize since it stopped paying welds — and gets
+  // the placement puff instead: a burst saying "×1" would be announcing
+  // nothing, in the colour of a tier the piece does not have.
+  if (fused && tier > 1) {
     const b = spawnBlock(typeId, c, r, false, undefined, false, 0, Math.max(1, tier), w, h)
-    // The merge burst, not the placement puff: the thing that arrived is a
-    // weld, and the burst is what says "×3" in the tier's colour.
     pushFx({ kind: 'merge', x: centreX(b), y: centreY(b), tier: tierOf(b.tier), palette })
     // A gift set down beside its twin fuses like anything else would.
     mergeAt(b.c, b.r)
@@ -4875,6 +4877,9 @@ export const spawnGiftBlocks = (
       for (let dy = 0; dy < h; dy++) spawnBlock(typeId, c + dx, r + dy)
     }
     pushFx({ kind: 'place', x: c + (w - 1) / 2, y: r + h / 2, palette })
+    // Set down beside its twin it still fuses, exactly as a bought piece
+    // does — the gift is a piece, not an exception to the board's rules.
+    if (fused) mergeAt(c, r)
   }
   blocksPlacedThisRun += w * h
   syncTowerStats()

@@ -18,9 +18,6 @@ import {
 } from '@/use/useGifts'
 import { denyPurchase } from '@/use/useResourceBlink'
 import { requestRejectFlash } from '@/use/useWorldCues'
-import IconGold from '@/components/icons/IconGold.vue'
-import IconStone from '@/components/icons/IconStone.vue'
-import IconWood from '@/components/icons/IconWood.vue'
 
 /**
  * ─── The gift tile ──────────────────────────────────────────────────────────
@@ -91,6 +88,13 @@ const isPair = computed(() => !!gift.value && !giftFuses(gift.value.typeId))
  * out of the pile when it lands is a piece the player did not agree to buy.
  */
 const price = computed(() => (gift.value ? giftPrice(gift.value) : null))
+
+/**
+ * Which piles cannot cover it — so the price says WHICH resource is missing,
+ * the way every other card in the hand does. A red number is the difference
+ * between "expensive" and "you cannot buy this yet".
+ */
+const short = computed(() => new Set(gift.value ? missingForGift(gift.value) : []))
 const isFree = computed(() => gift.value?.free === true)
 const offPct = computed(() => Math.round((1 - CHEST_GIFT_DISCOUNT) * 100))
 
@@ -472,14 +476,19 @@ defineExpose({ arm, disarm, placeAt, armed })
       //- flagged in the corner so the bill reads as the bargain it is.
       span.gift__free(v-if="isFree || !price") {{ t('gift.free') }}
       span.gift__free.is-price(v-else)
-        span.gift__cost(v-if="price.wood > 0")
-          IconWood.gift__res
+        //- Coloured DOTS, not glyphs — the same chips every other tile in the
+        //- hand uses, and for the same reason: at this size a drawn cord of
+        //- logs is mush where a flat colour reads instantly (BuildTray's
+        //- `__dot`). The full glyphs are in the hover panel. Dots also keep
+        //- the row to ONE line, so the price never covers the prize.
+        span.gift__cost(v-if="price.wood > 0" :class="{ 'is-short': short.has('wood') }")
+          i.gift__dot.is-wood
           | {{ price.wood }}
-        span.gift__cost(v-if="price.stone > 0")
-          IconStone.gift__res
+        span.gift__cost(v-if="price.stone > 0" :class="{ 'is-short': short.has('stone') }")
+          i.gift__dot.is-stone
           | {{ price.stone }}
-        span.gift__cost(v-if="price.coins > 0")
-          IconGold.gift__res
+        span.gift__cost(v-if="price.coins > 0" :class="{ 'is-short': short.has('coins') }")
+          i.gift__dot.is-gold
           | {{ price.coins }}
       span.gift__off(v-if="!isFree") {{ t('gift.discount', { n: offPct }) }}
       span.gift__count(v-if="count > 1") {{ count }}
@@ -487,7 +496,8 @@ defineExpose({ arm, disarm, placeAt, armed })
 
 <style scoped lang="sass">
 // The bottom padding keeps the FREE ribbon, which hangs below the tile, inside
-// the row it sits in rather than over the hand beneath it.
+// the row it sits in rather than over the hand beneath it. The PRICE needs no
+// room down here — it sits inside the tile (`.gift__free.is-price`).
 .gift
   position: relative
   display: flex
@@ -551,23 +561,71 @@ defineExpose({ arm, disarm, placeAt, armed })
   text-transform: uppercase
   white-space: nowrap
 
-// The price wears the same ribbon the FREE tag does, so the tile's shape does
-// not change when a chest stops giving pieces away.
+// ─── The price ──────────────────────────────────────────────────────────────
+//
+// The PRICE does not wear the FREE tag's ribbon. It used to, and that was two
+// faults at once, both reported from play (2026-09-12):
+//
+//  · gold with near-black 10 px type, carrying full-colour resource icons —
+//    the stone glyph on gold is grey on yellow, and the digits between them
+//    read as mud at tile size;
+//  · a gold pill sized to the WORD "free" cannot hold three resources and a
+//    number each. It ran past the tile, and the tray's scroller (`overflow-x`)
+//    cut it off mid-number: "…6" and "…4" with no way to tell what was behind
+//    the crop.
+//
+// So a price now reads exactly like every other price on the row — light type
+// on the dark card, wrapping inside the tile's own width. The FREE tag keeps
+// the gold ribbon, because one short word is what that shape is for.
 .gift__free.is-price
   display: flex
+  flex-wrap: wrap
   align-items: center
-  gap: 0.3em
-  padding: 0 5px
+  justify-content: center
+  // INSIDE the tile, across its bottom edge — not hanging under it like the
+  // FREE tag. A price is up to three resources and wraps to two lines, and
+  // below the tile there is nowhere for that to go: in the hand the gift has
+  // no room of its own (`.gift.is-tray`) and the row's scroller clips both
+  // axes, which is what cut the numbers in half. Anchored on all three sides,
+  // so it spans the thumbnail and grows UPWARD as it wraps.
+  left: 3px
+  right: 3px
+  bottom: 3px
+  translate: none
+  gap: 0 0.4em
+  padding: 1px 2px
+  border: none
+  // Square where it meets the tile's inner corners.
+  border-radius: 0 0 8px 8px
+  background: rgba(8, 14, 28, 0.88)
+  color: #dbe6ff
+  text-transform: none
+  letter-spacing: 0
 
 .gift__cost
   display: inline-flex
   align-items: center
-  gap: 0.1em
+  gap: 0.2em
   font-variant-numeric: tabular-nums
+  text-shadow: 1px 1px 0 #000
 
-.gift__res
-  width: 1.1em
-  height: 1.1em
+  &.is-short
+    color: #ff8f8f
+
+// The same dots, in the same colours, as the rest of the hand.
+.gift__dot
+  display: inline-block
+  width: 0.5em
+  height: 0.5em
+  border-radius: 999px
+
+  &.is-wood
+    background-color: #a9682f
+  &.is-stone
+    background-color: #8b939d
+  &.is-gold
+    background-color: #ffd93c
+
 
 // The discount, top-left — the corner the count badge does not use.
 .gift__off

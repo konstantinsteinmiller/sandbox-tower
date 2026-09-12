@@ -58,6 +58,17 @@ interface Props {
    */
   giftFirst?: boolean
   /**
+   * The piece waiting in the gift slot, so the panel can describe it like any
+   * other card.
+   *
+   * The gift is rendered through the `gift` SLOT — the tray never sees the
+   * queue — so the one card on the row that could not explain itself was the
+   * unfamiliar one: a chest prize is usually a gun the player has not unlocked
+   * and cannot look up anywhere else, and hovering it did nothing while every
+   * neighbour answered. Reported from play, 2026-09-12.
+   */
+  giftPiece?: { typeId: string; tier: number; wood: number; stone: number; coins: number; free: boolean } | null
+  /**
    * Bumped by the scene the moment the reinforced hand is actually PAID for.
    *
    * The purchase had no moment of its own: on the coin-priced builds the first
@@ -75,6 +86,7 @@ const props = withDefaults(defineProps<Props>(), {
   hideReroll: false,
   nudge: false,
   giftFirst: false,
+  giftPiece: null,
   paidAt: 0
 })
 
@@ -228,6 +240,7 @@ const entries = computed<Entry[]>(() =>
       weaponBoost:
         props.enhanced[slot] === true
         && shapeBlockTypes(shapeId).some((id) => !!blockDef(id).weapon),
+      free: false,
       boostChip: props.enhanced[slot] !== true
         ? null
         : shapeBlockTypes(shapeId).some((id) => !!blockDef(id).weapon)
@@ -266,13 +279,14 @@ const onReroll = (slot: number): void => {
 // requirement and what the piece is made of, because the thumbnail alone can't
 // say "this costs 45 wood AND 45 stone".
 
-const infoSlot = ref<number | null>(null)
+/** An offer index, or `'gift'` for the prize standing in the first slot. */
+const infoSlot = ref<number | 'gift' | null>(null)
 let pressTimer: ReturnType<typeof setTimeout> | null = null
 
-const openInfo = (slot: number): void => { infoSlot.value = slot }
+const openInfo = (slot: number | 'gift'): void => { infoSlot.value = slot }
 const closeInfo = (): void => { infoSlot.value = null }
 
-const onPressStart = (slot: number): void => {
+const onPressStart = (slot: number | 'gift'): void => {
   if (pressTimer) clearTimeout(pressTimer)
   pressTimer = setTimeout(() => { pressTimer = null; openInfo(slot) }, 380)
 }
@@ -280,7 +294,48 @@ const onPressEnd = (): void => {
   if (pressTimer) { clearTimeout(pressTimer); pressTimer = null }
 }
 
+/**
+ * The gift as a panel entry — the same shape an offer makes, so one panel
+ * describes both.
+ *
+ * A gift is a BLOCK at a tier rather than a dealt shape, so its footprint and
+ * parts are derived from the tier (one cell, or the square a weld makes) and
+ * its price comes from the queue rather than from the deck.
+ */
+const giftEntry = computed(() => {
+  const g = props.giftPiece
+  if (!g) return null
+  const side = g.tier >= 3 ? 2 : 1
+  const d = blockDef(g.typeId)
+  return {
+    slot: -1,
+    shapeId: '',
+    name: t(`blocks.names.${g.typeId}`),
+    wood: g.wood,
+    stone: g.stone,
+    coins: g.coins,
+    affordable: props.wood >= g.wood && props.stone >= g.stone && props.coins >= g.coins,
+    roof: false,
+    enhanced: false,
+    weaponBoost: false,
+    boostChip: null,
+    free: g.free,
+    footprint: `${side * (g.tier === 2 ? 2 : 1)}×${side}`,
+    parts: [{
+      id: g.typeId,
+      name: t(`blocks.names.${g.typeId}`),
+      desc: t(`blocks.descriptions.${g.typeId}`),
+      count: 2 ** Math.max(0, Math.min(2, g.tier - 1)),
+      hp: Math.round(d.hp),
+      boostedHp: false,
+      dmg: d.weapon ? Math.round(d.weapon.damage) : 0,
+      boostedDmg: false
+    }]
+  }
+})
+
 const infoEntry = computed(() => {
+  if (infoSlot.value === 'gift') return giftEntry.value
   if (infoSlot.value == null) return null
   const e = entries.value[infoSlot.value]
   if (!e) return null
@@ -339,6 +394,9 @@ const infoEntry = computed(() => {
                 | {{ part.dmg }} {{ t('blocks.stats.dmg') }}
             span.build-tray__part-desc(v-if="part.desc") {{ part.desc }}
         div.build-tray__info-cost
+          //- A chest's first prize on a board costs nothing; every one after it
+          //- is half price. Said in the panel, not only on the tile's ribbon.
+          span.build-tray__cost-free(v-if="infoEntry.free") {{ t('gift.free') }}
           span.build-tray__cost-item(v-if="infoEntry.wood > 0" :class="{ 'is-short': wood < infoEntry.wood }")
             IconWood.build-tray__cost-icon
             | {{ infoEntry.wood }} {{ t('resources.wood') }}
@@ -358,7 +416,15 @@ const infoEntry = computed(() => {
       //- slot — so it needs to address that tile and no other.
       //- The gift, standing in slot 0 while it waits — at this tray's own tile
       //- size, so the hand stays one row of equal tiles.
-      div.build-tray__slot(v-if="giftFirst" data-slot="gift")
+      div.build-tray__slot(
+        v-if="giftFirst"
+        data-slot="gift"
+        @pointerenter="openInfo('gift')"
+        @pointerleave="closeInfo"
+        @pointerdown="onPressStart('gift')"
+        @pointerup="onPressEnd"
+        @pointercancel="onPressEnd"
+      )
         slot(name="gift" :size="tileSize")
       div.build-tray__slot(
         v-for="e in entries"
@@ -767,6 +833,15 @@ const infoEntry = computed(() => {
   max-width: var(--tile-w, 2.6rem)
   gap: 0.1em 0.18em
   line-height: 1
+
+.build-tray__cost-free
+  padding: 0 0.5em
+  border-radius: 999px
+  background-color: rgba(110, 235, 140, 0.18)
+  color: #8ef0a8
+  font-weight: 900
+  text-transform: uppercase
+  letter-spacing: 0.04em
 
 .build-tray__cost-item
   display: inline-flex

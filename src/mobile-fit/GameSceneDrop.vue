@@ -12,7 +12,7 @@ import {
   manualReroll, canManualReroll, dealEnhancedOffers, speedBuffLeft, grantSpeedBuff,
   graceAvailable, continueRun, isFirstSession, seedScriptedOpening, applyRules,
   dropOffer, canDropAt, columnTop, repairAll, repairAllCost, canRepairAll, canAffordShape, sellBlock,
-  upgradeBlock, upgradeCostAt,
+  upgradeBlock, upgradeCostAt, seedTutorialRankGold, spanW, spanH,
   blockCount, CONTINUE_WOOD, CONTINUE_STONE, missingFor
 } from '@/use/useTowerGame'
 import { denyPurchase } from '@/use/useResourceBlink'
@@ -87,6 +87,8 @@ import RotateOverlay from './components/RotateOverlay.vue'
 import ControlHint, { type HintId } from '@/components/game/ControlHint.vue'
 import WaveClearToast from '@/components/game/WaveClearToast.vue'
 import TutorialOverlay, { type TutorialStep } from '@/components/game/TutorialOverlay.vue'
+import TutorialHand from '@/components/game/TutorialHand.vue'
+import { useAutoHand, type HandPoint } from '@/use/useAutoHand'
 import type { DimBox } from '@/components/game/dimRects'
 import DropDemo from './components/DropDemo.vue'
 import MergeGuide from '@/components/game/MergeGuide.vue'
@@ -401,7 +403,7 @@ const loop = (t: number): void => {
   // frame nobody can explain. Recording only.
   if (!isGamePaused.value && !rotateBlocked.value
     && (CLEAN_FEED || (!showResult.value && !showMergeGuide.value
-      && !showMergePower.value))) {
+      && !showMergePower.value && !handLessonHold.value))) {
     if (benchStep) benchStep(dt)
     step(dt)
   }
@@ -868,6 +870,7 @@ const onUpgradeInspected = (): void => {
     playSound('obstacle-hit', 0.03)
     return
   }
+  completeTutorialStep('rankUp')
   playSound('level-up', 0.05)
   noteBuildAction()
 }
@@ -906,9 +909,20 @@ const cardStyle = computed(() => {
 watch(towerVersion, () => {
   const b = inspected.value
   if (b && getBlocks().get(`${b.c},${b.r}`)?.uid !== b.uid) inspected.value = null
+  // A weld lost while its own lesson is up — the wave is held, but a cascade
+  // can still fold it into a deeper one — leaves the arc pointing at nothing.
+  // Retire it rather than dim the screen around an empty cell.
+  const step = tutorialStep.value
+  if ((step === 'inspectMerged' || step === 'rankUp') && !mergedBlock()) {
+    completeTutorialStep(step)
+  }
 })
 watch(inspected, (b) => {
   setBuildOverlay({ inspectC: b?.c ?? null, inspectR: b?.r ?? null })
+  // The `inspectMerged` beat IS this: the card, open on a weld. Only the weld
+  // is reachable while the beat is up (the dim eats everything else), so any
+  // welded block arriving here is the one that was pointed at.
+  if (b && (b.tier ?? 1) > 1) completeTutorialStep('inspectMerged')
 })
 
 /**
@@ -1151,6 +1165,23 @@ const merged = computed(() => {
 })
 watch(merged, (m) => { if (m) markHintDone('mergeBlock') })
 
+/**
+ * The deepest weld standing — what the rank arc teaches on.
+ *
+ * Deepest rather than first, so the beat points at the block the player is
+ * proudest of and the one a rank is worth most on. Null when a bat ate it
+ * between beats, which every caller treats as "there is nothing to teach here".
+ */
+const mergedBlock = (): Block | null => {
+  void towerVersion.value
+  let best: Block | null = null
+  for (const b of getTowerBlocks().values()) {
+    if ((b.tier ?? 1) <= 1) continue
+    if (!best || (b.tier ?? 1) > (best.tier ?? 1)) best = b
+  }
+  return best
+}
+
 const activeHint = computed<HintId | null>(() => {
   // Never over the coach marks: they are deliberately wordless, and a hint
   // bubble is the one thing on screen that would put copy back on them.
@@ -1190,10 +1221,16 @@ watch(wave, (w) => {
 // as done. What the beat taught is now taught by the game: the wave comes, and
 // the button is there for the waves after it.
 //
-// The pictogram is the third beat, and the power demo the fourth and LAST —
-// where the desktop board hands off to its Call Wave coach mark, this one has
-// no wave to call, so the tutorial ends on the reason to keep merging: the same
-// monster, shot by a plain cannon and then by a tier 3.
+// The pictogram is the third beat and the power demo the fourth; after them
+// comes the RANK ARC, the same three beats the desktop board teaches — open the
+// weld's card, buy it a rank, then watch the hand buy one for the Gate. It is
+// here for the same reason it is there: the 2026-09-11 blind playtest found the
+// upgrade tree late or never, and the Gate — the one block whose loss ends the
+// run — was never read as a block you can spend on at all. Nothing about a
+// board of five columns changes that.
+//
+// There is still no Call Wave beat at the end: this board calls its own opening
+// wave, so the arc ends on the Gate's rank.
 //
 // It carries the `cell` ladder, not the desktop's. A weld here collapses back
 // into ONE cell whatever its tier (`mergeArt: 'cell'`, `maxMergeTier:
@@ -1201,7 +1238,12 @@ watch(wave, (w) => {
 // promise this board never keeps — and on five columns the belief the player
 // actually needs is the opposite one: that a single cell is worth stacking
 // twins into, because the frontage never grows however deep the gun goes.
-const TUTORIAL_STEPS: TutorialStep[] = ['drop', 'merge', 'mergeGuide', 'mergePower']
+const TUTORIAL_STEPS: TutorialStep[] = [
+  'drop', 'merge', 'mergeGuide', 'mergePower', 'inspectMerged', 'rankUp', 'rankGate'
+]
+
+/** The three beats of the rank arc: open the weld, rank it, watch the Gate. */
+const RANK_BEATS = new Set<TutorialStep>(['inspectMerged', 'rankUp', 'rankGate'])
 const tutorialDone = ref(getState<boolean>(M2_TUTORIAL_KEY, false) === true)
 
 /**
@@ -1272,6 +1314,20 @@ const tutorialStep = computed<TutorialStep | null>(() => {
 })
 
 /**
+ * The automatic hand is playing, so the wave stands still for it.
+ *
+ * Only for `rankGate`, and only because that beat is BOUNDED: it is three
+ * seconds of script that ends on its own, with every touch on the screen taken
+ * by the hand's layer. The two beats before it wait on the player and are
+ * therefore left running, like every other coach mark on this board — a held
+ * clock that waits on a tap nobody makes never releases, and the stage's own
+ * expiry (`COACH_MARK_LAST_WAVE`) is what retires them instead.
+ *
+ * Read by the loop and by `isLiveGameplay`, exactly as the teaching cards are.
+ */
+const handLessonHold = computed(() => tutorialStep.value === 'rankGate')
+
+/**
  * The Blueprints button's stage-2 nudge, held back while a coach mark is up.
  * This board keeps its coach marks through wave 2 — the same wave `techNudge`
  * starts on — and two yellow arrows on one screen point at nothing.
@@ -1293,6 +1349,13 @@ const sameBox = (a: DimBox | null, b: DimBox | null): boolean =>
 
 const setBox = (target: { value: DimBox | null }, next: DimBox | null): void => {
   if (!sameBox(target.value, next)) target.value = next
+}
+
+/** A DOM element's rect, or null while it is missing or not laid out yet. */
+const elementBox = (sel: string): DimBox | null => {
+  const b = document.querySelector(sel)?.getBoundingClientRect()
+  if (!b || b.width <= 0) return null
+  return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) }
 }
 
 /** The tray card in `slot`, on screen, or null while the tray is not laid out. */
@@ -1392,11 +1455,32 @@ const measureTutorialTarget = (): void => {
   if (step === 'mergeGuide' || step === 'mergePower') { tutorialRect.value = null; return }
   const cell = getZoom()
   if (step === 'call') {
-    const el = document.querySelector('.call-wave__btn')
-    const b = el?.getBoundingClientRect()
-    tutorialRect.value = b && b.width > 0 ? { x: b.x, y: b.y, w: b.width, h: b.height } : null
+    setBox(tutorialRect, elementBox('.call-wave__btn'))
     return
   }
+
+  // The weld itself, projected from world space. The hole covers its WHOLE
+  // footprint: a block whose left half is the only live pixel on the screen
+  // sends the player tapping a dim layer that does nothing.
+  if (step === 'inspectMerged') {
+    const b = mergedBlock()
+    setBox(tutorialRect, b && {
+      x: Math.round(worldToScreenX(b.c - 0.5)),
+      y: Math.round(worldToScreenY(b.r + spanH(b))),
+      w: Math.round(cell * spanW(b)),
+      h: Math.round(cell * spanH(b))
+    })
+    return
+  }
+
+  // The rank button inside the card the beat before it opened. A null — the
+  // card not laid out yet on the frame the beat flips — leaves the player in a
+  // normal game for a frame rather than under a dim with no hole in it.
+  if (step === 'rankUp') { setBox(tutorialRect, elementBox('.card__upgrade')); return }
+
+  // Played by the automatic hand, not pointed at: no hole, no arrow, and its
+  // own layer holds the player's touches while it demonstrates (`runGateDemo`).
+  if (step === 'rankGate') { setBox(tutorialRect, null); return }
   // The drop and merge beats cut the hole over the WHOLE column: the dim layer
   // blocks every touch outside it, and a column is tapped anywhere along its
   // height. The piece itself is armed for the player when the beat starts
@@ -1454,6 +1538,87 @@ const completeTutorialStep = (step: TutorialStep): void => {
   advanceTutorial()
 }
 
+// ─── The Gate's rank, shown by the automatic hand ───────────────────────────
+//
+// The beat after the weld's rank, and the same script the desktop board plays.
+// The player has just pressed Upgrade on their weld; the hand takes over from
+// that button, taps the Gate — the card opens on it, exactly as the player's
+// own tap would — and presses its Upgrade once. About three seconds, every tap
+// in it real: the Gate really gains the rank.
+//
+// Paid for like the weld's lesson (`seedTutorialRankGold`): the purse is topped
+// UP to the price, so the player finishes the beat where they started it.
+
+const autoHand = useAutoHand()
+
+const gateBlock = (): Block | null => {
+  for (const b of getTowerBlocks().values()) if (b.typeId === GATE_ID) return b
+  return null
+}
+
+/** The Gate's centre on screen — its whole footprint, however it was built. */
+const gateOnScreen = (): HandPoint | null => {
+  const g = gateBlock()
+  if (!g) return null
+  return {
+    x: worldToScreenX(g.c - 0.5 + spanW(g) / 2),
+    y: worldToScreenY(g.r + spanH(g) / 2)
+  }
+}
+
+/** The card's Upgrade button, once the card has laid itself out. */
+const upgradeButtonOnScreen = (): HandPoint | null => {
+  const b = elementBox('.card__upgrade')
+  return b ? { x: b.x + b.w / 2, y: b.y + b.h / 2 } : null
+}
+
+const runGateDemo = async (): Promise<void> => {
+  const gate = gateBlock()
+  // Nothing to show — no Gate, or already at the top rank: the beat retires,
+  // as the weld's does when there is nothing to rank.
+  if (!gate || seedTutorialRankGold(gate.c, gate.r) <= 0) {
+    completeTutorialStep('rankGate')
+    return
+  }
+  // From the button the player just pressed; from the lower middle when the
+  // card has already gone.
+  const start = upgradeButtonOnScreen()
+    ?? { x: window.innerWidth * 0.5, y: window.innerHeight * 0.72 }
+  const outcome = await autoHand.run([
+    { kind: 'wait', ms: 350 },
+    { kind: 'move', to: gateOnScreen, ms: 650 },
+    {
+      kind: 'press',
+      ms: 180,
+      then: () => {
+        const g = gateBlock()
+        if (g) inspectBlock(g)
+      }
+    },
+    // The card re-renders for the Gate — and moves, since it is anchored on the
+    // block — before the hand goes looking for its button.
+    { kind: 'wait', ms: 420 },
+    { kind: 'move', to: upgradeButtonOnScreen, ms: 550 },
+    {
+      kind: 'press',
+      ms: 180,
+      then: () => {
+        const g = gateBlock()
+        if (g && upgradeBlock(g.c, g.r)) playSound('level-up', 0.05)
+      }
+    },
+    // Long enough to see the Gate's numbers move on the card.
+    { kind: 'wait', ms: 800 }
+  ], start)
+  // Cancelled: the beat was taken away and plays again from the top when it
+  // comes back.
+  if (outcome === 'cancelled') return
+  // Done — or a target that never appeared, which must not strand a tutorial
+  // with no Skip button anywhere in it: either way the lesson is over.
+  inspected.value = null
+  completeTutorialStep('rankGate')
+}
+
 /** The merge beat's piece: a twin of the fort's cannon, in hand. */
 const armMergePiece = (): void => {
   if (!offers.value.some((id) => id === 'b_cannon')) {
@@ -1472,12 +1637,39 @@ const armMergePiece = (): void => {
 // fired on a CHANGE would never arm the drop piece — leaving the player behind
 // a dim layer whose one live column drops nothing, with no way out.
 watch(tutorialStep, (step) => {
+  // The hand only ever plays inside its own beat. Anything that takes the beat
+  // away — the result screen, a turn to landscape — stops it where it is.
+  if (step !== 'rankGate') autoHand.cancel()
   measureTutorialTarget()
   if (step === 'drop') {
     selectedSlot.value = 0
     return
   }
-  if (step === 'merge') armMergePiece()
+  if (step === 'merge') { armMergePiece(); return }
+  if (!step || !RANK_BEATS.has(step)) return
+
+  // Nothing may be in hand for the rank arc: a tap on a block opens its card,
+  // but a piece still armed means the player who misses the weld drops a crate
+  // on their own tower instead — and the beat can never be finished.
+  selectedSlot.value = null
+  armedColumn.value = null
+
+  if (step === 'inspectMerged') {
+    // A weld that has just been eaten leaves nothing to teach on; the beat
+    // retires rather than pointing at a block that is not there.
+    if (!mergedBlock()) completeTutorialStep('inspectMerged')
+    return
+  }
+  // The tutorial buys the rank it is about to teach — see `seedTutorialRankGold`
+  // for why a run this young cannot afford its own lesson. A zero back means
+  // there is nothing to rank after all, and the beat retires rather than
+  // pointing at a button that can never light up.
+  if (step === 'rankUp') {
+    const b = mergedBlock()
+    if (!b || seedTutorialRankGold(b.c, b.r) <= 0) completeTutorialStep('rankUp')
+    return
+  }
+  void runGateDemo()
 }, { immediate: true })
 watch(merged, (m) => { if (m) completeTutorialStep('merge') })
 
@@ -1907,16 +2099,30 @@ const handPaidAt = ref(0)
 // ─── Flying chest and gift pieces ───────────────────────────────────────────
 //
 // One chest five seconds after the tutorial is behind the player and one
-// every forty-five seconds after that; tapping it queues a welded piece, which
+// every forty-five seconds after that (the phone keeps the short gap — see the
+// desktop scene's `CHEST_EVERY_MS`); tapping it queues a welded piece, which
 // waits in the hand's FIRST slot (see `useGifts` and DropTray's `giftFirst`)
 // until it is dropped — free the first time a chest is ever opened, half price
 // after. Both are self-contained — this
 // scene only says when they may run, and stands its own hand down when a gift
 // is picked up.
 
+
+/**
+ * The chest paid coins instead of a piece: it has introduced everything it
+ * carries this run (`rollChestGift`). Banked here, and burst out of the chest
+ * toward the coin badge so the payout is seen where it happened.
+ */
+const onChestCoins = ({ amount, el }: { amount: number; el: HTMLElement | null }): void => {
+  addCoins(amount)
+  playSound('coin-collect', 0.05)
+  spawnCoinExplosion({ sourceEl: el, targetEl: coinEl.value, count: 26 })
+}
+
 const chestReady = computed(() => tutorialOver.value && !showResult.value && phase.value !== 'defeat')
 const chestPaused = computed(() =>
   showResult.value || rotateBlocked.value || showMergeGuide.value || showMergePower.value
+  || handLessonHold.value
 )
 const giftDisabled = computed(() =>
   showResult.value || phase.value === 'defeat' || tutorialStep.value !== null
@@ -1973,6 +2179,7 @@ const isLiveGameplay = computed(
     && !rotateBlocked.value
     && !showMergeGuide.value
     && !showMergePower.value
+    && !handLessonHold.value
 )
 watch(isLiveGameplay, syncGameplayLifecycle, { immediate: true })
 
@@ -2132,6 +2339,7 @@ onUnmounted(() => {
           :ready="chestReady"
           :paused="chestPaused"
           :wave="wave"
+          @coins="onChestCoins"
         )
 
         //- Daily missions, out of the drawer while there is something to
@@ -2363,6 +2571,11 @@ onUnmounted(() => {
       :from="dropNudge.from"
       :to="dropNudge.to"
     )
+
+    //- The Gate's rank, played rather than pointed at: the hand taps the Gate
+    //- and presses Upgrade on its card, and its own layer holds every touch
+    //- while it does (see `runGateDemo`).
+    TutorialHand(:hand="autoHand.hand")
 
     //- The piece a drag is carrying, riding just above the finger so the thumb
     //- does not cover it. Over the coach-mark dim, and inert.

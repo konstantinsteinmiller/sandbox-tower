@@ -298,7 +298,7 @@ describe('the queue', () => {
   })
 })
 
-describe('the chest\'s draw', () => {
+describe('the chest’s draw', () => {
   const seq = (...xs: number[]) => {
     let i = 0
     return () => xs[i++ % xs.length]!
@@ -307,31 +307,54 @@ describe('the chest\'s draw', () => {
   it('prefers what the player has not unlocked', async () => {
     const { gifts } = await load()
     const owned = new Set(['tesla', 'frost', 'mortar'])
+    // Each roll spends the obelisk from this run's pass, so the pass is reset
+    // between them: what is asserted here is the preference, not the cycle.
     for (const r of [0, 0.3, 0.6, 0.99]) {
+      gifts.resetChestInventory()
       expect(gifts.rollChestGift(seq(r, 0.5), owned).typeId).toBe('obelisk')
     }
   })
 
-  it('pays a tier 3 about one time in ten — guns only', async () => {
+  it('pays ONE CELL, never a weld', async () => {
     const { gifts } = await load()
     const none = new Set<string>()
-    expect(gifts.rollChestGift(seq(0, 0.05), none)).toEqual({ typeId: 'tesla', tier: 3, source: 'chest' })
-    expect(gifts.rollChestGift(seq(0, 0.5), none).tier).toBe(2)
-    // The last entry is the obelisk: a low second roll still does not make it
-    // a tier 3.
-    expect(gifts.rollChestGift(seq(0.999, 0.01), none)).toEqual({ typeId: 'obelisk', tier: 2, source: 'chest' })
-    let jackpots = 0
-    let rolls = 0
+    // The chest is an introduction, not a head start: it used to hand over a
+    // tier 2 — and a tier 3 one time in ten — which is two to four welded
+    // cells of a gun the player may never have unlocked.
+    // Every type it carries, across a whole pass — the tier is never the
+    // draw's business again.
+    for (let i = 0; i < gifts.CHEST_GIFTS.length; i++) {
+      expect(gifts.rollChestGift(seq(0.5, 0.05), none)?.tier).toBe(1)
+    }
+  })
+
+  it('delivers each thing it carries once, then stops bringing pieces', async () => {
+    const { gifts } = await load()
+    const none = new Set<string>()
     let s = 7
     const lcg = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 }
-    for (let i = 0; i < 4000; i++) {
-      const g = gifts.rollChestGift(lcg, none)
-      if (g.typeId === 'obelisk') continue
-      rolls++
-      if (g.tier === 3) jackpots++
-    }
-    expect(jackpots / rolls).toBeGreaterThan(0.07)
-    expect(jackpots / rolls).toBeLessThan(0.13)
+    const kinds = gifts.CHEST_GIFTS.length
+
+    const pass = Array.from({ length: kinds }, () => gifts.rollChestGift(lcg, none)?.typeId)
+    expect(new Set(pass).size).toBe(kinds)
+    expect([...pass].sort()).toEqual(gifts.CHEST_GIFTS.map(([id]) => id).sort())
+
+    // Everything has been introduced, so there is nothing left to teach: the
+    // chest pays `CHEST_COIN_PRIZE` from here instead of handing out more
+    // guns (`FlyingChest.onOpen`).
+    for (let i = 0; i < 5; i++) expect(gifts.rollChestGift(lcg, none)).toBeNull()
+  })
+
+  it('starts a fresh pass with a fresh tower', async () => {
+    const { game, gifts } = await load()
+    const none = new Set<string>()
+    const first = gifts.rollChestGift(seq(0, 0.5), none).typeId
+    expect(gifts.chestDelivered().has(first)).toBe(true)
+    // The list resets with the run (`onRunStart`), so a new tower meets the
+    // whole inventory again.
+    game.startRun()
+    expect(gifts.chestDelivered().size).toBe(0)
+    expect(gifts.rollChestGift(seq(0, 0.5), none).typeId).toBe(first)
   })
 })
 

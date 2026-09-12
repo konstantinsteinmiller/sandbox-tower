@@ -86,9 +86,6 @@ export const CHEST_GIFTS: ReadonlyArray<readonly [string, number]> = [
   ['tesla', 3], ['frost', 3], ['mortar', 3], ['obelisk', 1]
 ]
 
-/** Chance that a chest's gun arrives as a tier 3 instead of a tier 2. */
-export const CHEST_JACKPOT_CHANCE = 0.1
-
 /** The first wave whose clear hands over the one-time present. */
 export const FIRST_CLEAR_WAVE = 3
 
@@ -125,7 +122,9 @@ const isGift = (g: unknown): g is Gift => {
   if (!g || typeof g !== 'object') return false
   const o = g as Record<string, unknown>
   return typeof o.typeId === 'string' && !!BLOCK_DEFS[o.typeId]
-    && typeof o.tier === 'number' && o.tier >= 2 && o.tier <= 3
+    // 1 since the chest stopped paying welds: its prize is one cell of a gun
+    // the player may never have seen. The first-clear present is still a 2.
+    && typeof o.tier === 'number' && o.tier >= 1 && o.tier <= 3
     && (o.source === 'chest' || o.source === 'firstClear')
 }
 
@@ -180,7 +179,9 @@ export const grantGift = (gift: Gift): boolean => {
  */
 export const giftPrice = (gift: Gift): BuildCost => {
   if (gift.free === true) return { wood: 0, stone: 0, coins: 0 }
-  const cells = 2 ** (Math.min(3, Math.max(2, gift.tier)) - 1)
+  // Cells in the piece: 1, 2 or 4. Clamped to what a gift can actually be, so
+  // a corrupt tier prices as the smallest rather than as the largest.
+  const cells = 2 ** (Math.min(3, Math.max(1, gift.tier)) - 1)
   const base = priceOfBlock(gift.typeId)
   const part = (v: number): number => Math.ceil(v * cells * CHEST_GIFT_DISCOUNT)
   return { wood: part(base.wood), stone: part(base.stone), coins: part(base.coins) }
@@ -233,6 +234,9 @@ export interface GiftFootprint { c: number; r: number; w: number; h: number }
  * bastion, which has no second orientation.
  */
 const FOOTPRINTS: Readonly<Record<number, ReadonlyArray<readonly [number, number]>>> = {
+  // One cell, and the only shape it comes in — the chest's own prize since it
+  // stopped paying welds.
+  1: [[1, 1]],
   2: [[2, 1], [1, 2]],
   3: [[2, 2]]
 }
@@ -264,7 +268,7 @@ export const giftShapeId = (typeId: string, w: number, h: number): string => {
  * placements, it never invents one.
  */
 export const giftPlacementAt = (gift: Gift, c: number, r: number): GiftFootprint | null => {
-  for (const [w, h] of FOOTPRINTS[Math.min(3, Math.max(2, gift.tier))] ?? []) {
+  for (const [w, h] of FOOTPRINTS[Math.min(3, Math.max(1, gift.tier))] ?? []) {
     const id = giftShapeId(gift.typeId, w, h)
     for (let ox = 0; ox < w; ox++) {
       for (let oy = 0; oy < h; oy++) {
@@ -286,7 +290,7 @@ export const giftPlacementAt = (gift: Gift, c: number, r: number): GiftFootprint
  * width plus the piece and a cell, from the ground to one row over the crown.
  */
 export const giftAnchors = (gift: Gift): Array<[number, number]> => {
-  const [w, h] = (FOOTPRINTS[Math.min(3, Math.max(2, gift.tier))] ?? [[2, 1]])[0]!
+  const [w, h] = (FOOTPRINTS[Math.min(3, Math.max(1, gift.tier))] ?? [[2, 1]])[0]!
   const id = giftShapeId(gift.typeId, w, h)
   const b = towerBounds()
   const reach = Math.max(Math.abs(b.minC), Math.abs(b.maxC))
@@ -330,19 +334,58 @@ export const dropGiftAt = (c: number): boolean => {
 // ─── The chest's draw ───────────────────────────────────────────────────────
 
 /**
- * Roll what a chest holds.
+ * What the chest still owes this run: one of each thing it carries.
  *
- * Prefers what the player has NOT unlocked: the chest is a taste of the tree,
- * and a tier-2 of a gun already in every hand is a smaller surprise than one
- * that has never been in any. Once everything is owned, all four are fair game.
- * The jackpot is for guns only — a tier-3 obelisk is a rule nobody has met.
+ * The chest exists to SHOW the player guns they have not met, not to arm them.
+ * Rolled freely it did the opposite — a fresh weighted draw every couple of
+ * minutes handed out the same tesla three times while the frost emitter never
+ * appeared at all, and the tower ended up built out of prizes. So a run is ONE
+ * PASS through the inventory: every type is delivered once, and then the chest
+ * has nothing left to introduce and pays coins instead (`CHEST_COIN_PRIZE`).
+ *
+ * Run-scoped and deliberately NOT persisted — `onRunStart` clears it, so the
+ * list resets with the tower. A reload mid-run resumes with the pass reset,
+ * which is the forgiving direction: the player meets the inventory again
+ * rather than a chest that has quietly stopped bringing anything.
+ */
+let deliveredThisRun = new Set<string>()
+
+/** Test seam, and what `onRunStart` calls. */
+export const resetChestInventory = (): void => { deliveredThisRun = new Set() }
+
+/** What the chest has already brought this run, for tests and QA. */
+export const chestDelivered = (): ReadonlySet<string> => deliveredThisRun
+
+/** What a chest pays once it has introduced everything it carries. */
+export const CHEST_COIN_PRIZE = 100
+
+/**
+ * Roll what a chest holds — or null once it has nothing new to show.
+ *
+ * Three rules, in order:
+ *
+ *  1. ONE PASS PER RUN. Anything already delivered this run is out of the hat,
+ *     and when the pass is complete this returns NULL: the chest stops paying
+ *     pieces and pays `CHEST_COIN_PRIZE` instead. A chest that kept handing
+ *     out guns was building the tower for the player.
+ *  2. Prefer what the player has NOT unlocked — the chest is a taste of the
+ *     tree, and a gun already in every hand is a smaller surprise than one
+ *     that has never been in any. Once everything is owned, all are fair game.
+ *  3. Weighted, among whatever is left, so the obelisk stays the rare one.
+ *
+ * TIER 1, always. A chest used to pay a tier 2 (and a tier 3 one time in ten),
+ * which is two-to-four welded cells of a gun the player may not even have
+ * unlocked — a free head start rather than an introduction. One cell of it
+ * introduces the gun and leaves the welding to the player.
  */
 export const rollChestGift = (
   rand: () => number = Math.random,
   owned: ReadonlySet<string> = availableBlocks.value
-): Gift => {
-  const locked = CHEST_GIFTS.filter(([id]) => !owned.has(id))
-  const pool = locked.length > 0 ? locked : CHEST_GIFTS
+): Gift | null => {
+  const fresh = CHEST_GIFTS.filter(([id]) => !deliveredThisRun.has(id))
+  if (fresh.length === 0) return null
+  const locked = fresh.filter(([id]) => !owned.has(id))
+  const pool = locked.length > 0 ? locked : fresh
   const total = pool.reduce((s, [, w]) => s + w, 0)
   let pick = rand() * total
   let typeId = pool[pool.length - 1]![0]
@@ -350,9 +393,8 @@ export const rollChestGift = (
     pick -= w
     if (pick < 0) { typeId = id; break }
   }
-  const gun = blockDef(typeId).weapon !== undefined
-  const tier = gun && rand() < CHEST_JACKPOT_CHANCE ? 3 : 2
-  return { typeId, tier, source: 'chest' }
+  deliveredThisRun.add(typeId)
+  return { typeId, tier: 1, source: 'chest' }
 }
 
 // ─── The first-clear present ────────────────────────────────────────────────
@@ -376,5 +418,7 @@ watch(phase, (next, prev) => {
 }, { flush: 'sync' })
 
 onRunStart(clearGifts)
+// A new tower is a new pass through the chest's inventory.
+onRunStart(resetChestInventory)
 onRulesChange(reloadGifts)
 reloadGifts()

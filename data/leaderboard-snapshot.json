@@ -1,8 +1,8 @@
 {
   "source": "https://tower-siege-leaderboard.hyperg8.workers.dev",
-  "fetchedAt": 1789225839188,
-  "updatedAt": 1789225838895,
-  "total": 364,
+  "fetchedAt": 1789234121818,
+  "updatedAt": 1789234047324,
+  "total": 366,
   "entries": [
     {
       "rank": 1,
@@ -1607,6 +1607,10 @@
       1
     ],
     [
+      116,
+      1
+    ],
+    [
       114,
       2
     ],
@@ -1644,6 +1648,10 @@
     ],
     [
       84,
+      1
+    ],
+    [
+      81,
       1
     ],
     [

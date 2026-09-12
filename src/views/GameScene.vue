@@ -104,7 +104,7 @@ import CoinBadge from '@/components/organisms/CoinBadge.vue'
 import TreasureChest from '@/components/organisms/TreasureChest.vue'
 import FlyingChest from '@/components/game/FlyingChest.vue'
 import GiftTile from '@/components/game/GiftTile.vue'
-import { nextGift, reloadGifts } from '@/use/useGifts'
+import { giftPrice, nextGift, reloadGifts } from '@/use/useGifts'
 import DailyRewards from '@/components/organisms/DailyRewards.vue'
 import AdRewardButton from '@/components/organisms/AdRewardButton.vue'
 import BattlePass from '@/components/organisms/BattlePass.vue'
@@ -2096,11 +2096,35 @@ watch(phase, (p) => { if (p !== 'build') cancelHandPreview() })
 
 // ─── Flying chest and gift pieces ───────────────────────────────────────────
 //
-// One chest five seconds after the tutorial is behind the player and one
-// every forty-five seconds after that; tapping it queues a welded piece, which
-// waits in the hand's first slot (see `useGifts` and BuildTray's `giftFirst`)
-// — free the first time a chest is ever opened, half price after. Both are self-contained — this scene only says when
-// they may run, and puts down whatever it was holding when a gift is picked up.
+// One chest five seconds after the tutorial is behind the player and one every
+// `CHEST_EVERY_MS` after that; tapping it queues a welded piece, which waits in
+// the hand's first slot (see `useGifts` and BuildTray's `giftFirst`) — free the
+// first time a chest is ever opened, half price after. Both are self-contained
+// — this scene only says when they may run, and puts down whatever it was
+// holding when a gift is picked up.
+
+/**
+ * Two minutes between chests on this board, against the phone's 45 seconds.
+ *
+ * The same rate read as constant traffic here: the desktop sky already carries
+ * the flyers, the bombers and every shot arcing over the tower, and its waves
+ * run long enough that a chest every 45 s was rarely off screen. The phone
+ * board keeps the shorter gap — its sky is mostly empty and its waves are
+ * short, so there the chest is punctuation rather than traffic.
+ */
+const CHEST_EVERY_MS = 120_000
+
+
+/**
+ * The chest paid coins instead of a piece: it has introduced everything it
+ * carries this run (`rollChestGift`). Banked here, and burst out of the chest
+ * toward the coin badge so the payout is seen where it happened.
+ */
+const onChestCoins = ({ amount, el }: { amount: number; el: HTMLElement | null }): void => {
+  addCoins(amount)
+  playSound('coin-collect', 0.05)
+  spawnCoinExplosion({ sourceEl: el, targetEl: coinBadgeEl.value, count: 26 })
+}
 
 const chestReady = computed(() => tutorialOver.value && !showResult.value && phase.value !== 'defeat')
 const chestPaused = computed(() =>
@@ -2115,6 +2139,25 @@ const giftDisabled = computed(() =>
  * structure lane, walls only — until it is placed (BuildTray's `giftFirst`).
  */
 const giftFirst = computed(() => !!nextGift.value && !giftDisabled.value)
+
+/**
+ * The waiting gift, as the tray's panel needs it — so hovering the gift slot
+ * answers like hovering any other card. See `BuildTray`'s `giftPiece`: the
+ * gift is rendered through a slot, so the tray cannot read the queue itself.
+ */
+const giftPieceInfo = computed(() => {
+  const g = nextGift.value
+  if (!g || !giftFirst.value) return null
+  const cost = giftPrice(g)
+  return {
+    typeId: g.typeId,
+    tier: g.tier,
+    wood: cost.wood,
+    stone: cost.stone,
+    coins: cost.coins,
+    free: g.free === true
+  }
+})
 const giftTileRef = ref<InstanceType<typeof GiftTile> | null>(null)
 
 // The wall armed in slot 0 is UNDER the gift once the gift takes the slot;
@@ -2605,6 +2648,8 @@ onUnmounted(() => {
         :ready="chestReady"
         :paused="chestPaused"
         :wave="wave"
+        :every-ms="CHEST_EVERY_MS"
+        @coins="onChestCoins"
       )
       //- The game's premise, said once, in the biggest type on the screen.
       //- First-time players only, and gone on their first touch — see
@@ -2792,6 +2837,7 @@ onUnmounted(() => {
             :hide-reroll="tutorialStep !== null"
             :nudge="idleNudge"
             :gift-first="giftFirst"
+            :gift-piece="giftPieceInfo"
             :paid-at="handPaidAt"
             @select="onSelectSlot"
             @reroll="onReroll"
