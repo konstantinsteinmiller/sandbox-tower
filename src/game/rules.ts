@@ -239,7 +239,7 @@ export const DESKTOP_RULES: RuleSet = {
     budgetMul: 1,
     buildMs: 15_000,
     earlyBuildMs: [],
-    firstRunScale: [0.6, 0.8],
+    firstRunScale: [2.4, 2.2],
     airShare: { base: 0.1, slope: 0.022, cap: 0.35 },
     firstBuildMs: 3_000,
     spawnWindowMs: 82_000,

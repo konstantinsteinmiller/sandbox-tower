@@ -267,8 +267,11 @@ export const giftShapeId = (typeId: string, w: number, h: number): string => {
  * `canPlaceShapeAt` a bought piece does — the snap chooses between legal
  * placements, it never invents one.
  */
+export const GIFT_SNAP_CELLS = 2
+
 export const giftPlacementAt = (gift: Gift, c: number, r: number): GiftFootprint | null => {
-  for (const [w, h] of FOOTPRINTS[Math.min(3, Math.max(1, gift.tier))] ?? []) {
+  const shapes = FOOTPRINTS[Math.min(3, Math.max(1, gift.tier))] ?? []
+  for (const [w, h] of shapes) {
     const id = giftShapeId(gift.typeId, w, h)
     for (let ox = 0; ox < w; ox++) {
       for (let oy = 0; oy < h; oy++) {
@@ -276,7 +279,35 @@ export const giftPlacementAt = (gift: Gift, c: number, r: number): GiftFootprint
       }
     }
   }
-  return null
+  // Nothing under the pointer. Rather than refuse, reach for the nearest legal
+  // socket within a couple of cells and put it THERE.
+  //
+  // The footprint snap above only ever shifted by the piece's own width, which
+  // means a tap one cell wide of a legal spot buzzed at a player who was
+  // pointing straight at it. A gift is won, not bought, and the first thing it
+  // should ever do is go down — so the miss is forgiven up to `GIFT_SNAP_CELLS`
+  // and refused honestly beyond that. Ties break toward the lower, more central
+  // cell, so a nudge never reads as random.
+  let best: GiftFootprint | null = null
+  let bestD = Infinity
+  for (const [w, h] of shapes) {
+    const id = giftShapeId(gift.typeId, w, h)
+    for (let dc = -GIFT_SNAP_CELLS; dc <= GIFT_SNAP_CELLS; dc++) {
+      for (let dr = -GIFT_SNAP_CELLS; dr <= GIFT_SNAP_CELLS; dr++) {
+        const ac = c + dc
+        const ar = r + dr
+        if (!canPlaceShapeAt(id, ac, ar)) continue
+        // Measured from the tapped cell to the footprint's middle, so a wide
+        // piece is not penalised for the corner it is anchored by.
+        const d = Math.hypot(ac + (w - 1) / 2 - c, ar + (h - 1) / 2 - r)
+        if (d < bestD - 1e-6 || (Math.abs(d - bestD) < 1e-6 && best && ar < best.r)) {
+          bestD = d
+          best = { c: ac, r: ar, w, h }
+        }
+      }
+    }
+  }
+  return best
 }
 
 /**
@@ -290,15 +321,29 @@ export const giftPlacementAt = (gift: Gift, c: number, r: number): GiftFootprint
  * width plus the piece and a cell, from the ground to one row over the crown.
  */
 export const giftAnchors = (gift: Gift): Array<[number, number]> => {
-  const [w, h] = (FOOTPRINTS[Math.min(3, Math.max(1, gift.tier))] ?? [[2, 1]])[0]!
-  const id = giftShapeId(gift.typeId, w, h)
+  const shapes = FOOTPRINTS[Math.min(3, Math.max(1, gift.tier))] ?? [[2, 1]]
   const b = towerBounds()
   const reach = Math.max(Math.abs(b.minC), Math.abs(b.maxC))
-  const halfW = Math.min(UPPER_HALF_WIDTH, Math.max(halfWidthAt(0), reach + w + 1))
   const out: Array<[number, number]> = []
-  for (let c = -halfW; c <= halfW - w + 1; c++) {
-    for (let r = 0; r <= b.maxR + 1; r++) {
-      if (canPlaceShapeAt(id, c, r)) out.push([c, r])
+  const seen = new Set<string>()
+  // EVERY orientation the tier comes in, not just the preferred one.
+  //
+  // This scanned `FOOTPRINTS[tier][0]` alone, so a tier-2 gift advertised only
+  // the cells where it could lie FLAT while `giftPlacementAt` would happily
+  // stand it up — the sockets under-reported the legal board, and on a narrow
+  // opening tower the difference is most of it. Two of three testers on
+  // 2026-09-14 gave up on a gift they were holding, which is the second round
+  // running that a gift has defeated the people who won it.
+  for (const [w, h] of shapes) {
+    const id = giftShapeId(gift.typeId, w, h)
+    const halfW = Math.min(UPPER_HALF_WIDTH, Math.max(halfWidthAt(0), reach + w + 1))
+    for (let c = -halfW; c <= halfW - w + 1; c++) {
+      for (let r = 0; r <= b.maxR + 1; r++) {
+        const key = `${c},${r}`
+        if (seen.has(key) || !canPlaceShapeAt(id, c, r)) continue
+        seen.add(key)
+        out.push([c, r])
+      }
     }
   }
   return out

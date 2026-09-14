@@ -11,7 +11,7 @@ import { monsterGore } from '@/game/monsters'
 import { pickMonster } from '@/game/monsterSprites'
 import { ALLY_DEFS, allyDef, CAVALRY_SQUAD } from '@/game/allies'
 import {
-  shapeCost, rollOffer, rollOffers, SHAPE_BY_ID, rotatedShape,
+  shapeCost, rollOffer, rollOffers, SHAPE_BY_ID, rotatedShape, registerShapeDefs,
   upgradeCrateShape, crateBaseId,
   pickAffordableWeapon, type OfferLaneConfig
 } from '@/game/shapes'
@@ -1680,6 +1680,110 @@ export const placeBlock = (typeId: string, c: number, r: number): boolean => {
   mergeAt(c, r)
   syncTowerStats()
   pushFx({ kind: 'place', x: c, y: r + 0.5, palette: def.palette })
+  return true
+}
+
+// ─── Moving a block that is already standing ────────────────────────────────
+//
+// The verb the game was missing, and the 2026-09-14 playtest found it the way
+// players always do: a tester dragged one cannon onto an identical one to fuse
+// them, and the camera panned.
+//
+// They were not wrong about the rule. `settleMerges` already fuses ANY two
+// adjacent twins on every structural change — "if they are adjacent, they
+// fuse" is the rule the game actually plays by. What was missing is the only
+// way a player could ever make two standing blocks adjacent on purpose. So the
+// fix is not a merge gesture; it is a MOVE, and the merge falls out of it for
+// free through the settle pass that already runs.
+//
+// Nothing is created or refunded, so there is no economy in this: it is the
+// same blocks the player already bought, in a different arrangement. What it
+// costs them is the thing that makes it a decision — a move happens in the
+// build phase, which is the resource the build phase actually meters.
+
+/** The shape id an arbitrary footprint is legality-checked as. Registered on
+ *  first use and never dealt, exactly as a gift's footprint is. */
+const footprintShapeId = (typeId: string, w: number, h: number): string => {
+  const id = `move:${typeId}:${w}x${h}`
+  if (!SHAPE_BY_ID[id]) {
+    const cells: Array<[number, number, string]> = []
+    for (let dy = 0; dy < h; dy++) for (let dx = 0; dx < w; dx++) cells.push([dx, dy, typeId])
+    registerShapeDefs([{ id, lane: 'weapon', weight: 0, cells }])
+  }
+  return id
+}
+
+/** The ghost shape for the block standing at `(c, r)` — what the renderer
+ *  draws while the player carries it. Null when there is nothing to carry. */
+export const blockFootprintShapeId = (c: number, r: number): string | null => {
+  const b = blockAt(c, r)
+  return b ? footprintShapeId(b.typeId, spanW(b), spanH(b)) : null
+}
+
+/**
+ * Can the block standing at `(fromC, fromR)` be picked up at all?
+ *
+ * The Gate never moves — it is the loss condition and the thing the tower is
+ * built around — and nothing moves mid-battle, because a turret that teleports
+ * out of a fight is a way to dodge damage rather than to build.
+ */
+export const canMoveBlock = (fromC: number, fromR: number): boolean => {
+  if (phase.value !== 'build') return false
+  const b = blockAt(fromC, fromR)
+  return !!b && b.typeId !== GATE_ID
+}
+
+/**
+ * Would this block sit legally with its bottom-left cell at `(toC, toR)`?
+ *
+ * Tested with the block LIFTED OUT of the grid, or it would collide with
+ * itself: every overlapping move — a one-cell nudge, a 2×1 sliding along by
+ * one — has the piece's own cells in the way of the piece.
+ */
+export const canMoveBlockTo = (
+  fromC: number, fromR: number, toC: number, toR: number
+): boolean => {
+  if (!canMoveBlock(fromC, fromR)) return false
+  const b = blockAt(fromC, fromR)!
+  if (b.c === toC && b.r === toR) return false
+  const id = footprintShapeId(b.typeId, spanW(b), spanH(b))
+  release(b)
+  try {
+    return canPlaceShapeAt(id, toC, toR)
+  } finally {
+    // Restored whatever happens. This runs inside a computed (`moveSlots` scans
+    // the whole board per drag), and a throw that left the block released would
+    // delete it from the tower for the rest of the run.
+    occupy(b)
+  }
+}
+
+/**
+ * Move a standing block. Returns false and changes nothing if it cannot go
+ * there.
+ *
+ * The settle passes afterwards are the whole reason this is safe to offer:
+ * `settleSupport` drops anything the move orphaned (the same rule that governs
+ * selling a load-bearing block), and `settleMerges` fuses the block with a twin
+ * if the player has just put it next to one — which is what they were trying to
+ * do in the first place.
+ */
+export const moveBlock = (
+  fromC: number, fromR: number, toC: number, toR: number
+): boolean => {
+  if (!canMoveBlockTo(fromC, fromR, toC, toR)) return false
+  const b = blockAt(fromC, fromR)!
+
+  release(b)
+  b.c = toC
+  b.r = toR
+  occupy(b)
+
+  settleSupport()
+  settleMerges()
+  syncTowerStats()
+  saveRunSnapshot()
+  pushFx({ kind: 'place', x: centreX(b), y: b.r + 0.5, palette: blockDef(b.typeId).palette })
   return true
 }
 

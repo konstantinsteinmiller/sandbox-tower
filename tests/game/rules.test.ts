@@ -86,7 +86,7 @@ describe('DESKTOP_RULES reproduces the pre-seam constants', () => {
     // desktop has always had: no early breaks, the 60/80 % first-session
     // discount, and the air curve from `airShare`'s own table.
     expect(d.waves.earlyBuildMs).toEqual([])
-    expect(d.waves.firstRunScale).toEqual([0.6, 0.8])
+    expect(d.waves.firstRunScale).toEqual([2.4, 2.2])
     expect(d.waves.airShare).toEqual({ base: 0.1, slope: 0.022, cap: 0.35 })
     // The opening is its own window: short, and started by the player's first
     // gesture rather than by the page loading. Zero on the phone board, which

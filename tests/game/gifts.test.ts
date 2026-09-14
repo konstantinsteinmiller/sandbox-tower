@@ -59,10 +59,15 @@ describe('where a gift can go', () => {
     gifts.grantGift({ typeId: 'tesla', tier: 2, source: 'chest' })
     const anchors = gifts.giftAnchors(gifts.gifts.value[0]!)
     expect(anchors.length).toBeGreaterThan(0)
-    // Beside the Gate on the ground; never over it.
+    // Beside the Gate on the ground; never over it. The Gate's OWN cell is the
+    // exclusion — a two-cell gift cannot start there in either orientation —
+    // while the cells either side of it are sockets, because a tier 2 may
+    // stand up as well as lie down. (`giftAnchors` scanned only the flat
+    // footprint until 2026-09-14, so it under-reported the legal board by
+    // roughly half on a narrow opening tower.)
     expect(anchors).toContainEqual([1, 0])
+    expect(anchors).toContainEqual([-1, 0])
     expect(anchors).not.toContainEqual([0, 0])
-    expect(anchors).not.toContainEqual([-1, 0])
     const [c, r] = anchors[anchors.length - 1]!
     expect(gifts.placeGiftAt(c, r)).toBe(true)
     expect(game.getBlocks().get(`${c},${r}`)?.typeId).toBe('tesla')

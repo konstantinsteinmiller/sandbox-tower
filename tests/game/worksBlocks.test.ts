@@ -16,7 +16,12 @@ import { TECH_BY_ID } from '@/game/tech'
 const loadGame = async (levels: Record<string, number> = {}) => {
   vi.resetModules()
   localStorage.clear()
-  localStorage.setItem('tower_state', JSON.stringify({ ts_tech: { levels } }))
+  // Onboarded, deliberately. These tests are about what a producer YIELDS, and
+  // they clear wave 1 with a hand-built row of cannons — but a first session
+  // now carries the opening surcharge (`FIRST_RUN_SCALE`), which is sized
+  // against the scripted fort rather than against whatever a test puts down.
+  // Left as a first session, they were measuring the wave director.
+  localStorage.setItem('tower_state', JSON.stringify({ ts_tech: { levels }, ts_onboarded: true }))
   const g = await import('@/use/useTowerGame')
   g.startRun()
   g.wood.value = 9999

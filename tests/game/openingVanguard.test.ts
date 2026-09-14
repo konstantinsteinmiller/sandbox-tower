@@ -295,6 +295,25 @@ describe('the guaranteed opening win survives it', () => {
       expect(g.gateHpPct.value).toBeGreaterThan(0.8)
     })
 
+  it('bites — the opening costs an outer wall, and never the Gate', async () => {
+    const g = await openFirstSession()
+    // The coach marks' own placement, so this is the board every first-timer
+    // actually meets wave 1 with: the scripted fort plus one merged tier-2 gun.
+    g.offers.value = ['cannon1', 'cannon1', ...g.offers.value.slice(2)]
+    expect(g.placeShape(1, -1, 1, 0)).toBe(true)
+    const before = g.getBlocks().size
+
+    expect(playWave(g)).toBe(true)
+
+    // A wall goes down. This is the whole point of the opening surcharge — a
+    // tower-defence game that never loses a block has not taught the player
+    // that blocks break, and the 2026-09-14 playtest watched three testers go
+    // five waves without one scratch.
+    expect(g.getBlocks().size).toBeLessThan(before)
+    // ...and the Gate is not what pays for it.
+    expect(g.gateHpPct.value).toBeGreaterThan(0.8)
+  })
+
   it('clears the field — the wave cannot end with a vanguard unit still alive',
     async () => {
       const g = await openFirstSession()

@@ -248,9 +248,11 @@ describe('desktop director is unchanged by the mode options', () => {
       90, 130, 183, 255, 320, 374, 395, 452, 489, 529, 600, 646, 688, 759, 807,
       821, 907, 920, 1004, 796, 1158, 1190, 1262, 1300, 1349, 1419, 1475, 1492, 1589, 1181
     ])
-    // A first session with a weak tower: the 60/80 % opening discount.
+    // A first session with a weak tower. Waves 1-2 carry the opening SURCHARGE
+    // (2.4 / 2.2 — see `FIRST_RUN_SCALE`), which is why they outspend a
+    // veteran's opening here; everything from wave 3 on is the plain curve.
     expect(spent(0.7, true)).toEqual([
-      20, 50, 84, 125, 166, 188, 180, 209, 232, 352, 283, 248, 306, 311, 320,
+      100, 140, 84, 125, 166, 188, 180, 209, 232, 352, 283, 248, 306, 311, 320,
       389, 380, 418, 431, 461, 481, 491, 507, 560, 609, 643, 630, 659, 712, 612
     ])
   })

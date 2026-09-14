@@ -1,0 +1,3 @@
+- [game 20.3s | shot 0010] 20s in and its just been tutorial popups explaining cannon merging, no actual battle yet, this better get good fast
+- [game 144.1s | shot 0046] stretch from about 132s to 144s was just the build screen sitting there, countdown timer barely moving, nothing to click that mattered, kind of a dead zone
+- [game 178.2s | shot 0052] end of session at 178s, wave 5 held, never took damage the whole time, castle at full hp throughout

@@ -44,17 +44,28 @@ const playWave = (g: any): boolean => {
   return g.phase.value !== 'defeat'
 }
 
-describe('first-session budget scale', () => {
-  it('discounts wave 1 to 60% and eases back to full by wave 3', () => {
-    expect(firstRunBudgetScale(1)).toBeCloseTo(0.6)
-    expect(firstRunBudgetScale(2)).toBeCloseTo(0.8)
+describe('first-session opening surcharge', () => {
+  it('prices waves 1-2 OVER the curve, and leaves wave 3 on alone', () => {
+    // Inverted on 2026-09-14. It was a discount (0.6 / 0.8) until a policy sim
+    // showed that every value below 2.4 left a player who BUILT on a flat
+    // 100 % Gate for six straight waves — see `FIRST_RUN_SCALE`.
+    expect(firstRunBudgetScale(1)).toBeCloseTo(2.4)
+    expect(firstRunBudgetScale(2)).toBeCloseTo(2.2)
     expect(firstRunBudgetScale(3)).toBe(1)
     expect(firstRunBudgetScale(12)).toBe(1)
   })
 
-  it('sends fewer enemies on the opening waves', () => {
-    expect(planWave(1, 1, true).total).toBeLessThan(planWave(1, 1, false).total)
-    expect(planWave(2, 1, true).total).toBeLessThan(planWave(2, 1, false).total)
+  it('eases OFF rather than on — wave 1 is the one that bites', () => {
+    // The ramp direction is the design, not an accident of two numbers: the
+    // surcharge is heaviest before the player has a tower and lifts as they
+    // build one.
+    expect(firstRunBudgetScale(1)).toBeGreaterThan(firstRunBudgetScale(2))
+    expect(firstRunBudgetScale(2)).toBeGreaterThan(firstRunBudgetScale(3))
+  })
+
+  it('sends MORE enemies on the opening waves', () => {
+    expect(planWave(1, 1, true).total).toBeGreaterThan(planWave(1, 1, false).total)
+    expect(planWave(2, 1, true).total).toBeGreaterThan(planWave(2, 1, false).total)
   })
 
   it('leaves everything from wave 3 on exactly as it was', () => {
@@ -63,7 +74,7 @@ describe('first-session budget scale', () => {
     }
   })
 
-  it('stays deterministic — the discounted wave is still the same wave twice', () => {
+  it('stays deterministic — the surcharged wave is still the same wave twice', () => {
     expect(planWave(1, 1, true).orders).toEqual(planWave(1, 1, true).orders)
   })
 
@@ -189,19 +200,22 @@ describe('the guaranteed opening win', () => {
     expect(playWave(g)).toBe(true)
     expect(g.wave.value).toBe(1)
     // Not merely alive — the Gate should still be worth defending afterwards.
+    // The opening surcharge is meant to cost an outer WALL, never the Gate.
     expect(g.gateHpPct.value).toBeGreaterThan(0.5)
   })
 
-  it('softens wave 1 for a first-session player and not for a veteran', async () => {
+  it('leans on wave 1 for a first-session player and not for a veteran', async () => {
     const fresh = await loadGame()
     fresh.startRun()
     fresh.callWave()
-    const softened = fresh.enemiesTotal.value
+    const opening = fresh.enemiesTotal.value
 
     const veteran = await loadVeteranGame()
     veteran.startRun()
     veteran.callWave()
 
-    expect(softened).toBeLessThan(veteran.enemiesTotal.value)
+    // The surcharge is the first session's alone: a returning player meets the
+    // curve, which is what keeps wave 1 meaning the same thing every run after.
+    expect(opening).toBeGreaterThan(veteran.enemiesTotal.value)
   })
 })

@@ -1,0 +1,4 @@
+- [game 56.4s | shot 0027] this waiting part is kinda boring nothing is happening just a countdown , wait 2000
+- [game 64.4s | shot 0031] tech tree has a million tiny icons and i only have 10 coins so i cant buy anything this is confusing , click 961 117 , wait 800
+- [game 132.8s | shot 0056] tried to place the free cannon but nothing lit up to click on i dont get why , wait 3000
+- [game 179.3s | shot 0065] ok time is up this was actually kinda fun watching the cannons blow stuff up but the waiting parts were boring

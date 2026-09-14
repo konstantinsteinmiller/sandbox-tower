@@ -20,7 +20,8 @@ import useTowerGame, {
   RANGE_BUFF_MUL, effectiveRangeMul,
   halfWidthAt, UPPER_HALF_WIDTH, WATER_ROW, speedBuffLeft, grantSpeedBuff, graceAvailable,
   continueRun, isFirstSession, seedScriptedOpening, seedOpeningVanguard, buildClockHeld,
-  repairAll, repairAllPlan, canRepairAll, seedTutorialRankGold, missingFor
+  repairAll, repairAllPlan, canRepairAll, seedTutorialRankGold, missingFor,
+  canMoveBlock, canMoveBlockTo, moveBlock, blockFootprintShapeId, towerBounds
 } from '@/use/useTowerGame'
 import { denyPurchase } from '@/use/useResourceBlink'
 import { idleNudge, noteBuildAction, useIdleNudge } from '@/use/useIdleNudge'
@@ -57,11 +58,11 @@ import { SEA_LEVEL } from '@/game/world'
 import { CLEAN_FEED } from '@/game/cleanFeed'
 import type { Block } from '@/game/types'
 
-import { getState, setState } from '@/use/useTowerState'
+import { flushPersist, getState, setState } from '@/use/useTowerState'
 import { readTutorialCheat, type TutorialCheat } from '@/use/useTutorialCheat'
 import {
   ONBOARDED_KEY, TECH_SPOTLIGHT_KEY, TIP_CURSOR_KEY, TUTORIAL_KEY,
-  MERGE_GUIDE_KEY, TRAP_TUTORIAL_KEY
+  MERGE_GUIDE_KEY, TRAP_TUTORIAL_KEY, CALL_TAUGHT_KEY, RANK_GATE_KEY
 } from '@/keys'
 import useSounds, { useMusic } from '@/use/useSound'
 import { useScreenshake } from '@/use/useScreenshake'
@@ -482,11 +483,59 @@ const legalSlots = computed<Array<[number, number]>>(() => {
   return out
 })
 
+// ─── Dragging a placed block ────────────────────────────────────────────────
+//
+// The gesture a tester tried on 2026-09-14 and got a camera pan for: pick up a
+// gun that is already standing and put it somewhere else. `settleMerges` does
+// the rest — if it lands beside its twin, the two fuse, which is what the
+// player was reaching for.
+//
+// `grab` is the offset from the block's anchor to the cell the player took
+// hold of, so a 2×1 follows the pointer by the half the pointer is on rather
+// than snapping its corner under the cursor.
+
+interface BlockDrag {
+  fromC: number
+  fromR: number
+  grabC: number
+  grabR: number
+  shapeId: string
+  w: number
+  h: number
+}
+/** The block under the pointer when the press began, if it could be moved. */
+let dragCandidate: BlockDrag | null = null
+/** Live while the player is actually dragging one. */
+const blockDrag = ref<BlockDrag | null>(null)
+
+/** Where the dragged block's anchor would land for a pointer over `cell`. */
+const dragAnchor = (drag: BlockDrag, cell: { c: number; r: number }) =>
+  ({ c: cell.c - (drag.grabC - drag.fromC), r: cell.r - (drag.grabR - drag.fromR) })
+
 // Publish the build overlay to the renderer whenever any input changes.
 watch(
-  [selectedShape, selectedRot, hoverCell, legalSlots, inspected, arrowRainArmed],
+  [selectedShape, selectedRot, hoverCell, legalSlots, inspected, arrowRainArmed, blockDrag],
   () => {
     const hover = hoverCell.value
+    const drag = blockDrag.value
+    // A drag takes the overlay over: the ghost is the block being carried, and
+    // the sockets are the anchors it could be set down on.
+    if (drag) {
+      const at = hover ? dragAnchor(drag, hover) : null
+      setBuildOverlay({
+        selectedShape: drag.shapeId,
+        selectedRot: 0,
+        hoverC: at?.c ?? null,
+        hoverR: at?.r ?? null,
+        hoverValid: !!at && canMoveBlockTo(drag.fromC, drag.fromR, at.c, at.r),
+        slots: moveSlots.value,
+        inspectC: null,
+        inspectR: null,
+        aimX: null,
+        aimRadius: ARROW_RAIN_RADIUS
+      })
+      return
+    }
     const shapeId = selectedShape.value
     const valid = !!(shapeId && hover
       && canPlaceShapeAt(shapeId, hover.c, hover.r, selectedRot.value)
@@ -506,6 +555,24 @@ watch(
   },
   { immediate: true, deep: false }
 )
+
+/** Every anchor the carried block could be set down on. Scanned once per
+ *  drag — the tower does not change while a block is in the air. */
+const moveSlots = computed<Array<[number, number]>>(() => {
+  const drag = blockDrag.value
+  if (!drag) return []
+  void towerVersion.value
+  const b = towerBounds()
+  const reach = Math.max(Math.abs(b.minC), Math.abs(b.maxC))
+  const halfW = Math.min(UPPER_HALF_WIDTH, Math.max(halfWidthAt(0), reach + drag.w + 1))
+  const out: Array<[number, number]> = []
+  for (let c = -halfW; c <= halfW - drag.w + 1; c++) {
+    for (let r = 0; r <= b.maxR + 1; r++) {
+      if (canMoveBlockTo(drag.fromC, drag.fromR, c, r)) out.push([c, r])
+    }
+  }
+  return out
+})
 
 // ─── Pointer handling ───────────────────────────────────────────────────────
 //
@@ -557,6 +624,24 @@ const onPointerDown = (e: PointerEvent): void => {
   panning = false
   longPressFired = false
 
+  // A block the player could pick up, remembered but not yet lifted: the press
+  // is still a tap (inspect) until it travels past the slop threshold. Nothing
+  // is a drag candidate while a piece, a gift or the volley is armed — those
+  // are modes the player entered on purpose and the next press is theirs.
+  dragCandidate = null
+  if (selectedSlot.value == null && !arrowRainArmed.value && !giftFirst.value) {
+    const cell = screenToCell(e.clientX, e.clientY)
+    const b = getBlocks().get(`${cell.c},${cell.r}`)
+    if (b && canMoveBlock(b.c, b.r)) {
+      dragCandidate = {
+        fromC: b.c, fromR: b.r, grabC: cell.c, grabR: cell.r,
+        shapeId: blockFootprintShapeId(b.c, b.r) ?? '',
+        w: spanW(b), h: spanH(b)
+      }
+      if (!dragCandidate.shapeId) dragCandidate = null
+    }
+  }
+
   // Long-press opens the inspector for an existing block. The press itself is
   // never destructive — selling lives behind the inspector's own button.
   clearLongPress()
@@ -596,9 +681,17 @@ const onPointerMove = (e: PointerEvent): void => {
 
   if (!moved && Math.hypot(e.clientX - downX, e.clientY - downY) > TAP_SLOP_PX) {
     moved = true
-    panning = true
     clearLongPress()
+    // Carrying a block wins over panning: the press started ON something the
+    // player can pick up, so that is what the drag is for.
+    if (dragCandidate) {
+      blockDrag.value = dragCandidate
+      inspected.value = null
+    } else {
+      panning = true
+    }
   }
+  if (blockDrag.value) hoverCell.value = screenToCell(e.clientX, e.clientY)
   if (panning) {
     // Per-frame delta, so the world tracks the finger 1:1.
     panBy(e.clientX - lastX, e.clientY - lastY)
@@ -616,6 +709,26 @@ const onPointerUp = (e: PointerEvent): void => {
   pointers.delete(e.pointerId)
   if (pointers.size < 2) endPinch()
   clearLongPress()
+
+  const drag = blockDrag.value
+  if (drag) {
+    blockDrag.value = null
+    dragCandidate = null
+    hoverCell.value = null
+    const at = dragAnchor(drag, screenToCell(e.clientX, e.clientY))
+    if (moveBlock(drag.fromC, drag.fromR, at.c, at.r)) {
+      noteBuildAction()
+      playSound('block-place', 0.05)
+    } else {
+      // Refused out loud, in the same voice a refused placement uses — a block
+      // that silently springs back reads as the drag not having worked.
+      requestRejectFlash()
+      playSound('obstacle-hit', 0.03)
+    }
+    panning = false
+    return
+  }
+  dragCandidate = null
 
   if (!wasSingle || moved || longPressFired) { panning = false; return }
 
@@ -686,6 +799,7 @@ const tryPlace = (c: number, r: number): void => {
   const taughtPlacement = tutorialStep.value === 'place'
 
   markHintDone('placeBlock')
+  if (openingSecondWave.value) builtSinceFirstWave.value = true
   completeTutorialStep('place')
 
   if (taughtPlacement) {
@@ -767,7 +881,7 @@ const activeHint = computed<HintId | null>(() => {
   if (onboarded.value || showResult.value || isAnyModalOpen.value) return null
   // Never over the coach marks either: they are deliberately wordless, and a
   // hint bubble is the one thing on screen that would put copy back on them.
-  if (tutorialStep.value) return null
+  if (activeTutorialStep.value) return null
   if (phase.value === 'defeat') return null
   if (!hintsDone.value.has('selectBlock') && selectedSlot.value == null) return 'selectBlock'
   if (!hintsDone.value.has('placeBlock') && selectedSlot.value != null) return 'placeBlock'
@@ -1314,14 +1428,39 @@ watch(lastWaveReward, async (r) => {
  * has lost a quarter. The ladder shows that welds keep going; players still
  * stopped at tier 2, because nothing showed them what the next weld is FOR.
  *
- * `rankGate` follows the cannon's rank: the automatic hand takes over, taps the
- * Gate and presses its upgrade once (see `runGateDemo`). A playtester found
- * this on their own — the Gate is the one block whose loss ends the run, and a
- * rank on it is the cheapest insurance the game sells — and almost nobody else
- * ever does, because nothing suggests the Gate is a block like the others.
+ *  · `rankGate` — the automatic hand taking over to tap the Gate and buy it a
+ *    rank (see `runGateDemo`) — now runs at wave 3 too, immediately after the
+ *    merge pictogram (`lateRankGate`). The lesson is worth keeping: the Gate is
+ *    the one block whose loss ends the run, a rank on it is the cheapest
+ *    insurance the game sells, and almost nobody finds it alone. What it cannot
+ *    be is the fourth thing in a row demanded of somebody who has not yet met a
+ *    monster — three seconds of watching a hand play for you is the least
+ *    interactive beat in the game, and it sat in the most fragile minute.
+ */
+/**
+ * ── What the OPENING teaches, and what waits ────────────────────────────────
+ *
+ * Two beats moved out of this list after the 2026-09-14 playtest, and both for
+ * the same reason: they were answering questions the player had not been given
+ * a chance to ask yet.
+ *
+ *  · `mergeGuide` — the merge LADDER pictogram — now runs at the top of wave 3
+ *    (`lateMergeGuide`). The ladder is a question about the long game, and it
+ *    landed on a player who had not yet watched a single monster reach their
+ *    wall. Two waves of actually defending the Gate is what turns "the ladder
+ *    continues" from a diagram into a plan. The `mergePower` demo STAYS here:
+ *    a tester called the −10 %/−75 % comparison "a genuinely good way to teach
+ *    the core hook in five seconds", and it is the one card that earns its place
+ *    before the fighting starts.
+ *
+ *  · `call` — pointing at Call Wave — now runs after wave 1 is WON
+ *    (`lateCall`). Wave 1 starts itself when the coach marks finish, so a
+ *    first-time player's opening is uninterrupted: the lesson ends and the
+ *    siege begins. The button is taught on the far side of that fight, which is
+ *    the first moment the player has any reason to care what it does.
  */
 const TUTORIAL_STEPS: TutorialStep[] = [
-  'pick', 'place', 'mergeGuide', 'mergePower', 'inspectMerged', 'rankUp', 'rankGate', 'call'
+  'pick', 'place', 'mergePower', 'inspectMerged', 'rankUp'
 ]
 
 /**
@@ -1332,7 +1471,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
  * nothing worth inspecting and nothing to rank. Showing any one of them to that
  * player is a beat about a thing that did not happen.
  */
-const MERGE_BEATS = new Set<TutorialStep>(['mergeGuide', 'mergePower', 'inspectMerged', 'rankUp'])
+const MERGE_BEATS = new Set<TutorialStep>(['mergePower', 'inspectMerged', 'rankUp'])
 
 /**
  * The piece the tutorial teaches with, dealt into the weapon slot.
@@ -1388,21 +1527,42 @@ const tutorialStep = computed<TutorialStep | null>(() => {
   return TUTORIAL_STEPS[tutorialIndex.value] ?? null
 })
 
-// ─── The second wave ────────────────────────────────────────────────────────
+// ─── Lessons that wait for their moment ─────────────────────────────────────
 //
-// The coach marks end on the press that starts wave 1. Then the field clears,
-// the game goes quiet, and the player is looking at a screen that is waiting
-// for them with nothing on it saying so — which is the second of the two quit
-// points the desktop funnel shows, right after the first wave is won.
+// Two beats that used to run before wave 1 and now run after the player has
+// EARNED the question they answer. Each is remembered on its own key, so a
+// player who meets one is never shown it again — and a player who never gets
+// there (a run that ends on wave 1) still meets it on their next attempt.
 //
-// So the build phase between wave 1 and wave 2 keeps pointing, in the gold the
-// coach marks trained: one arrow over the weapon in the hand ("another gun"),
-// one over Call Wave ("then go"). It is the same two actions the tutorial just
-// taught, with the dim sheet taken away — a rehearsal rather than a lesson.
-//
-// It runs ONCE. From wave 2 on the button and the tray behave exactly as they
-// always have, because by then the player has called two waves themselves and a
-// HUD that keeps jumping at them has stopped being help.
+// Both are ordinary tutorial steps as far as the overlay is concerned: they go
+// through `activeTutorialStep`, so the dim sheet, the hole, the arrow and the
+// build-clock hold are the ones the opening already uses. What is different is
+// only WHEN they become live.
+
+/**
+ * The weld the player just made, or null if they made none.
+ *
+ * Read live off the tower rather than remembered from the placement, and by
+ * UID rather than by cell, so a two-cell block is one answer instead of two.
+ * The deepest weld wins, which on this beat is the only one there is — but it
+ * keeps the coach mark pointing at the biggest thing on the board if a resumed
+ * run ever reaches here with more.
+ */
+const mergedBlock = (): Block | null => {
+  let best: Block | null = null
+  for (const b of getTowerBlocks().values()) {
+    if (tierOf(b.tier) <= 1) continue
+    if (!best || tierOf(b.tier) > tierOf(best.tier)) best = b
+  }
+  return best
+}
+
+/** True once the player has been shown where the wave comes from. */
+const callTaught = ref(getState<boolean>(CALL_TAUGHT_KEY, false) === true)
+/** True once the merge ladder has been shown, on either board. */
+const mergeGuideSeen = ref(getState<boolean>(MERGE_GUIDE_KEY, false) === true)
+/** True once the hand has shown the player that the Gate takes a rank. */
+const rankGateTaught = ref(getState<boolean>(RANK_GATE_KEY, false) === true)
 
 /** The build window between wave 1 and wave 2, in a player's first session. */
 const openingSecondWave = computed(() =>
@@ -1411,10 +1571,14 @@ const openingSecondWave = computed(() =>
   && phase.value === 'build'
   && !showResult.value
   && !isAnyModalOpen.value
-  // Never underneath a coach mark: that beat brings its own arrow and its own
-  // dim, and a second gold arrow outside the hole would point at a dead tile.
   && tutorialStep.value === null
 )
+
+/** Set when the player builds during the wave-1 → wave-2 window, so the Call
+ *  Wave lesson waits until they have spent the phase rather than talking over
+ *  the arrow already pointing at their hand. */
+const builtSinceFirstWave = ref(false)
+watch(() => [wave.value, phase.value], () => { builtSinceFirstWave.value = false })
 
 /**
  * The tray tile the second-wave nudge points at, or null.
@@ -1429,10 +1593,98 @@ const openingSecondWave = computed(() =>
  * than at an arrow over the card already in their hand.
  */
 const pointedTraySlot = computed<number | null>(() => {
-  if (!openingSecondWave.value || selectedSlot.value !== null) return null
+  if (!openingSecondWave.value || builtSinceFirstWave.value) return null
+  if (selectedSlot.value !== null) return null
   const shapeId = offers.value[WEAPON_SLOT]
   if (!shapeId || !canAffordShape(shapeId)) return null
   return WEAPON_SLOT
+})
+
+/**
+ * "Now send the next one." The Call Wave coach mark, on the far side of wave 1.
+ *
+ * Wave 1 starts itself, so this is the first time the button has ever been the
+ * player's to press — and the first time they have a reason to care, because
+ * they have just watched what it summons. Before the fight it was a control
+ * with no referent; after it, it is the thing that brings more of what they
+ * just enjoyed.
+ *
+ * It waits for the tray arrow to finish its own job: while the player can still
+ * afford a gun and has not placed one, the hand is what the game is pointing
+ * at, and dimming it to shout about a different button would cancel the lesson
+ * underneath. Once they have built — or cannot — the dim sheet comes up.
+ */
+const lateCall = computed(() =>
+  !callTaught.value
+  && openingSecondWave.value
+  && pointedTraySlot.value === null
+)
+
+/**
+ * The merge ladder, at the top of wave 3.
+ *
+ * Held back two full waves on purpose: the pictogram is an argument about where
+ * the tower is GOING, and before the 2026-09-14 playtest it was made to a
+ * player who had not yet seen a monster reach their wall. By the wave-3 build
+ * phase they have defended the Gate twice and lost something doing it, which is
+ * the state of mind the ladder is actually addressed to.
+ *
+ * Conditional on there being a weld to talk about, exactly as the beat always
+ * was — `void towerVersion` so the check re-runs as the tower changes.
+ */
+const lateMergeGuide = computed(() => {
+  void towerVersion.value
+  return !mergeGuideSeen.value
+    && tutorialDone.value
+    && wave.value === 2
+    && phase.value === 'build'
+    && !showResult.value
+    && !isAnyModalOpen.value
+    && mergedBlock() !== null
+})
+
+/**
+ * The Gate's rank, straight after the merge ladder.
+ *
+ * Deliberately the SAME build phase as the pictogram rather than a wave later:
+ * these two are one sitting — "here is where your tower is going, and here is
+ * the cheapest thing that keeps it standing" — and splitting them across waves
+ * would spend two build phases on teaching instead of one. Stacking them in the
+ * opening was the thing that overwhelmed; stacking them here, on a player three
+ * waves in, is a pause rather than a gate.
+ *
+ * Ordered behind `lateMergeGuide` by reading it: the pictogram owns the screen
+ * until it is dismissed, and the hand does not start playing underneath a card.
+ */
+const lateRankGate = computed(() =>
+  !rankGateTaught.value
+  && tutorialDone.value
+  && wave.value === 2
+  && phase.value === 'build'
+  && !showResult.value
+  && !isAnyModalOpen.value
+  && !lateMergeGuide.value
+)
+
+/** The Gate's rank lesson is over — however it ended. */
+const finishRankGate = (): void => {
+  if (rankGateTaught.value) return
+  rankGateTaught.value = true
+  setState(RANK_GATE_KEY, true)
+}
+
+/**
+ * The beat the overlay is actually showing: the opening sequence first, then
+ * whichever late lesson has come due. Everything downstream — the dim sheet,
+ * the measured target, the build-clock hold — reads this rather than
+ * `tutorialStep`, so a late beat behaves exactly like an opening one.
+ */
+const activeTutorialStep = computed<TutorialStep | null>(() => {
+  if (tutorialStep.value) return tutorialStep.value
+  if (lateMergeGuide.value) return 'mergeGuide'
+  if (lateRankGate.value) return 'rankGate'
+  if (lateCall.value) return 'call'
+  return null
 })
 
 /**
@@ -1537,7 +1789,7 @@ const armTutorialHand = (): void => {
 // fires on a CHANGE would never see the tutorial open — it would only ever see
 // it close, and the countdown would run underneath the whole thing.
 watch(
-  () => tutorialStep.value !== null,
+  () => activeTutorialStep.value !== null,
   (held) => { buildClockHeld.value = held },
   { immediate: true }
 )
@@ -1546,24 +1798,6 @@ watch(
 const finishTutorial = (): void => {
   tutorialDone.value = true
   setState(TUTORIAL_KEY, true)
-}
-
-/**
- * The weld the player just made, or null if they made none.
- *
- * Read live off the tower rather than remembered from the placement, and by
- * UID rather than by cell, so a two-cell block is one answer instead of two.
- * The deepest weld wins, which on this beat is the only one there is — but it
- * keeps the coach mark pointing at the biggest thing on the board if a resumed
- * run ever reaches here with more.
- */
-const mergedBlock = (): Block | null => {
-  let best: Block | null = null
-  for (const b of getTowerBlocks().values()) {
-    if (tierOf(b.tier) <= 1) continue
-    if (!best || tierOf(b.tier) > tierOf(best.tier)) best = b
-  }
-  return best
 }
 
 const advanceTutorial = (): void => {
@@ -1583,9 +1817,28 @@ const advanceTutorial = (): void => {
   if (tutorialIndex.value >= TUTORIAL_STEPS.length) finishTutorial()
 }
 
-/** Advance when the player performs the step's action. It is the only way. */
+/**
+ * Advance when the player performs the step's action. It is the only way.
+ *
+ * Latched on the INDEX rather than on `tutorialStep`, and that distinction is
+ * the whole of a bug the 2026-09-14 playtest caught: `tutorialStep` is null
+ * whenever `inFirstStage` is momentarily false — a modal, the result screen,
+ * the wave ticking over — and the old guard read it directly. A beat that
+ * completed on one of those frames was silently discarded, the index never
+ * moved, and the card came back.
+ *
+ * `MergePowerDemo` is the one that made it visible, because it finishes on its
+ * own timer rather than on a tap: nothing retried, so it remounted and replayed
+ * from zero. Two of three testers reported the opening cards "each showed
+ * twice", and the screenshots pinned the same demo on screen at game 8.0 s and
+ * again at 17.8 s — against a six-second animation.
+ *
+ * The index is the tutorial's actual position; whether the overlay happens to
+ * be on screen at this instant is a rendering question and never governed
+ * whether the lesson was performed.
+ */
 const completeTutorialStep = (step: TutorialStep): void => {
-  if (tutorialStep.value !== step) return
+  if (TUTORIAL_STEPS[tutorialIndex.value] !== step) return
   advanceTutorial()
 }
 
@@ -1603,7 +1856,7 @@ const completeTutorialStep = (step: TutorialStep): void => {
  * with no Skip button anywhere, would be unescapable.
  */
 const measureTutorialTarget = (): void => {
-  const step = tutorialStep.value
+  const step = activeTutorialStep.value
   if (!step) { tutorialRect.value = null; return }
 
   const fromEl = (sel: string): { x: number; y: number; w: number; h: number } | null => {
@@ -1687,7 +1940,7 @@ let tutorialTimer = 0
 // down — an immediate watcher evaluates the computed during setup and dies in
 // the temporal dead zone. The first measurement happens on mount instead, by
 // which time every ref exists and the layout is real.
-watch(tutorialStep, (step) => {
+watch(activeTutorialStep, (step) => {
   // The automatic hand only ever plays inside its own beat. Anything that takes
   // the beat away — a modal over the tutorial, the result screen — stops it
   // where it is; the beat coming back plays it again from the top.
@@ -1745,7 +1998,7 @@ watch(phase, (p) => { if (p !== 'build') completeTutorialStep('call') })
  *  than by rewinding the index, so a replay on wave 9 cannot resurrect the
  *  coach marks around it. */
 const forcedMerge = ref(false)
-const showMergeGuide = computed(() => forcedMerge.value || tutorialStep.value === 'mergeGuide')
+const showMergeGuide = computed(() => forcedMerge.value || activeTutorialStep.value === 'mergeGuide')
 
 /**
  * Remembered separately from `TUTORIAL_KEY`.
@@ -1758,8 +2011,8 @@ const showMergeGuide = computed(() => forcedMerge.value || tutorialStep.value ==
  */
 const onMergeGuideContinue = (): void => {
   if (forcedMerge.value) { forcedMerge.value = false; return }
+  mergeGuideSeen.value = true
   setState(MERGE_GUIDE_KEY, true)
-  completeTutorialStep('mergeGuide')
 }
 
 // ─── The merge power demo ───────────────────────────────────────────────────
@@ -1769,7 +2022,7 @@ const onMergeGuideContinue = (): void => {
 // the merge arc, so a first run that fused nothing never sees it.
 
 const forcedPower = ref(false)
-const showMergePower = computed(() => forcedPower.value || tutorialStep.value === 'mergePower')
+const showMergePower = computed(() => forcedPower.value || activeTutorialStep.value === 'mergePower')
 
 const onMergePowerContinue = (): void => {
   if (forcedPower.value) { forcedPower.value = false; return }
@@ -1892,7 +2145,15 @@ const callBonusPct = computed(() =>
 
 const onCallWave = (): void => {
   markHintDone('callWave')
-  completeTutorialStep('call')
+  // The late beat is retired by the press it exists to teach. Flushed rather
+  // than left to the state layer's debounce: pressing Call Wave is the last
+  // thing a player does before a wave they may well close the tab during, and
+  // losing the write costs them a dimmed screen on their next session.
+  if (!callTaught.value) {
+    callTaught.value = true
+    setState(CALL_TAUGHT_KEY, true)
+    flushPersist()
+  }
   selectedSlot.value = null
   callWave()
 }
@@ -1992,7 +2253,7 @@ const runGateDemo = async (): Promise<void> => {
   // Nothing to show — no Gate, or already at the top rank: the beat retires,
   // as the cannon's does when there is nothing to rank.
   if (!gate || seedTutorialRankGold(gate.c, gate.r) <= 0) {
-    completeTutorialStep('rankGate')
+    finishRankGate()
     return
   }
   // From the button the player just pressed; from the lower middle when the
@@ -2032,7 +2293,7 @@ const runGateDemo = async (): Promise<void> => {
   // Done — or a target that never appeared, which must not strand a tutorial
   // that has no Skip button: either way the lesson is over.
   inspected.value = null
-  completeTutorialStep('rankGate')
+  finishRankGate()
 }
 
 /** Convert a standing wall into a spiked one. */
@@ -2201,7 +2462,7 @@ const chestPaused = computed(() =>
   showResult.value || showMergeGuide.value || showMergePower.value || showTrap.value
 )
 const giftDisabled = computed(() =>
-  showResult.value || phase.value === 'defeat' || tutorialStep.value !== null
+  showResult.value || phase.value === 'defeat' || activeTutorialStep.value !== null
 )
 
 /**
@@ -2668,7 +2929,7 @@ onMounted(() => {
   tutorialTimer = window.setInterval(() => {
     if (tutorialDone.value) return
     tutorialTick.value++
-    if (tutorialStep.value) measureTutorialTarget()
+    if (activeTutorialStep.value) measureTutorialTarget()
   }, 250)
 })
 
@@ -2909,7 +3170,7 @@ onUnmounted(() => {
             :stone="stone"
             :coins="runCoins"
             :reroll-seconds="rerollReadyIn"
-            :hide-reroll="tutorialStep !== null"
+            :hide-reroll="activeTutorialStep !== null"
             :nudge="idleNudge"
             :point-slot="pointedTraySlot"
             :gift-first="giftFirst"
@@ -3009,7 +3270,7 @@ onUnmounted(() => {
             :speed="gameSpeed"
             :boss-incoming="isBossIncoming"
             :speed-buff-left="speedBuffLeft"
-            :attention="tutorialStep === 'call'"
+            :attention="activeTutorialStep === 'call'"
             :nudge="openingSecondWave"
             @call="onCallWave"
             @set-speed="onSetSpeed"
@@ -3153,7 +3414,7 @@ onUnmounted(() => {
     //- the whole screen rather than sitting inside the HUD's stacking context.
     //- No handlers: it emits nothing, because there is nothing on it to press.
     TutorialOverlay(
-      :step="tutorialStep"
+      :step="activeTutorialStep"
       :target="tutorialRect"
     )
 

@@ -188,6 +188,29 @@ export const TRAP_TUTORIAL_KEY = 'ts_trap_tutorial'
  */
 export const MERGE_GUIDE_KEY = 'ts_merge_guide'
 
+/**
+ * The player has been shown where the next wave comes from.
+ *
+ * Its own flag for the same reason `MERGE_GUIDE_KEY` has one: the Call Wave
+ * coach mark no longer runs inside the opening sequence, so "finished the
+ * tutorial" and "has been taught the button" became different facts about a
+ * save. It fires on the far side of wave 1, which is a moment a run that ends
+ * early never reaches — and that player should still meet it next time rather
+ * than be counted as taught.
+ */
+export const CALL_TAUGHT_KEY = 'ts_call_taught'
+
+/**
+ * The automatic hand has shown the player that the Gate takes a rank.
+ *
+ * Its own flag, for the same reason the two above have one: the beat left the
+ * opening sequence on 2026-09-14 and now runs after the merge pictogram at the
+ * top of wave 3, which a run that ends earlier never reaches. "Finished the
+ * tutorial" stopped implying "has been shown the Gate's rank" the moment the
+ * two came apart.
+ */
+export const RANK_GATE_KEY = 'ts_rank_gate_taught'
+
 // ─── User settings ──────────────────────────────────────────────────────────
 
 export const SOUND_KEY = 'ts_user_sound_volume'

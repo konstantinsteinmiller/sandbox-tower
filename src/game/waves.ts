@@ -51,28 +51,49 @@ export const waveBudget = (wave: number, difficulty = 1): number =>
 /**
  * Budget scale for a brand-new player's opening waves.
  *
- * Wave 1 is the only wave a player meets before they know anything: not that a
- * cannon beats a crate, not that the Gate is the loss condition, not that the
- * build timer is a resource. The wave that teaches them is the one they
- * SURVIVE — a wipe thirty seconds in teaches nothing and costs the install.
+ * This was a DISCOUNT — 0.6 then 0.8 — on the reasoning that the wave which
+ * teaches a player is the one they survive. The reasoning still holds; the
+ * numbers were answering the wrong question, and the 2026-09-14 playtest
+ * measured how badly.
  *
- * So the opening is priced ~40 % under the curve and eased back to full over
- * two waves. The ramp matters as much as the discount: a straight jump from 60 %
- * to 100 % at wave 2 reads as the game turning on them, which is the same
- * failure with an extra wave of setup.
+ * Wave 1 is not where a new player is lost. They are lost a minute later, to a
+ * game that has proved it cannot hurt them. Simulated over the board a
+ * first-timer actually has after the coach marks — the scripted fort plus the
+ * tutorial's own merged tier-2 cannon — the old opening ran like this:
+ *
+ *      scale          wave 1        wave 6 (never built anything)
+ *      0.6 / 0.8      7 enemies     Gate 100 %, not one block lost
+ *      1.8 / 1.6     13 enemies     Gate 100 % through wave 3
+ *      2.4 / 2.2     16 enemies     Gate 99 %, one wall down in WAVE 1
+ *
+ * And the part that decided it: at every value below 2.4 a player who BUILT
+ * finished six waves on a flat 100 % Gate. The wave director prices itself
+ * against the tower it measures, so the discount was compounding with the
+ * adaptive term into an opening that could not land a scratch on anyone who
+ * engaged with it. The reward for playing well was a game with nothing at stake.
+ *
+ * So the opening is now priced OVER the curve, and the ramp runs the other way:
+ * wave 1 bites hardest, and the surcharge eases off as the player's own tower
+ * starts carrying the fight.
+ *
+ *   w1 → 2.4    w2 → 2.2    w3+ → 1
+ *
+ * What this buys, measured on the same board: the first wave takes an outer
+ * wall down for every player, built or not — which is how a tower-defence game
+ * says "blocks break, rebuild them" without a line of copy — and the player who
+ * answers by building holds at 99 % from there, while the player who ignores it
+ * is down to 69 % by wave 6. Nobody dies in the opening; the difference between
+ * the two is now visible, which it never was before.
  *
  * Applied ONLY while `ts_onboarded` is false — the player's very first session —
  * and only to waves 1-2, so nothing learned here is a lie about the game that
  * follows.
  *
- *   w1 → 0.6    w2 → 0.8    w3+ → 1
- *
  * A mode may bring its own table (`RuleSet.waves.firstRunScale`). The phone
- * board brings no discount at all: its budget is already halved, and a
- * discounted wave 1 there was ONE grunt, shot dead before it reached the
- * screen — an opening with nothing in it is not gentle, it is empty.
+ * board sits at a flat 1: its budget is already halved and its board is five
+ * columns wide, so the desktop's surcharge would be a wipe rather than a wall.
  */
-const FIRST_RUN_SCALE: ReadonlyArray<number> = [0.6, 0.8]
+const FIRST_RUN_SCALE: ReadonlyArray<number> = [2.4, 2.2]
 
 export const firstRunBudgetScale = (
   wave: number, table: ReadonlyArray<number> = FIRST_RUN_SCALE
