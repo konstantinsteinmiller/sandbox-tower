@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import IconGold from '@/components/icons/IconGold.vue'
 import IconStone from '@/components/icons/IconStone.vue'
 import IconWood from '@/components/icons/IconWood.vue'
 import ShapeTile from '@/components/game/ShapeTile.vue'
+import PointerArrow from '@/components/game/PointerArrow.vue'
 import { shapeDef, shapeCost, shapeBlockTypes, shapeHasRoof, shapeBounds } from '@/game/shapes'
 import {
   blockDef, ENHANCED_HP_MUL, ENHANCED_DAMAGE_MUL, ROOF_HP_MUL
@@ -50,6 +51,18 @@ interface Props {
    */
   nudge?: boolean
   /**
+   * One slot the game is actively POINTING AT: a fat yellow arrow over it and
+   * a hop, until the player acts.
+   *
+   * Distinct from `nudge`, which pulses every affordable tile in a blue ring
+   * because the player has gone quiet. This one names a single tile and says
+   * "that one" in the same gold the coach marks use — today, the weapon in the
+   * hand after wave 1 is cleared, so a first-time player's second wave is met
+   * with two guns instead of one. `null` for "pointing at nothing", which is
+   * almost always.
+   */
+  pointSlot?: number | null
+  /**
    * A won piece is waiting: slot 0 shows the scene's `gift` slot (the gift
    * tile, handed this tray's tile size) in place of its offer until the gift
    * is placed. Slot 0 is the structure lane — walls — so borrowing it takes
@@ -85,6 +98,7 @@ const props = withDefaults(defineProps<Props>(), {
   rerollSeconds: () => [],
   hideReroll: false,
   nudge: false,
+  pointSlot: null,
   giftFirst: false,
   giftPiece: null,
   paidAt: 0
@@ -192,6 +206,50 @@ const tileSize = computed(() => {
   // the offers, and never above what the viewport can carry.
   const perSlot = (trackW.value - trayChrome(windowWidth.value, slots)) / slots
   return Math.round(Math.max(44, Math.min(viewportCap, perSlot)))
+})
+
+// ─── Where the pointer arrow goes ───────────────────────────────────────────
+//
+// Measured off the live tile rather than derived from `tileSize` and the gap.
+// The arithmetic above already exists and would be cheaper, but it answers for
+// the tray's own furniture, not for the row's actual layout — the gift borrows
+// slot 0, the scroller centres itself in a track it does not fill, and on a
+// narrow hand the row scrolls sideways under a fixed arrow. One rect is right
+// in all of those and cannot drift out of step with the stylesheet.
+
+const scrollEl = ref<HTMLElement | null>(null)
+/** Centre of the pointed tile, px from the tray root's left edge. */
+const pointerX = ref<number | null>(null)
+
+const measurePointer = (): void => {
+  const root = rootEl.value
+  const slot = props.pointSlot
+  if (!root || slot === null || slot === undefined) { pointerX.value = null; return }
+  const tile = root.querySelector<HTMLElement>(`[data-slot="${slot}"]`)
+  if (!tile) { pointerX.value = null; return }
+  const a = tile.getBoundingClientRect()
+  const b = root.getBoundingClientRect()
+  pointerX.value = Math.round(a.left - b.left + a.width / 2)
+}
+
+// Everything that can move the tile under the arrow: which slot is pointed at,
+// the hand itself, the gift borrowing slot 0, and any resize — `tileSize`
+// stands in for the last, since it is derived from the observed track width.
+watch(
+  () => [props.pointSlot, props.offers, props.giftFirst, tileSize.value],
+  () => { void nextTick(measurePointer) },
+  { deep: true }
+)
+
+onMounted(() => {
+  // A hand narrow enough to scroll sideways slides its tiles under an arrow
+  // that is anchored outside the scroller; the rect is re-read, not guessed.
+  scrollEl.value?.addEventListener('scroll', measurePointer, { passive: true })
+  void nextTick(measurePointer)
+})
+
+onUnmounted(() => {
+  scrollEl.value?.removeEventListener('scroll', measurePointer)
 })
 
 interface Entry {
@@ -410,7 +468,20 @@ const infoEntry = computed(() => {
         div.build-tray__enhanced-note(v-if="infoEntry.enhanced")
           | {{ t('blocks.enhancedNote', { hp: enhancedHpPct, dmg: enhancedDmgPct }) }}
 
-    div.build-tray__scroll
+    //- The gold arrow, over the one tile the game is asking for.
+    //-
+    //- A sibling of the scroller rather than a child of the slot, and measured
+    //- rather than nested: the scroller is `overflow-y: hidden` (it scrolls
+    //- sideways on a narrow hand), so anything drawn ABOVE a tile from inside
+    //- it is clipped away. The info box escapes the same box the same way.
+    div.build-tray__pointer(
+      v-if="pointerX !== null"
+      aria-hidden="true"
+      :style="{ left: pointerX + 'px' }"
+    )
+      PointerArrow(side="top" :length="2.2" :gap="0.25")
+
+    div.build-tray__scroll(ref="scrollEl")
       //- `data-slot` is the tutorial's handle on ONE offer. Its first beat cuts
       //- a hole over a single tile — the free archer it deals into the weapon
       //- slot — so it needs to address that tile and no other.
@@ -434,7 +505,7 @@ const infoEntry = computed(() => {
       )
         button.build-tray__tile(
           type="button"
-          :class="{ 'is-selected': selected === e.slot, 'is-poor': !e.affordable, 'is-enhanced': e.enhanced, 'is-nudge': nudge && e.affordable, 'is-paid': justPaid && e.enhanced }"
+          :class="{ 'is-selected': selected === e.slot, 'is-poor': !e.affordable, 'is-enhanced': e.enhanced, 'is-nudge': nudge && e.affordable, 'is-point': pointSlot === e.slot, 'is-paid': justPaid && e.enhanced }"
           :style="{ '--tile-w': tileSize + 'px', '--slot': e.slot }"
           :aria-label="e.name"
           @click="onTile(e.slot)"
@@ -511,6 +582,17 @@ const infoEntry = computed(() => {
   // exactly as before.
   width: 100%
   max-width: 100%
+
+// A zero-size anchor parked on the top edge of the hand, over the pointed
+// tile's centre. `PointerArrow` hangs off it tip-down, so the tip lands just
+// above the tile and the shape stands clear of the scroller that would clip it.
+.build-tray__pointer
+  position: absolute
+  top: 0
+  z-index: 6
+  width: 0
+  height: 0
+  pointer-events: none
 
 // Deliberately tight.
 //
@@ -599,11 +681,37 @@ const infoEntry = computed(() => {
       pointer-events: none
       animation: build-tray-nudge-ring 1.1s ease-out infinite
 
+  // The pointed-at tile: a hop rather than a pulse, in the coach marks' gold.
+  //
+  // A different MOTION from `is-nudge` on purpose, not just a different colour.
+  // The two can be live at once (a player who has gone quiet while the arrow is
+  // up), and two rings breathing in the same rhythm on the same row reads as
+  // one effect with a colour bug. A tile that jumps is unambiguous.
+  &.is-point
+    animation: build-tray-point 0.78s ease-in-out infinite
+
+    .build-tray__body::after
+      content: ''
+      position: absolute
+      inset: -4px
+      border: 2px solid rgba(255, 214, 80, 0.95)
+      border-radius: clamp(0.35rem, 1.7vw, 0.6rem)
+      box-shadow: 0 0 14px rgba(255, 200, 60, 0.5)
+      pointer-events: none
+
 @keyframes build-tray-nudge
   0%, 100%
     scale: 1
   45%
     scale: 1.08
+
+@keyframes build-tray-point
+  0%, 100%
+    translate: 0 0
+  40%
+    translate: 0 -7px
+  70%
+    translate: 0 0
 
 @keyframes build-tray-nudge-ring
   0%
@@ -620,6 +728,10 @@ const infoEntry = computed(() => {
     .build-tray__body::after
       animation: none
       opacity: 0.85
+
+  // The ring stays — it is the half of the cue that carries the meaning.
+  .build-tray__tile.is-point
+    animation: none
 
 .build-tray__shadow
   position: absolute

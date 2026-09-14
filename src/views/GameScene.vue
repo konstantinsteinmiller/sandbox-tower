@@ -19,7 +19,7 @@ import useTowerGame, {
   bestWeaponReach, unreachableSiege, isCavalryFree, isRangeBuffed, grantRangeBuff,
   RANGE_BUFF_MUL, effectiveRangeMul,
   halfWidthAt, UPPER_HALF_WIDTH, WATER_ROW, speedBuffLeft, grantSpeedBuff, graceAvailable,
-  continueRun, isFirstSession, seedScriptedOpening, buildClockHeld,
+  continueRun, isFirstSession, seedScriptedOpening, seedOpeningVanguard, buildClockHeld,
   repairAll, repairAllPlan, canRepairAll, seedTutorialRankGold, missingFor
 } from '@/use/useTowerGame'
 import { denyPurchase } from '@/use/useResourceBlink'
@@ -1128,6 +1128,24 @@ const beginRun = (): void => {
   armTutorialHand()
 }
 
+/**
+ * Stand the opening vanguard on the field, for the audience it is for.
+ *
+ * Same gate as the scripted fort — a player who has not yet reached wave 2 —
+ * because it answers the same question: what does someone who has never seen
+ * this game meet in their first thirty seconds? A veteran starting their
+ * fiftieth run does not need four monsters parked on the lawn to understand
+ * that monsters are coming.
+ *
+ * Called from the scene rather than from `beginRun` because it has to run
+ * AFTER the camera has framed the opening (see the call sites): where the
+ * vanguard stands depends on what the player can see.
+ */
+const standVanguard = (): void => {
+  if (!isFirstSession()) return
+  seedOpeningVanguard()
+}
+
 /** Wipe the battlefield and start a fresh siege. */
 const startFreshRun = (): void => {
   beginMissionRun()
@@ -1139,6 +1157,11 @@ const startFreshRun = (): void => {
   beginRun()
   progress.recordRunStart()
   snapToFit()
+  // After the snap, never before: the vanguard is placed against the frame the
+  // player is about to be looking at, and until `snapToFit` has run that frame
+  // is still the one the last run ended on — a tall tower's wide shot, which
+  // would park the monsters well outside the opening view.
+  standVanguard()
   startBattleMusic()
 }
 
@@ -1363,6 +1386,53 @@ const tutorialOver = computed(() => tutorialDone.value || wave.value > 1)
 const tutorialStep = computed<TutorialStep | null>(() => {
   if (!inFirstStage.value) return null
   return TUTORIAL_STEPS[tutorialIndex.value] ?? null
+})
+
+// ─── The second wave ────────────────────────────────────────────────────────
+//
+// The coach marks end on the press that starts wave 1. Then the field clears,
+// the game goes quiet, and the player is looking at a screen that is waiting
+// for them with nothing on it saying so — which is the second of the two quit
+// points the desktop funnel shows, right after the first wave is won.
+//
+// So the build phase between wave 1 and wave 2 keeps pointing, in the gold the
+// coach marks trained: one arrow over the weapon in the hand ("another gun"),
+// one over Call Wave ("then go"). It is the same two actions the tutorial just
+// taught, with the dim sheet taken away — a rehearsal rather than a lesson.
+//
+// It runs ONCE. From wave 2 on the button and the tray behave exactly as they
+// always have, because by then the player has called two waves themselves and a
+// HUD that keeps jumping at them has stopped being help.
+
+/** The build window between wave 1 and wave 2, in a player's first session. */
+const openingSecondWave = computed(() =>
+  !onboarded.value
+  && wave.value === 1
+  && phase.value === 'build'
+  && !showResult.value
+  && !isAnyModalOpen.value
+  // Never underneath a coach mark: that beat brings its own arrow and its own
+  // dim, and a second gold arrow outside the hole would point at a dead tile.
+  && tutorialStep.value === null
+)
+
+/**
+ * The tray tile the second-wave nudge points at, or null.
+ *
+ * The weapon lane, because the one thing that decides whether wave 2 is a fight
+ * or a wipe is whether the tower has a second gun on it — and unlike the
+ * structure and works lanes, that slot is guaranteed to hold one.
+ *
+ * Retired the moment it would stop being useful: an unaffordable tile is an
+ * instruction the player cannot follow (the same rule the idle nudge obeys),
+ * and once they have armed a piece they should be looking at the board rather
+ * than at an arrow over the card already in their hand.
+ */
+const pointedTraySlot = computed<number | null>(() => {
+  if (!openingSecondWave.value || selectedSlot.value !== null) return null
+  const shapeId = offers.value[WEAPON_SLOT]
+  if (!shapeId || !canAffordShape(shapeId)) return null
+  return WEAPON_SLOT
 })
 
 /**
@@ -2515,6 +2585,11 @@ const boot = async (): Promise<void> => {
     await nextTick()
     resize()
     snapToFit()
+    // After the frame exists, and on the resume path too: enemies are not in
+    // the run snapshot, so a first-timer who reloads mid-tutorial would come
+    // back to an empty field. `seedOpeningVanguard` refuses anything but an
+    // untouched opening build phase, so a resumed wave 7 is never re-seeded.
+    standVanguard()
     startBattleMusic()
     // Loading is genuinely finished here: the run is resumed or started, the
     // canvas is sized, and the first frame is about to draw.
@@ -2836,6 +2911,7 @@ onUnmounted(() => {
             :reroll-seconds="rerollReadyIn"
             :hide-reroll="tutorialStep !== null"
             :nudge="idleNudge"
+            :point-slot="pointedTraySlot"
             :gift-first="giftFirst"
             :gift-piece="giftPieceInfo"
             :paid-at="handPaidAt"
@@ -2934,6 +3010,7 @@ onUnmounted(() => {
             :boss-incoming="isBossIncoming"
             :speed-buff-left="speedBuffLeft"
             :attention="tutorialStep === 'call'"
+            :nudge="openingSecondWave"
             @call="onCallWave"
             @set-speed="onSetSpeed"
             @buy-speed="onBuySpeed"

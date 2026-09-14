@@ -10,11 +10,9 @@
 
 *(486 characters)*
 
-> Build a tower out of the blocks you are dealt, then defend it.
->
-> Between waves you get a hand of four shapes — walls, archers, cannons, mortars, tesla coils — and a short window to place them. Then the horde arrives: goblins, boar-beasts, burning hounds, bone knights and siege engines that out-range everything you own.
->
-> Blocks that lose their support fall, and falling rubble crushes whatever is underneath. Spend wood, stone and gold, unlock the tech tree, and see how deep you can get.
+Build a tower out of the blocks you are dealt, then defend it.
+Between waves you get a hand of four shapes — walls, archers, cannons, mortars, tesla coils — and a short window to place them. Then the horde arrives: goblins, boar-beasts, burning hounds, bone knights and siege engines that out-range everything you own.
+Blocks that lose their support fall, and falling rubble crushes whatever is underneath. Spend wood, stone and gold, unlock the tech tree, and see how deep you can get.
 
 ## How to play
 

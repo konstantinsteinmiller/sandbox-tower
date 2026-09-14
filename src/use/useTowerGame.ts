@@ -3169,6 +3169,11 @@ const stepEnemies = (dt: number): void => {
       continue
     }
 
+    // Frozen where it stands until the wave is called. Belt and braces: the
+    // build phase never reaches this function at all, so this only fires if a
+    // vanguard unit somehow outlives the wake-up in `callWave`.
+    if (e.dormant) continue
+
     if (e.flash > 0) e.flash = Math.max(0, e.flash - dt / 160)
     if (e.slowMs > 0) {
       e.slowMs -= dt
@@ -3646,6 +3651,10 @@ const pickTarget = (
 
   for (const e of enemies) {
     if (e.dying > 0) continue
+    // The opening vanguard waits out of the fight — and out of every gun's
+    // target list, or the tower would clear the field it is standing in while
+    // the player is still being taught. See `Enemy.dormant`.
+    if (e.dormant) continue
     const def = enemyDef(e.typeId)
     if (!hitsAir && def.movement === 'air') continue
     // Never lock onto something this weapon cannot hurt. Without this an
@@ -4152,8 +4161,17 @@ export const callWave = (): void => {
   spawnCursor = 0
   waveClock = 0
   wave.value = next
-  enemiesTotal.value = plan.total
-  enemiesLeft.value = plan.total
+  // The opening vanguard joins THIS wave: it wakes, it closes, and the wave is
+  // not over until it is dead. So it is part of the count the HUD shows and the
+  // bar it drains — a "3 left" over five monsters walking in is the readout
+  // lying about the fight the player is looking at.
+  //
+  // Written as "whatever is already standing" rather than as a vanguard-shaped
+  // special case: the field is empty at every other wave call, so this is the
+  // honest general rule and it costs one reduce.
+  const standing = wakeField()
+  enemiesTotal.value = plan.total + standing
+  enemiesLeft.value = plan.total + standing
   // The unused build time becomes a coin bonus, so an early call is a real
   // decision rather than a dead button.
   //
@@ -4162,7 +4180,11 @@ export const callWave = (): void => {
   // quantised by a display concern.
   pendingBonus = earlyCallBonus(Math.max(0, buildDeadline))
   // Priced NOW, with the bonus just earned, and then paid out a kill at a time.
-  killShare = openKillShare(next, plan.total)
+  // Split over everything the player has to kill, vanguard included — over
+  // `plan.total` alone the first four deaths would take the whole wave's
+  // materials and the five after them would drop nothing, which reads as the
+  // payout breaking halfway through the fight.
+  killShare = openKillShare(next, plan.total + standing)
   phase.value = 'battle'
   lastWaveReward.value = null
   pushFx({ kind: 'waveStart', x: 0, y: 0, wave: next, boss: plan.boss })
@@ -4282,8 +4304,23 @@ let repairedSinceMeasure = 0
  */
 let waveHpMul = 1
 
+/**
+ * A placement the caller dictates, overriding the walk-on geometry below.
+ *
+ * Only the opening vanguard uses it: those monsters are not arriving, they are
+ * already there, and where they stand is a teaching decision rather than a
+ * function of the camera.
+ */
+interface SpawnPlacement {
+  /** Distance from the tower's centre column, in cells. Sign comes from `side`. */
+  atCells?: number
+  /** World row, for a flyer that has to hang at a readable height. */
+  y?: number
+  dormant?: boolean
+}
+
 /** Put one enemy of `typeId` on the field, entering from `side`. */
-const spawnEnemy = (typeId: string, side: 1 | -1): void => {
+const spawnEnemy = (typeId: string, side: 1 | -1, place?: SpawnPlacement): void => {
   const def = enemyDef(typeId)
   const bounds = towerBounds()
   // Enemies walk ON from off-screen. Materialising one inside the frame reads
@@ -4345,11 +4382,14 @@ const spawnEnemy = (typeId: string, side: 1 | -1): void => {
           ? SEA_SWIM_Y
           : def.scale / 2
   const spawnUid = uidCounter++
+  // `side` is which flank the unit belongs to (+1 left, −1 right), so a
+  // dictated distance is signed by it exactly as the walk-on edge is.
+  const placedX = place?.atCells === undefined ? undefined : -side * place.atCells
   const enemy: Enemy = {
     uid: spawnUid,
     typeId: def.id,
-    x: fromTop ? side * (0.4 + Math.random() * 1.4) : edge,
-    y: spawnY,
+    x: placedX ?? (fromTop ? side * (0.4 + Math.random() * 1.4) : edge),
+    y: place?.y ?? spawnY,
     hp,
     maxHp: hp,
     // A diver entering from above on the right half of the board faces LEFT,
@@ -4360,9 +4400,14 @@ const spawnEnemy = (typeId: string, side: 1 | -1): void => {
     slowMs: 0,
     slowPct: 0,
     flash: 0,
-    phase: Math.random() * 6.28,
+    // `phase` is the walk clock the monster's own frame is picked from, and a
+    // unit that is standing still wants the frame with its legs together —
+    // which is phase 0, for the sprite strip and the procedural draw alike. A
+    // random one would park four waiting grumplings mid-stride.
+    phase: place?.dormant && def.movement !== 'air' ? 0 : Math.random() * 6.28,
     dying: 0,
-    surfaced: def.movement === 'sea' ? 0 : undefined
+    surfaced: def.movement === 'sea' ? 0 : undefined,
+    dormant: place?.dormant === true ? true : undefined
   }
   enemies.push(enemy)
   enemiesByUid.set(spawnUid, enemy)
@@ -4778,6 +4823,12 @@ export const startRun = (): void => {
   flawless.reset()
   flawlessProgress.value = 0
   difficultyMul.value = 1
+  // Reset with the rest of the difficulty state, and not merely for tidiness.
+  // `callWave` rewrites it before the wave director ever uses it, so a stale
+  // value was invisible — until something spawned an enemy OUTSIDE a wave call
+  // (the opening vanguard, `debugSpawn`), which would have inherited the last
+  // run's toughness scalar and handed a first-time player a wave-20 grumpling.
+  waveHpMul = 1
   lostBlockThisWave = false
   lastWaveReward.value = null
   // A fresh siege starts with the volley in hand.
@@ -4831,6 +4882,197 @@ export const seedScriptedOpening = (): boolean => {
   syncTowerStats()
   saveRunSnapshot()
   return true
+}
+
+// ─── The opening vanguard ───────────────────────────────────────────────────
+//
+// What a first-time player used to see in their first minute: a tutorial, a
+// press of Call Wave, and then three or four grunts walking on from eleven
+// cells out — where the starter cannon, which reaches 8.5, shot most of them
+// dead before they had crossed into the frame. The siege the game is named
+// after arrived as four puffs of smoke at the edge of the screen, and the
+// desktop funnel's two biggest quit points sit exactly there: right after wave
+// 1 spawns, and right after it is cleared.
+//
+// So the field is not empty when they arrive. Two grumplings stand on each
+// flank and a flyer hangs behind the right-hand pair, in plain view, from the
+// first frame — and they STAND there, dormant, while the coach marks run
+// (`Enemy.dormant`; movement is already frozen in the build phase). The moment
+// the player calls the wave they wake up and close, so the fight opens at
+// conversational range with monsters already most of the way in, while the
+// director's own wave 1 walks on from the edges behind them.
+//
+// First session only. It is the same audience the scripted fort and the
+// discounted opening waves are for, and a player who already knows what a
+// siege looks like does not need one parked on their lawn.
+
+/**
+ * Clearance between the tower's longest gun and where the vanguard stands.
+ *
+ * The point is that they are a THREAT rather than targets: close enough to read
+ * as "these are coming for you", far enough that the first thing the player
+ * does — putting a cannon on the shoulder of the fort, which moves the muzzle
+ * half a cell out — does not suddenly bring them under fire. Dormancy is what
+ * actually guarantees that; this is what makes it look deliberate.
+ */
+const VANGUARD_CLEARANCE = 1.1
+
+/** Never closer to the tower's own edge than this, whatever the frame does. */
+const VANGUARD_MIN_GAP = 4.5
+
+/**
+ * ...and never further out than this, whatever the frame allows.
+ *
+ * A no-op against the starter fort, whose longest gun puts the line at 9.6 —
+ * it is a guard rather than a tuning knob. The failure it exists to prevent is
+ * the one the feature was written to fix: a big monitor, a tower that has
+ * bought reach, and a vanguard standing so far out that it is back to being
+ * scenery at the edge of the screen.
+ */
+const VANGUARD_MAX_STANDOFF = 10
+
+/** How far inside the frame's own edge the outermost unit stands, in cells. */
+const VANGUARD_VIEW_INSET = 0.8
+
+/** Tightest the formation may be squeezed when the frame is very narrow —
+ *  below this the two ranks stop reading as two monsters. */
+const VANGUARD_MIN_SPREAD = 0.35
+
+/**
+ * The vanguard, as `[typeId, side, cells further out]`.
+ *
+ * `side` follows the simulation's convention — `+1` is the left flank, `−1` the
+ * right. The pairs are staggered rather than stacked so each side reads as two
+ * monsters instead of one wide one, and the flyer sits behind the right-hand
+ * pair: a first-time player who has only been shown a ground fight needs to
+ * learn that the sky is a lane too, and wave 9 is a long way to leave that
+ * unsaid. It is one bat, above a cannon that can already shoot it down.
+ */
+const VANGUARD: ReadonlyArray<readonly [string, 1 | -1, number]> = [
+  ['grunt', 1, 0],
+  ['grunt', 1, 1.15],
+  ['grunt', -1, 0],
+  ['grunt', -1, 1.15],
+  ['bat', -1, 2.5]
+]
+
+/** The row the vanguard's flyer hangs at — low enough to be inside the opening
+ *  frame, high enough to read as air rather than as a walker. */
+const VANGUARD_AIR_Y = 3.1
+
+/** How deep the formation is, from the front rank to the flyer behind it. */
+const vanguardDepth = (): number =>
+  VANGUARD.reduce((d, [, , back]) => Math.max(d, back), 0)
+
+/**
+ * Where the formation stands: `at` is the front rank's distance from the centre
+ * column in cells, `spread` scales the depth behind it.
+ *
+ * Three rules, applied in this order, because they are in this order of
+ * importance:
+ *
+ *   1. **Inside the frame.** Being SEEN is the entire purpose. A vanguard
+ *      parked off-screen is precisely the bug this feature exists to fix, so
+ *      the frame is the constraint that wins — first by pulling the formation
+ *      in, and if that is not enough, by compressing it.
+ *   2. **Outside the reach of every gun**, plus clearance, when the frame
+ *      leaves room for it. Measured through `bestWeaponReach`, so it answers
+ *      for the tower that is actually standing. On a wide monitor this is what
+ *      decides the line, and the monsters stand exactly where the design asks:
+ *      close enough to be a threat, a hair beyond the starter cannon.
+ *   3. **Never on top of the tower**, whatever the first two want. This is the
+ *      floor, and it can push the formation back inside the guns' reach on a
+ *      narrow frame — which is safe because a dormant unit cannot be shot at
+ *      all. Range was never the guarantee; dormancy is.
+ *
+ * With no camera reporting in — headless tests, a scene that has not framed yet
+ * — rule 1 drops out and rule 2 decides, exactly as the walk-on geometry falls
+ * back to its tower-relative margin.
+ */
+export const vanguardStandoff = (): { at: number; spread: number } => {
+  const bounds = towerBounds()
+  const depth = vanguardDepth()
+  const near = Math.max(Math.abs(bounds.minC), bounds.maxC) + VANGUARD_MIN_GAP
+  const wanted = Math.min(VANGUARD_MAX_STANDOFF, bestWeaponReach() + VANGUARD_CLEARANCE)
+  const far = viewLeft === undefined || viewRight === undefined
+    ? Infinity
+    : Math.min(Math.abs(viewLeft), viewRight) - VANGUARD_VIEW_INSET
+
+  let at = Math.max(near, wanted)
+  if (at + depth <= far) return { at, spread: 1 }
+
+  // Too deep for the frame. Walk the whole formation in as far as the tower
+  // allows before squeezing it — moving monsters closer costs nothing, while
+  // stacking them reads as one wide monster instead of two.
+  at = Math.max(near, Math.min(at, far - depth))
+  const spread = at + depth <= far
+    ? 1
+    : Math.max(VANGUARD_MIN_SPREAD, (far - at) / depth)
+  return { at, spread }
+}
+
+/**
+ * Stand the vanguard on the field.
+ *
+ * Guarded on the BOARD rather than on the player, the way `seedScriptedOpening`
+ * is: the opening build phase, before any wave has been called, with nothing
+ * else on the field. So a resumed first session re-seeds it (enemies are not in
+ * the run snapshot) and a mid-run call can never drop monsters into a fight.
+ * The caller decides whether this player should get one.
+ */
+export const seedOpeningVanguard = (): boolean => {
+  if (phase.value !== 'build' || wave.value !== 0) return false
+  if (enemies.length > 0) return false
+  const { at, spread } = vanguardStandoff()
+  for (const [typeId, side, back] of VANGUARD) {
+    const def = enemyDef(typeId)
+    spawnEnemy(typeId, side, {
+      atCells: at + back * spread,
+      y: def.movement === 'air' ? VANGUARD_AIR_Y : undefined,
+      dormant: true
+    })
+  }
+  return true
+}
+
+/**
+ * Bring the vanguard into the fight, and report what is standing on the field.
+ *
+ * One pass for both because `callWave` needs both: the wake-up, and the head
+ * count the wave's own total has to include. At every wave but the first the
+ * field is empty and this returns 0.
+ */
+const wakeField = (): number => {
+  let live = 0
+  for (const e of enemies) {
+    if (e.dormant) e.dormant = undefined
+    if (e.dying <= 0) live++
+  }
+  return live
+}
+
+/**
+ * Keep the waiting vanguard alive on screen.
+ *
+ * The build phase deliberately never reaches `stepEnemies` — that is what
+ * holds the vanguard still — and it would hold its ARTWORK still too, because
+ * `e.phase` is the clock every monster's frame is picked from. A walker is
+ * fine frozen: it is parked at phase 0, the frame with its legs together, and
+ * standing is what it is doing. A flyer is not — a bat hanging in the air with
+ * its wings stopped mid-flap reads as the game having hung, which is a bad
+ * first impression to hand a player who is still reading a coach mark.
+ *
+ * Sits with `stepTurrets` and `stepDebris` in the build branch for the same
+ * reason they are there: the build phase must never LOOK frozen.
+ */
+const stepWaiting = (dt: number): void => {
+  const dtSec = dt / 1000
+  for (const e of enemies) {
+    if (!e.dormant) continue
+    const def = enemyDef(e.typeId)
+    if (def.movement !== 'air') continue
+    e.phase += dtSec * (2.5 + def.speed)
+  }
 }
 
 // ─── Gift pieces ────────────────────────────────────────────────────────────
@@ -5103,6 +5345,7 @@ const fixedStep = (dt: number): void => {
     stepDebris(dt)
     stepAllies(dt)
     stepBurning(dt)
+    stepWaiting(dt)
     return
   }
 
@@ -5296,7 +5539,7 @@ export default function useTowerGame() {
     lastWaveReward, isBossIncoming, offers, offerEnhanced,
     rerollReadyIn, allyCount,
     startRun, resumeRun, hasSavedRun, saveRunSnapshot,
-    isFirstSession, seedScriptedOpening,
+    isFirstSession, seedScriptedOpening, seedOpeningVanguard,
     placeBlock, placeShape, sellBlock, canPlaceAt, canPlaceShapeAt,
     upgradeBlock, canUpgradeBlock, upgradeCostAt,
     canAfford, canAffordShape, rerollOffer, manualReroll, canManualReroll,

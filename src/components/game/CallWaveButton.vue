@@ -8,6 +8,7 @@ import {
 } from '@/use/useAdGate'
 import { coins as walletCoins } from '@/use/useTowerEconomy'
 import IconCoin from '@/components/icons/IconCoin.vue'
+import PointerArrow from '@/components/game/PointerArrow.vue'
 
 /**
  * The Call Wave button (reference image 1).
@@ -40,12 +41,29 @@ interface Props {
    * live thing rather than another piece of dimmed HUD.
    */
   attention?: boolean
+  /**
+   * The same instruction, without the dim sheet: a gold arrow over the button
+   * and a small hop.
+   *
+   * Its one caller is the build phase after wave 1, for a player still in their
+   * first session. The coach marks taught them to press this once; the second
+   * press is the one nobody takes, because the field is quiet and nothing on
+   * screen says the game is waiting for them. From wave 2 on the button is left
+   * alone — by then pressing it is the thing they know how to do, and a control
+   * that keeps jumping after the lesson has landed is noise.
+   *
+   * Separate from `attention` so the two never stack: the coach mark already
+   * brings its own arrow, and a second one over the same button would read as
+   * a rendering fault.
+   */
+  nudge?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   speedBuffLeft: 0,
   speeds: () => GAME_SPEEDS,
-  attention: false
+  attention: false,
+  nudge: false
 })
 const emit = defineEmits<{
   (e: 'call'): void
@@ -147,11 +165,14 @@ const onSpeed = (n: number): void => {
 
 <template lang="pug">
   div.call-wave
+    //- The gold arrow, when something is asking for this press and there is no
+    //- coach mark on screen to carry one. Never both: see the `nudge` prop.
+    PointerArrow(v-if="nudge && !attention && phase === 'build'" side="top" :length="2.3")
     //- BUILD: call the wave early for a bonus.
     button.call-wave__btn(
       v-if="phase === 'build'"
       type="button"
-      :class="{ 'is-urgent': urgent, 'is-boss': bossIncoming, 'is-attention': attention }"
+      :class="{ 'is-urgent': urgent, 'is-boss': bossIncoming, 'is-attention': attention, 'is-nudge': nudge && !attention }"
       @click="emit('call')"
     )
       span.call-wave__shadow(aria-hidden="true")
@@ -202,6 +223,9 @@ const onSpeed = (n: number): void => {
 
 <style scoped lang="sass">
 .call-wave
+  // Positioned so the pointer arrow can anchor to the control it points at
+  // rather than to whatever HUD row happens to be above it.
+  position: relative
   pointer-events: auto
 
 .call-wave__btn
@@ -467,8 +491,23 @@ const onSpeed = (n: number): void => {
   70%
     transform: translateY(0) scale(0.98)
 
+// The same idea at HUD volume: an arrow is already pointing here and the rest
+// of the screen is live, so the button only has to catch the eye rather than
+// win it outright.
+.call-wave__btn.is-nudge
+  animation: cw-nudge 0.78s ease-in-out infinite
+
+@keyframes cw-nudge
+  0%, 100%
+    transform: translateY(0) scale(1)
+  40%
+    transform: translateY(-5px) scale(1.03)
+  70%
+    transform: translateY(0) scale(0.99)
+
 @media (prefers-reduced-motion: reduce)
-  .call-wave__btn.is-attention
+  .call-wave__btn.is-attention,
+  .call-wave__btn.is-nudge
     animation: none
 
 // The wave is about to start on its own.

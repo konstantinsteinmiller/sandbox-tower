@@ -405,6 +405,21 @@ export interface Enemy {
    * being knocked back.
    */
   knockback?: number
+  /**
+   * Standing on the field, but not yet part of the fight.
+   *
+   * A dormant enemy does not move, does not attack, and — the part that matters
+   * — cannot be TARGETED, so no gun picks it off while it waits. It is the
+   * opening vanguard's whole mechanism (see `seedOpeningVanguard`): monsters
+   * visible on the field from the first frame, held until the wave is called.
+   *
+   * Movement is already frozen during the build phase, because `fixedStep`
+   * never reaches `stepEnemies` there. Targeting is NOT: turrets cool down and
+   * fire between waves on purpose, so without this flag the tower would shoot
+   * the vanguard away while a first-time player was still reading a coach mark.
+   * `callWave` wakes every one of them.
+   */
+  dormant?: boolean
 }
 
 // ─── Allies ─────────────────────────────────────────────────────────────────
