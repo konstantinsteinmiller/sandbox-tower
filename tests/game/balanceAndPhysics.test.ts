@@ -26,12 +26,25 @@ beforeEach(() => {
 
 describe('wave size', () => {
   it('gives the opening waves a real fight', () => {
-    // The complaint was that the first ten waves were three or four grunts. A
-    // grunt costs 10, so this asserts wave 1 is at least a half-dozen bodies.
-    const grunt = ENEMY_DEFS.grunt!.cost
-    expect(waveBudget(1) / grunt).toBeGreaterThanOrEqual(6)
-    expect(planWave(1).orders.length).toBeGreaterThanOrEqual(5)
-    expect(planWave(5).orders.length).toBeGreaterThanOrEqual(15)
+    // Measured as THREAT, not as bodies, and that is the point of the test
+    // rather than an implementation detail.
+    //
+    // It used to divide the budget by the grunt's cost and demand half a dozen
+    // of them. That was a fair proxy while a grumpling was 22 HP and 10 cost —
+    // and it stopped being one on 2026-09-14, when the unit was deliberately
+    // retuned to fewer-and-tankier (65 HP at 24) because the old one was
+    // one-shot by the player's starting gun. Counting bodies would now read
+    // that change as a regression while the wave got strictly harder.
+    const hpOf = (wave: number, firstRun = false): number =>
+      planWave(wave, 1, firstRun).orders.reduce((s, o) => s + ENEMY_DEFS[o.typeId]!.hp, 0)
+
+    // A first session's wave 1 — the one a new player actually meets, with the
+    // opening surcharge on and the vanguard already standing on the field.
+    expect(hpOf(1, true)).toBeGreaterThanOrEqual(200)
+    // And it keeps growing: wave 5 is several times wave 1.
+    expect(hpOf(5)).toBeGreaterThan(hpOf(1) * 3)
+    // Once the roster opens up it is a crowd as well as a threat.
+    expect(planWave(5).orders.length).toBeGreaterThanOrEqual(10)
   })
 
   it('keeps climbing after the opening', () => {

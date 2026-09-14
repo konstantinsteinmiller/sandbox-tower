@@ -11,7 +11,7 @@ export default {
   /** OPTIONAL. Left out on purpose for the first run: the pipeline resolves the
    *  game by `gameName` on `https://app.poki.dev/<team>` and prints the id it
    *  found, which then gets pasted here to skip the lookup next time. */
-  // gameId: '…',
+  gameId: 'e0ae9b25-1aea-4325-9ae5-db6b361cbc99',
 
   /** The project's OWN build script, always. `build:poki` ends with the
    *  `cd dist && tar -a -cf ../tower-siege-poki.zip *` idiom every portal
@@ -44,8 +44,18 @@ export default {
   allowHosts: [],
 
   qa: {
-    playMs: 45000,
-    adWaitMs: 120000,
+    /** Long enough that a wave actually CLEARS during the pass. Both of this
+     *  game's interstitial placements hang off a run boundary — the end of a
+     *  wave and the defeat screen (`maybeShowInterstitial`) — so a pass that
+     *  never finishes a wave can never reach one. */
+    playMs: 60000,
+
+    /** Above this game's own interstitial floor, which is the whole point.
+     *  `INTERSTITIAL_MIN_GAP_MS` is 121 s and the clock is stamped at module
+     *  load, so the default 120 s wait expires ONE SECOND before the first
+     *  break is permitted — and every ad step then reports unproven for a
+     *  reason that has nothing to do with the build. */
+    adWaitMs: 180000,
   },
 
   /** Surfaces this game actually has.

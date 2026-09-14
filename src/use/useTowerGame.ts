@@ -4980,12 +4980,46 @@ const OPENING_FORT: ReadonlyArray<readonly [string, number, number]> = [
  * blocks into cells the player has since built on. Returns false, changing
  * nothing, in that case.
  */
-export const seedScriptedOpening = (): boolean => {
+export const seedScriptedOpening = (taught = false): boolean => {
   if (blocksByUid.size !== 1 || !blocks.has(key(0, 0))) return false
-  for (const [typeId, c, r] of OPENING_FORT) spawnBlock(typeId, c, r)
+  for (const [typeId, c, r] of OPENING_FORT) {
+    // The weld below COVERS the fort's own gun cell, so that gun is not placed
+    // separately — it is one of the two halves the weld is made of.
+    if (taught && typeId === 'cannon') continue
+    spawnBlock(typeId, c, r)
+  }
+  if (taught) seedTaughtWeld()
   syncTowerStats()
   saveRunSnapshot()
   return true
+}
+
+/**
+ * Hand a player the weld the coach marks would have taught them.
+ *
+ * `taught` means "this player will not be shown the tutorial" — they have
+ * finished it before, and died before reaching wave 2. Without this they are
+ * given the scripted fort and nothing else, and that board is measurably
+ * unwinnable: the fort's lone tier-1 cannon does about 11 damage a second, and
+ * wave 1 walks in with several hundred HP of grumplings. Simulated 2026-09-14,
+ * it loses the Gate on wave 1 at EVERY opening surcharge, including none at
+ * all.
+ *
+ * The gap was always there and only became fatal when the grumpling stopped
+ * being one-shot (see `ENEMY_DEFS.grunt`): the scripted fort has never been a
+ * tower that survives wave 1 on its own. It survives it in combination with the
+ * placement the tutorial forces — and a returning player is exactly the one who
+ * does not get that placement, while still being the one who most recently
+ * proved they needed it.
+ *
+ * So they are handed its RESULT: the 2x1 tier-2 cannon the coach marks produce
+ * by putting a cannon on the fort's shoulder. Spawned, not placed — it costs
+ * nothing and must not count towards `blocksPlaced`.
+ */
+const seedTaughtWeld = (): void => {
+  // Where the tutorial's own beat puts it (`TUTORIAL_CELLS[0]`), fused with the
+  // fort's gun into one block over both cells.
+  spawnBlock('cannon', -1, 1, false, undefined, false, 0, 2, 2, 1)
 }
 
 // ─── The opening vanguard ───────────────────────────────────────────────────

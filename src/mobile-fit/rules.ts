@@ -99,7 +99,15 @@ export const DROPMERGE_RULES: RuleSet = {
     // and the first wave was over before it had begun. Undiscounted it is a
     // grunt or two and a bat (the preview) against a fort that cannot lose
     // them: busy, not dangerous.
-    firstRunScale: [1, 1],
+    // An opening surcharge, where there was none.
+    //
+    // The phone board runs on half the desktop's budget, so it feels a change
+    // in a unit's PRICE twice as hard: when the grumpling went 10 → 24 on
+    // 2026-09-14 this board's first wave fell from three bodies to ONE. Its own
+    // note further up — "an opening with nothing in it is not gentle, it is
+    // empty" — is exactly the failure that produces, so the surcharge buys the
+    // body count back and nothing else. Waves 3+ are untouched.
+    firstRunScale: [2.5, 2],
     // The sky is most of a portrait screen, and the one lane the whole board
     // can see coming — so it carries far more of each wave than on the
     // desktop: 28 % from wave 2, climbing to 45 %. Every gun but the bombard

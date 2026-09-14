@@ -241,19 +241,23 @@ describe('desktop director is unchanged by the mode options', () => {
 
   it('spends exactly what it always has, wave by wave', () => {
     expect(spent(1, false)).toEqual([
-      60, 90, 120, 179, 223, 254, 261, 302, 323, 427, 384, 397, 426, 479, 500,
-      532, 587, 632, 659, 579, 714, 760, 741, 828, 852, 909, 981, 1001, 1033, 855
+      48, 72, 120, 172, 221, 259, 266, 300, 321, 427, 383, 399, 433, 484,
+      500, 532, 593, 629, 660, 584, 711, 760, 742, 824, 856, 909, 985, 1006,
+      1029, 853
     ])
     expect(spent(1.5, false)).toEqual([
-      90, 130, 183, 255, 320, 374, 395, 452, 489, 529, 600, 646, 688, 759, 807,
-      821, 907, 920, 1004, 796, 1158, 1190, 1262, 1300, 1349, 1419, 1475, 1492, 1589, 1181
+      72, 120, 183, 256, 326, 370, 394, 447, 489, 531, 604, 650, 684, 763,
+      810, 827, 904, 913, 1004, 794, 1154, 1190, 1266, 1303, 1348, 1425,
+      1472, 1493, 1587, 1180
     ])
     // A first session with a weak tower. Waves 1-2 carry the opening SURCHARGE
-    // (2.4 / 2.2 — see `FIRST_RUN_SCALE`), which is why they outspend a
-    // veteran's opening here; everything from wave 3 on is the plain curve.
+    // (1.6 / 1.4 — see `FIRST_RUN_SCALE`); everything from wave 3 on is the
+    // plain curve. Re-measured 2026-09-14 when the grumpling's cost went
+    // 10 → 24: these are sums of enemy COSTS, so every figure moved.
     expect(spent(0.7, true)).toEqual([
-      100, 140, 84, 125, 166, 188, 180, 209, 232, 352, 283, 248, 306, 311, 320,
-      389, 380, 418, 431, 461, 481, 491, 507, 560, 609, 643, 630, 659, 712, 612
+      48, 72, 84, 130, 166, 187, 183, 205, 231, 355, 279, 256, 305, 313, 322,
+      392, 380, 415, 437, 459, 484, 488, 514, 553, 613, 642, 629, 657, 705,
+      612
     ])
   })
 })

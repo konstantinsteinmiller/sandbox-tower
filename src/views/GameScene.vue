@@ -1236,7 +1236,11 @@ const beginRun = (): void => {
   startRun()
   // Last run's payout must not still be drifting up into a fresh bar.
   clearResourceFloats()
-  if (isFirstSession()) seedScriptedOpening()
+  // `tutorialDone` is passed through as "this player will not be taught": a
+  // returning player who died before wave 2 still gets the scripted opening,
+  // and without the coach marks' forced placement the fort alone cannot hold
+  // wave 1 — so they are handed the weld it would have produced.
+  if (isFirstSession()) seedScriptedOpening(tutorialDone.value)
   // The first beat points at one tile; that tile has to hold the cannon before
   // the player is looking at it.
   armTutorialHand()

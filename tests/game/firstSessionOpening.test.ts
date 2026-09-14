@@ -49,8 +49,8 @@ describe('first-session opening surcharge', () => {
     // Inverted on 2026-09-14. It was a discount (0.6 / 0.8) until a policy sim
     // showed that every value below 2.4 left a player who BUILT on a flat
     // 100 % Gate for six straight waves — see `FIRST_RUN_SCALE`.
-    expect(firstRunBudgetScale(1)).toBeCloseTo(2.4)
-    expect(firstRunBudgetScale(2)).toBeCloseTo(2.2)
+    expect(firstRunBudgetScale(1)).toBeCloseTo(1.6)
+    expect(firstRunBudgetScale(2)).toBeCloseTo(1.4)
     expect(firstRunBudgetScale(3)).toBe(1)
     expect(firstRunBudgetScale(12)).toBe(1)
   })

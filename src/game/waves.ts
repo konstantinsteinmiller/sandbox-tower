@@ -76,7 +76,15 @@ export const waveBudget = (wave: number, difficulty = 1): number =>
  * wave 1 bites hardest, and the surcharge eases off as the player's own tower
  * starts carrying the fight.
  *
- *   w1 → 2.4    w2 → 2.2    w3+ → 1
+ *   w1 → 1.6    w2 → 1.4    w3+ → 1
+ *
+ * Those were 2.4 / 2.2 for a few hours on 2026-09-14, and came back down the
+ * moment the grumpling itself was retuned (see `ENEMY_DEFS.grunt`). The high
+ * surcharge was COMPENSATING for a unit the starting tower one-shot: the only
+ * way to make a wave of paper monsters land a blow was to send more of them
+ * than the guns could clear. With the unit carrying its own threat, the same
+ * 15 % Gate loss on wave 1 comes from 8 monsters instead of 16 — a fight
+ * rather than a queue, and the surcharge is back to a nudge.
  *
  * What this buys, measured on the same board: the first wave takes an outer
  * wall down for every player, built or not — which is how a tower-defence game
@@ -93,7 +101,7 @@ export const waveBudget = (wave: number, difficulty = 1): number =>
  * board sits at a flat 1: its budget is already halved and its board is five
  * columns wide, so the desktop's surcharge would be a wipe rather than a wall.
  */
-const FIRST_RUN_SCALE: ReadonlyArray<number> = [2.4, 2.2]
+const FIRST_RUN_SCALE: ReadonlyArray<number> = [1.6, 1.4]
 
 export const firstRunBudgetScale = (
   wave: number, table: ReadonlyArray<number> = FIRST_RUN_SCALE

@@ -39,7 +39,13 @@ const loadGame = async () => {
 const openFirstSession = async (view: number | null = 10) => {
   const g = await loadGame()
   g.startRun()
-  g.seedScriptedOpening()
+  // `taught`: the board EVERY player actually meets wave 1 with. A first-timer
+  // reaches it through the coach marks' forced placement (the build clock is
+  // held until they make it); a returning un-onboarded player is handed the
+  // same weld by `seedScriptedOpening`. The bare fort is not a state anyone
+  // starts a wave from — and since the grumpling stopped being one-shot it is
+  // not a survivable one either.
+  g.seedScriptedOpening(true)
   if (view !== null) g.setViewSpan(-view, view)
   g.seedOpeningVanguard()
   // The tutorial holds the opening countdown while its coach marks run; every
@@ -178,9 +184,13 @@ describe('while the player is being taught', () => {
   it('never damages the tower while it waits', async () => {
     const g = await openFirstSession()
     const hp = g.gateHpPct.value
+    const cells = g.getBlocks().size
     for (let t = 0; t < 20_000; t += 16) g.step(16)
     expect(g.gateHpPct.value).toBe(hp)
-    expect(g.getBlocks().size).toBe(4)
+    // Not a literal: the opening board's cell count moved when the scripted
+    // fort started carrying the taught weld. What matters is that nothing on it
+    // was touched.
+    expect(g.getBlocks().size).toBe(cells)
   })
 
   it('holds even when the player builds a gun that reaches them', async () => {
@@ -283,13 +293,14 @@ describe('the guaranteed opening win survives it', () => {
     expect(g.gateHpPct.value).toBeGreaterThan(0.5)
   })
 
-  it('a player who takes the tutorial\'s own merge comes out comfortably ahead',
+  it('rewards a player who answers the opening by building a second gun',
     async () => {
       const g = await openFirstSession()
-      // The coach marks' one placement: a cannon on the fort's shoulder, which
-      // fuses with the fort's own into a tier 2.
+      // The lesson wave 1 is meant to teach: it costs you a wall, and the
+      // answer is another gun. A player who takes it finishes ahead of one who
+      // does not.
       g.offers.value = ['cannon1', 'cannon1', ...g.offers.value.slice(2)]
-      expect(g.placeShape(1, -1, 1, 0)).toBe(true)
+      expect(g.placeShape(1, 1, 1, 0)).toBe(true)
 
       expect(playWave(g)).toBe(true)
       expect(g.gateHpPct.value).toBeGreaterThan(0.8)
@@ -297,10 +308,10 @@ describe('the guaranteed opening win survives it', () => {
 
   it('bites — the opening costs an outer wall, and never the Gate', async () => {
     const g = await openFirstSession()
-    // The coach marks' own placement, so this is the board every first-timer
-    // actually meets wave 1 with: the scripted fort plus one merged tier-2 gun.
-    g.offers.value = ['cannon1', 'cannon1', ...g.offers.value.slice(2)]
-    expect(g.placeShape(1, -1, 1, 0)).toBe(true)
+    // The scripted opening already carries the coach marks' weld, so this is
+    // the board as dealt: fort plus one merged tier-2 gun.
+    const gun = [...g.getTowerBlocks().values()].find((b) => b.typeId === 'cannon')!
+    expect(gun.w).toBe(2)
     const before = g.getBlocks().size
 
     expect(playWave(g)).toBe(true)

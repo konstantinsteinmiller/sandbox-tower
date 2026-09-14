@@ -83,3 +83,4 @@ __screenshots__/
 # Generated preview / trailer clips (tools/preview-video). Build artifacts —
 # a lossless 1080p 30 s master runs to ~140 MB.
 /preview-videos/
+poki-qa-report.json

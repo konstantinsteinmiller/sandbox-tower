@@ -34,17 +34,51 @@ import type { EnemyDef, ProjectileKind } from './types'
 // player meets one new idea at a time.
 
 export const ENEMY_DEFS: Record<string, EnemyDef> = {
+  // ── The grumpling ──
+  //
+  // Retuned 2026-09-14, because it was not a threat — it was a target.
+  //
+  // The board a first-time player has when wave 1 arrives is the scripted fort
+  // plus the tutorial's own merged cannon, ranked once. That gun hits for
+  // 16 x 3 (the tier-2 weld, `mergePowerMul`) x 1.22 (one rank) = **58.6**,
+  // with 1.2 cells of splash. Against 22 HP that is a 2.6x overkill ONE-SHOT,
+  // on clusters, from the starting tower — so a grumpling's entire contribution
+  // was to walk into range and pop. Nothing ever arrived, nothing was ever at
+  // stake, and the 2026-09-14 playtest watched three testers go five waves
+  // without the Gate losing a point.
+  //
+  // 65 HP is the smallest number that clears that one-shot line, and it is
+  // chosen against the line rather than picked for feel: it takes two shots
+  // from the ranked weld and five from a plain cannon.
+  //
+  // 8 damage is about the Gate's ARMOUR, not its HP. Armour is flat
+  // (`damageBlock`), so at 5 damage a grumpling landed 5 - 3 = 2 on the Gate
+  // and needed 150 connected hits to matter. At 8 it lands 5 — two and a half
+  // times what actually connects, for a 60 % nominal rise.
+  //
+  // 24 cost is what keeps the ROSTER honest. The director spends a budget, so
+  // tripling a unit's HP at a fixed price triples every wave in the game; and
+  // at cost 18 the grumpling would sit at 3.6 hp/cost, ABOVE the brute's 2.9 —
+  // the baseline unit tankier per point than the designated tank. 24 puts it at
+  // 2.7, just under, and measured composition keeps its share of waves 3-15
+  // where it is today. (Cost 30 was tried and rejected: the grumpling drops out
+  // of waves 10 and 20 entirely, and it is the thing the player's DPS is
+  // measured against.)
+  //
+  // Measured on the first-session board: wave 1 now ends with the Gate at 85 %
+  // and both outer walls gone, a builder holds 85 % from there, and a player
+  // who never builds again is dead by wave 6.
   grunt: {
     id: 'grunt',
     monster: ['grumpling', 'rattlejack'],
-    hp: 22,
+    hp: 65,
     speed: 1.0,
-    damage: 5,
+    damage: 8,
     attackCooldownMs: 850,
     reach: 0.85,
     movement: 'ground',
     coins: 1,
-    cost: 10,
+    cost: 24,
     minWave: 1,
     scale: 0.62,
     palette: 'grunt'

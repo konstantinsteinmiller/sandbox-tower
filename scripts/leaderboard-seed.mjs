@@ -156,20 +156,24 @@ export const stageShares = () => {
 // `buildSeedBoard`: the adaptive director scales the wave BUDGET linearly, and
 // the measured curves confirm the kill count follows it to within ~2 %.
 
+// Re-measured 2026-09-14, after the grumpling was retuned to fewer-and-tankier
+// (65 HP at cost 24, was 22 at 10). The director spends a budget, so a costlier
+// unit means fewer bodies per wave and fewer points per stage — every number
+// below came down, most sharply in the opening.
 export const CUM_KILLS = {
   /** The landscape tower-defence scene — `DESKTOP_RULES`. */
   desktop: [
-    0, 6, 15, 28, 45, 61, 76, 93, 111, 127, 142, 164, 183, 205, 229, 257, 281,
-    308, 335, 365, 381, 405, 428, 451, 478, 501, 529, 558, 589, 617, 641, 671,
-    703, 733, 762, 796, 826, 862, 897, 931, 960, 995, 1037, 1079, 1121, 1166,
-    1209, 1255, 1300
+    0, 2, 5, 15, 30, 42, 55, 68, 84, 100, 114, 133, 152, 173, 194, 220, 244,
+    267, 292, 321, 338, 362, 384, 406, 432, 455, 480, 506, 536, 563, 587,
+    617, 647, 676, 704, 739, 768, 802, 836, 870, 898, 932, 974, 1016, 1058,
+    1102, 1144, 1190, 1232
   ],
   /** The portrait Drop & Merge scene — `DROPMERGE_RULES`, half the budget. */
   dropmerge: [
-    0, 3, 6, 11, 17, 24, 31, 39, 48, 56, 63, 70, 79, 88, 98, 110, 123, 138,
-    148, 169, 183, 202, 219, 236, 255, 276, 301, 326, 355, 381, 410, 435, 452,
-    478, 506, 541, 568, 600, 627, 651, 670, 705, 748, 785, 822, 861, 898, 938,
-    963
+    0, 1, 3, 8, 15, 21, 26, 34, 42, 51, 58, 65, 73, 81, 91, 101, 112, 126,
+    138, 160, 173, 188, 204, 218, 233, 253, 274, 293, 314, 338, 361, 384,
+    398, 422, 448, 477, 501, 530, 557, 581, 599, 629, 661, 697, 729, 762,
+    798, 832, 855
   ]
 }
 
