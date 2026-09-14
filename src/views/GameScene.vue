@@ -68,6 +68,7 @@ import useSounds, { useMusic } from '@/use/useSound'
 import { useScreenshake } from '@/use/useScreenshake'
 import { isGamePaused, isAdShowing } from '@/use/useGamePause'
 import { isMobileLandscape, isCrazyWeb } from '@/use/useUser'
+import { isBottomBarCompact } from '@/utils/bottomBarLayout'
 import { isFullscreen, installFullscreenWatch } from '@/use/useFullscreen'
 import { isCrazyGamesFullRelease } from '@/use/useMatch'
 import { spawnCoinExplosion } from '@/use/useCoinExplosion'
@@ -231,6 +232,97 @@ const hudInset = ref({ top: 0, bottom: 0 })
  */
 const showMuteButton = computed(() => !isCrazyWeb || isFullscreen.value)
 
+// ─── Compact bottom bar ─────────────────────────────────────────────────────
+//
+// The three-column bar hands the hand a fixed SHARE of the viewport (46vw, see
+// `.scene__bottom`) — but only what the two side clusters leave over, because
+// their tracks floor at `min-content`. On a landscape phone those clusters are
+// both rows (the right one flattens at `RIGHT_ROW_QUERY`), between them they
+// take most of the bar, and the hand is left with whatever is in the middle —
+// its offers spilling off the side of a scroller nothing suggests can be
+// scrolled, which is the one decision the build phase is about.
+//
+// Where that happens the clusters stand up instead of lying down — the meta
+// buttons into a column ABOVE the mute button, Arrow Rain and the tech tree
+// into a row ABOVE the wave control — which costs a bar that is taller in a
+// corner of the screen that is empty sky, and gives the hand its full share.
+//
+// Measured rather than keyed to a breakpoint, because the two clusters' widths
+// are not constants: the wave control carries a translated label ("LLAMAR
+// OLEADA" is half again "CALL WAVE"), and the meta row grows and shrinks with
+// what the build ships.
+//
+// Every input is independent of the arrangement this decides, so the two
+// cannot chase each other — see `isBottomBarCompact`, which owns the line and
+// is tested against it. This side only reads the boxes.
+const bottomCompact = ref(false)
+const metaRowRef = ref<HTMLElement | null>(null)
+const rightColRef = ref<HTMLElement | null>(null)
+const rightButtonsRef = ref<HTMLElement | null>(null)
+const callWaveRef = ref<{ $el?: HTMLElement } | null>(null)
+/** Bottom-bar height in px, published to the stylesheet — the block inspector
+ *  sits directly above the meta cluster and has to clear it once it is three
+ *  buttons tall rather than one. */
+const bottomBarH = ref(0)
+
+/**
+ * The one media rule that lays the right-hand cluster out as a ROW rather than
+ * a column (the landscape-phone block in the stylesheet below). Its roomy
+ * width is a sum there and a max everywhere else — and it cannot be read back
+ * off the element, because the compact layout is what overrides the direction.
+ */
+const RIGHT_ROW_QUERY = '(orientation: landscape) and (max-height: 30rem)'
+const widthOf = (el: Element | null | undefined): number =>
+  el ? el.getBoundingClientRect().width : 0
+
+const gapOf = (el: HTMLElement | null): number =>
+  el ? parseFloat(getComputedStyle(el).columnGap) || 0 : 0
+
+/** What `el`'s visible children need laid out in ONE row — the arrangement the
+ *  roomy bar puts them in, whichever one they are in right now. */
+const rowWidthOf = (el: HTMLElement | null): number => {
+  if (!el) return 0
+  const widths = Array.from(el.children).map(widthOf).filter((w) => w > 0)
+  if (widths.length === 0) return 0
+  return widths.reduce((a, b) => a + b, 0) + gapOf(el) * (widths.length - 1)
+}
+
+const measureBottomBar = (): void => {
+  const bar = bottomBarRef.value
+  if (!bar) return
+  bottomBarH.value = Math.round(bar.getBoundingClientRect().height)
+  const cs = getComputedStyle(bar)
+  // The stacked phone layouts already give the hand a row to itself, so nothing
+  // the side clusters do can squeeze it. Asked of the live grid rather than by
+  // restating their breakpoints here, where they would drift apart.
+  if (cs.gridTemplateAreas.includes('tray tray')) {
+    bottomCompact.value = false
+    return
+  }
+  const inner = bar.clientWidth
+    - (parseFloat(cs.paddingLeft) || 0)
+    - (parseFloat(cs.paddingRight) || 0)
+  const meta = rowWidthOf(metaRowRef.value)
+  const buttons = widthOf(rightButtonsRef.value)
+  const wave = widthOf(callWaveRef.value?.$el)
+  const right = window.matchMedia(RIGHT_ROW_QUERY).matches
+    ? buttons + gapOf(rightColRef.value) + wave
+    : Math.max(buttons, wave)
+  bottomCompact.value = isBottomBarCompact({
+    inner,
+    columnGap: parseFloat(cs.columnGap) || 0,
+    metaRow: meta,
+    rightCluster: right,
+    viewport: window.innerWidth,
+    compact: bottomCompact.value
+  })
+}
+
+// The wave control swaps a translated "Call wave" for the speed switch, which
+// is the widest single thing on that side of the bar — so the phase is the one
+// change worth answering sooner than the 1 s tick in `onMounted`.
+watch(phase, () => { void nextTick(measureBottomBar) })
+
 const resize = (): void => {
   const canvas = canvasRef.value
   if (!canvas) return
@@ -253,6 +345,7 @@ const resize = (): void => {
   cssHRef.value = cssH
   ctx = canvas.getContext('2d')
   ctx?.setTransform(dpr, 0, 0, dpr, 0, 0)
+  measureBottomBar()
   const insets = measureInsets()
   hudInset.value = insets
   setViewport(cssW, cssH, insets.top, insets.bottom)
@@ -2951,6 +3044,10 @@ onMounted(() => {
   window.addEventListener('orientationchange', onOrientationChange)
   window.addEventListener('keydown', onKey)
   rafId = requestAnimationFrame(loop)
+  // Before `boot` gets as far as its own `resize`: the bar has its real boxes
+  // as soon as the HUD is in the document, and the first paint should already
+  // be in the arrangement the viewport calls for.
+  void nextTick(measureBottomBar)
 
   // Warm the audio synthesis path on an idle slot, so it does not compete with
   // the first frame. Drop-in art is no longer probed from here: `artPreload`
@@ -2968,6 +3065,9 @@ onMounted(() => {
   // reads — cheaper and far more robust than observing a dozen elements.
   insetTimer = window.setInterval(() => {
     if (cssW === 0) return
+    // Same cadence, same two rects: whether the side clusters still leave the
+    // hand its share is the same kind of question as how tall the bar is.
+    measureBottomBar()
     const insets = measureInsets()
     hudInset.value = insets
     setViewport(cssW, cssH, insets.top, insets.bottom)
@@ -3040,7 +3140,7 @@ onUnmounted(() => {
 
     //- ── HUD overlay ───────────────────────────────────────────────────────
     //- Non-interactive by default; individual controls opt back in.
-    div.scene__hud
+    div.scene__hud(:class="{ 'is-compact': bottomCompact }" :style="{ '--scene-bar-h': `${bottomBarH}px` }")
       //- The flying chest crosses the sky on its own timer. First in the HUD, so
       //- every panel and button after it paints over it rather than under.
       FlyingChest(
@@ -3127,7 +3227,7 @@ onUnmounted(() => {
               :can-repair="repairAllReady"
               @repair="onRepairAll"
             )
-          div.scene__meta
+          div.scene__meta(ref="metaRowRef")
             //- On CrazyGames the platform toolbar owns the mute control and QA
             //- rejects a second one competing with it — except in fullscreen,
             //- where that toolbar is gone and this is the only way to shut the
@@ -3257,8 +3357,8 @@ onUnmounted(() => {
               )
 
         //- Tech tree, themes, and the wave control.
-        div.scene__right
-          div.scene__right-buttons
+        div.scene__right(ref="rightColRef")
+          div.scene__right-buttons(ref="rightButtonsRef")
             //- Arrow Rain, left of the tech tree. Both are "spend something to
             //- change the fight", but this one spends a charge and resolves in
             //- the next second, so it sits first along the thumb's path.
@@ -3327,6 +3427,7 @@ onUnmounted(() => {
             ) {{ t(`warnings.${w.id}`, { n: w.n, m: w.m ?? 0 }) }}
 
           CallWaveButton(
+            ref="callWaveRef"
             :phase="phase"
             :time-left="buildTimeLeft"
             :bonus-pct="callBonusPct"
@@ -3970,6 +4071,47 @@ onUnmounted(() => {
   display: flex
   align-items: flex-end
   gap: clamp(0.15rem, 1vw, 0.35rem)
+
+// ─── Compact bottom bar ─────────────────────────────────────────────────────
+//
+// Set by `measureBottomBar` when the two side clusters, laid out as rows, do
+// not leave the hand the 46vw the middle track is meant to give it — which on
+// a landscape phone is every time, because the right-hand cluster is a row
+// there too. The hand is squeezed into what is left between them, and the
+// offers it cannot fit are off the side of a scroller nothing suggests can be
+// scrolled.
+//
+// Both clusters stand up: the meta buttons into a column ABOVE the mute button
+// (`column-reverse`, so the mute stays the bottom-left corner it has always
+// been), and Arrow Rain with the tech tree into a row ABOVE the wave control.
+// The left goes from three buttons wide to one and the right from its whole
+// row to its widest part, and all of that width goes into the hand.
+//
+// It costs height, in the two corners where a landscape phone has nothing but
+// sky — and none of it comes off the battlefield: the camera insets are
+// measured from the bar (`measureInsets`), so the tower reframes above it.
+.scene__bottom.is-compact
+  // The repair pill is right-aligned to the cluster below it. That cluster is
+  // now a single column at the screen edge, so both go left instead.
+  .scene__meta-col
+    align-items: flex-start
+
+  .scene__meta
+    flex-direction: column-reverse
+    align-items: flex-start
+
+  // Higher specificity than the landscape-phone rule that flattens this into a
+  // row, so source order between the two does not matter.
+  .scene__right
+    flex-direction: column
+    align-items: flex-end
+
+// The inspector is anchored above the meta cluster, which is three buttons tall
+// here rather than one. The generous constants it uses elsewhere cannot cover
+// that, so it clears the measured bar instead — `--scene-bar-h` already carries
+// the safe-area inset the bar pads itself with.
+.scene__hud.is-compact .scene__inspector
+  bottom: calc(var(--scene-bar-h, 8rem) + 0.35rem)
 
 // ─── Incoming-threat warnings ───────────────────────────────────────────────
 //
