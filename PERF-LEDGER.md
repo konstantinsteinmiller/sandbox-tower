@@ -62,6 +62,118 @@ Built bundle, mobile-fit board, painted art on, 4× CPU, tier mid, wave 10.
 
 ## Experiments
 
+### 2026-09-14 — The adaptive controller could not see a slideshow · **SHIPPED, proved by test not by harness**
+
+A second desktop playtest, four times worse than the first and on the same
+class of machine:
+
+```
+ANGLE (Intel, Intel(R) UHD Graphics (0x00009B41) Direct3D11) · 8 cores
+DPR 1.25 · Edge 153 · Windows 10 · Tower Siege 3.0.1
+  observed: 2-5 fps, sustained, for THREE MINUTES
+```
+
+The 2026-09-10 row shipped `useAdaptiveQuality` precisely so this could not
+happen. It did not fire. It could not have fired — **on that machine the
+controller was structurally incapable of judging a single window**, and would
+have stayed at `high` for as long as the player sat there.
+
+Three decisions had to be wrong at once, and each was defensible alone:
+
+1. **`GameScene.vue` fed the controller its CLAMPED delta.** `dt = Math.min(t -
+   lastT, 120)` is right for the simulation — a 400 ms physics step tunnels
+   projectiles through blocks — and was also what `sampleAdaptiveFrame` got. So
+   no frame could ever report worse than 120 ms.
+2. **The outlier rule discarded everything at or over 118 ms** as "the page
+   stopped" — a tab switch, an ad, a GC pause. Which is *every frame* a machine
+   below ~8.5 fps produces, arriving pre-clamped to exactly 120.
+3. **The warmup gate and the window floor were counted in FRAMES.** Even with
+   (1) and (2) fixed: 40 warmup frames is 13 s at 3 fps, and `MIN_WINDOW_FRAMES
+   = 18` can never be met inside a 1.6 s window below ~11 fps, so every window
+   would close short and be discarded — forever, at any frame rate low enough
+   to matter.
+
+The property all three share: **the worse the machine, the more certain it was
+to be ignored.** The relief mechanism had a hole exactly where the pain was
+worst, and nothing about it was visible on a developer's machine.
+
+Reproduced as a unit test against the shipped 3.0.1 controller — 900 frames of
+what the scene actually feeds at 4 fps:
+
+```
+  tier after 108 s of 120 ms frames:  high
+  __quality(): { windowsJudged: 0, lastP50: 0, bestP10: 0, upgradesLeft: 1 }
+```
+
+Zero. In 108 simulated seconds it judged nothing at all.
+
+**What shipped:**
+
+- `GameScene.vue` tracks two deltas. `dt` stays clamped for `step()`; `rawAccum`
+  is unclamped and is what the controller is judged on. A measurement must not
+  be capped at the value that means "ignore me".
+- The outlier rule is now a **run-length** rule. What separates a stall from a
+  slow machine is not the size of the delta but its ISOLATION: nothing that
+  stops the page produces four consecutive 118 ms frames, and a machine at
+  5 fps produces nothing else. `STALL_RUN = 4`.
+- The warmup gets a wall-clock **ceiling** (`WARMUP_CEILING_MS = 4000`) beside
+  its frame count, and a window that cannot hold 18 frames stays OPEN rather
+  than being discarded (`SLOW_WINDOW_MS = 4000`, `MIN_SLOW_FRAMES = 6`). Six
+  frames of 250 ms against a 22 ms threshold is not a close call.
+- The audition is bounded by **windows as well as by the clock** — 10 s is six
+  windows on a healthy machine and barely one at 3 fps, so the wall clock alone
+  handed the fast relief to the machines that needed it least.
+- A median past `COLLAPSE_P50_MS` (4x the struggle threshold, ~11 fps) **skips
+  `mid` and goes straight to the floor**. Walking an 11 fps machine through an
+  intermediate tier costs it an extra scenery re-bake and an extra window to
+  reach a fidelity that was never going to rescue it.
+- `adaptiveReport()` gains `stallsDropped`. A session where that is large and
+  `windowsJudged` is small is this bug re-opening, and the next playtest should
+  not have to re-derive it.
+
+Net on the reported machine: the bottom tier now arrives in **about nine
+seconds** instead of never.
+
+**And the boot guess that would have avoided those nine seconds.** Both desktop
+playtests scored `high` on every signal the game had — 8 cores, not mobile, no
+Android major — and both were identifiable before the first frame from one
+string the browser gives away free:
+
+```
+  2026-09-10  ANGLE (AMD, AMD Radeon(TM) 610M (0x000015BF) Direct3D11 …)   18 fps
+  2026-09-14  ANGLE (Intel, Intel(R) UHD Graphics (0x00009B41) Direct3D11 …) 2-5 fps
+```
+
+`gpuClass()` in `useDeviceTier.ts` reads `WEBGL_debug_renderer_info` off a
+throwaway context and classifies it: software rasterisers (SwiftShader,
+llvmpipe, Basic Render Driver) start at `low`, Intel's pre-Xe HD/UHD line and
+AMD's smallest integrated parts start at `mid`, **everything unrecognised keeps
+`high`**. `desktopStartTier()` feeds it to `initAdaptiveQuality`. A machine
+demoted wrongly climbs back after 25 s of comfortable play — that upgrade path
+is what makes guessing down here safe.
+
+The match list is an allowlist of things known slow, not a model of the GPU
+market, and `tests/game/gpuClass.test.ts` pins the false positives that would
+cost a capable desktop its fidelity: Iris Xe and Arc share a vendor with the
+UHD line and nothing else; the 660M/680M share "Radeon" and a naming scheme
+with the 610M at several times the throughput.
+
+**What this row is NOT.** No harness run. The controller fix is proved by unit
+test — which is the right instrument, because the defect is "it never judges a
+window" and that is a logic property, not a timing one. But **how fast the game
+actually is at `mid` on an Intel UHD 630 is still unmeasured**, and it is
+entirely possible that machine is under 30 fps at every tier this can reach.
+The claim here is "the machine now gets the tier it should always have had in
+nine seconds instead of never", not "the machine is now fast".
+
+**Open:** `?tier=high` vs `?tier=mid` vs `?tier=low` on a UHD-630-class
+machine, which is the same missing measurement the 2026-09-10 row asked for and
+still nobody has run. Ruled OUT as causes of the sustained 2-5 fps, by reading:
+the monster bake pool (off-thread via `OffscreenCanvas`, and the main-thread
+fallback is spaced across idle slices), painted-art invalidation (an opening-
+seconds cost, not a three-minute one), and `ctx.filter` (one clipped pass on a
+submerged sea monster).
+
 ### 2026-09-10 — Adaptive quality on the DESKTOP scene · **SHIPPED UNMEASURED**
 
 **Read this row's verdict first: nothing here has been A/B'd.** It is recorded

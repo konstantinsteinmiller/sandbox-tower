@@ -139,3 +139,123 @@ export const initDeviceTier = (): RenderProfile => {
   deviceTier.value = resolveDeviceTier(readDeviceSignals())
   return PROFILES[deviceTier.value]
 }
+
+// ─── The GPU, which is the one thing none of the signals above can see ──────
+//
+// `resolveDeviceTier` scores a machine weak on core count, memory, the UA and
+// the Poki category. Not one of those fires on a desktop, and PERF-LEDGER.md
+// has now collected two playtests from machines where every one of them was
+// wrong in the same direction:
+//
+//   2026-09-10  AMD Radeon 610M (2 CU) · 8 cores · DPR 1.5      18 fps
+//   2026-09-14  Intel UHD 630 · 8 cores · DPR 1.25        2-5 fps, 3 minutes
+//
+// Both scored `high` on every signal the game had. What they have in common is
+// visible in one string the browser will hand over for free — the unmasked
+// WebGL renderer — and nothing else in the profile comes close to it.
+//
+// This is a STARTING GUESS, not a verdict. `useAdaptiveQuality` measures the
+// machine either way, can take a wrongly-demoted desktop back up to `high`
+// after twenty-five seconds of comfortable play, and can take a machine this
+// misses down to `low` regardless. What the guess buys is the first ten
+// seconds, which on a 3 fps machine is the whole of the player's patience.
+
+export type GpuClass = 'software' | 'weak' | 'unknown'
+
+/**
+ * Classify an unmasked WebGL renderer string.
+ *
+ * Deliberately a small allowlist of things that are KNOWN slow rather than a
+ * model of the GPU market: an unrecognised string must read as `unknown` and
+ * keep its fidelity, because the cost of a false positive is a capable desktop
+ * quietly losing its reflection and the cost of a false negative is a machine
+ * that gets measured a few seconds later anyway.
+ *
+ * Exported and pure so the match list is testable without a GPU — see
+ * `tests/game/gpuClass.test.ts`, which pins the real strings both playtest
+ * machines reported alongside the ones that must NOT match.
+ */
+export const gpuClass = (renderer: string | null): GpuClass => {
+  if (!renderer) return 'unknown'
+  const r = renderer.toLowerCase()
+
+  // No GPU at all: Chrome's fallback rasteriser, Mesa's, and Windows'. Every
+  // full-viewport fill in this renderer is on the CPU here.
+  if (/swiftshader|llvmpipe|software rasterizer|basic render driver|softpipe|microsoft basic/.test(r)) {
+    return 'software'
+  }
+
+  // Intel's pre-Xe integrated line — HD / UHD / GMA. Iris Xe and Arc are a
+  // different architecture and several times the throughput, so the pattern is
+  // anchored on "hd graphics" rather than on "intel".
+  if (/intel/.test(r) && /\b(u?hd graphics|gma)\b/.test(r)) return 'weak'
+
+  // AMD's smallest integrated parts. Named individually because "Radeon" also
+  // covers the RX discrete line and the far stronger 660M/680M, and a pattern
+  // loose enough to catch a 610M catches those too.
+  if (/radeon/.test(r) && /\b(6[01]0m|vega [368]|r[2-5] graphics)\b/.test(r)) return 'weak'
+
+  // Mobile parts old enough to be a problem. Consumed only by the desktop
+  // start tier today — the phone scene's own boot guess is measured
+  // (PERF-LEDGER.md) and is deliberately not changed here on an unmeasured
+  // signal — but correct if a tablet ever arrives down this path.
+  if (/\bmali-(t\d|g3\d|g5[12])/.test(r)) return 'weak'
+  if (/\badreno\b.*\b[345]\d\d\b/.test(r)) return 'weak'
+  if (/powervr/.test(r)) return 'weak'
+
+  return 'unknown'
+}
+
+/** Cached across calls: the context creation is the expensive half. */
+let gpuRendererCache: string | null | undefined
+
+/**
+ * The unmasked WebGL renderer, or null where it cannot be had.
+ *
+ * Null is the common case on a privacy-hardened browser (Firefox's
+ * `resistFingerprinting`, Safari's masking, an extension that spoofs it) and on
+ * any machine where WebGL is off entirely. That is fine: it lands on `unknown`,
+ * which keeps the fidelity and leaves the decision to measurement.
+ *
+ * The context is thrown away immediately. The game's canvas is 2D — this exists
+ * only to ask the question.
+ */
+export const readGpuRenderer = (): string | null => {
+  if (gpuRendererCache !== undefined) return gpuRendererCache
+  gpuRendererCache = null
+  try {
+    if (typeof document === 'undefined') return null
+    const c = document.createElement('canvas')
+    const gl = (c.getContext('webgl') ?? c.getContext('experimental-webgl')) as WebGLRenderingContext | null
+    if (!gl) return null
+    const ext = gl.getExtension('WEBGL_debug_renderer_info')
+    const raw = ext
+      ? gl.getParameter((ext as { UNMASKED_RENDERER_WEBGL: number }).UNMASKED_RENDERER_WEBGL)
+      : gl.getParameter(gl.RENDERER)
+    gl.getExtension('WEBGL_lose_context')?.loseContext()
+    gpuRendererCache = typeof raw === 'string' && raw.length > 0 ? raw : null
+  } catch {
+    gpuRendererCache = null
+  }
+  return gpuRendererCache
+}
+
+/**
+ * Where the DESKTOP scene should start.
+ *
+ * `high` unless the GPU says otherwise, which is the historical behaviour for
+ * every machine this cannot identify. A software rasteriser starts at the
+ * floor; a known-weak integrated part starts one step down, which is the
+ * package PERF-LEDGER.md measured (frozen and baked sky, no reflection, no
+ * grain, HUD effects off) without touching the draw cadence or the enemy count.
+ */
+export const desktopStartTier = (): DeviceTier => {
+  switch (gpuClass(readGpuRenderer())) {
+    case 'software': return 'low'
+    case 'weak': return 'mid'
+    default: return 'high'
+  }
+}
+
+/** Test-only: forget the cached renderer string. */
+export const __resetGpuCache = (): void => { gpuRendererCache = undefined }

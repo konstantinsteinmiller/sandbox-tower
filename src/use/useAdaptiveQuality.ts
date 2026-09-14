@@ -104,17 +104,45 @@ const stepUp = (t: DeviceTier): DeviceTier => ORDER[Math.min(ORDER.length - 1, O
 // ─── Measurement constants ──────────────────────────────────────────────────
 
 /**
+ * ─── The slow-machine blind spot ────────────────────────────────────────────
+ *
+ * Every constant below used to be expressed in FRAMES with a wall-clock floor,
+ * and the outlier rule discarded anything at or over the scene's own 120 ms
+ * delta clamp. Together those three decisions made the controller structurally
+ * incapable of seeing the machines it exists for.
+ *
+ * A playtest on 2026-09-14 — Intel UHD 630, ANGLE D3D11, 8 cores, DPR 1.25 —
+ * sat at **2–5 fps for three minutes**. At 5 fps every frame is 200 ms, the
+ * scene handed that over clamped to 120, and 120 ≥ the 118 ms outlier ceiling,
+ * so every single frame was thrown away as "the page stopped". `__quality()`
+ * after 108 s of that reads `windowsJudged: 0`. The controller never judged one
+ * window, never stepped down, and the player kept the full `high` package —
+ * live day/night sky, the 4.5 s scenery re-bake, the grain pass, the HUD's
+ * `backdrop-filter` — for the entire session. The worse the machine, the more
+ * certain it was to be ignored.
+ *
+ * Two of the three are fixed here; the third is in `GameScene.vue`, which now
+ * feeds the TRUE frame interval rather than the clamped simulation delta (the
+ * clamp is right for physics and wrong for a measurement).
+ */
+
+/**
  * Frames and wall time discarded before the first window opens.
  *
- * Both, not either. The opening seconds carry the WebP decodes, the first
- * monster bakes, the platform SDK's own script work and the splash teardown —
- * none of which represent steady play, and all of which would push a healthy
- * machine straight to `low`. On a machine at 15 fps, 40 frames is 2.7 s, so the
- * frame count is what actually gates there and the time floor is what gates on
- * a fast one.
+ * The opening seconds carry the WebP decodes, the first monster bakes, the
+ * platform SDK's own script work and the splash teardown — none of which
+ * represent steady play, and all of which would push a healthy machine straight
+ * to `low`.
+ *
+ * `WARMUP_MS` is a floor and `WARMUP_CEILING_MS` is a ceiling, because the
+ * frame count alone is a trap: 40 frames is 0.7 s at 60 fps, 2.7 s at 15 fps
+ * and **thirteen seconds at 3 fps**. The machine that most needs relief would
+ * wait longest for it. Past the ceiling, wall time has done the warmup's job
+ * however few frames fit inside it.
  */
 const WARMUP_MS = 1500
 const WARMUP_FRAMES = 40
+const WARMUP_CEILING_MS = 4000
 
 /** A window closes at whichever of these comes first — see `MIN_WINDOW_FRAMES`. */
 const WINDOW_FRAMES = 60
@@ -124,21 +152,51 @@ const WINDOW_MS = 1600
 const MIN_WINDOW_FRAMES = 18
 
 /**
- * Frames longer than this are dropped from the sample entirely.
+ * The same floor, for a machine that cannot produce eighteen frames in 1.6 s.
  *
- * The scene clamps its own delta to 120 ms, so a 120 ms sample means "something
- * stopped the page" — a tab switch, an ad, a GC pause behind a modal — not
- * "this frame was slow". Counting those would downgrade a machine for events it
- * did not cause.
+ * Below ~11 fps `MIN_WINDOW_FRAMES` can never be met inside `WINDOW_MS`, so
+ * every window closed short and was discarded — forever, at any frame rate low
+ * enough to matter. The window stays OPEN instead until it has enough to rank,
+ * and six is enough when the signal is this loud: six frames of 250 ms give a
+ * median of 250 against a 22 ms threshold and an over-budget ratio of 1.0.
+ */
+const SLOW_WINDOW_MS = 4000
+const MIN_SLOW_FRAMES = 6
+
+/** A window with almost no frames in it at all is abandoned, not grown without
+ *  bound — the page is not drawing and there is nothing to judge. */
+const STALE_WINDOW_MS = 12_000
+
+/**
+ * Above this a frame is a SUSPECT, not yet evidence.
+ *
+ * A tab switch, an ad teardown, a GC pause behind a modal and a synchronous
+ * decode all produce one enormous delta, and counting those would downgrade a
+ * machine for events it did not cause. What separates them from a genuinely
+ * slow machine is not the size of the delta — it is that they happen ONCE.
+ *
+ * So a suspect frame is discarded on its own and counted once `STALL_RUN` of
+ * them arrive back to back. Nothing that stops the page produces four
+ * consecutive 118 ms frames; a machine at 5 fps produces nothing else.
  */
 const OUTLIER_MS = 118
+const STALL_RUN = 4
 
 /** How long after a tier change before its frames count. A change re-bakes the
  *  whole scenery layer, and those frames are not steady state. */
 const SETTLE_MS = 1400
 
-/** The opening audition: within it, ONE bad window is enough to step down. */
+/**
+ * The opening audition: within it, ONE bad window is enough to step down.
+ *
+ * Bounded by windows as well as by the clock, and it is the LATER of the two.
+ * Ten seconds is six or seven windows on a healthy machine and barely one on a
+ * machine at 3 fps, whose windows are four seconds long — so the wall clock
+ * alone hands the fast relief to the machines that need it least and makes the
+ * worst machine serve a two-window streak for every step it takes.
+ */
 const AUDITION_MS = 10_000
+const AUDITION_WINDOWS = 3
 
 /**
  * Thresholds, stated per PRESENTED frame at `drawEvery: 1`.
@@ -155,6 +213,18 @@ const AUDITION_MS = 10_000
  * hit: 60 fps of presented frames at `drawEvery: 1`, 30 at `drawEvery: 2`.
  */
 const STRUGGLE_P50_MS = 22
+
+/**
+ * A median this far over budget skips the intermediate tier entirely.
+ *
+ * Stepping one tier at a time is right for a machine that is *near* the line —
+ * it stops the controller oscillating, and every change costs a full scenery
+ * re-bake. It is wrong for a machine eleven times over budget: `mid` is not
+ * going to save it, and walking there first costs an extra re-bake and a whole
+ * extra window (four seconds, at the frame rate that produced this) before the
+ * tier that might actually help arrives.
+ */
+const COLLAPSE_P50_MS = STRUGGLE_P50_MS * 4
 
 /** Fraction of frames over budget above which the machine is not holding it. */
 const OVER_BUDGET_MS = 33.3
@@ -195,6 +265,9 @@ let lastChangeAt = 0
 let downStreak = 0
 let upStreak = 0
 
+/** Consecutive frames at or over the suspect ceiling — see `STALL_RUN`. */
+let stallRun = 0
+
 /** Window accumulator. Preallocated — a probe that allocates per frame is
  *  measuring itself. */
 const windowDeltas = new Float64Array(256)
@@ -207,6 +280,10 @@ let windowsJudged = 0
 let bestP10 = Number.POSITIVE_INFINITY
 let lastP50 = 0
 let lastOverRatio = 0
+/** Frames thrown away as isolated stalls. A session where this is large and
+ *  `windowsJudged` is small is the blind spot re-opening — say so in the
+ *  report rather than leaving it to be re-derived from a playtest. */
+let stallsDropped = 0
 
 let onProfileChange: ((p: RenderProfile) => void) | null = null
 
@@ -284,7 +361,7 @@ const applyHudPolicy = (tier: DeviceTier, policy: QualityPolicy): void => {
  * not evidence that the machine needs a permanently smaller game.
  */
 const judge = (p50: number, overRatio: number, t: number): void => {
-  const inAudition = t < auditionEndsAt
+  const inAudition = t < auditionEndsAt || windowsJudged <= AUDITION_WINDOWS
   const scale = drawEveryNow()
   const slowMedian = p50 > STRUGGLE_P50_MS * scale
   const manyOverBudget = overRatio > STRUGGLE_OVER_RATIO
@@ -315,7 +392,7 @@ const judge = (p50: number, overRatio: number, t: number): void => {
     downStreak++
     const needed = inAudition ? 1 : DOWN_STREAK_AFTER_AUDITION
     if (downStreak < needed) return
-    const next = stepDown(activeTier.value)
+    const next = p50 > COLLAPSE_P50_MS * scale ? ORDER[0]! : stepDown(activeTier.value)
     if (next === activeTier.value) { downStreak = 0; return }
     applyTier(next, t)
     return
@@ -343,14 +420,27 @@ export const sampleAdaptiveFrame = (dtMs: number): void => {
   if (!enabled || pinned) return
   if (typeof document !== 'undefined' && document.hidden) return
   // Scaled with the tier for the same reason the thresholds are: at
-  // `drawEvery: 2` one presented frame is two clamped scene deltas, so an
-  // honest 40 ms there is not the stall a 40 ms would be at `drawEvery: 1`.
+  // `drawEvery: 2` one presented frame spans two RAF intervals, so an honest
+  // 40 ms there is not the stall a 40 ms would be at `drawEvery: 1`.
   const scale = drawEveryNow()
-  if (!(dtMs > 0) || dtMs >= OUTLIER_MS * scale) return
+  if (!(dtMs > 0)) return
 
   const t = nowMs()
   framesSeen++
-  if (framesSeen < WARMUP_FRAMES || t - startedAt < WARMUP_MS) return
+
+  // A suspect frame counts only once it has company — see `STALL_RUN`. The run
+  // is tracked before the warmup gate so the first frames after a slow boot do
+  // not reset it; it is the shape of the stream that decides, not where in the
+  // session it falls.
+  if (dtMs >= OUTLIER_MS * scale) {
+    stallRun++
+    if (stallRun < STALL_RUN) { stallsDropped++; return }
+  } else {
+    stallRun = 0
+  }
+
+  const warmedUp = framesSeen >= WARMUP_FRAMES || t - startedAt >= WARMUP_CEILING_MS
+  if (!warmedUp || t - startedAt < WARMUP_MS) return
   if (t < settleUntil) return
   if (windowStartedAt === 0) resetWindow(t)
 
@@ -359,10 +449,18 @@ export const sampleAdaptiveFrame = (dtMs: number): void => {
     if (dtMs > OVER_BUDGET_MS * scale) windowOver++
   }
 
-  const full = windowCount >= WINDOW_FRAMES || t - windowStartedAt >= WINDOW_MS
-  if (!full) return
-
-  if (windowCount < MIN_WINDOW_FRAMES) { resetWindow(t); return }
+  // A window closes when it has enough frames to rank, or when it has run long
+  // enough to have collected enough. The third clause is what makes a slow
+  // machine measurable at all: at 5 fps there are never eighteen samples inside
+  // 1.6 s, so rather than discarding the window it simply stays open.
+  const elapsed = t - windowStartedAt
+  const closed = windowCount >= WINDOW_FRAMES
+    || (elapsed >= WINDOW_MS && windowCount >= MIN_WINDOW_FRAMES)
+    || (elapsed >= SLOW_WINDOW_MS && windowCount >= MIN_SLOW_FRAMES)
+  if (!closed) {
+    if (elapsed >= STALE_WINDOW_MS) resetWindow(t)
+    return
+  }
 
   const sorted: number[] = Array.prototype.slice.call(windowDeltas.subarray(0, windowCount))
   sorted.sort((a, b) => a - b)
@@ -427,6 +525,8 @@ export const initAdaptiveQuality = (opts: AdaptiveOptions = {}): RenderProfile =
   bestP10 = Number.POSITIVE_INFINITY
   lastP50 = 0
   lastOverRatio = 0
+  stallsDropped = 0
+  stallRun = 0
   downStreak = 0
   upStreak = 0
   upgradesLeft = 1
@@ -470,6 +570,9 @@ export interface AdaptiveReport {
    *  occasionally keeping up; well above it means the machine never does. */
   bestP10: number
   upgradesLeft: number
+  /** Frames discarded as isolated stalls. Large next to `windowsJudged` means
+   *  the controller is being fed a stream it cannot read. */
+  stallsDropped: number
 }
 
 /**
@@ -488,7 +591,8 @@ export const adaptiveReport = (): AdaptiveReport => ({
   lastP50: Math.round(lastP50 * 10) / 10,
   lastOverRatio: Math.round(lastOverRatio * 100) / 100,
   bestP10: bestP10 === Number.POSITIVE_INFINITY ? 0 : Math.round(bestP10 * 10) / 10,
-  upgradesLeft
+  upgradesLeft,
+  stallsDropped
 })
 
 /**
@@ -520,6 +624,8 @@ export const __resetAdaptiveQuality = (): void => {
   windowOver = 0
   windowsJudged = 0
   bestP10 = Number.POSITIVE_INFINITY
+  stallsDropped = 0
+  stallRun = 0
   downStreak = 0
   upStreak = 0
   upgradesLeft = 1

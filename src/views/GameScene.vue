@@ -35,7 +35,7 @@ import { drawScene, resetDrawnFx, setBuildOverlay } from '@/use/useTowerArt'
 import {
   initAdaptiveQuality, sampleAdaptiveFrame, stopAdaptiveQuality
 } from '@/use/useAdaptiveQuality'
-import { PROFILES, type RenderProfile } from '@/use/useDeviceTier'
+import { PROFILES, desktopStartTier, type RenderProfile } from '@/use/useDeviceTier'
 import { perf } from '@/use/usePerfProbe'
 import { resetVfx } from '@/use/useTowerVfx'
 import { warmAudio, playFx } from '@/use/useTowerAudio'
@@ -80,6 +80,7 @@ import {
 import { signalGameplayLoaded } from '@/use/useCrazyGames'
 import { syncGameplayLifecycle } from '@/use/useGameplayLifecycle'
 import { isAnyModalOpen } from '@/use/useModalState'
+import { holdsBuildClock as holdsBuildClockFor } from '@/use/useTutorialClock'
 import { playFirstStartInterstitial } from '@/use/useFirstStartInterstitial'
 
 import WaveHud from '@/components/game/WaveHud.vue'
@@ -177,6 +178,9 @@ let quality: RenderProfile = PROFILES.high
 /** Frames since mount, and time owed to the renderer when a draw is skipped. */
 let frameNo = 0
 let drawAccum = 0
+/** The same span of wall time, UNCLAMPED — what the adaptive controller judges
+ *  this machine on. See the two deltas in `loop`. */
+let rawAccum = 0
 
 /** HUD insets fed to the camera so auto-fit never frames the tower under the
  *  top bar or behind the build tray. Measured from the real elements rather
@@ -276,6 +280,16 @@ let framedH = 0
 // The starting profile comes back as the return value, so nothing is applied
 // through the callback before this line.
 quality = initAdaptiveQuality({
+  // Start from what the GPU says, not from `high` on every desktop alike.
+  //
+  // The controller measures either way, and on a machine at 3 fps it now
+  // reaches the bottom tier in about nine seconds. Nine seconds of 3 fps is
+  // still the whole of a portal player's patience, and the two playtests that
+  // produced it (Radeon 610M, Intel UHD 630) were both identifiable from one
+  // string before the first frame was drawn. A machine this demotes wrongly
+  // climbs back to `high` after twenty-five seconds of comfortable play —
+  // that upgrade path is exactly what makes guessing DOWN here safe.
+  startTier: desktopStartTier(),
   onProfile: (p) => {
     quality = p
     resize()
@@ -315,7 +329,19 @@ const cssHRef = ref(0)
 
 const loop = (t: number): void => {
   rafId = requestAnimationFrame(loop)
-  const dt = lastT ? Math.min(t - lastT, 120) : 16
+  // Two deltas, because they answer different questions.
+  //
+  // `dt` is clamped: a 400 ms simulation step would tunnel projectiles through
+  // blocks and hand the player a wave that arrived while the page was busy.
+  //
+  // `raw` is not, and the adaptive controller gets THAT one. Feeding it the
+  // clamped value is what let a 2-5 fps playtest run for three minutes at the
+  // top tier: every frame arrived as exactly 120 ms, which the controller reads
+  // as "the page stopped" rather than "this page is a slideshow", so it
+  // discarded all of them and judged nothing. A measurement must not be capped
+  // at the value that means "ignore me". See `useAdaptiveQuality`.
+  const raw = lastT ? t - lastT : 16
+  const dt = Math.min(raw, 120)
   lastT = t
 
   // The probe is inert (a few branches a frame) unless `?perf=1`,
@@ -345,6 +371,7 @@ const loop = (t: number): void => {
   // and animations move at the right speed rather than at half.
   frameNo++
   drawAccum += dt
+  rawAccum += raw
   if (frameNo % quality.drawEvery !== 0) {
     perf.endFrame()
     return
@@ -358,13 +385,14 @@ const loop = (t: number): void => {
 
   // Fed AFTER the cadence gate and with the accumulated delta, so what the
   // controller measures is the interval between frames the player actually
-  // saw — the thing they experience as smooth or not. Feeding it the raw RAF
+  // saw — the thing they experience as smooth or not. Feeding it the per-RAF
   // delta would tell it a machine drawing every second frame was managing 60.
   //
   // Only while running: a frame under an ad, behind the result screen or on a
   // paused tab is cheap for reasons that say nothing about the hardware.
-  if (running) sampleAdaptiveFrame(drawAccum)
+  if (running) sampleAdaptiveFrame(rawAccum)
   drawAccum = 0
+  rawAccum = 0
 
   const sea = worldToScreenY(SEA_LEVEL)
   if (Math.abs(sea - shorelineY.value) > 0.5) shorelineY.value = sea
@@ -1596,12 +1624,15 @@ watch(() => [wave.value, phase.value], () => { builtSinceFirstWave.value = false
  * and once they have armed a piece they should be looking at the board rather
  * than at an arrow over the card already in their hand.
  */
+const weaponAffordable = computed(() => {
+  const shapeId = offers.value[WEAPON_SLOT]
+  return !!shapeId && canAffordShape(shapeId)
+})
+
 const pointedTraySlot = computed<number | null>(() => {
   if (!openingSecondWave.value || builtSinceFirstWave.value) return null
   if (selectedSlot.value !== null) return null
-  const shapeId = offers.value[WEAPON_SLOT]
-  if (!shapeId || !canAffordShape(shapeId)) return null
-  return WEAPON_SLOT
+  return weaponAffordable.value ? WEAPON_SLOT : null
 })
 
 /**
@@ -1621,7 +1652,16 @@ const pointedTraySlot = computed<number | null>(() => {
 const lateCall = computed(() =>
   !callTaught.value
   && openingSecondWave.value
-  && pointedTraySlot.value === null
+  // NEVER over a placement in progress. Keying this off `pointedTraySlot`
+  // meant the lesson opened the instant the player ARMED a tile — the dim
+  // sheet came up, ate the click aimed at the cell they had just chosen, and
+  // left Call Wave as the only live pixel on the screen. The arrow over the
+  // hand retires while a piece is armed; this beat must simply wait.
+  && selectedSlot.value === null
+  // ...and it waits for the hand to have been used, or to be unusable. Those
+  // are the two states in which "now send the next wave" is the next thing the
+  // player has to do.
+  && (builtSinceFirstWave.value || !weaponAffordable.value)
 )
 
 /**
@@ -1788,12 +1828,23 @@ const armTutorialHand = (): void => {
 // The hold lifts the moment the tutorial ends, which now has exactly one route:
 // the player performed all three actions.
 //
+/**
+ * Should the countdown be held right now?
+ *
+ * The RULE lives in `useTutorialClock` as a pure function, deliberately: it was
+ * a computed in this file and the eight-minute freeze of 2026-09-14 came from
+ * getting it wrong here, where nothing could test it.
+ */
+const holdsBuildClock = computed(
+  () => holdsBuildClockFor(activeTutorialStep.value, tutorialStep.value !== null)
+)
+
 // `immediate`, and it has to be: the first beat is live on the very first
 // evaluation now that nothing has to be accepted first, so a watcher that only
 // fires on a CHANGE would never see the tutorial open — it would only ever see
 // it close, and the countdown would run underneath the whole thing.
 watch(
-  () => activeTutorialStep.value !== null,
+  holdsBuildClock,
   (held) => { buildClockHeld.value = held },
   { immediate: true }
 )
@@ -2880,6 +2931,14 @@ let insetTimer = 0
 
 onMounted(() => {
   void boot()
+  // A late beat can already be LIVE on the first frame — a resumed run lands
+  // straight back into the wave-3 build phase — and the watcher that starts the
+  // scripted hand only fires on a CHANGE. Without this the hand never plays
+  // while the clock is held for it, which is a frozen game behind an empty
+  // screen: `rankGate` measures no target, so the overlay draws nothing.
+  // (It cannot be an `immediate` watcher: `runGateDemo` is declared further
+  // down and would be in the temporal dead zone during setup.)
+  if (activeTutorialStep.value === 'rankGate') void runGateDemo()
   installFullscreenWatch()
   // The gift tile only exists while a gift is showing now, so the queue a late
   // cloud hydrate brings is read here rather than by the tile on its mount.

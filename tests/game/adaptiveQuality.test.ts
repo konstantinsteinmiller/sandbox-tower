@@ -148,8 +148,26 @@ describe('adaptive quality — a struggling machine', () => {
     feed(q.sampleAdaptiveFrame, 3000, 90)
 
     expect(q.activeTier.value).toBe('low')
-    // high -> mid -> low is two changes on top of the initial application.
-    expect(setRenderProfile).toHaveBeenCalledTimes(3)
+    // Fifty seconds of it, and the floor still only cost ONE change on top of
+    // the initial application — the controller settles rather than thrashing a
+    // full scenery re-bake every window against a wall it cannot get past.
+    expect(setRenderProfile).toHaveBeenCalledTimes(2)
+  })
+
+  /**
+   * 90 ms is 11 fps. Walking such a machine through `mid` costs it an extra
+   * scenery re-bake and an extra window at 11 fps before the tier that might
+   * actually help arrives, to arrive at a fidelity that was never going to
+   * rescue it. Below `COLLAPSE_P50_MS` the controller stops being polite.
+   */
+  it('skips the middle tier when the machine is nowhere near the line', async () => {
+    const q = await loadController()
+    q.initAdaptiveQuality()
+
+    feed(q.sampleAdaptiveFrame, 200, 90)
+
+    expect(q.activeTier.value).toBe('low')
+    expect(setRenderProfile.mock.calls.map(([p]) => p.drawEvery)).toEqual([1, 2])
   })
 })
 
@@ -166,15 +184,46 @@ describe('adaptive quality — what it refuses to measure', () => {
     expect(setRenderProfile).toHaveBeenCalledTimes(1)
   })
 
-  it('discards clamped frames, so a tab switch is not evidence', async () => {
+  /**
+   * This test used to feed THREE HUNDRED consecutive 120 ms frames and assert
+   * that nothing happened — i.e. it pinned the blind spot as intended
+   * behaviour. Three hundred consecutive 120 ms frames is thirty-six seconds at
+   * 8 fps, which is not a tab switch by any reading; it is the exact stream a
+   * 2-5 fps playtest produced for three minutes while the controller judged
+   * nothing at all.
+   *
+   * What actually distinguishes a stall from a slow machine is not the size of
+   * the delta but its ISOLATION, so that is what the test feeds now.
+   */
+  it('discards an isolated stall, so a tab switch is not evidence', async () => {
     const q = await loadController()
     q.initAdaptiveQuality()
     feed(q.sampleAdaptiveFrame, 200, 16.7)
     const settled = setRenderProfile.mock.calls.length
 
-    // The scene clamps its own delta to 120 ms, so 120 means "the page
-    // stopped", not "this frame was slow".
-    feed(q.sampleAdaptiveFrame, 300, 120)
+    // Nine seconds behind another tab, then straight back to 60 fps. Repeated,
+    // because a player switching away and back is not a once-per-session event.
+    for (let i = 0; i < 20; i++) {
+      clock += 9000
+      q.sampleAdaptiveFrame(9000)
+      feed(q.sampleAdaptiveFrame, 120, 16.7)
+    }
+
+    expect(q.activeTier.value).toBe('high')
+    expect(setRenderProfile).toHaveBeenCalledTimes(settled)
+    expect(q.adaptiveReport().stallsDropped).toBe(20)
+  })
+
+  it('discards a GC hitch or a synchronous decode, which is two frames at most', async () => {
+    const q = await loadController()
+    q.initAdaptiveQuality()
+    feed(q.sampleAdaptiveFrame, 200, 16.7)
+    const settled = setRenderProfile.mock.calls.length
+
+    for (let i = 0; i < 30; i++) {
+      feed(q.sampleAdaptiveFrame, 2, 300)
+      feed(q.sampleAdaptiveFrame, 100, 16.7)
+    }
 
     expect(q.activeTier.value).toBe('high')
     expect(setRenderProfile).toHaveBeenCalledTimes(settled)
@@ -261,5 +310,98 @@ describe('adaptive quality — the day phase', () => {
     const applied = setRenderProfile.mock.calls.at(-1)![0]
     expect(applied.dayCycle).toBe(false)
     expect(applied.staticDayPhase).toBe(0.42)
+  })
+})
+
+/**
+ * ─── The 2026-09-14 playtest ────────────────────────────────────────────────
+ *
+ * Intel UHD 630 · ANGLE D3D11 · 8 cores · DPR 1.25 · Edge 153, desktop scene:
+ * **2-5 fps sustained for three minutes**, at the top tier the whole way.
+ *
+ * Three independent decisions had to be wrong at once for that to be possible,
+ * and each of them looked defensible on its own:
+ *
+ *   1. the scene fed the controller its CLAMPED simulation delta, so no frame
+ *      could ever report worse than 120 ms;
+ *   2. the outlier rule discarded everything at or over 118 ms as "the page
+ *      stopped", which is every frame a sub-8.5 fps machine produces;
+ *   3. and both the warmup gate and the window floor were counted in FRAMES, so
+ *      even with (1) and (2) fixed a 3 fps machine waits thirteen seconds to be
+ *      looked at and then never collects the eighteen samples a window needs.
+ *
+ * Every case below fails on the shipped 3.0.1 build.
+ */
+describe('adaptive quality — the machines it could not see', () => {
+  it('steps down at 4 fps', async () => {
+    const q = await loadController()
+    q.initAdaptiveQuality()
+
+    feed(q.sampleAdaptiveFrame, 200, 250)
+
+    expect(q.activeTier.value).toBe('low')
+    expect(q.adaptiveReport().windowsJudged).toBeGreaterThan(0)
+  })
+
+  it('steps down at 2 fps — the floor of the report', async () => {
+    const q = await loadController()
+    q.initAdaptiveQuality()
+
+    feed(q.sampleAdaptiveFrame, 120, 500)
+
+    expect(q.activeTier.value).toBe('low')
+  })
+
+  it('reaches the bottom tier inside the three minutes the player actually sat there', async () => {
+    const q = await loadController()
+    q.initAdaptiveQuality()
+
+    // 15 s of 3 fps is 45 frames.
+    feed(q.sampleAdaptiveFrame, 45, 333)
+
+    expect(q.activeTier.value).toBe('low')
+  })
+
+  it('still sees a machine that is merely bad, not catastrophic', async () => {
+    const q = await loadController()
+    q.initAdaptiveQuality()
+
+    // 9 fps — under the old 118 ms ceiling by a hair, so this one was always
+    // visible. Pinned so the run-length rule cannot regress it.
+    feed(q.sampleAdaptiveFrame, 400, 111)
+
+    expect(q.activeTier.value).toBe('low')
+  })
+
+  it('does not wait for forty frames when forty frames is thirteen seconds', async () => {
+    const q = await loadController()
+    q.initAdaptiveQuality()
+
+    // 10 s at 3 fps: 30 frames, well under WARMUP_FRAMES.
+    feed(q.sampleAdaptiveFrame, 30, 333)
+
+    expect(q.activeTier.value).not.toBe('high')
+  })
+
+  it('judges a window that can never hold eighteen frames', async () => {
+    const q = await loadController()
+    q.initAdaptiveQuality()
+
+    feed(q.sampleAdaptiveFrame, 60, 200)
+
+    // The point is not the tier but that windows CLOSED: at 5 fps a 1.6 s
+    // window holds eight frames, and the old floor discarded every one of them.
+    expect(q.adaptiveReport().windowsJudged).toBeGreaterThan(0)
+  })
+
+  it('reports the frame time it saw, so the next playtest needs no guessing', async () => {
+    const q = await loadController()
+    q.initAdaptiveQuality()
+
+    feed(q.sampleAdaptiveFrame, 200, 250)
+
+    const r = q.adaptiveReport()
+    expect(r.lastP50).toBeGreaterThan(100)
+    expect(r.tier).toBe('low')
   })
 })
