@@ -95,6 +95,68 @@ describe('useAutoHand', () => {
     expect(hand.visible).toBe(false)
   })
 
+  it('carries between a grab and a drop, and lets go once', async () => {
+    const { hand, run } = useAutoHand()
+    const log: string[] = []
+    const done = run([
+      { kind: 'grab', ms: 200 },
+      { kind: 'move', to: () => ({ x: 400, y: 120 }), ms: 600 },
+      { kind: 'wait', ms: 200 },
+      { kind: 'drop', ms: 100, then: () => log.push('let go') },
+      { kind: 'wait', ms: 100 }
+    ], { x: 50, y: 500 })
+
+    // Down on the tile, holding something.
+    await vi.advanceTimersByTimeAsync(10)
+    expect([hand.pressing, hand.carrying]).toEqual([true, true])
+
+    // A glide in the middle of a drag is a CARRY: the finger stays down and
+    // the piece stays in it. This is the whole difference from two taps.
+    await vi.advanceTimersByTimeAsync(200 + 300)
+    expect([hand.pressing, hand.carrying]).toEqual([true, true])
+    expect([hand.x, hand.y]).toEqual([400, 120])
+    expect(log).toEqual([])
+
+    // The drop fires as the finger lifts, exactly as a press does.
+    await vi.advanceTimersByTimeAsync(300 + 200 + 100)
+    expect([hand.pressing, hand.carrying]).toEqual([false, false])
+    expect(log).toEqual(['let go'])
+
+    await vi.advanceTimersByTimeAsync(100)
+    await expect(done).resolves.toBe('done')
+    expect(hand.visible).toBe(false)
+  })
+
+  it('never leaves a piece stuck to a hand that was cancelled mid-carry', async () => {
+    const { hand, run, cancel } = useAutoHand()
+    const log: string[] = []
+    const done = run([
+      { kind: 'grab', ms: 200 },
+      { kind: 'move', to: () => ({ x: 400, y: 120 }), ms: 600 },
+      { kind: 'drop', ms: 100, then: () => log.push('let go') }
+    ], { x: 50, y: 500 })
+
+    await vi.advanceTimersByTimeAsync(300)
+    expect(hand.carrying).toBe(true)
+    cancel()
+    expect([hand.visible, hand.pressing, hand.carrying]).toEqual([false, false, false])
+
+    await vi.advanceTimersByTimeAsync(5_000)
+    await expect(done).resolves.toBe('cancelled')
+    expect(log).toEqual([])
+  })
+
+  it('leaves the older tap-only scripts exactly as they were', async () => {
+    // The Gate's rank demo uses move/press/wait only. Adding the drag steps
+    // must not have given it a phantom carried piece.
+    const { hand, run } = useAutoHand()
+    const done = run(script([]), { x: 0, y: 0 })
+    await vi.advanceTimersByTimeAsync(100 + 500 + 50)
+    expect([hand.pressing, hand.carrying]).toEqual([true, false])
+    await vi.advanceTimersByTimeAsync(5_000)
+    await expect(done).resolves.toBe('done')
+  })
+
   it('lets a newer script take over from an older one, which then taps nothing', async () => {
     const { run } = useAutoHand()
     const first: string[] = []
@@ -111,6 +173,22 @@ describe('useAutoHand', () => {
 })
 
 describe('TutorialHand', () => {
+  it('draws a piece under the fingertip only while the script is carrying', async () => {
+    const { hand } = useAutoHand()
+    hand.visible = true
+    const w = mount(TutorialHand, { props: { hand }, attachTo: document.body })
+    expect(w.find('.thand__carry').exists()).toBe(false)
+
+    hand.carrying = true
+    await nextTick()
+    expect(w.find('.thand__carry').exists()).toBe(true)
+
+    hand.carrying = false
+    await nextTick()
+    expect(w.find('.thand__carry').exists()).toBe(false)
+    w.unmount()
+  })
+
   it('draws nothing while hidden, and puts the fingertip on the point when shown', async () => {
     const { hand } = useAutoHand()
     const w = mount(TutorialHand, { props: { hand }, attachTo: document.body })

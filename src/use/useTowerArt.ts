@@ -2,7 +2,7 @@ import { blockDef, GATE_ID, isShip, tierOf } from '@/game/blocks'
 import { CLEAN_FEED } from '@/game/cleanFeed'
 import { rulesNow } from '@/game/rules'
 import { tierStyle, TIER_RUNGS } from '@/game/tierStyle'
-import { TIER_ART_WEAPONS, tierFixtureArt, tierFixtureId } from '@/game/paintedArt'
+import { TIER_ART_WEAPONS, tierFixtureArt, tierFixtureId, enemyStillArt } from '@/game/paintedArt'
 import { enemyDef } from '@/game/enemies'
 import {
   themedPalette, spriteFor, withAlpha, mixHex, onArtChanged, type Palette
@@ -2055,7 +2055,10 @@ const drawEnemy = (target: CanvasRenderingContext2D, e: Enemy, t: number): void 
   const ctx = tinted ? beginUnitLayer(cx, cy, pad) : target
   const stamp = (): void => { if (tinted) endUnitLayer(target, cx, cy, pad, tints) }
 
-  const override = spriteFor('enemy', e.typeId)
+  // Listed ids only. The slot has no files behind it and probing it for
+  // whatever was walking is what put `images/enemies/grunt.webp` and
+  // `…/bat.webp` in CrazyGames' QA log as missing resources.
+  const override = enemyStillArt(e.typeId)
   if (override) {
     ctx.save()
     ctx.globalAlpha = dieT

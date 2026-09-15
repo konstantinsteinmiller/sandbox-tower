@@ -59,11 +59,22 @@ interface Props {
    * the eye has to learn to check.
    */
   inTray?: boolean
+  /**
+   * Something ELSE in the row is being pointed at — hold still.
+   *
+   * The tray's own precedence is arrow → gift breathe → idle nudge, but the
+   * tray cannot enforce the middle rung: this tile is mounted through a slot
+   * and knows nothing about the coach arrow two tiles along. So the scene,
+   * which knows about both, says so. Without it the arrow hops on one tile
+   * while the gift breathes beside it, which is the two-things-moving the
+   * whole pass exists to remove.
+   */
+  quiet?: boolean
   /** The preview's edge, px — the tray's tile size when `inTray`. */
   size?: number
 }
 
-const props = withDefaults(defineProps<Props>(), { slotArmed: false, disabled: false, inTray: false, size: 52 })
+const props = withDefaults(defineProps<Props>(), { slotArmed: false, disabled: false, inTray: false, quiet: false, size: 52 })
 
 const emit = defineEmits<{
   /** The gift is in hand — the scene disarms whatever it was holding. */
@@ -146,6 +157,79 @@ const paint = (): void => {
 const cue = ref<string | null>(null)
 const popping = ref(false)
 let cueTimer = 0
+
+/**
+ * Where the cue is drawn — in SCREEN space, teleported to `body`.
+ *
+ * It used to be a plain absolutely-positioned child of the tile at
+ * `bottom: calc(100% + 8px)`, and inside the hand it was never seen once: the
+ * gift stands in the tray's first slot, and `.build-tray__scroll` is a scroll
+ * container (`overflow-x: auto` for a narrow hand). A scroll container clips on
+ * BOTH axes whatever `overflow-y` says, so a pill drawn ABOVE the tile is cut
+ * away entirely — and at the left edge of the row the corner badges were being
+ * sliced by the same box (reported from a CrazyGames QA screenshot).
+ *
+ * No amount of padding on the scroller fixes a whole pill standing above the
+ * row, and widening that scroller is width taken from the offers. So the cue
+ * leaves the box instead. `BuildTray` already solves this twice for its own
+ * furniture — the coach arrow and the info panel are siblings of the scroller,
+ * placed by measurement — and this is the same answer for a child component
+ * that cannot reach the tray's root: `position: fixed`, teleported past every
+ * ancestor that could clip or offset it, re-measured off the tile's own rect.
+ */
+const cueAt = ref<{ left: number; bottom: number } | null>(null)
+const tileEl = ref<HTMLElement | null>(null)
+const cueEl = ref<HTMLElement | null>(null)
+let cueTick = 0
+
+/** Where the pill sits before anything has been measured — centred, a little
+ *  above the bottom bar. The cue is never gated on a successful measure (see
+ *  `measureCue`), so it needs somewhere honest to start. */
+const cueFallback = (): { left: number; bottom: number } => ({
+  left: Math.round(window.innerWidth / 2),
+  bottom: Math.round(window.innerHeight * 0.22)
+})
+
+/**
+ * Put the pill over the tile, kept inside the viewport.
+ *
+ * Re-read rather than computed once: the hand scrolls sideways under it, the
+ * bottom bar re-arranges when the clusters stand up, and the tile itself lifts
+ * when it is armed. The clamp is what stops the pill — which is wider than the
+ * 52 px tile and may be a whole translated sentence — from running off the edge
+ * of a 320 px phone when the gift is in the first slot.
+ *
+ * A rect it cannot use LEAVES THE LAST ONE ALONE rather than clearing it. This
+ * is the whole reason the cue was invisible in the first place, just one level
+ * up: tie a thing's visibility to a measurement and every moment the
+ * measurement is not available — a tile mid-transition, a tray that has not
+ * been laid out yet — is a moment the player is told nothing. A cue in a
+ * slightly wrong place is a bug; a cue nobody ever sees is the bug we are here
+ * to fix.
+ */
+const measureCue = (): void => {
+  const el = tileEl.value
+  if (!el || !cue.value) return
+  const r = el.getBoundingClientRect()
+  if (r.width === 0) return
+  const half = (cueEl.value?.getBoundingClientRect().width ?? 0) / 2
+  const edge = 8
+  const left = half > 0
+    ? Math.max(half + edge, Math.min(window.innerWidth - half - edge, r.left + r.width / 2))
+    : r.left + r.width / 2
+  cueAt.value = { left: Math.round(left), bottom: Math.round(window.innerHeight - r.top + 8) }
+}
+
+// While the pill is up — 2.6 s — on a cheap cadence. Two rects on a timer is
+// the pattern the scene already uses for everything it pins to a moving box,
+// and it is robust against scroll containers this component cannot observe.
+watch(cue, (text) => {
+  window.clearInterval(cueTick)
+  if (!text) { cueAt.value = null; return }
+  cueAt.value = cueFallback()
+  void nextTick(measureCue)
+  cueTick = window.setInterval(measureCue, 120)
+})
 
 watch(giftArrival, (a) => {
   if (!a) return
@@ -446,6 +530,7 @@ onBeforeUnmount(() => {
   disarm()
   stopArt?.()
   window.clearTimeout(cueTimer)
+  window.clearInterval(cueTick)
   window.removeEventListener('pointerdown', onBoardDown)
   window.removeEventListener('pointermove', onBoardMove)
   window.removeEventListener('pointerup', onBoardUp)
@@ -460,12 +545,19 @@ defineExpose({ arm, disarm, placeAt, armed })
 </script>
 
 <template lang="pug">
-  div.gift(v-if="gift && !disabled" :class="{ 'is-tray': inTray }")
-    Transition(name="gift-cue")
-      span.gift__cue(v-if="cue") {{ cue }}
+  div.gift(v-if="gift && !disabled" data-gift-tile :class="{ 'is-tray': inTray }")
+    //- Out of the tray's scroll box entirely — see `measureCue`.
+    Teleport(to="body")
+      Transition(name="gift-cue")
+        span.gift__cue(
+          v-if="cue"
+          ref="cueEl"
+          :style="cueAt ? { left: `${cueAt.left}px`, bottom: `${cueAt.bottom}px` } : undefined"
+        ) {{ cue }}
     button.gift__tile(
+      ref="tileEl"
       type="button"
-      :class="{ 'is-armed': armed, 'is-pop': popping }"
+      :class="{ 'is-armed': armed, 'is-pop': popping, 'is-quiet': quiet }"
       :style="{ '--gift-rim': rimColour, '--gift-art': `${size}px` }"
       :aria-label="label"
       :aria-pressed="armed"
@@ -522,8 +614,15 @@ defineExpose({ arm, disarm, placeAt, armed })
   -webkit-tap-highlight-color: transparent
   animation: gift-breathe 1.4s ease-in-out infinite alternate
 
+  // Yielding to the arrow. Not `is-armed`'s treatment — the tile is not lifted,
+  // it has simply stopped breathing.
+  &.is-quiet
+    animation: none
+
   &.is-armed
-    translate: 0 -6px
+    // -4px, within the ~7px above the tile. Held for as long as the piece is in
+    // hand, so unlike the pop this one is on screen long enough to study.
+    translate: 0 -4px
     box-shadow: 0 6px 0 #3a2508, 0 0 0 3px #fff, 0 0 18px rgba(255, 240, 180, 0.95)
     animation: none
 
@@ -657,10 +756,13 @@ defineExpose({ arm, disarm, placeAt, armed })
   line-height: 18px
 
 .gift__cue
-  position: absolute
-  bottom: calc(100% + 8px)
-  left: 50%
+  // Fixed and teleported: the tray's scroller cannot clip what is not inside
+  // it. `left` / `bottom` come from `measureCue`; the translate re-centres the
+  // pill on the point it was given.
+  position: fixed
+  z-index: 40
   translate: -50% 0
+  max-width: min(18rem, 76vw)
   padding: 4px 10px
   border: 2px solid #2a1607
   border-radius: 10px
@@ -668,21 +770,53 @@ defineExpose({ arm, disarm, placeAt, armed })
   color: #2a1607
   font-size: 12px
   font-weight: 900
-  white-space: nowrap
+  text-align: center
   box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35)
   pointer-events: none
 
+// ── The corner badges, INSIDE the tile whenever it stands in the hand ───────
+//
+// Both hang 8 px outside the tile by default, which is right for the floating
+// variant and wrong in the tray: the scroller clips them, and at the left end
+// of a scrolled row the only thing still on screen was the sliced half of the
+// red count — a red wedge against the panel edge, which is what the QA
+// screenshot caught. Tucking them in costs a few pixels of the thumbnail and
+// makes them independent of every ancestor's overflow, which is the property
+// that actually has to hold: this tile is mounted by whoever owns the row, and
+// it cannot keep asking that row not to clip.
+.gift.is-tray
+
+  .gift__off
+    top: 2px
+    left: 2px
+
+  .gift__count
+    top: 2px
+    right: 2px
+
+// ─── Inside the tray's attention budget ─────────────────────────────────────
+//
+// In the hand's first slot this tile lives inside `.build-tray__scroll`, which
+// is a scroll container and therefore clips on both axes — and being the FIRST
+// slot, it is the one tile with the scroller's own edge right beside it rather
+// than a gap shared with a neighbour. See the budget worked out in
+// `BuildTray.vue`: roughly 4px sideways and 7px upward, no more.
+//
+// These were authored for a tile floating over the tray with room around it,
+// which is not where it has stood for some time. A 1.18 pop on a 67px tile
+// reaches 6px a side and had its corners taken off on arrival — the one moment
+// the tile most needs to be seen whole.
 @keyframes gift-breathe
   from
     scale: 1
   to
-    scale: 1.06
+    scale: 1.03
 
 @keyframes gift-pop
   0%
     scale: 0.6
   60%
-    scale: 1.18
+    scale: 1.08
   100%
     scale: 1
 

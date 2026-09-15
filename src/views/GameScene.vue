@@ -26,6 +26,7 @@ import useTowerGame, {
 import { denyPurchase } from '@/use/useResourceBlink'
 import { idleNudge, noteBuildAction, useIdleNudge } from '@/use/useIdleNudge'
 import { requestRejectFlash, strandedCount } from '@/use/useWorldCues'
+import { trayGestureFor, type TrayGesture } from '@/utils/trayGesture'
 import {
   setViewport, snapToFit, screenToCell, panBy, zoomAt,
   beginPinch, updatePinch, endPinch, recenter, isManual,
@@ -107,7 +108,10 @@ import CoinBadge from '@/components/organisms/CoinBadge.vue'
 import TreasureChest from '@/components/organisms/TreasureChest.vue'
 import FlyingChest from '@/components/game/FlyingChest.vue'
 import GiftTile from '@/components/game/GiftTile.vue'
-import { giftPrice, nextGift, reloadGifts } from '@/use/useGifts'
+import { giftArrival, giftPrice, nextGift, reloadGifts } from '@/use/useGifts'
+import {
+  cancelGiftCoach, refreshGiftCoach, runGiftCoach, shouldRunGiftCoach
+} from '@/use/useGiftCoach'
 import DailyRewards from '@/components/organisms/DailyRewards.vue'
 import AdRewardButton from '@/components/organisms/AdRewardButton.vue'
 import BattlePass from '@/components/organisms/BattlePass.vue'
@@ -967,6 +971,220 @@ const onSelectSlot = (slot: number | null): void => {
     const shapeId = offers.value[slot]
     if (shapeId) denyPurchase(missingFor(shapeId))
   }
+}
+
+// ─── Carrying a piece out of the hand ───────────────────────────────────────
+//
+// The tray has always been TAP-tap: tap a tile to take the piece into the
+// hand, tap the board to put it down. That survives untouched — it is the only
+// gesture a phone player finds by accident, and both taps are forgiving in a
+// way a drag is not. What it was missing is the gesture a desktop player tries
+// FIRST, because every other tray of things works that way: press the tile,
+// drag onto the board, let go.
+//
+// The carried piece is not a second kind of armed state. A drag simply arms the
+// slot early (`onSelectSlot`, exactly as the tap does) and steers `hoverCell`
+// from the pointer, so every preview the game already draws — the ghost, the
+// legal sockets, the weld guides, the red refusal — lights up with no second
+// set of paths to keep in step. The drop then goes through `tryPlace`, which is
+// what charges the piece, completes the tutorial beat and rerolls the slot; a
+// refused drag therefore refuses in the same voice a refused tap does.
+//
+// `GiftTile` owns this same gesture for the won piece and is the shape it
+// follows — press on the tile, window-level move, drop read off the board.
+
+/** Travel that turns a press on a tile into a carry. The board's own
+ *  `TAP_SLOP_PX`, so the two gestures agree on what "moved" means. */
+const TRAY_DRAG_SLOP_PX = TAP_SLOP_PX
+
+interface TrayPress {
+  slot: number
+  pointerId: number
+  pointerType: string
+  x: number
+  y: number
+  /** Latched once resolved: a scroll never becomes a drag, or the hand would
+   *  be snatched out from under a finger that was only reading the offers. */
+  mode: TrayGesture
+}
+
+let trayPress: TrayPress | null = null
+/** Remembered from the press, because once the finger has left the tray
+ *  `elementFromPoint` can no longer find the scroller for us. */
+let trayScroller: HTMLElement | null = null
+/** Deadline for eating the click a finished drag leaves behind, rather than a
+ *  flag: a touch drag often synthesises no click at all, and a flag left
+ *  standing would eat the player's next real one. See `swallowClick`. */
+let swallowClickUntil = 0
+
+/**
+ * Is this point over the BATTLEFIELD, rather than the HUD in front of it?
+ *
+ * The canvas is the whole viewport (`inset: 0`), so its rect alone answers
+ * "yes" for the tray the piece was just picked up from. The bottom bar is the
+ * one region that reliably covers the board's lower edge and it is measured
+ * already, so it is subtracted; a control anywhere else is treated the way
+ * `GiftTile` treats it.
+ */
+const overBoard = (x: number, y: number): boolean => {
+  const cv = canvasRef.value
+  if (!cv) return false
+  const r = cv.getBoundingClientRect()
+  if (x < r.left || x > r.right || y < r.top || y > r.bottom) return false
+  const bar = bottomBarRef.value?.getBoundingClientRect()
+  if (bar && x >= bar.left && x <= bar.right && y >= bar.top && y <= bar.bottom) return false
+  const el = document.elementFromPoint?.(x, y)
+  return el === cv || el?.closest?.('button') == null
+}
+
+/** Where the press sits against the tray's scroller, and whether that scroller
+ *  has anything to scroll — a hand that fits its track has no swipe to lose. */
+const trayScrollState = (x: number, y: number): { insideTray: boolean; scrollable: boolean } => {
+  const box = trayScroller?.getBoundingClientRect()
+  return {
+    insideTray: !!box && x >= box.left && x <= box.right && y >= box.top && y <= box.bottom,
+    scrollable: !!trayScroller && trayScroller.scrollWidth - trayScroller.clientWidth > 2
+  }
+}
+
+/**
+ * Eat the `click` a finished drag leaves behind.
+ *
+ * A press and a release on the same tile still synthesise a click even when
+ * everything between them was a drag, and the tray's click handler TOGGLES the
+ * slot — so a piece dragged out and dropped back on its own tile would be
+ * placed and then disarmed, and a drag refused over the tray would quietly
+ * pick the piece up again. Capture phase, so it never reaches the tile.
+ */
+const SWALLOW_CLICK_MS = 300
+
+const swallowClick = (e: MouseEvent): void => {
+  if (performance.now() > swallowClickUntil) return
+  swallowClickUntil = 0
+  e.stopPropagation()
+  e.preventDefault()
+}
+
+const endTrayDrag = (): void => {
+  window.removeEventListener('pointermove', onTrayDragMove)
+  window.removeEventListener('pointerup', onTrayDragUp)
+  window.removeEventListener('pointercancel', onTrayDragUp)
+  trayPress = null
+}
+
+const onTrayDragMove = (e: PointerEvent): void => {
+  const p = trayPress
+  if (!p || e.pointerId !== p.pointerId) return
+
+  if (p.mode === 'idle') {
+    const { insideTray, scrollable } = trayScrollState(e.clientX, e.clientY)
+    const next = trayGestureFor(
+      { dx: e.clientX - p.x, dy: e.clientY - p.y, pointerType: p.pointerType, insideTray, scrollable },
+      TRAY_DRAG_SLOP_PX
+    )
+    if (next === 'idle') return
+    if (next === 'scroll') {
+      // Hands off entirely: the browser is already scrolling the tray and this
+      // press is no longer ours. Nothing was armed, so a scroll leaves the hand
+      // exactly as it found it.
+      endTrayDrag()
+      return
+    }
+    p.mode = 'drag'
+    // Armed through the ordinary path, so the hint bookkeeping, the tutorial's
+    // "you picked the archer" beat and the cannot-afford blink all fire once,
+    // here, rather than being restated for the drag.
+    onSelectSlot(p.slot)
+  }
+
+  hoverCell.value = overBoard(e.clientX, e.clientY)
+    ? screenToCell(e.clientX, e.clientY)
+    : null
+}
+
+const onTrayDragUp = (e: PointerEvent): void => {
+  const p = trayPress
+  if (!p || e.pointerId !== p.pointerId) return
+  const dragged = p.mode === 'drag'
+  endTrayDrag()
+  if (!dragged) return
+
+  // Whatever happens next, the click this release may synthesise is not a pick.
+  swallowClickUntil = performance.now() + SWALLOW_CLICK_MS
+
+  if (e.type === 'pointercancel') { hoverCell.value = null; return }
+
+  if (overBoard(e.clientX, e.clientY)) {
+    const cell = screenToCell(e.clientX, e.clientY)
+    // The same call the board's own tap makes. An illegal cell is refused in
+    // there — the ghost shakes and every legal anchor flashes green — which is
+    // a better answer than anything this could add.
+    tryPlace(cell.c, cell.r)
+    return
+  }
+
+  // Let go over the HUD: the piece stays in hand and the gesture degrades into
+  // the tap-tap flow the player already had, which is the one thing they can
+  // certainly finish from here.
+  hoverCell.value = null
+
+  // Said out loud — unless the piece was put back where it came from.
+  //
+  // Dropping a carried thing back on its own shelf is how every drag UI spells
+  // "never mind", and answering a deliberate cancel with the refusal flash and
+  // the rejected-placement sound tells the player they did something wrong
+  // when they did the standard thing. Everywhere ELSE on the HUD it still
+  // speaks up, because there a silent spring-back reads as the drag not having
+  // worked at all.
+  if (trayScrollState(e.clientX, e.clientY).insideTray) return
+  requestRejectFlash()
+  playSound('obstacle-hit', 0.03)
+}
+
+/**
+ * A press landed on a tile. `BuildTray` neither preventDefaults nor captures
+ * the pointer, so the tap path is still live underneath this and a press that
+ * goes nowhere ends as the click it always was.
+ */
+const onTrayDragStart = (slot: number, e: PointerEvent): void => {
+  endTrayDrag()
+  // A real pointer, not the browser's own HTML5 `dragstart`. Only reachable if
+  // `BuildTray` ever stops DECLARING this emit — an undeclared listener falls
+  // through to its root element, where the native event of almost the same name
+  // is waiting to be mistaken for this one.
+  if (typeof e.pointerId !== 'number') return
+  // Left button only: a right-click belongs to the context menu and a middle
+  // click to the browser. `button` is 0 for the primary button of every
+  // pointer type, touch included.
+  if (e.button !== 0) return
+  if (!offers.value[slot]) return
+  // Nothing is carried while the game is not the thing on screen. These are the
+  // states that stand the hand down elsewhere already; a piece stuck to the
+  // pointer behind an ad or a result screen is a mode with no way out.
+  if (isGamePaused.value || isAdShowing.value || showResult.value) return
+  if (phase.value === 'defeat') return
+
+  trayScroller = (e.target as HTMLElement | null)?.closest?.('.build-tray__scroll') as HTMLElement | null
+  trayPress = {
+    slot,
+    pointerId: e.pointerId,
+    pointerType: e.pointerType,
+    x: e.clientX,
+    y: e.clientY,
+    mode: 'idle'
+  }
+  window.addEventListener('pointermove', onTrayDragMove)
+  window.addEventListener('pointerup', onTrayDragUp)
+  window.addEventListener('pointercancel', onTrayDragUp)
+}
+
+/** A pointer lost with the window takes the carry with it — the piece stays in
+ *  hand, but nothing is left following a cursor that is no longer there. */
+const cancelTrayDrag = (): void => {
+  if (!trayPress) return
+  const dragged = trayPress.mode === 'drag'
+  endTrayDrag()
+  if (dragged) hoverCell.value = null
 }
 
 // ─── Idle nudge ─────────────────────────────────────────────────────────────
@@ -2374,6 +2592,44 @@ const onUpgradeInspected = (): void => {
 
 const autoHand = useAutoHand()
 
+/**
+ * The first free gift is DEMONSTRATED rather than explained.
+ *
+ * A won piece arrives in the hand's first slot wearing a gold rim and the word
+ * FREE, and the 2026-09-11 playtest is the evidence that neither of those says
+ * "this is a thing you drag onto your tower": testers sat on the gift, or
+ * tapped it and then tapped nothing. So the automatic hand picks it up and
+ * carries it onto a cell the player's own tap would be accepted at, and lets
+ * go — a mime, never a placement. The piece is still theirs to put down
+ * afterwards, which is the whole point of stopping short of placing it.
+ *
+ * Hung off the ARRIVAL rather than off a tutorial step, because a gift is not
+ * a point in the tutorial: it can land on a player's fifth wave or their
+ * thirtieth. `useGiftCoach` owns the once-ever flag (`GIFT_COACH_KEY`) and
+ * marks it when the mimed drop lands, so a demo an ad or a modal cuts short
+ * plays again next time instead of being spent on nothing.
+ *
+ * It borrows THIS `autoHand` rather than making its own: only one
+ * `TutorialHand` is mounted, and sharing the instance means every
+ * `autoHand.cancel()` already in this scene cuts the demo short for free.
+ *
+ * `nextTick` because the tile enters the tray on the same beat the gift lands,
+ * and the hand needs a rect to start from — the run reports `lost` and does
+ * nothing rather than miming at a tile that is not there yet.
+ */
+watch(giftArrival, (a) => {
+  if (!a || !shouldRunGiftCoach(a.gift)) return
+  void nextTick(() => {
+    void runGiftCoach({
+      hand: autoHand,
+      canPlay: () => !showOptions.value && !showTech.value && !showResult.value
+        && !showTrap.value && !isGamePaused.value && !isAdShowing.value
+        && activeTutorialStep.value === null,
+      inset: () => hudInset.value
+    })
+  })
+})
+
 const gateBlock = (): Block | null => {
   for (const b of getTowerBlocks().values()) if (b.typeId === GATE_ID) return b
   return null
@@ -3040,9 +3296,16 @@ onMounted(() => {
   // when `useTechDiscovery` first read it, and a returning player must not be
   // told about a screen they already use.
   refreshTechFound()
+  // Same reason, same beat: the flag lives in the save blob and a platform
+  // build's cloud row may not have landed when the module first read it.
+  refreshGiftCoach()
   window.addEventListener('resize', resize)
   window.addEventListener('orientationchange', onOrientationChange)
   window.addEventListener('keydown', onKey)
+  // Capture phase, so the click a finished drag synthesises is eaten before
+  // the tray's own handler can toggle the slot back off.
+  window.addEventListener('click', swallowClick, true)
+  window.addEventListener('blur', cancelTrayDrag)
   rafId = requestAnimationFrame(loop)
   // Before `boot` gets as far as its own `resize`: the bar has its real boxes
   // as soon as the HUD is in the document, and the first paint should already
@@ -3100,6 +3363,9 @@ onUnmounted(() => {
   cancelAnimationFrame(rafId)
   // A hand mid-demo would otherwise fire its last tap into a scene that is gone.
   autoHand.cancel()
+  // The shared hand is already cancelled above; this only stops the coach's own
+  // guard poll now rather than at its next step boundary.
+  cancelGiftCoach()
   // The defeat flow is parked on this promise. Leaving it unresolved keeps
   // `presentDefeat` alive on a scene that no longer exists, and the result
   // screen it was about to show never gets its turn.
@@ -3108,6 +3374,9 @@ onUnmounted(() => {
   window.removeEventListener('resize', resize)
   window.removeEventListener('orientationchange', onOrientationChange)
   window.removeEventListener('keydown', onKey)
+  window.removeEventListener('click', swallowClick, true)
+  window.removeEventListener('blur', cancelTrayDrag)
+  cancelTrayDrag()
   clearInterval(insetTimer)
   clearInterval(tutorialTimer)
   toastRo?.disconnect()
@@ -3341,6 +3610,7 @@ onUnmounted(() => {
             :paid-at="handPaidAt"
             @select="onSelectSlot"
             @reroll="onReroll"
+            @drag-start="onTrayDragStart"
           )
             //- The gift a chest or a first clear paid out, standing in the first
             //- slot at the tray's own tile size until it is placed.
@@ -3349,6 +3619,7 @@ onUnmounted(() => {
                 ref="giftTileRef"
                 variant="footprint"
                 in-tray
+                :quiet="pointedTraySlot !== null"
                 :size="size"
                 :canvas="canvasRef"
                 :slot-armed="selectedSlot != null"

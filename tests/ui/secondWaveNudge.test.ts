@@ -95,7 +95,14 @@ describe('the pointed tray tile', () => {
     w.unmount()
   })
 
-  it('is a different cue from the idle pulse, so the two can stack', async () => {
+  it('outranks the idle pulse — the arrow is the only thing moving', async () => {
+    // These used to be allowed to stack, on the argument that a hop and a pulse
+    // read as two different cues. They do; there were just too many of them.
+    // With four affordable offers the row had the arrow hopping on one tile and
+    // a blue ring breathing out of all of them, and it read as the hand
+    // malfunctioning rather than as an instruction (reported from play, with a
+    // screenshot). The arrow names ONE tile, so while it is up nothing else in
+    // the row moves.
     const w = mount(BuildTray, {
       props: {
         selected: null,
@@ -109,8 +116,8 @@ describe('the pointed tray tile', () => {
       global: { plugins: [i18n], stubs: { ShapeTile: true } }
     })
     const weapon = w.findAll('.build-tray__tile')[1]!
-    expect(weapon.classes()).toContain('is-nudge')
     expect(weapon.classes()).toContain('is-point')
+    expect(w.findAll('.build-tray__tile.is-nudge')).toHaveLength(0)
     w.unmount()
   })
 })

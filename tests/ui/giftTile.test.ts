@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 
 vi.mock('@/use/useSound', () => ({
@@ -49,7 +50,7 @@ const pointer = (type: string, x: number, y: number, id = 1): MouseEvent => {
   return ev
 }
 
-const setup = async (variant: 'cell' | 'footprint') => {
+const setup = async (variant: 'cell' | 'footprint', props: Record<string, unknown> = {}) => {
   vi.resetModules()
   localStorage.clear()
   const game = await import('@/use/useTowerGame')
@@ -69,7 +70,7 @@ const setup = async (variant: 'cell' | 'footprint') => {
   document.body.appendChild(canvas)
   const { default: GiftTile } = await import('@/components/game/GiftTile.vue')
   const w = mount(GiftTile, {
-    props: { variant, canvas, slotArmed: false },
+    props: { variant, canvas, slotArmed: false, ...props },
     global: { plugins: [i18n] },
     attachTo: document.body
   })
@@ -229,6 +230,76 @@ describe('gift tile', () => {
     expect(w.find('.gift').classes()).toContain('is-tray')
     const tile = w.find('.gift__tile').element as HTMLElement
     expect(tile.style.getPropertyValue('--gift-art')).toBe('64px')
+    w.unmount()
+  })
+})
+
+/**
+ * ─── Nothing the hand's scroller can slice ──────────────────────────────────
+ *
+ * The tile stands in `BuildTray`'s first slot, and that tray's `__scroll` is a
+ * scroll container — `overflow-x: auto`, because a narrow hand scrolls
+ * sideways. A scroll container clips on BOTH axes whatever `overflow-y` says,
+ * so everything the tile hung outside itself was being cut away: the arrival
+ * pill above it was never visible at all, and at the left end of a scrolled row
+ * the red count badge showed as a sliced wedge against the panel edge. Both
+ * came back from CrazyGames QA as screenshots.
+ *
+ * The cue leaves the box (teleported, placed in screen space) and the corner
+ * badges move inside the tile. What is pinned here is the PROPERTY that fixes
+ * them — neither may depend on an ancestor choosing not to clip.
+ */
+describe('the gift tile overhangs nothing', () => {
+  beforeEach(() => {
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null)
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    document.body.innerHTML = ''
+  })
+
+  it('draws the arrival cue outside the component, not inside the tile', async () => {
+    const { w, gifts } = await setup('footprint', { inTray: true })
+    gifts.grantGift({ typeId: 'tesla', tier: 2, source: 'chest' })
+    await w.vm.$nextTick()
+    await w.vm.$nextTick()
+    const cue = document.querySelector('.gift__cue')
+    expect(cue, 'the cue should be on screen after a gift lands').not.toBeNull()
+    // Teleported: it is NOT a descendant of the tile that would be clipped.
+    expect(w.find('.gift__cue').exists()).toBe(false)
+    // The property that actually fixes the bug: the pill is not inside the
+    // component's own tree, so no ancestor of the tile can clip it.
+    expect(w.element.contains(cue)).toBe(false)
+    expect(document.body.contains(cue)).toBe(true)
+    // And placed in screen space. `position: fixed` itself lives in the scoped
+    // stylesheet, which jsdom never loads — what IS observable here is that the
+    // component hands it viewport coordinates rather than leaving it to flow
+    // inside whatever it was mounted in.
+    const style = (cue as HTMLElement).getAttribute('style') ?? ''
+    expect(style).toMatch(/left:\s*\d+px/)
+    expect(style).toMatch(/bottom:\s*\d+px/)
+    w.unmount()
+  })
+
+  it('takes the cue away with the component', async () => {
+    const { w, gifts } = await setup('footprint', { inTray: true })
+    gifts.grantGift({ typeId: 'tesla', tier: 2, source: 'chest' })
+    await w.vm.$nextTick()
+    await w.vm.$nextTick()
+    expect(document.querySelector('.gift__cue')).not.toBeNull()
+    w.unmount()
+    await nextTick()
+    // A teleported node is the one kind that can outlive its component and sit
+    // on screen forever; it must not.
+    expect(document.querySelector('.gift__cue')).toBeNull()
+  })
+
+  it('carries the handle the coach finds it by', async () => {
+    const { w, gifts } = await setup('footprint', { inTray: true })
+    gifts.grantGift({ typeId: 'tesla', tier: 2, source: 'chest' })
+    await w.vm.$nextTick()
+    expect(w.find('[data-gift-tile]').exists()).toBe(true)
     w.unmount()
   })
 })

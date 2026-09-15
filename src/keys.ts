@@ -211,6 +211,18 @@ export const CALL_TAUGHT_KEY = 'ts_call_taught'
  */
 export const RANK_GATE_KEY = 'ts_rank_gate_taught'
 
+/**
+ * The automatic hand has carried the first free gift onto the tower.
+ *
+ * Its own flag, on the same reasoning as the two above: the demo hangs off a
+ * gift ARRIVING, which is not a point in the tutorial and may be a player's
+ * fifth wave or their thirtieth. Written when the mimed drop lands rather than
+ * when the run starts — a demo an ad or a modal kills in its first frame was
+ * never seen, and spending the one showing on it leaves the player holding the
+ * same gift with the same question.
+ */
+export const GIFT_COACH_KEY = 'ts_gift_coach'
+
 // ─── User settings ──────────────────────────────────────────────────────────
 
 export const SOUND_KEY = 'ts_user_sound_volume'

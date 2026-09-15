@@ -45,21 +45,22 @@ interface Props {
   hideReroll?: boolean
   /**
    * The player has gone a while without building while something here is
-   * affordable (`useIdleNudge`): pulse the tiles they CAN pay for. The dimmed
-   * ones stay still — a nudge towards a piece they cannot buy is an
-   * instruction they cannot follow.
+   * affordable (`useIdleNudge`): pulse ONE tile they can pay for — which one is
+   * `nudgeSlot`'s decision. A dimmed tile is never the one chosen; a nudge
+   * towards a piece they cannot buy is an instruction they cannot follow.
    */
   nudge?: boolean
   /**
    * One slot the game is actively POINTING AT: a fat yellow arrow over it and
    * a hop, until the player acts.
    *
-   * Distinct from `nudge`, which pulses every affordable tile in a blue ring
+   * Distinct from `nudge`, which pulses one affordable tile in a blue ring
    * because the player has gone quiet. This one names a single tile and says
    * "that one" in the same gold the coach marks use — today, the weapon in the
    * hand after wave 1 is cleared, so a first-time player's second wave is met
    * with two guns instead of one. `null` for "pointing at nothing", which is
-   * almost always.
+   * almost always. It OUTRANKS the idle nudge: while this is set, nothing else
+   * in the row moves.
    */
   pointSlot?: number | null
   /**
@@ -122,6 +123,20 @@ const coolingFor = (slot: number): number => props.rerollSeconds[slot] ?? 0
 const emit = defineEmits<{
   (e: 'select', slot: number | null): void
   (e: 'reroll', slot: number): void
+  /**
+   * A press LANDED on a tile — every pointer type, every press, before it is
+   * known to be anything.
+   *
+   * Deliberately not a decision. The tray cannot tell a tap from the start of a
+   * drag without owning the whole gesture, and it must not: the scene already
+   * runs pan, pinch, long-press and block-carry off the same pointer stream and
+   * is the only place that can arbitrate between them. So this reports the
+   * press and the scene decides whether travel past its own slop threshold
+   * turns it into a carried piece. The tile's own `click` still arms the slot
+   * exactly as it always has, so a plain tap is untouched and a scene that
+   * ignores this event loses nothing.
+   */
+  (e: 'drag-start', slot: number, ev: PointerEvent): void
 }>()
 
 const { t } = useI18n()
@@ -225,7 +240,10 @@ const measurePointer = (): void => {
   const root = rootEl.value
   const slot = props.pointSlot
   if (!root || slot === null || slot === undefined) { pointerX.value = null; return }
-  const tile = root.querySelector<HTMLElement>(`[data-slot="${slot}"]`)
+  // The SLOT wrapper, not the tile button inside it — both carry `data-slot`
+  // now (the tile's is the drag gesture's handle) and the wrapper is the box
+  // the arrow is measured against.
+  const tile = root.querySelector<HTMLElement>(`.build-tray__slot[data-slot="${slot}"]`)
   if (!tile) { pointerX.value = null; return }
   const a = tile.getBoundingClientRect()
   const b = root.getBoundingClientRect()
@@ -312,6 +330,47 @@ const entries = computed<Entry[]>(() =>
     }
   })
 )
+
+/**
+ * The ONE tile the idle nudge pulses.
+ *
+ * It used to pulse every affordable offer at once: four boxes swelling in the
+ * same rhythm with a ring breathing out of each, plus the gift breathing beside
+ * them and the reinforced cards sweeping. Reported from play as the hand
+ * looking like it was malfunctioning rather than like an invitation — and a
+ * nudge that points at four things is not a nudge, it is the tray flashing.
+ *
+ * One tile says the same thing louder. The cheapest affordable offer is the one
+ * that is hardest to argue with — whatever else the player cannot pay for, they
+ * can pay for this — and pieces priced in GOLD are never chosen for it: gold is
+ * the run's scarce currency and spending it is a decision the game should not
+ * lean on a player to make while they are only idle.
+ *
+ * Null while the game is POINTING at a tile. The two used to be allowed to run
+ * together on the argument that a hop and a pulse read as different cues; with
+ * the rest of the row quietened down that is no longer worth the noise, and the
+ * gold arrow is a specific instruction that should not have a second tile
+ * pulsing beside it in another colour.
+ */
+const nudgeSlot = computed<number | null>(() => {
+  if (!props.nudge || props.pointSlot != null) return null
+  let best: Entry | null = null
+  for (const e of entries.value) {
+    // Slot 0 is `v-show`n away while the gift stands in it — pulsing a hidden
+    // tile pulses nothing, and the nudge would silently do nothing at all.
+    if (!e.affordable || (props.giftFirst && e.slot === 0)) continue
+    // Never the armed tile. It is not idle — and since a desktop drag holds the
+    // piece SELECTED for the whole carry, a nudge here would pulse under the
+    // player's own cursor from the moment they picked the piece up.
+    if (e.slot === props.selected) continue
+    if (!best) { best = e; continue }
+    const rank = (x: Entry): [number, number] => [x.coins > 0 ? 1 : 0, x.wood + x.stone]
+    const [ac, ar] = rank(e)
+    const [bc, br] = rank(best)
+    if (ac < bc || (ac === bc && ar < br)) best = e
+  }
+  return best?.slot ?? null
+})
 
 const onTile = (slot: number): void => {
   // Tapping the armed tile again disarms it — the escape hatch that stops a
@@ -505,13 +564,14 @@ const infoEntry = computed(() => {
       )
         button.build-tray__tile(
           type="button"
-          :class="{ 'is-selected': selected === e.slot, 'is-poor': !e.affordable, 'is-enhanced': e.enhanced, 'is-nudge': nudge && e.affordable, 'is-point': pointSlot === e.slot, 'is-paid': justPaid && e.enhanced }"
+          :class="{ 'is-selected': selected === e.slot, 'is-poor': !e.affordable, 'is-enhanced': e.enhanced, 'is-nudge': nudgeSlot === e.slot, 'is-point': pointSlot === e.slot, 'is-paid': justPaid && e.enhanced }"
           :style="{ '--tile-w': tileSize + 'px', '--slot': e.slot }"
+          :data-slot="e.slot"
           :aria-label="e.name"
           @click="onTile(e.slot)"
           @pointerenter="openInfo(e.slot)"
           @pointerleave="closeInfo"
-          @pointerdown="onPressStart(e.slot)"
+          @pointerdown="onPressStart(e.slot); emit('drag-start', e.slot, $event)"
           @pointerup="onPressEnd"
           @pointercancel="onPressEnd"
         )
@@ -600,6 +660,12 @@ const infoEntry = computed(() => {
 // outer pad, a gap, a per-tile pad and a border around each thumbnail, four
 // times over. None of that is doing work — the tiles are already separated by
 // their own dark panels — and every pixel it took was a pixel of battlefield.
+// `build-tray__scroll` is LOAD-BEARING as a NAME, not just as a style hook.
+// The scene resolves it with `closest('.build-tray__scroll')` on a touch press
+// to tell a sideways scroll of the hand from a drag of a piece onto the board;
+// if that selector ever returns null, every touch becomes a drag and the hand
+// stops scrolling on phones. Rename or restructure this only together with
+// `GameScene`'s pointer handling.
 .build-tray__scroll
   display: flex
   flex-direction: row
@@ -658,12 +724,24 @@ const infoEntry = computed(() => {
     // Dimmed, NOT hidden: the player should always see what they're saving for.
     filter: grayscale(0.7) brightness(0.62)
 
+  // An armed tile is STILL — a lift and a steady rim, never a loop.
+  //
+  // This matters more than it used to. Arming was once a discrete tap, so a
+  // selected tile was a momentary state; a drag now holds the carried piece
+  // selected for as long as the player's finger is down, and any animation left
+  // running here would beat away under their cursor for the whole gesture.
+  // `nudgeSlot` already refuses to choose this tile — this covers `is-point`,
+  // which is a prop the tray does not get to overrule.
   &.is-selected
     transform: translateY(-4px)
+    animation: none
 
     .build-tray__body
       border-color: #7fe0ff
       box-shadow: 0 0 0 2px rgba(127, 224, 255, 0.55), 0 0 14px rgba(127, 224, 255, 0.6)
+
+    .build-tray__body::after
+      animation: none
 
   // The idle nudge: a slow swell, and a ring breathing out of the thumbnail.
   // On `scale` and a pseudo-element rather than `transform` / `box-shadow`, so
@@ -675,7 +753,9 @@ const infoEntry = computed(() => {
     .build-tray__body::after
       content: ''
       position: absolute
-      inset: -4px
+      // 1px, not 4: the halo's growth has to fit in the side budget above, and
+      // its starting box is part of that sum.
+      inset: -1px
       border: 2px solid rgba(127, 224, 255, 0.9)
       border-radius: clamp(0.35rem, 1.7vw, 0.6rem)
       pointer-events: none
@@ -684,42 +764,77 @@ const infoEntry = computed(() => {
   // The pointed-at tile: a hop rather than a pulse, in the coach marks' gold.
   //
   // A different MOTION from `is-nudge` on purpose, not just a different colour.
-  // The two can be live at once (a player who has gone quiet while the arrow is
-  // up), and two rings breathing in the same rhythm on the same row reads as
-  // one effect with a colour bug. A tile that jumps is unambiguous.
+  // The two can no longer be live together — `nudgeSlot` stands down while this
+  // is up — but they still have to be told apart across the seconds between
+  // them, and two rings breathing in the same rhythm read as one effect with a
+  // colour bug. A tile that jumps is unambiguous.
   &.is-point
     animation: build-tray-point 0.78s ease-in-out infinite
 
     .build-tray__body::after
       content: ''
       position: absolute
-      inset: -4px
+      // 2px: this ring is static, but the tile under it hops, so its distance
+      // from the tile and the hop's height share one budget.
+      inset: -2px
       border: 2px solid rgba(255, 214, 80, 0.95)
       border-radius: clamp(0.35rem, 1.7vw, 0.6rem)
       box-shadow: 0 0 14px rgba(255, 200, 60, 0.5)
       pointer-events: none
 
+// ─── The attention budget ───────────────────────────────────────────────────
+//
+// Everything below grows or lifts a tile, and the scroller around them CLIPS:
+// `.build-tray__scroll` is `overflow-x: auto` for a hand that does not fit, and
+// a scroll container clips on both axes whatever `overflow-y` says. So these
+// numbers are not a taste question, they are a budget, and it is small.
+//
+// Measured on a landscape phone (860px wide, a 67px tile — the tightest layout
+// that ships): the scroller pads itself by `clamp(0.12rem, 0.7vw, 0.28rem)` =
+// 4.5px, and `.build-tray__slot` adds 3.2px above the tile for the reroll pip.
+// That is ~7.7px of room ABOVE a tile, ~4.5px BELOW it, and ~4.5px to the SIDE
+// for the first and last tile in the row (between tiles the gap absorbs it).
+//
+// These were all authored well past that and were being sliced every cycle —
+// the expanding ring worst of all, at 13.75px beyond the tile against a 4.5px
+// side budget, which is what the player was seeing cut off. Reported from play
+// with a screenshot, 2026-09-15.
+//
+// The rule for anything added here: a cue may leave the tile by ~4px sideways
+// and ~7px upward, and no more. A swell the player can see is worth more than a
+// big one they see the edge of.
+
 @keyframes build-tray-nudge
   0%, 100%
     scale: 1
   45%
-    scale: 1.08
+    // 67px tile → +1.3px a side. Compounds with the ring inside it, which is
+    // why both had to come down rather than just one.
+    scale: 1.04
 
 @keyframes build-tray-point
   0%, 100%
     translate: 0 0
   40%
-    translate: 0 -7px
+    // -4px, plus the 2px the gold ring sits outside the tile: 6px of the 7.7px
+    // above. The hop still reads — it is the only tile in the row moving.
+    translate: 0 -4px
   70%
     translate: 0 0
 
+// A halo that swells and fades, not a ring that flies off the tile.
+//
+// At 1.26 out of a box already inset 4px this reached ~13.75px beyond a 67px
+// tile — three times the side budget — so the outer two thirds of every pulse
+// was sliced by the scroller and what the player saw was a ring with a flat
+// edge. Inside the budget the travel is small, so the FADE carries the motion.
 @keyframes build-tray-nudge-ring
   0%
     opacity: 0.95
     scale: 1
   100%
     opacity: 0
-    scale: 1.26
+    scale: 1.05
 
 @media (prefers-reduced-motion: reduce)
   .build-tray__tile.is-nudge
@@ -840,7 +955,10 @@ const infoEntry = computed(() => {
     scale: 0.4
   60%
     opacity: 1
-    scale: 1.35
+    // The chip already overhangs the tile's top-left corner by a third of its
+    // own height; a 1.35 overshoot on top of that put it through the scroller's
+    // edge on the first slot in the row.
+    scale: 1.2
   100%
     opacity: 1
     scale: 1

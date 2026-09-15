@@ -1,14 +1,16 @@
-import { readdirSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 /**
  * ─── Drop-in art that only exists once somebody paints it ───────────────────
  *
- * The merged-tier weapons and the chest wing are slots for paintings that do
- * not exist yet. Probing a slot with no file behind it is a guaranteed 404,
- * and a portal's QA console reads every one as a broken build — so these are
- * probed only once their id is listed in `src/game/paintedArt.ts`.
+ * The merged-tier weapons, the chest wing and the per-type enemy stills are
+ * slots with no painting behind them. Probing a slot with no file behind it is
+ * a guaranteed 404, and a portal's QA console reads every one as a broken
+ * build — CrazyGames' came back with `images/enemies/grunt.webp` and
+ * `…/bat.webp` — so these are probed only once their id is listed in
+ * `src/game/paintedArt.ts`.
  *
  * Which makes the list the thing that can drift, in both directions: a
  * painting sliced in and never listed is art that silently never shows, and a
@@ -34,6 +36,19 @@ describe('the painted-art lists match what is on disk', () => {
     for (const id of PAINTED_TIER_FIXTURES) {
       expect(onDisk.includes(id),
         `'${id}' is listed but public/images/fixtures/${id}.webp does not exist`).toBe(true)
+    }
+  })
+
+  it('lists every enemy still in public/images/enemies, and nothing else', async () => {
+    const { PAINTED_ENEMY_STILLS } = await import('@/game/paintedArt')
+    const onDisk = filesIn('enemies').filter((f) => f.endsWith('.webp')).map((f) => f.replace(/\.webp$/, ''))
+    for (const id of onDisk) {
+      expect(PAINTED_ENEMY_STILLS.has(id),
+        `public/images/enemies/${id}.webp is on disk — add '${id}' to PAINTED_ENEMY_STILLS`).toBe(true)
+    }
+    for (const id of PAINTED_ENEMY_STILLS) {
+      expect(onDisk.includes(id),
+        `'${id}' is listed but public/images/enemies/${id}.webp does not exist`).toBe(true)
     }
   })
 
@@ -126,6 +141,38 @@ describe('merged-tier paintings are probed only once listed', () => {
     expect(painted.tierFixtureArt('cannon', 2)).toBeNull()
     await flush()
     expect(images.requested).toHaveLength(1)
+  })
+
+  it('asks for no enemy still while the list is empty — the CrazyGames QA miss', async () => {
+    // `drawEnemy` used to probe this slot for whatever was on the field, and
+    // `public/images/enemies/` has never existed: a review session that met a
+    // grunt and a bat came back with exactly those two missing resources, and
+    // a longer one would have logged the whole cast.
+    const { images, painted } = await loadWithArt()
+    const { ENEMY_DEFS } = await import('@/game/enemies')
+    for (const id of Object.keys(ENEMY_DEFS)) expect(painted.enemyStillArt(id), id).toBeNull()
+    await flush()
+    expect(images.requested.filter((u) => u.includes('images/enemies/'))).toEqual([])
+  })
+
+  it('fetches an enemy still once it is listed', async () => {
+    const { images, painted } = await loadWithArt()
+    ;(painted.PAINTED_ENEMY_STILLS as Set<string>).add('grunt')
+    expect(painted.enemyStillArt('grunt')).toBeNull() // still decoding
+    expect(painted.enemyStillArt('bat')).toBeNull()   // never asked for
+    await flush()
+    expect(painted.enemyStillArt('grunt')).not.toBeNull()
+    expect(images.requested.filter((u) => u.includes('images/enemies/'))).toHaveLength(1)
+    expect(images.requested.some((u) => u.includes('images/enemies/grunt.webp'))).toBe(true)
+  })
+
+  it('keeps the renderer on the gate rather than on the raw probe', () => {
+    // The gate is only worth anything while `drawEnemy` goes through it, and
+    // nothing a headless run can draw would notice if it stopped: the scene
+    // needs a whole world. So the call is pinned in the source instead.
+    const src = readFileSync(resolve(__dirname, '../../src/use/useTowerArt.ts'), 'utf8')
+    expect(src).toContain('enemyStillArt(')
+    expect(src).not.toMatch(/spriteFor\(\s*'enemy'/)
   })
 
   it('spells the ids the slicer writes', async () => {

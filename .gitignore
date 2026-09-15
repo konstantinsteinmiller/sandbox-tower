@@ -75,7 +75,7 @@ __screenshots__/
 # Local agent/editor state — never distribute
 .claude/
 .mcp-browser-profiles/
-/public/images/assets compressed.zip
+/src/assets/art/assets compressed.zip
 
 # Art Desk: paintings it replaced (kept, never deleted; the slicer never reads them)
 /art-sheets/painted/replaced/

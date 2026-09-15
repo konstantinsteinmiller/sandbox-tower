@@ -5,11 +5,13 @@ import { spriteFor } from './art'
  *
  * Every other override slot in the game is a drawable that has ALREADY been
  * painted — the thirteen fixtures, the seventeen monster strips — so the
- * renderer can probe for it unconditionally. These are slots for art that does
- * not exist yet: the merged-tier weapons and the flying chest's wing. Probing
- * them unconditionally would be a guaranteed 404 per slot per session, and
- * CrazyGames' QA console reports every one of those as a broken build (see
- * `art-todo.md` → "The probe is OFF by default").
+ * renderer can probe for it unconditionally. These are slots with no painting
+ * behind them: the merged-tier weapons, the flying chest's wing, and the
+ * per-type enemy stills. Probing them unconditionally is a guaranteed 404 per
+ * slot per session, and CrazyGames' QA console reports every one of those as a
+ * broken build (see `art-todo.md` → "The probe is OFF by default") — which is
+ * how the enemy stills were found, two `Missing resource` lines for the two
+ * designs a short review session put on screen.
  *
  * So each slot is probed only once its id is LISTED here, which is the step
  * that turns "a file is on disk" into "the game asks for it".
@@ -98,3 +100,28 @@ export const CHEST_WING_BOX = {
   restDeg: 25,
   chestScale: 1
 } as const
+
+// ─── Enemy stills ───────────────────────────────────────────────────────────
+//
+// The one drop-in slot in the game that has never had a file behind it, and
+// the reason CrazyGames' QA console came back with
+// `Missing resource detected: …/images/enemies/grunt.webp` and the same for
+// `bat` — the two designs a short review session puts on screen. Every other
+// type would have joined them in a longer one: `public/images/enemies/` does
+// not exist, and `drawEnemy` probed the slot for whatever was walking.
+//
+// It is empty ON PURPOSE rather than unpainted-for-now. A still replaces the
+// whole walk cycle (see `ART_FOLDERS.enemy`), and the monsters are painted as
+// STRIPS instead — seventeen of them, in `images/monsters/`, keyed on the
+// design rather than the enemy type, so a repaint keeps its gait. The slot
+// stays because the sheet still exports a cell per type and a one-off still is
+// a legitimate thing to want for a type with no design bound to it; listing an
+// id here is what turns a file on disk into a request.
+export const PAINTED_ENEMY_STILLS: ReadonlySet<string> = new Set<string>([])
+
+/**
+ * The painted still for an enemy TYPE, when one is listed and has decoded —
+ * or null, and the procedural body (or its painted walk strip) draws instead.
+ */
+export const enemyStillArt = (typeId: string): HTMLImageElement | null =>
+  PAINTED_ENEMY_STILLS.has(typeId) ? spriteFor('enemy', typeId) : null

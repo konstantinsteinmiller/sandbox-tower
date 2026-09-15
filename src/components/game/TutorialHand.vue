@@ -19,6 +19,14 @@ import type { HandState } from '@/use/useAutoHand'
  * Inked like the cast — a dark line under a flat pale fill — rather than an
  * emoji or a system cursor, so it reads as part of the game rather than as an
  * operating system reaching into it.
+ *
+ * While the script is CARRYING (`useAutoHand`'s `grab` … `drop`), a piece rides
+ * under the fingertip. Without it a drag is two taps with a glide in between,
+ * which is exactly the reading the gift lesson has to overcome — the player who
+ * has a piece in hand and does not know it can be dragged onto the tower. It is
+ * a generic crate rather than the real block: the battlefield's painters live
+ * in the renderer, the hand is a DOM overlay, and a wrong-looking real block
+ * would be worse than an honest stand-in.
  */
 
 const props = defineProps<{ hand: HandState }>()
@@ -38,8 +46,13 @@ const handStyle = computed(() => ({
       @pointerdown.stop.prevent
       @click.stop.prevent
     )
-      div.thand(:style="handStyle" :class="{ 'is-pressing': hand.pressing }")
+      div.thand(:style="handStyle" :class="{ 'is-pressing': hand.pressing, 'is-carrying': hand.carrying }")
         span.thand__ripple(v-if="hand.pressing")
+        //- The piece in hand. Behind the glove in paint order, so the fingers
+        //- close over it rather than the crate sitting on top of them.
+        Transition(name="thand-carry")
+          span.thand__carry(v-if="hand.carrying" aria-hidden="true")
+            span.thand__carry-grain
         //- The fingertip sits at the viewBox's (15, 2). Every shape is stroked
         //- first and filled after, so the glove reads as ONE outlined form with
         //- no seams where the fingers overlap the palm.
@@ -116,6 +129,50 @@ const handStyle = computed(() => ({
   stroke: #1a1208
   stroke-width: 2.4
 
+// The carried piece, centred on the fingertip and a little below it, so the
+// glove's fingers overlap its top edge and the two read as one gesture.
+//
+// Sized off the same percentages the ripple uses rather than a magic offset:
+// both are anchored to the fingertip, and a crate that drifts off the finger
+// when the hand box changes would be the first thing to look wrong.
+.thand__carry
+  position: absolute
+  left: 31%
+  top: 3%
+  width: 34px
+  height: 34px
+  margin: -6px 0 0 -17px
+  border: 3px solid #1a1208
+  border-radius: 6px
+  background-image: linear-gradient(to bottom, #c98a4b, #a9682f)
+  // Translucent, and it says so: this is a demonstration of a piece being
+  // moved, not a piece that is actually on the board.
+  opacity: 0.88
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35)
+  rotate: -6deg
+  pointer-events: none
+
+// Two plank lines. Enough to read as the game's timber at 34px, and cheaper
+// than another SVG for something that is on screen for two seconds.
+.thand__carry-grain
+  position: absolute
+  inset: 5px 4px
+  border-top: 2px solid rgba(26, 18, 8, 0.45)
+  border-bottom: 2px solid rgba(26, 18, 8, 0.45)
+
+// Picked up and set down, rather than appearing and vanishing: the pop is the
+// half of the lesson that says WHEN the piece left the tray.
+.thand-carry-enter-active
+  transition: scale 160ms cubic-bezier(0.2, 1.5, 0.4, 1), opacity 160ms ease-out
+.thand-carry-leave-active
+  transition: scale 180ms ease-in, opacity 180ms ease-in
+.thand-carry-enter-from
+  scale: 0.4
+  opacity: 0
+.thand-carry-leave-to
+  scale: 1.25
+  opacity: 0
+
 // The tap, where the fingertip is: one gold ring swelling out.
 .thand__ripple
   position: absolute
@@ -150,5 +207,11 @@ const handStyle = computed(() => ({
     opacity: 0
 
   .thand__glove
+    transition: none
+
+  // The crate stays — it is the content of the lesson, not decoration — and
+  // only its pop goes.
+  .thand-carry-enter-active,
+  .thand-carry-leave-active
     transition: none
 </style>
