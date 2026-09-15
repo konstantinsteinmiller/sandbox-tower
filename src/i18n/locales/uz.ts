@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': 'To‘lqin', 'enemies': 'Dushmanlar', 'callWave': 'To‘lqinni chaqirish', 'callBoss': 'Bossni chaqirish',
     'monstersIncoming': 'Maxluqlar yaqinlashmoqda!',
+    'skip': 'O\'tkazib yuborish',
     'speed': 'Tezlik {n}×',
     'speedOffer': '{n}× tezlikni ochish',
     'speedGroup': 'Oʻyin tezligi', 'recenter': 'Ko‘rinishni markazlash',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': 'Kamon yomg‘iri',
     'arrowRainAim': 'Zalpni chaqirish uchun jang maydoniga bosing',
     'extendRange': '+{n}% masofa'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': 'Sening minorang — hali tik turgan yolg\'iz narsa.',
+    'horde': 'To\'da allaqachon yo\'lga chiqdi.',
+    'siege': 'Va ular qamal mashinalarini olib kelmoqda.'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': 'Snaryadni tik yuqoriga otadi. Kichik portlash, faqat yerdagi nishonlar.'
     },
     'repair': 'Ta’mirlash',
-    'repairCooldown': '{n} s'
+    'repairCooldown': '{n} s',
+    'reposition': 'Bu blokni ko\'chirish'
   },
 
   'enemies': {

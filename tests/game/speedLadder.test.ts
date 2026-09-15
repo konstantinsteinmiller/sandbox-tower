@@ -128,11 +128,16 @@ describe('the speed ladder', () => {
   it('cycles only the free rungs while nothing is bought', async () => {
     // It used to pin at 1x, which was right when every rung above it was behind
     // a video and is now a key that refuses to do the free thing it points at.
+    //
+    // The cycle STARTS from 1.5x because that is where a run opens (see
+    // `openSpeedForRun`), so the first press is the one that slows the game
+    // down. What matters is the pair it walks and the rung it never reaches.
     const g = await loadGame()
     g.startRun()
+    expect(g.gameSpeed.value).toBe(1.5)
     const seen: number[] = []
     for (let i = 0; i < 3; i++) { g.toggleSpeed(); seen.push(g.gameSpeed.value) }
-    expect(seen).toEqual([1.5, 1, 1.5])
+    expect(seen).toEqual([1, 1.5, 1])
     expect(seen).not.toContain(3)
   })
 })

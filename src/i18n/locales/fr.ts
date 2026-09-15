@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': 'Vague', 'enemies': 'Ennemis', 'callWave': 'Appeler la vague', 'callBoss': 'Appeler le boss',
     'monstersIncoming': 'Les monstres arrivent !',
+    'skip': 'Passer',
     'speed': 'Vitesse {n}×',
     'speedOffer': 'Débloquer la vitesse {n}×',
     'speedGroup': 'Vitesse du jeu', 'recenter': 'Recentrer la vue',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': 'Pluie de flèches',
     'arrowRainAim': 'Touchez le champ de bataille pour lancer la volée',
     'extendRange': '+{n} % de portée'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': 'Ta tour est la dernière encore debout.',
+    'horde': 'La horde est déjà en marche.',
+    'siege': 'Et elle amène des engins de siège.'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': 'Envoie un obus à la verticale. Petite explosion, cibles au sol uniquement.'
     },
     'repair': 'Réparer',
-    'repairCooldown': '{n} s'
+    'repairCooldown': '{n} s',
+    'reposition': 'Déplacer ce bloc'
   },
 
   'enemies': {

@@ -420,6 +420,18 @@ export interface Enemy {
    * `callWave` wakes every one of them.
    */
   dormant?: boolean
+  /**
+   * A body in the opening cutscene, not a participant in the game.
+   *
+   * The intro flies the camera over an army of seventy of these (see
+   * `introCutscene.ts`). They are `dormant` too, which is what already makes
+   * them inert — nothing moves them, nothing shoots them — but dormancy is a
+   * state the real vanguard shares, and these have to be told apart from it for
+   * two reasons: the wave counters must not include them, and calling a wave
+   * must SWEEP them rather than wake them. A grumpling from a cutscene walking
+   * into wave one is a monster the player was never sent.
+   */
+  cameo?: boolean
 }
 
 // ─── Allies ─────────────────────────────────────────────────────────────────
@@ -460,6 +472,21 @@ export interface Ally {
   dying: number
   /** Remaining lifetime in ms — cavalry are a sortie, not a permanent army. */
   life: number
+  /**
+   * A rider in the opening cutscene, not a unit in the game.
+   *
+   * The intro's last shot is three knights galloping home INTO the Gate — a
+   * sortie played backwards, to plant the idea that the tower has something
+   * that leaves it. They ride on the cutscene director's clock rather than the
+   * simulation's, because `stepAllies` has exactly one job and it is the
+   * opposite of this one: find something on your flank and ride AT it. A
+   * cameo with nothing to target would patrol outward, away from the Gate it
+   * is supposed to be arriving at.
+   *
+   * Same contract as `Enemy.cameo`: swept by `clearCameoCast`, never counted,
+   * never stepped.
+   */
+  cameo?: boolean
 }
 
 export interface AllyDef {
@@ -571,6 +598,20 @@ export interface RunSnapshot {
   /** The four shape ids currently on offer. Persisted so a reload cannot be
    *  used to reroll a hand the player doesn't like. */
   offers: string[]
+  /**
+   * Which of those slots are REINFORCED, per slot.
+   *
+   * Persisted because the reinforcement is bought — thirty wallet coins or a
+   * rewarded video — and the pieces were already being restored without it. A
+   * reload therefore handed the player back the exact hand they had paid to
+   * upgrade, with every upgrade silently stripped off it. The snapshot is
+   * written at every wave boundary, so "call a wave, reload, the gold is gone"
+   * was the shape it presented as.
+   *
+   * Optional so older snapshots still load — they restore unreinforced, which
+   * is what they were written as.
+   */
+  enhanced?: boolean[]
   /** Cleared waves banked toward the next Arrow Rain, as a whole count.
    *  Optional so older snapshots still load — they restore to a full charge,
    *  which is the forgiving direction. */
@@ -578,6 +619,18 @@ export interface RunSnapshot {
   /** Which rule set the run was played under. A snapshot from another mode is
    *  never restored; absent means the desktop rules. */
   rules?: string
+  /**
+   * Repositions already made, and the three-wave window they were made in.
+   *
+   * Persisted because the reposition price escalates within a window, and that
+   * counter lives in module state — so without it a page reload would be a free
+   * reshuffle. Optional so older snapshots still load; absent restores an
+   * untouched allowance, which is the forgiving direction and is also correct,
+   * since a snapshot written before this existed was written by a build in
+   * which no move had a price at all.
+   */
+  moves?: number
+  movesWindow?: number
   startedAt: number
 }
 

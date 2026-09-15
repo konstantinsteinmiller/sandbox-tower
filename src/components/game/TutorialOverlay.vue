@@ -71,6 +71,42 @@ interface Props {
 
 const props = defineProps<Props>()
 
+const emit = defineEmits<{
+  /** The player tapped the dim — i.e. anywhere but the thing being taught. */
+  (e: 'miss'): void
+}>()
+
+/**
+ * ── Answering a tap that lands on the dim ───────────────────────────────────
+ *
+ * The dim eats every pointer event outside the hole, and until now that is
+ * literally all it did: no sound, no movement, nothing. A player who has not
+ * understood the arrow taps the biggest, brightest thing on the screen — which
+ * IS the arrow, and the arrow is outside the hole and `pointer-events: none` —
+ * gets absolutely no response, and concludes the game has frozen. There is no
+ * Skip here to rescue them and no copy to re-read, so that conclusion ends the
+ * session.
+ *
+ * So a miss is now answered in the game's own voice: the hole and the arrow
+ * snap once towards each other ("not there; HERE" — the same answer a refused
+ * placement gives) and the scene plays the refusal sound. It teaches nothing
+ * new, and it is not a dismiss control. It only says the game is alive and is
+ * still asking for the same thing.
+ */
+const bump = ref(0)
+let bumpTimer = 0
+
+const onMiss = (): void => {
+  emit('miss')
+  // Restart the animation even when one is already running: a player who taps
+  // three times should see three answers, not one long one.
+  bump.value++
+  window.clearTimeout(bumpTimer)
+  bumpTimer = window.setTimeout(() => { bump.value = 0 }, 420)
+}
+
+onUnmounted(() => window.clearTimeout(bumpTimer))
+
 /**
  * Beats that are NOT coach marks — they hand the whole screen to a card.
  *
@@ -198,18 +234,21 @@ const arrowStyle = computed(() => {
           v-for="(d, i) in passageDims"
           :key="i"
           :style="{ left: d.x + 'px', top: d.y + 'px', width: d.w + 'px', height: d.h + 'px' }"
+          @pointerdown="onMiss"
         )
-        div.tutorial__ring.is-passage(:style="{ left: passageHole.x + 'px', top: passageHole.y + 'px', width: passageHole.w + 'px', height: passageHole.h + 'px' }")
+        div.tutorial__ring.is-passage(:class="{ 'is-bump': bump > 0 }" :key="'p' + bump" :style="{ left: passageHole.x + 'px', top: passageHole.y + 'px', width: passageHole.w + 'px', height: passageHole.h + 'px' }")
       template(v-else)
-        div.tutorial__dim(:style="{ left: 0, top: 0, width: '100%', height: hole.y + 'px' }")
-        div.tutorial__dim(:style="{ left: 0, top: (hole.y + hole.h) + 'px', width: '100%', bottom: 0 }")
-        div.tutorial__dim(:style="{ left: 0, top: hole.y + 'px', width: hole.x + 'px', height: hole.h + 'px' }")
-        div.tutorial__dim(:style="{ left: (hole.x + hole.w) + 'px', top: hole.y + 'px', right: 0, height: hole.h + 'px' }")
-      div.tutorial__ring(:style="{ left: hole.x + 'px', top: hole.y + 'px', width: hole.w + 'px', height: hole.h + 'px' }")
+        div.tutorial__dim(:style="{ left: 0, top: 0, width: '100%', height: hole.y + 'px' }" @pointerdown="onMiss")
+        div.tutorial__dim(:style="{ left: 0, top: (hole.y + hole.h) + 'px', width: '100%', bottom: 0 }" @pointerdown="onMiss")
+        div.tutorial__dim(:style="{ left: 0, top: hole.y + 'px', width: hole.x + 'px', height: hole.h + 'px' }" @pointerdown="onMiss")
+        div.tutorial__dim(:style="{ left: (hole.x + hole.w) + 'px', top: hole.y + 'px', right: 0, height: hole.h + 'px' }" @pointerdown="onMiss")
+      //- `:key` on the bump so a second tap restarts the animation instead of
+      //- joining the one already playing.
+      div.tutorial__ring(:class="{ 'is-bump': bump > 0 }" :key="'h' + bump" :style="{ left: hole.x + 'px', top: hole.y + 'px', width: hole.w + 'px', height: hole.h + 'px' }")
 
       //- The whole instruction. Rotated about its own tip, so one shape serves
       //- all four sides of the hole.
-      div.tutorial__arrow(v-if="arrowStyle" aria-hidden="true" :style="arrowStyle")
+      div.tutorial__arrow(v-if="arrowStyle" aria-hidden="true" :class="{ 'is-bump': bump > 0 }" :key="'a' + bump" :style="arrowStyle")
         svg.tutorial__arrow-svg(viewBox="0 0 64 96" preserveAspectRatio="none")
           defs
             linearGradient#tutArrowFill(x1="0" y1="0" x2="0" y2="1")
@@ -281,10 +320,44 @@ const arrowStyle = computed(() => {
   50%
     transform: translateY(4%)
 
+// The answer to a tap that landed on the dim: one hard pulse of the ring and
+// one shove of the arrow along its own axis — after the parent's rotation, that
+// is always "towards the thing it is pointing at".
+.tutorial__ring.is-bump
+  animation: tut-bump 0.4s ease-out
+
+.tutorial__arrow.is-bump .tutorial__arrow-svg
+  animation: tut-arrow-bump 0.4s ease-out
+
+@keyframes tut-bump
+  0%
+    box-shadow: 0 0 0 3px rgba(255, 214, 80, 0.25), 0 0 22px rgba(255, 200, 60, 0.5)
+  35%
+    box-shadow: 0 0 0 10px rgba(255, 236, 150, 0.75), 0 0 44px rgba(255, 220, 90, 0.95)
+  100%
+    box-shadow: 0 0 0 3px rgba(255, 214, 80, 0.25), 0 0 22px rgba(255, 200, 60, 0.5)
+
+@keyframes tut-arrow-bump
+  0%
+    transform: translateY(-10%)
+  30%
+    transform: translateY(-38%)
+  65%
+    transform: translateY(10%)
+  100%
+    transform: translateY(-10%)
+
 @media (prefers-reduced-motion: reduce)
   .tutorial__arrow-svg
     animation: none
   .tutorial__ring
+    animation: none
+  // The miss answer stays — it is feedback, not decoration, and without it a
+  // reduced-motion player gets the silent dead screen this exists to end. The
+  // ring simply flashes in place instead of moving anything.
+  .tutorial__ring.is-bump
+    animation: tut-bump 0.4s ease-out
+  .tutorial__arrow.is-bump .tutorial__arrow-svg
     animation: none
 
 .tut-enter-active, .tut-leave-active

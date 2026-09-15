@@ -8,6 +8,13 @@
  * how a full-screen card ships with its layout broken in landscape — nobody
  * looks at a once-ever screen twice unless looking is cheap.
  *
+ * `?tut=intro` is the newest and the one that needed the hatch most: the
+ * opening cutscene is ten seconds long, fires once per save on the very first
+ * frame a player ever sees, and cannot be reached again from inside the game at
+ * all. Checking a change to its pacing, its framing or its type at 21
+ * languages' worth of string lengths would otherwise mean wiping the save and
+ * reloading for every single look.
+ *
  * It is a URL flag rather than a dev-only switch on purpose. These screens
  * break on the real device and inside the real portal shell, which is exactly
  * where a build-time gate cannot reach — so it ships, and it is kept to
@@ -20,9 +27,9 @@
  * same answer.
  */
 
-export type TutorialCheat = 'merge' | 'power' | 'trap' | 'reset'
+export type TutorialCheat = 'merge' | 'power' | 'trap' | 'intro' | 'reset'
 
-const CHEATS: readonly string[] = ['merge', 'power', 'trap', 'reset']
+const CHEATS: readonly string[] = ['merge', 'power', 'trap', 'intro', 'reset']
 
 export const parseTutorialCheat = (query: string): TutorialCheat | null => {
   const v = new URLSearchParams(query).get('tut')

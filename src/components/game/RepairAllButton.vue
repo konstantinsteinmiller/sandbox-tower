@@ -114,6 +114,10 @@ const label = computed<string>(() => t('mobile.repairAll'))
       //- recognises before they read anything.
       GameIcon.repair-all__icon(name="repair")
       span.repair-all__label(v-if="!compact") {{ label }}
+      //- Compact only: a hairline between the glyph and the bill, so the two
+      //- are read as two fields rather than as one expression. See the cost
+      //- rule in the stylesheet for what that is defending against.
+      span.repair-all__rule(v-if="compact" aria-hidden="true")
       span.repair-all__cost
         IconGold.repair-all__gold
         | {{ totalCost }}
@@ -259,21 +263,41 @@ const label = computed<string>(() => t('mobile.repairAll'))
   width: clamp(0.7rem, 2.8vw, 0.9rem)
   height: clamp(0.7rem, 2.8vw, 0.9rem)
 
-// With the word gone there are two marks left in a taller pill, so both grow —
-// otherwise the compact form is a big empty capsule with a pair of specks in
-// the middle, and the glyph is what identifies the button once the label is no
-// longer there to do it.
+// ── The compact pill must not read as a reward ──────────────────────────────
+//
+// Measured 2026-09-15: a blind tester clicked this expecting to be GIVEN five
+// gold and watched their purse fall from 9 to 4. The `repair` glyph is a cross
+// knocked out of a rounded plate, and at HUD size the plate reads as button
+// chrome and the cross as a plus — so a green capsule containing "cross, coin,
+// 5" and no word scans as "+5", which is the universal grammar of a gift.
+//
+// The word cannot come back: in compact mode the meta cluster stands up, this
+// pill sets `metaCol`, and `metaCol` is width taken off the build hand (see
+// `bottomBarLayout`). So the fix is composition, not copy.
+//
+// It used to be that BOTH marks grew here, which made the plus the biggest
+// thing in the button and its own price a footnote. Now the bill takes the
+// growth and the glyph stays at its base size, with a hairline between them:
+// the price is what the eye lands on, and a cross fielded off from a number can
+// no longer bind to it as a sign. The glyph still identifies the button — it is
+// simply no longer competing with the thing it is charging for.
 .repair-all.is-compact
-  .repair-all__icon
-    width: clamp(1rem, 4vw, 1.3rem)
-    height: clamp(1rem, 4vw, 1.3rem)
-
   .repair-all__cost
-    font-size: clamp(0.68rem, 3vw, 0.9rem)
+    font-size: clamp(0.8rem, 3.4vw, 1.02rem)
 
   .repair-all__gold
-    width: clamp(0.8rem, 3.2vw, 1rem)
-    height: clamp(0.8rem, 3.2vw, 1rem)
+    width: clamp(0.85rem, 3.4vw, 1.05rem)
+    height: clamp(0.85rem, 3.4vw, 1.05rem)
+
+// Sits inside the body's flex gap, so it needs no margin of its own. Drawn from
+// the button's own shadow colour rather than a new token: it is a crease in the
+// pill, not a border between two components.
+.repair-all__rule
+  flex: 0 0 auto
+  align-self: stretch
+  width: 1px
+  background: rgba(0, 0, 0, 0.3)
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.12)
 
 // Deliberately quieter than `.scene__spotlight`: that one is a coach mark for a
 // mechanic the player has not found yet, this is a shortcut for one they

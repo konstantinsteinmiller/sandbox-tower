@@ -99,6 +99,15 @@ export const isFixed = ref(false)
 export const setFixedFrame = (frame: { cell: number; x: number; y: number }): void => {
   isFixed.value = true
   isManual.value = false
+  // The MODE is recorded, the frame is not, while the cutscene has the camera.
+  //
+  // This is not defensive tidying. The phone board re-derives its fit on a
+  // one-second cadence (`layoutFrame`, which re-measures the strip and the
+  // bottom bar) and every one of those calls lands here — so without this the
+  // opening cutscene's camera was yanked back to the board once a second, all
+  // the way through the flight. The scene re-applies its own frame when the
+  // cutscene hands the camera back; see `clearCinematicFrame`.
+  if (isCinematic.value) return
   tx = x = frame.x
   ty = y = frame.y
   tzoom = zoom = Math.max(1, frame.cell)
@@ -108,6 +117,48 @@ export const setFixedFrame = (frame: { cell: number; x: number; y: number }): vo
 /** Back to the spring-damped auto-fit (tests, and the desktop scene). */
 export const clearFixedFrame = (): void => {
   isFixed.value = false
+  lastTowerVersion = -1
+}
+
+/**
+ * A DIRECTED frame: the opening cutscene.
+ *
+ * The camera is written per frame by `useIntroCutscene` from its own shot list,
+ * and outranks both other modes — the desktop's auto-fit and the phone board's
+ * fixed frame — because for these ten seconds the camera is not framing the
+ * game, it IS the game. Pan, pinch and wheel are inert while it is up (they
+ * would fight the director for the same three numbers), and the spring is
+ * bypassed entirely: the shot list already carries its own easing, and running
+ * a directed move through a second smoothing filter turns every arrival into an
+ * overshoot the storyboard did not ask for.
+ *
+ * The one thing it must NOT do is publish the view span. `publishSpan` tells
+ * the simulation where off-screen is, and off-screen during the cutscene is
+ * seventy cells west of the tower — so a wave called on the frame the cutscene
+ * ended would walk on from a mile away, and the opening vanguard would be stood
+ * somewhere the player is not looking. The last span the game itself framed
+ * stays in force throughout; see `publishSpan`.
+ */
+export const isCinematic = ref(false)
+
+export const setCinematicFrame = (frame: { x: number; y: number; zoom: number }): void => {
+  isCinematic.value = true
+  tx = x = frame.x
+  ty = y = frame.y
+  tzoom = zoom = Math.max(1, frame.zoom)
+}
+
+/**
+ * Hand the camera back.
+ *
+ * Auto-fit is re-derived from scratch (`lastTowerVersion`), and a scene with a
+ * fixed frame re-applies its own on the next layout pass — so the caller's job
+ * afterwards is a single `snapToFit()` (desktop) or `applyFrame()` (phone),
+ * which is what makes the last frame of the cutscene and the first frame of the
+ * game the same picture.
+ */
+export const clearCinematicFrame = (): void => {
+  isCinematic.value = false
   lastTowerVersion = -1
 }
 
@@ -173,8 +224,8 @@ export const screenToCell = (sx: number, sy: number): { c: number; r: number } =
  * always includes the ground lane so approaching enemies are visible — being
  * surprised by a wave you literally could not see is not difficulty, it's a bug.
  */
-const computeAutoTarget = (): void => {
-  if (viewW <= 0 || viewH <= 0) return
+const autoTarget = (): { x: number; y: number; zoom: number } | null => {
+  if (viewW <= 0 || viewH <= 0) return null
   const b = towerBounds()
 
   // Always frame at least this much horizontally so a one-block tower on wave 1
@@ -188,9 +239,8 @@ const computeAutoTarget = (): void => {
   // The usable viewport excludes the HUD insets.
   const usableH = Math.max(80, viewH - insetTop - insetBottom)
   const fit = Math.min(viewW / worldW, usableH / worldH)
-  tzoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, fit))
+  const fit2 = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, fit))
 
-  tx = 0
   // Vertical centre of the framed band (which starts at -BELOW_GROUND), then
   // nudge so the inset chrome eats dead space rather than the tower.
   //
@@ -202,10 +252,32 @@ const computeAutoTarget = (): void => {
   // fit already left slack; on a phone, where the bar owns a third of the
   // screen, it buried the Gate behind the tray.
   const contentCentre = (worldTop - BELOW_GROUND) / 2 - PAD_Y * 0.35
-  const insetShiftCells = (insetBottom - insetTop) / 2 / tzoom
+  const insetShiftCells = (insetBottom - insetTop) / 2 / fit2
   const portraitBias = isMobilePortrait.value ? worldH * 0.06 : 0
-  ty = contentCentre - insetShiftCells + portraitBias
+  return { x: 0, y: contentCentre - insetShiftCells + portraitBias, zoom: fit2 }
 }
+
+/** Write the auto-fit target into the spring's destination. */
+const computeAutoTarget = (): void => {
+  const f = autoTarget()
+  if (!f) return
+  tx = f.x
+  ty = f.y
+  tzoom = f.zoom
+}
+
+/**
+ * The frame the game itself would choose right now — where "home" is.
+ *
+ * Exported for the opening cutscene, which opens and closes on it and so has
+ * to ask every frame rather than remember it once: the answer moves when the
+ * HUD re-measures, when the device rotates and when the window resizes, and a
+ * cutscene that landed on a remembered frame would hand the player a view that
+ * jumps on its final frame. Falls back to where the camera actually IS before
+ * the first viewport is known (headless tests, the frame before `resize`).
+ */
+export const homeFrame = (): { x: number; y: number; zoom: number } =>
+  autoTarget() ?? { x, y, zoom }
 
 // ─── Input ──────────────────────────────────────────────────────────────────
 
@@ -215,7 +287,7 @@ const markManual = (): void => {
 
 /** Pan by a screen-space delta (a one-finger drag / mouse drag). */
 export const panBy = (dxPx: number, dyPx: number): void => {
-  if (isFixed.value) return
+  if (isFixed.value || isCinematic.value) return
   tx -= dxPx / zoom
   ty += dyPx / zoom
   // Snap the smoothed position too, so a drag tracks the finger 1:1 instead of
@@ -230,7 +302,7 @@ export const panBy = (dxPx: number, dyPx: number): void => {
  *  point under the anchor stays put — the behaviour every map app trained
  *  players to expect. */
 export const zoomAt = (factor: number, anchorX: number, anchorY: number): void => {
-  if (isFixed.value) return
+  if (isFixed.value || isCinematic.value) return
   const before = { wx: screenToWorldX(anchorX), wy: screenToWorldY(anchorY) }
   tzoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, tzoom * factor))
   zoom = tzoom
@@ -244,14 +316,14 @@ export const zoomAt = (factor: number, anchorX: number, anchorY: number): void =
 }
 
 export const beginPinch = (distPx: number): void => {
-  if (isFixed.value) return
+  if (isFixed.value || isCinematic.value) return
   pinchStartDist = Math.max(1, distPx)
   pinchStartZoom = tzoom
   markManual()
 }
 
 export const updatePinch = (distPx: number, anchorX: number, anchorY: number): void => {
-  if (isFixed.value || pinchStartDist <= 0) return
+  if (isFixed.value || isCinematic.value || pinchStartDist <= 0) return
   const desired = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, pinchStartZoom * (distPx / pinchStartDist)))
   zoomAt(desired / tzoom, anchorX, anchorY)
 }
@@ -260,7 +332,7 @@ export const endPinch = (): void => { pinchStartDist = 0 }
 
 /** Return to auto-fit immediately (the recenter button). */
 export const recenter = (): void => {
-  if (isFixed.value) return
+  if (isFixed.value || isCinematic.value) return
   isManual.value = false
   lastTowerVersion = towerVersion.value
   computeAutoTarget()
@@ -288,6 +360,9 @@ const clampTarget = (): void => {
 // ─── Per-frame update ───────────────────────────────────────────────────────
 
 export const updateCamera = (dtMs: number): void => {
+  // A directed frame was written by the cutscene director for THIS frame, and
+  // deliberately publishes no span — see `isCinematic`.
+  if (isCinematic.value) return
   // A fixed frame has nowhere to go; only the spawn span needs publishing.
   if (isFixed.value) { publishSpan(); return }
   if (!isManual.value) {
@@ -316,6 +391,10 @@ export const updateCamera = (dtMs: number): void => {
  * pulled because the sim must not import this module — see `setViewSpan`.
  */
 const publishSpan = (): void => {
+  // Belt and braces alongside the early return in `updateCamera`: a span
+  // measured off a cinematic frame would tell the simulation that off-screen is
+  // seventy cells west of the tower.
+  if (isCinematic.value) return
   if (viewW <= 0 || zoom <= 0 || tzoom <= 0) return
   // The union of where the camera IS and where it is heading. A wave call is
   // exactly when the tower grows and the auto-fit pulls back, so an enemy
@@ -334,6 +413,10 @@ const publishSpan = (): void => {
 /** Force the camera to its auto-fit target with no animation. Used on scene
  *  mount so the first painted frame is already correctly framed. */
 export const snapToFit = (): void => {
+  // Mid-cutscene the scene still calls this on a resize. The director owns the
+  // three numbers and re-reads `homeFrame()` every frame, so the new viewport
+  // is picked up on the next one without the frame jumping here.
+  if (isCinematic.value) return
   if (isFixed.value) { publishSpan(); return }
   isManual.value = false
   lastTowerVersion = towerVersion.value
@@ -346,8 +429,9 @@ export const snapToFit = (): void => {
 
 export default function useTowerCamera() {
   return {
-    isManual,
+    isManual, isCinematic,
     setViewport, snapToFit, updateCamera, recenter,
+    homeFrame, setCinematicFrame, clearCinematicFrame,
     panBy, zoomAt, beginPinch, updatePinch, endPinch,
     worldToScreenX, worldToScreenY, screenToWorldX, screenToWorldY,
     screenToCell, viewRect, getZoom, getCenter

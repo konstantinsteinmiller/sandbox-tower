@@ -281,11 +281,16 @@ describe('falling blocks', () => {
 })
 
 describe('the fast-forward buff', () => {
-  it('is not free — the default state is 1x with no buff', async () => {
+  it('is not free — a new run owns no buff and opens on a FREE rung', async () => {
+    // A run opens at 1.5x rather than 1x (see `openSpeedForRun`), so the claim
+    // here is not about the number: it is that nothing was GIVEN AWAY. No buff
+    // time, and the rung the player lands on is one that never needed buying.
     const g = await loadGame()
     g.startRun()
     expect(g.speedBuffLeft.value).toBe(0)
-    expect(g.gameSpeed.value).toBe(1)
+    expect(g.isSpeedBuffed.value).toBe(false)
+    expect(g.needsSpeedBuff(g.gameSpeed.value)).toBe(false)
+    expect(g.gameSpeed.value).toBeLessThan(g.MAX_GAME_SPEED)
   })
 
   it('grants five minutes and lands on the top rung', async () => {
@@ -321,8 +326,15 @@ describe('the fast-forward buff', () => {
   it('cannot reach a PAID rung without owning the buff', async () => {
     // The free rungs stay reachable — the toggle used to pin at 1x, which is
     // now a key refusing to do the one thing it costs nothing to do.
+    //
+    // A run opens at the free ceiling, so the toggle's first press walks DOWN
+    // to 1x and the second brings it back. What must hold either way: every
+    // rung the key can reach is free, and the paid one is refused outright.
     const g = await loadGame()
     g.startRun()
+    expect(g.gameSpeed.value).toBe(g.FREE_MAX_SPEED)
+    g.toggleSpeed()
+    expect(g.gameSpeed.value).toBe(1)
     g.toggleSpeed()
     expect(g.gameSpeed.value).toBe(g.FREE_MAX_SPEED)
     expect(g.setGameSpeed(g.MAX_GAME_SPEED)).toBe(false)

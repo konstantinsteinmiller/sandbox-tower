@@ -53,7 +53,7 @@ const clearOneWave = (g: {
 }
 
 describe('opening wave', () => {
-  it('gives the opening three seconds and every wave after it the full window', async () => {
+  it('gives the opening three seconds and the wave-2 break five', async () => {
     const { g } = await loadGame()
     g.startRun()
 
@@ -63,7 +63,13 @@ describe('opening wave', () => {
 
     clearOneWave(g)
     expect(g.wave.value).toBe(1)
-    expect(g.buildTimeLeft.value).toBe(15_000)
+    // Five, not the full fifteen. This is the one break in the game a player
+    // meets before they have learned Call Wave exists — the button is taught in
+    // this very window — so for its whole length their model is "waves arrive
+    // when the game sends them", and fifteen seconds of that is a countdown
+    // over an empty field on a wave the scripted fort survives untouched.
+    // See `earlyBuildMs` in the rule set.
+    expect(g.buildTimeLeft.value).toBe(5_000)
   })
 
   it('calls the wave itself once those three seconds are up', async () => {
@@ -201,12 +207,19 @@ describe('opening wave — Drop & Merge', () => {
     expect(breaks).toEqual([4_000, 6_000, 8_000, 10_000, 10_000])
   })
 
-  it('leaves the desktop board with its full window after every wave', async () => {
+  it('gives the desktop board one short break and then its full window', async () => {
+    // The desktop does not ramp the way the phone board above does: it has ONE
+    // shortened break, between waves 1 and 2, and every window after that is
+    // the full fifteen. The step up is deliberate — the five seconds are
+    // justified by the player not yet knowing about Call Wave, and by wave 3
+    // they have been shown the arrow over it.
     const { g } = await loadGame()
     g.startRun()
+    const breaks: number[] = []
     for (let w = 1; w <= 3; w++) {
       clearOneWave(g)
-      expect(g.buildTimeLeft.value).toBe(15_000)
+      breaks.push(g.buildTimeLeft.value)
     }
+    expect(breaks).toEqual([5_000, 15_000, 15_000])
   })
 })

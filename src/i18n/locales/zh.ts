@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': '波次', 'enemies': '敌人', 'callWave': '召唤波次', 'callBoss': '召唤首领',
     'monstersIncoming': '怪物来袭！',
+    'skip': '跳过',
     'speed': '速度 {n}×',
     'speedOffer': '解锁 {n}× 速度',
     'speedGroup': '游戏速度', 'recenter': '视角复位',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': '箭雨',
     'arrowRainAim': '点击战场召唤齐射',
     'extendRange': '射程 +{n}%'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': '你的塔是最后一处屏障。',
+    'horde': '兽潮已经上路了。',
+    'siege': '它们还带来了攻城器械。'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': '垂直抛射炮弹。爆炸范围很小，只能打地面目标。'
     },
     'repair': '修理',
-    'repairCooldown': '{n}秒'
+    'repairCooldown': '{n}秒',
+    'reposition': '移动这个方块'
   },
 
   'enemies': {

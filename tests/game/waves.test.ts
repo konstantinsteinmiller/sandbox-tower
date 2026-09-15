@@ -149,6 +149,46 @@ describe('early-call bonus', () => {
   it('never goes negative on a garbage input', () => {
     expect(earlyCallBonus(-5000)).toBe(1)
   })
+
+  it('keeps the cap reachable in a SHORTER window, not just the default one', () => {
+    // The bug this argument exists to kill. The rate used to be derived from
+    // `BUILD_TIME_MS` alone, which is the right idea aimed one level too high:
+    // the moment a mode gave the player a shorter window than the default, the
+    // advertised +40 % stopped being reachable at all.
+    //
+    // It went from theoretical to real when the window before wave 2 was cut to
+    // 5 s. At the old rate the best bonus obtainable there was 5 × (0.4 / 15) =
+    // +13 %, on the ONE window where a coach mark is actively teaching the
+    // player that calling early pays. A lesson that demonstrates a third of its
+    // advertised reward teaches the wrong thing.
+    for (const window of [5_000, 10_000, BUILD_TIME_MS, 30_000]) {
+      expect(earlyCallBonus(window, window), `window ${window}`)
+        .toBeCloseTo(1 + EARLY_CALL_MAX_BONUS, 5)
+      expect(earlyCallBonus(window / 2, window), `window ${window} half`)
+        .toBeCloseTo(1 + EARLY_CALL_MAX_BONUS / 2, 5)
+      expect(earlyCallBonus(0, window), `window ${window} spent`).toBe(1)
+    }
+    // The old behaviour, for the record: 13 %, not 40 %.
+    expect(earlyCallBonus(5_000)).toBeCloseTo(1 + EARLY_CALL_MAX_BONUS / 3, 2)
+  })
+
+  it('still caps, and still answers nonsense, with a window given', () => {
+    expect(earlyCallBonus(999_999, 5_000)).toBeCloseTo(1 + EARLY_CALL_MAX_BONUS, 5)
+    expect(earlyCallBonus(-1, 5_000)).toBe(1)
+    // A zero-length window — the phone board's opening — has no time to give
+    // back, so there is no bonus and no division by zero.
+    expect(earlyCallBonus(0, 0)).toBe(1)
+    expect(earlyCallBonus(1_000, 0)).toBe(1)
+  })
+
+  it('behaves exactly as it always did when no window is given', () => {
+    // Every existing call site that has not been taught about windows must be
+    // untouched by this change.
+    for (const left of [0, 1_000, 7_500, BUILD_TIME_MS, 600_000, -5_000]) {
+      expect(earlyCallBonus(left), `${left}`)
+        .toBe(earlyCallBonus(left, BUILD_TIME_MS))
+    }
+  })
 })
 
 describe('air and sea pressure ramps', () => {

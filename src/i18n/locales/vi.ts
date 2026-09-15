@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': 'Đợt', 'enemies': 'Kẻ địch', 'callWave': 'Gọi đợt', 'callBoss': 'Gọi trùm',
     'monstersIncoming': 'Quái vật đang đến!',
+    'skip': 'Bỏ qua',
     'speed': 'Tốc độ {n}×',
     'speedOffer': 'Mở khóa tốc độ {n}×',
     'speedGroup': 'Tốc độ trò chơi', 'recenter': 'Căn giữa khung nhìn',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': 'Mưa Tên',
     'arrowRainAim': 'Chạm vào chiến trường để gọi loạt bắn',
     'extendRange': '+{n}% tầm bắn'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': 'Tòa tháp của bạn là thứ cuối cùng còn đứng vững.',
+    'horde': 'Đại quân đã lên đường.',
+    'siege': 'Và chúng mang theo cả công thành.'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': 'Bắn đạn thẳng lên cao. Vụ nổ nhỏ, chỉ nhắm mục tiêu mặt đất.'
     },
     'repair': 'Sửa chữa',
-    'repairCooldown': '{n} giây'
+    'repairCooldown': '{n} giây',
+    'reposition': 'Di chuyển khối này'
   },
 
   'enemies': {

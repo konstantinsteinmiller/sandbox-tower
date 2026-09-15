@@ -68,12 +68,18 @@ describe('picking a block up', () => {
       expect(at(g, -3, 0)?.typeId).toBe('wood')
     })
 
-  it('costs nothing and refunds nothing — it is the same block', async () => {
+  it('costs gold and refunds no materials — it is the same block', async () => {
     const g = await load()
     g.placeBlock('wood', -3, 0)
     const purse = [g.wood.value, g.stone.value, g.runCoins.value]
     expect(g.moveBlock(-3, 0, 3, 0)).toBe(true)
-    expect([g.wood.value, g.stone.value, g.runCoins.value]).toEqual(purse)
+    // The crane, not the cargo: the block is not rebought and not resold, so
+    // its materials never move. Only run gold is spent (see `MOVE_COST`) —
+    // this used to be free, which made it the cheapest way in the game to
+    // reshuffle a whole board into a perfect merge lattice between waves.
+    expect(g.wood.value).toBe(purse[0])
+    expect(g.stone.value).toBe(purse[1])
+    expect(g.runCoins.value).toBe(purse[2]! - g.MOVE_COST)
   })
 
   it('carries the block\'s own history with it', async () => {

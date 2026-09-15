@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': 'الموجة', 'enemies': 'الأعداء', 'callWave': 'استدعِ الموجة', 'callBoss': 'استدعِ الزعيم',
     'monstersIncoming': 'الوحوش قادمة!',
+    'skip': 'تخطٍّ',
     'speed': 'السرعة {n}×',
     'speedOffer': 'فتح سرعة {n}×',
     'speedGroup': 'سرعة اللعبة', 'recenter': 'إعادة توسيط العرض',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': 'مطر السهام',
     'arrowRainAim': 'انقر على ساحة المعركة لاستدعاء الوابل',
     'extendRange': '+{n}% مدى'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': 'برجك هو آخر ما تبقّى واقفًا.',
+    'horde': 'الحشد يزحف بالفعل.',
+    'siege': 'وهم يجرّون آلات الحصار.'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': 'يقذف قذيفة عمودياً. انفجار صغير، أهداف أرضية فقط.'
     },
     'repair': 'إصلاح',
-    'repairCooldown': '{n} ث'
+    'repairCooldown': '{n} ث',
+    'reposition': 'انقل هذه الكتلة'
   },
 
   'enemies': {

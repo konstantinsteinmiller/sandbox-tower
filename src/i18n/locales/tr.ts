@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': 'Dalga', 'enemies': 'Düşmanlar', 'callWave': 'Dalgayı çağır', 'callBoss': 'Boss’u çağır',
     'monstersIncoming': 'Canavarlar geliyor!',
+    'skip': 'Atla',
     'speed': 'Hız {n}×',
     'speedOffer': '{n}× hızı aç',
     'speedGroup': 'Oyun hızı', 'recenter': 'Görünümü ortala',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': 'Ok Yağmuru',
     'arrowRainAim': 'Yaylım ateşi için savaş alanına dokun',
     'extendRange': '+%{n} menzil'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': 'Kulen ayakta kalan son şey.',
+    'horde': 'Sürü çoktan yola çıktı.',
+    'siege': 'Ve kuşatma makineleri getiriyorlar.'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': 'Mermiyi dik yukarı fırlatır. Küçük patlama, sadece kara hedefleri.'
     },
     'repair': 'Onar',
-    'repairCooldown': '{n} sn'
+    'repairCooldown': '{n} sn',
+    'reposition': 'Bu bloğu taşı'
   },
 
   'enemies': {

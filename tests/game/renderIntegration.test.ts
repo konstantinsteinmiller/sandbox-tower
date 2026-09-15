@@ -331,6 +331,101 @@ describe('renderer survives a full siege', () => {
   })
 })
 
+describe('the opening cutscene, drawn', () => {
+  /**
+   * The intro puts three things on screen that no ordinary frame contains, and
+   * every one of them reaches the renderer by a path nothing else uses:
+   *
+   *   · seventy DORMANT enemies, including siege engines and monster designs
+   *     that normally debut around wave 22 — so the painted strips they want
+   *     have not been fetched and each falls back to its procedural body;
+   *   · six SYNTHETIC ship blocks that are not in the `blocks` map at all
+   *     (`setDecorShips`), hand-built rather than placed, so any field
+   *     `drawBlock` reads and they do not carry is a null-deref on frame one;
+   *   · three cameo ALLIES driven by the director rather than by `stepAllies`.
+   *
+   * This is the only test that draws any of it. The rest of the cutscene's
+   * cover is arithmetic — where the camera goes, what the cast is, when the
+   * cards show — and none of that would catch a NaN in a hull's roll.
+   */
+  it('draws the whole flight, the fleet and the riders home without throwing', async () => {
+    const { game, camera, art } = await loadScene()
+    const intro = await import('@/use/useIntroCutscene')
+    intro.__resetIntroForTests()
+    const rec = makeCtx()
+
+    game.startRun()
+    game.seedScriptedOpening(true)
+    camera.setViewport(800, 600, 40, 120)
+    camera.snapToFit()
+
+    expect(intro.shouldPlayIntro()).toBe(true)
+    intro.playIntro()
+
+    let frames = 0
+    while (intro.introActive.value && frames < 2000) {
+      game.step(16.67)
+      // The scene's order: the director writes the camera, then the frame draws.
+      intro.stepIntro(16.67, 800, 600)
+      art.drawScene(rec.ctx, 800, 600, 16.67, 2)
+      frames++
+    }
+
+    // It ran to the end rather than being cut short by a throw.
+    expect(frames).toBeGreaterThan(600)
+    expect(intro.introActive.value).toBe(false)
+    expect(rec.badNumbers).toEqual([])
+    expect(rec.saveDepth).toBe(0)
+    expect(rec.calls.drawImage).toBeGreaterThan(0)
+
+    // And the set is struck: no cameo left on the field, and the camera handed
+    // back to the game.
+    expect(game.getEnemies().filter((e: any) => e.cameo)).toHaveLength(0)
+    expect(game.getAllies()).toHaveLength(0)
+    expect(camera.isCinematic.value).toBe(false)
+  })
+
+  it('draws a moored fleet at every quality tier', async () => {
+    // The hulls are drawn through `drawBlock`'s ship branch, which reaches the
+    // painted-strip path, the waterline clip and the swell roll — all of which
+    // are tier-sensitive, and none of which an ordinary early frame touches
+    // because a harbour is a tech-tree purchase.
+    const { game, camera, art, vfx } = await loadScene()
+    const { INTRO_FLEET } = await import('@/game/introCutscene')
+    const { blockDef } = await import('@/game/blocks')
+
+    game.startRun()
+    camera.setViewport(800, 600, 0, 0)
+    camera.snapToFit()
+    art.setDecorShips(INTRO_FLEET.map((f, i) => ({
+      uid: -1000 - i,
+      c: f.x,
+      r: game.WATER_ROW,
+      typeId: f.typeId,
+      hp: blockDef(f.typeId).hp,
+      maxHp: blockDef(f.typeId).hp,
+      cd: 0,
+      flash: 0,
+      bornAt: -10_000,
+      recoil: 0,
+      aim: 0
+    })))
+
+    for (const tier of ['high', 'medium', 'low'] as const) {
+      const rec = makeCtx()
+      vfx.quality.value = tier
+      // Parked where the flotillas are, so they are actually inside the frame.
+      camera.setCinematicFrame({ x: -25, y: 3, zoom: 30 })
+      for (let i = 0; i < 60; i++) art.drawScene(rec.ctx, 800, 600, 16.67, 2)
+      expect(rec.badNumbers, tier).toEqual([])
+      expect(rec.saveDepth, tier).toBe(0)
+      expect(rec.calls.drawImage, tier).toBeGreaterThan(0)
+    }
+    camera.clearCinematicFrame()
+    art.setDecorShips([])
+  })
+})
+
 describe('camera', () => {
   it('keeps the tower inside the frame as it grows', async () => {
     const { game, camera } = await loadScene()

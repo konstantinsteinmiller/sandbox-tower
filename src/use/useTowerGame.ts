@@ -469,6 +469,17 @@ export const buildClockHeld = ref(false)
  * `wave` holds the wave already survived, so zero is the opening — see
  * `firstBuildMs` in the rule set for why that one is short.
  */
+/**
+ * The length of the build window that is currently open, ms.
+ *
+ * Published because the early-call bonus is a FRACTION of it (see
+ * `earlyCallBonus`) and the HUD has to show the same number the payout will
+ * use. Held as a value rather than re-derived on read: `buildWindowMs` is keyed
+ * off `wave.value`, and `callWave` increments that before it prices anything.
+ */
+export const buildWindowTotal = ref(0)
+let openWindowMs = 0
+
 const buildWindowMs = (): number =>
   wave.value === 0
     ? R().waves.firstBuildMs
@@ -548,7 +559,19 @@ const enemyFieldCap = (): number => {
 
 export const blockCount = ref(0)
 export const towerHeight = ref(0)
-/** 1× / 2× battle-speed toggle (reference image 3). Build phase is unaffected. */
+/**
+ * The battle-speed rung: 1x / 1.5x / 3x. The BUILD PHASE IS UNAFFECTED — see
+ * `step`, which applies the multiplier only while `phase === 'battle'`, so no
+ * build countdown is ever shortened by a fast-forward.
+ *
+ * The 1 here is a pre-run placeholder and not the speed any player ever sees.
+ * Every entry point into a run calls `openSpeedForRun`, which opens on the
+ * fastest FREE rung (1.5x on both boards) — a siege whose opening minute is a
+ * handful of grumplings walking the width of the screen should not also be the
+ * slowest thing in the game. It stays 1 at module scope because `R()` is not
+ * safely readable before a rule set has been applied, and because a headless
+ * importer that never starts a run should not have a speed at all.
+ */
 export const gameSpeed = ref(1)
 /** Bumped whenever the tower's cell occupancy changes, so the camera's auto-fit
  *  and the build-tray affordability hints can recompute without deep watching. */
@@ -1398,6 +1421,19 @@ export const manualReroll = (slotIndex: number): boolean => {
 /**
  * Reinforce the hand the player is LOOKING AT (the rewarded perk's payout).
  *
+ * ── It lasts until the pieces do ──
+ *
+ * Nothing about a wave touches these flags, and that is a promise rather than
+ * an accident of where `dealOffers` happens to be called. The player paid for
+ * the reinforcement on the PIECES in front of them; the only thing that spends
+ * it is placing one, which rotates that slot over through `rerollOffer` and
+ * clears its flag alone. Calling a wave, clearing a wave and reloading mid-run
+ * all leave the rest of the hand gold.
+ *
+ * The reload half of that was broken until the snapshot learned to carry the
+ * flags (`RunSnapshot.enhanced`): the hand came back exactly as it was, with
+ * the purchase stripped out of it.
+ *
  * In place, not a fresh deal. The coin-priced button previews the purchase by
  * turning these very tiles gold before it charges (see the scenes'
  * `onEnhancedHand`); a payout that then re-rolled them would have sold the
@@ -1721,11 +1757,140 @@ export const blockFootprintShapeId = (c: number, r: number): string | null => {
 }
 
 /**
+ * What repositioning one standing block costs, in RUN gold.
+ *
+ * A price rather than a free verb, and the reason is the rule underneath it:
+ * `settleSupport` drops whatever the move orphaned, so picking the right block
+ * out of a wall is a way to collapse the top of your own tower on purpose —
+ * and for a while it was also the cheapest tool in the game for reshuffling a
+ * board into a perfect merge lattice between waves, at no cost and with no
+ * limit. Ten gold is roughly a wave-2 payout: enough that a move is a decision,
+ * far too little to price a player out of fixing a mistake.
+ *
+ * Deliberately FLAT — not scaled by the block's tier, size or rank. The thing
+ * being paid for is the crane, not the cargo, and a sliding scale would make
+ * the move most expensive on exactly the welded guns it is most useful for.
+ */
+export const MOVE_COST = 10
+
+/**
+ * ─── The reshuffle allowance ────────────────────────────────────────────────
+ *
+ * A flat ten gold priced the first move correctly and every move after it
+ * wrong. Ten gold is meant to be "a fix, not a free lunch" — the price of
+ * putting a gun where you meant to put it. What it also bought, unintentionally,
+ * was unlimited reshuffling of the merge lattice: by the mid waves a run's gold
+ * income comfortably covers a dozen moves a phase, so a player could dismantle
+ * and re-solve the whole tower between every wave. That is not a decision, it
+ * is a puzzle with an undo button, and it makes the one irreversible thing about
+ * placement — that a weld happens where you put it — reversible.
+ *
+ * So the price escalates, and the counter runs on a WINDOW of three waves
+ * rather than per build phase. Three waves, because per-phase would reset the
+ * allowance every thirty seconds and escalate nothing, while a run-long budget
+ * would make a move in wave 30 cost a fortune for something the player did
+ * badly in wave 4. A three-wave window is long enough that spending the
+ * allowance means something and short enough that a bad phase is forgiven soon.
+ *
+ * Inside a window: three moves at ten gold, then doubling. 10, 10, 10, 20, 40,
+ * 80, … The third and fourth moves are where the decision lives — the first
+ * three are free enough to use without thinking, and the fourth asks whether
+ * this is a fix or a reshuffle.
+ */
+
+/** Moves at the base price per window. */
+export const CHEAP_MOVES = 3
+/** How many waves one allowance covers. */
+export const MOVE_WINDOW_WAVES = 3
+/**
+ * Ceiling on the escalated price.
+ *
+ * Six doublings. Past this the price has long stopped being the constraint —
+ * nobody reaches the seventh move in a window by accident — and an uncapped
+ * exponential only buys a five-digit number in a chip sized for two. A player
+ * who genuinely wants to pay 640 gold a move is welcome to; at that rate they
+ * are paying more than the block is worth, which is the whole point.
+ */
+export const MOVE_COST_CAP = MOVE_COST * 64
+
+/**
+ * What the `movesMade`-th move of a window costs.
+ *
+ * Pure, and exported for the tests: this is the curve the whole feature is, and
+ * it should be checkable without a tower, a purse or a wave.
+ */
+export const moveCostFor = (movesMade: number): number => {
+  const over = Math.max(0, Math.floor(movesMade) - CHEAP_MOVES + 1)
+  return Math.min(MOVE_COST_CAP, MOVE_COST * 2 ** over)
+}
+
+/** Which allowance window a wave falls in. */
+export const moveWindowOf = (wave: number): number =>
+  Math.floor(Math.max(0, wave) / MOVE_WINDOW_WAVES)
+
+/** Moves made in the window the counter belongs to, and which window that is. */
+const movesMade = ref(0)
+const movesWindow = ref(-1)
+
+/**
+ * Moves already made in the window the player is standing in.
+ *
+ * DERIVED rather than reset by a watcher. The counter carries the window it was
+ * counted in, and a stale window simply reads as zero — so there is no moment,
+ * and no ordering of a wave change against a move, in which the price can be
+ * read off an allowance that has already expired. A `watch(wave, …)` that
+ * zeroed the count would flush after the synchronous `moveBlock` that read it.
+ */
+export const movesThisWindow = computed(() =>
+  movesWindow.value === moveWindowOf(wave.value) ? movesMade.value : 0
+)
+
+/** What the next reposition costs, live. */
+export const moveCost = computed(() => moveCostFor(movesThisWindow.value))
+
+/** Base-price moves left in this window — what the card counts down. */
+export const cheapMovesLeft = computed(() =>
+  Math.max(0, CHEAP_MOVES - movesThisWindow.value)
+)
+
+/** Spend one move against the allowance. */
+const noteMove = (): void => {
+  const now = moveWindowOf(wave.value)
+  movesMade.value = movesWindow.value === now ? movesMade.value + 1 : 1
+  movesWindow.value = now
+}
+
+/** Put the allowance back to untouched — a fresh run, or a restore with no
+ *  counter in its snapshot. */
+const resetMoveAllowance = (made = 0, window = -1): void => {
+  movesMade.value = Math.max(0, made)
+  movesWindow.value = window
+}
+
+/** Can the player pay for a reposition right now? */
+export const canAffordMove = (): boolean => runCoins.value >= moveCost.value
+
+/**
+ * The piles a reposition is short of — `[]` when it is affordable.
+ *
+ * Shaped for `denyPurchase(missingForMove())`, the one-line refusal idiom every
+ * other priced action in the scene already uses, so an unaffordable move blinks
+ * the gold pile in the resource bar instead of failing silently.
+ */
+export const missingForMove = (): BuildResource[] =>
+  canAffordMove() ? [] : ['coins']
+
+/**
  * Can the block standing at `(fromC, fromR)` be picked up at all?
  *
  * The Gate never moves — it is the loss condition and the thing the tower is
  * built around — and nothing moves mid-battle, because a turret that teleports
  * out of a fight is a way to dodge damage rather than to build.
+ *
+ * Deliberately says nothing about the PRICE. "This block can be moved" and
+ * "you can afford to move it" are different facts with different fixes — one is
+ * permanent and one is a wave away — and the UI has to be able to tell a player
+ * which of the two it is. See `canAffordMove`.
  */
 export const canMoveBlock = (fromC: number, fromR: number): boolean => {
   if (phase.value !== 'build') return false
@@ -1759,19 +1924,46 @@ export const canMoveBlockTo = (
 }
 
 /**
- * Move a standing block. Returns false and changes nothing if it cannot go
- * there.
+ * Move a standing block for `moveCost` gold — the base price for the first
+ * three moves of a three-wave window, doubling after that (see the allowance
+ * section above). Returns false and changes nothing — including the purse and
+ * the allowance — if it cannot go there.
  *
  * The settle passes afterwards are the whole reason this is safe to offer:
  * `settleSupport` drops anything the move orphaned (the same rule that governs
  * selling a load-bearing block), and `settleMerges` fuses the block with a twin
  * if the player has just put it next to one — which is what they were trying to
  * do in the first place.
+ *
+ * ── The order of the four gates is the whole contract ──
+ *
+ *   1. LEGALITY first. A refused destination must not cost a coin, and it must
+ *      not cost one even when the refusal is "that is where it already is" —
+ *      `canMoveBlockTo` returns false for the block's own cell, so tapping a
+ *      block back down where it started is free and changes nothing. That is
+ *      the behaviour the design asks for, and it falls out of putting this
+ *      check first rather than out of a special case.
+ *   2. AFFORDABILITY second, and it is checked here rather than inside
+ *      `canMoveBlockTo` on purpose: that predicate is called once per candidate
+ *      cell by the scene's board scan, and folding a purse read into it would
+ *      make every legal socket on the board vanish the moment the player was
+ *      one coin short — which reads as the tower having become unbuildable
+ *      rather than as a price.
+ *   3. The MOVE, which is the point of no return.
+ *   4. The CHARGE, after it. Nothing between 3 and 4 can fail, so the two are
+ *      one transaction; putting the charge first would be a purse that could be
+ *      lightened by a move that then threw.
+ *
+ * `settleSupport` runs INSIDE this function, which is what makes "falling
+ * blocks don't happen until the player has chosen the new position" true
+ * without any machinery: nothing about the tower changes while the player is
+ * still deciding, because until they tap a cell this function has not run.
  */
 export const moveBlock = (
   fromC: number, fromR: number, toC: number, toR: number
 ): boolean => {
   if (!canMoveBlockTo(fromC, fromR, toC, toR)) return false
+  if (!canAffordMove()) return false
   const b = blockAt(fromC, fromR)!
 
   release(b)
@@ -1779,9 +1971,20 @@ export const moveBlock = (
   b.r = toR
   occupy(b)
 
+  // Read BEFORE `noteMove`, so the move is charged the price the card quoted
+  // rather than the price of the next one.
+  runCoins.value -= moveCost.value
+  noteMove()
+  // Gold just left the purse, which can put the offered gun out of reach.
+  ensureAffordableWeapon()
+
   settleSupport()
   settleMerges()
   syncTowerStats()
+  // The inspector holds a plain, non-reactive block — tell it the numbers
+  // moved. Without this the card keeps showing the old cell's stats, and its
+  // own Reposition button keeps reading the pre-move purse.
+  towerVersion.value++
   saveRunSnapshot()
   pushFx({ kind: 'place', x: centreX(b), y: b.r + 0.5, palette: blockDef(b.typeId).palette })
   return true
@@ -2391,6 +2594,30 @@ const removeBlock = (b: Block, violent: boolean): void => {
   })
 
   const boom = def.utility?.deathExplosion
+
+  // A BLAST ON TOP OF THE DEBRIS, so a block dying is an event rather than a
+  // disappearance.
+  //
+  // Measured 2026-09-15: two blind testers watched towers leave the board and
+  // neither could say what had happened — "it silently became a placeholder
+  // icon", and one died on wave 8 holding 185 wood while three slots were
+  // dismantled one at a time. Shatter alone is debris the colour of the block
+  // that dropped it, against a battlefield already full of debris; it reads as
+  // something falling, not as something being destroyed.
+  //
+  // Sized well under a cannon's own splash (0.8-1.2 cells) — this punctuates a
+  // loss, it does not restage the shot that caused it — and scaled a little by
+  // footprint so a merged tower goes louder than a crate. `quiet`, because the
+  // shatter is already playing: the sound of a collapse is a chain of splinters,
+  // not a chain of sub thumps.
+  if (!boom) {
+    const span = Math.max(spanW(b), spanH(b))
+    pushFx({
+      kind: 'explosion', x: centreX(b), y: centreY(b),
+      radius: Math.min(1, 0.6 + 0.2 * (span - 1)), quiet: true
+    })
+  }
+
   if (boom) {
     // TNT pays off here: a nearly-free block that converts its own death into
     // a large area denial. Damages enemies only — chaining through the player's
@@ -3635,6 +3862,10 @@ const stepAllies = (dt: number): void => {
     const a = allies[i]!
     const def = allyDef(a.typeId)
 
+    // A cutscene rider is driven by the intro director, on its own clock and
+    // toward the Gate. Everything below this line would send it the other way.
+    if (a.cameo) continue
+
     if (a.dying > 0) {
       a.dying -= dt
       if (a.dying <= 0) allies.splice(i, 1)
@@ -3696,7 +3927,7 @@ const stepAllies = (dt: number): void => {
     }
   }
 
-  allyCount.value = allies.reduce((n, a) => n + (a.dying > 0 ? 0 : 1), 0)
+  allyCount.value = liveAllies()
 }
 
 /** Enemies fight back: any melee enemy in contact with a rider hits it. */
@@ -4222,6 +4453,12 @@ export const isFirstSession = (): boolean =>
 export const callWave = (): void => {
   if (phase.value !== 'build') return
   cacheTechMultipliers()
+  // The opening cutscene's army, if any of it is somehow still standing. The
+  // director clears its own cast on every exit it has — the end of the flight,
+  // a skip, an unmount — so reaching here with one on the field means one of
+  // those paths failed, and the cost of that failing silently is a wave with
+  // seventy free monsters in it. Swept rather than woken: see `Enemy.cameo`.
+  clearCameoCast()
 
   const next = wave.value + 1
   // Price the wave against what is actually standing, then apply the streak
@@ -4276,13 +4513,19 @@ export const callWave = (): void => {
   const standing = wakeField()
   enemiesTotal.value = plan.total + standing
   enemiesLeft.value = plan.total + standing
-  // The unused build time becomes a coin bonus, so an early call is a real
-  // decision rather than a dead button.
+  // The unused build time becomes a MATERIALS bonus — it multiplies the wave's
+  // wood and stone in `openKillShare`, not its coins — so an early call is a
+  // real decision rather than a dead button. (The comment here said "coin
+  // bonus" for a long time and sent at least one reader looking in the wrong
+  // purse.)
   //
   // Off `buildDeadline`, not off the ref: the ref is the HUD's copy and moves
   // in 100 ms steps (see `publishBuildClock`), and a payout must not be
   // quantised by a display concern.
-  pendingBonus = earlyCallBonus(Math.max(0, buildDeadline))
+  // Against the window the player was actually given, not against the default
+  // one — see `earlyCallBonus`. Read before `wave.value` moves below, because
+  // `buildWindowMs` is keyed off the current wave.
+  pendingBonus = earlyCallBonus(Math.max(0, buildDeadline), openWindowMs)
   // Priced NOW, with the bonus just earned, and then paid out a kill at a time.
   // Split over everything the player has to kill, vanguard included — over
   // `plan.total` alone the first four deaths would take the whole wave's
@@ -4612,6 +4855,8 @@ export const debugSetWave = (n: number): void => {
 
   phase.value = 'build'
   buildTimeLeft.value = buildWindowMs()
+  openWindowMs = buildTimeLeft.value
+  buildWindowTotal.value = openWindowMs
   buildDeadline = buildTimeLeft.value
   // The deck is wave-gated, so a jump has to re-deal or the player meets wave
   // 20 holding wave 1's hand.
@@ -4743,6 +4988,8 @@ const completeWave = (): void => {
 
   phase.value = 'build'
   buildTimeLeft.value = buildWindowMs()
+  openWindowMs = buildTimeLeft.value
+  buildWindowTotal.value = openWindowMs
   buildDeadline = buildTimeLeft.value
   // Entering a build phase is the moment the guarantee matters most: whatever
   // the player does next, they must be able to put a gun on the tower.
@@ -4850,8 +5097,16 @@ export const saveRunSnapshot = (): void => {
     ),
     // Persisted so a reload can't be used to reroll a hand the player dislikes.
     offers: offers.value.slice(),
+    // And which of them the player PAID to reinforce. Without this the hand
+    // came back intact and stripped of a purchase — see `RunSnapshot.enhanced`.
+    enhanced: offerEnhanced.value.slice(),
     // Same reason: without it, a reload is a free volley.
     arrowRain: arrowRainStock.value,
+    // And without these, a reload is a free reshuffle: the escalating move
+    // price lives in module state, so a page refresh would hand the player
+    // three more base-price moves in the same window.
+    moves: movesMade.value,
+    movesWindow: movesWindow.value,
     rules: R().id,
     startedAt: Date.now()
   }
@@ -4906,6 +5161,9 @@ export const startRun = (): void => {
   clock = 0
   accumulator = 0
   clearWorld()
+  // The opening rung, before anything else about the run is decided — see
+  // `openSpeedForRun`. A fresh siege does not start at 1x.
+  openSpeedForRun()
   wave.value = 0
   const start = priceOf({ wood: startWood.value, stone: startStone.value })
   wood.value = start.wood
@@ -4937,6 +5195,8 @@ export const startRun = (): void => {
   lastWaveReward.value = null
   // A fresh siege starts with the volley in hand.
   arrowRainStock.value = ARROW_RAIN_WAVES
+  // …and with every reposition at the base price.
+  resetMoveAllowance()
   cacheTechMultipliers()
   spawnGate()
   syncTowerStats()
@@ -4945,6 +5205,8 @@ export const startRun = (): void => {
   rerollReadyIn.value = new Array(R().offers.slots).fill(0)
   phase.value = 'build'
   buildTimeLeft.value = buildWindowMs()
+  openWindowMs = buildTimeLeft.value
+  buildWindowTotal.value = openWindowMs
   buildDeadline = buildTimeLeft.value
   saveRunSnapshot()
 }
@@ -5183,6 +5445,9 @@ export const seedOpeningVanguard = (): boolean => {
 const wakeField = (): number => {
   let live = 0
   for (const e of enemies) {
+    // A cutscene body is not a combatant. `callWave` sweeps them before it
+    // gets here, so this is the second line of the same defence.
+    if (e.cameo) continue
     if (e.dormant) e.dormant = undefined
     if (e.dying <= 0) live++
   }
@@ -5211,6 +5476,185 @@ const stepWaiting = (dt: number): void => {
     if (def.movement !== 'air') continue
     e.phase += dtSec * (2.5 + def.speed)
   }
+}
+
+// ─── The opening cutscene's cast ────────────────────────────────────────────
+//
+// Seventy monsters standing along seventy cells of ground west of the tower, so
+// the intro can fly the camera over them (see `src/game/introCutscene.ts`).
+//
+// They go into the SAME `enemies` array the fight uses, because that array is
+// what the renderer draws — reusing it is what makes the cutscene look like the
+// game rather than like a cutscene. Everything that keeps them out of the game
+// itself is in the three properties they carry:
+//
+//   `cameo`   — sweeps them on `callWave` and hides them from `wakeField`, so a
+//               leak can never become a wave the player did not earn.
+//   `dormant` — nothing moves them (the build phase never reaches `stepEnemies`)
+//               and nothing can target them, so a turret cannot pick one off at
+//               a range the camera happens to be looking at.
+//   full HP   — `drawEnemy` shows a health bar only on a damaged unit, so the
+//               tableau has no HUD furniture over it.
+//
+// The counters (`enemiesLeft`, `enemiesTotal`) are deliberately NOT touched: the
+// HUD is hidden during the cutscene, and a readout that said "70" for ten
+// seconds and then "8" would be the one thing a player remembered about it.
+
+/** Where a cutscene body stands, and how it is posed. */
+export interface CameoPlacement {
+  typeId: string
+  x: number
+  /** Omitted for ground units, which are stood on the line like every walker. */
+  y?: number
+  /** Frozen walk-cycle phase — the frame this one is caught on. */
+  pose?: number
+  /** Which way it faces. Defaults to +1: toward the tower, in from the west. */
+  dir?: 1 | -1
+}
+
+/**
+ * Stand a cutscene cast on the field, and hand back the uids to sweep later.
+ *
+ * Bypasses `spawnEnemy` entirely rather than extending it, and that is the
+ * point: every geometry rule in that function — the walk-on margin, the
+ * `SPAWN_MAX_REACH` clamp, the view-edge placement, the HP scaling — exists to
+ * make a SPAWN fair, and all of them would fight a storyboard. A body placed at
+ * x = −73.5 is not being spawned; it is being dressed into a shot.
+ *
+ * Refuses anything but an untouched opening build phase, on the same reasoning
+ * as `seedOpeningVanguard`: the one board this can be correct on is the one
+ * nobody is playing yet.
+ */
+export const spawnCameoCast = (cast: readonly CameoPlacement[]): number[] => {
+  if (phase.value !== 'build' || wave.value !== 0) return []
+  const uids: number[] = []
+  for (const place of cast) {
+    const def = ENEMY_DEFS[place.typeId]
+    if (!def) continue
+    const uid = uidCounter++
+    const enemy: Enemy = {
+      uid,
+      typeId: def.id,
+      x: place.x,
+      y: place.y ?? (def.movement === 'sea' ? SEA_SWIM_Y : def.scale / 2),
+      // BASE hp, never `waveHpMul`: the bar is hidden either way, but a cameo
+      // carrying the last run's scaling is a landmine for anything that ever
+      // reads this array.
+      hp: def.hp,
+      maxHp: def.hp,
+      dir: place.dir ?? 1,
+      cd: 0,
+      targetUid: -1,
+      slowMs: 0,
+      slowPct: 0,
+      flash: 0,
+      phase: place.pose ?? 0,
+      dying: 0,
+      surfaced: def.movement === 'sea' ? 0 : undefined,
+      dormant: true,
+      cameo: true
+    }
+    enemies.push(enemy)
+    enemiesByUid.set(uid, enemy)
+    uids.push(uid)
+  }
+  return uids
+}
+
+/**
+ * Riders the player actually owns.
+ *
+ * Cutscene riders are excluded, and not merely for tidiness: `allyCount` is
+ * what `isCavalryFree` reads to decide whether a sortie is the only move left
+ * on the board, and what the HUD shows as riders out. Three cameo knights
+ * galloping home would answer "do you have cavalry out?" with yes.
+ */
+const liveAllies = (): number =>
+  allies.reduce((n, a) => n + (a.dying > 0 || a.cameo ? 0 : 1), 0)
+
+/** Where a cutscene rider starts, and which way it is pointed. */
+export interface CameoRider {
+  typeId?: string
+  x: number
+  y?: number
+  facing?: 1 | -1
+}
+
+/**
+ * Put cutscene riders on the field, and hand the live objects back.
+ *
+ * The objects, not their uids, because the director animates them frame by
+ * frame — position, gait and the fade as they reach the Gate — and looking
+ * three of them up by uid every frame for ten seconds would be bookkeeping for
+ * its own sake. They are inert as far as the simulation is concerned —
+ * `stepAllies` skips them and `liveAllies` does not count them — so the only
+ * thing that can move them is whoever holds this array.
+ */
+export const spawnCameoRiders = (riders: readonly CameoRider[]): Ally[] => {
+  if (phase.value !== 'build' || wave.value !== 0) return []
+  const out: Ally[] = []
+  for (const r of riders) {
+    const def = allyDef(r.typeId ?? 'cavalry')
+    const uid = uidCounter++
+    const facing: 1 | -1 = r.facing ?? -1
+    const a: Ally = {
+      uid,
+      typeId: def.id,
+      x: r.x,
+      y: r.y ?? def.scale / 2,
+      hp: def.hp,
+      maxHp: def.hp,
+      // The flank it belongs to. Riding IN from the right, so the right flank —
+      // it targets nothing either way, but a `dir` of 0 is not a thing.
+      dir: 1,
+      facing,
+      cd: 0,
+      targetUid: -1,
+      flash: 0,
+      phase: Math.random() * 6.28,
+      dying: 0,
+      // Full, so `drawAlly`'s expiry fade leaves them at full opacity until the
+      // director spends it — that fade is how they vanish into the Gate.
+      life: def.lifeMs,
+      cameo: true
+    }
+    allies.push(a)
+    out.push(a)
+  }
+  return out
+}
+
+/**
+ * Take the cutscene's army off the field.
+ *
+ * By flag rather than by the uid list the caller was handed, so it is correct
+ * from anywhere — a scene unmounting mid-flight, `callWave`'s own guard, a
+ * second run of the cutscene — and cannot strand a body because a caller lost
+ * track of one. Returns how many it removed, which is what lets a test assert
+ * the field is genuinely clean rather than assert that a function was called.
+ */
+export const clearCameoCast = (): number => {
+  let removed = 0
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    const e = enemies[i]!
+    if (!e.cameo) continue
+    enemies.splice(i, 1)
+    enemiesByUid.delete(e.uid)
+    removed++
+  }
+  // The riders too, by the same flag and for the same reason: a knight left
+  // standing on the field would be a free unit the player never bought, and
+  // `stepAllies` skips it, so it would stand there for the rest of the run.
+  for (let i = allies.length - 1; i >= 0; i--) {
+    if (!allies[i]!.cameo) continue
+    allies.splice(i, 1)
+    removed++
+  }
+  // Republished here rather than left to the next `stepAllies`: the cast is
+  // struck on the frame the cutscene ends, and a readout that is one step stale
+  // is a readout that is wrong on the frame the player takes over.
+  allyCount.value = liveAllies()
+  return removed
 }
 
 // ─── Gift pieces ────────────────────────────────────────────────────────────
@@ -5322,10 +5766,22 @@ export const resumeRun = (): boolean => {
   accumulator = 0
   clearWorld()
   cacheTechMultipliers()
+  // Same opening rung as a fresh run. The speed is NOT in the snapshot — it is
+  // a live control, not run state — so a reload always lands on the module's
+  // initial 1x, and a returning player would be dropped a rung below the one
+  // they were playing at for no reason they could see.
+  openSpeedForRun()
 
   // A snapshot written before Arrow Rain existed has no charge on it; those
   // resume READY rather than empty, which is the forgiving direction and the
   // one that cannot strand a returning player without their emergency button.
+  // Restored, or a page reload hands the player three more base-price moves in
+  // the window they have already spent. An absent counter is an untouched
+  // allowance — see `RunSnapshot.moves`.
+  resetMoveAllowance(
+    typeof snap.moves === 'number' ? Math.round(snap.moves) : 0,
+    typeof snap.movesWindow === 'number' ? Math.round(snap.movesWindow) : -1
+  )
   arrowRainStock.value = typeof snap.arrowRain === 'number'
     ? Math.min(ARROW_RAIN_WAVES, Math.max(0, Math.round(snap.arrowRain)))
     : ARROW_RAIN_WAVES
@@ -5411,11 +5867,21 @@ export const resumeRun = (): boolean => {
   const kept = saved.filter((id) => typeof id === 'string' && SHAPE_BY_ID[id]).slice(0, slots)
   const fresh = rollOffers(wave.value, availableBlocks.value, Math.random, laneCfg()).map(dealt)
   offers.value = Array.from({ length: slots }, (_, i) => kept[i] ?? fresh[i]!)
-  offerEnhanced.value = new Array(slots).fill(false)
+  // The reinforcement follows the PIECE, not the slot. A slot that had to be
+  // topped up from `fresh` is holding something the player never paid for, so
+  // it comes back plain however the snapshot's flag array was padded — which is
+  // the same rule `rerollOffer` applies when a slot rotates over.
+  const savedFlags = Array.isArray(snap.enhanced) ? snap.enhanced : []
+  offerEnhanced.value = Array.from(
+    { length: slots },
+    (_, i) => kept[i] !== undefined && savedFlags[i] === true
+  )
   ensureAffordableWeapon()
 
   phase.value = 'build'
   buildTimeLeft.value = buildWindowMs()
+  openWindowMs = buildTimeLeft.value
+  buildWindowTotal.value = openWindowMs
   buildDeadline = buildTimeLeft.value
   return true
 }
@@ -5568,6 +6034,47 @@ const fastestFreeSpeed = (): number =>
 /** Remaining buff time, ms. */
 export const speedBuffLeft = ref(0)
 export const isSpeedBuffed = computed(() => speedBuffLeft.value > 0)
+
+/**
+ * The rung a run OPENS on.
+ *
+ * Not 1x. The opening minute of a siege is the slowest thing in the game — a
+ * handful of grumplings walking the width of the screen at one cell a second,
+ * at a tower that kills them without the player doing anything — and it is
+ * the minute a first-time player decides on. 1.5x does not make that fight
+ * harder or easier by a single point of damage; it just stops the player
+ * waiting through the boring half of it.
+ *
+ * Derived from the mode's own ladder rather than written as `1.5`, so a mode
+ * that shapes its ladder differently still opens on a rung it actually offers
+ * — and it is the fastest FREE rung, because opening on a rung the player has
+ * not bought would be a trailer for the buff rather than a default.
+ *
+ * It coincides with `fastestFreeSpeed` by design and not by accident: both ask
+ * the same question ("the best speed this player is entitled to for nothing"),
+ * one at the start of a run and one when a purchase runs out. Kept as its own
+ * name because the call sites are about opening a run, and a reader should not
+ * have to know that an expiring buff is involved.
+ */
+const openingSpeed = (): number => fastestFreeSpeed()
+
+/**
+ * Put a run's speed on the opening rung.
+ *
+ * A paid rung with time still on it is the player's and is left alone — they
+ * bought 3x for five minutes of their life, and a fresh run inside that window
+ * must not quietly hand back the difference. Everything else opens on the free
+ * ceiling, including a deliberate 1x from the previous run: the speed switch is
+ * a within-run control like the tower itself, not a persisted preference.
+ *
+ * Declared below `isSpeedBuffed` on purpose: it reads it, and both `startRun`
+ * and `resumeRun` — which sit far earlier in this file — call this only at run
+ * time, so the reading order is free to follow the dependency.
+ */
+const openSpeedForRun = (): void => {
+  if (needsSpeedBuff(gameSpeed.value) && isSpeedBuffed.value) return
+  gameSpeed.value = openingSpeed()
+}
 
 /**
  * Grant (or extend) the buff, and jump straight to the rung that was asked for.

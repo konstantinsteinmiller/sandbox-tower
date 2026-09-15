@@ -223,6 +223,20 @@ export const RANK_GATE_KEY = 'ts_rank_gate_taught'
  */
 export const GIFT_COACH_KEY = 'ts_gift_coach'
 
+/**
+ * The opening cutscene has had its turn.
+ *
+ * Written the moment the cutscene STARTS rather than when it ends, on purpose:
+ * completion is the wrong test, because a player who closed the tab ten seconds
+ * into an introduction is precisely the player who must not be shown it again.
+ *
+ * Shared by both boards, like `TECH_FOUND_KEY` and for the same reason: it
+ * answers "has this person been introduced to Tower Siege", which is a fact
+ * about the player and not about a board. A phone player who later opens the
+ * desktop game already knows why the tower is there.
+ */
+export const INTRO_SEEN_KEY = 'ts_intro_seen'
+
 // ─── User settings ──────────────────────────────────────────────────────────
 
 export const SOUND_KEY = 'ts_user_sound_volume'

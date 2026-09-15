@@ -19,8 +19,9 @@ import {
   mergeDamageMul, navalDamageMul
 } from '@/use/useTowerProgress'
 import {
-  runCoins, towerVersion, canFortifyBlock,
-  repairCostAt, repairWaitAt, canRepairBlock, effectiveRangeMul
+  runCoins, towerVersion, canFortifyBlock, moveCost, cheapMovesLeft, CHEAP_MOVES,
+  repairCostAt, repairWaitAt, canRepairBlock, effectiveRangeMul,
+  canMoveBlock, canAffordMove, MOVE_COST
 } from '@/use/useTowerGame'
 import type { Block } from '@/game/types'
 
@@ -48,6 +49,7 @@ const emit = defineEmits<{
   (e: 'upgrade'): void
   (e: 'fortify'): void
   (e: 'repair'): void
+  (e: 'reposition'): void
 }>()
 
 const { t } = useI18n()
@@ -270,6 +272,49 @@ const repair = computed(() => {
   }
 })
 
+/**
+ * Picking this block up and putting it somewhere else.
+ *
+ * Null — the button is not rendered at all — when the block cannot be moved on
+ * principle: the Gate never moves, and nothing moves mid-battle. Both of those
+ * are `canMoveBlock`'s answer rather than a second copy of the rule here, so
+ * the card can never offer a move the simulation would refuse.
+ *
+ * `can` is the PRICE, and it is deliberately a separate axis from whether the
+ * button exists. "This can never be moved" and "you are short of gold" are
+ * different facts — one is permanent, the other is one kill away — so the first
+ * hides the control and the second greys it, exactly as Upgrade and Fortify
+ * already distinguish the two.
+ *
+ * `towerVersion` is touched for the usual reason (the inspector holds a plain,
+ * non-reactive `Block`); `canAffordMove` reads `runCoins`, which is reactive on
+ * its own, so the button ungreys the moment a payout lands.
+ */
+/**
+ * The reposition offer: what the next move costs, and whether it is affordable.
+ *
+ * `moveCost` rather than the base `MOVE_COST`, because the price escalates
+ * after three moves in a three-wave window (see the allowance section in
+ * `useTowerGame`). A card that always quoted 10 would be advertising a price
+ * the simulation does not charge — the exact failure the early-call badge had.
+ *
+ * `cheap` is what the pips below count down: three base-price moves, then the
+ * doubling. Shown BEFORE the price jumps rather than after, because "that cost
+ * twice what the card said" is the one thing a spend must never be.
+ */
+const reposition = computed(() => {
+  const b = props.block
+  void towerVersion.value
+  if (!b || !canMoveBlock(b.c, b.r)) return null
+  return {
+    cost: moveCost.value,
+    can: canAffordMove(),
+    cheapLeft: cheapMovesLeft.value,
+    /** The price has already left the base rate. */
+    surged: moveCost.value > MOVE_COST
+  }
+})
+
 const refund = computed(() =>
   live.value
     ? sellRefund(live.value.typeId, live.value.w * live.value.h, live.value.level)
@@ -370,6 +415,40 @@ const refund = computed(() =>
             template(v-if="fortify.cost.coins > 0")
               span {{ fortify.cost.coins }}
               IconGold.inspector__res-icon
+
+        //- Pick this block up and set it down somewhere else, for run gold.
+        //-
+        //- WORDLESS on purpose — glyph, price, coin and nothing else. It is the
+        //- only button on this card whose meaning is a direction rather than a
+        //- noun, and a four-way arrow says "anywhere" in every language the
+        //- game ships in, where the verb would need a translation that fits a
+        //- 9.5rem card in Vietnamese. That makes the `aria-label` the only name
+        //- it has, so it is not optional: a screen reader would otherwise
+        //- announce "10".
+        button.inspector__move(
+          v-if="reposition"
+          type="button"
+          :disabled="!reposition.can"
+          :aria-label="t('blocks.reposition')"
+          :title="t('blocks.reposition')"
+          @click="emit('reposition')"
+        )
+          GameIcon.inspector__move-icon(name="move")
+          span.inspector__move-cost(:class="{ 'is-surged': reposition.surged }")
+            | {{ reposition.cost }}
+            IconGold.inspector__res-icon
+          //- The allowance, as pips rather than a sentence: three base-price
+          //- moves per three-wave window, then the price doubles. Pips because
+          //- the button has no room for words and because this is the same
+          //- "how much is left" question the rank pips below already answer
+          //- this way. They vanish once the allowance is spent — at that point
+          //- the number itself is the message.
+          span.inspector__move-pips(v-if="reposition.cheapLeft > 0" aria-hidden="true")
+            i.inspector__move-pip(
+              v-for="n in CHEAP_MOVES"
+              :key="n"
+              :class="{ 'is-on': n <= reposition.cheapLeft }"
+            )
 
         //- Rank pips, so "how much more is there" is answerable without maths.
         div.inspector__pips(v-if="!isMaxLevel || level > 0" :aria-hidden="true")
@@ -695,6 +774,84 @@ const refund = computed(() =>
   align-items: center
   gap: 0.15em 0.3em
   font-variant-numeric: tabular-nums
+
+// Violet: the fourth action colour on a card that already spends green on
+// building up (repair, upgrade), blue on hardening (fortify) and red on tearing
+// down (sell). A move is none of those three — it neither adds, hardens nor
+// removes — so it gets a hue of its own rather than borrowing one and reading
+// as a variant of it. Violet is also the furthest thing on the wheel from the
+// blue next to it at the same value, which is what keeps the two apart for a
+// player with a red-green deficiency.
+.inspector__move
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  justify-content: center
+  gap: 0.2em 0.4em
+  min-height: 1.9rem
+  margin-top: 0.25rem
+  padding: 0.2rem 0.5rem
+  border: 2px solid #0f1a30
+  border-radius: 0.5rem
+  background-image: linear-gradient(to bottom, #b98ae8, #6a3cab)
+  color: #fff
+  font-weight: 900
+  font-size: clamp(0.5rem, 2.3vw, 0.7rem)
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6)
+  cursor: pointer
+  -webkit-tap-highlight-color: transparent
+
+  &:active:not(:disabled)
+    translate: 0 2px
+    scale: 0.97
+
+  // Disabled here means "you cannot afford this yet", which is information, so
+  // the price stays legible rather than being greyed into the background.
+  &:disabled
+    background-image: linear-gradient(to bottom, #4a5a72, #2b3548)
+    cursor: not-allowed
+    opacity: 0.85
+
+// Nested a level deeper than it needs to be, for the reason spelled out over
+// `.inspector__repair .inspector__repair-icon`: `GameIcon`'s own scoped rule
+// sizes `.game-icon` to fill its box at the same specificity as a bare class
+// here, so which of the two wins would come down to stylesheet emit order.
+.inspector__move .inspector__move-icon
+  width: 1.2em
+  height: 1.2em
+  flex: 0 0 auto
+
+.inspector__move-cost
+  display: inline-flex
+  align-items: center
+  gap: 0.15em 0.3em
+  font-variant-numeric: tabular-nums
+
+  // Past the base rate. Amber rather than red: the price has gone up, which is
+  // a thing to notice before spending, not a refusal — `:disabled` above is
+  // what says "you cannot".
+  &.is-surged
+    color: #ffd93c
+
+// The allowance, three pips wide. Same vocabulary as the rank pips at the
+// bottom of the card, deliberately: a player who has learned that a row of
+// small lights means "how many of these you have left" does not have to learn
+// it twice.
+.inspector__move-pips
+  display: inline-flex
+  align-items: center
+  gap: 0.18em
+  flex: 0 0 auto
+
+.inspector__move-pip
+  width: 0.34em
+  height: 0.34em
+  border-radius: 50%
+  background-color: rgba(255, 255, 255, 0.28)
+
+  &.is-on
+    background-color: #fff6e2
+    box-shadow: 0 0 0.2em rgba(255, 246, 226, 0.7)
 
 .inspector__sell
   display: flex

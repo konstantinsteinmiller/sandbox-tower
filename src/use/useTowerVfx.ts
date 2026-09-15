@@ -28,8 +28,13 @@ export type FxEvent =
    *  from above or from no side at all (a bomb, a fire, a blast). */
   | { kind: 'gateHit'; x: number; y: number; side: -1 | 0 | 1 }
   /** `kindOf` is the round that detonated, so a frost shell does not bloom
-   *  orange. Omitted for demolition charges, which are always fire. */
-  | { kind: 'explosion'; x: number; y: number; radius: number; kindOf?: string }
+   *  orange. Omitted for demolition charges, which are always fire.
+   *
+   *  `quiet` draws the blast without its own report. It is for blasts that
+   *  punctuate a sound another event is already playing — a dying block's
+   *  shatter — where a second sub thump per block turns a five-block collapse
+   *  into five overlapping booms. */
+  | { kind: 'explosion'; x: number; y: number; radius: number; kindOf?: string; quiet?: boolean }
   | { kind: 'impact'; x: number; y: number; kindOf: string; angle: number }
   /** `weapon` is the firing block's type id: the renderer draws a different
    *  flash for a bow, a cannon and a mortar, and anchors it to that fixture's

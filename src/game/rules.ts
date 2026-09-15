@@ -238,7 +238,23 @@ export const DESKTOP_RULES: RuleSet = {
   waves: {
     budgetMul: 1,
     buildMs: 15_000,
-    earlyBuildMs: [],
+    // Five seconds between wave 1 and wave 2, then the full window.
+    //
+    // The window after wave 1 is the only one in the game a player meets
+    // BEFORE they have learned that Call Wave exists. The button is taught in
+    // this very window (the `lateCall` coach mark runs once wave 1 is won), so
+    // for its whole length the player's model of the game is "waves arrive when
+    // the game sends them" — and fifteen seconds of that is fifteen seconds of
+    // watching a countdown over an empty field, on a wave 2 the scripted fort
+    // survives untouched. It lands exactly where a new player is deciding
+    // whether to stay.
+    //
+    // Five, and only here. The step up to fifteen afterwards is deliberate and
+    // not an oversight: the short window is justified by a condition that has
+    // expired by then — the player has now seen two waves and the arrow over
+    // the button, so from wave 3 the full window is a decision they can
+    // actually use rather than a wait they cannot shorten.
+    earlyBuildMs: [5_000],
     firstRunScale: [1.6, 1.4],
     airShare: { base: 0.1, slope: 0.022, cap: 0.35 },
     firstBuildMs: 3_000,

@@ -304,16 +304,34 @@ export const buildTimeMs = (_wave: number): number => BUILD_TIME_MS
 /**
  * Bonus multiplier for calling a wave early.
  *
- * The rate is derived from `BUILD_TIME_MS` rather than fixed, so the +40 % cap
- * stays exactly reachable by calling the instant the phase opens. Pinning it at
- * the old 1 %/second would have quietly capped the mechanic at +15 % once the
- * build phase shrank, stranding most of a reward the UI still advertises.
+ * The rate is derived from the LENGTH OF THE WINDOW the player is standing in,
+ * so the +40 % cap stays exactly reachable by calling the instant that window
+ * opens — whatever length it happens to be.
+ *
+ * It used to be derived from `BUILD_TIME_MS` alone, which was the same idea
+ * aimed one level too high. The comment then said, correctly, that a FIXED
+ * 1 %/second "would have quietly capped the mechanic at +15 % once the build
+ * phase shrank, stranding most of a reward the UI still advertises" — and a
+ * rate pinned to the DEFAULT window does exactly that as soon as any window is
+ * shorter than the default. The 5 s window before wave 2 (`earlyBuildMs`) made
+ * it concrete: the best bonus obtainable there was +13 %, on the one window
+ * where a coach mark is actively teaching the player that calling early pays.
+ * A lesson that demonstrates a third of the advertised reward teaches the
+ * wrong thing.
+ *
+ * `windowMs` defaults to `BUILD_TIME_MS`, so a caller that does not know which
+ * window it is in behaves exactly as this function always did.
  */
 export const EARLY_CALL_MAX_BONUS = 0.4
-const EARLY_CALL_RATE = EARLY_CALL_MAX_BONUS / (BUILD_TIME_MS / 1000)
 
-export const earlyCallBonus = (remainingMs: number): number =>
-  1 + Math.min(EARLY_CALL_MAX_BONUS, Math.max(0, remainingMs / 1000) * EARLY_CALL_RATE)
+export const earlyCallBonus = (remainingMs: number, windowMs = BUILD_TIME_MS): number => {
+  // A zero-length window (the phone board's opening) has no time to give back,
+  // so there is no bonus to earn and no division to do.
+  const window = Math.max(0, windowMs)
+  if (window <= 0) return 1
+  const left = Math.min(window, Math.max(0, remainingMs))
+  return 1 + EARLY_CALL_MAX_BONUS * (left / window)
+}
 
 /**
  * Resources granted for clearing a wave, before tech multipliers.

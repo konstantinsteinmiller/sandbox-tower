@@ -325,5 +325,25 @@ export const ICON_PATHS: Record<GameIconName, string[]> = {
   'repair': [
     'M7 3.4L17 3.4A3.6 3.6 0 0 1 20.6 7L20.6 17A3.6 3.6 0 0 1 17 20.6L7 20.6A3.6 3.6 0 0 1 3.4 17L3.4 7A3.6 3.6 0 0 1 7 3.4Z',
     'M10.2 10.2L6.6 10.2L6.6 13.8L10.2 13.8L10.2 17.4L13.8 17.4L13.8 13.8L17.4 13.8L17.4 10.2L13.8 10.2L13.8 6.6L10.2 6.6Z'
+  ],
+  // Reposition a placed block — the inspector's move button.
+  //
+  // The four-way arrow cross, which is what every editor, map and layout tool
+  // on the player's machine already uses for "pick this up and put it
+  // somewhere else". Nothing else reads as unambiguously: a single arrow says
+  // "go that way", a hand says "grab", and neither says "anywhere".
+  //
+  // Six sub-paths — two bars and four heads — all wound the SAME direction, so
+  // nonzero merges them into one solid cross rather than punching the overlaps
+  // at the centre into a hole (the failure this file's header warns about). The
+  // bars are 3 units thick and the heads 8.8 units across the base, so the
+  // thinnest limb survives the 16px HUD size the set is drawn at.
+  'move': [
+    'M10.5 6.5L13.5 6.5L13.5 17.5L10.5 17.5Z',
+    'M6.5 10.5L17.5 10.5L17.5 13.5L6.5 13.5Z',
+    'M12 2.6L16.4 7.4L7.6 7.4Z',
+    'M12 21.4L7.6 16.6L16.4 16.6Z',
+    'M2.6 12L7.4 7.6L7.4 16.4Z',
+    'M21.4 12L16.6 16.4L16.6 7.6Z'
   ]
 }

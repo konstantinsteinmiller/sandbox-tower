@@ -44,6 +44,7 @@ export default {
     'enemies': 'Enemies',
     'callWave': 'Call Wave',
     'monstersIncoming': 'Monsters incoming!',
+    'skip': 'Skip',
     'callBoss': 'Call Boss',
     'speed': 'Speed {n}×',
     'speedOffer': 'Unlock {n}× speed',
@@ -56,8 +57,19 @@ export default {
     'extendRange': '+{n}% Range'
   },
 
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': 'Your tower is the last thing standing.',
+    'horde': 'The horde is already marching.',
+    'siege': 'And they are bringing engines.'
+  },
+
   // ─── Control hints ────────────────────────────────────────────────────────
   // Each has a touch and a pointer phrasing — a wrong verb reads as a bug.
+
   'warnings': {
     'hoard': 'Hoard +{n}%',
     'air': 'Air ×{n}',
@@ -113,6 +125,7 @@ export default {
     'mergeTier': 'Merged {n}×',
     'repair': 'Repair',
     'repairCooldown': '{n}s',
+    'reposition': 'Move this block',
     'sell': 'Sell',
     'upgrade': 'Upgrade',
     'upgradeMax': 'Fully upgraded',

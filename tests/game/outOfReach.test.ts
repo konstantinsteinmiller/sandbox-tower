@@ -51,10 +51,21 @@ describe('warning before the wave', () => {
   })
 })
 
+/**
+ * Every case here walks an engine in over a fixed number of FRAMES and then
+ * reads the reach scan, so each one pins the battle clock to 1x first.
+ *
+ * `step` multiplies its delta by `gameSpeed` during a battle, and a run now
+ * opens on 1.5x — so 400 unpinned frames are ten seconds of siege rather than
+ * the six and a half these budgets were chosen for, which is long enough for
+ * the engine to have set up and started firing. The subject is where an engine
+ * STANDS relative to the guns, not the rung the player is watching it at.
+ */
 describe('free cavalry while the tower cannot answer', () => {
   it('charges nothing while an engine stands beyond every gun', async () => {
     const g = await loadGame()
     g.startRun()
+    g.setGameSpeed(1)
     // An archer-only tower: 7.5 cells, well short of a trebuchet at 12.
     g.wood.value = 500
     g.stone.value = 500
@@ -71,6 +82,7 @@ describe('free cavalry while the tower cannot answer', () => {
   it('stops being free the moment riders are on the field', async () => {
     const g = await loadGame()
     g.startRun()
+    g.setGameSpeed(1)
     g.wood.value = 500
     g.placeBlock('archer', 0, 1)
     g.callWave()
@@ -87,6 +99,7 @@ describe('free cavalry while the tower cannot answer', () => {
   it('never fires for an engine the tower can already shoot', async () => {
     const g = await loadGame()
     g.startRun()
+    g.setGameSpeed(1)
     g.wood.value = 500
     g.stone.value = 500
     // A ram walks into contact, so nothing about it is ever out of reach.

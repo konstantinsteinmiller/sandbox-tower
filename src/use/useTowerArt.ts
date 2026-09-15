@@ -4066,7 +4066,7 @@ const consumeFx = (ev: FxEvent): void => {
       }
       if (!cold && ev.y < 1.4) emitDecal(ev.x, 0.06, r * 0.9, 0.5)
       triggerShake(r > 2 ? 'strong' : 'small')
-      playFx(cold ? 'frost' : 'explosion')
+      if (!ev.quiet) playFx(cold ? 'frost' : 'explosion')
       break
     }
     case 'impact': {
@@ -7431,6 +7431,40 @@ export const setRenderProfile = (p: RenderProfile): void => {
 let monsterPrimeFilter: string[] | null = null
 export const setMonsterPrimeFilter = (ids: string[] | null): void => { monsterPrimeFilter = ids }
 
+/**
+ * ─── Scenery hulls: the intro's fleet ───────────────────────────────────────
+ *
+ * Ships moored far out on the lake, drawn and nothing else. The opening
+ * cutscene sails a flotilla of each hull type past the horde so a first-time
+ * player has seen a galley before they have any idea the harbour exists — the
+ * whole purpose is the thought "wait, can I build those?", which is the one
+ * question a tech tree cannot ask on the player's behalf.
+ *
+ * They are NOT blocks. A hull in the `blocks` map would be part of the tower:
+ * counted by `blockCount`, measured by `towerBounds` (which would drag the
+ * camera's auto-fit forty cells west the moment the cutscene ended), priced
+ * into `measureTower`, saved into the run snapshot, and shot at. So the
+ * renderer keeps its own list and the simulation never learns they exist.
+ *
+ * `drawBlock`'s ship branch is reused rather than reimplemented, because the
+ * point is that these are the REAL hulls — same painted art, same roll on the
+ * swell, same waterline clip. It early-returns for `isShip`, so none of the
+ * block machinery below it (damage stages, buff aura, merge plate) is reached.
+ */
+let decorShips: Block[] = []
+
+/**
+ * Stand a scenery fleet on the water. Pass `[]` to strike it.
+ *
+ * Shaped as plain `Block`s so they can go straight through `drawBlock`. They
+ * must be undamaged (`hp === maxHp`) and tier 1 or that branch draws a health
+ * bar and a tier plate over decoration, and `bornAt` must be in the past or
+ * they arrive doing the placement squash of a block the player just built.
+ */
+export const setDecorShips = (ships: readonly Block[]): void => {
+  decorShips = [...ships]
+}
+
 let lastFrame = 0
 
 /**
@@ -7547,6 +7581,17 @@ export const drawScene = (
   }
 
   perf.phase('blocks')
+  // 7a-ii. The intro's scenery fleet, if one is moored (see `setDecorShips`).
+  //
+  // Before the tower and before the enemies: these sit far out on the water and
+  // are backdrop, so anything nearer has to paint over them. Culled on x alone
+  // — they are all on the water row, which the frame either includes or does
+  // not — and the list is empty on every frame of every normal game.
+  for (const ship of decorShips) {
+    if (ship.c < rect.l - 2 || ship.c > rect.r + 2) continue
+    drawBlock(ctx, ship, t)
+  }
+
   // 7b. Block BODIES — culled to the visible rect.
   for (const b of getTowerBlocks().values()) {
     if (b.c + spanW(b) - 1 < rect.l - 1 || b.c > rect.r + 1) continue

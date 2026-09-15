@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': 'Gelombang', 'enemies': 'Musuh', 'callWave': 'Panggil gelombang', 'callBoss': 'Panggil bos',
     'monstersIncoming': 'Monster datang!',
+    'skip': 'Lewati',
     'speed': 'Kecepatan {n}×',
     'speedOffer': 'Buka kecepatan {n}×',
     'speedGroup': 'Kecepatan game', 'recenter': 'Pusatkan tampilan',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': 'Hujan Panah',
     'arrowRainAim': 'Ketuk medan perang untuk memanggil tembakan',
     'extendRange': '+{n}% jangkauan'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': 'Menaramu adalah satu-satunya yang masih berdiri.',
+    'horde': 'Gerombolan itu sudah bergerak.',
+    'siege': 'Dan mereka membawa mesin pengepung.'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': 'Melontarkan peluru lurus ke atas. Ledakan kecil, hanya target darat.'
     },
     'repair': 'Perbaiki',
-    'repairCooldown': '{n} d'
+    'repairCooldown': '{n} d',
+    'reposition': 'Pindahkan blok ini'
   },
 
   'enemies': {

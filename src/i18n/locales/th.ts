@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': 'เวฟ', 'enemies': 'ศัตรู', 'callWave': 'เรียกเวฟ', 'callBoss': 'เรียกบอส',
     'monstersIncoming': 'มอนสเตอร์กำลังมา!',
+    'skip': 'ข้าม',
     'speed': 'ความเร็ว {n}×',
     'speedOffer': 'ปลดล็อกความเร็ว {n}×',
     'speedGroup': 'ความเร็วเกม', 'recenter': 'จัดมุมมองให้ตรงกลาง',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': 'ห่าธนู',
     'arrowRainAim': 'แตะสนามรบเพื่อเรียกการระดมยิง',
     'extendRange': 'ระยะ +{n}%'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': 'หอคอยของคุณคือสิ่งสุดท้ายที่ยังตั้งอยู่',
+    'horde': 'ฝูงมอนสเตอร์เคลื่อนพลมาแล้ว',
+    'siege': 'และพวกมันลากเครื่องล้อมเมืองมาด้วย'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': 'ยิงลูกกระสุนขึ้นตรง ระเบิดวงเล็ก โจมตีได้เฉพาะเป้าหมายภาคพื้น'
     },
     'repair': 'ซ่อม',
-    'repairCooldown': '{n} วิ'
+    'repairCooldown': '{n} วิ',
+    'reposition': 'ย้ายบล็อกนี้'
   },
 
   'enemies': {

@@ -134,3 +134,72 @@ describe('replaying the drop lesson', () => {
     expect(at(5, { step: 'merge' })).toBe(false)
   })
 })
+
+/**
+ * ─── What the coach marks are allowed to stop ───────────────────────────────
+ *
+ * The 2026-09-15 fix gave this board's beats a hold, because the sequence was
+ * being taken away mid-lesson by a wave clock the player does not control:
+ * seven beats against four- and six-second build windows and a stage that
+ * expires for good at wave 3.
+ *
+ * What it holds is the COUNTDOWN. It must not hold the board, and that is not a
+ * preference — a drop spawns a FALLING block that needs stepped frames to land,
+ * settle and fuse, and the `merge` beat waits on that fusion. A board frozen for
+ * the beats would leave the piece in the air and the beat waiting on a merge
+ * that can never happen.
+ */
+describe('the coach marks hold the countdown, not the board', () => {
+  const TICK = 1000 / 60
+
+  const load = async (scripted = false) => {
+    const { vi } = await import('vitest')
+    vi.resetModules()
+    localStorage.clear()
+    const game = await import('@/use/useTowerGame')
+    const { DROPMERGE_RULES } = await import('@/mobile-fit/rules')
+    game.applyRules(DROPMERGE_RULES)
+    game.startRun()
+    if (scripted) game.seedScriptedOpening()
+    return game
+  }
+
+  it('lets a dropped piece land while the hold is up', async () => {
+    const game = await load()
+    // Exactly the state a coach mark puts the board in.
+    game.buildClockHeld.value = true
+    game.wood.value = 20_000
+    game.offers.value = ['b_wood', 'b_wood', 'b_wood']
+    const topBefore = game.columnTop(-2)
+    expect(game.dropOffer(0, -2)).toBe(true)
+    // In the air, and the board has to be stepped to bring it down.
+    expect(game.getDebris()).toHaveLength(1)
+
+    for (let i = 0; i < 400 && game.getDebris().length > 0; i++) game.step(TICK)
+    // Out of the air and standing on the column — which is the whole point: a
+    // held board would have left it hanging there for ever.
+    expect(game.getDebris()).toHaveLength(0)
+    expect(game.columnTop(-2)).toBeGreaterThan(topBefore)
+  })
+
+  it('still stops the build window from expiring under the lesson', async () => {
+    const game = await load(true)
+    // Get to a build phase: this board calls wave 1 for itself.
+    for (let i = 0; i < 20_000 && game.phase.value !== 'build'; i++) game.step(TICK)
+    if (game.phase.value !== 'build') return
+    game.buildClockHeld.value = true
+    const left = game.buildTimeLeft.value
+    // Far longer than the four-second opening window the beats were losing to.
+    for (let i = 0; i < 1_800; i++) game.step(TICK)
+    expect(game.phase.value).toBe('build')
+    expect(game.buildTimeLeft.value).toBe(left)
+  })
+
+  it('is wired that way in the scene, not to the simulation gate', async () => {
+    const source = await import('node:fs').then((fs) =>
+      fs.readFileSync('src/mobile-fit/GameSceneDrop.vue', 'utf8'))
+    expect(source).toContain('watch(coachHold, (held) => { buildClockHeld.value = held }')
+    // The loop's `step` gate stays on the beats that genuinely own the screen.
+    expect(source).toContain('&& !showMergePower.value && !handLessonHold.value')
+  })
+})

@@ -11,6 +11,8 @@ import {
   blockDef, ENHANCED_HP_MUL, ENHANCED_DAMAGE_MUL, ROOF_HP_MUL
 } from '@/game/blocks'
 import { windowHeight, windowWidth } from '@/use/useUser'
+import { trayTilePx } from '@/utils/trayFit'
+import { deniedSeq, traySlotKey } from '@/use/useResourceBlink'
 
 /**
  * The build hand (reference images 1 / 3).
@@ -185,43 +187,14 @@ onUnmounted(() => {
   ro = null
 })
 
-/** One CSS `clamp(<min>rem, <n>vw, <max>rem)` in pixels, at viewport width `w`.
- *  Assumes a 16px root, which is the browser default and what this app ships. */
-const clampPx = (minRem: number, vw: number, maxRem: number, w: number): number =>
-  Math.min(maxRem * 16, Math.max(minRem * 16, (vw / 100) * w))
-
-/**
- * Every pixel of the tray that is NOT thumbnail, for `slots` tiles.
- *
- * Mirrors the stylesheet below — the scroller's border and padding, the gap
- * between slots, and each tile body's own border and padding. Kept honest
- * rather than approximate: now that `trackW` is a real budget instead of a
- * self-referential one, over-counting only costs a pixel or two of thumbnail,
- * while under-counting overflows the scroller and hides the last offer.
- */
-const trayChrome = (w: number, slots: number): number =>
-  4                                                   // .build-tray__scroll border
-  + 2 * clampPx(0.12, 0.7, 0.28, w)                   // .build-tray__scroll padding
-  + Math.max(0, slots - 1) * clampPx(0.12, 0.8, 0.28, w) // gap between slots
-  + slots * (4 + 2 * clampPx(0.04, 0.3, 0.1, w))      // .build-tray__body border + padding
-
-const tileSize = computed(() => {
-  // A 44 px floor is the tap-target minimum; below that the tile stops being
-  // reliably hittable and horizontal scrolling is the lesser evil.
-  //
-  // The height term is what lets the tray live in the bottom bar on a landscape
-  // phone: there the short axis is the scarce one, and a hand sized off the
-  // width alone would eat a third of it.
-  const viewportCap = Math.min(72, windowWidth.value * 0.135, windowHeight.value * 0.14)
-  const slots = Math.max(1, props.offers.length)
-  if (trackW.value <= 0) return Math.round(Math.max(44, viewportCap))
-
-  // Straight division now that `trackW` is the room available rather than the
-  // room taken: whatever is left after the tray's own furniture, split between
-  // the offers, and never above what the viewport can carry.
-  const perSlot = (trackW.value - trayChrome(windowWidth.value, slots)) / slots
-  return Math.round(Math.max(44, Math.min(viewportCap, perSlot)))
-})
+const tileSize = computed(() =>
+  // The arithmetic moved to `@/utils/trayFit` so the bottom bar can ask the
+  // same question before it decides how much width to hand over — see
+  // `bottomBarLayout`. Sizing off the viewport alone was wrong for the same
+  // reason it always was: the tray is one column of a three-column bar and
+  // receives far less than the viewport.
+  trayTilePx(trackW.value, windowWidth.value, windowHeight.value, props.offers.length)
+)
 
 // ─── Where the pointer arrow goes ───────────────────────────────────────────
 //
@@ -592,6 +565,21 @@ const infoEntry = computed(() => {
               v-if="e.boostChip"
               :title="t('blocks.enhancedNote', { hp: enhancedHpPct, dmg: enhancedDmgPct })"
             ) {{ e.boostChip }}
+            //- "Not right now": a pale wash laid OVER the thumbnail, and the
+            //- last child so it covers the badges and the reinforced sweep too.
+            //- Inside the body rather than on the tile, so the price chips
+            //- below keep their full colour — including the red on the pile
+            //- that is short, which is the answer to the question the wash
+            //- raises. See `.is-poor`.
+            span.build-tray__poor(v-if="!e.affordable" aria-hidden="true")
+            //- "I heard you, and the answer is no." Keyed on the refusal
+            //- counter so re-pressing the same tile restarts the strobe rather
+            //- than landing on an element that has already played.
+            span.build-tray__deny(
+              v-if="deniedSeq(traySlotKey(e.slot))"
+              :key="deniedSeq(traySlotKey(e.slot))"
+              aria-hidden="true"
+            )
           //- Price chips. Only the resources the shape actually costs are shown,
           //- so a wood-only piece never displays a misleading "0 stone". A piece
           //- can carry all three at once, which is why the row is width-capped
@@ -720,9 +708,27 @@ const infoEntry = computed(() => {
   &:active
     transform: translateY(2px) scale(0.94)
 
-  &.is-poor
-    // Dimmed, NOT hidden: the player should always see what they're saving for.
-    filter: grayscale(0.7) brightness(0.62)
+  // ── Cannot be paid for right now ──
+  //
+  // A pale wash, not a dimming, and the distinction is the whole point.
+  // `brightness(0.62)` made an unaffordable piece HARDER to read than an
+  // affordable one — a dark tile against a dark tray, with its art sunk into
+  // the background — so the player could see that something was unavailable
+  // without being able to see WHAT. That is backwards: the tile they cannot
+  // buy yet is precisely the one they are deciding whether to save for, and
+  // deciding means recognising the gun, the buff or the producer on it.
+  //
+  // So the piece is pushed AWAY from the eye rather than into the dark: most of
+  // its colour goes, and a light grey veil (`.build-tray__poor`) settles over
+  // the thumbnail. Silhouette, glyph and colour relationships all survive it —
+  // an archer still reads as an archer — while the row splits at a glance into
+  // "now" and "not yet".
+  //
+  // The filter is on the BODY, not on the tile: the price chips under it must
+  // keep their real colours, because the red on a short pile is the answer to
+  // the question the wash just asked.
+  &.is-poor .build-tray__body
+    filter: grayscale(0.62)
 
   // An armed tile is STILL — a lift and a steady rim, never a loop.
   //
@@ -747,8 +753,14 @@ const infoEntry = computed(() => {
   // On `scale` and a pseudo-element rather than `transform` / `box-shadow`, so
   // it composes with the selected lift and the reinforced glow instead of
   // overwriting them.
+  // THREE swells, not `infinite`. The loop used to run until the next
+  // placement, so a player who was deliberately saving — or just watching the
+  // wave — had a tile breathing at them for as long as they held out, which
+  // reads as a fault rather than as an invitation. The count and the 1.1 s are
+  // the same numbers `useIdleNudge` holds the flag up for (`NUDGE_LOOPS`,
+  // `NUDGE_LOOP_MS`); change one and change the other.
   &.is-nudge
-    animation: build-tray-nudge 1.1s ease-in-out infinite
+    animation: build-tray-nudge 1.1s ease-in-out 3
 
     .build-tray__body::after
       content: ''
@@ -759,7 +771,7 @@ const infoEntry = computed(() => {
       border: 2px solid rgba(127, 224, 255, 0.9)
       border-radius: clamp(0.35rem, 1.7vw, 0.6rem)
       pointer-events: none
-      animation: build-tray-nudge-ring 1.1s ease-out infinite
+      animation: build-tray-nudge-ring 1.1s ease-out 3
 
   // The pointed-at tile: a hop rather than a pulse, in the coach marks' gold.
   //
@@ -867,7 +879,58 @@ const infoEntry = computed(() => {
   border: 2px solid #24345a
   border-radius: clamp(0.3rem, 1.5vw, 0.5rem)
   background-color: rgba(10, 18, 36, 0.85)
-  transition: border-color 110ms ease-out, box-shadow 110ms ease-out
+  transition: border-color 110ms ease-out, box-shadow 110ms ease-out, filter 110ms ease-out
+
+// The unaffordable wash. Light, so the art stays legible THROUGH it — a veil
+// over the thumbnail rather than a lid on it — and `inherit` on the radius so
+// it never squares off the corner it covers.
+.build-tray__poor
+  position: absolute
+  inset: 0
+  border-radius: inherit
+  background-color: rgba(214, 223, 238, 0.4)
+  pointer-events: none
+
+// ─── The refusal strobe ─────────────────────────────────────────────────────
+//
+// The wash above is a STATE — "you cannot afford this". This is an EVENT — "the
+// press you just made was refused" — and the 2026-09-15 playtest found that
+// players do not infer the second from the first. One tester re-placed the same
+// piece three times and read every rejection as a click that had been missed,
+// because the only thing that answered was a ghost shaking under the cursor.
+//
+// Sits on the body with the wash, so a card that is both unaffordable and just
+// refused shows the veil with the strobe over it. Never takes input.
+.build-tray__deny
+  position: absolute
+  inset: 0
+  border-radius: inherit
+  pointer-events: none
+  animation: build-tray-deny 460ms steps(1, end)
+
+@keyframes build-tray-deny
+  0%, 50%
+    background-color: rgba(255, 46, 46, 0.5)
+    box-shadow: inset 0 0 0 2px rgba(255, 90, 90, 0.95)
+  25%, 75%
+    background-color: rgba(255, 46, 46, 0.12)
+    box-shadow: inset 0 0 0 2px rgba(255, 90, 90, 0.3)
+  100%
+    background-color: transparent
+    box-shadow: none
+
+// The colour is the message; the strobe rate is not. Halved, and held.
+@media (prefers-reduced-motion: reduce)
+  .build-tray__deny
+    animation: build-tray-deny-slow 460ms steps(1, end)
+
+  @keyframes build-tray-deny-slow
+    0%, 70%
+      background-color: rgba(255, 46, 46, 0.4)
+      box-shadow: inset 0 0 0 2px rgba(255, 90, 90, 0.8)
+    100%
+      background-color: transparent
+      box-shadow: none
 
 // ─── Reinforced shine ───────────────────────────────────────────────────────
 //

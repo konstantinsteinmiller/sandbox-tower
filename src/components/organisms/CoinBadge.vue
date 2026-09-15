@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import IconCoin from '@/components/icons/IconCoin.vue'
 import useTowerEconomy from '@/use/useTowerEconomy'
+import { registerAdChordTap } from '@/use/useAdChord'
 
 const { coins } = useTowerEconomy()
 
@@ -11,9 +12,14 @@ defineExpose({ rootEl })
 </script>
 
 <template lang="pug">
+  //- Thirty consecutive taps here force an interstitial — the QA chord, see
+  //- `useAdChord`. Both events, because portal shells swallow one or the other;
+  //- the module coalesces the pair into one tap. Silent: no counter, no hint.
   div.coin-badge.relative.flex.items-center.gap-2.rounded-full.font-bold(
     ref="rootEl"
     class="pl-1 pr-3 py-1 text-sm sm:text-base"
+    @pointerdown="registerAdChordTap('down')"
+    @click="registerAdChordTap('click')"
   )
     div.coin-badge__icon.flex.items-center.justify-center.rounded-full(
       class="w-7 h-7 sm:w-8 sm:h-8"
@@ -26,6 +32,12 @@ defineExpose({ rootEl })
 .coin-badge
   background: linear-gradient(135deg, #50aaff 0%, #2266ff 50%, #1b3e95 100%)
   border: 2px solid #fcd34d
+  // The badge is a readout, not a control — but it is the chord's trigger, so
+  // it has to receive taps wherever the HUD around it is inert. No cursor
+  // change and no hover state: nothing here advertises itself.
+  pointer-events: auto
+  // Thirty taps against a double-tap-zoom delay is a chord nobody can enter.
+  touch-action: manipulation
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -2px 4px rgba(0, 0, 0, 0.4)
   overflow: hidden
 

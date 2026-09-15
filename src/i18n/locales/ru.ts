@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': 'Волна', 'enemies': 'Враги', 'callWave': 'Вызвать волну', 'callBoss': 'Вызвать босса',
     'monstersIncoming': 'Монстры наступают!',
+    'skip': 'Пропустить',
     'speed': 'Скорость {n}×',
     'speedOffer': 'Открыть скорость {n}×',
     'speedGroup': 'Скорость игры', 'recenter': 'Центрировать обзор',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': 'Дождь стрел',
     'arrowRainAim': 'Коснитесь поля боя, чтобы вызвать залп',
     'extendRange': '+{n}% дальности'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': 'Твоя башня — последнее, что ещё стоит.',
+    'horde': 'Орда уже идёт.',
+    'siege': 'И они везут осадные машины.'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': 'Бросает снаряд почти вертикально. Малый взрыв, только наземные цели.'
     },
     'repair': 'Починить',
-    'repairCooldown': '{n} с'
+    'repairCooldown': '{n} с',
+    'reposition': 'Переместить этот блок'
   },
 
   'enemies': {

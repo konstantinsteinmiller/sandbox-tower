@@ -82,10 +82,15 @@ describe('DESKTOP_RULES reproduces the pre-seam constants', () => {
     expect(d.enemies.spawnAt).toBe('offscreen')
     expect(d.waves.budgetMul).toBe(1)
     expect(d.waves.buildMs).toBe(15_000)
-    // The three levers the phone board moved for its opening, at the values the
-    // desktop has always had: no early breaks, the 60/80 % first-session
-    // discount, and the air curve from `airShare`'s own table.
-    expect(d.waves.earlyBuildMs).toEqual([])
+    // Two of the three levers the phone board moved for its opening, at the
+    // values the desktop has always had: the 60/80 % first-session discount and
+    // the air curve from `airShare`'s own table.
+    //
+    // The third is no longer shared. The desktop has ONE shortened break — the
+    // wave-1 → wave-2 window, the only one a player meets before they have been
+    // taught that Call Wave exists — where the phone board ramps across three.
+    // Everything after it is the full `buildMs`.
+    expect(d.waves.earlyBuildMs).toEqual([5_000])
     expect(d.waves.firstRunScale).toEqual([1.6, 1.4])
     expect(d.waves.airShare).toEqual({ base: 0.1, slope: 0.022, cap: 0.35 })
     // The opening is its own window: short, and started by the player's first

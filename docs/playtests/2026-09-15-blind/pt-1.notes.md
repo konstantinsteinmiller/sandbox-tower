@@ -1,0 +1,5 @@
+- [game 6.2s | shot 0003] Confusing screen right after placing first tower - two cannons shown with -10% and -75% labels, red/yellow bars, no explanation of what they mean. I don't get it.
+- [game 47.2s | shot 0016] Tech tree screen is a wall of tiny grey icons, most locked, hard to tell what anything does. Boring, too much reading, I just want to close it.
+- [game 66.1s | shot 0023] Tech tree has tons of tiny icons and no pictures showing what towers look like, just abstract symbols. Spent real coins without really knowing what I bought. Bit boring, wanted to get back to the fighting.
+- [game 147.3s | shot 0049] Gate glowing bright red around wave 9, looked like it was about to break - only moment I felt worried/excited. Flying blue monsters and a guy right at the door.
+- [game 164.5s | shot 0054] Screen suddenly zoomed way in after boss wave 10 - confusing jump cut, a SELL+3 popup covered the view, skeleton and goblin guys just standing there. Wasn't sure what happened to my other cannon tower - it looked destroyed earlier. This is where I'd feel lost if I were still playing.

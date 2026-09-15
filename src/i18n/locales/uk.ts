@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': 'Хвиля', 'enemies': 'Вороги', 'callWave': 'Викликати хвилю', 'callBoss': 'Викликати боса',
     'monstersIncoming': 'Монстри наступають!',
+    'skip': 'Пропустити',
     'speed': 'Швидкість {n}×',
     'speedOffer': 'Відкрити швидкість {n}×',
     'speedGroup': 'Швидкість гри', 'recenter': 'Відцентрувати огляд',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': 'Дощ стріл',
     'arrowRainAim': 'Торкніться поля бою, щоб викликати залп',
     'extendRange': '+{n}% дальності'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': 'Твоя башта — останнє, що ще стоїть.',
+    'horde': 'Орда вже йде.',
+    'siege': 'І вони везуть облогові машини.'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': 'Кидає снаряд майже вертикально. Малий вибух, лише наземні цілі.'
     },
     'repair': 'Полагодити',
-    'repairCooldown': '{n} с'
+    'repairCooldown': '{n} с',
+    'reposition': 'Перемістити цей блок'
   },
 
   'enemies': {

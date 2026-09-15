@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': '웨이브', 'enemies': '적', 'callWave': '웨이브 호출', 'callBoss': '보스 호출',
     'monstersIncoming': '몬스터가 몰려온다!',
+    'skip': '건너뛰기',
     'speed': '속도 {n}×',
     'speedOffer': '{n}× 속도 잠금 해제',
     'speedGroup': '게임 속도', 'recenter': '화면 중앙 정렬',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': '화살비',
     'arrowRainAim': '전장을 탭해 일제 사격을 부르세요',
     'extendRange': '사거리 +{n}%'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': '당신의 탑이 마지막 남은 보루다.',
+    'horde': '무리는 이미 진군을 시작했다.',
+    'siege': '게다가 공성 병기까지 끌고 온다.'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': '포탄을 수직으로 쏘아 올립니다. 폭발은 작고 지상 목표만 타격.'
     },
     'repair': '수리',
-    'repairCooldown': '{n}초'
+    'repairCooldown': '{n}초',
+    'reposition': '이 블록 옮기기'
   },
 
   'enemies': {

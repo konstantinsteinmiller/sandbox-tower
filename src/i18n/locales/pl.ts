@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': 'Fala', 'enemies': 'Wrogowie', 'callWave': 'Wezwij falę', 'callBoss': 'Wezwij bossa',
     'monstersIncoming': 'Nadchodzą potwory!',
+    'skip': 'Pomiń',
     'speed': 'Prędkość {n}×',
     'speedOffer': 'Odblokuj prędkość {n}×',
     'speedGroup': 'Szybkość gry', 'recenter': 'Wyśrodkuj widok',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': 'Deszcz strzał',
     'arrowRainAim': 'Dotknij pola bitwy, aby wezwać salwę',
     'extendRange': '+{n}% zasięgu'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': 'Twoja wieża to ostatnie, co jeszcze stoi.',
+    'horde': 'Horda już nadciąga.',
+    'siege': 'I prowadzą maszyny oblężnicze.'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': 'Wystrzeliwuje pocisk stromo w górę. Mały wybuch, tylko cele naziemne.'
     },
     'repair': 'Napraw',
-    'repairCooldown': '{n} s'
+    'repairCooldown': '{n} s',
+    'reposition': 'Przenieś ten blok'
   },
 
   'enemies': {

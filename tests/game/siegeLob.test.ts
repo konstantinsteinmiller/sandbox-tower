@@ -22,6 +22,13 @@ const advance = (g: { step: (ms: number) => void }, ms: number): void => {
 const siegedTower = async () => {
   const g = await loadGame()
   g.startRun()
+  // Pinned to 1x. Every budget below is quoted in milliseconds against the
+  // engine's own reload ("well short of the reload — so exactly one stone has
+  // been thrown"), and `step` multiplies its delta by `gameSpeed` during a
+  // battle — so at the 1.5x a run now OPENS on, 3000 ms of stepping is 4500 ms
+  // of siege and the trebuchet has thrown twice. What is under test here is the
+  // flight of one stone, not the rung the player is watching it at.
+  g.setGameSpeed(1)
   g.wood.value = 9999
   g.stone.value = 9999
   for (let c = -3; c <= -1; c++) {

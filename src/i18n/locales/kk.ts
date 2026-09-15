@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': 'Толқын', 'enemies': 'Жаулар', 'callWave': 'Толқынды шақыру', 'callBoss': 'Боссты шақыру',
     'monstersIncoming': 'Құбыжықтар келе жатыр!',
+    'skip': 'Өткізу',
     'speed': 'Жылдамдық {n}×',
     'speedOffer': '{n}× жылдамдықты ашу',
     'speedGroup': 'Ойын жылдамдығы', 'recenter': 'Көріністі ортаға келтіру',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': 'Жебе жаңбыры',
     'arrowRainAim': 'Залп шақыру үшін шайқас алаңын түртіңіз',
     'extendRange': '+{n}% қашықтық'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': 'Сенің мұнараң — тұрған соңғы нәрсе.',
+    'horde': 'Орда әлдеқашан жолға шықты.',
+    'siege': 'Және олар қоршау машиналарын алып келеді.'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': 'Снарядты тік жоғары атады. Кішкене жарылыс, тек жердегі нысандар.'
     },
     'repair': 'Жөндеу',
-    'repairCooldown': '{n} с'
+    'repairCooldown': '{n} с',
+    'reposition': 'Бұл блокты жылжыту'
   },
 
   'enemies': {

@@ -21,9 +21,10 @@ import useTowerGame, {
   halfWidthAt, UPPER_HALF_WIDTH, WATER_ROW, speedBuffLeft, grantSpeedBuff, graceAvailable,
   continueRun, isFirstSession, seedScriptedOpening, seedOpeningVanguard, buildClockHeld,
   repairAll, repairAllPlan, canRepairAll, seedTutorialRankGold, missingFor,
-  canMoveBlock, canMoveBlockTo, moveBlock, blockFootprintShapeId, towerBounds
+  canMoveBlock, canMoveBlockTo, moveBlock, blockFootprintShapeId, towerBounds,
+  missingForMove, buildWindowTotal
 } from '@/use/useTowerGame'
-import { denyPurchase } from '@/use/useResourceBlink'
+import { denyPurchase, pulseDenied, traySlotKey } from '@/use/useResourceBlink'
 import { idleNudge, noteBuildAction, useIdleNudge } from '@/use/useIdleNudge'
 import { requestRejectFlash, strandedCount } from '@/use/useWorldCues'
 import { trayGestureFor, type TrayGesture } from '@/utils/trayGesture'
@@ -43,6 +44,11 @@ import { warmAudio, playFx } from '@/use/useTowerAudio'
 import useTowerProgress, { bestWave } from '@/use/useTowerProgress'
 import { awaitingFirstInteraction } from '@/use/useFirstInteraction'
 import {
+  introActive, introBeat, introShown, playIntro,
+  resetIntroForReplay, shouldPlayIntro, skipIntro, stepIntro, stopIntro
+} from '@/use/useIntroCutscene'
+import { DESKTOP_TABLEAU } from '@/game/introCutscene'
+import {
   reportRun, rankFor, playerTotal, leaderboardEnabled, leaderboardPending
 } from '@/use/useLeaderboard'
 import useTowerEconomy from '@/use/useTowerEconomy'
@@ -60,16 +66,19 @@ import { CLEAN_FEED } from '@/game/cleanFeed'
 import type { Block } from '@/game/types'
 
 import { flushPersist, getState, setState } from '@/use/useTowerState'
+import { saveDataVersion } from '@/use/useSaveStatus'
 import { readTutorialCheat, type TutorialCheat } from '@/use/useTutorialCheat'
 import {
   ONBOARDED_KEY, TECH_SPOTLIGHT_KEY, TIP_CURSOR_KEY, TUTORIAL_KEY,
-  MERGE_GUIDE_KEY, TRAP_TUTORIAL_KEY, CALL_TAUGHT_KEY, RANK_GATE_KEY
+  MERGE_GUIDE_KEY, TRAP_TUTORIAL_KEY, CALL_TAUGHT_KEY, RANK_GATE_KEY,
+  INTRO_SEEN_KEY
 } from '@/keys'
 import useSounds, { useMusic } from '@/use/useSound'
 import { useScreenshake } from '@/use/useScreenshake'
 import { isGamePaused, isAdShowing } from '@/use/useGamePause'
 import { isMobileLandscape, isCrazyWeb } from '@/use/useUser'
-import { isBottomBarCompact } from '@/utils/bottomBarLayout'
+import { bottomBarLayoutFor } from '@/utils/bottomBarLayout'
+import { trayWantWidthPx } from '@/utils/trayFit'
 import { isFullscreen, installFullscreenWatch } from '@/use/useFullscreen'
 import { isCrazyGamesFullRelease } from '@/use/useMatch'
 import { spawnCoinExplosion } from '@/use/useCoinExplosion'
@@ -90,7 +99,9 @@ import ResourceBar from '@/components/game/ResourceBar.vue'
 import BuildTray from '@/components/game/BuildTray.vue'
 import BlockInspector from '@/components/game/BlockInspector.vue'
 import CallWaveButton from '@/components/game/CallWaveButton.vue'
-import ControlHint, { type HintId } from '@/components/game/ControlHint.vue'
+import ControlHint, {
+  activeControlHint, onboardingDone, type HintId
+} from '@/components/game/ControlHint.vue'
 import WaveClearToast from '@/components/game/WaveClearToast.vue'
 import TutorialOverlay, { type TutorialStep } from '@/components/game/TutorialOverlay.vue'
 import MergeGuide from '@/components/game/MergeGuide.vue'
@@ -126,6 +137,7 @@ import PointerArrow from '@/components/game/PointerArrow.vue'
 import GameIcon from '@/components/icons/GameIcon.vue'
 import RebuiltGlyph from '@/components/game/RebuiltGlyph.vue'
 import IncomingBanner from '@/components/game/IncomingBanner.vue'
+import IntroCutscene from '@/components/game/IntroCutscene.vue'
 import IconStone from '@/components/icons/IconStone.vue'
 import IconWood from '@/components/icons/IconWood.vue'
 import IconMovie from '@/components/icons/IconMovie.vue'
@@ -236,30 +248,24 @@ const hudInset = ref({ top: 0, bottom: 0 })
  */
 const showMuteButton = computed(() => !isCrazyWeb || isFullscreen.value)
 
-// ─── Compact bottom bar ─────────────────────────────────────────────────────
+// ─── How the bottom bar arranges itself ─────────────────────────────────────
 //
-// The three-column bar hands the hand a fixed SHARE of the viewport (46vw, see
-// `.scene__bottom`) — but only what the two side clusters leave over, because
-// their tracks floor at `min-content`. On a landscape phone those clusters are
-// both rows (the right one flattens at `RIGHT_ROW_QUERY`), between them they
-// take most of the bar, and the hand is left with whatever is in the middle —
-// its offers spilling off the side of a scroller nothing suggests can be
-// scrolled, which is the one decision the build phase is about.
+// Three things share the bar: the meta buttons, the build hand, and the wave
+// control with Arrow Rain and the tech tree above it. The hand is the one that
+// must never lose a card — an offer outside its scroller is invisible, with
+// nothing on screen to say it is there — and the other two are buttons that can
+// stand up or move.
 //
-// Where that happens the clusters stand up instead of lying down — the meta
-// buttons into a column ABOVE the mute button, Arrow Rain and the tech tree
-// into a row ABOVE the wave control — which costs a bar that is taller in a
-// corner of the screen that is empty sky, and gives the hand its full share.
+// This side only READS BOXES. `bottomBarLayoutFor` owns the escalation and the
+// reasoning, and `@/utils/trayFit` owns what the hand actually needs; both are
+// pure and tested, because none of it can be seen in a headless mount.
 //
-// Measured rather than keyed to a breakpoint, because the two clusters' widths
-// are not constants: the wave control carries a translated label ("LLAMAR
-// OLEADA" is half again "CALL WAVE"), and the meta row grows and shrinks with
-// what the build ships.
-//
-// Every input is independent of the arrangement this decides, so the two
-// cannot chase each other — see `isBottomBarCompact`, which owns the line and
-// is tested against it. This side only reads the boxes.
+// Measured rather than keyed to breakpoints, because the widths are not
+// constants: the wave control carries a translated label ("LLAMAR OLEADA" is
+// half again "CALL WAVE"), the meta row grows and shrinks with what the build
+// ships, and the hand's need moves with the offer count.
 const bottomCompact = ref(false)
+const bottomStacked = ref(false)
 const metaRowRef = ref<HTMLElement | null>(null)
 const rightColRef = ref<HTMLElement | null>(null)
 const rightButtonsRef = ref<HTMLElement | null>(null)
@@ -268,27 +274,43 @@ const callWaveRef = ref<{ $el?: HTMLElement } | null>(null)
  *  sits directly above the meta cluster and has to clear it once it is three
  *  buttons tall rather than one. */
 const bottomBarH = ref(0)
-
 /**
- * The one media rule that lays the right-hand cluster out as a ROW rather than
- * a column (the landscape-phone block in the stylesheet below). Its roomy
- * width is a sum there and a max everywhere else — and it cannot be read back
- * off the element, because the compact layout is what overrides the direction.
+ * What the hand wants, in px, published to the stylesheet as the middle grid
+ * track's maximum.
+ *
+ * That track used to be capped at a flat `46vw`, which is a share of the
+ * screen and not an answer to "how much does the hand need" — so on a short
+ * landscape phone, where the viewport cap makes tiles small, 46vw was LESS
+ * than five cards and the hand was cut off with room to spare beside it. No
+ * arrangement of the buttons could have fixed that; the cap was the limit.
+ *
+ * Still independent of the layout it feeds, so it cannot set up a loop: it is
+ * a function of the viewport and the offer count only.
  */
-const RIGHT_ROW_QUERY = '(orientation: landscape) and (max-height: 30rem)'
+const trayWantPx = ref(0)
+
 const widthOf = (el: Element | null | undefined): number =>
   el ? el.getBoundingClientRect().width : 0
 
 const gapOf = (el: HTMLElement | null): number =>
   el ? parseFloat(getComputedStyle(el).columnGap) || 0 : 0
 
-/** What `el`'s visible children need laid out in ONE row — the arrangement the
- *  roomy bar puts them in, whichever one they are in right now. */
+/** The visible children of `el`, as rects. */
+const kidRects = (el: HTMLElement | null): number[] =>
+  el ? Array.from(el.children).map(widthOf).filter((w) => w > 0) : []
+
+/** What `el`'s children need laid out in ONE row — the arrangement the roomy
+ *  bar puts them in, whichever one they are in right now. */
 const rowWidthOf = (el: HTMLElement | null): number => {
-  if (!el) return 0
-  const widths = Array.from(el.children).map(widthOf).filter((w) => w > 0)
-  if (widths.length === 0) return 0
-  return widths.reduce((a, b) => a + b, 0) + gapOf(el) * (widths.length - 1)
+  const w = kidRects(el)
+  if (w.length === 0) return 0
+  return w.reduce((a, b) => a + b, 0) + gapOf(el) * (w.length - 1)
+}
+
+/** What `el`'s children need as a COLUMN: the widest single one. */
+const colWidthOf = (el: HTMLElement | null): number => {
+  const w = kidRects(el)
+  return w.length === 0 ? 0 : Math.max(...w)
 }
 
 const measureBottomBar = (): void => {
@@ -296,30 +318,29 @@ const measureBottomBar = (): void => {
   if (!bar) return
   bottomBarH.value = Math.round(bar.getBoundingClientRect().height)
   const cs = getComputedStyle(bar)
-  // The stacked phone layouts already give the hand a row to itself, so nothing
-  // the side clusters do can squeeze it. Asked of the live grid rather than by
-  // restating their breakpoints here, where they would drift apart.
-  if (cs.gridTemplateAreas.includes('tray tray')) {
-    bottomCompact.value = false
-    return
-  }
-  const inner = bar.clientWidth
-    - (parseFloat(cs.paddingLeft) || 0)
-    - (parseFloat(cs.paddingRight) || 0)
-  const meta = rowWidthOf(metaRowRef.value)
-  const buttons = widthOf(rightButtonsRef.value)
-  const wave = widthOf(callWaveRef.value?.$el)
-  const right = window.matchMedia(RIGHT_ROW_QUERY).matches
-    ? buttons + gapOf(rightColRef.value) + wave
-    : Math.max(buttons, wave)
-  bottomCompact.value = isBottomBarCompact({
-    inner,
+  // The right-hand cluster is a COLUMN at every size — Arrow Rain and the tech
+  // tree sit above the speed switch always — so its width is the wider of the
+  // two, never their sum, and there is no breakpoint to restate here.
+  const next = bottomBarLayoutFor({
+    inner: bar.clientWidth
+      - (parseFloat(cs.paddingLeft) || 0)
+      - (parseFloat(cs.paddingRight) || 0),
     columnGap: parseFloat(cs.columnGap) || 0,
-    metaRow: meta,
-    rightCluster: right,
-    viewport: window.innerWidth,
+    metaRow: rowWidthOf(metaRowRef.value),
+    metaCol: colWidthOf(metaRowRef.value),
+    rightCol: Math.max(widthOf(rightButtonsRef.value), widthOf(callWaveRef.value?.$el)),
+    viewportW: window.innerWidth,
+    viewportH: window.innerHeight,
+    // The gift borrows slot 0 rather than adding one, so the offer count is the
+    // slot count either way.
+    slots: Math.max(1, offers.value.length),
     compact: bottomCompact.value
   })
+  bottomCompact.value = next.compact
+  bottomStacked.value = next.stacked
+  trayWantPx.value = Math.round(
+    trayWantWidthPx(window.innerWidth, window.innerHeight, Math.max(1, offers.value.length))
+  )
 }
 
 // The wave control swaps a translated "Call wave" for the speed switch, which
@@ -462,6 +483,15 @@ const loop = (t: number): void => {
   // clip whose last seconds are a frozen board is dead air. Recording only.
   const running = !isGamePaused.value && (CLEAN_FEED || !showResult.value)
   if (running) step(dt)
+
+  // The opening cutscene, if one is playing. Stepped here — every frame, ahead
+  // of the draw-cadence gate below and ahead of `drawScene` — because it WRITES
+  // THE CAMERA that `drawScene` is about to read. A frame behind and the pan
+  // judders; after the cadence gate and it would run at half speed on the low
+  // tier. The simulation keeps stepping underneath it: the cutscene holds the
+  // build clock rather than the world, so the sky, the turrets and the waiting
+  // flyers' wings all stay alive (see `playIntro`).
+  stepIntro(dt, cssW, cssH)
 
   // On the low tier every second frame is skipped; the simulation still steps
   // every frame, and the renderer is handed the accumulated time so particles
@@ -633,18 +663,67 @@ let dragCandidate: BlockDrag | null = null
 /** Live while the player is actually dragging one. */
 const blockDrag = ref<BlockDrag | null>(null)
 
+/**
+ * The block armed for a TAP reposition by the inspector's Reposition button.
+ *
+ * The button puts a block in the player's hands without their finger ever
+ * having been on it, and the next tap on the board says where it goes. That is
+ * the only affordance touch has: a drag needs the player to already know the
+ * gesture exists, and the 2026-09-14 tester who tried it was the exception —
+ * everybody else's blocks stayed where they first landed.
+ *
+ * Deliberately the SAME `BlockDrag` shape as a real drag, with `grab` pinned to
+ * the block's own anchor so `dragAnchor` is the identity. That makes the tapped
+ * cell the block's new anchor — the rule a placed piece already follows — and
+ * it lets the overlay, the socket scan and the commit path be one code path for
+ * both gestures instead of two that drift.
+ */
+const repositioning = ref<BlockDrag | null>(null)
+
+/**
+ * The block in the player's hands right now, however it got there.
+ *
+ * One input for the overlay and the socket scan, so a dragged block and a
+ * tap-armed one light the board identically. A drag wins if both are somehow
+ * live: a finger on a block is a more immediate statement of intent than a
+ * button pressed a moment ago.
+ */
+const carried = computed(() => blockDrag.value ?? repositioning.value)
+
+/**
+ * Is anything on the board waiting to be told where the pointer is?
+ *
+ * One predicate, because it used to be three copies of a list of modes and the
+ * third mode was added to only two of them. `onPointerMove` writes `hoverCell`
+ * from three places — a mouse hovering with no button held, a drag in progress,
+ * and a pointer held down over the board — and a mode missing from any one of
+ * them is a placement ghost that does not follow the cursor. That is exactly
+ * what happened to `repositioning`: the block lit its legal sockets, the commit
+ * worked, and the ghost sat where the block already was, because the branch
+ * that tracks a hovering mouse still only knew about an armed tray piece and an
+ * armed volley.
+ *
+ * So the question is asked once. Anything that draws a ghost, a target band or
+ * a socket preview belongs in here, and nothing has to remember three places.
+ */
+const tracksPointer = computed(() =>
+  selectedShape.value !== null || arrowRainArmed.value || carried.value !== null
+)
+
 /** Where the dragged block's anchor would land for a pointer over `cell`. */
 const dragAnchor = (drag: BlockDrag, cell: { c: number; r: number }) =>
   ({ c: cell.c - (drag.grabC - drag.fromC), r: cell.r - (drag.grabR - drag.fromR) })
 
 // Publish the build overlay to the renderer whenever any input changes.
 watch(
-  [selectedShape, selectedRot, hoverCell, legalSlots, inspected, arrowRainArmed, blockDrag],
+  [selectedShape, selectedRot, hoverCell, legalSlots, inspected, arrowRainArmed,
+    blockDrag, repositioning],
   () => {
     const hover = hoverCell.value
-    const drag = blockDrag.value
-    // A drag takes the overlay over: the ghost is the block being carried, and
-    // the sockets are the anchors it could be set down on.
+    const drag = carried.value
+    // A carried block takes the overlay over — dragged or tap-armed alike: the
+    // ghost is the block in hand, and the sockets are the anchors it could be
+    // set down on.
     if (drag) {
       const at = hover ? dragAnchor(drag, hover) : null
       setBuildOverlay({
@@ -684,7 +763,7 @@ watch(
 /** Every anchor the carried block could be set down on. Scanned once per
  *  drag — the tower does not change while a block is in the air. */
 const moveSlots = computed<Array<[number, number]>>(() => {
-  const drag = blockDrag.value
+  const drag = carried.value
   if (!drag) return []
   void towerVersion.value
   const b = towerBounds()
@@ -754,7 +833,8 @@ const onPointerDown = (e: PointerEvent): void => {
   // is a drag candidate while a piece, a gift or the volley is armed — those
   // are modes the player entered on purpose and the next press is theirs.
   dragCandidate = null
-  if (selectedSlot.value == null && !arrowRainArmed.value && !giftFirst.value) {
+  if (selectedSlot.value == null && !arrowRainArmed.value && !giftFirst.value
+    && !repositioning.value) {
     const cell = screenToCell(e.clientX, e.clientY)
     const b = getBlocks().get(`${cell.c},${cell.r}`)
     if (b && canMoveBlock(b.c, b.r)) {
@@ -787,7 +867,7 @@ const onPointerMove = (e: PointerEvent): void => {
   if (!pointers.has(e.pointerId)) {
     // Mouse hover with no button held: preview the placement cell, or the
     // strip an armed volley would come down on.
-    if (e.pointerType === 'mouse' && (selectedShape.value || arrowRainArmed.value)) {
+    if (e.pointerType === 'mouse' && tracksPointer.value) {
       hoverCell.value = screenToCell(e.clientX, e.clientY)
     }
     return
@@ -816,7 +896,13 @@ const onPointerMove = (e: PointerEvent): void => {
       panning = true
     }
   }
-  if (blockDrag.value) hoverCell.value = screenToCell(e.clientX, e.clientY)
+  // Before the pan below, deliberately: `panBy` moves the camera, and a cell
+  // resolved after it would be the cell under the pointer in the NEW framing.
+  // A carry and a pan are mutually exclusive today (a press that started on a
+  // liftable block becomes a drag, anything else becomes a pan), so this only
+  // matters if that ever stops being true — at which point the carried block
+  // should track the finger and not the scenery.
+  if (carried.value) hoverCell.value = screenToCell(e.clientX, e.clientY)
   if (panning) {
     // Per-frame delta, so the world tracks the finger 1:1.
     panBy(e.clientX - lastX, e.clientY - lastY)
@@ -824,7 +910,7 @@ const onPointerMove = (e: PointerEvent): void => {
   }
   lastX = e.clientX
   lastY = e.clientY
-  if (selectedShape.value || arrowRainArmed.value) {
+  if (tracksPointer.value) {
     hoverCell.value = screenToCell(e.clientX, e.clientY)
   }
 }
@@ -844,9 +930,15 @@ const onPointerUp = (e: PointerEvent): void => {
     if (moveBlock(drag.fromC, drag.fromR, at.c, at.r)) {
       noteBuildAction()
       playSound('block-place', 0.05)
-    } else {
+    } else if (!denyPurchase(missingForMove())) {
       // Refused out loud, in the same voice a refused placement uses — a block
       // that silently springs back reads as the drag not having worked.
+      //
+      // Unless the refusal was the PRICE, which `denyPurchase` has just
+      // answered in the resource bar by blinking the gold pile. An empty purse
+      // and an illegal cell are different problems with different fixes, and
+      // flashing the board for the first one sends the player hunting for a
+      // better cell they do not need.
       requestRejectFlash()
       playSound('obstacle-hit', 0.03)
     }
@@ -863,6 +955,15 @@ const onPointerUp = (e: PointerEvent): void => {
   // purpose and the next tap is the whole interaction.
   if (arrowRainArmed.value) {
     fireArrowRain(cell.c)
+    return
+  }
+
+  // A block armed for repositioning is the same kind of mode: the player
+  // pressed a button for it and the next tap is the whole interaction. Ahead of
+  // the inspect-on-tap fall-through below, or every destination tap would
+  // quietly open the card on whatever was already standing there.
+  if (repositioning.value) {
+    tryReposition(cell.c, cell.r)
     return
   }
 
@@ -902,7 +1003,7 @@ const tryPlace = (c: number, r: number): void => {
   // even looked at: the short piles blink in the resource bar and a heavier
   // knock plays (`useResourceBlink`). An illegal cell and an empty purse are
   // different problems with different fixes, so they get different answers.
-  if (denyPurchase(missingFor(shapeId))) return
+  if (denyPurchase(missingFor(shapeId), traySlotKey(slot))) return
   if (!canPlaceShapeAt(shapeId, c, r, selectedRot.value)) {
     // A short negative click is better feedback than silence — it confirms the
     // tap registered and the placement was rejected, not missed.
@@ -914,6 +1015,11 @@ const tryPlace = (c: number, r: number): void => {
     // has no hover, so the tapped cell becomes the ghost's cell first.
     hoverCell.value = { c, r }
     requestRejectFlash()
+    // And on the card itself. The ghost's shake is at the cursor, which is
+    // where the player is LOOKING but not what they think they pressed; a
+    // tester who re-placed the same piece three times read every one of those
+    // rejections as the click having been missed entirely.
+    pulseDenied(traySlotKey(slot))
     return
   }
   if (!placeShape(slot, c, r, selectedRot.value)) return
@@ -955,8 +1061,126 @@ const tryPlace = (c: number, r: number): void => {
   if (phase.value === 'build') saveRunSnapshot()
 }
 
+// ─── Repositioning a standing block ────────────────────────────────────────
+//
+// The inspector's Reposition button (`blocks.reposition`) arms the block the
+// card is open on; the next tap on the battlefield sets it down. It costs
+// `MOVE_COST` run gold, charged by `moveBlock` and only on a move that actually
+// happens — see the note on the four gates there.
+//
+// Nothing here settles the tower. `moveBlock` does, inside itself, which is why
+// "the falling boxes don't happen until the player has chosen the new position"
+// needs no machinery: until a destination tap reaches `tryReposition`, the
+// tower has not been touched.
+
+/** Arm the inspected block for a tap reposition — the card's violet button. */
+const onRepositionInspected = (): void => {
+  const b = inspected.value
+  if (!b || !canMoveBlock(b.c, b.r)) {
+    playSound('obstacle-hit', 0.03)
+    return
+  }
+  // Pressing it again puts the block back down: the button is a toggle, like
+  // Arrow Rain's, so the mode the player entered by pressing something can be
+  // left by pressing the same thing.
+  if (repositioning.value?.fromC === b.c && repositioning.value?.fromR === b.r) {
+    cancelReposition()
+    playFx('uiTap')
+    return
+  }
+  const shapeId = blockFootprintShapeId(b.c, b.r)
+  if (!shapeId) {
+    playSound('obstacle-hit', 0.03)
+    return
+  }
+  // Arming is a mode, and two modes at once is how a player ends up placing a
+  // wall where they meant to move a gun.
+  selectedSlot.value = null
+  arrowRainArmed.value = false
+  // `grab` pinned to the anchor: the tapped cell becomes the block's new
+  // anchor, exactly as it does for a piece out of the hand.
+  repositioning.value = {
+    fromC: b.c, fromR: b.r, grabC: b.c, grabR: b.r,
+    shapeId, w: spanW(b), h: spanH(b)
+  }
+  // Touch has no hover, so without a seed the ghost would not appear until the
+  // tap that had already committed the move. Where the block stands is the
+  // honest default — it is where the block still is.
+  hoverCell.value = { c: b.c, r: b.r }
+  playFx('uiTap')
+}
+
+/** Put the carried block back down without moving or charging anything. */
+const cancelReposition = (): void => {
+  if (!repositioning.value) return
+  repositioning.value = null
+  hoverCell.value = null
+}
+
+/**
+ * Set the carried block down on `(c, r)`.
+ *
+ * Three outcomes, and they are deliberately three different answers:
+ *
+ *   · the block's OWN cell — a change of mind, not a refusal. The mode simply
+ *     ends: no move, no charge, no refusal sound, nothing flashed. This is the
+ *     behaviour the design asks for in as many words, and it costs nothing
+ *     because `moveBlock` is never reached.
+ *   · too poor — answered in the resource bar, where the answer lives, before
+ *     the cell is looked at. The same order and the same helper `tryPlace`
+ *     uses for a piece nobody can pay for. The mode STAYS armed: the player's
+ *     intent is still good and a kill's payout is seconds away.
+ *   · an illegal cell — answered on the board, because that is what is wrong.
+ *     The mode stays armed here too, so the player can simply tap a better one.
+ */
+const tryReposition = (c: number, r: number): void => {
+  const move = repositioning.value
+  if (!move) return
+
+  if (c === move.fromC && r === move.fromR) {
+    cancelReposition()
+    playFx('uiTap')
+    return
+  }
+
+  if (denyPurchase(missingForMove())) return
+
+  if (!moveBlock(move.fromC, move.fromR, c, r)) {
+    // Touch has no hover, so the refused ghost has to be put where the player
+    // actually tapped before the flash will mean anything.
+    hoverCell.value = { c, r }
+    requestRejectFlash()
+    playSound('obstacle-hit', 0.03)
+    return
+  }
+
+  repositioning.value = null
+  hoverCell.value = null
+  // The card is closed rather than followed. `settleMerges` runs inside the
+  // move, so the block may have just FUSED into a twin and stopped existing —
+  // leaving the panel open on it would be a stat card for a block that is no
+  // longer in the tower.
+  inspected.value = null
+  noteBuildAction()
+  playSound('block-place', 0.05)
+}
+
+/** The inspector's close button. Closing the card drops the mode it armed —
+ *  the block being carried is the one the card was about. */
+const onInspectorClose = (): void => {
+  cancelReposition()
+  inspected.value = null
+}
+
+// A mode that outlives the build phase is a mode that cannot do anything:
+// `canMoveBlock` refuses mid-battle, so an armed reposition surviving a wave
+// call would leave a board lit with sockets that swallow every tap and never
+// move a block.
+watch(phase, (p) => { if (p !== 'build') cancelReposition() })
+
 const onSelectSlot = (slot: number | null): void => {
   cancelHandPreview()
+  cancelReposition()
   selectedSlot.value = slot
   inspected.value = null
   if (slot != null) {
@@ -969,7 +1193,7 @@ const onSelectSlot = (slot: number | null): void => {
     // always let them look at what they are saving for — but the pick itself
     // is told what is missing, by click or by number key alike.
     const shapeId = offers.value[slot]
-    if (shapeId) denyPurchase(missingFor(shapeId))
+    if (shapeId) denyPurchase(missingFor(shapeId), traySlotKey(slot))
   }
 }
 
@@ -1215,33 +1439,56 @@ const markHintDone = (id: HintId): void => {
   hintsDone.value = next
 }
 
-const activeHint = computed<HintId | null>(() => {
-  // Never nag a veteran, and never talk over a result screen.
-  if (onboarded.value || showResult.value || isAnyModalOpen.value) return null
-  // Never over the coach marks either: they are deliberately wordless, and a
-  // hint bubble is the one thing on screen that would put copy back on them.
-  if (activeTutorialStep.value) return null
-  if (phase.value === 'defeat') return null
-  if (!hintsDone.value.has('selectBlock') && selectedSlot.value == null) return 'selectBlock'
-  if (!hintsDone.value.has('placeBlock') && selectedSlot.value != null) return 'placeBlock'
-  if (!hintsDone.value.has('callWave') && phase.value === 'build' && wave.value === 0) return 'callWave'
-  if (!hintsDone.value.has('camera') && wave.value >= 1) return 'camera'
-  // The inspector is where run gold is spent — block upgrades, ranks, the
-  // effective stats of a reinforced or roofed block. It opens on a long-press,
-  // which nothing ever taught: this hint has been written and translated into
-  // every locale since the inspector shipped and was never once emitted, so
-  // in practice no player was told the upgrade button exists.
-  if (!hintsDone.value.has('inspect') && wave.value >= 1 && blockCount.value > 1) return 'inspect'
-  return null
-})
+/**
+ * Which primer is up. The rule itself is a pure function in `ControlHint` —
+ * see `activeControlHint` there, and the note on why it does not live here.
+ */
+const activeHint = computed<HintId | null>(() => activeControlHint({
+  done: hintsDone.value,
+  onboarded: onboarded.value,
+  wave: wave.value,
+  busy: showResult.value || isAnyModalOpen.value || activeTutorialStep.value !== null,
+  defeated: phase.value === 'defeat',
+  // "Mid-placement of SOMETHING", which is now two modes rather than one: a
+  // tray slot, or a block being repositioned. Reading only `selectedSlot`
+  // would put "Click a block below to pick it" on screen while the player is
+  // already holding a block and looking for somewhere to put it.
+  armed: selectedSlot.value != null || repositioning.value != null,
+  building: phase.value === 'build',
+  blocks: blockCount.value
+}))
+
+/**
+ * Opening the inspector retires the primer that asked for it.
+ *
+ * This was missing, and it is the whole of the complaint. Every other primer is
+ * marked done by the handler for the gesture it teaches — `selectBlock` by
+ * arming a slot, `placeBlock` by building, `camera` by panning, `callWave` by
+ * pressing the button — but `markHintDone('inspect')` had no call site
+ * anywhere in the project. So a player who did exactly what "Click a block to
+ * inspect it" told them to do was told to do it again, and again, for the rest
+ * of the wave: the one hint in the game that would not take yes for an answer.
+ *
+ * Watched rather than marked from the pointer handlers, which set `inspected`
+ * from four different places seven hundred lines away and are not this
+ * section's business. The watcher fires for all four.
+ */
+watch(inspected, (block) => { if (block) markHintDone('inspect') })
 
 // After the second wave the player has seen every primer that matters; persist
-// that so a returning player is never re-onboarded.
-watch(wave, (w) => {
-  if (w >= 2 && !onboarded.value) {
-    onboarded.value = true
-    setState(ONBOARDED_KEY, true)
-  }
+// that so a returning player is never re-onboarded. `activeControlHint` no
+// longer DEPENDS on this to retire the primers — it has its own wave clause —
+// but the flag still has to be written, because it is what makes a returning
+// player's second session start silent.
+// Latched on the same edge the rule retires on — `wave 2 CLEARED`, not wave 2
+// started. Watching `phase` as well as `wave` is what makes that edge
+// observable; latched once and never unset, so the far side of it is a player
+// who is silent for every session that follows.
+watch([wave, phase], () => {
+  if (onboarded.value) return
+  if (!onboardingDone({ wave: wave.value, building: phase.value === 'build' })) return
+  onboarded.value = true
+  setState(ONBOARDED_KEY, true)
 })
 
 // ─── Result flow ────────────────────────────────────────────────────────────
@@ -1854,6 +2101,11 @@ const inFirstStage = computed(() =>
   && wave.value <= 1
   && !showResult.value
   && !isAnyModalOpen.value
+  // The opening cutscene has the screen. A coach mark under a letterbox is a
+  // dim sheet with a hole in it over a camera move, pointing at a tray the
+  // player cannot see — and because the first beat holds the build clock until
+  // it is answered, it would also be the thing the cutscene was blocking.
+  && !introActive.value
 )
 
 /**
@@ -1906,6 +2158,28 @@ const callTaught = ref(getState<boolean>(CALL_TAUGHT_KEY, false) === true)
 const mergeGuideSeen = ref(getState<boolean>(MERGE_GUIDE_KEY, false) === true)
 /** True once the hand has shown the player that the Gate takes a rank. */
 const rankGateTaught = ref(getState<boolean>(RANK_GATE_KEY, false) === true)
+
+/**
+ * Re-read every "already taught" flag when a cloud save lands.
+ *
+ * All four are read ONCE, during setup, and on a platform build that read can
+ * easily lose the race with the SDK's own store — which is why `refreshTechFound`
+ * and `refreshGiftCoach` are called again from `onMounted`. These four had no
+ * such second chance: a returning CrazyGames or Playgama player whose row
+ * arrived late was walked through the entire opening again, against a RESUMED
+ * run — and a resumed run is exactly the board on which the beats have nothing
+ * placeable to point at.
+ *
+ * One-way, deliberately. A hydrate can only ever teach us that the player has
+ * already seen something; it must never un-teach a lesson this session just
+ * gave, which an older cloud row would otherwise do.
+ */
+watch(saveDataVersion, () => {
+  if (getState<boolean>(TUTORIAL_KEY, false) === true) tutorialDone.value = true
+  if (getState<boolean>(CALL_TAUGHT_KEY, false) === true) callTaught.value = true
+  if (getState<boolean>(MERGE_GUIDE_KEY, false) === true) mergeGuideSeen.value = true
+  if (getState<boolean>(RANK_GATE_KEY, false) === true) rankGateTaught.value = true
+})
 
 /** The build window between wave 1 and wave 2, in a player's first session. */
 const openingSecondWave = computed(() =>
@@ -2139,6 +2413,24 @@ const armTutorialHand = (): void => {
 // The hold lifts the moment the tutorial ends, which now has exactly one route:
 // the player performed all three actions.
 //
+// …and two backstops, added 2026-09-15, because "the player performed all three
+// actions" is a promise this file cannot keep on its own. A beat with no
+// measurable target draws NOTHING (see `TutorialOverlay`), and until now the
+// clock went on being held behind that empty screen — a game that looked normal,
+// answered every tap, and would never send another wave. So the hold now
+// follows the overlay: no target, no hold. And whatever else goes wrong,
+// `MAX_HOLD_MS` ends it.
+//
+/**
+ * How long the coach marks have already stopped the siege, this run.
+ *
+ * Accumulated by the 250 ms poll below rather than by the render loop: the poll
+ * is already the thing that keeps the overlay's geometry honest, it only runs
+ * while the tutorial is unfinished, and a quarter-second is ample resolution
+ * for a forty-five-second budget.
+ */
+const tutorialHeldMs = ref(0)
+
 /**
  * Should the countdown be held right now?
  *
@@ -2147,7 +2439,12 @@ const armTutorialHand = (): void => {
  * getting it wrong here, where nothing could test it.
  */
 const holdsBuildClock = computed(
-  () => holdsBuildClockFor(activeTutorialStep.value, tutorialStep.value !== null)
+  () => holdsBuildClockFor({
+    step: activeTutorialStep.value,
+    opening: tutorialStep.value !== null,
+    hasTarget: tutorialRect.value !== null,
+    heldMs: tutorialHeldMs.value
+  })
 )
 
 // `immediate`, and it has to be: the first beat is live on the very first
@@ -2160,10 +2457,18 @@ watch(
   { immediate: true }
 )
 
-/** Persist it. The only caller is the last beat completing. */
+/**
+ * Persist it. The only caller is the last beat completing.
+ *
+ * Written THROUGH the debounce, for the same reason the Call Wave lesson is
+ * (`onCallWave`): the tutorial ends on the frame wave 1 is released, which is
+ * the most likely moment in the whole session for the tab to go away — and a
+ * lost write costs that player the entire dimmed opening a second time.
+ */
 const finishTutorial = (): void => {
   tutorialDone.value = true
   setState(TUTORIAL_KEY, true)
+  flushPersist()
 }
 
 const advanceTutorial = (): void => {
@@ -2300,6 +2605,8 @@ const measureTutorialTarget = (): void => {
 
 /** Bumped by the poll below so the screen-space positions recompute. */
 const tutorialTick = ref(0)
+/** The poll's cadence — also the resolution of the hold budget it spends. */
+const TUTORIAL_POLL_MS = 250
 let tutorialTimer = 0
 
 // NOT `immediate`. `tutorialStep` reads `showResult`, which is declared further
@@ -2348,6 +2655,39 @@ watch(activeTutorialStep, (step) => {
   }
 
   measureTutorialTarget()
+})
+
+/**
+ * A tap that landed on the dim instead of on the lesson.
+ *
+ * The overlay answers it visually; this is the audible half, and it is the same
+ * refusal the board plays for a placement it cannot accept — because it means
+ * the same thing. Silence here reads as a frozen game, which is what it cost.
+ */
+const onTutorialMiss = (): void => { playSound('obstacle-hit', 0.03) }
+
+/**
+ * Keep the taught piece in the player's hand for the whole `place` beat.
+ *
+ * The beat dims everything but ONE board cell, so the tray is inert while it is
+ * up — which means a piece that leaves the player's hand while it is live
+ * cannot be picked back up. The lit cell then does nothing at all (a tap with
+ * nothing armed falls through to `inspected`, and the cell is empty), and the
+ * tutorial can never be finished. Before the clock followed the overlay that
+ * was also a game that never sent another wave; now it is merely a lesson the
+ * player cannot perform, which is still the whole run for them.
+ *
+ * Escape is the route that made it worth a watcher rather than a guard: it
+ * clears the hand (`onKey`), it is the reflex for an overlay with no dismiss
+ * control, and on a portal it is ALSO how a player leaves the parent's
+ * fullscreen. But it is not the only route — a reroll, the gift taking slot 0,
+ * arming the volley — so this re-arms from the state rather than defending one
+ * keystroke.
+ */
+watch([activeTutorialStep, selectedSlot], ([step, slot]) => {
+  if (step !== 'place' || slot !== null) return
+  armTutorialHand()
+  selectedSlot.value = TUTORIAL_SLOT
 })
 
 // The wave starting by any other route retires the beat that asks for it. A
@@ -2494,6 +2834,7 @@ const replayTutorial = (what: TutorialCheat): void => {
   if (what === 'merge') { forcedMerge.value = true; return }
   if (what === 'power') { forcedPower.value = true; return }
   if (what === 'trap') { showTrap.value = true; return }
+  if (what === 'intro') { void replayIntro(); return }
   setState(MERGE_GUIDE_KEY, false)
   setState(TRAP_TUTORIAL_KEY, false)
   setState(TUTORIAL_KEY, false)
@@ -2506,7 +2847,12 @@ const replayTutorial = (what: TutorialCheat): void => {
 // ─── Early-call bonus preview ───────────────────────────────────────────────
 
 const callBonusPct = computed(() =>
-  phase.value === 'build' ? Math.round((earlyCallBonus(buildTimeLeft.value) - 1) * 100) : 0
+  phase.value === 'build'
+    // Against the window the player was GIVEN, not the default one — otherwise
+    // the badge advertises a payout `callWave` will not make. See
+    // `earlyCallBonus`.
+    ? Math.round((earlyCallBonus(buildTimeLeft.value, buildWindowTotal.value) - 1) * 100)
+    : 0
 )
 
 const onCallWave = (): void => {
@@ -2904,6 +3250,7 @@ const onGiftArmed = (): void => {
   selectedSlot.value = null
   inspected.value = null
   arrowRainArmed.value = false
+  cancelReposition()
 }
 
 /**
@@ -2935,8 +3282,33 @@ const onContinueRun = async (): Promise<void> => {
  * `awaitingFirstInteraction` is the dismissal — the same edge that starts the
  * opening wave's countdown and opens the portal's gameplay bracket, so the
  * banner is on screen for exactly as long as the game is waiting for them.
+ *
+ * `introShown` is the third clause and it is the one that is easy to lose. The
+ * opening cutscene shows this same banner over the siege line, which is the
+ * whole reason it was moved there — the premise said against the army it is
+ * about, rather than over an empty lawn. A player who watched the cutscene
+ * without touching anything still satisfies both clauses above, so without this
+ * they would be shown the line a second time the moment the camera landed.
+ *
+ * It is a SESSION flag, not the save flag: a player who never got the cutscene
+ * (they have it switched off with reduced motion, or they closed the tab during
+ * it and came back) still gets the banner on the board, exactly as before.
  */
-const showIncoming = computed(() => bestWave.value === 0 && awaitingFirstInteraction.value)
+const showIncoming = computed(() =>
+  bestWave.value === 0 && awaitingFirstInteraction.value && !introShown.value
+)
+
+/**
+ * Is the interface hidden for the cutscene?
+ *
+ * Retired one beat EARLY, on `land` rather than on the cutscene ending. The
+ * letterbox retracts across the whip home, so releasing the HUD on the same
+ * edge means the bars, the interface and the camera all arrive together as one
+ * motion — whereas waiting for `introActive` to go false fades the HUD up a
+ * third of a second after the game is already playable, which reads as the
+ * interface having been slow to load.
+ */
+const hudHidden = computed(() => introActive.value && introBeat.value !== 'land')
 
 const enhancedHandOffered = computed(() =>
   phase.value === 'build' && !offerEnhanced.value.some(Boolean)
@@ -2961,6 +3333,7 @@ const onArrowRain = (): void => {
   if (arrowRainArmed.value) {
     selectedSlot.value = null
     inspected.value = null
+    cancelReposition()
     // Touch has no hover, so without a seed the band would not appear until
     // the tap that already fired it. Over the Gate is the honest default.
     hoverCell.value = { c: 0, r: 0 }
@@ -3156,10 +3529,29 @@ const onKey = (e: KeyboardEvent): void => {
   const tgt = e.target
   if (tgt instanceof HTMLElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(tgt.tagName)) return
 
+  // While the opening cutscene has the screen, every key is the skip key and
+  // nothing else. The overlay swallows POINTER events for the same reason —
+  // the battlefield underneath is live and its handlers place blocks — but
+  // keystrokes arrive on `window` and would otherwise reach the board: a
+  // player who pressed Space to skip would have called wave 1 instead.
+  if (introActive.value) {
+    e.preventDefault()
+    skipIntro()
+    return
+  }
+
   if (e.code === 'Escape') {
+    // Never while a coach mark is up. Escape is what a player presses at an
+    // overlay they want rid of — and on a portal it is also how they leave the
+    // parent's fullscreen — and both of those used to land here and quietly
+    // dismantle the beat: the hand it had just dealt, or the inspector panel
+    // the `rankUp` arrow is pointing INTO. The piece is re-armed by the watcher
+    // above either way; this stops the keystroke costing the lesson at all.
+    if (activeTutorialStep.value) return
     selectedSlot.value = null
     inspected.value = null
     arrowRainArmed.value = false
+    cancelReposition()
     return
   }
   if (e.repeat) return
@@ -3250,11 +3642,36 @@ const boot = async (): Promise<void> => {
     await nextTick()
     resize()
     snapToFit()
-    // After the frame exists, and on the resume path too: enemies are not in
-    // the run snapshot, so a first-timer who reloads mid-tutorial would come
-    // back to an empty field. `seedOpeningVanguard` refuses anything but an
-    // untouched opening build phase, so a resumed wave 7 is never re-seeded.
-    standVanguard()
+    // The opening cutscene, for a player who has never been introduced to the
+    // game. It borrows the field (seventy dormant bodies west of the tower),
+    // the camera and the screen for about ten seconds, and hands all three back
+    // through `onDone` — which is why the vanguard is stood THERE rather than
+    // here on that path. Standing it now would put four monsters on a lawn the
+    // camera is about to fly away from, and `seedOpeningVanguard` refuses a
+    // field that already has something on it, so the real opening would then
+    // never get one.
+    //
+    // `shouldPlayIntro` refuses everything that is not an untouched opening
+    // build phase, so a resumed wave 7 takes the plain path below unchanged.
+    if (shouldPlayIntro()) {
+      void playIntro({
+        tableau: DESKTOP_TABLEAU,
+        onDone: () => {
+          // In this order. The frame has to be the game's own again before the
+          // vanguard is placed against it — `vanguardStandoff` reads the camera
+          // span, and the span the cutscene left behind is the one from before
+          // it started (the director publishes none; see `isCinematic`).
+          snapToFit()
+          standVanguard()
+        }
+      })
+    } else {
+      // After the frame exists, and on the resume path too: enemies are not in
+      // the run snapshot, so a first-timer who reloads mid-tutorial would come
+      // back to an empty field. `seedOpeningVanguard` refuses anything but an
+      // untouched opening build phase, so a resumed wave 7 is never re-seeded.
+      standVanguard()
+    }
     startBattleMusic()
     // Loading is genuinely finished here: the run is resumed or started, the
     // canvas is sized, and the first frame is about to draw.
@@ -3268,6 +3685,33 @@ const boot = async (): Promise<void> => {
   } finally {
     booting = false
   }
+}
+
+/**
+ * Play the opening cutscene again — `?tut=intro`.
+ *
+ * A replay differs from the real thing in one visible way, and it is left
+ * alone deliberately: on the path where `boot` has already stood the opening
+ * vanguard, the first shot has four monsters on the lawn beside the tower that
+ * a first-time player would not see there. Taking them back off would mean an
+ * "unseed the vanguard" entry point in the simulation that nothing else in the
+ * game wants, in order to improve a developer hatch — and they are honest game
+ * state, not a rendering artefact.
+ *
+ * `standVanguard` still runs on the way out, and is a no-op when they are
+ * already standing: `seedOpeningVanguard` refuses a field with anything on it.
+ * That covers the other path, where the cheat interrupted a cutscene that was
+ * already playing and the vanguard had therefore never been stood at all.
+ */
+const replayIntro = async (): Promise<void> => {
+  setState(INTRO_SEEN_KEY, false)
+  resetIntroForReplay()
+  await nextTick()
+  if (!shouldPlayIntro()) return
+  void playIntro({
+    tableau: DESKTOP_TABLEAU,
+    onDone: () => { snapToFit(); standVanguard() }
+  })
 }
 
 const fireCoinExplosion = (sourceEl: HTMLElement): void => {
@@ -3356,7 +3800,12 @@ onMounted(() => {
     if (tutorialDone.value) return
     tutorialTick.value++
     if (activeTutorialStep.value) measureTutorialTarget()
-  }, 250)
+    // Spend the hold budget here, where the beat's geometry was just checked —
+    // see `tutorialHeldMs`. Only while the clock is ACTUALLY held, so a
+    // tutorial the player is working through at their own pace over a live
+    // game never touches it.
+    if (buildClockHeld.value) tutorialHeldMs.value += TUTORIAL_POLL_MS
+  }, TUTORIAL_POLL_MS)
 })
 
 onUnmounted(() => {
@@ -3383,6 +3832,11 @@ onUnmounted(() => {
   toastRo = null
   clearLongPress()
   stopBattleMusic()
+  // A scene unmounting mid-cutscene must still take the cast off the field and
+  // give the camera back: the director's state is module level and shared with
+  // the phone board, so a cast left standing would be inherited by whichever
+  // scene mounts next.
+  stopIntro()
   // Releases the scene callback as well as stopping the sampler — without it a
   // tier change after unmount would call `resize` on a dead canvas ref.
   stopAdaptiveQuality()
@@ -3409,7 +3863,10 @@ onUnmounted(() => {
 
     //- ── HUD overlay ───────────────────────────────────────────────────────
     //- Non-interactive by default; individual controls opt back in.
-    div.scene__hud(:class="{ 'is-compact': bottomCompact }" :style="{ '--scene-bar-h': `${bottomBarH}px` }")
+    div.scene__hud(
+      :class="{ 'is-compact': bottomCompact, 'is-stacked': bottomStacked, 'is-cinema': hudHidden }"
+      :style="{ '--scene-bar-h': `${bottomBarH}px`, '--tray-want': `${trayWantPx}px` }"
+    )
       //- The flying chest crosses the sky on its own timer. First in the HUD, so
       //- every panel and button after it paints over it rather than under.
       FlyingChest(
@@ -3472,11 +3929,15 @@ onUnmounted(() => {
           @upgrade="onUpgradeInspected"
           @fortify="onFortifyInspected"
           @repair="onRepairInspected"
-          @close="inspected = null"
+          @reposition="onRepositionInspected"
+          @close="onInspectorClose"
         )
 
       //- ── Bottom bar ────────────────────────────────────────────────────
-      div.scene__bottom(ref="bottomBarRef")
+      div.scene__bottom(
+        ref="bottomBarRef"
+        :class="{ 'is-compact': bottomCompact, 'is-stacked': bottomStacked }"
+      )
         //- Meta buttons, with Repair-All on its own row directly above them.
         //-
         //- The repair pill is NOT in the settings row. That row's grid track is
@@ -3851,6 +4312,7 @@ onUnmounted(() => {
     TutorialOverlay(
       :step="activeTutorialStep"
       :target="tutorialRect"
+      @miss="onTutorialMiss"
     )
 
     //- The automatic hand: the Gate's rank, shown rather than pointed at. Its
@@ -3881,6 +4343,12 @@ onUnmounted(() => {
 
     OptionsModal(:is-open="showOptions" @close="showOptions = false")
     TechTreeModal(v-model="showTech" :intro="techIntro")
+
+    //- The opening cutscene: letterbox, premise and the way out. Last in the
+    //- scene, so it paints over the HUD it has just faded and over every panel.
+    //- The flight itself is a camera move on the canvas above — this is only
+    //- the frame around it (see `IntroCutscene`).
+    IntroCutscene(v-if="introActive")
 </template>
 
 <style scoped lang="sass">
@@ -3906,6 +4374,26 @@ onUnmounted(() => {
   pointer-events: none
   display: flex
   flex-direction: column
+  // Fading back IN, when `is-cinema` comes off. The out direction carries its
+  // own longer curve below.
+  transition: opacity 260ms ease
+
+// The opening cutscene has the screen: the interface goes away entirely for the
+// ten seconds the camera is somewhere else, because a wave counter and a build
+// tray over a cinematic are what makes it read as a bug rather than as an
+// introduction.
+//
+// `visibility`, not `display`. The bar is still MEASURED while it is hidden —
+// `measureInsets` runs on a one-second cadence and feeds the camera's auto-fit,
+// which is the frame the cutscene flies home to — and `display: none` would
+// hand it two zero-height rects, so the landing frame would not be the frame
+// the game then hands the player. `visibility: hidden` keeps the layout and
+// still takes the whole subtree out of hit-testing, which `pointer-events` on
+// this element alone could not do (every control in here opts back in).
+.scene__hud.is-cinema
+  opacity: 0
+  visibility: hidden
+  transition: opacity 320ms ease, visibility 0s linear 320ms
 
 // ─── Top bar ────────────────────────────────────────────────────────────────
 
@@ -4009,24 +4497,27 @@ onUnmounted(() => {
   // painted straight through the hand, while the meta cluster wrapped into a
   // vertical stack of single buttons. Both were visible on a ~700x640 embed.
   //
-  // And the middle track is a SHARE of the viewport, not `auto`. `auto` meant
-  // the track was sized to the hand and the hand was sized to the track, so
-  // `BuildTray` could measure its own width but never learn how much room it
-  // actually had — the whole reason its `chrome` term had to under-count to
-  // converge. A share the tray does not influence breaks that loop: the tiles
-  // now shrink to whatever is left over, which is what makes the hand able to
-  // give way at all.
-  //
-  // 46vw is measured, not chosen: at 700px the meta cluster needs 162px to stay
-  // on ONE row and the wave control 163px at its widest shipped label (Spanish
-  // "LLAMAR OLEADA"; German "WELLE RUFEN" is close behind). Those plus the gaps
-  // and this bar's padding leave the hand ~331px. Give it more and the meta
-  // cluster wraps into a vertical stack, which is taller and reads as broken
-  // even when nothing overlaps.
+  // And the middle track is a FIXED NUMBER, not `auto`. `auto` meant the track
+  // was sized to the hand and the hand was sized to the track, so `BuildTray`
+  // could measure its own width but never learn how much room it actually had
+  // — the whole reason its `chrome` term had to under-count to converge. A
+  // maximum the tray does not influence breaks that loop: the tiles shrink to
+  // whatever is left over, which is what makes the hand able to give way at all.
   //
   // On a wide screen the track is simply roomier than the hand needs — the
   // scroller inside shrink-wraps and centres, so nothing looks stretched.
-  grid-template-columns: minmax(min-content, 1fr) minmax(0, 46vw) minmax(min-content, 1fr)
+  //
+  // The middle track's maximum is what the HAND asked for (`--tray-want`,
+  // published by `measureBottomBar`), not a share of the screen. `46vw` is the
+  // fallback for the frame before the first measurement lands, and was the bug
+  // for every frame after it: on a short landscape phone the viewport caps the
+  // tile size, five cards want ~320px, and 46vw of an 670px screen is 308 — so
+  // the hand lost a card to a track that was never asked how wide it should be.
+  //
+  // Still a number the hand does not influence, which is the property that
+  // makes the track centre on the SCREEN rather than drifting to the midpoint
+  // between two clusters of unequal width.
+  grid-template-columns: minmax(min-content, 1fr) minmax(0, var(--tray-want, 46vw)) minmax(min-content, 1fr)
   grid-template-areas: 'meta tray right'
   align-items: end
   gap: clamp(0.25rem, 1.6vw, 0.7rem)
@@ -4289,78 +4780,73 @@ onUnmounted(() => {
   grid-area: right
   justify-self: end
   display: flex
+  // ALWAYS a column: Arrow Rain and the tech tree sit above the wave control at
+  // every viewport, never beside it. `measureBottomBar` takes this as given —
+  // it budgets this cluster as the WIDER of the two rows, not their sum — so a
+  // rule that flattens it anywhere would silently un-budget the hand.
   flex-direction: column
   align-items: flex-end
   gap: clamp(0.25rem, 1.4vw, 0.5rem)
   pointer-events: auto
 
-// On a phone the three columns leave the tray about 130–230 px. Four tap-sized
-// tiles plus their chrome need ~250, so two of the four offers end up outside
-// the scroll area — invisible, with nothing to suggest they are there. The hand
-// is the core decision of the build phase and has to be visible in full, so
-// below this width the tray takes a row of its own.
+// ─── Step three: the hand takes the row ─────────────────────────────────────
 //
-// The meta cluster keeps its full width in this layout ON PURPOSE: constrained
-// to 29vw it wrapped to three rows and the bottom bar grew to 44% of a 659 px
-// screen, which is worse than the problem it was solving. One wide row of small
-// buttons is shorter than three narrow ones.
+// Set by `measureBottomBar` when standing the clusters up is STILL not enough
+// room for every offer at the tap-target floor — so no arrangement of three
+// columns can show the hand in full, and the only honest answer left is to give
+// it a row of its own and put the buttons underneath.
 //
-// Restricted to PORTRAIT because a landscape phone turns the tray into a
-// vertical rail, where a full-width row would eat the short axis instead.
+// This used to be a breakpoint: `max-width: 37rem` and portrait only. Both
+// halves of that were wrong. The width was a proxy for "the hand is starved",
+// which is a question the hand can now be ASKED (`@/utils/trayFit`) — and it
+// answered differently than the proxy did, because the offer count and the
+// translated wave label move the line. And the portrait gate meant a landscape
+// phone, where the three columns are worst, was the one shape that could never
+// reach this layout: that is the screen the player reported three of five cards
+// on, twice.
 //
-// Deliberately NOT widened past 37rem. Three columns stop fitting five
-// tap-sized tiles at about 41rem — below that the hand scrolls by a tile's
-// width — but buying those pixels with a second row costs far more than it
-// returns: measured on a 640x629 embed the bar goes from ~145px to 243px, 39%
-// of the screen, and the battlefield is what pays. A hand whose last tile is
-// two-thirds visible still reads as scrollable; a bottom bar that eats the
-// board does not read as anything but broken.
-@media (max-width: 37rem) and (orientation: portrait)
-  .scene__bottom
-    grid-template-columns: minmax(0, 1fr) auto
-    grid-template-areas: 'tray tray' 'meta right'
-    justify-items: stretch
-    row-gap: clamp(0.15rem, 1vw, 0.35rem)
-    column-gap: clamp(0.15rem, 1vw, 0.4rem)
+// It costs height, which is why it is last and not first: measured on a 640x629
+// embed the bar goes from ~145px to 243px, 39% of the screen, and the
+// battlefield is what pays. A hand missing a card is worse.
+.scene__bottom.is-stacked
+  grid-template-columns: minmax(0, 1fr) auto
+  grid-template-areas: 'tray tray' 'meta right'
+  justify-items: stretch
+  row-gap: clamp(0.15rem, 1vw, 0.35rem)
+  column-gap: clamp(0.15rem, 1vw, 0.4rem)
+
+  .scene__meta-col
+    max-width: none
 
   .scene__meta
     max-width: none
-    flex-wrap: nowrap
-    // Tighter than the desktop gap: with five controls sharing this row on a
-    // phone, the spacing between them is the cheapest width to give back.
+    // Tighter than the desktop gap: with the controls sharing a row under the
+    // hand, the spacing between them is the cheapest width to give back.
     gap: clamp(0.1rem, 0.7vw, 0.25rem)
-    // The cluster is the one thing here that may scroll: every button in it
-    // opens a modal the player can also reach later, unlike the offers.
-    overflow-x: auto
-    overscroll-behavior-x: contain
-    scrollbar-width: none
-
-    &::-webkit-scrollbar
-      display: none
 
 .scene__right-buttons
   display: flex
   align-items: flex-end
   gap: clamp(0.15rem, 1vw, 0.35rem)
 
-// ─── Compact bottom bar ─────────────────────────────────────────────────────
+// ─── Step two: the clusters stand up ────────────────────────────────────────
 //
-// Set by `measureBottomBar` when the two side clusters, laid out as rows, do
-// not leave the hand the 46vw the middle track is meant to give it — which on
-// a landscape phone is every time, because the right-hand cluster is a row
-// there too. The hand is squeezed into what is left between them, and the
-// offers it cannot fit are off the side of a scroller nothing suggests can be
-// scrolled.
+// Set by `measureBottomBar` when the two side clusters, lying down as rows, do
+// not leave the hand room for its offers at the size the viewport allows.
 //
-// Both clusters stand up: the meta buttons into a column ABOVE the mute button
+// Both stand up: the meta buttons into a column ABOVE the mute button
 // (`column-reverse`, so the mute stays the bottom-left corner it has always
-// been), and Arrow Rain with the tech tree into a row ABOVE the wave control.
-// The left goes from three buttons wide to one and the right from its whole
-// row to its widest part, and all of that width goes into the hand.
+// been), and the wave control below the two buttons it already sits under. The
+// left goes from three buttons wide to one, and all of that width goes to the
+// hand.
 //
-// It costs height, in the two corners where a landscape phone has nothing but
-// sky — and none of it comes off the battlefield: the camera insets are
-// measured from the bar (`measureInsets`), so the tower reframes above it.
+// It costs height in two corners of the screen that are empty sky, and none of
+// it comes off the battlefield: the camera insets are measured from the bar
+// (`measureInsets`), so the tower reframes above it.
+//
+// Note what is NOT here: the buttons do not get smaller. They shrink on the
+// VIEWPORT instead (see "Very narrow" below), because a size that changed with
+// this flag would free the width that set it — see `bottomBarLayoutFor`.
 .scene__bottom.is-compact
   // The repair pill is right-aligned to the cluster below it. That cluster is
   // now a single column at the screen edge, so both go left instead.
@@ -4594,26 +5080,25 @@ onUnmounted(() => {
 // bar cannot fit side by side, so it becomes two stacked rows: the tray takes a
 // full-width row of its own (it is the primary control) and the buttons share
 // the row beneath it.
-@media (max-width: 30rem)
-  .scene__bottom
-    grid-template-columns: minmax(0, 1fr) auto
-    grid-template-areas: "tray tray" "meta right"
-    gap: clamp(0.25rem, 1.6vw, 0.5rem)
-
-  .scene__tray
-    grid-area: tray
-
-  .scene__meta-col
-    grid-area: meta
-    max-width: none
-
-  .scene__right
-    grid-area: right
-    flex-direction: row
-    align-items: center
-
-  .scene__inspector
-    bottom: calc(11rem + env(safe-area-inset-bottom, 0px))
+// ─── Very narrow ────────────────────────────────────────────────────────────
+//
+// The narrowest supported viewport is 320x658. The GRID here used to be a
+// second copy of the stacked layout, keyed on width; `is-stacked` decides that
+// by measurement now and reaches this screen on its own, so what is left is the
+// part a measurement cannot work out — how big the buttons should be.
+//
+// They shrink on the VIEWPORT, never on the layout flag. A button that got
+// smaller because the bar went compact would free the width that made the bar
+// compact, which would make it roomy, which would make it compact: the one
+// feedback loop `bottomBarLayoutFor` is built to avoid. The viewport does not
+// move when the bar re-arranges, so keying off it is safe.
+@media (max-width: 30rem), (orientation: landscape) and (max-height: 26rem)
+  .scene__meta :deep(button),
+  .scene__right-buttons :deep(button)
+    width: clamp(2.1rem, 9vw, 2.6rem)
+    height: clamp(2.1rem, 9vw, 2.6rem)
+    min-width: 2.1rem
+    min-height: 2.1rem
 
 // ─── Landscape phone ────────────────────────────────────────────────────────
 //
@@ -4635,9 +5120,15 @@ onUnmounted(() => {
     padding-bottom: calc(0.2rem + env(safe-area-inset-bottom, 0px))
     gap: 0.2rem
 
-  .scene__right
-    flex-direction: row
-    align-items: flex-end
+  // `.scene__right` is deliberately NOT flattened into a row here any more.
+  //
+  // It was, to save the short axis, and that is what put Arrow Rain and the
+  // tech tree beside the 1x/1.5x/3x switch — three controls in a row taking
+  // ~300px of an 850px bar, with the hand living on whatever was left. It is
+  // the single biggest reason the hand was starved on a landscape phone. The
+  // two buttons sit above the wave control at EVERY size now; the row of height
+  // that costs comes out of empty sky, and the width it returns goes to the one
+  // control that cannot do without it.
 
   .scene__inspector
     bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px))

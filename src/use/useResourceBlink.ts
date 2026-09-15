@@ -87,15 +87,72 @@ export const playDenied = (): void => {
 }
 
 /**
+ * ─── …and on the control the player actually pressed ────────────────────────
+ *
+ * The blink above answers in the place the ANSWER lives. This answers in the
+ * place the QUESTION was asked, and the two are not the same place.
+ *
+ * Measured 2026-09-15: three blind testers, both boards, independently reported
+ * that a refusal is invisible. One re-placed the same piece three times — "no
+ * error message, no sound, no shake… no way to tell success from failure except
+ * checking the gold counter"; one tapped every structure on the board with a
+ * card that had nowhere to go; one, on the phone, could not tell "this is
+ * disabled" from "you can't afford this" from "the game is frozen", because the
+ * pressed card looked identical in all three cases.
+ *
+ * The piles blinking at the top of the screen is the right answer to "why", and
+ * it is the wrong answer to "did my press even register" — which is what a
+ * player hammering a card is actually asking. So the refused control strobes
+ * too. The two cues are complementary and both fire: the bar says which pile is
+ * short, the card says "yes, I heard you, and the answer is no".
+ *
+ * Keyed by control rather than flagged, for the same reason the piles are
+ * counted: the consumer mounts a fresh overlay on every refusal, so a second
+ * refusal restarts the strobe from its first frame instead of landing on an
+ * element whose animation has already run.
+ */
+export interface DenyPulse {
+  /** Bumped on every refusal; 0 means nothing has ever been refused. */
+  n: number
+  /** Which control was refused — see `traySlotKey` — or '' for none. */
+  key: string
+}
+
+export const denyPulse = ref<DenyPulse>({ n: 0, key: '' })
+
+/** The key for a build-tray slot. Both boards' trays use it. */
+export const traySlotKey = (slot: number): string => `tray:${slot}`
+
+/** Strobe the control under `key`. A control already strobing starts over. */
+export const pulseDenied = (key: string): void => {
+  denyPulse.value = { n: denyPulse.value.n + 1, key }
+}
+
+/**
+ * The refusal counter for `key`, or 0 when this control is not the refused one.
+ *
+ * Non-zero is "render the strobe", and the VALUE is what the consumer keys the
+ * overlay on — that is what restarts the animation on a repeat refusal.
+ */
+export const deniedSeq = (key: string): number => {
+  const s = denyPulse.value
+  return s.n > 0 && s.key === key ? s.n : 0
+}
+
+/**
  * Refuse a purchase the player is `missing` these piles for.
  *
  * Returns true when it refused — the caller stops there — and false, doing
  * nothing at all, when nothing is missing. So a call site reads as one line:
  * `if (denyPurchase(missingFor(id))) return`.
+ *
+ * `key` names the control that was pressed, when the caller knows it. Optional
+ * because not every refusal comes from a control with a place on screen.
  */
-export const denyPurchase = (missing: readonly BuildResource[]): boolean => {
+export const denyPurchase = (missing: readonly BuildResource[], key?: string): boolean => {
   if (missing.length === 0) return false
   blinkResources(missing)
+  if (key) pulseDenied(key)
   playDenied()
   return true
 }
@@ -103,5 +160,6 @@ export const denyPurchase = (missing: readonly BuildResource[]): boolean => {
 /** Forget every refusal and the knock's throttle (tests). */
 export const resetResourceBlink = (): void => {
   resourceBlink.value = fresh()
+  denyPulse.value = { n: 0, key: '' }
   lastDenyAt = -Infinity
 }

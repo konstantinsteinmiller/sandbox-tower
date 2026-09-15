@@ -1,0 +1,7 @@
+- [game 4.4s | shot 0003] first 4s - tower defense game with card building lane its confusing what the goal is - no title screen just dropped straight in building a wall thing, gold went 90 to 68 automatically when I tapped
+- [game 33.5s | shot 0021] 33s - found BLUEPRINTS permanent upgrade shop good progression hook stars currency = 9 first item Foundations costs 20 cant afford yet
+- [game 43.8s | shot 0028] 44s - got a FREE card but all 3 tower slots are full, tapping it and then tapping the board does nothing, cant tell where to put it, confusing, wasted a card
+- [game 73.4s | shot 0044] 73s - long idle gap between waves waiting on CALL WAVE timer nothing to do but watch a countdown feels like dead time on phone Id just tap CALL WAVE early
+- [game 144.7s | shot 0075] 144s - died to a boss tree monster wave 8 GATE got destroyed - had 185 wood and 105 stone sitting unused when it happened, felt like I lost because I didnt know I needed to keep rebuilding not because it was hard. Got Destroyed screen You survived to wave 8 NEW RECORD Rank 324 of 367 plus93 stars - decent reward for dying, felt ok not rage quit
+- [game 146.6s | shot 0076] 146s - new run started instantly with stars carried over 254 wave reset to 1 gate rebuilt fresh this is the roguelite loop good hook would make me go again
+- [game 153.6s | shot 0080] 154s - stopping here budget almost spent overall the merge tower building plus blueprint shop plus boss fight kept me interested more than I expected once past the slow opening tutorial the CALL WAVE countdown gaps were the boring part

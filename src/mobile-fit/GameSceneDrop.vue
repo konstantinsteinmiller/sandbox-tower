@@ -13,15 +13,20 @@ import {
   graceAvailable, continueRun, isFirstSession, seedScriptedOpening, applyRules,
   dropOffer, canDropAt, columnTop, repairAll, repairAllCost, canRepairAll, canAffordShape, sellBlock,
   upgradeBlock, upgradeCostAt, seedTutorialRankGold, spanW, spanH,
-  blockCount, CONTINUE_WOOD, CONTINUE_STONE, missingFor
+  blockCount, CONTINUE_WOOD, CONTINUE_STONE, missingFor, buildClockHeld, buildWindowTotal
 } from '@/use/useTowerGame'
-import { denyPurchase } from '@/use/useResourceBlink'
+import { denyPurchase, pulseDenied, traySlotKey } from '@/use/useResourceBlink'
 import { idleNudge, noteBuildAction, useIdleNudge } from '@/use/useIdleNudge'
 import { isStranded, requestRejectFlash, strandedCount } from '@/use/useWorldCues'
 import {
   setViewport, setFixedFrame, clearFixedFrame, screenToWorldX, screenToWorldY,
   worldToScreenX, worldToScreenY, getZoom, viewRect
 } from '@/use/useTowerCamera'
+import {
+  introActive, introBeat, introShown, playIntro,
+  resetIntroForReplay, shouldPlayIntro, skipIntro, stepIntro, stopIntro
+} from '@/use/useIntroCutscene'
+import { DROPMERGE_TABLEAU } from '@/game/introCutscene'
 import {
   drawScene, resetDrawnFx, setBuildOverlay, setRenderProfile, setMonsterPrimeFilter,
   type DropGuide
@@ -30,6 +35,7 @@ import { resetVfx } from '@/use/useTowerVfx'
 import { warmAudio, playFx } from '@/use/useTowerAudio'
 import useTowerProgress, { bestWave } from '@/use/useTowerProgress'
 import { awaitingFirstInteraction } from '@/use/useFirstInteraction'
+import IntroCutscene from '@/components/game/IntroCutscene.vue'
 import useTowerEconomy from '@/use/useTowerEconomy'
 import useMissions, { beginMissionRun } from '@/use/useMissions'
 import useAchievements from '@/use/useAchievements'
@@ -42,8 +48,13 @@ import { earlyCallBonus } from '@/game/waves'
 import { spriteFor } from '@/game/art'
 import type { Block } from '@/game/types'
 
-import { getState, setState } from '@/use/useTowerState'
-import { M2_DROP_LEARNED_KEY, M2_MERGE_GUIDE_KEY, M2_ONBOARDED_KEY, M2_TUTORIAL_KEY } from '@/keys'
+import { flushPersist, getState, setState } from '@/use/useTowerState'
+import { saveDataVersion } from '@/use/useSaveStatus'
+import { holdsBuildClock as holdsBuildClockFor } from '@/use/useTutorialClock'
+import {
+  M2_DROP_LEARNED_KEY, M2_MERGE_GUIDE_KEY, M2_ONBOARDED_KEY, M2_TUTORIAL_KEY,
+  INTRO_SEEN_KEY
+} from '@/keys'
 import useSounds, { useMusic } from '@/use/useSound'
 import { useScreenshake } from '@/use/useScreenshake'
 import { isGamePaused, isAdShowing, acquireAppPause } from '@/use/useGamePause'
@@ -408,6 +419,14 @@ const loop = (t: number): void => {
     step(dt)
   }
 
+  // The opening cutscene, if one is playing. Before the draw-cadence gate and
+  // before `drawScene`, because it writes the camera that `drawScene` reads —
+  // see the same call in the desktop scene. The cutscene holds the build clock
+  // rather than the world, which on THIS board is not optional: its
+  // `firstBuildMs` is zero, so wave 1 is called on the first stepped frame
+  // unless something is holding the clock.
+  stepIntro(dt, cssW, cssH)
+
   // On the low tier every second frame is skipped; the VFX get the accumulated
   // time so motion stays honest.
   frameNo++
@@ -483,12 +502,16 @@ const tryDrop = (slot: number, c: number): void => {
   // answer lives: the short piles blink in the strip and a knock plays. See
   // `useResourceBlink` for why a silent no was the bug.
   const shapeId = offers.value[slot]
-  if (shapeId && denyPurchase(missingFor(shapeId))) return
+  if (shapeId && denyPurchase(missingFor(shapeId), traySlotKey(slot))) return
   if (!dropOffer(slot, c)) {
     playSound('obstacle-hit', 0.03)
     // Shown as well as heard: every column that would take the piece flashes
-    // its landing cell green (`drawBuildOverlay`).
+    // its landing cell green (`drawBuildOverlay`), AND the card the player is
+    // holding strobes. The board flash answers "where could this have gone";
+    // the card answers "your press registered and the answer is no" — which is
+    // the question a player who has tapped four times is actually asking.
     requestRejectFlash()
+    pulseDenied(traySlotKey(slot))
     return
   }
   playFx('uiTap')
@@ -544,7 +567,7 @@ const onSelectSlot = (slot: number | null): void => {
   // that armed it is told why it will not go in, rather than finding out on
   // the column.
   const shapeId = offers.value[slot]
-  if (shapeId && denyPurchase(missingFor(shapeId))) return
+  if (shapeId && denyPurchase(missingFor(shapeId), traySlotKey(slot))) return
   playFx('uiTap')
 }
 
@@ -1110,7 +1133,12 @@ const onBuySpeed = async (target: number): Promise<void> => {
 // ─── Wave control and warnings ──────────────────────────────────────────────
 
 const callBonusPct = computed(() =>
-  phase.value === 'build' ? Math.round((earlyCallBonus(buildTimeLeft.value) - 1) * 100) : 0
+  phase.value === 'build'
+    // Against the window the player was GIVEN, not the default one — otherwise
+    // the badge advertises a payout `callWave` will not make. See
+    // `earlyCallBonus`.
+    ? Math.round((earlyCallBonus(buildTimeLeft.value, buildWindowTotal.value) - 1) * 100)
+    : 0
 )
 
 const onCallWave = (): void => {
@@ -1267,6 +1295,8 @@ const tutorialPassage = ref<DimBox | null>(null)
 /** The cell the lesson's piece would land in — where the demo's ghost settles. */
 const tutorialLanding = ref<DimBox | null>(null)
 const tutorialTick = ref(0)
+/** The poll's cadence — also the resolution of the hold budget it spends. */
+const TUTORIAL_POLL_MS = 250
 let tutorialTimer = 0
 
 const inFirstStage = computed(() =>
@@ -1280,6 +1310,9 @@ const inFirstStage = computed(() =>
   && wave.value <= COACH_MARK_LAST_WAVE
   && !showResult.value
   && !isAnyModalOpen.value
+  // The opening cutscene has the screen. A dimmed board with a hole in it,
+  // pointing at a tray card behind a letterbox, is not a lesson.
+  && !introActive.value
   // A rotate prompt owns the whole screen; a spotlight measured behind it
   // points at wherever the board happened to be before the turn.
   && !rotateBlocked.value
@@ -1306,8 +1339,20 @@ const tutorialOver = computed(() => tutorialDone.value || wave.value > COACH_MAR
  * time is told what it is even if they have played the other one. It leaves on
  * their first touch: this board's wave 1 is already walking in by then, so the
  * banner names the thing they are about to watch happen.
+ *
+ * `introShown` is the third clause: the opening cutscene shows this same banner
+ * over the peak of its own army, so a player who has just watched it must not
+ * be shown the line again over the board. A player who never got the cutscene
+ * — reduced motion, or a tab closed during it — still gets it here, exactly as
+ * before. See the fuller note in the desktop scene.
  */
-const showIncoming = computed(() => bestWave.value === 0 && awaitingFirstInteraction.value)
+const showIncoming = computed(() =>
+  bestWave.value === 0 && awaitingFirstInteraction.value && !introShown.value
+)
+
+/** Is the interface hidden for the cutscene? Released one beat early, as the
+ *  camera starts home — see the desktop scene's note. */
+const hudHidden = computed(() => introActive.value && introBeat.value !== 'land')
 const tutorialStep = computed<TutorialStep | null>(() => {
   if (!inFirstStage.value) return null
   return TUTORIAL_STEPS[tutorialIndex.value] ?? null
@@ -1318,14 +1363,63 @@ const tutorialStep = computed<TutorialStep | null>(() => {
  *
  * Only for `rankGate`, and only because that beat is BOUNDED: it is three
  * seconds of script that ends on its own, with every touch on the screen taken
- * by the hand's layer. The two beats before it wait on the player and are
- * therefore left running, like every other coach mark on this board — a held
- * clock that waits on a tap nobody makes never releases, and the stage's own
- * expiry (`COACH_MARK_LAST_WAVE`) is what retires them instead.
+ * by the hand's layer.
  *
- * Read by the loop and by `isLiveGameplay`, exactly as the teaching cards are.
+ * Read by `isLiveGameplay` and by the chest, which is why it stayed narrow when
+ * `coachHold` below widened: those two are the PORTAL's view of the game, and a
+ * gameplayStart/Stop pair around every coach mark is churn on a contract that
+ * is graded, not a truth the SDK needs.
  */
 const handLessonHold = computed(() => tutorialStep.value === 'rankGate')
+
+/** How long the coach marks have already held the countdown, this run. */
+const coachHeldMs = ref(0)
+
+/**
+ * ── The coach marks hold the countdown while they wait ──────────────────────
+ *
+ * This is the 2026-09-15 fix for a sequence that could not be finished in the
+ * time it was given. The beats used to run over a LIVE board: seven of them —
+ * drop, merge, two cards, then the three-beat rank arc — raced against a wave
+ * clock the player does not control, on a board whose early build windows are
+ * four and six seconds and whose coach marks expire for good at wave 3
+ * (`COACH_MARK_LAST_WAVE`). Most players simply ran out of stage, which is why
+ * the sequence was so often never recorded as done.
+ *
+ * The previous comment here argued against exactly this change, and it was
+ * right about the danger: "a held clock that waits on a tap nobody makes never
+ * releases". That is what `MAX_HOLD_MS` is for, and what `hasTarget` is for.
+ * The hold now ends by itself three ways — the player acts, the beat has
+ * nothing on screen to point at, or the budget runs out — after which the board
+ * runs on and the stage expires exactly as it does today. What it can no longer
+ * do is sit there for ever, and what the player can no longer do is lose the
+ * lesson to a clock they were never shown.
+ *
+ * WHAT IT HOLDS IS THE COUNTDOWN, NOT THE BOARD. The cards and the scripted
+ * hand stop the simulation outright (the loop's `step` gate above), and that is
+ * right for them: nothing the player does during one has to resolve. It is
+ * wrong for these. A drop spawns a FALLING block — `dropOffer` — which needs
+ * stepped frames to land, settle and fuse, and the `merge` beat then waits on
+ * that fusion. Freezing the board would leave the piece hanging in the air and
+ * the beat waiting on a merge that can never happen: the deadlock the comment
+ * on `handLessonHold` warned about, arrived at from the other direction.
+ *
+ * So it raises `buildClockHeld` instead. Monsters walk, pieces fall, welds
+ * settle; the only thing that stands still is the four- or six-second build
+ * window whose expiry was taking the lesson away.
+ */
+const coachHold = computed(() => holdsBuildClockFor({
+  step: tutorialStep.value,
+  // Every beat on this board belongs to the one forced sequence; there is no
+  // "late lesson over a running game" tier here, as there is on the tower.
+  opening: true,
+  hasTarget: tutorialRect.value !== null,
+  heldMs: coachHeldMs.value
+}))
+
+// `immediate`: the first beat is live on the very first evaluation, so a
+// watcher that only fired on a CHANGE would never see the sequence open.
+watch(coachHold, (held) => { buildClockHeld.value = held }, { immediate: true })
 
 /**
  * The Blueprints button's stage-2 nudge, held back while a coach mark is up.
@@ -1526,6 +1620,10 @@ const finishTutorial = (): void => {
   // the next boot does not read this as an old save that finished the whole
   // sequence (a done tutorial with no merge flag at all means exactly that).
   if (!mergeLessonSeen.value) setState(M2_MERGE_GUIDE_KEY, false)
+  // Through the debounce: this lands in the middle of a live wave on a phone,
+  // which is where a tab goes away without warning — and a lost write costs the
+  // player the whole dimmed opening again on their next run.
+  flushPersist()
 }
 
 const advanceTutorial = (): void => {
@@ -1673,6 +1771,29 @@ watch(tutorialStep, (step) => {
 }, { immediate: true })
 watch(merged, (m) => { if (m) completeTutorialStep('merge') })
 
+/**
+ * Keep a piece in the player's hand for the whole of both drop beats.
+ *
+ * The tray tile has a live window of its own here (`tutorialPassage`), and that
+ * window is measured FROM the armed slot — so a hand that empties takes the
+ * window with it and leaves the card dimmed and unreachable, with a lit column
+ * that now drops nothing. The tile's own toggle-off is already blocked while
+ * teaching (`onTile`), but it is not the only route: Escape on a keyboard, a
+ * reroll, the gift borrowing slot 0. This re-arms from the state instead of
+ * defending each one.
+ */
+watch([tutorialStep, selectedSlot], ([step, slot]) => {
+  if (slot !== null) return
+  if (step === 'drop') selectedSlot.value = 0
+  else if (step === 'merge') armMergePiece()
+})
+
+/**
+ * A tap that landed on the dim instead of on the lesson — the audible half of
+ * the overlay's answer. Silence here reads as a frozen game.
+ */
+const onTutorialMiss = (): void => { playSound('obstacle-hit', 0.03) }
+
 // The card has a window of its own now, so the cannon can be carried somewhere
 // other than onto its twin — and a merge beat whose hand no longer holds a
 // cannon could never be finished. Deal it again.
@@ -1702,6 +1823,21 @@ const savedMergeGuide = getState<boolean | null>(M2_MERGE_GUIDE_KEY, null)
 const mergeLessonSeen = ref(mergeLessonSeenFromSave(savedMergeGuide, tutorialDone.value))
 const lessonMerge = ref(false)
 const lessonPower = ref(false)
+
+/**
+ * Re-read the "already taught" flags when a cloud save lands.
+ *
+ * Same asymmetry the tower board had: these are read once during setup, and on
+ * a platform build that read can lose the race with the SDK's store — which is
+ * why `refreshTechFound` is called a second time from `onMounted`. Without it a
+ * returning player whose row arrives late is walked through the whole sequence
+ * again. One-way: a hydrate may only ever tell us a lesson has been seen.
+ */
+watch(saveDataVersion, () => {
+  if (getState<boolean>(M2_TUTORIAL_KEY, false) === true) tutorialDone.value = true
+  if (getState<boolean>(M2_DROP_LEARNED_KEY, false) === true) dropLearned.value = true
+  if (getState<boolean>(M2_MERGE_GUIDE_KEY, false) === true) mergeLessonSeen.value = true
+})
 const markMergeLessonSeen = (): void => {
   mergeLessonSeen.value = true
   setState(M2_MERGE_GUIDE_KEY, true)
@@ -1813,6 +1949,7 @@ watch([wave, dropLearned], ([w, learned]) => {
 const replayTutorial = (what: TutorialCheat): void => {
   if (what === 'merge') { forcedMerge.value = true; return }
   if (what === 'power') { forcedPower.value = true; return }
+  if (what === 'intro') { void replayIntro(); return }
   if (what !== 'reset') return
   setState(M2_TUTORIAL_KEY, false)
   setState(M2_DROP_LEARNED_KEY, false)
@@ -2148,6 +2285,10 @@ const onGiftArmed = (): void => {
 const onKey = (e: KeyboardEvent): void => {
   const tgt = e.target
   if (tgt instanceof HTMLElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(tgt.tagName)) return
+  // While the cutscene has the screen every key is the skip key. The overlay
+  // swallows pointer events; keystrokes arrive on `window` and would otherwise
+  // reach the board — Space to skip would have called wave 1 instead.
+  if (introActive.value) { e.preventDefault(); skipIntro(); return }
   if (e.code === 'Escape') { selectedSlot.value = null; inspected.value = null; return }
   if (e.repeat) return
   if ((e.code === 'Space' || e.code === 'Enter') && phase.value === 'build' && !showResult.value) {
@@ -2199,6 +2340,17 @@ const boot = async (): Promise<void> => {
     beginMissionRun()
     await nextTick()
     resize()
+    // The opening cutscene, for a player who has never been introduced to the
+    // game. It takes the camera off this board's fixed frame for about ten
+    // seconds and hands it back through `onDone` — `applyFrame` is what puts
+    // the board back where the thumb expects it, and it is the phone board's
+    // equivalent of the desktop's `snapToFit`.
+    //
+    // This board's own peak is golems and a sky full of wyverns rather than a
+    // siege train, because it has no siege engines: see `DROPMERGE_TABLEAU`.
+    if (shouldPlayIntro()) {
+      void playIntro({ tableau: DROPMERGE_TABLEAU, onDone: () => { applyFrame() } })
+    }
     startBattleMusic()
     signalGameplayLoaded()
 
@@ -2209,6 +2361,17 @@ const boot = async (): Promise<void> => {
     if (cheat) replayTutorial(cheat)
   } finally {
     booting = false
+  }
+}
+
+/** Play the opening cutscene again — `?tut=intro`. This board stands no
+ *  vanguard, so there is nothing to clear but the flag. */
+const replayIntro = async (): Promise<void> => {
+  setState(INTRO_SEEN_KEY, false)
+  resetIntroForReplay()
+  await nextTick()
+  if (shouldPlayIntro()) {
+    void playIntro({ tableau: DROPMERGE_TABLEAU, onDone: () => { applyFrame() } })
   }
 }
 
@@ -2275,7 +2438,9 @@ onMounted(() => {
     if (tutorialDone.value) return
     tutorialTick.value++
     if (tutorialStep.value) measureTutorialTarget()
-  }, 250)
+    // Spend the coach marks' hold budget — see `coachHold`.
+    if (coachHold.value) coachHeldMs.value += TUTORIAL_POLL_MS
+  }, TUTORIAL_POLL_MS)
 })
 
 onUnmounted(() => {
@@ -2291,9 +2456,16 @@ onUnmounted(() => {
   clearInterval(tutorialTimer)
   clearLongPress()
   cancelDropNudge()
+  // A board unmounting mid-cutscene must still strike the set: the director is
+  // a module singleton shared with the desktop scene, and a cast left standing
+  // would be inherited by whichever scene mounts next.
+  stopIntro()
   releaseRotatePause?.()
   clearFixedFrame()
   stopBattleMusic()
+  // Module-level state, shared with the desktop scene: a board that unmounts
+  // mid-sequence must not hand the next one a frozen build clock.
+  buildClockHeld.value = false
   saveRunSnapshot()
   // The overlay is a module singleton shared with the desktop scene: leave
   // none of this board's columns behind in it.
@@ -2313,7 +2485,7 @@ onUnmounted(() => {
       @contextmenu.prevent
     )
 
-    div.drop__hud
+    div.drop__hud(:class="{ 'is-cinema': hudHidden }")
       //- The game's premise, said once, in the biggest type on the screen.
       //- First-time players only, and gone on their first touch — see
       //- `showIncoming`.
@@ -2552,6 +2724,7 @@ onUnmounted(() => {
       :step="tutorialStep"
       :target="tutorialRect"
       :passage="tutorialPassage"
+      @miss="onTutorialMiss"
     )
 
     //- The lesson, played for the player until they play it: the card's piece
@@ -2601,6 +2774,13 @@ onUnmounted(() => {
     OptionsModal(:is-open="showOptions" @close="showOptions = false")
     BlueprintsModal(v-model="showBlueprints" :intro="blueprintsIntro")
     RotateOverlay(v-if="rotateBlocked")
+
+    //- The opening cutscene: letterbox, premise and the way out. Last in the
+    //- scene so it paints over the HUD it has just faded. Under the rotate
+    //- overlay in intent but not in order — the cutscene declines to start at
+    //- all while the board is sideways, because a sideways phone is already
+    //- holding the clock (see `rotateBlocked`).
+    IntroCutscene(v-if="introActive && !rotateBlocked")
 </template>
 
 <style scoped lang="sass">
@@ -2624,6 +2804,20 @@ onUnmounted(() => {
   display: flex
   flex-direction: column
   pointer-events: none
+  // Fading back IN, when `is-cinema` comes off.
+  transition: opacity 260ms ease
+
+// The opening cutscene has the screen. `visibility`, not `display`: the strip
+// and the bottom bar are still MEASURED while hidden (`layoutFrame` runs on a
+// one-second cadence and derives the board's fit from their rects), and
+// `display: none` would hand it two zero-height boxes — so the frame the
+// cutscene hands back would not be the frame the board is played on. Hiding
+// also takes the whole subtree out of hit-testing, which `pointer-events` on
+// this element alone cannot do: every control inside it opts back in.
+.drop__hud.is-cinema
+  opacity: 0
+  visibility: hidden
+  transition: opacity 320ms ease, visibility 0s linear 320ms
 
 .drop__mid
   position: relative

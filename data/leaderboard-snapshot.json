@@ -1,8 +1,8 @@
 {
   "source": "https://tower-siege-leaderboard.hyperg8.workers.dev",
-  "fetchedAt": 1789392607816,
-  "updatedAt": 1789392607516,
-  "total": 366,
+  "fetchedAt": 1789499996989,
+  "updatedAt": 1789499997015,
+  "total": 368,
   "entries": [
     {
       "rank": 1,
@@ -474,135 +474,135 @@
     },
     {
       "rank": 79,
+      "name": "_N3XuS_",
+      "score": 532,
+      "wave": 18
+    },
+    {
+      "rank": 80,
       "name": "Sentinel802975",
       "score": 531,
       "wave": 21
     },
     {
-      "rank": 80,
+      "rank": 81,
       "name": "Sentinel584733",
       "score": 524,
       "wave": 18
     },
     {
-      "rank": 81,
+      "rank": 82,
       "name": "Watcher202997",
       "score": 522,
       "wave": 17
     },
     {
-      "rank": 82,
+      "rank": 83,
       "name": "Keeper757440",
       "score": 518,
       "wave": 17
     },
     {
-      "rank": 83,
+      "rank": 84,
       "name": "Warden617576",
       "score": 515,
       "wave": 16
     },
     {
-      "rank": 84,
+      "rank": 85,
       "name": "Anonymous394896",
       "score": 514,
       "wave": 23
     },
     {
-      "rank": 85,
+      "rank": 86,
       "name": "Rampart436323",
       "score": 514,
       "wave": 19
     },
     {
-      "rank": 86,
+      "rank": 87,
       "name": "Keeper092863",
       "score": 512,
       "wave": 19
     },
     {
-      "rank": 87,
+      "rank": 88,
       "name": "Bastion098992",
       "score": 505,
       "wave": 19
     },
     {
-      "rank": 88,
+      "rank": 89,
       "name": "Rampart692643",
       "score": 505,
       "wave": 18
     },
     {
-      "rank": 89,
+      "rank": 90,
       "name": "Keeper571804",
       "score": 503,
       "wave": 23
     },
     {
-      "rank": 90,
+      "rank": 91,
       "name": "Warden424006",
       "score": 502,
       "wave": 22
     },
     {
-      "rank": 91,
+      "rank": 92,
       "name": "Anonymous638017",
       "score": 499,
       "wave": 15
     },
     {
-      "rank": 92,
+      "rank": 93,
       "name": "Warden756455",
       "score": 496,
       "wave": 17
     },
     {
-      "rank": 93,
+      "rank": 94,
       "name": "Vanguard020737",
       "score": 496,
       "wave": 18
     },
     {
-      "rank": 94,
+      "rank": 95,
       "name": "Watcher010067",
       "score": 495,
       "wave": 17
     },
     {
-      "rank": 95,
+      "rank": 96,
       "name": "Watcher982521",
       "score": 495,
       "wave": 17
     },
     {
-      "rank": 96,
+      "rank": 97,
       "name": "Rampart921898",
       "score": 482,
       "wave": 22
     },
     {
-      "rank": 97,
+      "rank": 98,
       "name": "Bastion123832",
       "score": 480,
       "wave": 22
     },
     {
-      "rank": 98,
+      "rank": 99,
       "name": "Keeper073285",
       "score": 479,
       "wave": 19
     },
     {
-      "rank": 99,
+      "rank": 100,
       "name": "Vanguard116524",
       "score": 478,
       "wave": 21
-    },
-    {
-      "rank": 100,
-      "name": "Keeper594514",
-      "score": 472,
-      "wave": 19
     }
   ],
   "dist": [
@@ -904,6 +904,10 @@
     ],
     [
       536,
+      1
+    ],
+    [
+      532,
       1
     ],
     [
@@ -1440,6 +1444,10 @@
     ],
     [
       209,
+      1
+    ],
+    [
+      203,
       1
     ],
     [

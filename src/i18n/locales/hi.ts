@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': 'लहर', 'enemies': 'दुश्मन', 'callWave': 'लहर बुलाएँ', 'callBoss': 'बॉस बुलाएँ',
     'monstersIncoming': 'राक्षस आ रहे हैं!',
+    'skip': 'छोड़ें',
     'speed': 'गति {n}×',
     'speedOffer': '{n}× गति अनलॉक करें',
     'speedGroup': 'गेम की गति', 'recenter': 'दृश्य केंद्र में लाएँ',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': 'बाण वर्षा',
     'arrowRainAim': 'बौछार बुलाने के लिए रणभूमि पर टैप करें',
     'extendRange': '+{n}% रेंज'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': 'तुम्हारा बुर्ज ही आख़िरी बचा ठिकाना है।',
+    'horde': 'भीड़ पहले ही कूच कर चुकी है।',
+    'siege': 'और वे घेराबंदी यंत्र ला रहे हैं।'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': 'गोला सीधा ऊपर दागता है। छोटा धमाका, सिर्फ़ ज़मीनी निशाने।'
     },
     'repair': 'मरम्मत',
-    'repairCooldown': '{n} से'
+    'repairCooldown': '{n} से',
+    'reposition': 'इस ब्लॉक को दूसरी जगह ले जाएँ'
   },
 
   'enemies': {

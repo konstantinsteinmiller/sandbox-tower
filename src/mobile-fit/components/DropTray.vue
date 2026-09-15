@@ -6,6 +6,7 @@ import FHudBadge from '@/components/atoms/FHudBadge.vue'
 import { shapeBlockTypes } from '@/game/shapes'
 import { blockDef, ENHANCED_HP_MUL, ENHANCED_DAMAGE_MUL } from '@/game/blocks'
 import { priceOfShape } from '@/use/useTowerGame'
+import { deniedSeq, traySlotKey } from '@/use/useResourceBlink'
 
 /**
  * The hand: three drop pieces at the thumb, and the Volley beside them.
@@ -167,6 +168,17 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
           ShapeTile(:shape-id="e.shapeId" :size="52")
           //- What the rewarded video bought, in numbers, on the card itself.
           span.tray__boost(v-if="e.boostChip") {{ e.boostChip }}
+          //- "Not right now" — the pale wash. Inside the body, so the price
+          //- chips below keep their colours. See `.is-poor`.
+          span.tray__poor(v-if="!e.affordable" aria-hidden="true")
+          //- "I heard you, and the answer is no." Keyed on the refusal counter
+          //- so a player pressing the same card again restarts the strobe
+          //- instead of landing on an element that has already played.
+          span.tray__deny(
+            v-if="deniedSeq(traySlotKey(e.slot))"
+            :key="deniedSeq(traySlotKey(e.slot))"
+            aria-hidden="true"
+          )
         span.tray__cost
           span.tray__cost-item(:class="{ 'is-short': materials < e.materials }")
             i.tray__dot.is-wood
@@ -223,8 +235,15 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
   &:active
     transform: translateY(2px)
 
-  &.is-poor
-    filter: grayscale(0.7) brightness(0.62)
+  // A pale wash, not a dimming — see BuildTray's `.is-poor` for the argument.
+  // Short version: the tile a player cannot buy YET is the one they are
+  // deciding whether to save for, and deciding means being able to see what is
+  // on it. Sunk into the dark, it was the least readable card in the hand.
+  //
+  // On the BODY, so the price chips keep their real colours — the red on the
+  // short pile is the answer to the question the wash asks.
+  &.is-poor .tray__body
+    filter: grayscale(0.62)
 
   &.is-selected
     border-color: #7fe0ff
@@ -244,8 +263,11 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
   // `scale` and a pseudo-element, never `transform` or `box-shadow`, so it
   // rides on top of the selected lift and the reinforced glow instead of
   // fighting them for the same property.
+  // Three swells, not `infinite` — see BuildTray's `.is-nudge`. The count and
+  // the 1.1 s match `useIdleNudge`'s `NUDGE_LOOPS` / `NUDGE_LOOP_MS`, which is
+  // how long the flag stays up; change one and change the other.
   &.is-nudge
-    animation: tray-nudge 1.1s ease-in-out infinite
+    animation: tray-nudge 1.1s ease-in-out 3
 
     &::after
       content: ''
@@ -254,10 +276,10 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
       border: 2px solid rgba(127, 224, 255, 0.9)
       border-radius: 0.75rem
       pointer-events: none
-      animation: tray-nudge-ring 1.1s ease-out infinite
+      animation: tray-nudge-ring 1.1s ease-out 3
 
 .tray__tile.is-enhanced.is-nudge
-  animation: tray-flip-gold 460ms cubic-bezier(0.3, 1.4, 0.5, 1) calc(var(--slot, 0) * 80ms) both, tray-nudge 1.1s ease-in-out infinite
+  animation: tray-flip-gold 460ms cubic-bezier(0.3, 1.4, 0.5, 1) calc(var(--slot, 0) * 80ms) both, tray-nudge 1.1s ease-in-out 3
 
 @keyframes tray-flip-gold
   0%, 49.9%
@@ -307,6 +329,55 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
   align-items: center
   justify-content: center
   pointer-events: none
+  transition: filter 110ms ease-out
+
+// The unaffordable wash: light enough that the art reads straight through it.
+.tray__poor
+  position: absolute
+  inset: 0
+  border-radius: clamp(0.25rem, 1.4vw, 0.45rem)
+  background-color: rgba(214, 223, 238, 0.4)
+  pointer-events: none
+
+// ─── The refusal strobe ─────────────────────────────────────────────────────
+//
+// The pale wash above says "you cannot afford this" as a STATE. This says "the
+// press you just made was refused" as an EVENT, and the 2026-09-15 playtest
+// found that players cannot infer the second from the first: three testers
+// across both boards read a refused press as a press that never registered.
+//
+// Red, brief and on top of the wash, so it reads over an already-dimmed card.
+// It never takes input — the card underneath still arms on the next press.
+.tray__deny
+  position: absolute
+  inset: 0
+  border-radius: clamp(0.25rem, 1.4vw, 0.45rem)
+  pointer-events: none
+  animation: tray-deny 460ms steps(1, end)
+
+@keyframes tray-deny
+  0%, 50%
+    background-color: rgba(255, 46, 46, 0.5)
+    box-shadow: inset 0 0 0 2px rgba(255, 90, 90, 0.95)
+  25%, 75%
+    background-color: rgba(255, 46, 46, 0.12)
+    box-shadow: inset 0 0 0 2px rgba(255, 90, 90, 0.3)
+  100%
+    background-color: transparent
+    box-shadow: none
+
+// The colour is the message; the strobe rate is not. Halved, and held.
+@media (prefers-reduced-motion: reduce)
+  .tray__deny
+    animation: tray-deny-slow 460ms steps(1, end)
+
+  @keyframes tray-deny-slow
+    0%, 70%
+      background-color: rgba(255, 46, 46, 0.4)
+      box-shadow: inset 0 0 0 2px rgba(255, 90, 90, 0.8)
+    100%
+      background-color: transparent
+      box-shadow: none
 
 // ─── What the reinforced hand bought ────────────────────────────────────────
 //

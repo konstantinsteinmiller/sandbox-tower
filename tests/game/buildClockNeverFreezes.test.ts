@@ -99,10 +99,16 @@ describe('which beats may stop the siege', () => {
    * `GameScene` — unmountable in a headless run, and therefore untestable,
    * which is why the freeze shipped.
    */
+  const at = (over: Partial<import('@/use/useTutorialClock').HoldState> = {}) => ({
+    step: null, opening: false, hasTarget: true, heldMs: 0, ...over
+  })
+
   it('lets a card or a scripted hand stop the clock', async () => {
     const { holdsBuildClock } = await import('@/use/useTutorialClock')
     for (const step of ['mergeGuide', 'mergePower', 'rankGate'] as const) {
-      expect(holdsBuildClock(step, false), step).toBe(true)
+      // They measure no target BY DESIGN — their own card or hand is the thing
+      // on screen — so the hold must not depend on one.
+      expect(holdsBuildClock(at({ step, hasTarget: false })), step).toBe(true)
     }
   })
 
@@ -110,21 +116,47 @@ describe('which beats may stop the siege', () => {
     const { holdsBuildClock, CLOCK_OWNING_STEPS } = await import('@/use/useTutorialClock')
     // The whole bug, in one assertion. `call` is an arrow over a live game: a
     // player who does not press it must still be sent the next wave.
-    expect(holdsBuildClock('call', false)).toBe(false)
+    expect(holdsBuildClock(at({ step: 'call' }))).toBe(false)
     expect(CLOCK_OWNING_STEPS.has('call')).toBe(false)
   })
 
   it('holds for anything in the forced opening, which gates wave 1 itself', async () => {
     const { holdsBuildClock } = await import('@/use/useTutorialClock')
     for (const step of ['pick', 'place', 'inspectMerged', 'rankUp', 'call'] as const) {
-      expect(holdsBuildClock(step, true), step).toBe(true)
+      expect(holdsBuildClock(at({ step, opening: true })), step).toBe(true)
     }
+  })
+
+  /**
+   * The 2026-09-15 rule, and the expensive half of it.
+   *
+   * `TutorialOverlay` draws NOTHING without a measured target, deliberately — a
+   * dim layer with no hole is a modal with no way out. The hold did not follow
+   * that rule, so every way a target can go missing produced a game that looked
+   * normal, answered every tap, and would never send another wave: the player
+   * pressing Escape and closing the inspector the `rankUp` beat points into, a
+   * resumed run that cannot afford the piece `place` teaches with.
+   */
+  it('never holds the clock behind a beat with nothing on screen', async () => {
+    const { holdsBuildClock } = await import('@/use/useTutorialClock')
+    for (const step of ['pick', 'place', 'inspectMerged', 'rankUp'] as const) {
+      expect(holdsBuildClock(at({ step, opening: true, hasTarget: false })), step).toBe(false)
+    }
+  })
+
+  /** The backstop, for the failures nothing here can enumerate. */
+  it('gives the siege back once the hold budget is spent', async () => {
+    const { holdsBuildClock, MAX_HOLD_MS } = await import('@/use/useTutorialClock')
+    const card = { step: 'mergePower' as const, hasTarget: false }
+    expect(holdsBuildClock(at({ ...card, heldMs: MAX_HOLD_MS - 1 }))).toBe(true)
+    expect(holdsBuildClock(at({ ...card, heldMs: MAX_HOLD_MS }))).toBe(false)
+    expect(holdsBuildClock(at({ step: 'place', opening: true, heldMs: MAX_HOLD_MS }))).toBe(false)
   })
 
   it('holds for nothing at all when no beat is live', async () => {
     const { holdsBuildClock } = await import('@/use/useTutorialClock')
-    expect(holdsBuildClock(null, false)).toBe(false)
-    expect(holdsBuildClock(null, true)).toBe(false)
+    expect(holdsBuildClock(at({ step: null }))).toBe(false)
+    expect(holdsBuildClock(at({ step: null, opening: true }))).toBe(false)
   })
 
   it('never holds the clock for a beat the player cannot see', async () => {

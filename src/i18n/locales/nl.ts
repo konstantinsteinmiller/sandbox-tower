@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': 'Golf', 'enemies': 'Vijanden', 'callWave': 'Golf oproepen', 'callBoss': 'Boss oproepen',
     'monstersIncoming': 'Monsters in aantocht!',
+    'skip': 'Overslaan',
     'speed': 'Snelheid {n}×',
     'speedOffer': '{n}× snelheid ontgrendelen',
     'speedGroup': 'Spelsnelheid', 'recenter': 'Beeld centreren',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': 'Pijlenregen',
     'arrowRainAim': 'Tik op het slagveld om het salvo te roepen',
     'extendRange': '+{n}% bereik'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': 'Jouw toren is het laatste wat nog staat.',
+    'horde': 'De horde is al op mars.',
+    'siege': 'En ze brengen belegeringstuig mee.'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': 'Schiet een granaat recht omhoog. Kleine knal, alleen doelen op de grond.'
     },
     'repair': 'Repareren',
-    'repairCooldown': '{n} s'
+    'repairCooldown': '{n} s',
+    'reposition': 'Dit blok verplaatsen'
   },
 
   'enemies': {

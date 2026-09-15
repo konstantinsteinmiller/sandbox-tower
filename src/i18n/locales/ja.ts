@@ -36,6 +36,7 @@ export default {
   'hud': {
     'wave': 'ウェーブ', 'enemies': '敵', 'callWave': 'ウェーブを呼ぶ', 'callBoss': 'ボスを呼ぶ',
     'monstersIncoming': 'モンスター襲来！',
+    'skip': 'スキップ',
     'speed': '速度 {n}×',
     'speedOffer': '{n}×速度を解放',
     'speedGroup': 'ゲーム速度', 'recenter': '視点を戻す',
@@ -44,6 +45,17 @@ export default {
     'arrowRain': '矢の雨',
     'arrowRainAim': '戦場をタップして一斉射を呼びます',
     'extendRange': '射程 +{n}%'
+  },
+
+
+  // ─── The opening cutscene ─────────────────────────────────────────────────
+  // Three lines across the ten-second fly-over west of the tower, one per beat:
+  // the tower, the horde, the siege train. The fourth thing the player reads is
+  // `hud.monstersIncoming`, shown over the engines rather than over the board.
+  'intro': {
+    'premise': 'この塔が、最後に残された砦だ。',
+    'horde': '群れはすでに進軍している。',
+    'siege': 'しかも攻城兵器を引き連れている。'
   },
 
   'warnings': {
@@ -140,7 +152,8 @@ export default {
       'bombard': '砲弾を真上に打ち上げます。爆発は小さく、地上の敵のみ。'
     },
     'repair': '修理',
-    'repairCooldown': '{n}秒'
+    'repairCooldown': '{n}秒',
+    'reposition': 'このブロックを移動'
   },
 
   'enemies': {
