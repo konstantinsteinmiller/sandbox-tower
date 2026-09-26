@@ -3,8 +3,8 @@ import {
   noise2, tones, type Pt
 } from '@/game/inkArt'
 import {
-  INK, SHADOW_DIR, LINE, paint, blink, eye, groundShadow,
-  gait, swing, pivot, SPORE_LIGHT, EMBER_LIGHT, type SocketLight
+  INK, SHADOW_DIR, LINE, paint, blink, eye, gait, swing, pivot, SPORE_LIGHT, EMBER_LIGHT, type SocketLight,
+  drawShadowSpec, type ShadowSpec
 } from '@/game/monsterKit'
 
 /**
@@ -239,6 +239,9 @@ const FLY_VEINS: Pt[][] = [
   [[0.46, -0.13], [0.5, -0.02], [0.48, 0.1]]
 ]
 
+/** Its contact shadow — baked into the frames, and laid under a painted strip. */
+export const HOUSEFLY_SHADOW: ShadowSpec = { w: 0.24, y: 1.02, a: 0.14 }
+
 export const drawHousefly = (ctx: CanvasRenderingContext2D, S: number, t: number): void => {
   const g = gait(t, 860)
   // Twelve beats a cycle: a real buzz on the bench, four clean strokes in the
@@ -253,7 +256,7 @@ export const drawHousefly = (ctx: CanvasRenderingContext2D, S: number, t: number
   const FACE = tones('#d9d4c4', 0.85)
   const LEG = '#2f2c35'
 
-  groundShadow(ctx, S, 0.24, 1.02, 0.14)
+  drawShadowSpec(ctx, S, HOUSEFLY_SHADOW)
 
   const cx = lean
   const cy = 0.12 * S + bob
@@ -360,6 +363,9 @@ const MOSQ_ABD: Pt[] = [
   [0.78, 0.0], [0.71, 0.12], [0.56, 0.17], [0.36, 0.15], [0.16, 0.11], [0.0, 0.08]
 ]
 
+/** Its contact shadow — baked into the frames, and laid under a painted strip. */
+export const MOSQUITO_SHADOW: ShadowSpec = { w: 0.22, y: 1.02, a: 0.12 }
+
 export const drawMosquito = (ctx: CanvasRenderingContext2D, S: number, t: number): void => {
   // A hover rather than a flight: rise, drift, settle, with the drift trailing
   // the rise so the pair reads as swimming rather than orbiting.
@@ -384,7 +390,7 @@ export const drawMosquito = (ctx: CanvasRenderingContext2D, S: number, t: number
   const LEG = '#3b2a44'
   const LEG_FAR = '#2c1f33'
 
-  groundShadow(ctx, S, 0.22, 1.02, 0.12)
+  drawShadowSpec(ctx, S, MOSQUITO_SHADOW)
 
   const ox = sway
   const oy = bob - 0.02 * s
@@ -514,6 +520,9 @@ const HORNET_ABD: Pt[] = [
   [0.14, 0.2], [0.02, 0.1]
 ]
 
+/** Its contact shadow — baked into the frames, and laid under a painted strip. */
+export const HORNET_SHADOW: ShadowSpec = { w: 0.3, y: 1.02, a: 0.16 }
+
 export const drawHornet = (ctx: CanvasRenderingContext2D, S: number, t: number): void => {
   // The fastest cycle in the cast. Faces LEFT: the head leads at −x.
   const g = gait(t, 480)
@@ -527,7 +536,7 @@ export const drawHornet = (ctx: CanvasRenderingContext2D, S: number, t: number):
   const LEG = '#eaa21c'
   const LEG_FAR = '#a8641a'
 
-  groundShadow(ctx, S, 0.3, 1.02, 0.16)
+  drawShadowSpec(ctx, S, HORNET_SHADOW)
 
   const cy = 0.16 * S + bob
   const P = (x: number, y: number): Pt => [x * S, cy + y * S]
@@ -676,6 +685,9 @@ const BEE_VEINS: Pt[][] = [
   [[0.03, 0.01], [0.24, 0.02], [0.4, 0.03]]
 ]
 
+/** Its contact shadow — baked into the frames, and laid under a painted strip. */
+export const BUMBLEBEE_SHADOW: ShadowSpec = { w: 0.32, y: 1.02, a: 0.16 }
+
 export const drawBumblebee = (ctx: CanvasRenderingContext2D, S: number, t: number): void => {
   const g = gait(t, 780)
   // Tiny wings, big body: they have to go flat out.
@@ -693,7 +705,7 @@ export const drawBumblebee = (ctx: CanvasRenderingContext2D, S: number, t: numbe
   const HONEY = tones('#ffb319', 1.05)
   const POLLEN = tones('#ff9a2a', 0.95)
 
-  groundShadow(ctx, S, 0.32, 1.02, 0.16)
+  drawShadowSpec(ctx, S, BUMBLEBEE_SHADOW)
 
   const cx = tilt
   const cy = -0.04 * s + bob
@@ -878,6 +890,9 @@ const ELYTRON: Pt[] = [
   [0.48, 0.07], [0.28, 0.1], [0.08, 0.07]
 ]
 
+/** Its contact shadow — baked into the frames, and laid under a painted strip. */
+export const FIREFLY_SHADOW: ShadowSpec = { w: 0.24, y: 1.02, a: 0.12 }
+
 export const drawFirefly = (ctx: CanvasRenderingContext2D, S: number, t: number): void => {
   const g = gait(t, 1500)
   const beat = Math.sin(g * TAU * 12)
@@ -895,7 +910,7 @@ export const drawFirefly = (ctx: CanvasRenderingContext2D, S: number, t: number)
   const LAMP = tones('#eaff8a', 0.8)
   const LEG = '#2e2530'
 
-  groundShadow(ctx, S, 0.24, 1.02, 0.12)
+  drawShadowSpec(ctx, S, FIREFLY_SHADOW)
 
   const cx = swing(g - 0.2, 0.015) * S
   const cy = -0.05 * s + bob

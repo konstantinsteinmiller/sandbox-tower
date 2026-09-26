@@ -1804,6 +1804,17 @@ const drawTrebuchetArm = (
 }
 
 /**
+ * A contraption's contact shadow.
+ *
+ * Part of the baked static layer — and so gone when a painted chassis
+ * replaces that layer, since a painter cannot paint a soft shadow over a
+ * chroma key and is told not to. The battlefield lays this under a painted
+ * chassis instead, so an adopted engine still stands on the sand.
+ */
+export const drawSiegeShadow = (ctx: CanvasRenderingContext2D, S: number): void =>
+  groundShadow(ctx, S, 0.62, GROUND + 0.03, 0.32)
+
+/**
  * Draw one siege engine.
  *
  * `spin` drives the wheels; `engaged` is "has a target" — the flag that
@@ -1837,7 +1848,7 @@ export const drawSiegeMachine = (
 
   // The shadow belongs to the baked pass. Re-stamping it in the live pass would
   // double its opacity every frame the two are composited together.
-  if (wantStatic) groundShadow(ctx, S, 0.62, GROUND + 0.03, 0.32)
+  if (wantStatic) drawSiegeShadow(ctx, S)
 
   // The three throwers are split into a baked frame and a live arm, so each
   // machine animates against its OWN reload rather than every catapult on the

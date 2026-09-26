@@ -37,14 +37,18 @@ creature through one step. It slices into ONE horizontal strip at
 same clock that drives the procedural walk.
 
 Use these rather than `cell-enemy/…`: a still in `images/enemies/` replaces the
-whole walk cycle with one frozen pose that slides across the grass. The slicer
+whole walk cycle with one frozen pose that slides across the sand. The slicer
 warns when you do it.
 
 Named after the DESIGN, not the enemy type — one design can field several ranks,
 and it is the design that owns the gait. `walk-grumpling.png` and a bare
 `grumpling.png` both land.
 
-## Siege engines roll
+## Contraptions roll
+
+The siege engines are ant contraptions built from toy junk now — a toy car
+with a pencil ram, a soup tin with a fork, a rubber-band crossbow, a spoon
+catapult, a juice-box tower and a pencil trebuchet. The ids are unchanged.
 
 `siege-<engine>.png` is ONE square image per engine, not a cycle. It shipped as
 an eight-panel roll first; the wheels do turn, but nobody has ever watched a
@@ -60,16 +64,17 @@ does — so the strip stays keyed to when the machine actually fires. It lands a
 `public/images/siege-arms/<engine>.webp` and is composited over the chassis.
 Paint the arm alone: no wheels, no carriage, no frame.
 
-The reference shows the CARRIAGE ONLY. The arm, bow, counterweight and sling
-are keyed to each machine's own reload and are still drawn live on top, exactly
+The reference shows the CARRIAGE ONLY. The crossbow arms and band, the spoon,
+the pencil beam, the eraser weight and the sling are keyed to each machine's own reload and are still drawn live on top, exactly
 as a block's fixture is drawn over its painted body. Paint an arm into the sheet
 and the engine ends up with two.
 
 All six engines have a sheet. The ram, the iron ram and the siege tower each
 needed one concession to z-order first, which is why their references show less
-than you might expect: the ram's roof but not its log, the iron ram's casemate
-but not the log sliding out of it, the tower's body but not the ramp, banner,
-crew or battlements. Those all animate, so they all stay live.
+than you might expect: the ram's toy car but not its pencil, the tin-can ram's
+tin but not the fork sliding out of it, the juice box but not the ramp, the
+straw flagpole, the bottle-cap fighting top or its ant archers. Those all
+animate, so they all stay live.
 
 ## Rounds
 
@@ -77,10 +82,11 @@ crew or battlements. Those all animate, so they all stay live.
 `public/images/rounds/<kind>.webp`. Both are drawn pointing RIGHT and rotated to
 their heading in game, so one still covers every direction.
 
-They are two different things and must look it: `bolt` is the archer post's
-arrow, `quarrel` is the siege ballista's — short, heavy, dark, iron-headed. The
-other rounds are reference only; a cannonball is a circle drawn at its own
-radius and the shell, bomb and molotov each carry something live on top.
+They are two different things and must look it: `bolt` is the dart blaster's
+orange foam dart with a blue suction cup, `quarrel` is the rubber-band
+crossbow's toothpick — thin, pale and sharp. The other rounds are reference
+only; a water blob is drawn at its own radius and the mud ball, honey bomb and
+ember each carry something live on top.
 
 The grid is cut blind, so the slicer checks what it cannot see and reports it:
 an empty panel, feet that wander between frames, a body that slides sideways, a

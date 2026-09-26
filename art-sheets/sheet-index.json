@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-05T18:58:27.039Z",
+  "generated": "2026-09-26T14:58:04.321Z",
   "cell": 128,
   "scales": [
     1,
@@ -82,20 +82,11 @@
     {
       "id": "roof",
       "file": "bg-roof.png",
-      "width": 512,
-      "height": 384,
+      "width": 768,
+      "height": 432,
       "tileable": false,
       "bg": "magenta",
       "target": "images/bg/roof.webp"
-    },
-    {
-      "id": "ribbon",
-      "file": "bg-ribbon.png",
-      "width": 1280,
-      "height": 256,
-      "tileable": false,
-      "bg": "magenta",
-      "target": "images/bg/ribbon.webp"
     },
     {
       "id": "icon-wood",
@@ -125,6 +116,15 @@
       "target": "images/icons/gold.webp"
     },
     {
+      "id": "ribbon",
+      "file": "bg-ribbon.png",
+      "width": 1280,
+      "height": 256,
+      "tileable": false,
+      "bg": "magenta",
+      "target": "images/bg/ribbon.webp"
+    },
+    {
       "id": "icon-chest",
       "file": "icon-chest.png",
       "width": 512,
@@ -132,6 +132,15 @@
       "tileable": false,
       "bg": "magenta",
       "target": "images/icons/chest.webp"
+    },
+    {
+      "id": "prop-chest-wing",
+      "file": "prop-chest-wing.png",
+      "width": 512,
+      "height": 512,
+      "tileable": false,
+      "bg": "magenta",
+      "target": "images/props/chest-wing.webp"
     }
   ],
   "walks": [
@@ -149,12 +158,12 @@
         "h": 360
       },
       "fit": {
-        "h": 0.5611111111111111,
-        "w": 0.815625,
-        "bottom": 0.9194444444444444,
-        "cx": 0.4875
+        "h": 0.6555555555555556,
+        "w": 1,
+        "bottom": 0.9083333333333333,
+        "cx": 0.4984375
       },
-      "faces": "front",
+      "faces": "left",
       "anchor": "feet",
       "target": "images/monsters/grumpling.webp"
     },
@@ -172,10 +181,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.7805555555555556,
-        "w": 0.51875,
-        "bottom": 0.9166666666666666,
-        "cx": 0.5140625
+        "h": 0.6638888888888889,
+        "w": 1,
+        "bottom": 0.9027777777777778,
+        "cx": 0.4984375
       },
       "faces": "front",
       "anchor": "feet",
@@ -195,10 +204,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.5305555555555556,
-        "w": 0.740625,
-        "bottom": 0.9222222222222223,
-        "cx": 0.409375
+        "h": 0.4361111111111111,
+        "w": 1,
+        "bottom": 0.9138888888888889,
+        "cx": 0.4984375
       },
       "faces": "left",
       "anchor": "feet",
@@ -218,10 +227,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.6055555555555555,
-        "w": 0.621875,
-        "bottom": 0.8888888888888888,
-        "cx": 0.515625
+        "h": 0.7083333333333334,
+        "w": 0.75,
+        "bottom": 0.8777777777777778,
+        "cx": 0.4734375
       },
       "faces": "front",
       "anchor": "feet",
@@ -241,10 +250,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.675,
-        "w": 0.55625,
-        "bottom": 0.9138888888888889,
-        "cx": 0.4953125
+        "h": 0.5611111111111111,
+        "w": 0.89375,
+        "bottom": 0.9166666666666666,
+        "cx": 0.4765625
       },
       "faces": "front",
       "anchor": "feet",
@@ -264,10 +273,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.5583333333333333,
-        "w": 0.90625,
-        "bottom": 0.8027777777777778,
-        "cx": 0.4984375
+        "h": 0.5305555555555556,
+        "w": 0.846875,
+        "bottom": 0.8583333333333333,
+        "cx": 0.496875
       },
       "faces": "front",
       "anchor": "feet",
@@ -287,10 +296,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.6388888888888888,
-        "w": 0.7375,
-        "bottom": 0.9222222222222223,
-        "cx": 0.4703125
+        "h": 0.675,
+        "w": 0.940625,
+        "bottom": 0.9083333333333333,
+        "cx": 0.490625
       },
       "faces": "left",
       "anchor": "feet",
@@ -310,10 +319,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.7444444444444445,
-        "w": 0.621875,
-        "bottom": 0.9222222222222223,
-        "cx": 0.496875
+        "h": 0.55,
+        "w": 0.925,
+        "bottom": 0.9027777777777778,
+        "cx": 0.4609375
       },
       "faces": "front",
       "anchor": "feet",
@@ -333,9 +342,9 @@
         "h": 360
       },
       "fit": {
-        "h": 0.8916666666666667,
+        "h": 0.8861111111111111,
         "w": 1,
-        "bottom": 0.95,
+        "bottom": 0.9027777777777778,
         "cx": 0.4984375
       },
       "faces": "front",
@@ -356,12 +365,12 @@
         "h": 360
       },
       "fit": {
-        "h": 0.7694444444444445,
-        "w": 0.609375,
-        "bottom": 0.9083333333333333,
-        "cx": 0.459375
+        "h": 0.7166666666666667,
+        "w": 0.840625,
+        "bottom": 0.9055555555555556,
+        "cx": 0.471875
       },
-      "faces": "front",
+      "faces": "left",
       "anchor": "feet",
       "target": "images/monsters/rattlejack.webp"
     },
@@ -379,10 +388,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.5638888888888889,
-        "w": 0.934375,
-        "bottom": 0.8305555555555556,
-        "cx": 0.496875
+        "h": 0.6583333333333333,
+        "w": 0.9125,
+        "bottom": 0.8666666666666667,
+        "cx": 0.4984375
       },
       "faces": "front",
       "anchor": "feet",
@@ -402,10 +411,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.8055555555555556,
-        "w": 0.871875,
-        "bottom": 0.8611111111111112,
-        "cx": 0.553125
+        "h": 0.6527777777777778,
+        "w": 0.85625,
+        "bottom": 0.8472222222222222,
+        "cx": 0.4890625
       },
       "faces": "left",
       "anchor": "feet",
@@ -425,10 +434,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.575,
-        "w": 0.8875,
-        "bottom": 0.8722222222222222,
-        "cx": 0.5078125
+        "h": 0.7666666666666667,
+        "w": 0.740625,
+        "bottom": 0.9111111111111111,
+        "cx": 0.496875
       },
       "faces": "front",
       "anchor": "feet",
@@ -448,10 +457,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.19444444444444445,
-        "w": 0.81875,
-        "bottom": 0.6055555555555555,
-        "cx": 0.5140625
+        "h": 0.2,
+        "w": 0.840625,
+        "bottom": 0.6222222222222222,
+        "cx": 0.4875
       },
       "faces": "right",
       "anchor": "centre",
@@ -471,10 +480,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.4666666666666667,
-        "w": 0.778125,
-        "bottom": 0.7388888888888889,
-        "cx": 0.4125
+        "h": 0.43333333333333335,
+        "w": 0.7375,
+        "bottom": 0.775,
+        "cx": 0.5359375
       },
       "faces": "right",
       "anchor": "centre",
@@ -494,10 +503,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.44166666666666665,
-        "w": 0.840625,
-        "bottom": 0.7194444444444444,
-        "cx": 0.484375
+        "h": 0.3472222222222222,
+        "w": 0.8625,
+        "bottom": 0.7138888888888889,
+        "cx": 0.5140625
       },
       "faces": "right",
       "anchor": "centre",
@@ -517,10 +526,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.4888888888888889,
-        "w": 0.809375,
-        "bottom": 0.7416666666666667,
-        "cx": 0.453125
+        "h": 0.5388888888888889,
+        "w": 0.80625,
+        "bottom": 0.7944444444444444,
+        "cx": 0.4671875
       },
       "faces": "right",
       "anchor": "centre",
@@ -540,10 +549,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.6527777777777778,
-        "w": 0.7611111111111111,
+        "h": 0.6555555555555556,
+        "w": 0.7583333333333333,
         "bottom": 0.7305555555555555,
-        "cx": 0.5819444444444445
+        "cx": 0.5861111111111111
       },
       "faces": "right",
       "anchor": "feet",
@@ -563,10 +572,10 @@
         "h": 768
       },
       "fit": {
-        "h": 0.3958333333333333,
-        "w": 0.5481770833333334,
-        "bottom": 0.7213541666666666,
-        "cx": 0.45703125
+        "h": 0.4036458333333333,
+        "w": 0.5546875,
+        "bottom": 0.71484375,
+        "cx": 0.451171875
       },
       "faces": "right",
       "anchor": "feet",
@@ -586,10 +595,10 @@
         "h": 768
       },
       "fit": {
-        "h": 0.36328125,
-        "w": 0.4700520833333333,
-        "bottom": 0.71875,
-        "cx": 0.4934895833333333
+        "h": 0.3932291666666667,
+        "w": 0.46875,
+        "bottom": 0.7135416666666666,
+        "cx": 0.4915364583333333
       },
       "faces": "right",
       "anchor": "feet",
@@ -609,10 +618,10 @@
         "h": 768
       },
       "fit": {
-        "h": 0.3802083333333333,
-        "w": 0.4661458333333333,
-        "bottom": 0.7200520833333334,
-        "cx": 0.5006510416666666
+        "h": 0.359375,
+        "w": 0.5859375,
+        "bottom": 0.71484375,
+        "cx": 0.4407552083333333
       },
       "faces": "right",
       "anchor": "feet",
@@ -632,10 +641,10 @@
         "h": 768
       },
       "fit": {
-        "h": 0.4700520833333333,
-        "w": 0.4778645833333333,
-        "bottom": 0.71875,
-        "cx": 0.4921875
+        "h": 0.546875,
+        "w": 0.5638020833333334,
+        "bottom": 0.7135416666666666,
+        "cx": 0.484375
       },
       "faces": "right",
       "anchor": "feet",
@@ -655,10 +664,10 @@
         "h": 768
       },
       "fit": {
-        "h": 0.4270833333333333,
-        "w": 0.4791666666666667,
-        "bottom": 0.7200520833333334,
-        "cx": 0.5006510416666666
+        "h": 0.625,
+        "w": 0.66015625,
+        "bottom": 0.7135416666666666,
+        "cx": 0.57421875
       },
       "faces": "right",
       "anchor": "feet",
@@ -678,10 +687,10 @@
         "h": 768
       },
       "fit": {
-        "h": 0.6171875,
-        "w": 0.3528645833333333,
-        "bottom": 0.7213541666666666,
-        "cx": 0.49609375
+        "h": 0.62890625,
+        "w": 0.4348958333333333,
+        "bottom": 0.7161458333333334,
+        "cx": 0.5397135416666666
       },
       "faces": "right",
       "anchor": "feet",
@@ -701,10 +710,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.3888888888888889,
-        "w": 0.65,
-        "bottom": 0.625,
-        "cx": 0.5902777777777778
+        "h": 0.37222222222222223,
+        "w": 0.7722222222222223,
+        "bottom": 0.6222222222222222,
+        "cx": 0.5513888888888889
       },
       "faces": "right",
       "anchor": "centre",
@@ -724,10 +733,10 @@
         "h": 360
       },
       "fit": {
-        "h": 0.4166666666666667,
-        "w": 0.6777777777777778,
-        "bottom": 0.6055555555555555,
-        "cx": 0.39861111111111114
+        "h": 0.43333333333333335,
+        "w": 0.7,
+        "bottom": 0.6111111111111112,
+        "cx": 0.4013888888888889
       },
       "faces": "right",
       "anchor": "centre",
@@ -747,7 +756,7 @@
         "h": 360
       },
       "fit": {
-        "h": 0.675,
+        "h": 0.6916666666666667,
         "w": 0.7333333333333333,
         "bottom": 0.7166666666666667,
         "cx": 0.5125
@@ -771,9 +780,9 @@
       },
       "fit": {
         "h": 0.6352459016393442,
-        "w": 0.5947916666666667,
-        "bottom": 1,
-        "cx": 0.4625
+        "w": 0.63125,
+        "bottom": 0.9959016393442623,
+        "cx": 0.45260416666666664
       },
       "faces": "right",
       "anchor": "feet",
@@ -793,12 +802,12 @@
         "h": 732
       },
       "fit": {
-        "h": 0.7991803278688525,
-        "w": 0.7604166666666666,
+        "h": 0.6147540983606558,
+        "w": 0.7864583333333334,
         "bottom": 1,
-        "cx": 0.46822916666666664
+        "cx": 0.43854166666666666
       },
-      "faces": "right",
+      "faces": "left",
       "anchor": "feet",
       "target": "images/ships/longship.webp"
     },
@@ -817,9 +826,9 @@
       },
       "fit": {
         "h": 0.9153005464480874,
-        "w": 0.8729166666666667,
+        "w": 0.8677083333333333,
         "bottom": 1,
-        "cx": 0.49322916666666666
+        "cx": 0.4947916666666667
       },
       "faces": "right",
       "anchor": "feet",
@@ -839,10 +848,10 @@
         "h": 512
       },
       "fit": {
-        "h": 0.19140625,
-        "w": 0.380859375,
-        "bottom": 0.595703125,
-        "cx": 0.591796875
+        "h": 0.34765625,
+        "w": 0.45703125,
+        "bottom": 0.6640625,
+        "cx": 0.5537109375
       },
       "faces": "right",
       "anchor": "feet",
@@ -862,10 +871,10 @@
         "h": 512
       },
       "fit": {
-        "h": 0.4296875,
-        "w": 0.20703125,
-        "bottom": 0.71484375,
-        "cx": 0.6103515625
+        "h": 0.240234375,
+        "w": 0.439453125,
+        "bottom": 0.6484375,
+        "cx": 0.53125
       },
       "faces": "right",
       "anchor": "feet",
@@ -885,10 +894,10 @@
         "h": 512
       },
       "fit": {
-        "h": 0.26953125,
-        "w": 0.255859375,
-        "bottom": 0.537109375,
-        "cx": 0.572265625
+        "h": 0.306640625,
+        "w": 0.283203125,
+        "bottom": 0.552734375,
+        "cx": 0.57421875
       },
       "faces": "right",
       "anchor": "feet",
@@ -908,10 +917,10 @@
         "h": 512
       },
       "fit": {
-        "h": 0.2734375,
-        "w": 0.248046875,
-        "bottom": 0.580078125,
-        "cx": 0.54296875
+        "h": 0.357421875,
+        "w": 0.25390625,
+        "bottom": 0.587890625,
+        "cx": 0.5302734375
       },
       "faces": "right",
       "anchor": "feet",
@@ -931,9 +940,9 @@
         "h": 512
       },
       "fit": {
-        "h": 0.232421875,
-        "w": 0.14453125,
-        "bottom": 0.5,
+        "h": 0.2734375,
+        "w": 0.20703125,
+        "bottom": 0.525390625,
         "cx": 0.4990234375
       },
       "faces": "right",
@@ -954,10 +963,10 @@
         "h": 512
       },
       "fit": {
-        "h": 0.150390625,
+        "h": 0.3671875,
         "w": 0.17578125,
-        "bottom": 0.431640625,
-        "cx": 0.4970703125
+        "bottom": 0.619140625,
+        "cx": 0.4990234375
       },
       "faces": "right",
       "anchor": "feet",
@@ -977,10 +986,10 @@
         "h": 512
       },
       "fit": {
-        "h": 0.2890625,
-        "w": 0.28515625,
-        "bottom": 0.62890625,
-        "cx": 0.5009765625
+        "h": 0.37109375,
+        "w": 0.419921875,
+        "bottom": 0.646484375,
+        "cx": 0.51171875
       },
       "faces": "right",
       "anchor": "feet",
@@ -1000,10 +1009,10 @@
         "h": 512
       },
       "fit": {
-        "h": 0.421875,
-        "w": 0.21875,
-        "bottom": 0.6796875,
-        "cx": 0.5849609375
+        "h": 0.435546875,
+        "w": 0.216796875,
+        "bottom": 0.69140625,
+        "cx": 0.5859375
       },
       "faces": "right",
       "anchor": "feet",
@@ -1023,10 +1032,10 @@
         "h": 512
       },
       "fit": {
-        "h": 0.380859375,
-        "w": 0.15234375,
+        "h": 0.3359375,
+        "w": 0.390625,
         "bottom": 0.650390625,
-        "cx": 0.4990234375
+        "cx": 0.5029296875
       },
       "faces": "right",
       "anchor": "feet",
@@ -1046,9 +1055,9 @@
         "h": 512
       },
       "fit": {
-        "h": 0.279296875,
-        "w": 0.31640625,
-        "bottom": 0.5703125,
+        "h": 0.40625,
+        "w": 0.33203125,
+        "bottom": 0.6484375,
         "cx": 0.4990234375
       },
       "faces": "right",
@@ -1069,10 +1078,10 @@
         "h": 512
       },
       "fit": {
-        "h": 0.2421875,
-        "w": 0.26171875,
-        "bottom": 0.62109375,
-        "cx": 0.4990234375
+        "h": 0.35546875,
+        "w": 0.388671875,
+        "bottom": 0.65625,
+        "cx": 0.498046875
       },
       "faces": "right",
       "anchor": "feet",
@@ -1092,10 +1101,10 @@
         "h": 512
       },
       "fit": {
-        "h": 0.16796875,
-        "w": 0.16796875,
-        "bottom": 0.46875,
-        "cx": 0.4990234375
+        "h": 0.29296875,
+        "w": 0.3828125,
+        "bottom": 0.5390625,
+        "cx": 0.5166015625
       },
       "faces": "right",
       "anchor": "feet",
@@ -1115,21 +1124,298 @@
         "h": 512
       },
       "fit": {
-        "h": 0.6484375,
-        "w": 0.64453125,
-        "bottom": 0.82421875,
+        "h": 0.6640625,
+        "w": 0.6640625,
+        "bottom": 0.83203125,
         "cx": 0.4990234375
       },
       "faces": "right",
       "anchor": "feet",
+      "hollow": true,
       "target": "images/fixtures/spikes.webp"
+    },
+    {
+      "id": "cannon-t2",
+      "file": "fixture-cannon-t2.png",
+      "width": 512,
+      "height": 512,
+      "cols": 1,
+      "rows": 1,
+      "frames": 1,
+      "kind": "fixture",
+      "panel": {
+        "w": 512,
+        "h": 512
+      },
+      "fit": {
+        "h": 0.34765625,
+        "w": 0.45703125,
+        "bottom": 0.6640625,
+        "cx": 0.5537109375
+      },
+      "faces": "right",
+      "anchor": "feet",
+      "target": "images/fixtures/cannon-t2.webp"
+    },
+    {
+      "id": "cannon-t3",
+      "file": "fixture-cannon-t3.png",
+      "width": 512,
+      "height": 512,
+      "cols": 1,
+      "rows": 1,
+      "frames": 1,
+      "kind": "fixture",
+      "panel": {
+        "w": 512,
+        "h": 512
+      },
+      "fit": {
+        "h": 0.357421875,
+        "w": 0.45703125,
+        "bottom": 0.6640625,
+        "cx": 0.5537109375
+      },
+      "faces": "right",
+      "anchor": "feet",
+      "target": "images/fixtures/cannon-t3.webp"
+    },
+    {
+      "id": "archer-t2",
+      "file": "fixture-archer-t2.png",
+      "width": 512,
+      "height": 512,
+      "cols": 1,
+      "rows": 1,
+      "frames": 1,
+      "kind": "fixture",
+      "panel": {
+        "w": 512,
+        "h": 512
+      },
+      "fit": {
+        "h": 0.240234375,
+        "w": 0.439453125,
+        "bottom": 0.6484375,
+        "cx": 0.53125
+      },
+      "faces": "right",
+      "anchor": "feet",
+      "target": "images/fixtures/archer-t2.webp"
+    },
+    {
+      "id": "archer-t3",
+      "file": "fixture-archer-t3.png",
+      "width": 512,
+      "height": 512,
+      "cols": 1,
+      "rows": 1,
+      "frames": 1,
+      "kind": "fixture",
+      "panel": {
+        "w": 512,
+        "h": 512
+      },
+      "fit": {
+        "h": 0.259765625,
+        "w": 0.439453125,
+        "bottom": 0.6484375,
+        "cx": 0.53125
+      },
+      "faces": "right",
+      "anchor": "feet",
+      "target": "images/fixtures/archer-t3.webp"
+    },
+    {
+      "id": "bombard-t2",
+      "file": "fixture-bombard-t2.png",
+      "width": 512,
+      "height": 512,
+      "cols": 1,
+      "rows": 1,
+      "frames": 1,
+      "kind": "fixture",
+      "panel": {
+        "w": 512,
+        "h": 512
+      },
+      "fit": {
+        "h": 0.357421875,
+        "w": 0.25390625,
+        "bottom": 0.587890625,
+        "cx": 0.5302734375
+      },
+      "faces": "right",
+      "anchor": "feet",
+      "target": "images/fixtures/bombard-t2.webp"
+    },
+    {
+      "id": "bombard-t3",
+      "file": "fixture-bombard-t3.png",
+      "width": 512,
+      "height": 512,
+      "cols": 1,
+      "rows": 1,
+      "frames": 1,
+      "kind": "fixture",
+      "panel": {
+        "w": 512,
+        "h": 512
+      },
+      "fit": {
+        "h": 0.369140625,
+        "w": 0.25390625,
+        "bottom": 0.587890625,
+        "cx": 0.5302734375
+      },
+      "faces": "right",
+      "anchor": "feet",
+      "target": "images/fixtures/bombard-t3.webp"
+    },
+    {
+      "id": "mortar-t2",
+      "file": "fixture-mortar-t2.png",
+      "width": 512,
+      "height": 512,
+      "cols": 1,
+      "rows": 1,
+      "frames": 1,
+      "kind": "fixture",
+      "panel": {
+        "w": 512,
+        "h": 512
+      },
+      "fit": {
+        "h": 0.306640625,
+        "w": 0.283203125,
+        "bottom": 0.552734375,
+        "cx": 0.57421875
+      },
+      "faces": "right",
+      "anchor": "feet",
+      "target": "images/fixtures/mortar-t2.webp"
+    },
+    {
+      "id": "mortar-t3",
+      "file": "fixture-mortar-t3.png",
+      "width": 512,
+      "height": 512,
+      "cols": 1,
+      "rows": 1,
+      "frames": 1,
+      "kind": "fixture",
+      "panel": {
+        "w": 512,
+        "h": 512
+      },
+      "fit": {
+        "h": 0.306640625,
+        "w": 0.283203125,
+        "bottom": 0.552734375,
+        "cx": 0.57421875
+      },
+      "faces": "right",
+      "anchor": "feet",
+      "target": "images/fixtures/mortar-t3.webp"
+    },
+    {
+      "id": "tesla-t2",
+      "file": "fixture-tesla-t2.png",
+      "width": 512,
+      "height": 512,
+      "cols": 1,
+      "rows": 1,
+      "frames": 1,
+      "kind": "fixture",
+      "panel": {
+        "w": 512,
+        "h": 512
+      },
+      "fit": {
+        "h": 0.2734375,
+        "w": 0.20703125,
+        "bottom": 0.525390625,
+        "cx": 0.4990234375
+      },
+      "faces": "right",
+      "anchor": "feet",
+      "target": "images/fixtures/tesla-t2.webp"
+    },
+    {
+      "id": "tesla-t3",
+      "file": "fixture-tesla-t3.png",
+      "width": 512,
+      "height": 512,
+      "cols": 1,
+      "rows": 1,
+      "frames": 1,
+      "kind": "fixture",
+      "panel": {
+        "w": 512,
+        "h": 512
+      },
+      "fit": {
+        "h": 0.2734375,
+        "w": 0.20703125,
+        "bottom": 0.525390625,
+        "cx": 0.4990234375
+      },
+      "faces": "right",
+      "anchor": "feet",
+      "target": "images/fixtures/tesla-t3.webp"
+    },
+    {
+      "id": "frost-t2",
+      "file": "fixture-frost-t2.png",
+      "width": 512,
+      "height": 512,
+      "cols": 1,
+      "rows": 1,
+      "frames": 1,
+      "kind": "fixture",
+      "panel": {
+        "w": 512,
+        "h": 512
+      },
+      "fit": {
+        "h": 0.3671875,
+        "w": 0.17578125,
+        "bottom": 0.619140625,
+        "cx": 0.4990234375
+      },
+      "faces": "right",
+      "anchor": "feet",
+      "target": "images/fixtures/frost-t2.webp"
+    },
+    {
+      "id": "frost-t3",
+      "file": "fixture-frost-t3.png",
+      "width": 512,
+      "height": 512,
+      "cols": 1,
+      "rows": 1,
+      "frames": 1,
+      "kind": "fixture",
+      "panel": {
+        "w": 512,
+        "h": 512
+      },
+      "fit": {
+        "h": 0.412109375,
+        "w": 0.17578125,
+        "bottom": 0.619140625,
+        "cx": 0.4990234375
+      },
+      "faces": "right",
+      "anchor": "feet",
+      "target": "images/fixtures/frost-t3.webp"
     }
   ],
   "sheets": [
     {
       "id": "blocks",
       "title": "Blocks — assembled, body, glyph",
-      "brief": "Every buildable block in three rows per band: the block as played, the body that is actually the override file, and the tray pictogram. Slice the BODY row.",
+      "brief": "Every buildable block of the sandcastle in three rows per band: the block as played, the body that is actually the override file (one per block), and the tray pictogram. Slice the BODY row.",
       "files": {
         "clean": "sheet-blocks.png",
         "clean2x": "sheet-blocks@2x.png",
@@ -1153,13 +1439,13 @@
         {
           "id": "block/gate/body",
           "label": "gate",
-          "variant": "gate base — SLICE THIS",
+          "variant": "body — SLICE THIS",
           "x": 0,
           "y": 128,
           "w": 128,
           "h": 128,
           "target": "images/blocks/gate.webp",
-          "note": "The shared gate base. Paint the MATERIAL, not this one block — the fixture on top is what tells them apart."
+          "note": "The Castle Gate body."
         },
         {
           "id": "block/gate/icon",
@@ -1184,13 +1470,13 @@
         {
           "id": "block/wood/body",
           "label": "wood",
-          "variant": "timber base — SLICE THIS",
+          "variant": "body — SLICE THIS",
           "x": 128,
           "y": 128,
           "w": 128,
           "h": 128,
-          "target": "images/blocks/timber.webp",
-          "note": "The shared timber base. Also worn by archer, spikes, repair, lumberHut. Paint the MATERIAL, not this one block — the fixture on top is what tells them apart."
+          "target": "images/blocks/wood.webp",
+          "note": "The Sand Block body."
         },
         {
           "id": "block/wood/icon",
@@ -1215,13 +1501,13 @@
         {
           "id": "block/brace/body",
           "label": "brace",
-          "variant": "braced base — SLICE THIS",
+          "variant": "body — SLICE THIS",
           "x": 256,
           "y": 128,
           "w": 128,
           "h": 128,
-          "target": "images/blocks/braced.webp",
-          "note": "The shared braced base. Paint the MATERIAL, not this one block — the fixture on top is what tells them apart."
+          "target": "images/blocks/brace.webp",
+          "note": "The Packed Sand body."
         },
         {
           "id": "block/brace/icon",
@@ -1246,13 +1532,13 @@
         {
           "id": "block/stone/body",
           "label": "stone",
-          "variant": "masonry base — SLICE THIS",
+          "variant": "body — SLICE THIS",
           "x": 384,
           "y": 128,
           "w": 128,
           "h": 128,
-          "target": "images/blocks/masonry.webp",
-          "note": "The shared masonry base. Also worn by cannon, stonepit. Paint the MATERIAL, not this one block — the fixture on top is what tells them apart."
+          "target": "images/blocks/stone.webp",
+          "note": "The Pebble Wall body."
         },
         {
           "id": "block/stone/icon",
@@ -1277,12 +1563,13 @@
         {
           "id": "block/archer/body",
           "label": "archer",
-          "variant": "uses timber base",
+          "variant": "body — SLICE THIS",
           "x": 512,
           "y": 128,
           "w": 128,
           "h": 128,
-          "note": "Reference only. Reads from the shared timber base, owned by wood."
+          "target": "images/blocks/archer.webp",
+          "note": "The Dart Blaster body. The colour band is how a player finds this toy in a tower full of sand — keep it."
         },
         {
           "id": "block/archer/icon",
@@ -1307,12 +1594,13 @@
         {
           "id": "block/cannon/body",
           "label": "cannon",
-          "variant": "uses masonry base",
+          "variant": "body — SLICE THIS",
           "x": 640,
           "y": 128,
           "w": 128,
           "h": 128,
-          "note": "Reference only. Reads from the shared masonry base, owned by stone."
+          "target": "images/blocks/cannon.webp",
+          "note": "The Squirt Gun body. The colour band is how a player finds this toy in a tower full of sand — keep it."
         },
         {
           "id": "block/cannon/icon",
@@ -1337,13 +1625,13 @@
         {
           "id": "block/mortar/body",
           "label": "mortar",
-          "variant": "metal base — SLICE THIS",
+          "variant": "body — SLICE THIS",
           "x": 768,
           "y": 128,
           "w": 128,
           "h": 128,
-          "target": "images/blocks/metal.webp",
-          "note": "The shared metal base. Also worn by bombard, tesla, frost, coffer. Paint the MATERIAL, not this one block — the fixture on top is what tells them apart."
+          "target": "images/blocks/mortar.webp",
+          "note": "The Mud Mortar body. The colour band is how a player finds this toy in a tower full of sand — keep it."
         },
         {
           "id": "block/mortar/icon",
@@ -1368,12 +1656,13 @@
         {
           "id": "block/bombard/body",
           "label": "bombard",
-          "variant": "uses metal base",
+          "variant": "body — SLICE THIS",
           "x": 896,
           "y": 128,
           "w": 128,
           "h": 128,
-          "note": "Reference only. Reads from the shared metal base, owned by mortar."
+          "target": "images/blocks/bombard.webp",
+          "note": "The Balloon Launcher body. The colour band is how a player finds this toy in a tower full of sand — keep it."
         },
         {
           "id": "block/bombard/icon",
@@ -1398,12 +1687,13 @@
         {
           "id": "block/tesla/body",
           "label": "tesla",
-          "variant": "uses metal base",
+          "variant": "body — SLICE THIS",
           "x": 0,
           "y": 512,
           "w": 128,
           "h": 128,
-          "note": "Reference only. Reads from the shared metal base, owned by mortar."
+          "target": "images/blocks/tesla.webp",
+          "note": "The Bug Zapper body. The colour band is how a player finds this toy in a tower full of sand — keep it."
         },
         {
           "id": "block/tesla/icon",
@@ -1428,12 +1718,13 @@
         {
           "id": "block/frost/body",
           "label": "frost",
-          "variant": "uses metal base",
+          "variant": "body — SLICE THIS",
           "x": 128,
           "y": 512,
           "w": 128,
           "h": 128,
-          "note": "Reference only. Reads from the shared metal base, owned by mortar."
+          "target": "images/blocks/frost.webp",
+          "note": "The Ice Pop body. The colour band is how a player finds this toy in a tower full of sand — keep it."
         },
         {
           "id": "block/frost/icon",
@@ -1458,12 +1749,13 @@
         {
           "id": "block/spikes/body",
           "label": "spikes",
-          "variant": "uses timber base",
+          "variant": "body — SLICE THIS",
           "x": 256,
           "y": 512,
           "w": 128,
           "h": 128,
-          "note": "Reference only. Reads from the shared timber base, owned by wood."
+          "target": "images/blocks/spikes.webp",
+          "note": "The Toothpick Wall body."
         },
         {
           "id": "block/spikes/icon",
@@ -1488,12 +1780,13 @@
         {
           "id": "block/repair/body",
           "label": "repair",
-          "variant": "uses timber base",
+          "variant": "body — SLICE THIS",
           "x": 384,
           "y": 512,
           "w": 128,
           "h": 128,
-          "note": "Reference only. Reads from the shared timber base, owned by wood."
+          "target": "images/blocks/repair.webp",
+          "note": "The Bucket & Spade body. The colour band is how a player finds this toy in a tower full of sand — keep it."
         },
         {
           "id": "block/repair/icon",
@@ -1518,13 +1811,13 @@
         {
           "id": "block/banner/body",
           "label": "banner",
-          "variant": "heraldry base — SLICE THIS",
+          "variant": "body — SLICE THIS",
           "x": 512,
           "y": 512,
           "w": 128,
           "h": 128,
-          "target": "images/blocks/heraldry.webp",
-          "note": "The shared heraldry base. Paint the MATERIAL, not this one block — the fixture on top is what tells them apart."
+          "target": "images/blocks/banner.webp",
+          "note": "The Paper Flag body. The colour band is how a player finds this toy in a tower full of sand — keep it."
         },
         {
           "id": "block/banner/icon",
@@ -1549,13 +1842,13 @@
         {
           "id": "block/obelisk/body",
           "label": "obelisk",
-          "variant": "arcane base — SLICE THIS",
+          "variant": "body — SLICE THIS",
           "x": 640,
           "y": 512,
           "w": 128,
           "h": 128,
-          "target": "images/blocks/arcane.webp",
-          "note": "The shared arcane base. Paint the MATERIAL, not this one block — the fixture on top is what tells them apart."
+          "target": "images/blocks/obelisk.webp",
+          "note": "The Magic Seashell body. The colour band is how a player finds this toy in a tower full of sand — keep it."
         },
         {
           "id": "block/obelisk/icon",
@@ -1580,12 +1873,13 @@
         {
           "id": "block/lumberHut/body",
           "label": "lumberHut",
-          "variant": "uses timber base",
+          "variant": "body — SLICE THIS",
           "x": 768,
           "y": 512,
           "w": 128,
           "h": 128,
-          "note": "Reference only. Reads from the shared timber base, owned by wood."
+          "target": "images/blocks/lumberHut.webp",
+          "note": "The Sand Sifter body. The colour band is how a player finds this toy in a tower full of sand — keep it."
         },
         {
           "id": "block/lumberHut/icon",
@@ -1610,12 +1904,13 @@
         {
           "id": "block/stonepit/body",
           "label": "stonepit",
-          "variant": "uses masonry base",
+          "variant": "body — SLICE THIS",
           "x": 896,
           "y": 512,
           "w": 128,
           "h": 128,
-          "note": "Reference only. Reads from the shared masonry base, owned by stone."
+          "target": "images/blocks/stonepit.webp",
+          "note": "The Pebble Digger body. The colour band is how a player finds this toy in a tower full of sand — keep it."
         },
         {
           "id": "block/stonepit/icon",
@@ -1640,12 +1935,13 @@
         {
           "id": "block/coffer/body",
           "label": "coffer",
-          "variant": "uses metal base",
+          "variant": "body — SLICE THIS",
           "x": 0,
           "y": 896,
           "w": 128,
           "h": 128,
-          "note": "Reference only. Reads from the shared metal base, owned by mortar."
+          "target": "images/blocks/coffer.webp",
+          "note": "The Piggy Bank body. The colour band is how a player finds this toy in a tower full of sand — keep it."
         },
         {
           "id": "block/coffer/icon",
@@ -1758,7 +2054,7 @@
             {
               "id": "block/gate/body",
               "label": "gate",
-              "variant": "gate base — SLICE THIS",
+              "variant": "body — SLICE THIS",
               "x": 0,
               "y": 0,
               "w": 512,
@@ -1776,12 +2072,12 @@
             {
               "id": "block/wood/body",
               "label": "wood",
-              "variant": "timber base — SLICE THIS",
+              "variant": "body — SLICE THIS",
               "x": 0,
               "y": 0,
               "w": 512,
               "h": 512,
-              "target": "images/blocks/timber.webp"
+              "target": "images/blocks/wood.webp"
             }
           ]
         },
@@ -1794,12 +2090,12 @@
             {
               "id": "block/brace/body",
               "label": "brace",
-              "variant": "braced base — SLICE THIS",
+              "variant": "body — SLICE THIS",
               "x": 0,
               "y": 0,
               "w": 512,
               "h": 512,
-              "target": "images/blocks/braced.webp"
+              "target": "images/blocks/brace.webp"
             }
           ]
         },
@@ -1812,12 +2108,48 @@
             {
               "id": "block/stone/body",
               "label": "stone",
-              "variant": "masonry base — SLICE THIS",
+              "variant": "body — SLICE THIS",
               "x": 0,
               "y": 0,
               "w": 512,
               "h": 512,
-              "target": "images/blocks/masonry.webp"
+              "target": "images/blocks/stone.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/archer/body",
+          "file": "cell-block-archer-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/archer/body",
+              "label": "archer",
+              "variant": "body — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/archer.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/cannon/body",
+          "file": "cell-block-cannon-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/cannon/body",
+              "label": "cannon",
+              "variant": "body — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/cannon.webp"
             }
           ]
         },
@@ -1830,12 +2162,102 @@
             {
               "id": "block/mortar/body",
               "label": "mortar",
-              "variant": "metal base — SLICE THIS",
+              "variant": "body — SLICE THIS",
               "x": 0,
               "y": 0,
               "w": 512,
               "h": 512,
-              "target": "images/blocks/metal.webp"
+              "target": "images/blocks/mortar.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/bombard/body",
+          "file": "cell-block-bombard-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/bombard/body",
+              "label": "bombard",
+              "variant": "body — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/bombard.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/tesla/body",
+          "file": "cell-block-tesla-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/tesla/body",
+              "label": "tesla",
+              "variant": "body — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/tesla.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/frost/body",
+          "file": "cell-block-frost-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/frost/body",
+              "label": "frost",
+              "variant": "body — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/frost.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/spikes/body",
+          "file": "cell-block-spikes-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/spikes/body",
+              "label": "spikes",
+              "variant": "body — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/spikes.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/repair/body",
+          "file": "cell-block-repair-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/repair/body",
+              "label": "repair",
+              "variant": "body — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/repair.webp"
             }
           ]
         },
@@ -1848,12 +2270,12 @@
             {
               "id": "block/banner/body",
               "label": "banner",
-              "variant": "heraldry base — SLICE THIS",
+              "variant": "body — SLICE THIS",
               "x": 0,
               "y": 0,
               "w": 512,
               "h": 512,
-              "target": "images/blocks/heraldry.webp"
+              "target": "images/blocks/banner.webp"
             }
           ]
         },
@@ -1866,12 +2288,66 @@
             {
               "id": "block/obelisk/body",
               "label": "obelisk",
-              "variant": "arcane base — SLICE THIS",
+              "variant": "body — SLICE THIS",
               "x": 0,
               "y": 0,
               "w": 512,
               "h": 512,
-              "target": "images/blocks/arcane.webp"
+              "target": "images/blocks/obelisk.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/lumberHut/body",
+          "file": "cell-block-lumberHut-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/lumberHut/body",
+              "label": "lumberHut",
+              "variant": "body — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/lumberHut.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/stonepit/body",
+          "file": "cell-block-stonepit-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/stonepit/body",
+              "label": "stonepit",
+              "variant": "body — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/stonepit.webp"
+            }
+          ]
+        },
+        {
+          "id": "block/coffer/body",
+          "file": "cell-block-coffer-body.png",
+          "width": 512,
+          "height": 512,
+          "cells": [
+            {
+              "id": "block/coffer/body",
+              "label": "coffer",
+              "variant": "body — SLICE THIS",
+              "x": 0,
+              "y": 0,
+              "w": 512,
+              "h": 512,
+              "target": "images/blocks/coffer.webp"
             }
           ]
         }
@@ -1970,7 +2446,7 @@
             {
               "id": "block/gate/body",
               "label": "gate",
-              "variant": "gate base — SLICE THIS",
+              "variant": "body — SLICE THIS",
               "x": 0,
               "y": 0,
               "w": 256,
@@ -1980,69 +2456,72 @@
             {
               "id": "block/wood/body",
               "label": "wood",
-              "variant": "timber base — SLICE THIS",
+              "variant": "body — SLICE THIS",
               "x": 256,
               "y": 0,
               "w": 256,
               "h": 256,
-              "target": "images/blocks/timber.webp"
+              "target": "images/blocks/wood.webp"
             },
             {
               "id": "block/brace/body",
               "label": "brace",
-              "variant": "braced base — SLICE THIS",
+              "variant": "body — SLICE THIS",
               "x": 512,
               "y": 0,
               "w": 256,
               "h": 256,
-              "target": "images/blocks/braced.webp"
+              "target": "images/blocks/brace.webp"
             },
             {
               "id": "block/stone/body",
               "label": "stone",
-              "variant": "masonry base — SLICE THIS",
+              "variant": "body — SLICE THIS",
               "x": 768,
               "y": 0,
               "w": 256,
               "h": 256,
-              "target": "images/blocks/masonry.webp"
+              "target": "images/blocks/stone.webp"
             },
             {
               "id": "block/archer/body",
               "label": "archer",
-              "variant": "uses timber base",
+              "variant": "body — SLICE THIS",
               "x": 1024,
               "y": 0,
               "w": 256,
-              "h": 256
+              "h": 256,
+              "target": "images/blocks/archer.webp"
             },
             {
               "id": "block/cannon/body",
               "label": "cannon",
-              "variant": "uses masonry base",
+              "variant": "body — SLICE THIS",
               "x": 1280,
               "y": 0,
               "w": 256,
-              "h": 256
+              "h": 256,
+              "target": "images/blocks/cannon.webp"
             },
             {
               "id": "block/mortar/body",
               "label": "mortar",
-              "variant": "metal base — SLICE THIS",
+              "variant": "body — SLICE THIS",
               "x": 1536,
               "y": 0,
               "w": 256,
               "h": 256,
-              "target": "images/blocks/metal.webp"
+              "target": "images/blocks/mortar.webp"
             },
             {
               "id": "block/bombard/body",
               "label": "bombard",
-              "variant": "uses metal base",
+              "variant": "body — SLICE THIS",
               "x": 1792,
               "y": 0,
               "w": 256,
-              "h": 256
+              "h": 256,
+              "target": "images/blocks/bombard.webp"
             }
           ]
         },
@@ -2221,76 +2700,82 @@
             {
               "id": "block/tesla/body",
               "label": "tesla",
-              "variant": "uses metal base",
+              "variant": "body — SLICE THIS",
               "x": 0,
               "y": 0,
               "w": 256,
-              "h": 256
+              "h": 256,
+              "target": "images/blocks/tesla.webp"
             },
             {
               "id": "block/frost/body",
               "label": "frost",
-              "variant": "uses metal base",
+              "variant": "body — SLICE THIS",
               "x": 256,
               "y": 0,
               "w": 256,
-              "h": 256
+              "h": 256,
+              "target": "images/blocks/frost.webp"
             },
             {
               "id": "block/spikes/body",
               "label": "spikes",
-              "variant": "uses timber base",
+              "variant": "body — SLICE THIS",
               "x": 512,
               "y": 0,
               "w": 256,
-              "h": 256
+              "h": 256,
+              "target": "images/blocks/spikes.webp"
             },
             {
               "id": "block/repair/body",
               "label": "repair",
-              "variant": "uses timber base",
+              "variant": "body — SLICE THIS",
               "x": 768,
               "y": 0,
               "w": 256,
-              "h": 256
+              "h": 256,
+              "target": "images/blocks/repair.webp"
             },
             {
               "id": "block/banner/body",
               "label": "banner",
-              "variant": "heraldry base — SLICE THIS",
+              "variant": "body — SLICE THIS",
               "x": 1024,
               "y": 0,
               "w": 256,
               "h": 256,
-              "target": "images/blocks/heraldry.webp"
+              "target": "images/blocks/banner.webp"
             },
             {
               "id": "block/obelisk/body",
               "label": "obelisk",
-              "variant": "arcane base — SLICE THIS",
+              "variant": "body — SLICE THIS",
               "x": 1280,
               "y": 0,
               "w": 256,
               "h": 256,
-              "target": "images/blocks/arcane.webp"
+              "target": "images/blocks/obelisk.webp"
             },
             {
               "id": "block/lumberHut/body",
               "label": "lumberHut",
-              "variant": "uses timber base",
+              "variant": "body — SLICE THIS",
               "x": 1536,
               "y": 0,
               "w": 256,
-              "h": 256
+              "h": 256,
+              "target": "images/blocks/lumberHut.webp"
             },
             {
               "id": "block/stonepit/body",
               "label": "stonepit",
-              "variant": "uses masonry base",
+              "variant": "body — SLICE THIS",
               "x": 1792,
               "y": 0,
               "w": 256,
-              "h": 256
+              "h": 256,
+              "target": "images/blocks/stonepit.webp"
             }
           ]
         },
@@ -2433,11 +2918,12 @@
             {
               "id": "block/coffer/body",
               "label": "coffer",
-              "variant": "uses metal base",
+              "variant": "body — SLICE THIS",
               "x": 0,
               "y": 0,
               "w": 256,
-              "h": 256
+              "h": 256,
+              "target": "images/blocks/coffer.webp"
             },
             {
               "id": "block/skiff/body",
@@ -2519,7 +3005,7 @@
     {
       "id": "merged",
       "title": "Merged blocks — tier I / II / III",
-      "brief": "Column per fusable weapon, row per tier. Only armed blocks fuse. Reference only until the renderer keys overrides by tier.",
+      "brief": "Column per fusable toy weapon, row per tier. Only armed blocks fuse. Reference only: a merged weapon is painted on its own fixture sheet.",
       "files": {
         "clean": "sheet-merged.png",
         "clean2x": "sheet-merged@2x.png",
@@ -2548,7 +3034,7 @@
           "y": 128,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/archer/t3",
@@ -2558,7 +3044,7 @@
           "y": 256,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/cannon/t1",
@@ -2578,7 +3064,7 @@
           "y": 128,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/cannon/t3",
@@ -2588,7 +3074,7 @@
           "y": 256,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/mortar/t1",
@@ -2608,7 +3094,7 @@
           "y": 128,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/mortar/t3",
@@ -2618,7 +3104,7 @@
           "y": 256,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/bombard/t1",
@@ -2638,7 +3124,7 @@
           "y": 128,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/bombard/t3",
@@ -2648,7 +3134,7 @@
           "y": 256,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/tesla/t1",
@@ -2668,7 +3154,7 @@
           "y": 128,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/tesla/t3",
@@ -2678,7 +3164,7 @@
           "y": 256,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/frost/t1",
@@ -2698,7 +3184,7 @@
           "y": 128,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/frost/t3",
@@ -2708,7 +3194,7 @@
           "y": 256,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/skiff/t1",
@@ -2728,7 +3214,7 @@
           "y": 128,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/skiff/t3",
@@ -2738,7 +3224,7 @@
           "y": 256,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/longship/t1",
@@ -2758,7 +3244,7 @@
           "y": 128,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/longship/t3",
@@ -2768,7 +3254,7 @@
           "y": 256,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/galley/t1",
@@ -2788,7 +3274,7 @@
           "y": 128,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         },
         {
           "id": "merged/galley/t3",
@@ -2798,7 +3284,7 @@
           "y": 256,
           "w": 128,
           "h": 128,
-          "note": "Reference only — the renderer reads one bitmap per block id for every tier, so there is no per-tier override slot yet."
+          "note": "Reference only — a merged tier is painted as a fixture of its own (fixture-<id>-t2 / -t3 on the walk sheets), not from this cell."
         }
       ],
       "singles": [],
@@ -3080,8 +3566,8 @@
     },
     {
       "id": "enemies",
-      "title": "Enemies — land, air and sea",
-      "brief": "One cell per enemy id, drawn with its bound monster design. Authored facing RIGHT; the battlefield mirrors by travel direction.",
+      "title": "Bugs — ground, air and water",
+      "brief": "One cell per enemy id, drawn with its bound bug design. Authored facing RIGHT; the battlefield mirrors by travel direction.",
       "files": {
         "clean": "sheet-enemies.png",
         "clean2x": "sheet-enemies@2x.png",
@@ -3211,7 +3697,7 @@
           "w": 128,
           "h": 128,
           "target": "images/enemies/eel.webp",
-          "note": "Sea creature: a fish, not a serpent. Drawn twice per frame and clipped at the waterline, so the tail must trail DOWNWARD."
+          "note": "Water bug, swimming side-on and centred. In game it is drawn twice per frame, split at the waterline, so keep it level and side-on exactly as the reference has it."
         },
         {
           "id": "enemy/shark",
@@ -3222,7 +3708,7 @@
           "w": 128,
           "h": 128,
           "target": "images/enemies/shark.webp",
-          "note": "Sea creature: a fish, not a serpent. Drawn twice per frame and clipped at the waterline, so the tail must trail DOWNWARD."
+          "note": "Water bug, swimming side-on and centred. In game it is drawn twice per frame, split at the waterline, so keep it level and side-on exactly as the reference has it."
         },
         {
           "id": "enemy/kraken",
@@ -3233,7 +3719,7 @@
           "w": 128,
           "h": 128,
           "target": "images/enemies/kraken.webp",
-          "note": "Sea creature: a fish, not a serpent. Drawn twice per frame and clipped at the waterline, so the tail must trail DOWNWARD."
+          "note": "Water bug, swimming side-on and centred. In game it is drawn twice per frame, split at the waterline, so keep it level and side-on exactly as the reference has it."
         },
         {
           "id": "enemy/seadrake",
@@ -3244,7 +3730,7 @@
           "w": 128,
           "h": 128,
           "target": "images/enemies/seadrake.webp",
-          "note": "Sea creature: a fish, not a serpent. Drawn twice per frame and clipped at the waterline, so the tail must trail DOWNWARD."
+          "note": "Water bug, swimming side-on and centred. In game it is drawn twice per frame, split at the waterline, so keep it level and side-on exactly as the reference has it."
         },
         {
           "id": "enemy/golem",
@@ -3753,8 +4239,8 @@
     },
     {
       "id": "siege",
-      "title": "Siege engines",
-      "brief": "The six wheeled engines, engaged and mid-cycle. The largest silhouettes in the game and the ones that lose most to a static bitmap.",
+      "title": "Ant contraptions (siege engines)",
+      "brief": "The six ant contraptions built from toy junk, engaged and mid-cycle. The largest silhouettes in the game and the ones that lose most to a static bitmap.",
       "files": {
         "clean": "sheet-siege.png",
         "clean2x": "sheet-siege@2x.png",
@@ -3829,7 +4315,7 @@
           "w": 128,
           "h": 128,
           "target": "images/enemies/ironRam.webp",
-          "note": "COLD IRON. It is the only enemy immune to arrows, and the riveted plate — with spent arrows lodged in it — is the whole of how the player is told. Never timber."
+          "note": "TIN. It is the only enemy immune to foam darts, and the shiny soup tin — with darts stuck uselessly to it — is the whole of how the player is told. Never cardboard or plastic."
         }
       ],
       "singles": [
@@ -4027,8 +4513,8 @@
     },
     {
       "id": "allies",
-      "title": "Ally and projectiles",
-      "brief": "The cavalry ally plus every projectile kind. Two of the rounds are live effects and cannot be bitmaps.",
+      "title": "Toy Knight and projectiles",
+      "brief": "The Toy Knight ally plus every projectile kind. Only the foam dart and the toothpick can be bitmaps; the rest are reference.",
       "files": {
         "clean": "sheet-allies-rounds.png",
         "clean2x": "sheet-allies-rounds@2x.png",
@@ -4042,7 +4528,7 @@
         {
           "id": "ally/cavalry",
           "label": "cavalry",
-          "variant": "0.80c · ally",
+          "variant": "1.1c · ally",
           "x": 0,
           "y": 0,
           "w": 128,
@@ -4051,69 +4537,69 @@
         },
         {
           "id": "projectile/bolt",
-          "label": "arrow",
+          "label": "foam dart",
           "variant": "round",
           "x": 128,
           "y": 0,
           "w": 128,
           "h": 128,
           "target": "images/rounds/bolt.webp",
-          "note": "The most-fired round in the game — the archer post and both bolt-throwing ships."
+          "note": "The most-fired round in the game — the dart blaster, the paper boat and the rubber duck."
         },
         {
           "id": "projectile/quarrel",
-          "label": "quarrel",
+          "label": "toothpick",
           "variant": "round",
           "x": 256,
           "y": 0,
           "w": 128,
           "h": 128,
           "target": "images/rounds/quarrel.webp",
-          "note": "The siege ballista’s round, and the one shot the player has to see coming and answer."
+          "note": "The rubber-band crossbow’s round, and the one shot the player has to see coming and answer."
         },
         {
           "id": "projectile/ball",
-          "label": "ball",
+          "label": "water blob",
           "variant": "round",
           "x": 384,
           "y": 0,
           "w": 128,
           "h": 128,
-          "note": "Cannonball. No override hook: this one is drawn from its own geometry every frame."
+          "note": "Squirt-gun water blob (hostile: catapult pebble / sand clod). No override hook: this one is drawn from its own geometry every frame."
         },
         {
           "id": "projectile/shell",
-          "label": "shell",
+          "label": "mud ball",
           "variant": "round",
           "x": 512,
           "y": 0,
           "w": 128,
           "h": 128,
-          "note": "Mortar shell — finned, fuse lit, points along its arc. No override hook: this one is drawn from its own geometry every frame."
+          "note": "Mud-mortar mud ball (balloon launcher: water balloon, knot trailing). No override hook: this one is drawn from its own geometry every frame."
         },
         {
           "id": "projectile/bomb",
-          "label": "bomb",
+          "label": "honey bomb",
           "variant": "round",
           "x": 640,
           "y": 0,
           "w": 128,
           "h": 128,
-          "note": "Enemy ordnance, nose-down along its fall. No override hook: this one is drawn from its own geometry every frame."
+          "note": "Bumblebee honey bomb — drips hang straight down. No override hook: this one is drawn from its own geometry every frame."
         },
         {
           "id": "projectile/fire",
-          "label": "fire",
+          "label": "ember",
           "variant": "round",
           "x": 768,
           "y": 0,
           "w": 128,
           "h": 128,
-          "note": "Molotov, tumbling. No override hook: this one is drawn from its own geometry every frame."
+          "note": "Firefly ember, tumbling under its own flame. No override hook: this one is drawn from its own geometry every frame."
         },
         {
           "id": "projectile/frost",
-          "label": "frost",
+          "label": "ice shard",
           "variant": "live FX",
           "x": 896,
           "y": 0,
@@ -4131,7 +4617,7 @@
           "cells": [
             {
               "id": "projectile/bolt",
-              "label": "arrow",
+              "label": "foam dart",
               "variant": "round",
               "x": 0,
               "y": 0,
@@ -4149,7 +4635,7 @@
           "cells": [
             {
               "id": "projectile/quarrel",
-              "label": "quarrel",
+              "label": "toothpick",
               "variant": "round",
               "x": 0,
               "y": 0,
@@ -4172,7 +4658,7 @@
             {
               "id": "ally/cavalry",
               "label": "cavalry",
-              "variant": "0.80c · ally",
+              "variant": "1.1c · ally",
               "x": 0,
               "y": 0,
               "w": 256,
@@ -4180,7 +4666,7 @@
             },
             {
               "id": "projectile/bolt",
-              "label": "arrow",
+              "label": "foam dart",
               "variant": "round",
               "x": 256,
               "y": 0,
@@ -4190,7 +4676,7 @@
             },
             {
               "id": "projectile/quarrel",
-              "label": "quarrel",
+              "label": "toothpick",
               "variant": "round",
               "x": 512,
               "y": 0,
@@ -4200,7 +4686,7 @@
             },
             {
               "id": "projectile/ball",
-              "label": "ball",
+              "label": "water blob",
               "variant": "round",
               "x": 768,
               "y": 0,
@@ -4209,7 +4695,7 @@
             },
             {
               "id": "projectile/shell",
-              "label": "shell",
+              "label": "mud ball",
               "variant": "round",
               "x": 1024,
               "y": 0,
@@ -4218,7 +4704,7 @@
             },
             {
               "id": "projectile/bomb",
-              "label": "bomb",
+              "label": "honey bomb",
               "variant": "round",
               "x": 1280,
               "y": 0,
@@ -4227,7 +4713,7 @@
             },
             {
               "id": "projectile/fire",
-              "label": "fire",
+              "label": "ember",
               "variant": "round",
               "x": 1536,
               "y": 0,
@@ -4236,7 +4722,7 @@
             },
             {
               "id": "projectile/frost",
-              "label": "frost",
+              "label": "ice shard",
               "variant": "live FX",
               "x": 1792,
               "y": 0,
@@ -4249,37 +4735,37 @@
     },
     {
       "id": "props",
-      "title": "Props, sky bodies and shipped UI",
-      "brief": "The discrete background objects and the four bitmaps that already ship. The tileable parallax bands are deliberately absent — they need a strip, not a grid.",
+      "title": "Flowers, sky bodies and shipped UI",
+      "brief": "The discrete background objects and the two bitmaps that already ship. The tileable parallax bands are deliberately absent — they need a strip, not a grid.",
       "files": {
         "clean": "sheet-props-sky.png",
         "clean2x": "sheet-props-sky@2x.png",
         "key": "sheet-props-sky-key.png"
       },
       "cols": 6,
-      "rows": 2,
+      "rows": 1,
       "width": 768,
-      "height": 256,
+      "height": 128,
       "cells": [
         {
           "id": "prop/conifer",
           "label": "conifer",
-          "variant": "forest band",
+          "variant": "flower bed — tall",
           "x": 0,
           "y": 0,
           "w": 128,
           "h": 128,
-          "note": "Stacked canopy tiers with a lit right edge. Reads at 30 px in a parallax band, so silhouette over detail."
+          "note": "The slot is still called conifer; it is the TALL flower of the bed now (a sunflower, sometimes a hollyhock). Reads at about 5–9% of the screen height, so silhouette over detail."
         },
         {
           "id": "prop/broadleaf",
           "label": "broadleaf",
-          "variant": "forest band",
+          "variant": "flower bed — low",
           "x": 128,
           "y": 0,
           "w": 128,
           "h": 128,
-          "note": "The other half of the tree line. Must not read as the conifer at distance."
+          "note": "The slot is still called broadleaf; it is the LOW flower clump of the bed now (tulips, daisies, dandelions or clover). Must not read as the tall flower at distance."
         },
         {
           "id": "sky/sun",
@@ -4299,7 +4785,7 @@
           "y": 0,
           "w": 128,
           "h": 128,
-          "note": "Cratered disc, no rays. Identical at every wave tier — the blood moon is the SKY going red behind it, not the moon itself."
+          "note": "Cream disc with a sleeping face, no rays. Identical at every wave tier — the storm sunset on a boss wave is the SKY changing behind it, not the moon itself."
         },
         {
           "id": "ui/coin",
@@ -4317,41 +4803,11 @@
           "note": "Already a bitmap. Letterboxed into the cell here — check its real aspect ratio in the index before overwriting it."
         },
         {
-          "id": "ui/movie",
-          "label": "movie",
-          "variant": "rewarded button",
-          "x": 640,
-          "y": 0,
-          "w": 128,
-          "h": 128,
-          "target": "images/icons/movie_128x96.webp",
-          "letterboxed": {
-            "w": 128,
-            "h": 96
-          },
-          "note": "Already a bitmap. Letterboxed into the cell here — check its real aspect ratio in the index before overwriting it."
-        },
-        {
-          "id": "ui/ribbon",
-          "label": "ribbon",
-          "variant": "result screen",
-          "x": 0,
-          "y": 128,
-          "w": 128,
-          "h": 128,
-          "target": "images/bg/parchment-ribbon_553x188.webp",
-          "letterboxed": {
-            "w": 553,
-            "h": 188
-          },
-          "note": "Already a bitmap. Letterboxed into the cell here — check its real aspect ratio in the index before overwriting it."
-        },
-        {
           "id": "ui/logo",
           "label": "logo",
           "variant": "splash",
-          "x": 128,
-          "y": 128,
+          "x": 640,
+          "y": 0,
           "w": 128,
           "h": 128,
           "target": "images/logo/logo_256x256.webp",
@@ -4381,50 +4837,6 @@
               "letterboxed": {
                 "w": 128,
                 "h": 128
-              }
-            }
-          ]
-        },
-        {
-          "id": "ui/movie",
-          "file": "cell-ui-movie.png",
-          "width": 512,
-          "height": 512,
-          "cells": [
-            {
-              "id": "ui/movie",
-              "label": "movie",
-              "variant": "rewarded button",
-              "x": 0,
-              "y": 0,
-              "w": 512,
-              "h": 512,
-              "target": "images/icons/movie_128x96.webp",
-              "letterboxed": {
-                "w": 128,
-                "h": 96
-              }
-            }
-          ]
-        },
-        {
-          "id": "ui/ribbon",
-          "file": "cell-ui-ribbon.png",
-          "width": 512,
-          "height": 512,
-          "cells": [
-            {
-              "id": "ui/ribbon",
-              "label": "ribbon",
-              "variant": "result screen",
-              "x": 0,
-              "y": 0,
-              "w": 512,
-              "h": 512,
-              "target": "images/bg/parchment-ribbon_553x188.webp",
-              "letterboxed": {
-                "w": 553,
-                "h": 188
               }
             }
           ]
@@ -4464,7 +4876,7 @@
             {
               "id": "prop/conifer",
               "label": "conifer",
-              "variant": "forest band",
+              "variant": "flower bed — tall",
               "x": 0,
               "y": 0,
               "w": 256,
@@ -4473,7 +4885,7 @@
             {
               "id": "prop/broadleaf",
               "label": "broadleaf",
-              "variant": "forest band",
+              "variant": "flower bed — low",
               "x": 256,
               "y": 0,
               "w": 256,
@@ -4512,48 +4924,10 @@
               }
             },
             {
-              "id": "ui/movie",
-              "label": "movie",
-              "variant": "rewarded button",
-              "x": 1280,
-              "y": 0,
-              "w": 256,
-              "h": 256,
-              "target": "images/icons/movie_128x96.webp",
-              "letterboxed": {
-                "w": 128,
-                "h": 96
-              }
-            }
-          ]
-        },
-        {
-          "id": "props-r1",
-          "file": "strip-props-r1.png",
-          "row": 1,
-          "width": 1536,
-          "height": 256,
-          "cell": 256,
-          "cells": [
-            {
-              "id": "ui/ribbon",
-              "label": "ribbon",
-              "variant": "result screen",
-              "x": 0,
-              "y": 0,
-              "w": 256,
-              "h": 256,
-              "target": "images/bg/parchment-ribbon_553x188.webp",
-              "letterboxed": {
-                "w": 553,
-                "h": 188
-              }
-            },
-            {
               "id": "ui/logo",
               "label": "logo",
               "variant": "splash",
-              "x": 256,
+              "x": 1280,
               "y": 0,
               "w": 256,
               "h": 256,

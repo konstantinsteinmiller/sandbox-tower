@@ -14,7 +14,7 @@ to save the return under) and, after the arrow, where the slice lands under
 `public/`. `pnpm art:desk` finds any block by sprite name, copies reference
 and prompt in one go, and files, slices and compresses the return.
 
-## gate — gate base — SLICE THIS  (cell-block-gate-body.png → images/blocks/gate.webp)
+## gate — body — SLICE THIS  (cell-block-gate-body.png → images/blocks/gate.webp)
 
 ```text
 Repaint this single game sprite.
@@ -32,36 +32,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: The shared GATE base: a square iron-banded block with a flat top, its face an arched fortress door with warm light glowing between the bars. Nothing is composited on top of this one, so it is the whole block. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #4b3d70, shadows #2a2140, highlights #7a63ad, accent details #c9a227.
+WHAT IT IS: Castle Gate — the block BODY, which is the file that ships: a sandcastle gatehouse block of bright dry sand — two shallow square notches cut down into its top edge leave three little merlons that stop exactly AT the top edge; a raised packed-sand arch with pressed joints frames a dark doorway glowing with warm golden light, a popsicle-stick door standing ajar against the right jamb, and a coral-pink scallop shell set over the arch — the thing the whole game protects. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #eccb8c, shadows #b3803f, highlights #fff1cc, accent details #ffb42e.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
 · A square block that FILLS the frame edge to edge and corner to corner. The
@@ -73,9 +92,11 @@ THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
   leave four visible holes wherever four blocks meet.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no battlements, no crenellations, no
-  wheels, no peaked roof, no rounded shoulders, no legs, no protruding parts.
-  Anything above the top edge leaves the next block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
 · No margin, no drop shadow, no ground beneath it, no background around it.
@@ -92,7 +113,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 
 ---
 
-## wood — timber base — SLICE THIS  (cell-block-wood-body.png → images/blocks/timber.webp)
+## wood — body — SLICE THIS  (cell-block-wood-body.png → images/blocks/wood.webp)
 
 ```text
 Repaint this single game sprite.
@@ -110,36 +131,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: The shared TIMBER base: a square plank crate with a flat top: horizontal plank courses, iron corner brackets and nail heads. ONE bitmap worn by 5 different blocks (wood, archer, spikes, repair, lumberHut), so paint the MATERIAL and nothing block-specific — no weapon, no machinery, no tools, no signage. LEAVE THE MIDDLE PLAIN: the game draws a different machine there for each block, and anything painted in the centre ends up buried under it. Material and edge detail only; the centre is a clear wall. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #a9682f, shadows #6b3f1d, highlights #d99a53, accent details #4a2a12.
+WHAT IT IS: Sand Block — the block BODY, which is the file that ships: a bucket-moulded cube of dry pale sand: a lighter packed band along the top, three wavy horizontal mould ridges, dark and light grain speckle, and one tiny white shell crumb. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e3c07e, shadows #b88c4c, highlights #f6e2ae, accent details #9c7038.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
 · A square block that FILLS the frame edge to edge and corner to corner. The
@@ -151,9 +191,11 @@ THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
   leave four visible holes wherever four blocks meet.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no battlements, no crenellations, no
-  wheels, no peaked roof, no rounded shoulders, no legs, no protruding parts.
-  Anything above the top edge leaves the next block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
 · No margin, no drop shadow, no ground beneath it, no background around it.
@@ -170,7 +212,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 
 ---
 
-## brace — braced base — SLICE THIS  (cell-block-brace-body.png → images/blocks/braced.webp)
+## brace — body — SLICE THIS  (cell-block-brace-body.png → images/blocks/brace.webp)
 
 ```text
 Repaint this single game sprite.
@@ -188,36 +230,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: The shared BRACED base: a square plank crate with a flat top and a bold X of squared timber bolted across its face. Nothing is composited on top of this one, so it is the whole block. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #97602c, shadows #5d3a1b, highlights #c98d4b, accent details #3a2410.
+WHAT IT IS: Packed Sand — the block BODY, which is the file that ships: a cube of darker, wetter packed sand with a few damp blotches, and a big X pressed deep into its face from corner to corner — crumbs along the lips of the groove, a couple of wet glints at the upper left, and no frame around the X. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #c79a5c, shadows #8d673a, highlights #dcb57c, accent details #6e4c26.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
 · A square block that FILLS the frame edge to edge and corner to corner. The
@@ -229,9 +290,11 @@ THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
   leave four visible holes wherever four blocks meet.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no battlements, no crenellations, no
-  wheels, no peaked roof, no rounded shoulders, no legs, no protruding parts.
-  Anything above the top edge leaves the next block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
 · No margin, no drop shadow, no ground beneath it, no background around it.
@@ -248,7 +311,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 
 ---
 
-## stone — masonry base — SLICE THIS  (cell-block-stone-body.png → images/blocks/masonry.webp)
+## stone — body — SLICE THIS  (cell-block-stone-body.png → images/blocks/stone.webp)
 
 ```text
 Repaint this single game sprite.
@@ -266,36 +329,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: The shared MASONRY base: a square block of running-bond masonry with a flat top, mortared, chipped and a little mossy. ONE bitmap worn by 3 different blocks (stone, cannon, stonepit), so paint the MATERIAL and nothing block-specific — no weapon, no machinery, no tools, no signage. LEAVE THE MIDDLE PLAIN: the game draws a different machine there for each block, and anything painted in the centre ends up buried under it. Material and edge detail only; the centre is a clear wall. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #767e88, shadows #4a5058, highlights #a8b2bd, accent details #333940.
+WHAT IT IS: Pebble Wall — the block BODY, which is the file that ships: a cube of damp sand grout faced edge to edge with smooth grey-blue pebbles — about ten big ovals and five small ones in slightly different blue-greys, each with a white glint at its upper left — visibly heavier than sand. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8f9aa6, shadows #5f6975, highlights #c9d0d6, accent details #454d57.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
 · A square block that FILLS the frame edge to edge and corner to corner. The
@@ -307,9 +389,11 @@ THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
   leave four visible holes wherever four blocks meet.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no battlements, no crenellations, no
-  wheels, no peaked roof, no rounded shoulders, no legs, no protruding parts.
-  Anything above the top edge leaves the next block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
 · No margin, no drop shadow, no ground beneath it, no background around it.
@@ -326,7 +410,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 
 ---
 
-## mortar — metal base — SLICE THIS  (cell-block-mortar-body.png → images/blocks/metal.webp)
+## archer — body — SLICE THIS  (cell-block-archer-body.png → images/blocks/archer.webp)
 
 ```text
 Repaint this single game sprite.
@@ -344,36 +428,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: The shared METAL base: a square iron-plated block with a flat top, riveted around its edges, warm and slightly worn rather than cold. ONE bitmap worn by 5 different blocks (mortar, bombard, tesla, frost, coffer), so paint the MATERIAL and nothing block-specific — no weapon, no machinery, no tools, no signage. LEAVE THE MIDDLE PLAIN: the game draws a different machine there for each block, and anything painted in the centre ends up buried under it. Material and edge detail only; the centre is a clear wall. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #5f5f6e, shadows #3a3a44, highlights #8d8da0, accent details #c0453a.
+WHAT IT IS: Dart Blaster — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy ORANGE toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws an orange-and-blue toy foam-dart blaster live ON TOP of this body, so paint NO orange-and-blue toy foam-dart blaster here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8a2b, its lower half #c75416, studs and gloss #ffb56e. Keep that band bright and saturated.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
 · A square block that FILLS the frame edge to edge and corner to corner. The
@@ -385,9 +488,11 @@ THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
   leave four visible holes wherever four blocks meet.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no battlements, no crenellations, no
-  wheels, no peaked roof, no rounded shoulders, no legs, no protruding parts.
-  Anything above the top edge leaves the next block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
 · No margin, no drop shadow, no ground beneath it, no background around it.
@@ -404,7 +509,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 
 ---
 
-## banner — heraldry base — SLICE THIS  (cell-block-banner-body.png → images/blocks/heraldry.webp)
+## cannon — body — SLICE THIS  (cell-block-cannon-body.png → images/blocks/cannon.webp)
 
 ```text
 Repaint this single game sprite.
@@ -422,36 +527,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: The shared HERALDRY base: a square block with a flat top, gilt edging over deep rose cloth around its border. Nothing is composited on top of this one, so it is the whole block. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #6f3059, shadows #3d1c33, highlights #a3557f, accent details #ffd35c.
+WHAT IT IS: Squirt Gun — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy GREEN toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a chunky green toy water pistol with a water tank on top live ON TOP of this body, so paint NO chunky green toy water pistol with a water tank on top here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #43b649, its lower half #23833b, studs and gloss #86dc6e. Keep that band bright and saturated.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
 · A square block that FILLS the frame edge to edge and corner to corner. The
@@ -463,9 +587,11 @@ THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
   leave four visible holes wherever four blocks meet.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no battlements, no crenellations, no
-  wheels, no peaked roof, no rounded shoulders, no legs, no protruding parts.
-  Anything above the top edge leaves the next block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
 · No margin, no drop shadow, no ground beneath it, no background around it.
@@ -482,7 +608,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 
 ---
 
-## obelisk — arcane base — SLICE THIS  (cell-block-obelisk-body.png → images/blocks/arcane.webp)
+## mortar — body — SLICE THIS  (cell-block-mortar-body.png → images/blocks/mortar.webp)
 
 ```text
 Repaint this single game sprite.
@@ -500,36 +626,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: The shared ARCANE base: a square dark arcane block with a flat top, pale blue glyphs inlaid around its border. Nothing is composited on top of this one, so it is the whole block. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #3f3a63, shadows #23203a, highlights #6a63a0, accent details #9be8ff.
+WHAT IT IS: Mud Mortar — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy PURPLE toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a blue toy bucket tube lobbing a mud ball live ON TOP of this body, so paint NO blue toy bucket tube lobbing a mud ball here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #8a5cd8, its lower half #5b36a8, studs and gloss #b894f0. Keep that band bright and saturated.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
 · A square block that FILLS the frame edge to edge and corner to corner. The
@@ -541,9 +686,1001 @@ THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
   leave four visible holes wherever four blocks meet.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no battlements, no crenellations, no
-  wheels, no peaked roof, no rounded shoulders, no legs, no protruding parts.
-  Anything above the top edge leaves the next block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
+· Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
+  wall. It is a face seen straight on, not an object standing in space.
+· No margin, no drop shadow, no ground beneath it, no background around it.
+
+OUTPUT — read this twice, it is where every previous attempt failed:
+· ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
+  If your tool has an aspect-ratio control, set it to 1:1 / Square. Returns
+  have twice come back at 1024x559, which is the tool default overriding
+  this line — the setting wins, so change the setting.
+· ONE object. Not two, not a comparison, not variants side by side, not a
+  before-and-after pair. A single sprite, alone, filling the frame.
+· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
+
+---
+
+## bombard — body — SLICE THIS  (cell-block-bombard-body.png → images/blocks/bombard.webp)
+
+```text
+Repaint this single game sprite.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
+
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
+
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+WHAT IT IS: Balloon Launcher — the block BODY, which is the file that ships: a square sand plinth with a sunken firing pit in the middle of its face — a dark oval crater ringed in glossy TEAL plastic with a white glint — and three little sand mounds along the bottom edge. No plastic band on this one. The game draws a cardboard launch tube with a water balloon live ON TOP of this body, so paint NO cardboard launch tube with a water balloon here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the pit ring teal plastic around #1fb5a8 (shade #138a80); the crater dark brown #6e4a24.
+
+THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
+· A square block that FILLS the frame edge to edge and corner to corner. The
+  material must TOUCH all four edges of the image — no margin, no gap, not
+  even a few pixels. A block that stops short shows a seam on every side once
+  it is stacked. Let the artwork BLEED off all four edges rather than leave a
+  border: the frame is a crop of a wall, not a portrait of an object.
+· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
+  leave four visible holes wherever four blocks meet.
+· FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
+  directly on top of and beside each other to build a tower.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
+· Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
+  wall. It is a face seen straight on, not an object standing in space.
+· No margin, no drop shadow, no ground beneath it, no background around it.
+
+OUTPUT — read this twice, it is where every previous attempt failed:
+· ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
+  If your tool has an aspect-ratio control, set it to 1:1 / Square. Returns
+  have twice come back at 1024x559, which is the tool default overriding
+  this line — the setting wins, so change the setting.
+· ONE object. Not two, not a comparison, not variants side by side, not a
+  before-and-after pair. A single sprite, alone, filling the frame.
+· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
+
+---
+
+## tesla — body — SLICE THIS  (cell-block-tesla-body.png → images/blocks/tesla.webp)
+
+```text
+Repaint this single game sprite.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
+
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
+
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+WHAT IT IS: Bug Zapper — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy INDIGO toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a glowing blue-violet bug-zapper lantern live ON TOP of this body, so paint NO glowing blue-violet bug-zapper lantern here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #4d52d6, its lower half #2b2f8f, studs and gloss #8189f2. Keep that band bright and saturated.
+
+THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
+· A square block that FILLS the frame edge to edge and corner to corner. The
+  material must TOUCH all four edges of the image — no margin, no gap, not
+  even a few pixels. A block that stops short shows a seam on every side once
+  it is stacked. Let the artwork BLEED off all four edges rather than leave a
+  border: the frame is a crop of a wall, not a portrait of an object.
+· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
+  leave four visible holes wherever four blocks meet.
+· FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
+  directly on top of and beside each other to build a tower.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
+· Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
+  wall. It is a face seen straight on, not an object standing in space.
+· No margin, no drop shadow, no ground beneath it, no background around it.
+
+OUTPUT — read this twice, it is where every previous attempt failed:
+· ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
+  If your tool has an aspect-ratio control, set it to 1:1 / Square. Returns
+  have twice come back at 1024x559, which is the tool default overriding
+  this line — the setting wins, so change the setting.
+· ONE object. Not two, not a comparison, not variants side by side, not a
+  before-and-after pair. A single sprite, alone, filling the frame.
+· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
+
+---
+
+## frost — body — SLICE THIS  (cell-block-frost-body.png → images/blocks/frost.webp)
+
+```text
+Repaint this single game sprite.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
+
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
+
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+WHAT IT IS: Ice Pop — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SKY-BLUE toy plastic running across its lower third, with a white gloss streak and two round studs, with icy white rime dripping in a wavy line over its top edge. The game draws a giant blue ice pop on a wooden stick live ON TOP of this body, so paint NO giant blue ice pop on a wooden stick here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #5cc4ea, its lower half #2382b5, studs and gloss #aaeaff. Keep that band bright and saturated.
+
+THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
+· A square block that FILLS the frame edge to edge and corner to corner. The
+  material must TOUCH all four edges of the image — no margin, no gap, not
+  even a few pixels. A block that stops short shows a seam on every side once
+  it is stacked. Let the artwork BLEED off all four edges rather than leave a
+  border: the frame is a crop of a wall, not a portrait of an object.
+· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
+  leave four visible holes wherever four blocks meet.
+· FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
+  directly on top of and beside each other to build a tower.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
+· Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
+  wall. It is a face seen straight on, not an object standing in space.
+· No margin, no drop shadow, no ground beneath it, no background around it.
+
+OUTPUT — read this twice, it is where every previous attempt failed:
+· ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
+  If your tool has an aspect-ratio control, set it to 1:1 / Square. Returns
+  have twice come back at 1024x559, which is the tool default overriding
+  this line — the setting wins, so change the setting.
+· ONE object. Not two, not a comparison, not variants side by side, not a
+  before-and-after pair. A single sprite, alone, filling the frame.
+· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
+
+---
+
+## spikes — body — SLICE THIS  (cell-block-spikes-body.png → images/blocks/spikes.webp)
+
+```text
+Repaint this single game sprite.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
+
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
+
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+WHAT IT IS: Toothpick Wall — the block BODY, which is the file that ships: a cube of golden sand with one mould ridge and grain speckle, and six short pale wooden toothpick stubs pushed into its face in two rows of three, angled upward. The game draws long wooden toothpicks bristling out of all four sides live ON TOP of this body, so paint NO long wooden toothpicks bristling out of all four sides here. Keep the face above the bottom edge plain: whatever is painted there ends up buried under the toy. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #d8ae6a, shadows #a57539, highlights #f2d9a0, accent details #7d5a2e.
+
+THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
+· A square block that FILLS the frame edge to edge and corner to corner. The
+  material must TOUCH all four edges of the image — no margin, no gap, not
+  even a few pixels. A block that stops short shows a seam on every side once
+  it is stacked. Let the artwork BLEED off all four edges rather than leave a
+  border: the frame is a crop of a wall, not a portrait of an object.
+· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
+  leave four visible holes wherever four blocks meet.
+· FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
+  directly on top of and beside each other to build a tower.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
+· Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
+  wall. It is a face seen straight on, not an object standing in space.
+· No margin, no drop shadow, no ground beneath it, no background around it.
+
+OUTPUT — read this twice, it is where every previous attempt failed:
+· ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
+  If your tool has an aspect-ratio control, set it to 1:1 / Square. Returns
+  have twice come back at 1024x559, which is the tool default overriding
+  this line — the setting wins, so change the setting.
+· ONE object. Not two, not a comparison, not variants side by side, not a
+  before-and-after pair. A single sprite, alone, filling the frame.
+· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
+
+---
+
+## repair — body — SLICE THIS  (cell-block-repair-body.png → images/blocks/repair.webp)
+
+```text
+Repaint this single game sprite.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
+
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
+
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+WHAT IT IS: Bucket & Spade — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy BLUE toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a green toy bucket with a spade live ON TOP of this body, so paint NO green toy bucket with a spade here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #2f7de1, its lower half #1d5fb5, studs and gloss #72acf2. Keep that band bright and saturated.
+
+THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
+· A square block that FILLS the frame edge to edge and corner to corner. The
+  material must TOUCH all four edges of the image — no margin, no gap, not
+  even a few pixels. A block that stops short shows a seam on every side once
+  it is stacked. Let the artwork BLEED off all four edges rather than leave a
+  border: the frame is a crop of a wall, not a portrait of an object.
+· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
+  leave four visible holes wherever four blocks meet.
+· FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
+  directly on top of and beside each other to build a tower.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
+· Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
+  wall. It is a face seen straight on, not an object standing in space.
+· No margin, no drop shadow, no ground beneath it, no background around it.
+
+OUTPUT — read this twice, it is where every previous attempt failed:
+· ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
+  If your tool has an aspect-ratio control, set it to 1:1 / Square. Returns
+  have twice come back at 1024x559, which is the tool default overriding
+  this line — the setting wins, so change the setting.
+· ONE object. Not two, not a comparison, not variants side by side, not a
+  before-and-after pair. A single sprite, alone, filling the frame.
+· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
+
+---
+
+## banner — body — SLICE THIS  (cell-block-banner-body.png → images/blocks/banner.webp)
+
+```text
+Repaint this single game sprite.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
+
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
+
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+WHAT IT IS: Paper Flag — the block BODY, which is the file that ships: a square sand plinth with a paper party frill across its lower third — light rose paper cut with pinking-shear teeth, a deep plum-rose stripe along it dotted with six gold dots. The game draws a paper swallowtail flag on a toothpick live ON TOP of this body, so paint NO paper swallowtail flag on a toothpick here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the paper frill light rose #e685c6 with a deep plum-rose #b8479a stripe and gold #ffd35c dots.
+
+THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
+· A square block that FILLS the frame edge to edge and corner to corner. The
+  material must TOUCH all four edges of the image — no margin, no gap, not
+  even a few pixels. A block that stops short shows a seam on every side once
+  it is stacked. Let the artwork BLEED off all four edges rather than leave a
+  border: the frame is a crop of a wall, not a portrait of an object.
+· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
+  leave four visible holes wherever four blocks meet.
+· FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
+  directly on top of and beside each other to build a tower.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
+· Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
+  wall. It is a face seen straight on, not an object standing in space.
+· No margin, no drop shadow, no ground beneath it, no background around it.
+
+OUTPUT — read this twice, it is where every previous attempt failed:
+· ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
+  If your tool has an aspect-ratio control, set it to 1:1 / Square. Returns
+  have twice come back at 1024x559, which is the tool default overriding
+  this line — the setting wins, so change the setting.
+· ONE object. Not two, not a comparison, not variants side by side, not a
+  before-and-after pair. A single sprite, alone, filling the frame.
+· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
+
+---
+
+## obelisk — body — SLICE THIS  (cell-block-obelisk-body.png → images/blocks/obelisk.webp)
+
+```text
+Repaint this single game sprite.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
+
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
+
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+WHAT IT IS: Magic Seashell — the block BODY, which is the file that ships: a square pearly plinth — pale lilac mother-of-pearl rather than sand — with two soft sheen bands, one lilac and one pale cyan, and a scatter of little white four-point glitter stars. The game draws a glowing pink scallop shell live ON TOP of this body, so paint NO glowing pink scallop shell here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: pearly lilac — body around #e8cde4, shadows #ae88b6, highlights #fbeefa; sheen bands #b99ae6 and #9be8ff; glitter #e6fbff.
+
+THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
+· A square block that FILLS the frame edge to edge and corner to corner. The
+  material must TOUCH all four edges of the image — no margin, no gap, not
+  even a few pixels. A block that stops short shows a seam on every side once
+  it is stacked. Let the artwork BLEED off all four edges rather than leave a
+  border: the frame is a crop of a wall, not a portrait of an object.
+· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
+  leave four visible holes wherever four blocks meet.
+· FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
+  directly on top of and beside each other to build a tower.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
+· Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
+  wall. It is a face seen straight on, not an object standing in space.
+· No margin, no drop shadow, no ground beneath it, no background around it.
+
+OUTPUT — read this twice, it is where every previous attempt failed:
+· ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
+  If your tool has an aspect-ratio control, set it to 1:1 / Square. Returns
+  have twice come back at 1024x559, which is the tool default overriding
+  this line — the setting wins, so change the setting.
+· ONE object. Not two, not a comparison, not variants side by side, not a
+  before-and-after pair. A single sprite, alone, filling the frame.
+· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
+
+---
+
+## lumberHut — body — SLICE THIS  (cell-block-lumberHut-body.png → images/blocks/lumberHut.webp)
+
+```text
+Repaint this single game sprite.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
+
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
+
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+WHAT IT IS: Sand Sifter — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy LIME-GREEN toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a toy sand wheel under a funnel of sand live ON TOP of this body, so paint NO toy sand wheel under a funnel of sand here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #94cc3a, its lower half #5c961d, studs and gloss #c8ee82. Keep that band bright and saturated.
+
+THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
+· A square block that FILLS the frame edge to edge and corner to corner. The
+  material must TOUCH all four edges of the image — no margin, no gap, not
+  even a few pixels. A block that stops short shows a seam on every side once
+  it is stacked. Let the artwork BLEED off all four edges rather than leave a
+  border: the frame is a crop of a wall, not a portrait of an object.
+· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
+  leave four visible holes wherever four blocks meet.
+· FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
+  directly on top of and beside each other to build a tower.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
+· Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
+  wall. It is a face seen straight on, not an object standing in space.
+· No margin, no drop shadow, no ground beneath it, no background around it.
+
+OUTPUT — read this twice, it is where every previous attempt failed:
+· ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
+  If your tool has an aspect-ratio control, set it to 1:1 / Square. Returns
+  have twice come back at 1024x559, which is the tool default overriding
+  this line — the setting wins, so change the setting.
+· ONE object. Not two, not a comparison, not variants side by side, not a
+  before-and-after pair. A single sprite, alone, filling the frame.
+· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
+
+---
+
+## stonepit — body — SLICE THIS  (cell-block-stonepit-body.png → images/blocks/stonepit.webp)
+
+```text
+Repaint this single game sprite.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
+
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
+
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+WHAT IT IS: Pebble Digger — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SUNSHINE-YELLOW toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a yellow toy digger scooping pebbles live ON TOP of this body, so paint NO yellow toy digger scooping pebbles here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ffc21f, its lower half #c98a00, studs and gloss #ffe07a. Keep that band bright and saturated.
+
+THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
+· A square block that FILLS the frame edge to edge and corner to corner. The
+  material must TOUCH all four edges of the image — no margin, no gap, not
+  even a few pixels. A block that stops short shows a seam on every side once
+  it is stacked. Let the artwork BLEED off all four edges rather than leave a
+  border: the frame is a crop of a wall, not a portrait of an object.
+· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
+  leave four visible holes wherever four blocks meet.
+· FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
+  directly on top of and beside each other to build a tower.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
+· Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
+  wall. It is a face seen straight on, not an object standing in space.
+· No margin, no drop shadow, no ground beneath it, no background around it.
+
+OUTPUT — read this twice, it is where every previous attempt failed:
+· ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
+  If your tool has an aspect-ratio control, set it to 1:1 / Square. Returns
+  have twice come back at 1024x559, which is the tool default overriding
+  this line — the setting wins, so change the setting.
+· ONE object. Not two, not a comparison, not variants side by side, not a
+  before-and-after pair. A single sprite, alone, filling the frame.
+· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+```
+
+---
+
+## coffer — body — SLICE THIS  (cell-block-coffer-body.png → images/blocks/coffer.webp)
+
+```text
+Repaint this single game sprite.
+
+BACKGROUND — read this before anything else. It matters more than the style.
+Fill every pixel that is not the object itself with solid, flat, pure magenta
+#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
+· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
+  pink, not mauve, not a soft or tinted version of it. Only the true colour can
+  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
+  fill eats any pale paint it can reach.
+· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
+  and then baked into the artwork as though the squares were paint.
+· NOT white, cream, parchment, paper, or any tinted or textured ground.
+· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
+  any kind. The magenta must touch the outline of the object on every side.
+· No drop shadow onto the background, and no vignette.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
+
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
+
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
+· NO frames, borders, cards, vignettes, matting or paper background inside a
+  square. The object itself fills the square edge to edge, corner to corner.
+· Do not invent content for a square that is blank. Leave it blank.
+· Keep each object the same subject and silhouette it already has. This is a
+  restyle, not a redesign.
+
+WHAT IT IS: Piggy Bank — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy BUBBLE-GUM PINK toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a pink piggy bank live ON TOP of this body, so paint NO pink piggy bank here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8fbf, its lower half #d05a8e, studs and gloss #ffc3dc. Keep that band bright and saturated.
+
+THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
+· A square block that FILLS the frame edge to edge and corner to corner. The
+  material must TOUCH all four edges of the image — no margin, no gap, not
+  even a few pixels. A block that stops short shows a seam on every side once
+  it is stacked. Let the artwork BLEED off all four edges rather than leave a
+  border: the frame is a crop of a wall, not a portrait of an object.
+· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
+  leave four visible holes wherever four blocks meet.
+· FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
+  directly on top of and beside each other to build a tower.
+· Nothing may stick out past the square: no sandcastle turrets, battlements or
+  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
+  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
+  wall, not a little sandcastle. Anything above the top edge leaves the next
+  block floating in mid-air.
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
 · No margin, no drop shadow, no ground beneath it, no background around it.
@@ -578,36 +1715,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Grumpling — Cute-evil imp. All head, tiny body, permanently unimpressed. Facing RIGHT, drawn at 0.62 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #8d3238, shadows #4a1f22, highlights #c04b52, accent details #2a1012.
+WHAT IT IS: Black Ant: a cartoon black ant seen from the side: three glossy beads — a big round head at the front, a small humped thorax and a fat egg-shaped abdomen tilted up at the back with three darker bands — joined by a tiny waist knot; six legs with little knee nubs, the feet flat on the sand; two elbowed antennae with club tips; two curved mandibles. Two white eyes with black pupils under heavy lids that slope together into a determined frown, and a small down-turned mouth. Facing RIGHT, drawn at 0.62 cells in game. Colours: blue-black slate — body #3e3d58, highlights #5d6588, legs #3a3952, mandibles #4b4a66 — with icy blue-white shine streaks. This one is inked in near-black (#15101a).
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -641,36 +1797,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Cinderhound — Burning hound. All legs and ribs — the fast one, and it is starving. Facing RIGHT, drawn at 0.55 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #8f7020, shadows #4a3a12, highlights #c39c33, accent details #231b08.
+WHAT IT IS: Cockroach: a cartoon cockroach, the lowest and longest shape in the cast: one long glossy oval of wing cases skimming the sand with a long cream shine streak along its back, a ringed belly showing below, a head shield with a cream front rim over a small round head tucked low at the front, two whip antennae longer than its whole body sweeping up and back, two tail prongs, and six splayed spiny legs. Sly V-shaped lids and a smirk. Facing RIGHT, drawn at 0.55 cells in game. Colours: glossy chestnut — wing cases #9a4a20, belly #733617, head shield #843f1b, legs #ab6531 (far legs #7c4321) — with a cream shine streak.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -704,36 +1879,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Bonecap — Fungal undead. The mushroom is driving; the skeleton is the host. Facing RIGHT, drawn at 0.6 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #376b4f, shadows #20402f, highlights #529b74, accent details #12241a.
+WHAT IT IS: Spitting Spider: a round, fuzzy cartoon jumping spider in three-quarter view: a big furry tan head with a darker mask across the eyes and cream cheek fur, and a round charcoal abdomen riding behind it like a backpack, with a bold orange arcing stripe and three cream spots; eight legs with high arched knees and pale bands, the front pair crossed in front of its face; two cream fuzzy palps like mittens and small teal jaws with little white fangs. Two ENORMOUS glossy black front eyes (one bigger than the other), two small side eyes and two dots on the crown, under white fur brows in a menacing V. A thin white silk line trails from its rear down to the sand. Facing RIGHT, drawn at 0.6 cells in game. Colours: head tan #9a7452, abdomen charcoal #4d4852 with an orange #ff8a2b stripe, legs #765945 with pale bands #cfb08a, jaws teal #2cb9a5.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -767,36 +1961,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Snaggletusk — Boar-beast. Low, heavy, forward — built to hit a wall and keep going. Facing RIGHT, drawn at 0.85 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #63348d, shadows #3a1f4a, highlights #8d52c0, accent details #1c0f24.
+WHAT IT IS: Rhino Beetle: a heavy rhino beetle seen from the side, leaning forward like a wedge: a tall glossy domed shell at the back, a lower dome in front, and the head lowest at the front with ONE big thick horn sweeping forward and curling up and back to a point, plus a small second horn jutting forward off the front dome; six thick toothed legs. Orange eyes under heavy V-shaped lids and a flat clamped mouth. Built to hit a wall and keep going. Facing RIGHT, drawn at 0.85 cells in game. Colours: glossy mahogany — shell and horns #6c2c19, head #7a3520, legs #6c2e1a — with a strong peach shine band on the dome and up the horn; eyes #ffb347.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -830,36 +2043,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Blorp — Swamp ooze. Delighted to see you; still digesting the last one. Facing RIGHT, drawn at 0.66 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #8d4f1c, shadows #4a2a10, highlights #c4762e, accent details #ff5a2a.
+WHAT IT IS: Bombardier Beetle: a nervous bombardier beetle in three-quarter side view: a glossy navy-blue shell dome with fine grooves and a blue-white shine, an orange head and middle, six orange legs and two beaded antennae. A too-wide clenched white grin, wide eyes with tiny darting pupils, worried eyebrows and a blue sweat drop behind its head — and cream puffs of stink smoke curling up out of its backside, with a hot yellow puff at the tail. It is about to go pop. Facing RIGHT, drawn at 0.66 cells in game. Colours: shell navy #2c3a6e, head and body orange #ff8a2b, legs #f47a22, smoke puffs cream, sweat drop #a9e4ff.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -893,36 +2125,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Nibbler — Cute-evil bat. Ninety per cent ears, and fully aware of it. Facing RIGHT, drawn at 0.5 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #3f376b, shadows #241f3a, highlights #61549b, accent details #ff5ad0.
+WHAT IT IS: Housefly: a cartoon housefly: a broad grey hairy thorax with four stripes and black bristles along its outline, an olive-grey barrel abdomen with dark chequer patches, six thin dark legs dangling, and two clear veined wings held out in a V behind it. Its silver face sits between two HUGE cherry-red compound eyes with big dark pupils looking to the right — one eye bigger, one brow cocked and one scowling — with a lopsided smirk and a dangling tube mouth. Facing RIGHT, drawn at 0.5 cells in game. Colours: thorax grey #5b6072, abdomen olive-grey #7b7560, face silver #d9d4c4, eyes cherry red #e0362d; the wings clear with a faint warm tint — never pink or magenta.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -956,36 +2207,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Marrow Knight — Armoured skeleton. Waiting, not lurching — the one that outranks the rest. Facing RIGHT, drawn at 0.78 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #37536b, shadows #1f303f, highlights #527c9b, accent details #c9a227.
+WHAT IT IS: Roly-Poly: a roly-poly pill bug in three-quarter view: a tall half-dome of seven overlapping grey armour plates, every other plate a little darker, each with a light lip; many short legs rippling underneath; a small grey head peeking over the top front with two short elbowed antennae, smug flat eyelids and a small smirk. Held out on its RIGHT side, gripped by two front legs, is a red BOTTLE CAP used as a shield — crimped silver rim, a printed yellow ring and a cream star in the middle. That shield is how the player knows it is armoured in front: keep it big and clear. Facing RIGHT, drawn at 0.78 cells in game. Colours: plates grey #9aa3ad, head #7d8693, legs #b3adb5 (far legs #6e7782); bottle cap red #e5483b with a silver #d1d6dc rim, a yellow #ffc93c ring and a cream star.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1019,36 +2289,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Skewer — Wyrmling. Small, fast, and almost entirely the pointy end. Facing RIGHT, drawn at 0.8 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #57306e, shadows #2d1a3a, highlights #8a4fa8, accent details #ff9a3c.
+WHAT IT IS: Hornet: an angry cartoon hornet in side view: a yellow abdomen angled down and back with three near-black bands, ending in a dark tip and a stinger with a cream glint; a fuzzy rust-brown thorax with a pinched dark waist; a yellow face under a dark rust helmet like a mask, elbowed black antennae and two dark toothed pincers held open. Four amber-tinted wings raised over its back; three yellow legs near, three darker far. Red eyes with lowered lids and hard angry V brows. Facing RIGHT, drawn at 0.8 cells in game. Colours: abdomen yellow #ffc21f with near-black bands, thorax and helmet rust-brown #8e3a22, eyes red, wings amber-tinted.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1082,36 +2371,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Gloomcrow — Bone crow. Carrying something gold it did not find lying around. Facing RIGHT, drawn at 0.82 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #6a5936, shadows #3a3020, highlights #9b8552, accent details #4a5560.
+WHAT IT IS: Bumblebee: a round, fuzzy cartoon bumblebee — one big golden fuzz-ball body with two curved black bands and a cream tail band, fuzz tufts all round its outline, and tiny clear wings on top beating flat out with little white effort arcs. A small dark head with knobbed antennae, pink cheeks, big dark eyes and a cream grin. Its black hind legs stick out to the sides with orange pollen baskets, and its two front legs hug a golden HONEY BOMB under its belly — a ball of honey with a faint honeycomb pattern, a wet shine and drips. Facing RIGHT, drawn at 0.82 cells in game. Colours: body gold #ffc42e with black bands and a cream tail band, honey bomb #ffb319, pollen baskets orange, cheeks soft pink.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1145,36 +2453,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Dustmoth — Plush moth. Adorable — and the spots on the wings are watching you. Facing RIGHT, drawn at 0.9 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #7a3418, shadows #3d1a12, highlights #b45a24, accent details #ff8a2a.
+WHAT IT IS: Firefly: a cartoon firefly carrying fire: a dark plum body, dark wing cases raised in a V with yellow edges, smoky clear hind wings spread to the sides, and a salmon-red hood over its head with a black spot and a yellow rim; big dark eyes with huge pupils and sleepy, sly lids. Its tail is a glowing pale-lime lantern. Held out in its front legs on its RIGHT side is a glowing orange ember with a gold core and a few rising sparks; four more legs dangle. Facing RIGHT, drawn at 0.9 cells in game. Colours: body plum #40333c, wing-case edges yellow #ffd85c, hood salmon #f26c52, lantern pale lime #eaff8a with its green glow kept tight, ember orange #ff6d1f with a gold core.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1208,36 +2535,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Sliverfin — Reef eel. A ribbon with a mouth on the front, and it is always open. Facing RIGHT, drawn at 0.85 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #1f5a68, shadows #123040, highlights #2f8a94, accent details #7ef0d0.
+WHAT IT IS: Water Tiger: a water tiger — a diving-beetle larva — swimming side-on: a long thin ribbon of twelve rings, pinched at every ring, with a dark saddle on the back of each ring and a cream belly, six short paddling legs and bristly tail prongs. A flat wedge head with a dark cap and two reddish-brown sickle jaws bowing out and hooking back in — they NEVER close, so its mouth is always open — with a crooked grin between them and lime eyes, the far eye peeking over the crown. Facing RIGHT, drawn at 0.85 cells in game. Colours: body ochre #d6b24c, saddles #735424, belly cream, jaws #8e4a22, eyes lime #b8e04a.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1271,36 +2617,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Gnashfin — Reefshark. Stiff through the shoulders, and everything else is teeth. Facing RIGHT, drawn at 1 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #3f5c74, shadows #1b2c3a, highlights #6d8ba6, accent details #c9d8e4.
+WHAT IT IS: Diving Beetle: a diving beetle swimming side-on: a rigid glossy olive oval shell with a bright yellow rim along its lower edge and around the tail, an olive head at the front with a small chin pincer, a dark belly, an air bubble at its tail, and two big amber oar legs plus two smaller paddles fringed with cream hairs. Amber eyes under a flat, determined brow. Stiff as a pebble — its body never bends. Facing RIGHT, drawn at 1 cells in game. Colours: shell olive #40602c with a yellow #ffc93c rim and a pale-green catch-light, oar legs amber, fringes cream.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1334,36 +2699,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Brinemaw — Deep kraken. Hangs a little green light out and waits for company. Facing RIGHT, drawn at 1.25 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #332055, shadows #1a1030, highlights #553a85, accent details #b06bff.
+WHAT IT IS: Toe-Biter: a toe-biter — a giant water bug — swimming side-on: a big flat brown oval body tipped slightly so its back shows, folded wings with a pale leathery half and a dark tip, a segment-ticked rim, twin breathing tubes trailing at the tail, and a small pointed head with a beak. Two grabbing arms shaped like a "7" held up in front of its face, each ending in a dark hooked claw; four fringed paddle legs. A stalk arches up off its crown to hang a small glowing pale-green bulb in front of its face, like an angler fish. Pale yellow eyes with tiny pupils under a menacing brow. Facing RIGHT, drawn at 1.25 cells in game. Colours: body brown #9a5c28, wings pale leather with dark tips, lure pale green #b6ff8c with its glow kept tight, eyes pale yellow.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1397,36 +2781,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Tidewyrm — Sea dragon. Crested, whiskered, and the only thing down there with hands. Facing RIGHT, drawn at 1.4 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #2f7f74, shadows #12332f, highlights #57b0a2, accent details #c9503a.
+WHAT IT IS: Dragonfly Nymph: a fat dragonfly nymph swimming side-on: a moss-green nine-ringed abdomen with a darker mottle on each ring, a pale belly and three tail spikes; two leaf-like wing pads lying back along its top; six long legs with the knees up; one big bulging amber dome eye. Folded under its face is a pale khaki hinged lower lip with a smile line — its hands on its chin — that can shoot forward with two dark hooks flung open. Facing RIGHT, drawn at 1.4 cells in game. Colours: body moss green #83a13f, the hinged lip khaki #bdbf6c, hooks dark brown #6a3f1c, eye amber #ffc94a.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1460,36 +2863,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Thornwick — Bramble treant. Slow, patient, and entirely made of thorns. Facing RIGHT, drawn at 1.45 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #514838, shadows #2a2620, highlights #7d7055, accent details #ff7a1f.
+WHAT IT IS: Stag Beetle: the boss: a huge stag beetle in a near-frontal crest pose — a wide flat black-maroon head with a scowl built into its outline, a wide shield behind it and a bulging mahogany wing case behind that; giant rust-red antler mandibles rising above the head, spreading out and hooking back in at dark tips like a crown (one inner prong on the left antler, two on the right); six long dark spurred legs, comb-tipped antennae and a golden moustache of palps. Amber eyes with slit pupils under heavy angry brow ridges. Slow, patient and enormous. Facing RIGHT, drawn at 1.45 cells in game. Colours: head #422629, shield #62241f, wing case #8c2a1d, antlers rust-red #a8391f, legs #43292b, palps gold #e8a844, eyes amber #ffb428.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1523,36 +2945,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: ram: a roofed shed on solid wheels with a swinging log slung inside. Facing RIGHT, 1.15 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #6b4522, shadows #3a2614, highlights #9c6a38, accent details #8a8f96.
+WHAT IT IS: Pencil Ram: a red die-cast toy car driven by ants, with a popsicle-stick gantry over its roof from which a sharpened yellow pencil hangs on two rubber bands as a battering ram, point forward, an ant in an acorn-cap helmet riding it like a jouster. Facing RIGHT, 1.15 cells in game. Colours: car red #e5483b with a yellow #ffc93c racing stripe, pencil yellow with a sharpened cedar tip, popsicle sticks #efcd92, ants glossy black #342b31.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1586,36 +3027,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: ballista: a wheeled timber frame carrying a great horizontal bow with a bolt loaded. Facing RIGHT, 1.2 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #705027, shadows #3d2c18, highlights #a37a42, accent details #b8bcc4.
+WHAT IT IS: Rubber-Band Crossbow: an ant-built crossbow on green bottle-cap wheels: a popsicle-stick carriage and stock, two popsicle-stick arms strung with a fat pink rubber band, a toothpick loaded in the groove, a corrugated-cardboard shield at the front, and an ant turning a brass wind-up key at the back. Facing RIGHT, 1.2 cells in game. Colours: popsicle sticks #efcd92, bottle caps green #43b649, rubber bands pink #ff5f8f, toothpicks #f3d6a6, cardboard #cf9f62, brass key #e2b447.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1649,36 +3109,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: catapult: a single-armed throwing engine with a bucket at the arm tip. Facing RIGHT, 1.45 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #68431f, shadows #382412, highlights #9a6733, accent details #c07a2a.
+WHAT IT IS: Spoon Catapult: an ant-built catapult on yellow bottle-cap wheels: a stacked popsicle-stick frame, a pink plastic spoon as the throwing arm sprung by a wad of rubber bands, a kitchen sponge at the front as its stop, a cotton reel of thread at the tail, and pebbles on the deck. Facing RIGHT, 1.45 cells in game. Colours: spoon pink #ff6fae, bottle caps and bands yellow #ffc93c, popsicle sticks #efcd92, sponge #ffd23f with a green #3fa84a scourer, pebbles grey #9aa3ad.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1712,36 +3191,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: siegeTower: a tall rolling assault tower with a drop ramp and a banner. Facing RIGHT, 1.05 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #5e4a2c, shadows #33291a, highlights #8c7044, accent details #9a3a2e.
+WHAT IT IS: Juice-Box Tower: an orange juice box on red button wheels, with a red bottle cap on top as a fighting top holding two ant archers with toothpick bows, a striped bendy-straw flagpole with a red paper flag, and a cardboard ramp hinged at the top front. Facing RIGHT, 1.05 cells in game. Colours: carton orange #ff8a2b with a white top band and a green #43b649 wave, red #e5483b cap, buttons and flag, cardboard #cf9f62.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1775,36 +3273,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: trebuchet: an A-frame with a long throwing arm and a heavy counterweight box. Facing RIGHT, 1.7 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #574024, shadows #2e2314, highlights #856439, accent details #6a8fbf.
+WHAT IT IS: Pencil Trebuchet: an ant-built trebuchet on red bottle-cap wheels: a popsicle-stick A-frame lashed with green rubber bands, a long yellow pencil as the throwing beam on a red pushpin pivot, a big pink eraser hanging from a paperclip as the counterweight, and a string sling with a pale cloth pouch. Facing RIGHT, 1.7 cells in game. Colours: popsicle sticks #efcd92, bottle caps red #e5483b, bands green #43b649, pencil yellow #ffc93c, eraser pink #ff8ea4, pouch #ffe08a.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1838,36 +3355,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: ironRam: a plated iron casemate on wheels with a vision slit and spent arrows lodged uselessly in the plating — COLD IRON, never timber, because it is the only enemy arrows cannot hurt. Facing RIGHT, 1.35 cells in game. Colour identity (keep the HUE, but muted and paper-toned, never vivid): body around #454c56, shadows #22262c, highlights #727c8a, accent details #b9c2cd.
+WHAT IT IS: Tin-Can Ram: a soup tin lying on its side on a popsicle-stick sled with bottle-cap wheels, its can-opened lid bent up over the open mouth like a visor, a steel dinner fork sliding out of the mouth as the ram, and foam darts stuck uselessly to the tin — shiny cold TIN, never cardboard or plastic, because it is the only enemy foam darts cannot hurt. Facing RIGHT, 1.35 cells in game. Colours: tin #b7c0cb with bright specular bands, a torn red label #d8402f with a cream disc, fork steel #d3dae2, bottle caps dark grey #4a4f58.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1883,7 +3419,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 
 ---
 
-## arrow — round  (cell-projectile-bolt.png → images/rounds/bolt.webp)
+## foam dart — round  (cell-projectile-bolt.png → images/rounds/bolt.webp)
 
 ```text
 Repaint this single game sprite.
@@ -1901,36 +3437,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: arrow: an archer’s arrow in flight, pale ash shaft, feather fletching, a bright leaf-shaped steel broadhead, pointing right. Must stay recognisable at a few pixels across in flight.
+WHAT IT IS: foam dart: a toy foam dart in flight: a fat orange foam shaft, a blue rubber suction cup on the front, two little blue fins at the tail, pointing right. Must stay recognisable at a few pixels across in flight.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -1946,7 +3501,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
 
 ---
 
-## quarrel — round  (cell-projectile-quarrel.png → images/rounds/quarrel.webp)
+## toothpick — round  (cell-projectile-quarrel.png → images/rounds/quarrel.webp)
 
 ```text
 Repaint this single game sprite.
@@ -1964,36 +3519,55 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: quarrel: a siege ballista’s quarrel: SHORT and heavy, a thick dark oiled timber shaft, a cord binding at the socket, stiff cut-leather vanes and a squat blunt four-sided iron bodkin head. It must not be mistakable for the archer’s arrow, pointing right. Must stay recognisable at a few pixels across in flight.
+WHAT IT IS: toothpick: a party toothpick fired by an ant-built rubber-band crossbow: thin pale wood, sharp at both ends, a red cellophane frill round the tail. It must not be mistakable for the foam dart, pointing right. Must stay recognisable at a few pixels across in flight.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -2027,29 +3601,48 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.
@@ -2057,132 +3650,6 @@ AVOID — this is exactly how earlier attempts went wrong:
   restyle, not a redesign.
 
 WHAT IT IS: UI art: the coin. Keep it clean, flat and high-contrast — it is interface, not scenery — and do not restyle any lettering.
-
-Centre the object in the frame with a little clear space around it, and do not crop any part of it.
-
-OUTPUT — read this twice, it is where every previous attempt failed:
-· ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
-  If your tool has an aspect-ratio control, set it to 1:1 / Square. Returns
-  have twice come back at 1024x559, which is the tool default overriding
-  this line — the setting wins, so change the setting.
-· ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
-```
-
----
-
-## movie — rewarded button  (cell-ui-movie.png → images/icons/movie_128x96.webp)
-
-```text
-Repaint this single game sprite.
-
-BACKGROUND — read this before anything else. It matters more than the style.
-Fill every pixel that is not the object itself with solid, flat, pure magenta
-#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
-· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
-  pink, not mauve, not a soft or tinted version of it. Only the true colour can
-  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
-  fill eats any pale paint it can reach.
-· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
-  and then baked into the artwork as though the squares were paint.
-· NOT white, cream, parchment, paper, or any tinted or textured ground.
-· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
-  any kind. The magenta must touch the outline of the object on every side.
-· No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
-
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
-
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
-· Do not invent content for a square that is blank. Leave it blank.
-· Keep each object the same subject and silhouette it already has. This is a
-  restyle, not a redesign.
-
-WHAT IT IS: UI art: the movie. Keep it clean, flat and high-contrast — it is interface, not scenery — and do not restyle any lettering.
-
-Centre the object in the frame with a little clear space around it, and do not crop any part of it.
-
-OUTPUT — read this twice, it is where every previous attempt failed:
-· ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
-  If your tool has an aspect-ratio control, set it to 1:1 / Square. Returns
-  have twice come back at 1024x559, which is the tool default overriding
-  this line — the setting wins, so change the setting.
-· ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
-```
-
----
-
-## ribbon — result screen  (cell-ui-ribbon.png → images/bg/parchment-ribbon_553x188.webp)
-
-```text
-Repaint this single game sprite.
-
-BACKGROUND — read this before anything else. It matters more than the style.
-Fill every pixel that is not the object itself with solid, flat, pure magenta
-#FF00FF. Treat it as a green-screen: one flat chroma-key colour, edge to edge.
-· EXACTLY #FF00FF — red 255, green 0, blue 255. Not pink, not rose, not dusty
-  pink, not mauve, not a soft or tinted version of it. Only the true colour can
-  be cut away cleanly; a near miss has to be flood-filled instead, and a flood
-  fill eats any pale paint it can reach.
-· NOT transparent. Transparency gets exported as a grey-and-white CHECKERBOARD
-  and then baked into the artwork as though the squares were paint.
-· NOT white, cream, parchment, paper, or any tinted or textured ground.
-· The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
-  any kind. The magenta must touch the outline of the object on every side.
-· No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
-
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
-
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
-· Do not invent content for a square that is blank. Leave it blank.
-· Keep each object the same subject and silhouette it already has. This is a
-  restyle, not a redesign.
-
-WHAT IT IS: UI art: the ribbon. Keep it clean, flat and high-contrast — it is interface, not scenery — and do not restyle any lettering.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -2216,29 +3683,48 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
 · The object must NOT sit on a card, panel, sheet, badge, frame or rectangle of
   any kind. The magenta must touch the outline of the object on every side.
 · No drop shadow onto the background, and no vignette.
-· The object itself must contain no magenta or hot pink.
+· NOTHING may be see-through. Clear plastic, water tanks, glass and insect
+  wings are painted as SOLID pale tints — pale icy blue, pale grey — even
+  where the reference lets the magenta show through them. Anything the
+  background shows through comes back pink, or with a hole in it.
+· The object itself must contain no magenta, fuchsia or hot pink. A toy that
+  IS pink — the piggy bank, the spoon catapult, a water balloon — is a soft,
+  warm bubble-gum or salmon pink, clearly lighter and more orange than the
+  background, never a purple-pink: nothing pinker than about #ffa8c8, and
+  warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
+  see-through and greyed, because the key takes it for background.
 
-STYLE — cozy hand-drawn medieval fantasy, like a page from an illustrated
-storybook or a hand-painted board game. Match this in every square:
-· INK FIRST. Visible hand-drawn contour lines in dark warm brown, slightly
-  sketchy and uneven, with the line weight varying like a real pen. The
-  drawing should look drawn, with the linework still showing.
-· FLAT WATERCOLOUR WASHES inside the lines — chalky, softly mottled, a little
-  uneven, with the texture of paint on paper. Minimal gradients, no gloss, no
-  specular highlights, no rendered 3D volume.
-· MUTED, DUSTY, PAPER-TONED colour. Desaturated and gentle: sage green, dusty
-  blue, faded brick, weathered tan, soft warm grey. Aged and lived-in.
-· LOW CONTRAST and warm overall, as if painted in ink and watercolour. Any
-  paper tooth belongs to the OBJECT itself — never paint a sheet of
-  paper, a parchment card or a cream backdrop behind it.
-· Honest, slightly naive craft — charming rather than slick.
+STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
+from a children’s picture book or a hand-painted board game. The world is
+a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
+garden bugs attacking it. Match this in every square:
+· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
+  #3b2a21, never pure black), with the line weight varying like a real brush
+  pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
+  tone, one small highlight, with the light from the UPPER LEFT. A little
+  hand-painted texture in the fills, like gouache or marker on paper.
+· BRIGHT, WARM, SUNNY COLOUR. Clean toy primaries, warm sand, leaf green and
+  paddling-pool turquoise — saturated and cheerful, but never neon.
+· MATERIALS READ AS WHAT THEY ARE: sand is grainy and crumbly, pebbles are
+  smooth and matte, toy plastic is smooth with one soft highlight and a
+  faint moulding seam, bug shells are glossy with a single glint.
+· CUTE-EVIL, not scary: bugs are cartoon characters with big expressive
+  eyes and a mischievous look. Toys look loved and a little worn.
+· Chunky, readable shapes — silhouette first, detail second. Charming,
+  slightly naive handmade craft, never slick.
 
-AVOID — this is exactly how earlier attempts went wrong:
-· NO glossy, plasticky, airbrushed mobile-game look. No shiny highlights, no
-  smooth 3D-rendered shading, no bevelled plastic edges.
-· NO saturated, candy-bright colour. If it looks vivid, it is wrong.
-· NO heavy uniform black outlines and no hard cel-shaded banding.
-· NO cold grey, gritty, weathered-industrial or grimdark look.
+AVOID — these are the ways this goes wrong:
+· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
+  rendered volume, no bevel-and-emboss, no lens flare, no bloom.
+· NO muddy, dusty, greyed, aged or parchment look. It is a sunny afternoon,
+  not an old book.
+· NO medieval fantasy: no stone keeps, iron, timber crates, real armour,
+  goblins or monsters. Everything here is sand, toys, garden and bugs.
+· NO realistic insects: no hairy macro-photo bugs, no creepy anatomy, no
+  gore. Cartoon bugs only.
+· NO uniform-weight black vector outlines (clip-art) — the ink is warm
+  brown and hand-varied.
 · NO frames, borders, cards, vignettes, matting or paper background inside a
   square. The object itself fills the square edge to edge, corner to corner.
 · Do not invent content for a square that is blank. Leave it blank.

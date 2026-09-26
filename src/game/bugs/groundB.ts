@@ -4,7 +4,7 @@ import {
 } from '@/game/inkArt'
 import {
   INK, SHADOW_DIR, LINE, paint, gait, footStep, bodyBob, weightShift, limb, ik,
-  groundShadow, spines, pivot
+  spines, pivot, drawShadowSpec, type ShadowSpec
 } from '@/game/monsterKit'
 
 /**
@@ -266,6 +266,9 @@ const spiderLeg = (
   fillShape(ctx, blob(foot[0], foot[1] - 0.005 * S, 0.035 * S, 0.025 * S, seed + 30, 0.2), INK)
 }
 
+/** Its contact shadow — baked into the frames, and laid under a painted strip. */
+export const SPIDER_SHADOW: ShadowSpec = { w: 0.84, y: 1.02, a: 0.26 }
+
 /**
  * A round fuzzy jumping spider: a big furry face with two enormous glossy eyes,
  * a charcoal abdomen with an orange racing stripe riding behind it like a
@@ -292,7 +295,7 @@ export const drawSpider = (ctx: CanvasRenderingContext2D, S: number, t: number):
   const PALP = tones('#f3e6c8', 0.75)
   const HAIR = '#3b2a21'
 
-  groundShadow(ctx, S, 0.84, 1.02, 0.26)
+  drawShadowSpec(ctx, S, SPIDER_SHADOW)
 
   const hx = 0.05 * S + sway
   const hy = 0.36 * S + b
@@ -437,6 +440,9 @@ export const drawSpider = (ctx: CanvasRenderingContext2D, S: number, t: number):
 /** One authored steam puff, reused at every size — scaled, never re-seeded. */
 const PUFF: Pt[] = blob(0, 0, 1, 0.84, 701, 0.16, 2.4, 36)
 
+/** Its contact shadow — baked into the frames, and laid under a painted strip. */
+export const BOMBARDIER_SHADOW: ShadowSpec = { w: 0.82, y: 1.01, a: 0.26 }
+
 /**
  * Bright orange head and legs, a glossy blue-black wing case, and a backside
  * that will not stop smoking. It walks up to the wall grinning through its
@@ -459,7 +465,7 @@ export const drawBombardier = (ctx: CanvasRenderingContext2D, S: number, t: numb
   const SHELL = tones('#2c3a6e', 1.05)
   const STEAM: CelTones = { base: '#fbf4e2', shade: '#dccdb0' }
 
-  groundShadow(ctx, S, 0.82, 1.01, 0.26)
+  drawShadowSpec(ctx, S, BOMBARDIER_SHADOW)
 
   const ex = -0.08 * S + sway + jit
   const ey = 0.3 * S + b
@@ -613,6 +619,9 @@ export const drawBombardier = (ctx: CanvasRenderingContext2D, S: number, t: numb
 /** Plate seams along the dome, back to front, as fractions of its length. */
 const PLATES = 7
 
+/** Its contact shadow — baked into the frames, and laid under a painted strip. */
+export const ROLY_POLY_SHADOW: ShadowSpec = { w: 0.96, y: 1.02, a: 0.3 }
+
 /**
  * A pill bug in seven overlapping grey plates, scurrying on a ripple of tiny
  * legs, holding a bottle cap out in front as a shield. The cap is on +x — the
@@ -637,7 +646,7 @@ export const drawRolyPoly = (ctx: CanvasRenderingContext2D, S: number, t: number
   const RIM = tones('#d1d6dc', 1.1)
   const SEAM = 'rgba(52,46,62,0.9)'
 
-  groundShadow(ctx, S, 0.96, 1.02, 0.3)
+  drawShadowSpec(ctx, S, ROLY_POLY_SHADOW)
 
   // Body frame: pivot about the belly so the rock tips it forward and back.
   // Sized so tail prongs to cap rim fits the ±1.1 frame box.
@@ -882,6 +891,9 @@ const mandible = (
   fillShape(ctx, blob(tip[0], tip[1], 0.03 * S, 0.026 * S, seed + 21, 0.1), 'rgba(40,14,10,0.85)')
 }
 
+/** Its contact shadow — baked into the frames, and laid under a painted strip. */
+export const STAG_BEETLE_SHADOW: ShadowSpec = { w: 1.04, y: 1.02, a: 0.34 }
+
 /**
  * The boss: a stag beetle in full threat posture, head raised and antler
  * mandibles spread like a crown. Glossy black-red, slow, and heavy — each
@@ -903,7 +915,7 @@ export const drawStagBeetle = (ctx: CanvasRenderingContext2D, S: number, t: numb
   const LEGT = tones('#43292b', 1.05)
   const DUST = '#e9cf98'
 
-  groundShadow(ctx, S, 1.04, 1.02, 0.34)
+  drawShadowSpec(ctx, S, STAG_BEETLE_SHADOW)
 
   const ex = -0.1 * S + sway * 0.8
   const ey = 0.16 * S + b * 0.9

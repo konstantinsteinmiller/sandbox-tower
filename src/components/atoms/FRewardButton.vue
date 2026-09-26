@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { prependBaseUrl } from '@/utils/function'
 import {
   isRewardGated, canOfferReward, adInFlight, REWARD_COIN_COST
 } from '@/use/useAdGate'
 import { coins as walletCoins } from '@/use/useTowerEconomy'
 import IconCoin from '@/components/icons/IconCoin.vue'
 import GameIcon from '@/components/icons/GameIcon.vue'
+import IconMovie from '@/components/icons/IconMovie.vue'
 import type { GameIconName } from '@/components/icons/iconNames'
 
 /**
@@ -62,8 +62,6 @@ const purse = computed(() => props.coins ?? walletCoins.value)
 
 defineEmits(['click'])
 
-const movieSrc = prependBaseUrl('images/icons/movie_128x96.webp')
-
 /** Show the badge only when tapping this really will play a video. */
 const showMovie = computed(() => isRewardGated && !props.free)
 
@@ -91,12 +89,7 @@ const disabled = computed(() =>
     span.f-reward-button__body
       //- The video badge LEADS: it is not a price, it is what tapping this
       //- does, and the player needs to know that before they read the offer.
-      img.f-reward-button__movie(
-        v-if="showMovie"
-        :src="movieSrc"
-        alt=""
-        draggable="false"
-      )
+      IconMovie.f-reward-button__movie(v-if="showMovie" aria-hidden="true")
       GameIcon.f-reward-button__icon(v-if="iconOnly && icon" :name="icon")
       span.f-reward-button__label(v-else)
         slot {{ label }}
@@ -182,7 +175,7 @@ const disabled = computed(() =>
 .f-reward-button__movie
   flex: 0 0 auto
   width: clamp(1.1rem, 4.6vw, 1.6rem)
-  height: auto
+  height: clamp(1.1rem, 4.6vw, 1.6rem)
   // The icon is the price tag; it must not be dimmed into invisibility on the
   // gold body.
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6))

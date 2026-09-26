@@ -173,6 +173,22 @@ export const drawCavalryDust = (
 }
 
 /**
+ * The rider's contact shadow at this moment of the gallop — narrower and
+ * fainter while every hoof is off the ground.
+ *
+ * Its own function because a PAINTED gallop strip replaces the whole rider and
+ * carries no shadow (a soft shadow cannot be painted over a chroma key), so
+ * the battlefield lays this one under it, on the same beat.
+ */
+export const drawCavalryShadow = (
+  ctx: CanvasRenderingContext2D, S: number, t: number, phase: number
+): void => {
+  const g = gait(t, CAVALRY_CYCLE_MS, phase)
+  const airborne = Math.max(0, Math.sin(g * Math.PI * 2 + 0.6))
+  groundShadow(ctx, S, 0.5 - airborne * 0.13, GROUND + 0.04, 0.26 - airborne * 0.1)
+}
+
+/**
  * Draw one rider.
  *
  * `phase` is the individual's gait offset so a squad of three never moves in
@@ -199,7 +215,7 @@ export const drawCavalry = (
   // The spine flexes — the horse gathers under itself, then extends.
   const gather = Math.cos(g * Math.PI * 2) * 0.028 * S
 
-  groundShadow(ctx, S, 0.5 - airborne * 0.13, GROUND + 0.04, 0.26 - airborne * 0.1)
+  drawCavalryShadow(ctx, S, t, phase)
 
   if (opts.dust !== false) drawCavalryDust(ctx, S, t, phase)
 

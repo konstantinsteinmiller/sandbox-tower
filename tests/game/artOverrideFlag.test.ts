@@ -65,9 +65,9 @@ describe('art overrides, on', () => {
     art.spriteFor('block', 'wood')
     art.spriteFor('enemy', 'grunt')
 
-    // A block reads from its SHARED base: wood is a timber crate, and so is the
-    // archer post. The documented path for 'wood' is therefore timber.webp.
-    expect(requested.some((u) => u.endsWith('images/blocks/timber.webp'))).toBe(true)
+    // Every block reads its OWN body: each toy's plinth wears its own colour
+    // band, so there is no shared base to fall back to (`BLOCK_ART_BASE`).
+    expect(requested.some((u) => u.endsWith('images/blocks/wood.webp'))).toBe(true)
     expect(requested.some((u) => u.endsWith('images/enemies/grunt.webp'))).toBe(true)
   })
 

@@ -3,8 +3,8 @@ import {
   type Pt, type CelTones
 } from '@/game/inkArt'
 import {
-  INK, SHADOW_DIR, LINE, paint, blink, gait, footStep, bodyBob, groundShadow, ik, pivot,
-  type PaintOpts
+  INK, SHADOW_DIR, LINE, paint, blink, gait, footStep, bodyBob, ik, pivot,
+  type PaintOpts, drawShadowSpec, type ShadowSpec
 } from '@/game/monsterKit'
 
 /**
@@ -426,6 +426,9 @@ const antLegs = (
 
 // ─── 1 · Black Ant (grumpling) ──────────────────────────────────────────────
 
+/** Its contact shadow — baked into the frames, and laid under a painted strip. */
+export const BLACK_ANT_SHADOW: ShadowSpec = { w: 0.7, y: 1.02, a: 0.24 }
+
 /**
  * The Black Ant — the baseline, and the most common thing on screen.
  *
@@ -442,7 +445,7 @@ export const drawBlackAnt = (ctx: CanvasRenderingContext2D, S: number, t: number
   const lag = (bodyBob(g - 0.12, 0.014) - bodyBob(g, 0.014)) * S
   const lag2 = (bodyBob(g - 0.24, 0.014) - bodyBob(g, 0.014)) / 0.014
 
-  groundShadow(ctx, S, 0.7, 1.02, 0.24)
+  drawShadowSpec(ctx, S, BLACK_ANT_SHADOW)
 
   // Tripod A = near front, far middle, near hind; B the other three.
   // hipX, hipY, footX, femur, tibia, bend, phase, toe
@@ -541,6 +544,9 @@ export const drawBlackAnt = (ctx: CanvasRenderingContext2D, S: number, t: number
 
 const PEBBLE = tones('#9aa3ad', 1.05)
 
+/** Its contact shadow — baked into the frames, and laid under a painted strip. */
+export const RED_ANT_SHADOW: ShadowSpec = { w: 0.62, y: 1.02, a: 0.26 }
+
 /**
  * The Red Ant: the Black Ant's hot-headed sibling.
  *
@@ -555,7 +561,7 @@ export const drawRedAnt = (ctx: CanvasRenderingContext2D, S: number, t: number):
   const lag = (bodyBob(g - 0.12, 0.018) - bodyBob(g, 0.018)) * S
   const lag2 = (bodyBob(g - 0.24, 0.018) - bodyBob(g, 0.018)) / 0.018
 
-  groundShadow(ctx, S, 0.62, 1.02, 0.26)
+  drawShadowSpec(ctx, S, RED_ANT_SHADOW)
 
   // Four walking legs, trotting in diagonal pairs.
   const LEGS: readonly LegRow[] = [
@@ -689,6 +695,9 @@ const ROACH_HEAD = tones('#8e4520', 1.05)
 const ROACH_LEG: CelTones = { base: '#ab6531', shade: '#7c4321', lit: '#d0935a' }
 const ROACH_LEG_FAR: CelTones = { base: '#7c4321', shade: '#5a2e16', lit: '#96562f' }
 
+/** Its contact shadow — baked into the frames, and laid under a painted strip. */
+export const COCKROACH_SHADOW: ShadowSpec = { w: 0.86, y: 1.02, a: 0.26 }
+
 /**
  * The Cockroach: low, long and glossy, with antennae longer than its body.
  *
@@ -707,7 +716,7 @@ export const drawCockroach = (ctx: CanvasRenderingContext2D, S: number, t: numbe
   // A skitter rocks the long body nose-down on each footfall.
   const pitch = osc(g, 2, 0.15) * 0.018
 
-  groundShadow(ctx, S, 0.86, 1.02, 0.26)
+  drawShadowSpec(ctx, S, COCKROACH_SHADOW)
 
   const LEGS = [
     [-0.36, 0.72, -0.8, 0.34, 0.38, 1, 0.0, -1],
@@ -827,6 +836,9 @@ const BEETLE_LEG: CelTones = { base: '#6c2e1a', shade: '#4a1d10', lit: '#a45c3c'
 const BEETLE_LEG_FAR: CelTones = { base: '#4a1d10', shade: '#2e120a', lit: '#6c2e1a' }
 const SHELL_SPEC = 'rgba(255,206,168,0.88)'
 
+/** Its contact shadow — baked into the frames, and laid under a painted strip. */
+export const RHINO_BEETLE_SHADOW: ShadowSpec = { w: 0.8, y: 1.02, a: 0.3 }
+
 /**
  * The Rhino Beetle: a battering ram with legs.
  *
@@ -841,7 +853,7 @@ export const drawRhinoBeetle = (ctx: CanvasRenderingContext2D, S: number, t: num
   const shove = osc(g, 2, 0.1) * 0.012 * S
   const lag = (bodyBob(g - 0.1, 0.018) - bodyBob(g, 0.018)) * S
 
-  groundShadow(ctx, S, 0.8, 1.02, 0.3)
+  drawShadowSpec(ctx, S, RHINO_BEETLE_SHADOW)
 
   const LEGS = [
     [-0.34, 0.66, -0.66, 0.3, 0.36, 1, 0.0, -1],

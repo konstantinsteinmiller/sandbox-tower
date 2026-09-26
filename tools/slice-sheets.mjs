@@ -327,6 +327,10 @@ const TARGETS = [
     // Where the reference sits inside a panel, so a return painted at a
     // different size can be normalised back onto it.
     fit: a.fit ?? null, anchor: a.anchor ?? 'feet',
+    // A single subject with a gap through it (the toothpick ring): the grid
+    // check below would read the gap as a panel edge. See `hollow` in the
+    // manifest's WalkSpec.
+    hollow: a.hollow === true,
     // A fixture's box is a hard boundary — it is the space a block lends the
     // weapon bolted to it — so a return is fitted INSIDE it in both axes. A
     // creature's box is not: it stands on open ground, and shrinking it
@@ -808,6 +812,12 @@ try {
         console.warn(`  ! grid reads ${got.cols}x${got.rows} = ${got.cols * got.rows} panels,`
           + ` not ${wantCols}x${wantRows} — taking it as a ${FRAMES_OVERRIDE}-frame cycle.`)
         sheet = { ...sheet, cols: got.cols, rows: got.rows, frames: got.cols * got.rows }
+      } else if (sheet.hollow && sheet.frames === 1) {
+        // One image, and its subject has a gap right through it by design, so
+        // the "panels" the detector found are that gap. There is nothing to
+        // shred in a one-frame sheet; cut it whole, as asked.
+        console.log(`  · reads as ${got.cols}x${got.rows} through the gap in a hollow subject;`
+          + ' cutting it whole, as asked')
       } else if (got.cols === 1 && got.rows === 1) {
         console.warn('  ! the whole sheet reads as ONE panel. Either the creatures'
           + ' touch each other or the background is not one flat colour.')

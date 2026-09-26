@@ -397,15 +397,42 @@ export const boneLimb = (
   cel(ctx, k, t, { shade: terminator(k, SHADOW_DIR, SHADE, 0.16, seed + 4) })
 }
 
+/**
+ * Whether contact shadows are being left out, for an art-sheet reference.
+ *
+ * A painter is told never to paint a shadow — soft dark over the magenta key
+ * cannot be cut out cleanly — so the game lays its own under a painting. The
+ * reference has to agree with that, and not only for honesty: the slicer
+ * registers a return by the BOTTOM of the reference's ink, and a shadow
+ * reaching below the feet put every painted character's feet on the shadow's
+ * lower edge instead, standing it a shadow's depth too low.
+ */
+let shadowsOff = false
+
+/** Run `fn` with every `groundShadow` a no-op. For reference renders only. */
+export const withoutShadows = <T>(fn: () => T): T => {
+  const was = shadowsOff
+  shadowsOff = true
+  try { return fn() } finally { shadowsOff = was }
+}
+
 /** A contact shadow, so nothing floats unintentionally. */
 export const groundShadow = (
   ctx: CanvasRenderingContext2D, S: number, w: number, y = 1.02, a = 0.28
 ): void => {
+  if (shadowsOff) return
   ctx.save()
   ctx.globalAlpha = a
   fillShape(ctx, blob(0, y * S, w * S, 0.1 * S, 21, 0.14), '#20141c')
   ctx.restore()
 }
+
+/** A design's contact shadow, as numbers: width and height in `S`, and alpha. */
+export interface ShadowSpec { w: number; y: number; a: number }
+
+/** `groundShadow` from a spec — the one a design and its painted strip share. */
+export const drawShadowSpec = (ctx: CanvasRenderingContext2D, S: number, sh: ShadowSpec): void =>
+  groundShadow(ctx, S, sh.w, sh.y, sh.a)
 
 // ─── Locomotion ─────────────────────────────────────────────────────────────
 

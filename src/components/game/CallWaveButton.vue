@@ -2,12 +2,12 @@
 import { computed } from 'vue'
 import { GAME_SPEEDS, needsSpeedBuff, SPEED_BUFF_MS } from '@/use/useTowerGame'
 import { useI18n } from 'vue-i18n'
-import { prependBaseUrl } from '@/utils/function'
 import {
   isRewardGated, canOfferReward, adInFlight, REWARD_COIN_COST
 } from '@/use/useAdGate'
 import { coins as walletCoins } from '@/use/useTowerEconomy'
 import IconCoin from '@/components/icons/IconCoin.vue'
+import IconMovie from '@/components/icons/IconMovie.vue'
 import PointerArrow from '@/components/game/PointerArrow.vue'
 
 /**
@@ -109,7 +109,6 @@ const urgent = computed(() => props.phase === 'build' && props.timeLeft <= 10_00
 // about pattern in portal QA) and it must never be a visible cost that is not
 // real: 1.5× is free, so a film badge on it would be a lie that costs a tap to
 // discover.
-const movieSrc = prependBaseUrl('images/icons/movie_128x96.webp')
 
 /** True once fast-forward is paid for, whatever rung is selected. */
 const buffOwned = computed(() => props.speedBuffLeft > 0)
@@ -200,12 +199,7 @@ const onSpeed = (n: number): void => {
         )
           span.speed-switch__x {{ n }}×
           //- Only on the rungs it gates, and only until they are paid for.
-          img.speed-switch__movie(
-            v-if="needsSpeedBuff(n) && showMovie"
-            :src="movieSrc"
-            alt=""
-            draggable="false"
-          )
+          IconMovie.speed-switch__movie(v-if="needsSpeedBuff(n) && showMovie" aria-hidden="true")
           //- The coin price, as a chip pinned to the rung's corner so the
           //- tightest row in the HUD does not widen: the amount, then the coin.
           //- It pops back in the moment the paid time runs out.
@@ -406,7 +400,7 @@ const onSpeed = (n: number): void => {
 .speed-switch__movie
   flex: 0 0 auto
   width: clamp(0.85rem, 3.6vw, 1.15rem)
-  height: auto
+  height: clamp(0.85rem, 3.6vw, 1.15rem)
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6))
   pointer-events: none
 

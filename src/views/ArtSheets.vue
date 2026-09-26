@@ -12,6 +12,7 @@ import { blockGlyph } from '@/game/blockGlyph'
 import { themedPalette } from '@/game/art'
 import { MONSTERS } from '@/game/monsters'
 import { paintMonsterFrame } from '@/game/monsterSprites'
+import { withoutShadows } from '@/game/monsterKit'
 import { ENEMY_DEFS } from '@/game/enemies'
 import { drawSiegeMachine } from '@/game/siegeArt'
 import { drawCavalry, CAVALRY_CYCLE_MS } from '@/game/cavalryArt'
@@ -186,7 +187,20 @@ const paintHull = (
   c.restore()
 }
 
-const paintCell = (ctx: CanvasRenderingContext2D, cell: SheetCell, size: number): void => {
+/**
+ * Every reference is drawn WITHOUT contact shadows.
+ *
+ * The painter is told never to paint one (soft dark over the magenta key
+ * cannot be cut out), and the game lays its own under a painted bug, rider or
+ * engine. A shadow left in the reference also broke the fit: the slicer
+ * registers a return by the bottom of the reference's ink, which was the
+ * shadow's lower edge rather than the feet — so every painted character landed
+ * a shadow's depth too low.
+ */
+const paintCell = (ctx: CanvasRenderingContext2D, cell: SheetCell, size: number): void =>
+  withoutShadows(() => paintCellWithShadows(ctx, cell, size))
+
+const paintCellWithShadows = (ctx: CanvasRenderingContext2D, cell: SheetCell, size: number): void => {
   const a = cell.art
 
   switch (a.kind) {
@@ -318,9 +332,9 @@ const paintCell = (ctx: CanvasRenderingContext2D, cell: SheetCell, size: number)
     case 'bitmap': {
       const img = bitmaps.get(a.src)
       if (!img?.naturalWidth) break
-      // Letterboxed, aspect preserved. The ribbon is 3:1 and the movie icon is
-      // 4:3 — stretching either to a square would hand the painter a distorted
-      // reference and get a distorted asset back.
+      // Letterboxed, aspect preserved. Stretching a non-square bitmap to a
+      // square would hand the painter a distorted reference and get a
+      // distorted asset back.
       const k = Math.min(size / img.naturalWidth, size / img.naturalHeight) * 0.92
       const w = img.naturalWidth * k
       const h = img.naturalHeight * k
@@ -472,7 +486,11 @@ const paintFixtureRef = (c: CanvasRenderingContext2D, walk: WalkSpec): void => {
   )
 }
 
-const renderWalk = (walk: WalkSpec): HTMLCanvasElement => {
+/** A walk, arm, chassis, hull or fixture sheet — without shadows, see `paintCell`. */
+const renderWalk = (walk: WalkSpec): HTMLCanvasElement =>
+  withoutShadows(() => renderWalkWithShadows(walk))
+
+const renderWalkWithShadows = (walk: WalkSpec): HTMLCanvasElement => {
   const cv = document.createElement('canvas')
   cv.width = walk.w
   cv.height = walk.h
@@ -736,6 +754,7 @@ const buildIndex = () => ({
     ...(walkFits.has(`${w.kind}/${w.id}`) ? { fit: walkFits.get(`${w.kind}/${w.id}`) } : {}),
     faces: w.faces,
     anchor: w.anchor,
+    ...(w.hollow ? { hollow: true } : {}),
     target: w.target
   })),
   sheets: SHEETS.map((s) => ({
@@ -760,11 +779,11 @@ const buildIndex = () => ({
       w: c.cw * CELL,
       h: c.ch * CELL,
       ...(c.target ? { target: c.target } : {}),
-      // A cell holding an EXISTING bitmap was letterboxed to fit the square —
-      // the ribbon is 3:1 and the movie icon 4:3. Without its true size here,
-      // the slicer would write a padded square back over a 553x188 file and
-      // quietly wreck the result screen. With it, the slicer trims the
-      // transparent margin and restores the original shape.
+      // A cell holding an EXISTING bitmap was letterboxed to fit the square.
+      // Without its true size here, the slicer would write a padded square
+      // back over a non-square file and quietly wreck whatever shows it. With
+      // it, the slicer trims the transparent margin and restores the original
+      // shape.
       ...(c.art.kind === 'bitmap' ? { letterboxed: nativeSize(c.art.src) } : {}),
       ...(c.note ? { note: c.note } : {})
     })),

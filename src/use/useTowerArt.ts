@@ -2,7 +2,7 @@ import { blockDef, GATE_ID, isShip, tierOf } from '@/game/blocks'
 import { CLEAN_FEED } from '@/game/cleanFeed'
 import { rulesNow } from '@/game/rules'
 import { tierStyle, TIER_RUNGS } from '@/game/tierStyle'
-import { TIER_ART_WEAPONS, tierFixtureArt, tierFixtureId, enemyStillArt } from '@/game/paintedArt'
+import { TIER_ART_WEAPONS, TOP_PAINTED_TIER, tierFixtureArt, tierFixtureId, enemyStillArt } from '@/game/paintedArt'
 import { enemyDef } from '@/game/enemies'
 import {
   themedPalette, spriteFor, withAlpha, mixHex, onArtChanged, type Palette
@@ -10,13 +10,14 @@ import {
 import { isBossWave } from '@/game/waves'
 import {
   monsterFrame, monsterFaces, monsterAnchor, pickMonster, primeMonsterSprites,
-  allMonsterIds, SPRITE_FOOT_R, SPRITE_HEIGHT_R
+  allMonsterIds, paintedMonsterShadow, SPRITE_FOOT_R, SPRITE_HEIGHT_R
 } from '@/game/monsterSprites'
 import { stripFrame } from '@/game/spriteStrip'
 import {
   drawSquirtMount, drawSquirtGun, drawBlasterMount, drawDartBlaster, drawMudMortar,
   drawBalloonLauncher, drawBugZapper, drawIcePop, drawToothpicks, drawPaperFlag,
-  drawMagicShell, drawSandSifter, drawPebbleDigger, drawPiggyBank, drawBucketSpade
+  drawMagicShell, drawSandSifter, drawPebbleDigger, drawPiggyBank, drawBucketSpade,
+  drawZapperGlow, drawZapperCrackle, drawIcePopGlow, drawIcePopGlints, drawToothpickGlints
 } from '@/game/toyFixtures'
 import {
   blob, fillShape, grain, ink, noise2, shrink, stroke as inkStroke, withHatching,
@@ -163,12 +164,12 @@ const tileBand = (
 }
 
 import { rotatedShape, SHAPE_BY_ID } from '@/game/shapes'
-import { drawSiegeMachine } from '@/game/siegeArt'
+import { drawSiegeMachine, drawSiegeShadow } from '@/game/siegeArt'
 import { drawShip, type ShipLayer } from '@/game/shipArt'
 import {
   bodyLook, traceBlockBody, paintBlockMaterial, paintSandDamage, drawBucketRoof
 } from '@/game/sandBlockArt'
-import { drawCavalry, cavalryCycle01, drawCavalryDust } from '@/game/cavalryArt'
+import { drawCavalry, cavalryCycle01, drawCavalryDust, drawCavalryShadow } from '@/game/cavalryArt'
 import { ALLY_DEFS } from '@/game/allies'
 import { GRASS_DEPTH, SEA_LEVEL } from '@/game/world'
 import {
@@ -485,6 +486,26 @@ const MORTAR_ELEV = 0.98
 /** The bombard drops it just over the wall, so it sits far steeper. */
 const BOMBARD_ELEV = 1.24
 
+/**
+ * What an aimed gun is bolted to — the squirt gun's swivel stand, the dart
+ * blaster's tripod — in BLOCK space: it does not turn with the gun. Drawn
+ * under a painted gun as well, which is authored without it.
+ */
+const drawFixtureMount = (ctx: CanvasRenderingContext2D, typeId: string, s: number): void => {
+  if (typeId === 'cannon') drawSquirtMount(ctx, s)
+  else if (typeId === 'archer') drawBlasterMount(ctx, s)
+}
+
+/**
+ * The 0..1 pulse a clock-animated fixture breathes on. One definition, because
+ * the drawing and the live layer over a PAINTED fixture must agree on it.
+ */
+const fixturePulse = (typeId: string, t: number, c: number): number =>
+  typeId === 'tesla' ? 0.5 + 0.5 * Math.sin(t / 150)
+    : typeId === 'frost' ? 0.5 + 0.5 * Math.sin(t / 320)
+      : typeId === 'spikes' ? 0.55 + 0.45 * Math.sin(t / 420 + c * 1.7)
+        : 0
+
 const drawFixture = (
   ctx: CanvasRenderingContext2D, b: Block, cx: number, cy: number, s: number,
   t: number, layer: FixtureLayer = 'all'
@@ -497,6 +518,10 @@ const drawFixture = (
   // A gun with a grip and a top face flips across its own axis once it points
   // back over the tower, so it never hangs upside-down (as `shipArt` does).
   const flip = Math.cos(b.aim) < 0
+  // The moving glow, spark and glints — left out of the art bench's reference
+  // (the `weapon` layer), because a painting keeps them live on top of itself
+  // and a reference that showed them would get them painted in as well.
+  const live = layer !== 'weapon'
 
   ctx.save()
   ctx.translate(cx, cy)
@@ -505,7 +530,7 @@ const drawFixture = (
     case 'cannon': {
       // Squirt Gun. The swivel stand first, in BLOCK space — it does not
       // rotate with the gun.
-      if (layer !== 'weapon') drawSquirtMount(ctx, s)
+      if (layer !== 'weapon') drawFixtureMount(ctx, 'cannon', s)
 
       ctx.rotate(-b.aim)
       ctx.translate(-recoil, 0)
@@ -516,7 +541,7 @@ const drawFixture = (
     }
     case 'archer': {
       // Dart Blaster. Its tripod stands in block space, like the old parapet.
-      if (layer !== 'weapon') drawBlasterMount(ctx, s)
+      if (layer !== 'weapon') drawFixtureMount(ctx, 'archer', s)
 
       ctx.rotate(-b.aim)
       ctx.translate(-recoil * 0.6, 0)
@@ -545,23 +570,20 @@ const drawFixture = (
     case 'tesla': {
       // Bug Zapper: a glowing grid lantern; the pulse telegraphs "this one
       // chains", and the arcs leave from the hook on its roof.
-      const pulse = 0.5 + 0.5 * Math.sin(t / 150)
-      drawBugZapper(ctx, s, pulse, tier, p)
+      drawBugZapper(ctx, s, fixturePulse('tesla', t, b.c), tier, p, live)
       break
     }
     case 'frost': {
       // Ice Pop: a giant ice pop on its stick; the old crystals are its
       // frost glints now, breathing on the same clock.
-      const pulse = 0.5 + 0.5 * Math.sin(t / 320)
-      drawIcePop(ctx, s, pulse, tier)
+      drawIcePop(ctx, s, fixturePulse('frost', t, b.c), tier, live)
       break
     }
     case 'spikes': {
       // Toothpicks on all four faces. They point OUT of the block on every
       // side because the thorns rule fires no matter which face gets hit, and
       // art that only spiked the top would lie about that.
-      const glint = 0.55 + 0.45 * Math.sin(t / 420 + b.c * 1.7)
-      drawToothpicks(ctx, s, glint)
+      drawToothpicks(ctx, s, fixturePulse('spikes', t, b.c), live)
       break
     }
     case 'bombard': {
@@ -695,43 +717,23 @@ const AIMED_FIXTURES = new Set(['cannon', 'archer'])
 /**
  * How much bigger a painted fixture is blitted than the box it was fitted to.
  *
- * A deliberate override of the fit, not a correction to it, and it is per
- * fixture because the reason is per fixture.
+ * A deliberate override of the fit, not a correction to it, and per fixture
+ * because the reason would be per fixture. EMPTY: every Sandbox Tower toy is
+ * fitted to its own drawing by the slicer and registered on it here (see
+ * `drawnCentre`), so a painting lands at the drawn toy's size and place.
  *
- * FROST: the drawn emitter is a small crystal cluster inside a wide soft
- * glow, and the glow is most of what a player sees. The painting has no glow,
- * so a crystal fitted to the drawn crystal reads as a chip of ice on an empty
- * plate. Its return also measures larger than it is — half-keyed speckle from
- * the glow it was painted with survives the key and inflates the box the fit
- * is computed from — so the fit lands it at two thirds of even that.
- *
- * TESLA: no such story. It just reads small next to the coil it replaces.
+ * Tower Siege carried five knobs here — frost 1.5, repair 1.7, the lumber hut
+ * 1.35, archer 1.25, tesla 1.12 — each justified by one of ITS drawings: a
+ * crystal inside a wide glow, a matchstick crane, a roof under a curl of smoke.
+ * None of those drawings exists any more, and left in they would have blown a
+ * painted Bucket & Spade up to 1.7 times the drawn one. Kept as the knob for
+ * the next painting that genuinely reads small.
  */
-const FIXTURE_ART_SCALE: Record<string, number> = {
-  // Re-trimmed when the fit moved from "inside the box" to "the box's
-  // area": every painting got its height back, so each knob had to give up
-  // the share of the growth the fit is now doing itself. They are targets
-  // against the DRAWN fixture — frost about 1.6x it, tesla about 1.2x,
-  // the hut about level — not multipliers anyone should read on their own.
-  frost: 1.5,
-  tesla: 1.12,
-  archer: 1.25,
-  // The drawn crane is a small thing in a big box; the painting matched it
-  // faithfully and read as a matchstick on a crate.
-  repair: 1.7,
-  // The drawn hut carries a curl of smoke the painting leaves out, so the
-  // reference box is taller than the roof that has to fill it.
-  lumberHut: 1.35
-}
+const FIXTURE_ART_SCALE: Record<string, number> = {}
 
 /**
- * Where a painted fixture sits, nudged, in fractions of its sprite box.
- *
- * Empty on purpose. It held the banner (dragged back to centre) and the
- * lumber hut (lifted back onto its block) while the slicer registered a
- * fixture against the drawing it replaced; the slicer now centres every
- * fixture in its box, so both corrections would push a centred part OFF
- * centre by the same amount. Kept as the knob for the next one-off.
+ * Where a painted fixture sits, nudged, in fractions of its sprite box, on top
+ * of the registration. Empty; kept as the knob for the next one-off.
  */
 const FIXTURE_ART_NUDGE: Record<string, [number, number]> = {}
 
@@ -925,6 +927,104 @@ const getFixtureSprite = (b: Block, s: number, t: number): FixtureSprite | null 
   return e
 }
 
+/** Stand-in Block for measuring a drawing — kept apart from `fixtureProxy`,
+ *  which is mid-use whenever a painted fixture is being blitted. */
+const measureProxy = { typeId: '', aim: 0, recoil: 0, uid: 0, c: 0, tier: 1 } as unknown as Block
+
+const drawnCentres = new Map<string, { x: number; y: number }>()
+
+/**
+ * Where the DRAWN fixture's ink sits in its sprite box, 0..1.
+ *
+ * A painting is registered on this. The slicer centres every returned fixture
+ * in its box — it cannot know where the game wants it — but the drawn toys are
+ * not centred: the squirt gun pivots on its stand with its nozzle reaching
+ * right, the zapper and the bucket stand in the upper half of the cell, the
+ * lobbers stand on a hub at the cell's middle. Blitted as sliced, a painted
+ * gun floated off the stand under it and a painted zapper sank into its
+ * block. So the painting's ink centre goes where the drawing's ink centre is,
+ * and every part of the game that was placed against the drawing — the stand,
+ * the pivot, the live glints — lines up with the painting too.
+ *
+ * Measured off the same drawing the art bench exports as the reference (the
+ * `weapon` layer at aim zero, clock zero, no live parts), once per type and
+ * tier, and only for a type that has a painting — so the drawn game never pays
+ * for it.
+ */
+const drawnCentre = (type: string, tier: number): { x: number; y: number } => {
+  const key = `${type}|${tier}`
+  const known = drawnCentres.get(key)
+  if (known) return known
+  const centre = { x: 0.5, y: 0.5 }
+  if (typeof document !== 'undefined') {
+    const S = 48
+    const box = S * FIXTURE_BOX
+    const c = document.createElement('canvas')
+    c.width = box
+    c.height = box
+    const cc = c.getContext('2d', { willReadFrequently: true })
+    if (cc) {
+      const m = measureProxy as unknown as { typeId: string; aim: number; recoil: number; uid: number; c: number; tier: number }
+      m.typeId = type
+      m.aim = 0
+      m.recoil = 0
+      m.uid = 0
+      m.c = 0
+      m.tier = tier
+      drawFixture(cc, measureProxy, box / 2, box / 2, S, 0, 'weapon')
+      const d = cc.getImageData(0, 0, box, box).data
+      let x0 = box, y0 = box, x1 = -1, y1 = -1
+      for (let y = 0; y < box; y++) {
+        for (let x = 0; x < box; x++) {
+          if (d[(y * box + x) * 4 + 3]! <= 24) continue
+          if (x < x0) x0 = x
+          if (x > x1) x1 = x
+          if (y < y0) y0 = y
+          if (y > y1) y1 = y
+        }
+      }
+      if (x1 >= 0) {
+        centre.x = ((x0 + x1 + 1) / 2) / box
+        centre.y = ((y0 + y1 + 1) / 2) / box
+      }
+    }
+  }
+  drawnCentres.set(key, centre)
+  return centre
+}
+
+/** The middle of a sprite box, in the 0..1 units `artCentre` measures in. */
+const BOX_MIDDLE = { x: 0.5, y: 0.5 } as const
+
+/** How far each recoiling fixture kicks, as a share of `0.12 * scale` — the
+ *  drawing's own numbers (`drawFixture`), so a painting kicks as far. */
+const RECOIL_KICK: Record<string, number> = { cannon: 1, archer: 0.6, mortar: 1, bombard: 1.4 }
+
+/**
+ * The live layer of a clock-animated fixture, drawn around a PAINTING of it.
+ *
+ * A painting is one still, so what moves — the zapper's glow and spark, the
+ * ice pop's glow and glints, the toothpicks' glints — is kept procedural and
+ * laid around it: `under` behind the painting, the rest in front. The painting
+ * sits where the drawing does (see `drawnCentre`), so these land where they do
+ * over the drawing.
+ */
+const drawLiveFixtureLayer = (
+  g: CanvasRenderingContext2D, type: string, s: number, t: number, c: number, under: boolean
+): void => {
+  if (!TIMED_FIXTURES.has(type)) return
+  const pulse = fixturePulse(type, t, c)
+  if (type === 'tesla') {
+    if (under) drawZapperGlow(g, s, pulse, themedPalette(blockDef('tesla').palette))
+    else drawZapperCrackle(g, s, pulse)
+  } else if (type === 'frost') {
+    if (under) drawIcePopGlow(g, s, pulse)
+    else drawIcePopGlints(g, s, pulse)
+  } else if (type === 'spikes' && !under) {
+    drawToothpickGlints(g, s, pulse)
+  }
+}
+
 /**
  * One copy of a fixture into `g`, whose origin is the sprite's top-left.
  *
@@ -937,46 +1037,16 @@ const getFixtureSprite = (b: Block, s: number, t: number): FixtureSprite | null 
  * `artId` names the painting `gun` is, for its size and placement knobs: a
  * painted merged tier (`cannon-t2`) may carry its own, and falls back to its
  * weapon's — it was painted by the same hand, over the same kind of drawing,
- * and comes back with the same habits.
+ * and comes back with the same habits. `artTier` is the tier of the drawing
+ * that painting was cut against, which is what it is registered on.
  */
 const paintOneGun = (
   g: CanvasRenderingContext2D, gun: HTMLImageElement | null, box: number,
   type: string, aimed: boolean, side: number, scale: number, clock: number,
-  ox: number, oy: number, k: number, layer: FixtureLayer, artId: string = type
+  ox: number, oy: number, k: number, layer: FixtureLayer, artId: string = type,
+  artTier = 1
 ): void => {
-  const px = fixtureProxy as unknown as { aim: number; recoil: number }
-  if (gun) {
-    g.save()
-    g.translate(box / 2, box / 2)
-    if (aimed) g.rotate(-px.aim)
-    // Lobbers do not aim; they are mirrored by which side of the tower they
-    // stand on, so both flanks throw outward.
-    if (side) g.scale(-1, 1)
-    g.translate(ox * scale - px.recoil * scale * 0.12, oy * scale)
-    if (k !== 1) g.scale(k, k)
-    // Grown about its own ink, so a fixture that reads too small next to the
-    // drawing it replaces can be given back the size without re-slicing it —
-    // and without sliding out of the place the fit put it.
-    const grow = FIXTURE_ART_SCALE[artId] ?? FIXTURE_ART_SCALE[type] ?? 1
-    const [nx, ny] = FIXTURE_ART_NUDGE[artId] ?? FIXTURE_ART_NUDGE[type] ?? [0, 0]
-    if (grow === 1) {
-      g.drawImage(gun, -box / 2 + nx * box, -box / 2 + ny * box, box, box)
-    } else {
-      const gw = box * grow
-      const c = artCentre(gun)
-      // Solve for the offset that leaves the content's centre where it was:
-      // it sits at (c - 0.5) * box today, and at (c - 0.5) * gw once grown.
-      const off = (v: number): number => (v - 0.5) * (box - gw)
-      g.drawImage(
-        gun,
-        -gw / 2 + off(c.x) + nx * box,
-        -gw / 2 + off(c.y) + ny * box,
-        gw, gw
-      )
-    }
-    g.restore()
-    return
-  }
+  const px = fixtureProxy as unknown as { aim: number; recoil: number; c: number }
   // The drawing rotates itself, so the gun-frame offset is rotated here to
   // land in the same place the painted path's `translate` puts it.
   let dx = ox
@@ -986,6 +1056,71 @@ const paintOneGun = (
     const sa = Math.sin(px.aim)
     dx = ox * ca + oy * sa
     dy = -ox * sa + oy * ca
+  }
+  if (gun) {
+    const cx = box / 2 + dx * scale
+    const cy = box / 2 + dy * scale
+    const s = scale * k
+    // What the gun is bolted to, first and unrotated, exactly as the drawing
+    // lays it — the painting is authored without it (a stand that turned with
+    // its gun would swing through the air), and without one the gun floats.
+    if (layer !== 'weapon' && aimed) {
+      g.save()
+      g.translate(cx, cy)
+      drawFixtureMount(g, type, s)
+      g.restore()
+    }
+    if (layer !== 'weapon') {
+      g.save()
+      g.translate(cx, cy)
+      drawLiveFixtureLayer(g, type, s, clock, px.c, true)
+      g.restore()
+    }
+
+    g.save()
+    g.translate(box / 2, box / 2)
+    if (aimed) g.rotate(-px.aim)
+    // Lobbers do not aim; they are mirrored by which side of the tower they
+    // stand on, so both flanks throw outward.
+    if (side) g.scale(-1, 1)
+    g.translate(ox * scale, oy * scale)
+    // The kick runs back along the barrel, as the drawing's does — for a
+    // lobber that is down its tube, not sideways across the block.
+    const kick = px.recoil * scale * 0.12 * (RECOIL_KICK[type] ?? 0)
+    if (kick) {
+      const elev = type === 'mortar' ? MORTAR_ELEV : type === 'bombard' ? BOMBARD_ELEV : 0
+      g.translate(-kick * Math.cos(elev), kick * Math.sin(elev))
+    }
+    // A gun aimed back over the tower flips across its own barrel, as the drawn
+    // one does, so its grip hangs down instead of up (`drawFixture`'s `flip`).
+    if (aimed && Math.cos(px.aim) < 0) g.scale(1, -1)
+    if (k !== 1) g.scale(k, k)
+    // Registered on the DRAWING (`drawnCentre`), and grown about its own ink,
+    // so a fixture that reads too small can be given back size without
+    // re-slicing it and without sliding out of place.
+    const grow = FIXTURE_ART_SCALE[artId] ?? FIXTURE_ART_SCALE[type] ?? 1
+    const [nx, ny] = FIXTURE_ART_NUDGE[artId] ?? FIXTURE_ART_NUDGE[type] ?? [0, 0]
+    const gw = box * grow
+    // The slicer centres every fixture in its box, so a painting's ink sits at
+    // the middle by contract; it is only measured when a knob grows it, where
+    // growing about the wrong point would also move it.
+    const ink = grow === 1 ? BOX_MIDDLE : artCentre(gun)
+    const at = drawnCentre(type, artTier)
+    g.drawImage(
+      gun,
+      (at.x - 0.5) * box - ink.x * gw + nx * box,
+      (at.y - 0.5) * box - ink.y * gw + ny * box,
+      gw, gw
+    )
+    g.restore()
+
+    if (layer !== 'weapon') {
+      g.save()
+      g.translate(cx, cy)
+      drawLiveFixtureLayer(g, type, s, clock, px.c, false)
+      g.restore()
+    }
+    return
   }
   drawFixture(g, fixtureProxy, box / 2 + dx * scale, box / 2 + dy * scale, scale * k, clock, layer)
 }
@@ -1108,7 +1243,7 @@ const paintTieredFixture = (
     // plain fixture, so it takes the plain fixture's aim, recoil and
     // mirroring — and no wash: the painter has put the tier's colour in.
     paintOneGun(a, painting, e.box, type, aimed, side, scale, clock, 0, 0, 1, 'all',
-      tierFixtureId(type, tier))
+      tierFixtureId(type, tier), Math.min(TOP_PAINTED_TIER, tier))
   } else {
     paintOneGun(a, gun, e.box, type, aimed, side, scale, clock, 0, 0, 1, 'all')
     // The tier's colour washed over the toy, lightly: enough that the gun
@@ -1494,6 +1629,8 @@ const drawEnemy = (target: CanvasRenderingContext2D, e: Enemy, t: number): void 
       : null
     if (painted) {
       const box = s * SIEGE_BOX
+      // The shadow was part of the baked static layer the painting replaces.
+      drawSiegeShadow(ctx, s)
       ctx.drawImage(painted, -box / 2, -box / 2, box, box)
       // A painted ARM too, where one has been dropped in. It is indexed by the
       // machine's own reload rather than by a wall clock, which is the whole
@@ -1592,6 +1729,16 @@ const drawEnemy = (target: CanvasRenderingContext2D, e: Enemy, t: number): void 
       const top = monsterAnchor(monsterId) === 'centre'
         ? -h * 0.5
         : s * 0.5 - frame.height * SPRITE_FOOT_R * k
+      // A painted strip carries no shadow — the bake's own frame did — so the
+      // design's shadow goes under it, in the bake's frame box and therefore
+      // through the same fit, landing where the drawn shadow did.
+      const shadow = paintedMonsterShadow(monsterId, frame)
+      if (shadow) {
+        const ks = (s * 1.3) / (shadow.height * SPRITE_HEIGHT_R)
+        const hs = shadow.height * ks
+        const ts = monsterAnchor(monsterId) === 'centre' ? -hs * 0.5 : s * 0.5 - shadow.height * SPRITE_FOOT_R * ks
+        ctx.drawImage(shadow, -shadow.width * ks * 0.5, ts, shadow.width * ks, hs)
+      }
       ctx.drawImage(frame, -w * 0.5, top, w, h)
       ctx.restore()
       stamp()
@@ -1740,6 +1887,8 @@ const drawAlly = (target: CanvasRenderingContext2D, a: Ally, t: number): void =>
     // The dust stays live and stays UNDER the rider, the same way a ship's
     // wake does: it is transient, it is off the body, and over the magenta of
     // a reference sheet it would key to a pink smudge instead of to nothing.
+    // The contact shadow is live for the same reason, and on the same beat.
+    drawCavalryShadow(ctx, s, t, a.phase)
     drawCavalryDust(ctx, s, t, a.phase)
     const box = s * ALLY_ART_BOX
     ctx.drawImage(painted, -box / 2, -box / 2, box, box)
@@ -2693,26 +2842,14 @@ const renderBackground = (w: number, h: number, dpr: number): void => {
   // stops in mid-air is simply a floating plant. Distance is carried by scale,
   // parallax and haze instead.
   const farBase = groundY
-  // A painted far line, when there is painted art to draw it with: the same
-  // bitmap, smaller and hazed back, so the line recedes by ATMOSPHERE rather
-  // than by being a cruder shape.
-  const farTree = bgSprite('conifer')
-  if (farTree?.naturalWidth) {
-    const step = Math.max(9, w / 90)
-    c.save()
-    c.globalAlpha = 0.72
-    for (let sx = -step; sx <= w + step; sx += step) {
-      const wx = (sx + rect.l * zoom * 0.26) / 17
-      const seed = Math.floor(wx)
-      const jitter = (hash(seed * 2.9) - 0.5) * step * 0.9
-      const hgt = h * 0.032 * (0.72 + hash(seed * 5.3) * 0.6)
-      paintedTree(c, farTree, sx + jitter, farBase, hgt)
-    }
-    c.restore()
-  } else {
-    // The bed's leafy mass and tall grass, behind the flowers.
-    paintBedBack(c, w, h, farBase, rect.l * zoom * 0.26)
-  }
+  // The bed's leafy mass and tall grass, behind the flowers — drawn, painted
+  // art or not.
+  //
+  // Tower Siege filled this band with its painted spruce, small and hazed: a
+  // far tree line made of the near tree. The slot is a SUNFLOWER now, and the
+  // same trick laid a row of tiny sunflowers where the bed's foliage belongs.
+  // Nothing is painted for this band, so it keeps its drawing.
+  paintBedBack(c, w, h, farBase, rect.l * zoom * 0.26)
 
   // The flowers themselves, a little smaller than the units that walk in
   // front of them so the lane reads as running along the bed, not through it.

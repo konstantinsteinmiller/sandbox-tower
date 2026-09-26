@@ -380,40 +380,28 @@ export const ART_FOLDERS = {
 
 export type ArtKind = keyof typeof ART_FOLDERS
 
-// ─── Shared block bases ─────────────────────────────────────────────────────
+// ─── Block body bitmaps ─────────────────────────────────────────────────────
 //
-// Twenty block types do NOT need twenty bitmaps.
+// Tower Siege shared seven bases between its twenty blocks: an archery post and
+// a sawmill were the same timber crate wearing different hardware, so painting
+// both bought variety nobody could see while costing two downloads.
 //
-// Almost every block is a slab of material with a machine bolted to it, and the
-// machine is drawn live: the bow, the barrel, the coil, the blade and the pick
-// are all `drawFixture` every frame. What the bitmap underneath actually has to
-// say is what the block is MADE OF. An archery post and a sawmill are the same
-// timber crate wearing different hardware, and painting two of them buys
-// variety nobody can see while costing two downloads.
+// Sandbox Tower's bodies do not share like that. Every toy stands on a sand
+// plinth wearing its OWN coloured plastic band — orange under the dart
+// blaster, green under the squirt gun, pink under the piggy bank — because one
+// saturated colour per gun is how a player finds it in a tower full of sand
+// (see `PALETTES`). One shared bitmap would paint that band out of every block
+// but one, in the world and in the build tray alike. So each block reads its
+// own body, `images/blocks/<id>.webp`.
 //
-// So blocks share a base, and the fixture on top carries the identity. Three
-// keep their own art because nothing is drawn over them to tell them apart —
-// the Gate's door, the braced crate's X and the obelisk's glyphs ARE the block.
-//
-// Applied inside `spriteFor` rather than at the call sites. There are five
-// places that paint a block face (world, build ghost, water reflection, tray
-// tile, shape preview) and a mapping applied per-site is a mapping that will
+// The map stays, empty, because the lookup still belongs in ONE place: five
+// places paint a block face (world, build ghost, water reflection, tray tile,
+// shape preview), and a mapping applied per-site is a mapping that will
 // eventually be missed at one of them — which is exactly the bug the ghost
-// preview already had.
+// preview once had. If two bodies ever become the same drawing again, sharing
+// them is one line here.
 
-export const BLOCK_ART_BASE: Record<string, string> = {
-  // Timber — a plank crate. The workhorse.
-  wood: 'timber', archer: 'timber', repair: 'timber',
-  sawmill: 'timber', lumberHut: 'timber', spikes: 'timber',
-  // Masonry — quarried, mortared, heavier than timber.
-  stone: 'masonry', cannon: 'masonry', quarry: 'masonry',
-  stonepit: 'masonry', mint: 'masonry',
-  // Iron — plated and riveted. Everything that runs hot or holds a charge.
-  mortar: 'metal', bombard: 'metal', tesla: 'metal',
-  frost: 'metal', coffer: 'metal',
-  // Their own, because the block IS the picture.
-  brace: 'braced', obelisk: 'arcane', banner: 'heraldry', gate: 'gate'
-}
+export const BLOCK_ART_BASE: Record<string, string> = {}
 
 /**
  * Blocks that have NO block bitmap, ever.
@@ -431,9 +419,8 @@ const NO_BLOCK_ART = new Set(['skiff', 'longship', 'galley'])
 export const blockArtBase = (typeId: string): string =>
   BLOCK_ART_BASE[typeId] ?? typeId
 
-/** Every distinct base bitmap, in a stable order. */
-export const BLOCK_ART_BASES: string[] =
-  [...new Set(Object.values(BLOCK_ART_BASE))]
+/** Whether a block type has a body bitmap slot at all (hulls do not). */
+export const hasBlockArt = (typeId: string): boolean => !NO_BLOCK_ART.has(typeId)
 
 /**
  * Return a decoded override bitmap for `(kind, id)` or null when none exists.

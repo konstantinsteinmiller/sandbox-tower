@@ -1,7 +1,17 @@
-import { drawHousefly, drawMosquito, drawHornet, drawBumblebee, drawFirefly } from '@/game/bugs/air'
+import {
+  drawHousefly, drawMosquito, drawHornet, drawBumblebee, drawFirefly,
+  HOUSEFLY_SHADOW, MOSQUITO_SHADOW, HORNET_SHADOW, BUMBLEBEE_SHADOW, FIREFLY_SHADOW
+} from '@/game/bugs/air'
 import { drawWaterTiger, drawDivingBeetle, drawDragonflyNymph, drawToeBiter } from '@/game/bugs/sea'
-import { drawBlackAnt, drawRedAnt, drawCockroach, drawRhinoBeetle } from '@/game/bugs/groundA'
-import { drawSpider, drawBombardier, drawRolyPoly, drawStagBeetle } from '@/game/bugs/groundB'
+import {
+  drawBlackAnt, drawRedAnt, drawCockroach, drawRhinoBeetle,
+  BLACK_ANT_SHADOW, RED_ANT_SHADOW, COCKROACH_SHADOW, RHINO_BEETLE_SHADOW
+} from '@/game/bugs/groundA'
+import {
+  drawSpider, drawBombardier, drawRolyPoly, drawStagBeetle,
+  SPIDER_SHADOW, BOMBARDIER_SHADOW, ROLY_POLY_SHADOW, STAG_BEETLE_SHADOW
+} from '@/game/bugs/groundB'
+import type { ShadowSpec } from '@/game/monsterKit'
 
 /**
  * ─── Monster designs ────────────────────────────────────────────────────────
@@ -87,6 +97,15 @@ export interface MonsterDef {
    */
   anchor?: 'feet' | 'centre'
   draw: (ctx: CanvasRenderingContext2D, S: number, t: number) => void
+  /**
+   * The contact shadow `draw` lays under it, as numbers.
+   *
+   * The bake gets it from `draw` itself. A PAINTED strip replaces the whole
+   * frame, shadow and all, and the painter is told not to paint one — so the
+   * battlefield lays this under a painted strip instead (`paintedMonsterShadow`).
+   * Absent for the swimmers, which have none.
+   */
+  shadow?: ShadowSpec
 }
 
 // ─── Registry ───────────────────────────────────────────────────────────────
@@ -101,7 +120,8 @@ export const MONSTERS: MonsterDef[] = [
     name: 'Black Ant',
     tagline: 'The baseline. Big head, six busy legs, and a frown that means business.',
     backdrop: ['#fff1c9', '#e8c47e'],
-    draw: drawBlackAnt
+    draw: drawBlackAnt,
+    shadow: BLACK_ANT_SHADOW
   },
   {
     id: 'bonecap',
@@ -111,7 +131,8 @@ export const MONSTERS: MonsterDef[] = [
     name: 'Spitting Spider',
     tagline: 'Jumping spider. Eight fuzzy legs, two enormous eyes, and a web ball with your name on it.',
     backdrop: ['#fff4d6', '#e9c88a'],
-    draw: drawSpider
+    draw: drawSpider,
+    shadow: SPIDER_SHADOW
   },
   {
     id: 'snaggletusk',
@@ -121,7 +142,8 @@ export const MONSTERS: MonsterDef[] = [
     name: 'Rhino Beetle',
     tagline: 'Low, heavy, forward, one big horn — built to hit a wall and keep going.',
     backdrop: ['#fbe7b8', '#d9a86a'],
-    draw: drawRhinoBeetle
+    draw: drawRhinoBeetle,
+    shadow: RHINO_BEETLE_SHADOW
   },
   {
     id: 'wispling',
@@ -131,7 +153,8 @@ export const MONSTERS: MonsterDef[] = [
     name: 'Mosquito',
     tagline: 'All legs and one long straw. Heavy-lidded, striped, and it has already picked you.',
     backdrop: ['#e4f1ff', '#8fbde6'],
-    draw: drawMosquito
+    draw: drawMosquito,
+    shadow: MOSQUITO_SHADOW
   },
   {
     id: 'marrowknight',
@@ -141,7 +164,8 @@ export const MONSTERS: MonsterDef[] = [
     name: 'Roly-Poly',
     tagline: 'Pill bug in seven plates of armour, and a bottle cap held out front like it means it.',
     backdrop: ['#eef8dc', '#9fcf74'],
-    draw: drawRolyPoly
+    draw: drawRolyPoly,
+    shadow: ROLY_POLY_SHADOW
   },
   {
     id: 'nibbler',
@@ -151,7 +175,8 @@ export const MONSTERS: MonsterDef[] = [
     name: 'Housefly',
     tagline: 'Two cherry-red eyes, a buzz, and absolutely no manners. It has seen your sandwich.',
     backdrop: ['#e2f5ff', '#7cc4ef'],
-    draw: drawHousefly
+    draw: drawHousefly,
+    shadow: HOUSEFLY_SHADOW
   },
   {
     id: 'cinderhound',
@@ -161,7 +186,8 @@ export const MONSTERS: MonsterDef[] = [
     name: 'Cockroach',
     tagline: 'Low, long and glossy. Antennae longer than it is — the fast one.',
     backdrop: ['#fdf0cf', '#e2b877'],
-    draw: drawCockroach
+    draw: drawCockroach,
+    shadow: COCKROACH_SHADOW
   },
   {
     id: 'blorp',
@@ -171,7 +197,8 @@ export const MONSTERS: MonsterDef[] = [
     name: 'Bombardier Beetle',
     tagline: 'Grinning through its teeth like it knows something. It does: its backside is about to pop.',
     backdrop: ['#e6f6ff', '#94cdf2'],
-    draw: drawBombardier
+    draw: drawBombardier,
+    shadow: BOMBARDIER_SHADOW
   },
   {
     id: 'thornwick',
@@ -181,7 +208,8 @@ export const MONSTERS: MonsterDef[] = [
     name: 'Stag Beetle',
     tagline: 'The garden heavyweight. Antlers first, everything else very slowly after.',
     backdrop: ['#fff0c8', '#eaa75a'],
-    draw: drawStagBeetle
+    draw: drawStagBeetle,
+    shadow: STAG_BEETLE_SHADOW
   },
   {
     id: 'rattlejack',
@@ -191,7 +219,8 @@ export const MONSTERS: MonsterDef[] = [
     name: 'Red Ant',
     tagline: 'The fire ant. Leaner, hotter-headed, and it brought a rock.',
     backdrop: ['#ffeec4', '#f0b27a'],
-    draw: drawRedAnt
+    draw: drawRedAnt,
+    shadow: RED_ANT_SHADOW
   },
   {
     id: 'dustmoth',
@@ -201,7 +230,8 @@ export const MONSTERS: MonsterDef[] = [
     name: 'Firefly',
     tagline: 'Wears its lantern on its tail and a little red hood. The ember is for your castle.',
     backdrop: ['#9c98d8', '#44427e'],
-    draw: drawFirefly
+    draw: drawFirefly,
+    shadow: FIREFLY_SHADOW
   },
   {
     id: 'skewer',
@@ -211,7 +241,8 @@ export const MONSTERS: MonsterDef[] = [
     name: 'Hornet',
     tagline: 'The late air threat. Striped, furious, and the pointy end is the whole point.',
     backdrop: ['#fff0c2', '#f0a24a'],
-    draw: drawHornet
+    draw: drawHornet,
+    shadow: HORNET_SHADOW
   },
   {
     id: 'gloomcrow',
@@ -221,7 +252,8 @@ export const MONSTERS: MonsterDef[] = [
     name: 'Bumblebee',
     tagline: 'Round, fuzzy, wings going flat out — all of it spent hauling one sticky honey bomb.',
     backdrop: ['#f1fbd6', '#9ccf72'],
-    draw: drawBumblebee
+    draw: drawBumblebee,
+    shadow: BUMBLEBEE_SHADOW
   },
 
   // ── Swimmers ─────────────────────────────────────────────────────────────

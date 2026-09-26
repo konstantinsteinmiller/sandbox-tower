@@ -301,7 +301,7 @@ describe('the art manifest carries the new sheets', () => {
     }
   })
 
-  it('writes a tier prompt that names the design, ONE gun, its size, the tier colour and the 40 px test', async () => {
+  it('writes a tier prompt that names the design, ONE toy, its size, the tier colour and the 40 px test', async () => {
     const { WALKS, promptForWalk } = await import('@/game/artSheet')
     const { tierStyle } = await import('@/game/tierStyle')
     for (const tier of [2, 3]) {
@@ -309,12 +309,13 @@ describe('the art manifest carries the new sheets', () => {
       const text = promptForWalk(walk)
       expect(text).toContain('images/fixtures/cannon.webp')
       expect(text).toContain(tierStyle(tier).hex)
-      expect(text).toContain('ONE HEAVIER GUN AT 40 PX')
+      expect(text).toContain('THE UPGRADED TOY AT 40 PX')
       expect(text).toContain('never two or three side by side')
       expect(text).toContain('KEEP ITS SIZE AND ITS PLACE')
-      // The sheet's own name and blurb ask for one gun, not a pair or a rank.
+      // The sheet's own name and blurb ask for one toy, not a pair or a rank.
       expect(walk.name).not.toMatch(/twin|battery/i)
-      expect(text).not.toMatch(/\b(TWO|THREE) (cast-iron|war bows|squat|stubby|lightning|clusters)/)
+      expect(text).toContain('ONE squirt gun')
+      expect(text).not.toMatch(/\b(TWO|THREE) (squirt guns|blasters|buckets|tubes|zappers|ice pops)/i)
       // It sits on the cannon's block, so it takes the cannon's contrast
       // clause — `cannon-t2` has no palette of its own.
       expect(text).toContain('IT MUST READ AGAINST THE BLOCK')

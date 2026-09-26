@@ -4,11 +4,11 @@ import { blockDef } from '@/game/blocks'
 import { ENEMY_DEFS } from '@/game/enemies'
 import { setArtOverrides, artOverridesEnabled, themedPalette } from '@/game/art'
 import { stripFrame } from '@/game/spriteStrip'
-import { drawSiegeMachine } from '@/game/siegeArt'
-import { drawCavalry, cavalryCycle01 } from '@/game/cavalryArt'
+import { drawSiegeMachine, drawSiegeShadow } from '@/game/siegeArt'
+import { drawCavalry, cavalryCycle01, drawCavalryShadow } from '@/game/cavalryArt'
 import {
   monsterFrame, monsterFaces, monsterAnchor, primeMonsterSprites, allMonsterIds,
-  SPRITE_FOOT_R, SPRITE_HEIGHT_R
+  paintedMonsterShadow, SPRITE_FOOT_R, SPRITE_HEIGHT_R
 } from '@/game/monsterSprites'
 import {
   paintWorldBlock, paintLiveFixture, paintShipBlock,
@@ -167,6 +167,15 @@ const paint = (now: number): void => {
       const top = monsterAnchor(id) === 'centre'
         ? -h * 0.5
         : mS * 0.5 - frame.height * SPRITE_FOOT_R * k
+      // The shadow `drawEnemy` lays under a painted strip, the same way.
+      const shadow = paintedMonsterShadow(id, frame)
+      if (shadow) {
+        const ks = (mS * 1.3) / (shadow.height * SPRITE_HEIGHT_R)
+        const ts = monsterAnchor(id) === 'centre'
+          ? -shadow.height * ks * 0.5
+          : mS * 0.5 - shadow.height * SPRITE_FOOT_R * ks
+        ctx.drawImage(shadow, -shadow.width * ks * 0.5, ts, shadow.width * ks, shadow.height * ks)
+      }
       ctx.drawImage(frame, -w * 0.5, top, w, h)
       ctx.restore()
     }
@@ -196,6 +205,7 @@ const paint = (now: number): void => {
     ctx.save()
     ctx.translate(x, cy)
     if (chassis) {
+      drawSiegeShadow(ctx, s)
       ctx.drawImage(chassis, -sBox / 2, -sBox / 2, sBox, sBox)
       const arm = ARM_ENGINES.has(id) ? stripFrame('siegeArm', id, 1, cycle) : null
       if (arm) ctx.drawImage(arm, -sBox / 2, -sBox / 2, sBox, sBox)
@@ -245,7 +255,10 @@ const paint = (now: number): void => {
     ctx.translate(x, cy)
     ctx.scale(dir, 1)
     const frame = stripFrame('ally', 'cavalry', 1, cavalryCycle01(t, 0))
-    if (frame) ctx.drawImage(frame, -cavBox / 2, -cavBox / 2, cavBox, cavBox)
+    if (frame) {
+      drawCavalryShadow(ctx, s, t, 0)
+      ctx.drawImage(frame, -cavBox / 2, -cavBox / 2, cavBox, cavBox)
+    }
     else drawCavalry(ctx, s, themedPalette('cavalry'), { phase: 0, striking: false, t })
     ctx.restore()
     label(ctx, dir > 0 ? 'cavalry →' : 'cavalry ←', x, cy + cavBox / 2 + LABEL + 2)

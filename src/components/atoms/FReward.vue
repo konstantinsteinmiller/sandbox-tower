@@ -105,14 +105,14 @@ const isMobile = computed(() => {
 /**
  * The painted 5:1 title band, when the art layer has one.
  *
- * The shipped `parchment-ribbon_553x188.webp` is 2.94:1 and hides a quarter of
- * its height under a bottom curl the label has to dodge — which is why the wrap
+ * The CSS ribbon keeps the old 553x188 bitmap's 2.94:1 box and hides a quarter
+ * of its height under the tails the label has to dodge — which is why the wrap
  * below carries four media queries whose only job is to claw that height back.
  * The painted banner is a flat band with its writing panel centred, so the same
  * width costs 41% less vertical room and the content's -14% lift can go.
  *
  * Null until the bitmap decodes, and null forever with art overrides off — in
- * which case every rule here falls back to the shipped ribbon and the screen
+ * which case every rule here falls back to the CSS ribbon and the screen
  * looks exactly as it does today. The probe subscribes because it is async and
  * the first paint happens before the image is in.
  */

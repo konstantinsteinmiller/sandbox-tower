@@ -671,17 +671,17 @@ export const drawBalloonLauncher = (
 // ─── Bug Zapper (tesla) ─────────────────────────────────────────────────────
 
 /**
- * A blue-violet bug-zapper lantern: wire grid over a glowing UV tube, a hook
- * on top where the chain lightning leaves from. `pulse` is 0..1 and drives
- * the glow; an idle crackle jumps the grid near the top of each pulse.
+ * The zapper's pulsing glow, behind the lantern.
+ *
+ * Split out, with the crackle, because they are the part that MOVES: a
+ * painted lantern replaces the body and keeps these live around it, and the
+ * art-sheet reference leaves them out so they are not painted in as well.
  */
-export const drawBugZapper = (
-  ctx: CanvasRenderingContext2D, s: number, pulse: number, tier: number, pal: { accent: string; accent2: string }
+export const drawZapperGlow = (
+  ctx: CanvasRenderingContext2D, s: number, pulse: number, pal: { accent2: string }
 ): void => {
   ctx.save()
   ctx.scale(s, s)
-
-  // Glow behind the lantern.
   const gr = 0.3 * (0.72 + pulse * 0.4)
   const glow = ctx.createRadialGradient(0, -0.22, 0, 0, -0.22, gr + 0.06)
   glow.addColorStop(0, withA(pal.accent2, 0.85))
@@ -689,6 +689,39 @@ export const drawBugZapper = (
   glow.addColorStop(1, 'rgba(150,120,255,0)')
   ctx.fillStyle = glow
   disc(ctx, 0, -0.22, gr + 0.06); ctx.fill()
+  ctx.restore()
+}
+
+/** The idle crackle that jumps the grid near the top of each pulse. */
+export const drawZapperCrackle = (ctx: CanvasRenderingContext2D, s: number, pulse: number): void => {
+  if (pulse <= 0.82) return
+  ctx.save()
+  ctx.scale(s, s)
+  ctx.strokeStyle = '#ffffff'
+  ctx.lineWidth = W(s, 0.02)
+  ctx.beginPath()
+  ctx.moveTo(-0.105, -0.22)
+  ctx.lineTo(-0.06, -0.19)
+  ctx.lineTo(-0.02, -0.23)
+  ctx.lineTo(0.03, -0.18)
+  ctx.lineTo(0.055, -0.21)
+  ctx.stroke()
+  ctx.restore()
+}
+
+/**
+ * A blue-violet bug-zapper lantern: wire grid over a glowing UV tube, a hook
+ * on top where the chain lightning leaves from. `pulse` is 0..1 and drives
+ * the glow; an idle crackle jumps the grid near the top of each pulse.
+ * `live: false` leaves out the glow and the crackle (see `drawZapperGlow`).
+ */
+export const drawBugZapper = (
+  ctx: CanvasRenderingContext2D, s: number, pulse: number, tier: number,
+  pal: { accent: string; accent2: string }, live = true
+): void => {
+  if (live) drawZapperGlow(ctx, s, pulse, pal)
+  ctx.save()
+  ctx.scale(s, s)
 
   // Cage interior and the tube.
   ctx.fillStyle = '#261b52'
@@ -719,16 +752,11 @@ export const drawBugZapper = (
   ctx.stroke()
 
   // Idle crackle across the grid.
-  if (pulse > 0.82) {
-    ctx.strokeStyle = '#ffffff'
-    ctx.lineWidth = W(s, 0.02)
-    ctx.beginPath()
-    ctx.moveTo(-0.105, -0.22)
-    ctx.lineTo(-0.06, -0.19)
-    ctx.lineTo(-0.02, -0.23)
-    ctx.lineTo(0.03, -0.18)
-    ctx.lineTo(0.055, -0.21)
-    ctx.stroke()
+  if (live) {
+    ctx.restore()
+    drawZapperCrackle(ctx, s, pulse)
+    ctx.save()
+    ctx.scale(s, s)
   }
 
   // Base.
@@ -769,21 +797,39 @@ export const drawBugZapper = (
 
 // ─── Ice Pop (frost) ────────────────────────────────────────────────────────
 
-/**
- * A giant ice pop on its stick, one bite out of the top, frost glints
- * twinkling on it. `pulse` 0..1 breathes the cold glow and the glints.
- */
-export const drawIcePop = (
-  ctx: CanvasRenderingContext2D, s: number, pulse: number, tier: number
-): void => {
+/** The ice pop's breathing cold glow, behind it — live over a painting too. */
+export const drawIcePopGlow = (ctx: CanvasRenderingContext2D, s: number, pulse: number): void => {
   ctx.save()
   ctx.scale(s, s)
-
   const glow = ctx.createRadialGradient(0, -0.28, 0, 0, -0.28, 0.32)
   glow.addColorStop(0, `rgba(215,250,255,${0.42 + pulse * 0.25})`)
   glow.addColorStop(1, 'rgba(215,250,255,0)')
   ctx.fillStyle = glow
   disc(ctx, 0, -0.28, 0.32); ctx.fill()
+  ctx.restore()
+}
+
+/** The frost glints twinkling on the pop, out of step with each other. */
+export const drawIcePopGlints = (ctx: CanvasRenderingContext2D, s: number, pulse: number): void => {
+  ctx.save()
+  ctx.scale(s, s)
+  twinkle(ctx, -0.07, -0.37, 0.06 * (0.55 + 0.45 * pulse), '#ffffff')
+  twinkle(ctx, 0.065, -0.17, 0.05 * (1 - 0.45 * pulse), '#ffffff')
+  twinkle(ctx, -0.085, -0.12, 0.035 * (0.6 + 0.4 * pulse), '#f2fdff')
+  ctx.restore()
+}
+
+/**
+ * A giant ice pop on its stick, one bite out of the top, frost glints
+ * twinkling on it. `pulse` 0..1 breathes the cold glow and the glints.
+ * `live: false` leaves both out — they are what a painted pop keeps live.
+ */
+export const drawIcePop = (
+  ctx: CanvasRenderingContext2D, s: number, pulse: number, tier: number, live = true
+): void => {
+  if (live) drawIcePopGlow(ctx, s, pulse)
+  ctx.save()
+  ctx.scale(s, s)
 
   // Stick.
   rrect(ctx, -0.045, -0.12, 0.09, 0.34, 0.045)
@@ -835,11 +881,9 @@ export const drawIcePop = (
     }
   }
 
-  // Frost glints, breathing out of step with each other.
-  twinkle(ctx, -0.07, -0.37, 0.06 * (0.55 + 0.45 * pulse), '#ffffff')
-  twinkle(ctx, 0.065, -0.17, 0.05 * (1 - 0.45 * pulse), '#ffffff')
-  twinkle(ctx, -0.085, -0.12, 0.035 * (0.6 + 0.4 * pulse), '#f2fdff')
   ctx.restore()
+  // Frost glints, breathing out of step with each other.
+  if (live) drawIcePopGlints(ctx, s, pulse)
 }
 
 // ─── Toothpick Wall (spikes) ────────────────────────────────────────────────
@@ -847,11 +891,25 @@ export const drawIcePop = (
 /** Small fixed tilts so the toothpicks look pushed in by hand, not machined. */
 const PICK_TILT = [0.09, -0.06, 0.12, -0.1, 0.04, -0.13, 0.07, -0.03, 0.11, -0.08, 0.02, -0.12, 0.1, -0.05]
 
+/** The glints twinkling at the toothpicks' points — live over a painting too. */
+export const drawToothpickGlints = (ctx: CanvasRenderingContext2D, s: number, glint: number): void => {
+  ctx.save()
+  ctx.scale(s, s)
+  ctx.fillStyle = `rgba(255,255,255,${0.35 + 0.45 * glint})`
+  for (const [gx, gy] of [[0.63, -0.19], [0.63, 0.19], [-0.63, 0], [0, -0.64], [0, 0.64]] as const) {
+    disc(ctx, gx, gy, 0.028); ctx.fill()
+  }
+  ctx.restore()
+}
+
 /**
  * Toothpicks bristling out of all four faces — the thorns fire whichever face
- * is hit, so the art says so on every side. `glint` 0..1 twinkles the points.
+ * is hit, so the art says so on every side. `glint` 0..1 twinkles the points;
+ * `live: false` leaves the glints out.
  */
-export const drawToothpicks = (ctx: CanvasRenderingContext2D, s: number, glint: number): void => {
+export const drawToothpicks = (
+  ctx: CanvasRenderingContext2D, s: number, glint: number, live = true
+): void => {
   ctx.save()
   ctx.scale(s, s)
   let k = 0
@@ -881,11 +939,8 @@ export const drawToothpicks = (ctx: CanvasRenderingContext2D, s: number, glint: 
     }
     ctx.restore()
   }
-  ctx.fillStyle = `rgba(255,255,255,${0.35 + 0.45 * glint})`
-  for (const [gx, gy] of [[0.63, -0.19], [0.63, 0.19], [-0.63, 0], [0, -0.64], [0, 0.64]] as const) {
-    disc(ctx, gx, gy, 0.028); ctx.fill()
-  }
   ctx.restore()
+  if (live) drawToothpickGlints(ctx, s, glint)
 }
 
 // ─── Paper Flag (banner) ────────────────────────────────────────────────────

@@ -81,10 +81,10 @@ const paint = (): void => {
     // procedurally otherwise — but the glyph below is painted either way.
     //
     // It used to live inside the `else`, which was harmless while every block
-    // had its own bitmap. Blocks now SHARE a base (`BLOCK_ART_BASE`), so an
-    // archery post, a sawmill and a plain crate are one and the same timber
-    // image, and without the pictogram on top the tray offered five identical
-    // crates with different tooltips.
+    // had its own bitmap. Blocks could SHARE a base (`BLOCK_ART_BASE`) — Tower
+    // Siege gave an archery post, a sawmill and a plain crate one timber image —
+    // and without the pictogram on top the tray offered identical tiles with
+    // different tooltips. The pictogram still carries identity at 14 px.
     const override = spriteFor('block', typeId)
     const bd = blockDef(typeId)
     const p = themedPalette(bd.palette)

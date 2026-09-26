@@ -238,9 +238,8 @@ const CRITICAL_IMAGE_SRCS: ReadonlyArray<string> = [
 // before the player can reach them — without holding the splash open for a
 // round trip the opening frame does not need.
 const DEFERRED_IMAGE_SRCS: ReadonlyArray<string> = [
-  // Coin sprite for the reward burst, and the rewarded-ad film icon.
-  '/images/props/coin_128x128.webp',
-  '/images/icons/movie_128x96.webp'
+  // Coin sprite for the reward burst.
+  '/images/props/coin_128x128.webp'
 ]
 
 /** Block until `img.complete && naturalWidth > 0` (success) or `error`

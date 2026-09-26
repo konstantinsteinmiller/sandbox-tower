@@ -1,9 +1,10 @@
 import { ENEMY_DEFS } from '@/game/enemies'
+import { BLOCK_DEFS } from '@/game/blocks'
 import { previewsFor } from '@/game/waves'
 import { pickMonster } from '@/game/monsterSprites'
 import {
   artSettled, artOverridesEnabled, sceneArtWants, spriteFor,
-  BLOCK_ART_BASES, type ArtWant
+  blockArtBase, hasBlockArt, type ArtWant
 } from '@/game/art'
 import { PAINTED_PROPS, PAINTED_TIER_FIXTURES } from '@/game/paintedArt'
 
@@ -11,7 +12,7 @@ import { PAINTED_PROPS, PAINTED_TIER_FIXTURES } from '@/game/paintedArt'
  * ─── Staged art loading ─────────────────────────────────────────────────────
  *
  * With painted art on, the game used to fetch the whole set at once: every
- * block base, every background band and icon behind the splash, and then on
+ * block body, every background band and icon behind the splash, and then on
  * the first frame every monster strip, every siege chassis and arm, every hull,
  * the cavalry and every fixture — 60-odd files, most of them for things a
  * first-time player will not see for twenty minutes. A trebuchet debuts at
@@ -23,14 +24,14 @@ import { PAINTED_PROPS, PAINTED_TIER_FIXTURES } from '@/game/paintedArt'
  * them, and nothing here goes stale when a wave is retuned.
  *
  *   tier 0 — behind the splash, `fetchPriority: high`. What wave 0 and wave 1
- *            put on screen: the two starting bases, the two starting weapons,
+ *            put on screen: the four starting block bodies, the two starting weapons,
  *            the scenery (it IS the screen), the HUD icons, and every design
  *            that can appear on wave 1.
  *   tier 1 — right after the splash, normal priority, in debut order, one at a
  *            time so the wave-3 design lands before the wave-6 one. Everything
  *            that debuts inside the early game.
  *   tier 2 — on an idle slot after tier 1 has settled, `fetchPriority: low`.
- *            The late cast, the other bases and fixtures, siege engines and
+ *            The late cast, the other bodies and fixtures, siege engines and
  *            their arms, the hulls, the rider, the rounds. The browser fits
  *            these around whatever the player is actually doing.
  *
@@ -110,9 +111,9 @@ const designsDebuting = (from: number, to: number): string[] =>
 /**
  * Tier 0: what the splash holds for.
  *
- * `wood` and `stone` resolve to the shared timber and masonry bases inside
- * `spriteFor`, which is every block a fresh player can place. The archer and
- * the cannon are the two weapons the game starts with.
+ * The Sand Block and the Pebble Wall are the two materials a fresh player can
+ * place, and the archer and the cannon are the two weapons the game starts
+ * with — body and fixture both, since every toy block wears its own body.
  */
 export const criticalArtWants = (): ArtWant[] => {
   // A resuming player's first screen is their own wave, not wave 1. Fetching
@@ -125,6 +126,8 @@ export const criticalArtWants = (): ArtWant[] => {
   return [
     ['block', 'wood'],
     ['block', 'stone'],
+    ['block', 'archer'],
+    ['block', 'cannon'],
     ['fixture', 'archer'],
     ['fixture', 'cannon'],
     ...sceneArtWants(),
@@ -140,6 +143,11 @@ const LATER_FIXTURES = [
 const SIEGE = ['ballista', 'catapult', 'trebuchet', 'ram', 'ironRam', 'siegeTower']
 const SIEGE_ARMS = ['ballista', 'catapult', 'trebuchet']
 const SHIPS = ['skiff', 'longship', 'galley']
+
+/** Every block body bitmap, one per block unless `BLOCK_ART_BASE` shares one. */
+const BLOCK_BODIES = [...new Set(
+  Object.keys(BLOCK_DEFS).filter(hasBlockArt).map(blockArtBase)
+)]
 const ROUNDS = ['bolt', 'quarrel']
 
 let started = false
@@ -168,7 +176,7 @@ export const preloadRemainingArt = async (): Promise<void> => {
 
   const late = (): void => {
     for (const id of monsterDebuts().keys()) spriteFor('monster', id, 'low')
-    for (const id of BLOCK_ART_BASES) spriteFor('block', id, 'low')
+    for (const id of BLOCK_BODIES) spriteFor('block', id, 'low')
     for (const id of LATER_FIXTURES) spriteFor('fixture', id, 'low')
     for (const id of SIEGE) spriteFor('siege', id, 'low')
     for (const id of SIEGE_ARMS) spriteFor('siegeArm', id, 'low')

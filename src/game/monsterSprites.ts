@@ -1,5 +1,6 @@
 import { MONSTERS, type MonsterDef } from '@/game/monsters'
 import { withHatching } from '@/game/inkArt'
+import { drawShadowSpec, withoutShadows } from '@/game/monsterKit'
 import { stripFrame } from '@/game/spriteStrip'
 import { spriteFor } from '@/game/art'
 import { bakeDesign, bakePoolAvailable, releaseBakePool } from '@/game/monsterBakePool'
@@ -54,6 +55,13 @@ export {
 } from '@/game/monsterFrameBox'
 
 const CACHE = new Map<string, HTMLCanvasElement[]>()
+
+/**
+ * Every frame the bake produced, main thread or worker — so a caller can tell a
+ * baked frame (which carries its own shadow) from a PAINTED one (which does
+ * not) without a lookup that allocates. See `paintedMonsterShadow`.
+ */
+const BAKED = new WeakSet<HTMLCanvasElement>()
 const DEFS = new Map<string, MonsterDef>(MONSTERS.map((m) => [m.id, m]))
 
 let queue: string[] = []
@@ -95,6 +103,7 @@ const bakeFrame = (def: MonsterDef, i: number): HTMLCanvasElement => {
     // hatching in `cel` is free here and ruinous anywhere else.
     withHatching(() => def.draw(ctx, SPRITE_S, (i / FRAMES) * def.cycleMs))
   }
+  BAKED.add(c)
   return c
 }
 
@@ -116,7 +125,10 @@ export const paintMonsterFrame = (
   if (!def) return
   ctx.save()
   ctx.translate(w / 2, h / 2)
-  withHatching(() => def.draw(ctx, SPRITE_S * (h / FRAME_H), (i / frames) * def.cycleMs))
+  // No contact shadow: the painter is told not to paint one, and the slicer
+  // registers a return by the bottom of this drawing — see `withoutShadows`.
+  withoutShadows(() =>
+    withHatching(() => def.draw(ctx, SPRITE_S * (h / FRAME_H), (i / frames) * def.cycleMs)))
   ctx.restore()
 }
 
@@ -193,6 +205,7 @@ const adoptFrames = (bitmaps: ImageBitmap[]): HTMLCanvasElement[] => {
     c.height = FRAME_H
     c.getContext('2d')?.drawImage(bmp, 0, 0)
     bmp.close()
+    BAKED.add(c)
     frames.push(c)
   }
   return frames
@@ -259,6 +272,39 @@ export const monsterFrame = (id: string, cycle01: number): HTMLCanvasElement | n
   const frames = CACHE.get(id)
   if (!frames) return null
   return frames[Math.floor(c01 * FRAMES) % FRAMES] ?? null
+}
+
+const SHADOWS = new Map<string, HTMLCanvasElement | null>()
+
+/**
+ * The contact shadow to lay under a PAINTED frame of a design, or null.
+ *
+ * A baked frame has the shadow in it — the design's own `draw` put it there.
+ * A painted strip replaces the whole frame, and a painter cannot paint a soft
+ * shadow over a chroma key (and is told not to), so without this a painted bug
+ * floated. The shadow is baked once per design into a canvas with the bake's
+ * own frame box, so it is blitted with exactly the transform the frame is and
+ * lands where the drawn one did. Null for a baked frame, and for a design
+ * with no shadow (the swimmers).
+ */
+export const paintedMonsterShadow = (id: string, frame: HTMLCanvasElement): HTMLCanvasElement | null => {
+  if (BAKED.has(frame)) return null
+  const known = SHADOWS.get(id)
+  if (known !== undefined) return known
+  const sh = DEFS.get(id)?.shadow
+  let c: HTMLCanvasElement | null = null
+  if (sh && typeof document !== 'undefined') {
+    c = document.createElement('canvas')
+    c.width = PX
+    c.height = FRAME_H
+    const ctx = c.getContext('2d')
+    if (ctx) {
+      ctx.translate(PX / 2, FRAME_H / 2)
+      drawShadowSpec(ctx, SPRITE_S, sh)
+    }
+  }
+  SHADOWS.set(id, c)
+  return c
 }
 
 /** Which way a design is drawn, for the battlefield's mirroring. */
