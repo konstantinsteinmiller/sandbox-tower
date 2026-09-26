@@ -143,8 +143,9 @@ const TILE_PX = 72
   gap: clamp(0.3rem, 1.6vw, 0.7rem)
   padding: 0.2rem clamp(0.5rem, 2.4vw, 0.9rem)
   border-radius: 999px
-  background: rgba(6, 12, 26, 0.55)
-  box-shadow: inset 0 0 0 2px rgba(255, 246, 226, 0.12)
+  // Translucent pool-blue plastic, so the battlefield still shows through.
+  background: rgba(31, 90, 160, 0.62)
+  box-shadow: inset 0 0 0 2px var(--ui-rim-soft), 0 0 0 1.5px rgba(23, 58, 102, 0.7)
   animation: incoming-in 420ms cubic-bezier(0.2, 1.3, 0.5, 1) 120ms both
 
 .incoming__monsters

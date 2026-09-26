@@ -41,8 +41,18 @@ import { fileURLToPath } from 'node:url'
  *
  * Deliberately NOT read from `VITE_LEADERBOARD_URL`: the builds that need this
  * are precisely the builds that set that variable to empty.
+ *
+ * EMPTY during the Sandbox Tower reskin, on purpose. The previous value here
+ * was tower-siege's real production Worker — fetching it would bake a
+ * different game's players into this game's committed snapshot again (see
+ * `data/leaderboard-snapshot.json`, which had exactly that problem). Leaving
+ * this empty makes any refresh attempt fail closed (`getJson` rejects an
+ * empty URL) and the committed file stands in, which is what `readSnapshot`
+ * and every caller already treat as a normal, non-fatal outcome. Set this — or
+ * `LEADERBOARD_SNAPSHOT_URL` — to `sandbox-tower-leaderboard`'s own Worker URL
+ * once `worker/wrangler.toml` has been deployed for this game.
  */
-export const DEFAULT_SOURCE = 'https://tower-siege-leaderboard.hyperg8.workers.dev'
+export const DEFAULT_SOURCE = ''
 
 export const SNAPSHOT_FILE = resolve(
   fileURLToPath(new URL('../data/leaderboard-snapshot.json', import.meta.url))

@@ -4,6 +4,7 @@ import { blockDef } from '@/game/blocks'
 import { themedPalette, spriteFor, onArtChanged } from '@/game/art'
 import { shapeDef, shapeBounds } from '@/game/shapes'
 import { blockGlyph } from '@/game/blockGlyph'
+import { bucketCapPath } from '@/game/sandBlockArt'
 
 /**
  * A shape thumbnail, drawn on its own canvas with the SAME palettes as the
@@ -107,7 +108,7 @@ const paint = (): void => {
 
       // 2 · Dark rim. Two blocks of the same family sit flush against each
       //     other in a shape, and without this seam they read as one slab.
-      ctx.strokeStyle = 'rgba(10,14,24,0.85)'
+      ctx.strokeStyle = 'rgba(59,42,33,0.85)' // world ink (#3b2a21)
       ctx.lineWidth = Math.max(1, cell * 0.07)
       ctx.stroke()
     }
@@ -146,17 +147,11 @@ const paint = (): void => {
       ctx.stroke()
     }
 
-    // Roof cap — same red gable the placed block will wear.
+    // Roof cap — the same upside-down red bucket the placed block will wear.
     if (roofs.has(i)) {
-      const cx = x + cell / 2
-      const halfW = cell * 0.6
-      const peak = cell * 0.4
-      ctx.fillStyle = '#b8332c'
-      ctx.beginPath()
-      ctx.moveTo(cx - halfW, y + cell * 0.06)
-      ctx.lineTo(cx, y - peak)
-      ctx.lineTo(cx + halfW, y + cell * 0.06)
-      ctx.closePath()
+      ctx.fillStyle = '#e5483b' // toy-red, the red-bucket roof
+      // Squashed to the 0.42 of headroom `roofPad` reserves above the cell.
+      bucketCapPath(ctx, x + cell / 2, y, cell, 0.74)
       ctx.fill()
       ctx.strokeStyle = 'rgba(20,10,8,0.9)'
       ctx.lineWidth = Math.max(1, cell * 0.05)

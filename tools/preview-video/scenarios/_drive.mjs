@@ -1,5 +1,5 @@
 /**
- * ─── Driving Tower Siege ────────────────────────────────────────────────────
+ * ─── Driving Sandbox Tower ────────────────────────────────────────────────────
  *
  * Everything game-specific lives here, so the scenario modules read as beat
  * sheets. When the recorder is ported to another game, this file, the scenarios
@@ -8,7 +8,7 @@
  *
  * ── The seams this game gives us ──
  *
- *   the save        ONE localStorage key, `tower_state`, holding a flat
+ *   the save        ONE localStorage key, `sandbox_state`, holding a flat
  *                   `{ ts_*: value }` blob (`src/use/useTowerState.ts`). Seeded
  *                   before the app's first line runs, so the game BOOTS into
  *                   the staged position rather than being mutated into it.
@@ -239,7 +239,7 @@ export const runSnapshot = (board, wave, { gateHp = GATE_HP, ...over } = {}) => 
 /**
  * Written into the page before any app code runs.
  *
- * Runs in the PAGE, so it closes over nothing from this module — `tower_state`
+ * Runs in the PAGE, so it closes over nothing from this module — `sandbox_state`
  * is the one localStorage key the game keeps (`src/use/useTowerState.ts`) and
  * is spelt out here rather than referenced.
  */
@@ -247,7 +247,7 @@ const seedScript = (blob) => {
   try {
     localStorage.clear()
     sessionStorage.clear()
-    localStorage.setItem('tower_state', JSON.stringify(blob))
+    localStorage.setItem('sandbox_state', JSON.stringify(blob))
     // Makes the app hand its OWN live simulation to `window.__tower`
     // (`src/use/useCheats.ts`, DEV only, read at module load — which is why it
     // is seeded here rather than set later). See `attachSim`.

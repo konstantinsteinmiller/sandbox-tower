@@ -24,27 +24,28 @@ onMounted(() => {
 </script>
 
 <template lang="pug">
-  //- ── Stone ──
+  //- ── Pebbles (resource id `stone`) ──
   //-
-  //- Two faceted blocks, each cut into a lit top plane and a shadowed face. One
-  //- flat pentagon read as a grey smudge; the plane break is what makes it read
-  //- as cut rock.
+  //- Three smooth grey-blue pebbles in a little pile, each with a wet-look
+  //- highlight. Round, where the sand is a heap and gold an ingot, so the three
+  //- resources never share a silhouette.
   //-
   //- Sized by the caller (e.g. `class="w-4 h-4"`), like every other icon here.
   img(v-if="painted" :src="painted" alt="" aria-hidden="true" class="res-icon-img")
   svg(v-else viewBox="0 0 24 24" aria-hidden="true")
-    //- Back block.
-    g(stroke="#39404a" stroke-width="1" stroke-linejoin="round")
-      path(d="M2.6 12.4 L7 9.6 L12.4 11.4 L11.6 17.6 L4.4 18.6 Z" fill="#6a727d")
-      path(d="M2.6 12.4 L7 9.6 L12.4 11.4 L7.6 13.4 Z" fill="#8d97a3")
-    //- Front block, larger and a step lighter — the one the eye lands on.
-    g(stroke="#39404a" stroke-width="1.2" stroke-linejoin="round")
-      path(d="M9.4 13 L15.2 8.8 L21.4 11.8 L20.4 19.4 L11.4 20.4 Z" fill="#78818d")
-      path(d="M9.4 13 L15.2 8.8 L21.4 11.8 L15.6 14.6 Z" fill="#a7b2bf")
-      path(d="M15.6 14.6 L21.4 11.8 L20.4 19.4 Z" fill="#5f6772")
-    //- Two chips of quartz catching the light.
-    path(d="M13.2 11.4 L15 10.6 L14.4 12 Z" fill="#dfe7f0")
-    path(d="M4.8 12.2 L6.4 11.4 L5.9 12.7 Z" fill="#c9d3de")
+    g(stroke="#34404e" stroke-width="1.2" stroke-linejoin="round")
+      ellipse(cx="7.3" cy="17.3" rx="5.7" ry="4.1" fill="#8594a6")
+      ellipse(cx="17.1" cy="17.9" rx="5.1" ry="3.6" fill="#71829a")
+      ellipse(cx="12.3" cy="10.5" rx="5.6" ry="4.4" fill="#9fb0c2")
+    //- Highlights, upper left.
+    ellipse(cx="5.9" cy="15.9" rx="2.4" ry="1.15" fill="#c9d4df")
+    ellipse(cx="15.8" cy="16.8" rx="2" ry="1" fill="#a9b8c8")
+    ellipse(cx="10.7" cy="8.9" rx="2.6" ry="1.35" fill="#e2e9f0")
+    //- Contact shadows between the stones.
+    path(d="M8.4 19.9 Q11 19.5 12.3 17.6" fill="none" stroke="#5f6f82" stroke-width="0.9" stroke-linecap="round")
+    path(d="M14.3 13.4 Q16.4 12.8 17.3 10.9" fill="none" stroke="#6e7f93" stroke-width="0.9" stroke-linecap="round")
+    circle(cx="19.3" cy="18.8" r="0.55" fill="#4f5d6e")
+    circle(cx="4.6" cy="18.6" r="0.5" fill="#5f6f82")
 </template>
 
 <style scoped lang="sass">

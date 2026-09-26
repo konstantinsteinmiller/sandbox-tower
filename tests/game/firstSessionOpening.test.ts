@@ -29,7 +29,7 @@ const loadGame = async () => {
 const loadVeteranGame = async () => {
   vi.resetModules()
   localStorage.clear()
-  localStorage.setItem('tower_state', JSON.stringify({ ts_onboarded: true }))
+  localStorage.setItem('sandbox_state', JSON.stringify({ ts_onboarded: true }))
   return import('@/use/useTowerGame')
 }
 

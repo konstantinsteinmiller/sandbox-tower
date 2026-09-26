@@ -44,13 +44,13 @@ const selectedIcon = computed(() => {
 const theme = computed(() => {
   switch (props.type) {
     case 'secondary':
-      return { from: '#50aaff', to: '#2266ff', shadow: '#102e7a' }
+      return { from: 'var(--btn-orange-from)', to: 'var(--btn-orange-to)', shadow: 'var(--btn-orange-drop)' }
     case 'primary':
-      return { from: '#ffcd00', to: '#f7a000', shadow: '#1a2b4b' }
+      return { from: 'var(--btn-yellow-from)', to: 'var(--btn-yellow-to)', shadow: 'var(--btn-yellow-drop)' }
     case 'neutral':
-      return { from: '#4a5878', to: '#2d3855', shadow: '#151d31' }
+      return { from: 'var(--btn-plain-from)', to: 'var(--btn-plain-to)', shadow: 'var(--btn-plain-drop)' }
     default:
-      return { from: '#ff5a5a', to: '#d32222', shadow: '#6b1212' }
+      return { from: 'var(--btn-red-from)', to: 'var(--btn-red-to)', shadow: 'var(--btn-red-drop)' }
   }
 })
 
@@ -151,9 +151,10 @@ const styleVars = computed(() => ({
   justify-content: center
   width: 100%
   height: 100%
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: var(--fib-radius)
   background-image: linear-gradient(to bottom, var(--fib-from), var(--fib-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
   color: #fff
 
 .f-icon-button__svg

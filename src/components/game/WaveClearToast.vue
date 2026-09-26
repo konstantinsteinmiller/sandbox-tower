@@ -129,7 +129,8 @@ const onTriple = (): void => {
   inset: 0
   transform: translateY(4px)
   border-radius: clamp(0.6rem, 3vw, 1rem)
-  background-color: #0d1830
+  background-color: var(--ui-drop)
+  box-shadow: 0 0 0 1.5px var(--ui-line)
 
 .wave-toast__body
   position: relative
@@ -138,10 +139,10 @@ const onTriple = (): void => {
   align-items: center
   gap: clamp(0.15rem, 1vw, 0.35rem)
   padding: clamp(0.35rem, 1.8vw, 0.7rem) clamp(0.7rem, 4vw, 1.4rem)
-  border: 2px solid #ffd93c
+  border: 2px solid var(--ui-rim)
   border-radius: clamp(0.6rem, 3vw, 1rem)
-  background-image: linear-gradient(to bottom, rgba(30, 48, 88, 0.97), rgba(14, 24, 48, 0.97))
-  box-shadow: 0 0 22px rgba(255, 210, 60, 0.28)
+  background-image: linear-gradient(to bottom, var(--ui-panel-top), var(--ui-panel-bot))
+  box-shadow: 0 0 0 1.5px var(--ui-line), inset 0 2px 0 var(--ui-gloss), 0 0 22px rgba(255, 210, 60, 0.35)
 
 .wave-toast__title
   display: flex
@@ -157,7 +158,7 @@ const onTriple = (): void => {
 
 .wave-toast__bonus
   color: rgb(255, 255, 255)
-  background-color: #4fc56e
+  background-color: var(--btn-green-to)
   border-radius: 999px
   padding: 0 0.4em
   font-size: 0.72em

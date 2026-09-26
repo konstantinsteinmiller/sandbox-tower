@@ -253,7 +253,7 @@ const onSpeed = (n: number): void => {
   inset: 0
   transform: translateY(4px)
   border-radius: clamp(0.5rem, 2.4vw, 0.9rem)
-  background-color: #102e7a
+  background-color: var(--btn-green-drop)
 
 .call-wave__body
   position: relative
@@ -264,9 +264,11 @@ const onSpeed = (n: number): void => {
   gap: 0.1rem
   width: 100%
   padding: clamp(0.28rem, 1.5vw, 0.5rem) clamp(0.6rem, 3.2vw, 1.15rem)
-  border: 2px solid #0f1a30
+  // Toy-green candy plastic: the build phase's primary action.
+  border: 2px solid var(--ui-line)
   border-radius: clamp(0.5rem, 2.4vw, 0.9rem)
-  background-image: linear-gradient(to bottom, #6ab4ff, #2266ff)
+  background-image: linear-gradient(to bottom, var(--btn-green-from), var(--btn-green-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
 
 .call-wave__label
   color: #fff
@@ -284,7 +286,7 @@ const onSpeed = (n: number): void => {
   gap: 0.35em
 
 .call-wave__clock
-  color: #cfe4ff
+  color: var(--ui-text)
   font-weight: 900
   font-variant-numeric: tabular-nums
   font-size: clamp(0.55rem, 2.4vw, 0.75rem)
@@ -302,7 +304,8 @@ const onSpeed = (n: number): void => {
   align-items: center
   gap: 0.2em
   color: #fff
-  background-color: #1f9d4d
+  // A deeper green pill sunk into the green button.
+  background-color: var(--btn-green-drop)
   border: 1px solid rgba(8, 40, 20, 0.7)
   border-radius: 999px
   padding: 0 0.4em
@@ -333,7 +336,7 @@ const onSpeed = (n: number): void => {
   inset: 0
   transform: translateY(4px)
   border-radius: 999px
-  background-color: #1c2436
+  background-color: var(--btn-plain-drop)
 
 .speed-switch__body
   position: relative
@@ -341,9 +344,9 @@ const onSpeed = (n: number): void => {
   align-items: stretch
   gap: 2px
   padding: 3px
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 999px
-  background-image: linear-gradient(to bottom, #46536f, #2a3348)
+  background-image: linear-gradient(to bottom, var(--btn-plain-from), var(--btn-plain-to))
 
 .speed-switch__seg
   position: relative
@@ -362,15 +365,15 @@ const onSpeed = (n: number): void => {
   padding: 0.1rem clamp(0.28rem, 1.6vw, 0.5rem)
   border: 0
   border-radius: 999px
-  background-color: rgba(12, 18, 32, 0.45)
-  color: #c8d4ea
+  background-color: var(--ui-well-a)
+  color: var(--ui-text-soft)
   cursor: pointer
   touch-action: manipulation
   -webkit-tap-highlight-color: transparent
   transition: background-color 110ms ease-out, color 110ms ease-out, transform 90ms ease-out
 
   &:hover:not(.is-active)
-    background-color: rgba(12, 18, 32, 0.22)
+    background-color: rgba(12, 44, 88, 0.2)
 
   &:active
     transform: translateY(1px) scale(0.97)
@@ -378,7 +381,7 @@ const onSpeed = (n: number): void => {
   // The live rung. Gold body, dark text: the one place in the HUD that inverts,
   // because "which speed am I on" has to survive a glance mid-battle.
   &.is-active
-    background-image: linear-gradient(to bottom, #ffd93c, #f0a500)
+    background-image: linear-gradient(to bottom, var(--btn-yellow-from), var(--btn-yellow-to))
     color: #21160a
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35)
 
@@ -425,9 +428,9 @@ const onSpeed = (n: number): void => {
   align-items: center
   gap: 0.12em
   padding: 0.05em 0.3em 0.05em 0.35em
-  border: 1.5px solid #0f1a30
+  border: 1.5px solid var(--ui-line)
   border-radius: 999px
-  background-image: linear-gradient(to bottom, #3a4a6e, #1c2640)
+  background-image: linear-gradient(to bottom, var(--ui-well), var(--ui-well-deep))
   color: #fff
   font-weight: 900
   font-variant-numeric: tabular-nums
@@ -517,15 +520,15 @@ const onSpeed = (n: number): void => {
 // A boss wave is next — recolour so nobody calls it by reflex.
 .call-wave__btn.is-boss
   .call-wave__body
-    background-image: linear-gradient(to bottom, #ff7a5a, #b3251b)
+    background-image: linear-gradient(to bottom, var(--btn-red-from), var(--btn-red-to))
   .call-wave__shadow
-    background-color: #6b1212
+    background-color: var(--btn-red-drop)
 
 @keyframes cw-urgent
   0%, 100%
-    box-shadow: 0 0 0 0 rgba(255, 210, 60, 0)
+    box-shadow: inset 0 2px 0 var(--ui-gloss), 0 0 0 0 rgba(255, 210, 60, 0)
   50%
-    box-shadow: 0 0 0 4px rgba(255, 210, 60, 0.55)
+    box-shadow: inset 0 2px 0 var(--ui-gloss), 0 0 0 4px rgba(255, 210, 60, 0.55)
 
 // ─── Portrait phone ─────────────────────────────────────────────────────────
 //

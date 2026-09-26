@@ -127,7 +127,7 @@ const hoardArgs = (): [number, number, number, number] => {
 }
 
 /**
- * ─── Tower Siege — simulation ───────────────────────────────────────────────
+ * ─── Sandbox Tower — simulation ───────────────────────────────────────────────
  *
  * Owns the tower, the enemies, the projectiles and the wave clock. Runs on a
  * fixed 60 Hz accumulator so behaviour is frame-rate independent and a
@@ -1458,7 +1458,7 @@ const dealOffers = (): void => {
  * alone so a deliberate pick is never yanked out from under the player.
  *
  * The watch source is a SORTED STRING, not the Set itself. `availableBlocks` is
- * a computed that rebuilds its Set whenever `tower_state` changes identity —
+ * a computed that rebuilds its Set whenever `sandbox_state` changes identity —
  * which is every persisted write, including the run snapshot saved after each
  * placement. Watching the Set by reference therefore rerolled two of the
  * player's offers on essentially every action; watching its contents fires only

@@ -57,25 +57,25 @@ const host = computed(() => {
         @click="dismissAdsBlockedModal"
       )
         //- Backdrop
-        div.absolute.inset-0(class="bg-black/70 backdrop-blur-sm")
+        div.absolute.inset-0(class="bg-[var(--ui-scrim)] backdrop-blur-sm")
 
         //- Card
         div.relative.w-full.max-w-md.rounded-2xl.text-white.shadow-2xl.text-center(
-          class="bg-gradient-to-b from-slate-700 to-slate-900 border-2 border-slate-500 p-6"
+          class="bg-gradient-to-b from-[var(--ui-panel-top)] to-[var(--ui-panel-bot)] border-2 border-[var(--ui-rim)] p-6"
           @click.stop
         )
           div.mb-2.text-5xl 🛡️
           h2.text-2xl.font-bold.mb-2 {{ t('adsBlocked.title') }}
-          p.text-base.mb-4(class="text-slate-200") {{ t('adsBlocked.body') }}
-          p.text-sm.mb-5(class="text-slate-300")
+          p.text-base.mb-4(class="text-white") {{ t('adsBlocked.body') }}
+          p.text-sm.mb-5(class="text-[var(--ui-text-soft)]")
             | {{ t('adsBlocked.allowPrefix') }}
             |
-            span.font-bold(class="text-amber-300") {{ host }}
+            span.font-bold(class="text-[var(--ui-rim)]") {{ host }}
             |
             | {{ t('adsBlocked.allowSuffix') }}
 
           button.w-full.rounded-lg.font-bold.text-lg.text-white.shadow-lg(
-            class="bg-amber-500 hover:bg-amber-400 active:translate-y-px py-3"
+            class="bg-[var(--btn-green-to)] hover:bg-[var(--btn-green-from)] border-2 border-[var(--ui-line)] active:translate-y-px py-3"
             @click="dismissAdsBlockedModal"
           ) {{ t('adsBlocked.gotIt') }}
 </template>

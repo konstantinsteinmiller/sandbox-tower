@@ -31,10 +31,10 @@ const close = () => {
 
       div(class="relative max-w-sm w-full cursor-pointer" @click="close")
         //- The Bubble Container
-        div(class="relative bg-[#1a2b4b] border-[4px] border-[#0f1a30] rounded-2xl p-5 shadow-2xl")
+        div(class="relative bg-[var(--ui-panel)] border-[4px] border-[var(--ui-rim)] rounded-2xl p-5 shadow-2xl")
 
           //- Speaker Name Ribbon (Brawl Stars Style)
-          div(v-if="speakerName" class="absolute -top-5 left-6 bg-gradient-to-b from-[#ffcd00] to-[#f7a000] border-2 border-[#0f1a30] px-3 py-0.5 rounded-lg shadow-md")
+          div(v-if="speakerName" class="absolute -top-5 left-6 bg-gradient-to-b from-[var(--btn-orange-from)] to-[var(--btn-orange-to)] border-2 border-[var(--ui-line)] px-3 py-0.5 rounded-lg shadow-md")
             span(class="brawl-text text-sm text-white uppercase font-bold") {{ speakerName }}
 
           //- Dialogue Text
@@ -47,7 +47,7 @@ const close = () => {
             div(class="w-2 h-2 bg-amber-400 rounded-full animate-ping")
 
           //- The Bubble Tail
-          div(class="absolute -bottom-3 left-10 w-6 h-6 bg-[#1a2b4b] border-r-[4px] border-b-[4px] border-[#0f1a30] rotate-45")
+          div(class="absolute -bottom-3 left-10 w-6 h-6 bg-[var(--ui-panel)] border-r-[4px] border-b-[4px] border-[var(--ui-rim)] rotate-45")
 
 </template>
 

@@ -103,7 +103,7 @@ $loop: 2.6s
   margin: -4px 0 0 -4px
   border-radius: 999px
   background: radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.95), rgba(220, 236, 255, 0.75) 60%, rgba(160, 200, 255, 0.4))
-  box-shadow: 0 0 0 3px rgba(20, 30, 50, 0.55), 0 4px 10px rgba(0, 0, 0, 0.5)
+  box-shadow: 0 0 0 3px rgba(23, 58, 102, 0.6), 0 4px 10px rgba(0, 0, 0, 0.4)
   opacity: 0
   animation: demo-finger $loop ease-in-out infinite
 

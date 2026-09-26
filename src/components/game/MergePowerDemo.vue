@@ -516,8 +516,8 @@ const drawChip = (
   ctx.save()
   ctx.translate(cx(centreX), cy(CONTENT_H - 0.5))
   ctx.scale(pop, pop)
-  ctx.fillStyle = 'rgba(12, 20, 34, 0.9)'
-  ctx.strokeStyle = tier > 1 ? ts.hex : 'rgba(255, 255, 255, 0.28)'
+  ctx.fillStyle = 'rgba(20, 63, 117, 0.92)' // --ui-well-deep: pool-blue plastic
+  ctx.strokeStyle = tier > 1 ? ts.hex : 'rgba(255, 255, 255, 0.4)'
   ctx.lineWidth = Math.max(1.5, cell * 0.05)
   roundRectPath(ctx, -w / 2, -h / 2, w, h, h * 0.3)
   ctx.fill()
@@ -727,9 +727,10 @@ const paint = (now: number): void => {
   const band = cell * GROUND_BAND
   if (!paintMeadowBand(ctx, 0, groundY, W, band, originX)) {
     const meadow = ctx.createLinearGradient(0, groundY, 0, groundY + band)
-    meadow.addColorStop(0, '#63a34a')
-    meadow.addColorStop(0.35, '#4d8a38')
-    meadow.addColorStop(1, '#2c5220')
+    // Sandbox sand (sandbox-reskin.md: sand-light → sand-mid → sand-dark).
+    meadow.addColorStop(0, '#f0d69a')
+    meadow.addColorStop(0.35, '#e3c07e')
+    meadow.addColorStop(1, '#b88c4c')
     ctx.fillStyle = meadow
     ctx.fillRect(0, groundY, W, band)
   }
@@ -883,7 +884,8 @@ defineExpose({
   position: fixed
   inset: 0
   z-index: 45
-  background-color: rgba(6, 10, 20, 0.84)
+  // The modal scrim's blue, held dark enough to carry the card on its own.
+  background-color: rgba(14, 42, 80, 0.84)
   cursor: pointer
   touch-action: none
   -webkit-tap-highlight-color: transparent

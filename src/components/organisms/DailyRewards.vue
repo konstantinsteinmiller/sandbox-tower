@@ -136,25 +136,25 @@ const onCardClick = (event: MouseEvent, idx: number) => {
 
 <style scoped lang="sass">
 .daily-card
-  background: rgba(0, 0, 0, 0.35)
-  border-color: rgba(255, 255, 255, 0.18)
+  background: var(--ui-well)
+  border-color: rgba(255, 255, 255, 0.22)
   cursor: not-allowed
   transition: all 0.2s ease
 
   &.is-claimed
-    background: rgba(80, 170, 80, 0.4)
-    border-color: rgba(120, 220, 120, 0.6)
-    opacity: 0.55
+    background: rgba(67, 182, 73, 0.55)
+    border-color: rgba(127, 220, 94, 0.8)
+    opacity: 0.6
 
   &.is-today
-    background: linear-gradient(180deg, #ffcd00, #f7a000)
+    background: linear-gradient(180deg, var(--btn-yellow-from), var(--btn-yellow-to))
     border-color: #fff7d6
-    box-shadow: 0 0 12px rgba(255, 200, 0, 0.6)
+    box-shadow: 0 0 12px rgba(255, 200, 0, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.4)
     cursor: pointer
     animation: today-bounce 1s ease-in-out infinite alternate
 
   &.is-locked
-    background: rgba(0, 0, 0, 0.45)
+    background: var(--ui-well-deep)
     opacity: 0.7
 
 @keyframes today-bounce

@@ -10,14 +10,14 @@ import { nextTick } from 'vue'
 //   wave 0, no coins, no tech. The next write then commits those defaults over
 //   the real cloud save and the loss becomes permanent.
 //
-// The whole game state lives in ONE `tower_state` blob (an allowlisted payload
+// The whole game state lives in ONE `sandbox_state` blob (an allowlisted payload
 // key), so the strategy mirrors it verbatim. `reloadTowerState()` is wired into
 // the `saveDataVersion` bump inside `useSaveStatus` — and the ORDER matters:
 // the blob must be re-read BEFORE the bump, or every `watch(saveDataVersion)`
 // consumer re-reads the stale pre-hydrate snapshot and the bug survives.
 
 const MANIFEST_KEY = '__save_internal__crazy_keys'
-const STATE_KEY = 'tower_state'
+const STATE_KEY = 'sandbox_state'
 
 const makeFakeData = (seed: Record<string, string> = {}) => {
   const store = new Map<string, string>(Object.entries(seed))
@@ -89,7 +89,7 @@ const bootCloudOnly = async (data: ReturnType<typeof makeFakeData>) => {
   return manager
 }
 
-describe('tower_state cloud hydrate → composable refresh', () => {
+describe('sandbox_state cloud hydrate → composable refresh', () => {
   it('hydrates the blob into localStorage before the app graph reads it', async () => {
     const data = await seededCloud()
     await bootCloudOnly(data)

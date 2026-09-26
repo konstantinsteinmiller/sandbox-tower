@@ -100,8 +100,8 @@ const tier2 = tierStyle(2).hex
   width: 100%
   padding: clamp(0.28rem, 1.5vw, 0.5rem) clamp(0.45rem, 2.6vw, 0.8rem)
   border-radius: 0.7rem
-  background: rgba(8, 14, 28, 0.5)
-  box-shadow: inset 0 0 0 2px rgba(255, 214, 92, 0.22)
+  background: var(--ui-well-a)
+  box-shadow: inset 0 0 0 2px var(--ui-rim-soft)
 
 .result-tip__icon
   flex: 0 0 auto
@@ -173,7 +173,7 @@ const tier2 = tierStyle(2).hex
   padding: 1px
   border-radius: 999px
   background: rgba(16, 70, 38, 0.95)
-  box-shadow: 0 0 0 1.5px #0b0530
+  box-shadow: 0 0 0 1.5px var(--ui-line)
 
 .result-tip__tech
   flex: 0 0 auto
@@ -188,7 +188,7 @@ const tier2 = tierStyle(2).hex
 
 .result-tip__text
   min-width: 0
-  color: rgba(226, 236, 255, 0.94)
+  color: var(--ui-text-soft)
   font-weight: 700
   line-height: 1.28
   font-size: clamp(0.56rem, 2.6vw, 0.8rem)

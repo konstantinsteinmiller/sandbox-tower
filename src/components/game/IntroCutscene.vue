@@ -405,9 +405,10 @@ const onSkip = (e: Event): void => {
   align-items: center
   gap: 0.5rem
   padding: 0.62rem 1.05rem
-  border: 2px solid rgba(255, 207, 90, 0.42)
+  // Pool-blue plastic pill with a soft sunshine rim (theme.sass).
+  border: 2px solid var(--ui-rim-soft)
   border-radius: 999px
-  background: rgba(6, 12, 26, 0.74)
+  background: rgba(31, 90, 160, 0.8)
   color: #fff6e2
   font-size: clamp(0.82rem, 3.4vw, 1.02rem)
   font-weight: 800
@@ -419,7 +420,7 @@ const onSkip = (e: Event): void => {
   // Lifted off the battlefield. The vignette darkens the corners, so without a
   // shadow of its own the button's edge disappears into the frame exactly where
   // it sits.
-  box-shadow: 0 0.3rem 1rem rgba(4, 12, 24, 0.55), inset 0 1px 0 rgba(255, 246, 226, 0.09)
+  box-shadow: 0 0 0 1.5px var(--ui-line), 0 0.3rem 1rem rgba(4, 12, 24, 0.45), inset 0 2px 0 var(--ui-gloss-soft)
   // A 48 px target at every size, whatever the label's language does to the box.
   // "Überspringen" and "O'tkazib yuborish" are both a good deal longer than
   // "Skip", so the box is allowed to grow sideways and never to shrink below the
@@ -437,8 +438,8 @@ const onSkip = (e: Event): void => {
 
   &:hover,
   &:focus-visible
-    border-color: #ffcf5a
-    background: rgba(10, 18, 34, 0.86)
+    border-color: var(--ui-rim)
+    background: rgba(42, 108, 184, 0.9)
 
   &:focus-visible
     outline: 2px solid rgba(255, 246, 226, 0.75)

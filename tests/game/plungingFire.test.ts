@@ -18,7 +18,7 @@ import { BLOCK_DEFS } from '@/game/blocks'
 const loadGame = async () => {
   vi.resetModules()
   localStorage.clear()
-  localStorage.setItem('tower_state', JSON.stringify({
+  localStorage.setItem('sandbox_state', JSON.stringify({
     ts_tech: {
       levels: {
         foundations: 1, unlockBombard: 1, unlockMortar: 1,

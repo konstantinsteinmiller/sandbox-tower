@@ -17,7 +17,7 @@ import type { LocalStorageAccessor } from '@/utils/save/types'
  * cloud has been read.
  */
 
-const STATE_KEY = 'tower_state'
+const STATE_KEY = 'sandbox_state'
 const META_KEY = '__save_meta__'
 
 interface BridgeHarness {

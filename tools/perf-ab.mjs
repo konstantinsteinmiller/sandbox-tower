@@ -134,14 +134,14 @@ const buildUrl = (spec) => {
 /**
  * Seeded into every rep BEFORE the app boots (`addScriptToEvaluateOnNewDocument`).
  *
- * Tower Siege persists everything into one `tower_state` blob, so one write
+ * Sandbox Tower persists everything into one `sandbox_state` blob, so one write
  * settles the whole first-run experience: no tutorial overlay, no onboarding
  * gate, no daily-bonus modal — all of which pause the clock or cover the board
  * and would make the measured window mostly a still frame.
  */
 const PRELUDE = `try {
   const today = new Date().toISOString().slice(0, 10)
-  localStorage.setItem('tower_state', JSON.stringify({
+  localStorage.setItem('sandbox_state', JSON.stringify({
     ts_m2_onboarded: true,
     ts_m2_tutorial: true,
     ts_daily_bonus_day: today,

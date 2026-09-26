@@ -16,7 +16,7 @@ import type { TechNode } from '@/game/types'
 /**
  * Meta progression: permanent tech levels + lifetime statistics.
  *
- * Everything here lives inside the single `tower_state` blob and is re-read on
+ * Everything here lives inside the single `sandbox_state` blob and is re-read on
  * BOTH `saveDataVersion` (cloud hydrate finished) and `towerState` identity
  * changes (a cloud sync wrote back into the blob) — the two-watcher pattern is
  * what keeps a returning player from being rendered as a fresh one for the

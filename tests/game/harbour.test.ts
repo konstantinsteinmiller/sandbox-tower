@@ -17,7 +17,7 @@ const loadGame = async (levels: Record<string, number> = {}) => {
   vi.resetModules()
   localStorage.clear()
   if (Object.keys(levels).length > 0) {
-    localStorage.setItem('tower_state', JSON.stringify({ ts_tech: { levels } }))
+    localStorage.setItem('sandbox_state', JSON.stringify({ ts_tech: { levels } }))
   }
   const g = await import('@/use/useTowerGame')
   g.startRun()

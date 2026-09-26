@@ -275,7 +275,9 @@ const arrowStyle = computed(() => {
 
 .tutorial__dim
   position: absolute
-  background-color: rgba(6, 10, 20, 0.72)
+  // Blue-tinted, like the modal scrim: the sunny scene dims without going to
+  // night, and the gold ring still owns the eye.
+  background-color: rgba(14, 42, 80, 0.66)
   pointer-events: auto
 
 .tutorial__ring

@@ -132,13 +132,13 @@ const onClaim = (index: number): void => {
         div.flex.items-center.gap-3.rounded-xl.border-2.p-2.text-left(
           v-for="card in cards"
           :key="card.index"
-          class="bg-black/30"
+          class="bg-[var(--ui-well)]"
           :class="card.claimable ? 'border-yellow-300' : 'border-white/15'"
         )
           div.flex-1.min-w-0
             div.font-black.game-text.text-white(class="text-xs sm:text-sm") {{ card.label }}
             //- Progress bar
-            div.relative.mt-1.h-2.w-full.overflow-hidden.rounded-full(class="bg-black/40")
+            div.relative.mt-1.h-2.w-full.overflow-hidden.rounded-full(class="bg-[var(--ui-well-deep)]")
               div.absolute.inset-y-0.left-0.rounded-full(
                 class="bg-gradient-to-r from-yellow-300 to-amber-500"
                 :style="{ width: (card.fraction * 100) + '%' }"

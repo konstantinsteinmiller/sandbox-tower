@@ -150,9 +150,11 @@ const label = computed<string>(() => t('mobile.repairAll'))
   height: clamp(2rem, 7vw, 2.5rem)
   padding: 0 clamp(0.4rem, 1.8vw, 0.7rem)
   overflow: hidden
-  border: 2px solid #0f1a30
+  // Toy-green candy plastic, like every "do it" button.
+  border: 2px solid var(--ui-line)
   border-radius: clamp(0.45rem, 2vw, 0.7rem)
-  background-image: linear-gradient(to bottom, #67d68c, #248a4c)
+  background-image: linear-gradient(to bottom, var(--btn-green-from), var(--btn-green-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
   color: #fff
   cursor: pointer
   pointer-events: auto
@@ -170,7 +172,8 @@ const label = computed<string>(() => t('mobile.repairAll'))
   // AGAINST. Over the bright green base a 40% bar is invisible, and that bar is
   // the only thing telling the player this press will not finish the job.
   &.is-partial
-    background-image: linear-gradient(to bottom, #2f4a3c, #1d3029)
+    // The green's own drop slab, so the fill still has something to fill AGAINST.
+    background-image: linear-gradient(to bottom, #2c6a31, var(--btn-green-drop))
 
   // Compact drops the word, so the pill loses most of its width — and with it
   // the tap area the label was providing. It buys that back in HEIGHT: a 44px
@@ -202,7 +205,7 @@ const label = computed<string>(() => t('mobile.repairAll'))
   left: 0
   top: 0
   bottom: 0
-  background-image: linear-gradient(to right, rgba(103, 214, 140, 0.95), rgba(103, 214, 140, 0.55))
+  background-image: linear-gradient(to right, rgba(127, 220, 94, 0.95), rgba(127, 220, 94, 0.55))
   pointer-events: none
   transition: width 260ms ease-out
 
@@ -308,16 +311,16 @@ const label = computed<string>(() => t('mobile.repairAll'))
 
 @keyframes repair-all-breathe
   0%, 100%
-    box-shadow: 0 0 0 0 rgba(140, 255, 170, 0)
+    box-shadow: inset 0 2px 0 var(--ui-gloss), 0 0 0 0 rgba(140, 255, 170, 0)
   50%
-    box-shadow: 0 0 0 3px rgba(140, 255, 170, 0.4)
+    box-shadow: inset 0 2px 0 var(--ui-gloss), 0 0 0 3px rgba(140, 255, 170, 0.4)
 
 // A player who asked the OS for less motion still has to be able to find the
 // button, so the nudge becomes a static rim rather than nothing at all.
 @media (prefers-reduced-motion: reduce)
   .repair-all.is-urgent:not(.is-poor)
     animation: none
-    box-shadow: 0 0 0 2px rgba(140, 255, 170, 0.45)
+    box-shadow: inset 0 2px 0 var(--ui-gloss), 0 0 0 2px rgba(140, 255, 170, 0.45)
 
   .repair-all__fill
     transition: none

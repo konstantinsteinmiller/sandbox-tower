@@ -146,7 +146,8 @@ const denied = computed(() => {
   inset: 0
   transform: translateY(3px)
   border-radius: clamp(0.5rem, 2.4vw, 0.9rem)
-  background-color: #0d1830
+  background-color: var(--ui-drop)
+  box-shadow: 0 0 0 1.5px var(--ui-line)
 
 .resource-bar__body
   position: relative
@@ -156,9 +157,11 @@ const denied = computed(() => {
   // A floor so the bar keeps its shape even with single-digit values.
   min-height: 3rem
   padding: clamp(0.3rem, 1.7vw, 0.6rem) clamp(0.7rem, 3.6vw, 1.35rem)
-  border: 2px solid #0f1a30
+  // Pool-blue plastic, sunshine rim, gloss along the top (theme.sass).
+  border: 2px solid var(--ui-rim)
   border-radius: clamp(0.5rem, 2.4vw, 0.9rem)
-  background-image: linear-gradient(to bottom, rgba(38, 56, 96, 0.94), rgba(20, 32, 60, 0.94))
+  background-image: linear-gradient(to bottom, var(--ui-panel-top-a), var(--ui-panel-bot-a))
+  box-shadow: 0 0 0 1.5px var(--ui-line), inset 0 2px 0 var(--ui-gloss)
 
 .resource-bar__item
   position: relative
@@ -200,9 +203,9 @@ const denied = computed(() => {
   animation: res-float var(--float-life, 2500ms) cubic-bezier(0.22, 0.9, 0.3, 1) backwards
 
   &.is-wood
-    color: #ffc27a
+    color: #ffe2a0
   &.is-stone
-    color: #dce4ee
+    color: #dfe8f2
   &.is-gold
     color: #ffd93c
 
@@ -305,7 +308,7 @@ const denied = computed(() => {
     grid-column: 1 / -1
     justify-content: center
     padding-top: 0.12rem
-    border-top: 1px solid rgba(255, 255, 255, 0.14)
+    border-top: 1px solid rgba(255, 255, 255, 0.22)
 
   // Wood and stone move to a FIRST row here, with gold on a second one beneath
   // them — so `top: 100%` of those two cells is no longer the bottom of the

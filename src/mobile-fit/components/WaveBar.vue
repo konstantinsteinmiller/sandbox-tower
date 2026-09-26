@@ -133,10 +133,11 @@ const { t } = useI18n()
   justify-content: center
   width: 2.75rem
   height: 2.75rem
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 0.6rem
-  background-image: linear-gradient(to bottom, #4a5a7d, #2b3654)
-  color: #cfe4ff
+  background-image: linear-gradient(to bottom, var(--btn-plain-from), var(--btn-plain-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss), 0 3px 0 var(--btn-plain-drop)
+  color: #fff
   cursor: pointer
   touch-action: manipulation
   -webkit-tap-highlight-color: transparent
@@ -146,7 +147,7 @@ const { t } = useI18n()
     height: 1.4rem
 
   &.is-open
-    border-color: #7fe0ff
+    border-color: var(--ui-rim)
 
 .bar__left
   display: flex
@@ -174,7 +175,7 @@ const { t } = useI18n()
   height: 1.1rem
   padding: 0 0.25em
   border-radius: 999px
-  background-color: #c62f2f
+  background-color: var(--btn-red-to)
   color: #fff
   font-size: 0.6rem
   font-weight: 900
@@ -188,9 +189,10 @@ const { t } = useI18n()
   min-width: 3.6rem
   height: 2.75rem
   padding: 0 0.5rem
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 0.6rem
-  background-image: linear-gradient(to bottom, #57a37c, #2f6f4e)
+  background-image: linear-gradient(to bottom, var(--btn-green-from), var(--btn-green-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss), 0 3px 0 var(--btn-green-drop)
   color: #fff
   cursor: pointer
   touch-action: manipulation
@@ -245,9 +247,9 @@ const { t } = useI18n()
 
 .bar__warning
   padding: 0.1rem 0.4rem
-  border: 1px solid rgba(0, 0, 0, 0.6)
+  border: 1px solid var(--ui-line)
   border-radius: 999px
-  background-color: #2b3654
+  background-color: var(--ui-panel)
   color: #fff
   font-size: 0.55rem
   font-weight: 900
@@ -255,9 +257,9 @@ const { t } = useI18n()
   white-space: nowrap
 
   &.is-air
-    background-color: #5a3f8a
+    background-color: #7a5cc8
   &.is-bombers
-    background-color: #a3441e
+    background-color: #e0662a
   &.is-hoard
-    background-color: #a8781e
+    background-color: #d99a1e
 </style>

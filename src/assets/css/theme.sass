@@ -1,0 +1,86 @@
+// ─── Sandbox Tower — toy-plastic summer UI tokens ──────────────────────────
+//
+// Every piece of DOM chrome (HUD panels, tray tiles, modals, buttons, badges)
+// reads its colours from these custom properties rather than from literals of
+// its own, so the look of the whole interface is changed HERE, once.
+//
+// Custom properties rather than sass variables because the components use
+// scoped `<style lang="sass">` blocks with no shared `@use`, and because a few
+// component scripts hand colours to inline styles (`FButton`'s `type` switch) —
+// `var(--btn-green-to)` works in both places, a sass `$var` in neither.
+//
+// The look (see `sandbox-reskin.md` § UI chrome):
+//   • panels are pool-blue plastic with a sunshine-yellow rim and a soft gloss
+//     along the top edge;
+//   • buttons are candy plastic — green primary, orange secondary, red for
+//     danger/close, yellow for the call to action;
+//   • text stays white with a dark outline, so it reads on sky AND on sand.
+:root
+  // ── Line ──────────────────────────────────────────────────────────────────
+  // The dark contour around every chip, panel and button. A deep plastic navy:
+  // it frames the bright candy colours hard enough to pop off a pale sky or
+  // pale sand, without the near-black of the old night-time chrome.
+  --ui-line: #173a66
+  // The world art's ink (outlines of blocks and bugs) — for the warm bits:
+  // sand-coloured plates, ribbons, the logo.
+  --ui-ink: #3b2a21
+
+  // ── Pool-blue plastic panels ─────────────────────────────────────────────
+  --ui-panel-top: #2a6cb8
+  --ui-panel-bot: #1f5aa0
+  --ui-panel: #2463ac
+  --ui-panel-hover: #3479c6
+  // Translucent variants for HUD panels floating over the battlefield.
+  --ui-panel-top-a: rgba(42, 108, 184, 0.95)
+  --ui-panel-bot-a: rgba(31, 90, 160, 0.95)
+  // Sunk wells inside a panel: slots, tracks, list rows, empty cells.
+  --ui-well: #1a4f8f
+  --ui-well-deep: #143f75
+  --ui-well-a: rgba(12, 44, 88, 0.42)
+  // The slab under a panel (the 3px "thickness" peeking below it).
+  --ui-drop: #123463
+  // Soft inner highlight along a panel's top edge.
+  --ui-gloss: rgba(255, 255, 255, 0.26)
+  --ui-gloss-soft: rgba(255, 255, 255, 0.14)
+
+  // ── Sunshine rim ─────────────────────────────────────────────────────────
+  --ui-rim: #ffd65a
+  --ui-rim-dark: #d9a21e
+  --ui-rim-soft: rgba(255, 214, 90, 0.55)
+
+  // ── Text on panels ───────────────────────────────────────────────────────
+  --ui-text: #ffffff
+  // Secondary copy (labels, captions) on pool-blue — a pale sky tint.
+  --ui-text-soft: #d4ebff
+  --ui-text-dim: #a6cbf0
+  --ui-text-gold: #ffd93c
+
+  // ── Candy-plastic buttons: face gradient (from → to) + drop slab ─────────
+  --btn-green-from: #7fdc5e
+  --btn-green-to: #43b649
+  --btn-green-drop: #22752b
+  --btn-orange-from: #ffb65c
+  --btn-orange-to: #ff8a2b
+  --btn-orange-drop: #a3511a
+  --btn-red-from: #ff7c68
+  --btn-red-to: #e5483b
+  --btn-red-drop: #8c2219
+  --btn-yellow-from: #ffe36e
+  --btn-yellow-to: #ffc21f
+  --btn-yellow-drop: #a8740e
+  --btn-blue-from: #5fb2ff
+  --btn-blue-to: #2f7de1
+  --btn-blue-drop: #164c93
+  --btn-pink-from: #ff9ccb
+  --btn-pink-to: #ff6fae
+  --btn-pink-drop: #a3336a
+  // "Neutral" chips (settings, mute, disabled-looking controls): pool-blue
+  // plastic, the same material as the panels.
+  --btn-plain-from: #3f89d8
+  --btn-plain-to: #2463ac
+  --btn-plain-drop: #123463
+
+  // ── Overlays ─────────────────────────────────────────────────────────────
+  // Modal scrim: a blue-tinted dim rather than a black one, so the sunny scene
+  // still reads through it.
+  --ui-scrim: rgba(14, 42, 80, 0.62)

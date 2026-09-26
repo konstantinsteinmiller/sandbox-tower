@@ -485,7 +485,8 @@ const refund = computed(() =>
   inset: 0
   transform: translateY(3px)
   border-radius: clamp(0.5rem, 2.4vw, 0.9rem)
-  background-color: #0d1830
+  background-color: var(--ui-drop)
+  box-shadow: 0 0 0 1.5px var(--ui-line)
 
 .inspector__body
   position: relative
@@ -493,9 +494,11 @@ const refund = computed(() =>
   flex-direction: column
   gap: clamp(0.25rem, 1.2vw, 0.45rem)
   padding: clamp(0.35rem, 1.8vw, 0.65rem)
-  border: 2px solid #0f1a30
+  // Pool-blue plastic card, sunshine rim (theme.sass).
+  border: 2px solid var(--ui-rim)
   border-radius: clamp(0.5rem, 2.4vw, 0.9rem)
-  background-image: linear-gradient(to bottom, rgba(38, 56, 96, 0.96), rgba(18, 30, 56, 0.96))
+  background-image: linear-gradient(to bottom, var(--ui-panel-top), var(--ui-panel-bot))
+  box-shadow: 0 0 0 1.5px var(--ui-line), inset 0 2px 0 var(--ui-gloss)
 
 .inspector__head
   display: flex
@@ -521,7 +524,7 @@ const refund = computed(() =>
   white-space: nowrap
 
 .inspector__kind
-  color: #9fb6de
+  color: var(--ui-text-soft)
   text-transform: uppercase
   letter-spacing: 0.08em
   font-size: clamp(0.45rem, 2vw, 0.6rem)
@@ -538,8 +541,8 @@ const refund = computed(() =>
   padding: 0
   border: 0
   border-radius: 0.35rem
-  background-color: rgba(255, 255, 255, 0.1)
-  color: #cfe0ff
+  background-color: var(--ui-well-a)
+  color: var(--ui-text-soft)
   cursor: pointer
 
   svg
@@ -556,7 +559,7 @@ const refund = computed(() =>
   margin: 0
 
   dt
-    color: #9fb6de
+    color: var(--ui-text-soft)
     text-transform: uppercase
     letter-spacing: 0.05em
     font-size: clamp(0.45rem, 2.1vw, 0.62rem)
@@ -600,9 +603,9 @@ const refund = computed(() =>
     border: 1px solid rgba(255, 217, 60, 0.55)
     color: #ffd93c
   &.is-red
-    background-color: rgba(224, 87, 77, 0.18)
-    border: 1px solid rgba(224, 87, 77, 0.6)
-    color: #ff9a92
+    background-color: rgba(229, 72, 59, 0.3)
+    border: 1px solid rgba(255, 140, 128, 0.75)
+    color: #ffc2bb
   // In the tier's own colour (`tierStyle`), so the chip on the card and the
   // plate on the block are visibly the same thing. The rgb triplet arrives as
   // a custom property; the pale gold is only the fallback.
@@ -624,9 +627,10 @@ const refund = computed(() =>
   min-height: 1.9rem
   margin-top: 0.15rem
   padding: 0.2rem 0.5rem
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 0.5rem
-  background-image: linear-gradient(to bottom, #6fe08a, #1f8f4d)
+  background-image: linear-gradient(to bottom, var(--btn-green-from), var(--btn-green-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
   color: #fff
   font-weight: 900
   text-transform: uppercase
@@ -642,7 +646,7 @@ const refund = computed(() =>
   // Disabled means "you cannot afford this yet", which is information, so the
   // price stays legible rather than being greyed into the background.
   &:disabled
-    background-image: linear-gradient(to bottom, #4a5a72, #2b3548)
+    background-image: linear-gradient(to bottom, var(--ui-well), var(--ui-well-deep))
     cursor: default
     opacity: 0.85
 
@@ -674,7 +678,7 @@ const refund = computed(() =>
   width: 0.85rem
   height: 0.22rem
   border-radius: 999px
-  background-color: rgba(255, 255, 255, 0.16)
+  background-color: var(--ui-well-a)
 
   &.is-on
     background-color: #ffd93c
@@ -692,9 +696,11 @@ const refund = computed(() =>
   min-height: 1.9rem
   margin-top: 0.25rem
   padding: 0.2rem 0.5rem
-  border: 2px solid #0f1a30
+  // Toy-blue plastic: a conversion, between green growth and red disposal.
+  border: 2px solid var(--ui-line)
   border-radius: 0.5rem
-  background-image: linear-gradient(to bottom, #7fa8c8, #3d6a92)
+  background-image: linear-gradient(to bottom, var(--btn-blue-from), var(--btn-blue-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
   color: #fff
   font-weight: 900
   text-transform: uppercase
@@ -708,7 +714,7 @@ const refund = computed(() =>
     scale: 0.97
 
   &:disabled
-    background-image: linear-gradient(to bottom, #4a5a72, #2b3548)
+    background-image: linear-gradient(to bottom, var(--ui-well), var(--ui-well-deep))
     cursor: not-allowed
     opacity: 0.85
 
@@ -730,9 +736,10 @@ const refund = computed(() =>
   min-height: 1.9rem
   margin-top: 0.35rem
   padding: 0.2rem 0.5rem
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 0.5rem
-  background-image: linear-gradient(to bottom, #67d68c, #248a4c)
+  background-image: linear-gradient(to bottom, var(--btn-green-from), var(--btn-green-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
   color: #fff
   font-weight: 900
   text-transform: uppercase
@@ -746,14 +753,14 @@ const refund = computed(() =>
     scale: 0.97
 
   &:disabled
-    background-image: linear-gradient(to bottom, #4a5a72, #2b3548)
+    background-image: linear-gradient(to bottom, var(--ui-well), var(--ui-well-deep))
     cursor: not-allowed
     opacity: 0.85
 
   // Cooling down is not the same as unaffordable: it says "not yet", so it
   // keeps a hint of its own colour rather than going fully dead.
   &.is-cooling:disabled
-    background-image: linear-gradient(to bottom, #4c6b58, #2b3f34)
+    background-image: linear-gradient(to bottom, #3f7a45, var(--btn-green-drop))
     opacity: 0.9
 
 // Nested one level deeper than it needs to be, on purpose.
@@ -791,9 +798,10 @@ const refund = computed(() =>
   min-height: 1.9rem
   margin-top: 0.25rem
   padding: 0.2rem 0.5rem
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 0.5rem
   background-image: linear-gradient(to bottom, #b98ae8, #6a3cab)
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
   color: #fff
   font-weight: 900
   font-size: clamp(0.5rem, 2.3vw, 0.7rem)
@@ -808,7 +816,7 @@ const refund = computed(() =>
   // Disabled here means "you cannot afford this yet", which is information, so
   // the price stays legible rather than being greyed into the background.
   &:disabled
-    background-image: linear-gradient(to bottom, #4a5a72, #2b3548)
+    background-image: linear-gradient(to bottom, var(--ui-well), var(--ui-well-deep))
     cursor: not-allowed
     opacity: 0.85
 
@@ -847,7 +855,7 @@ const refund = computed(() =>
   width: 0.34em
   height: 0.34em
   border-radius: 50%
-  background-color: rgba(255, 255, 255, 0.28)
+  background-color: rgba(12, 44, 88, 0.5)
 
   &.is-on
     background-color: #fff6e2
@@ -862,9 +870,10 @@ const refund = computed(() =>
   min-height: 1.9rem
   margin-top: 0.1rem
   padding: 0.2rem 0.5rem
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 0.5rem
-  background-image: linear-gradient(to bottom, #ff8a5a, #c62828)
+  background-image: linear-gradient(to bottom, var(--btn-red-from), var(--btn-red-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
   color: #fff
   font-weight: 900
   text-transform: uppercase

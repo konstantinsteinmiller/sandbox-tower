@@ -141,7 +141,7 @@ describe('the build hand', () => {
     // Wide and the Great Foundation nodes were bought and did nothing at all.
     vi.resetModules()
     localStorage.clear()
-    localStorage.setItem('tower_state', JSON.stringify({
+    localStorage.setItem('sandbox_state', JSON.stringify({
       ts_tech: { levels: { wideFoundation: 2, greatFoundation: 1 } }
     }))
     const g = await import('@/use/useTowerGame')

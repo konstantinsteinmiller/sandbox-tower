@@ -2790,7 +2790,8 @@ onUnmounted(() => {
   height: 100vh
   height: 100dvh
   overflow: hidden
-  background-color: #0a1224
+  // Sunny sky behind the canvas (matches index.sass / the splash).
+  background-color: #8fd0f5
 
 .drop__canvas
   position: absolute
@@ -2857,9 +2858,11 @@ onUnmounted(() => {
   justify-content: center
   width: 2.5rem
   height: 7.75rem
-  border: 2px solid rgba(255, 255, 255, 0.25)
+  // Pool-blue plastic rail with the sunshine rim (theme.sass).
+  border: 2px solid var(--ui-rim)
   border-radius: 999px
-  background-color: rgba(8, 14, 28, 0.72)
+  background-image: linear-gradient(to right, var(--ui-panel-top-a), var(--ui-panel-bot-a))
+  box-shadow: 0 0 0 1.5px var(--ui-line), inset 2px 0 0 var(--ui-gloss-soft)
   cursor: pointer
   touch-action: none
   -webkit-tap-highlight-color: transparent
@@ -2880,12 +2883,12 @@ onUnmounted(() => {
   &::-webkit-slider-runnable-track
     height: 0.4rem
     border-radius: 999px
-    background-color: rgba(255, 255, 255, 0.24)
+    background-color: var(--ui-well-deep)
 
   &::-moz-range-track
     height: 0.4rem
     border-radius: 999px
-    background-color: rgba(255, 255, 255, 0.24)
+    background-color: var(--ui-well-deep)
 
   &::-webkit-slider-thumb
     -webkit-appearance: none
@@ -2893,18 +2896,18 @@ onUnmounted(() => {
     height: 1.3rem
     // (track 0.4rem − thumb 1.3rem) / 2 — the one centring hack.
     margin-top: -0.45rem
-    border: 2px solid #0b1224
+    border: 2px solid var(--ui-line)
     border-radius: 999px
-    background-image: linear-gradient(to bottom, #9fe9ff, #2f8fe0)
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.55)
+    background-image: linear-gradient(to bottom, var(--btn-yellow-from), var(--btn-yellow-to))
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.5)
 
   &::-moz-range-thumb
     width: 1.3rem
     height: 1.3rem
-    border: 2px solid #0b1224
+    border: 2px solid var(--ui-line)
     border-radius: 999px
-    background-color: #6fd3ff
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.55)
+    background-color: var(--btn-yellow-to)
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4)
 
 .drop__zoom-reset
   display: flex
@@ -2913,10 +2916,11 @@ onUnmounted(() => {
   width: 2.5rem
   height: 2.5rem
   padding: 0
-  border: 2px solid rgba(255, 255, 255, 0.25)
+  border: 2px solid var(--ui-rim)
   border-radius: 999px
-  background-color: rgba(8, 14, 28, 0.72)
-  color: #cfe4ff
+  background-image: linear-gradient(to bottom, var(--ui-panel-top-a), var(--ui-panel-bot-a))
+  box-shadow: 0 0 0 1.5px var(--ui-line), inset 0 2px 0 var(--ui-gloss)
+  color: #fff
   cursor: pointer
   -webkit-tap-highlight-color: transparent
 
@@ -3010,17 +3014,18 @@ onUnmounted(() => {
   gap: 0.4rem
   max-width: calc(100vw - 1rem)
   padding: 0.5rem
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-rim)
   border-radius: 0.8rem
-  background-image: linear-gradient(to bottom, rgba(38, 56, 96, 0.96), rgba(18, 30, 56, 0.96))
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55)
+  background-image: linear-gradient(to bottom, var(--ui-panel-top), var(--ui-panel-bot))
+  box-shadow: 0 0 0 1.5px var(--ui-line), 0 8px 18px rgba(30, 50, 80, 0.45), inset 0 2px 0 var(--ui-gloss)
   pointer-events: auto
 
 .drop__bottom
   position: relative
   display: flex
   flex-direction: column
-  background-image: linear-gradient(to top, rgba(10, 18, 36, 0.9), rgba(10, 18, 36, 0.35))
+  // Pool-blue plastic wash under the tray, fading up into the scene.
+  background-image: linear-gradient(to top, rgba(31, 90, 160, 0.9), rgba(42, 108, 184, 0.35))
   pointer-events: none
 
   > *
@@ -3090,8 +3095,8 @@ onUnmounted(() => {
 .dresult__record
   padding: 0.05em 0.5em
   border-radius: 999px
-  border: 2px solid rgba(255, 217, 60, 0.75)
-  background: rgba(60, 40, 0, 0.45)
+  border: 2px solid var(--ui-rim)
+  background: rgba(23, 58, 102, 0.55)
   color: #ffd93c
   font-size: 0.8rem
   font-weight: 900
@@ -3174,10 +3179,10 @@ onUnmounted(() => {
   min-width: 1.85em
   height: 1.85em
   padding: 0 0.3em
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 999px
   background-image: linear-gradient(to bottom, #fff3b0, #ffc83d)
-  box-shadow: 0 2px 0 #0f1a30
+  box-shadow: 0 2px 0 var(--ui-line)
   color: #3a2400
   font-size: 0.62em
   font-weight: 900

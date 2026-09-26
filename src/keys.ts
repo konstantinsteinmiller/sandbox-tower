@@ -1,6 +1,6 @@
 // ─── Game-state field catalogue ─────────────────────────────────────────────
 //
-// Field names INSIDE the single `tower_state` blob (see `useTowerState.ts`).
+// Field names INSIDE the single `sandbox_state` blob (see `useTowerState.ts`).
 // These are NOT separate localStorage keys — they are properties of the one
 // persisted object — but they are still a contract with the player base:
 // renaming any of them strands existing players' progress on the old field.
@@ -231,7 +231,7 @@ export const GIFT_COACH_KEY = 'ts_gift_coach'
  * into an introduction is precisely the player who must not be shown it again.
  *
  * Shared by both boards, like `TECH_FOUND_KEY` and for the same reason: it
- * answers "has this person been introduced to Tower Siege", which is a fact
+ * answers "has this person been introduced to Sandbox Tower", which is a fact
  * about the player and not about a board. A phone player who later opens the
  * desktop game already knows why the tower is there.
  */

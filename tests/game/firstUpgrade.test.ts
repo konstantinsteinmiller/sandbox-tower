@@ -108,7 +108,7 @@ describe('a phone save from before the strip was re-ordered', () => {
   const loadPhone = async (levels: Record<string, number>, coins = 500) => {
     vi.resetModules()
     localStorage.clear()
-    localStorage.setItem('tower_state', JSON.stringify({ ts_m2_tech: { levels }, ts_coins: coins }))
+    localStorage.setItem('sandbox_state', JSON.stringify({ ts_m2_tech: { levels }, ts_coins: coins }))
     const game = await import('@/use/useTowerGame')
     const { DROPMERGE_RULES } = await import('@/mobile-fit/rules')
     game.applyRules(DROPMERGE_RULES)
@@ -148,7 +148,7 @@ describe('the in-tree spotlight', () => {
   const load = async (levels: Record<string, number> = {}) => {
     vi.resetModules()
     localStorage.clear()
-    localStorage.setItem('tower_state', JSON.stringify({ ts_tech: { levels } }))
+    localStorage.setItem('sandbox_state', JSON.stringify({ ts_tech: { levels } }))
     const discovery = await import('@/use/useTechDiscovery')
     const game = await import('@/use/useTowerGame')
     const progress = await import('@/use/useTowerProgress')

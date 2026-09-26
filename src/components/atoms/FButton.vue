@@ -63,27 +63,29 @@ const theme = computed(() => {
   switch (props.type) {
     case 'secondary':
       return {
-        from: props.colorFrom ?? '#50aaff',
-        to: props.colorTo ?? '#2266ff',
-        shadow: props.shadowColor ?? '#102e7a'
+        // Toy-orange: the secondary candy plastic (see theme.sass).
+        from: props.colorFrom ?? 'var(--btn-orange-from)',
+        to: props.colorTo ?? 'var(--btn-orange-to)',
+        shadow: props.shadowColor ?? 'var(--btn-orange-drop)'
       }
     case 'danger':
       return {
-        from: props.colorFrom ?? '#ff6b5a',
-        to: props.colorTo ?? '#c62828',
-        shadow: props.shadowColor ?? '#6b1212'
+        from: props.colorFrom ?? 'var(--btn-red-from)',
+        to: props.colorTo ?? 'var(--btn-red-to)',
+        shadow: props.shadowColor ?? 'var(--btn-red-drop)'
       }
     case 'success':
       return {
-        from: props.colorFrom ?? '#67e08a',
-        to: props.colorTo ?? '#1f9d4d',
-        shadow: props.shadowColor ?? '#0e5c2c'
+        from: props.colorFrom ?? 'var(--btn-green-from)',
+        to: props.colorTo ?? 'var(--btn-green-to)',
+        shadow: props.shadowColor ?? 'var(--btn-green-drop)'
       }
     default:
       return {
-        from: props.colorFrom ?? '#ffcd00',
-        to: props.colorTo ?? '#f7a000',
-        shadow: props.shadowColor ?? '#1a2b4b'
+        // Sunshine yellow: the call to action.
+        from: props.colorFrom ?? 'var(--btn-yellow-from)',
+        to: props.colorTo ?? 'var(--btn-yellow-to)',
+        shadow: props.shadowColor ?? 'var(--btn-yellow-drop)'
       }
   }
 })
@@ -275,7 +277,7 @@ span.f-button__icon
   width: 100%
   min-height: var(--fbtn-min-h)
   padding: var(--fbtn-py) var(--fbtn-px)
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: var(--fbtn-radius)
   background-image: linear-gradient(to bottom, var(--fbtn-from), var(--fbtn-to))
   overflow: hidden
@@ -285,7 +287,7 @@ span.f-button__icon
   inset-inline: 0
   top: 0
   height: 48%
-  background-color: rgba(255, 255, 255, 0.25)
+  background-color: rgba(255, 255, 255, 0.28)
   border-radius: var(--fbtn-radius) var(--fbtn-radius) 0 0
   pointer-events: none
 

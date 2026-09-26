@@ -3,7 +3,7 @@ import { prependBaseUrl } from '@/utils/function'
 /**
  * ─── Art contract ───────────────────────────────────────────────────────────
  *
- * Tower Siege ships with ZERO gameplay bitmaps: every block, enemy and
+ * Sandbox Tower ships with ZERO gameplay bitmaps: every block, enemy and
  * background layer is drawn procedurally in `useTowerArt.ts` from the palettes
  * below. That keeps the download tiny, makes the art resolution-independent
  * (crisp at any DPR and any zoom), and means the game is playable the instant
@@ -37,26 +37,41 @@ export interface Palette {
 }
 
 export const PALETTES: Record<string, Palette> = {
-  // ── Blocks ───────────────────────────────────────────────────────────────
-  wood: { dark: '#6b3f1d', mid: '#a9682f', light: '#d99a53', accent: '#4a2a12', accent2: '#f0c185', debris: [169, 104, 47] },
-  brace: { dark: '#5d3a1b', mid: '#97602c', light: '#c98d4b', accent: '#3a2410', accent2: '#e8bb7d', debris: [151, 96, 44] },
-  stone: { dark: '#4a5058', mid: '#767e88', light: '#a8b2bd', accent: '#333940', accent2: '#c9d3dd', debris: [118, 126, 136] },
-  gate: { dark: '#2a2140', mid: '#4b3d70', light: '#7a63ad', accent: '#c9a227', accent2: '#ffe9a8', debris: [75, 61, 112] },
-  archer: { dark: '#4d3a20', mid: '#8a6a3a', light: '#c2995a', accent: '#2f7d5a', accent2: '#7ef0bb', debris: [138, 106, 58] },
-  cannon: { dark: '#2f3338', mid: '#565c64', light: '#868e98', accent: '#d0761f', accent2: '#ffcf7a', debris: [86, 92, 100] },
-  mortar: { dark: '#3a3a44', mid: '#5f5f6e', light: '#8d8da0', accent: '#c0453a', accent2: '#ff9a7a', debris: [95, 95, 110] },
-  tesla: { dark: '#1e2c44', mid: '#33507a', light: '#5680bd', accent: '#57e2ff', accent2: '#ccf7ff', debris: [51, 80, 122] },
-  frost: { dark: '#1f3a48', mid: '#356577', light: '#5d9db4', accent: '#8ef0ff', accent2: '#e6fdff', debris: [53, 101, 119] },
-  spikes: { dark: '#3d3a35', mid: '#6d6862', light: '#a5a099', accent: '#8a6a3a', accent2: '#e8e2d6', debris: [109, 104, 98] },
-  bombard: { dark: '#33302c', mid: '#5c564e', light: '#8c8478', accent: '#c98a2a', accent2: '#ffd98a', debris: [92, 86, 78] },
-  repair: { dark: '#204035', mid: '#356b52', light: '#57a37c', accent: '#ffe08a', accent2: '#fff6d6', debris: [53, 107, 82] },
-  sawmill: { dark: '#59401f', mid: '#8d6a34', light: '#bf9553', accent: '#9fd45a', accent2: '#e2ffb0', debris: [141, 106, 52] },
-  quarry: { dark: '#403f47', mid: '#6a6875', light: '#9a97a8', accent: '#d3b06a', accent2: '#ffeab8', debris: [106, 104, 117] },
-  mint: { dark: '#4b3a15', mid: '#836424', light: '#b9903c', accent: '#ffd93c', accent2: '#fff3b0', debris: [131, 100, 36] },
-  // Buffs read as heraldry — cloth and gilt, not masonry — so a player can pick
-  // the block that is doing nothing on its own out of a crowded tower.
-  banner: { dark: '#3d1c33', mid: '#6f3059', light: '#a3557f', accent: '#ffd35c', accent2: '#fff0bd', debris: [111, 48, 89] },
-  obelisk: { dark: '#23203a', mid: '#3f3a63', light: '#6a63a0', accent: '#9be8ff', accent2: '#e6fbff', debris: [63, 58, 99] },
+  // ── Blocks (the sandcastle) ──────────────────────────────────────────────
+  //
+  // Two families, and the ramp means something different in each:
+  //
+  //   * MATERIAL blocks — the Sand Block, Packed Sand, the Pebble Wall, the
+  //     Toothpick Wall and the Castle Gate. The ramp IS the block: dry sand,
+  //     wet sand, grey-blue pebbles.
+  //   * TOY blocks — every gun, producer and buff. They stand on a shared sand
+  //     plinth (`sandBlockArt.ts`), so their ramp is the TOY's plastic: the
+  //     plinth wears it as trim, the fixture is moulded from it, the tray tile
+  //     is filled with it and the debris flies off in it. A tower full of sand
+  //     still has one saturated colour per gun to find it by.
+  //
+  // Red is deliberately missing from the toy colours: the roof cap is the red
+  // bucket, and "can I build on this?" has to stay one glance.
+  wood: { dark: '#b88c4c', mid: '#e3c07e', light: '#f6e2ae', accent: '#9c7038', accent2: '#fff4d6', debris: [227, 192, 126] },
+  brace: { dark: '#8d673a', mid: '#c79a5c', light: '#dcb57c', accent: '#6e4c26', accent2: '#f2d7a2', debris: [199, 154, 92] },
+  stone: { dark: '#5f6975', mid: '#8f9aa6', light: '#c9d0d6', accent: '#454d57', accent2: '#e8edf1', debris: [154, 163, 173] },
+  gate: { dark: '#b3803f', mid: '#eccb8c', light: '#fff1cc', accent: '#ffb42e', accent2: '#ffd36b', debris: [236, 203, 140] },
+  archer: { dark: '#c75416', mid: '#ff8a2b', light: '#ffb56e', accent: '#2f7de1', accent2: '#ffe2c2', debris: [255, 138, 43] },
+  cannon: { dark: '#23833b', mid: '#43b649', light: '#86dc6e', accent: '#34b3d1', accent2: '#d4f7ff', debris: [67, 182, 73] },
+  mortar: { dark: '#5b36a8', mid: '#8a5cd8', light: '#b894f0', accent: '#7a4a22', accent2: '#eadcff', debris: [138, 92, 216] },
+  tesla: { dark: '#2b2f8f', mid: '#4d52d6', light: '#8189f2', accent: '#57e2ff', accent2: '#ccf7ff', debris: [77, 82, 214] },
+  frost: { dark: '#2382b5', mid: '#5cc4ea', light: '#aaeaff', accent: '#8ef0ff', accent2: '#effdff', debris: [170, 234, 255] },
+  spikes: { dark: '#a57539', mid: '#d8ae6a', light: '#f2d9a0', accent: '#7d5a2e', accent2: '#fbecc8', debris: [216, 174, 106] },
+  bombard: { dark: '#138a80', mid: '#1fb5a8', light: '#6adccf', accent: '#ffc93c', accent2: '#d6fff9', debris: [31, 181, 168] },
+  repair: { dark: '#1d5fb5', mid: '#2f7de1', light: '#72acf2', accent: '#ffc93c', accent2: '#fff3c4', debris: [47, 125, 225] },
+  sawmill: { dark: '#5c961d', mid: '#94cc3a', light: '#c8ee82', accent: '#ff8a2b', accent2: '#f4ffd6', debris: [148, 204, 58] },
+  quarry: { dark: '#c98a00', mid: '#ffc21f', light: '#ffe07a', accent: '#4a4f57', accent2: '#c9d0d6', debris: [255, 194, 31] },
+  mint: { dark: '#d05a8e', mid: '#ff8fbf', light: '#ffc3dc', accent: '#ffc93c', accent2: '#fff3b0', debris: [255, 143, 191] },
+  // Buffs read as a party, not a fort — paper bunting and a pearly shell — so a
+  // player can pick the block that is doing nothing on its own out of a crowded
+  // tower. The flag keeps its heraldic magenta and gilt.
+  banner: { dark: '#7a2a63', mid: '#b8479a', light: '#e685c6', accent: '#ffd35c', accent2: '#fff0bd', debris: [184, 71, 154] },
+  obelisk: { dark: '#7656a8', mid: '#b99ae6', light: '#efe0ff', accent: '#9be8ff', accent2: '#e6fbff', debris: [185, 154, 230] },
 
   // ── Enemies ──────────────────────────────────────────────────────────────
   grunt: { dark: '#4a1f22', mid: '#8d3238', light: '#c04b52', accent: '#2a1012', accent2: '#ffcf6b', debris: [141, 50, 56] },
@@ -77,29 +92,33 @@ export const PALETTES: Record<string, Palette> = {
   kraken: { dark: '#1a1030', mid: '#332055', light: '#553a85', accent: '#b06bff', accent2: '#e8d0ff', debris: [51, 32, 85] },
   seadrake: { dark: '#12332f', mid: '#2f7f74', light: '#57b0a2', accent: '#c9503a', accent2: '#ffd76a', debris: [47, 127, 116] },
 
-  // ── Siege engines ────────────────────────────────────────────────────────
-  // Timber-and-iron tones, deliberately close to one another: engines should
-  // read as one category of threat that the player answers the same way.
-  ram: { dark: '#3a2614', mid: '#6b4522', light: '#9c6a38', accent: '#8a8f96', accent2: '#d6dae0', debris: [107, 69, 34] },
-  // Cold, hard iron rather than timber — the palette itself says "arrows will
-  // not do anything here" before the player has read a single tooltip.
-  ironRam: { dark: '#22262c', mid: '#454c56', light: '#727c8a', accent: '#b9c2cd', accent2: '#eef2f7', debris: [69, 76, 86] },
-  ballista: { dark: '#3d2c18', mid: '#705027', light: '#a37a42', accent: '#b8bcc4', accent2: '#eef1f5', debris: [112, 80, 39] },
-  catapult: { dark: '#382412', mid: '#68431f', light: '#9a6733', accent: '#c07a2a', accent2: '#ffd08a', debris: [104, 67, 31] },
-  siegeTower: { dark: '#33291a', mid: '#5e4a2c', light: '#8c7044', accent: '#9a3a2e', accent2: '#e8a08a', debris: [94, 74, 44] },
-  trebuchet: { dark: '#2e2314', mid: '#574024', light: '#856439', accent: '#6a8fbf', accent2: '#cfe2ff', debris: [87, 64, 36] },
+  // ── Siege engines (ant contraptions built from toy junk) ─────────────────
+  // `mid` is each machine's own toy colour (car paint, spoon plastic, juice
+  // carton, bottle caps); `accent` its rubber bands / caps / label. All WARM:
+  // toy-blue belongs to the player's knights and must never appear on a
+  // machine the player is supposed to shoot. `debris` is the material that
+  // flies off it — popsicle stick for the stick-built ones.
+  ram: { dark: '#8f231c', mid: '#e5483b', light: '#ff8577', accent: '#ffc93c', accent2: '#fff1c2', debris: [229, 72, 59] },
+  // Bright, cold tin — the palette itself says "darts will not do anything
+  // here" before the player has read a single tooltip.
+  ironRam: { dark: '#4c545e', mid: '#9aa4b0', light: '#d7dee6', accent: '#d8402f', accent2: '#fff4dc', debris: [154, 164, 176] },
+  ballista: { dark: '#23702a', mid: '#43b649', light: '#86dc7a', accent: '#ff5f8f', accent2: '#fff0a8', debris: [236, 201, 142] },
+  catapult: { dark: '#b0306a', mid: '#ff6fae', light: '#ffa9cf', accent: '#ffc93c', accent2: '#fff3c0', debris: [236, 201, 142] },
+  siegeTower: { dark: '#b8561a', mid: '#ff8a2b', light: '#ffb66b', accent: '#e5483b', accent2: '#fff6e0', debris: [255, 138, 43] },
+  trebuchet: { dark: '#962018', mid: '#e5483b', light: '#ff8577', accent: '#43b649', accent2: '#ffe08a', debris: [255, 201, 60] },
 
   // ── Allies ───────────────────────────────────────────────────────────────
   // Deliberately the brightest, coolest palette on the field: a friendly unit
-  // must never be mistaken for something you are supposed to shoot.
-  cavalry: { dark: '#123a5e', mid: '#1f6aa8', light: '#42a3e0', accent: '#ffd93c', accent2: '#fff3b0', debris: [31, 106, 168] },
+  // must never be mistaken for something you are supposed to shoot. Toy-blue
+  // plastic with gold trim — the Toy Knights.
+  cavalry: { dark: '#1a4f9c', mid: '#2f7de1', light: '#6fb0f5', accent: '#ffc93c', accent2: '#fff3b0', debris: [47, 125, 225] },
 
   // ── Ships ──
-  // Warm timber hulls with a livery sail, so a harbour reads as the player's
-  // even though the tower above it is grey stone.
-  skiff: { dark: '#4a3520', mid: '#7d5c34', light: '#b2874d', accent: '#3f7fbf', accent2: '#cfe4ff', debris: [125, 92, 52] },
-  longship: { dark: '#42301f', mid: '#755331', light: '#a87d49', accent: '#c1543f', accent2: '#ffd0b0', debris: [117, 83, 49] },
-  galley: { dark: '#38301f', mid: '#665534', light: '#96814f', accent: '#d8a12c', accent2: '#ffe6a8', debris: [102, 85, 52] },
+  // Bath toys on the paddling pool: a folded notebook-paper boat, a yellow
+  // rubber duck and a brown plastic pirate ship with gold trim.
+  skiff: { dark: '#8ea3ba', mid: '#e4ecf5', light: '#ffffff', accent: '#5a9be6', accent2: '#ff6b6b', debris: [228, 236, 245] },
+  longship: { dark: '#d99400', mid: '#ffc93c', light: '#ffe78f', accent: '#ff8a2b', accent2: '#fff7cc', debris: [255, 201, 60] },
+  galley: { dark: '#4f2a18', mid: '#8c4d2b', light: '#bd7a45', accent: '#ffc93c', accent2: '#e5483b', debris: [140, 77, 43] },
 
   // ── Projectiles / effects ────────────────────────────────────────────────
   bolt: { dark: '#5b4326', mid: '#a07a45', light: '#e0c089', accent: '#ffffff', accent2: '#ffe9b0', debris: [224, 192, 137] },

@@ -9,7 +9,7 @@ import useBattlePass from '@/use/useBattlePass'
 //
 // Three rotating goals, regenerated each local day, that give a reason to open
 // the game daily beyond the login chest. Completing one pays coins + a chunk of
-// battle-pass XP. State persists in the single `tower_state` blob under
+// battle-pass XP. State persists in the single `sandbox_state` blob under
 // `MISSIONS_KEY` as `{ day, missions }`, so it round-trips through cloud save.
 //
 // PROGRESS IS CREDITED IN DELTAS, and that is the whole design of `recordRun`.

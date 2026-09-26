@@ -21,7 +21,7 @@ const loadGame = async (levels: Record<string, number> = {}) => {
   // now carries the opening surcharge (`FIRST_RUN_SCALE`), which is sized
   // against the scripted fort rather than against whatever a test puts down.
   // Left as a first session, they were measuring the wave director.
-  localStorage.setItem('tower_state', JSON.stringify({ ts_tech: { levels }, ts_onboarded: true }))
+  localStorage.setItem('sandbox_state', JSON.stringify({ ts_tech: { levels }, ts_onboarded: true }))
   const g = await import('@/use/useTowerGame')
   g.startRun()
   g.wood.value = 9999

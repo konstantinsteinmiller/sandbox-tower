@@ -55,7 +55,7 @@ const BOOT_GRACE_MS = 9000
 
 const PRELUDE = `try {
   const today = new Date().toISOString().slice(0, 10)
-  localStorage.setItem('tower_state', JSON.stringify({
+  localStorage.setItem('sandbox_state', JSON.stringify({
     ts_m2_onboarded: true, ts_m2_tutorial: true, ts_daily_bonus_day: today,
     ts_user_sound_volume: 0, ts_user_music_volume: 0, ts_mobile_mute: true
   }))

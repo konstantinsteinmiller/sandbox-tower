@@ -1,6 +1,6 @@
 // ─── The opening cutscene, as data ──────────────────────────────────────────
 //
-// A player who opens Tower Siege is shown a small fort, a hand of blocks and a
+// A player who opens Sandbox Tower is shown a small fort, a hand of blocks and a
 // countdown, and is told none of what any of it is FOR. The 2026-09-11 blind
 // playtest put numbers on it: not one of ten first-time players was told the
 // goal, and every one of them had to infer it from monsters eventually

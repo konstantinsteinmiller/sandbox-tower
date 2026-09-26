@@ -374,8 +374,9 @@ onUnmounted(() => {
   display: inline-block
   padding: 0.05em 0.4em
   border-radius: 999px
-  background-color: rgba(10, 16, 30, 0.72)
-  color: #cfdcf0
+  background-color: rgba(23, 58, 102, 0.85)
+  box-shadow: 0 0 0 1px var(--ui-rim-soft)
+  color: #fff
   font-weight: 900
   font-size: clamp(0.5rem, 2.1vw, 0.66rem)
   line-height: 1.5
@@ -388,7 +389,7 @@ onUnmounted(() => {
   justify-content: center
   gap: 0.2em
   padding: 0.1em 0.45em
-  border: 2px solid #2a1c06
+  border: 2px solid var(--ui-line)
   border-radius: 999px
   background-image: linear-gradient(to bottom, #cfd9e6, #93a3b8)
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.45)

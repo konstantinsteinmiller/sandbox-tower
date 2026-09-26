@@ -30,15 +30,15 @@ defineExpose({ rootEl })
 
 <style scoped lang="sass">
 .coin-badge
-  background: linear-gradient(135deg, #50aaff 0%, #2266ff 50%, #1b3e95 100%)
-  border: 2px solid #fcd34d
+  background: linear-gradient(to bottom, var(--ui-panel-top), var(--ui-panel-bot))
+  border: 2px solid var(--ui-rim)
   // The badge is a readout, not a control — but it is the chord's trigger, so
   // it has to receive taps wherever the HUD around it is inert. No cursor
   // change and no hover state: nothing here advertises itself.
   pointer-events: auto
   // Thirty taps against a double-tap-zoom delay is a chord nobody can enter.
   touch-action: manipulation
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -2px 4px rgba(0, 0, 0, 0.4)
+  box-shadow: 0 0 0 1.5px var(--ui-line), 0 3px 0 1.5px var(--ui-drop), inset 0 2px 0 var(--ui-gloss), inset 0 -2px 3px rgba(0, 0, 0, 0.18)
   overflow: hidden
 
   &::before

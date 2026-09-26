@@ -29,14 +29,18 @@ const { t } = useI18n()
   align-items: center
   justify-content: center
   gap: 1rem
-  background: radial-gradient(circle at 50% 40%, #1b2b52 0%, #0a1224 70%)
+  // The splash's sunny sky into sand (index.html).
+  background: linear-gradient(180deg, #6fc3f7 0%, #a9dcf9 38%, #d6f0ff 56%, #f6e2ae 70%, #e3c07e 100%)
   pointer-events: auto
 
 .rotate__phone
   width: 3.2rem
   height: 5.4rem
-  border: 3px solid #cfe4ff
+  // A toy phone: pool-blue plastic shell with the sunshine rim.
+  border: 3px solid var(--ui-rim)
   border-radius: 0.6rem
+  background-image: linear-gradient(to bottom, var(--ui-panel-top), var(--ui-panel-bot))
+  box-shadow: 0 0 0 2px var(--ui-line), inset 0 2px 0 var(--ui-gloss)
   animation: rotate-hint 1.6s ease-in-out infinite
   transform-origin: center
 
@@ -46,7 +50,7 @@ const { t } = useI18n()
     height: 3px
     margin: 0.35rem auto 0
     border-radius: 3px
-    background-color: #cfe4ff
+    background-color: var(--ui-text-soft)
 
 @keyframes rotate-hint
   0%, 20%

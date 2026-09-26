@@ -40,11 +40,11 @@ const onClaim = (id: string, event: MouseEvent): void => {
         div.flex.items-center.gap-3.rounded-xl.border-2.p-2.text-left(
           v-for="a in list"
           :key="a.id"
-          class="bg-black/30"
+          class="bg-[var(--ui-well)]"
           :class="a.claimable ? 'border-yellow-300' : (a.claimed ? 'border-emerald-400/50' : 'border-white/15')"
         )
           div.shrink-0.flex.items-center.justify-center.rounded-lg.border-2(
-            class="w-10 h-10 bg-gradient-to-b from-[#ffcd00] to-[#f7a000] border-[#0f1a30]"
+            class="w-10 h-10 bg-gradient-to-b from-[var(--btn-yellow-from)] to-[var(--btn-yellow-to)] border-[var(--ui-line)]"
             :class="a.complete ? '' : 'opacity-40 grayscale'"
           )
             svg(viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round")
@@ -56,7 +56,7 @@ const onClaim = (id: string, event: MouseEvent): void => {
           div.flex-1.min-w-0
             div.font-black.game-text.text-white(class="text-sm sm:text-base") {{ t('achievements.items.' + a.id + '.name') }}
             div.text-white.game-text.opacity-70.leading-tight(class="text-[10px] sm:text-xs") {{ t('achievements.items.' + a.id + '.desc') }}
-            div.mt-1.relative.h-2.rounded-full.overflow-hidden.border(class="bg-black/40 border-white/20")
+            div.mt-1.relative.h-2.rounded-full.overflow-hidden.border(class="bg-[var(--ui-well-deep)] border-white/20")
               div.h-full.bg-gradient-to-r.from-yellow-300.to-amber-500.transition-all(
                 :style="{ width: Math.min(100, (a.current / a.target) * 100) + '%' }"
               )
@@ -65,7 +65,7 @@ const onClaim = (id: string, event: MouseEvent): void => {
             div.text-center.text-emerald-300.font-black.game-text(v-if="a.claimed" class="text-[10px] sm:text-xs") {{ t('achievements.claimed') }}
             button.cursor-pointer.transition-transform.flex.items-center.justify-center.gap-1.rounded-lg.border-2.px-3(
               v-else-if="a.claimable"
-              class="py-1.5 active:scale-95 hover:scale-[103%] bg-gradient-to-b from-[#ffcd00] to-[#f7a000] border-[#0f1a30]"
+              class="py-1.5 active:scale-95 hover:scale-[103%] bg-gradient-to-b from-[var(--btn-yellow-from)] to-[var(--btn-yellow-to)] border-[var(--ui-line)]"
               @click="onClaim(a.id, $event)"
             )
               IconCoin(class="w-4 h-4 text-yellow-100")

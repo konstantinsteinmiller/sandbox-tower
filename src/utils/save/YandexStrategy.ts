@@ -20,7 +20,7 @@
 //
 //   2. **Single blob key.** Yandex's setData accepts an arbitrary object;
 //      we send `{ blob: <serialized snapshot>, meta: <SaveMeta JSON> }`.
-//      The blob is the consolidated `tower_state` blob (the same payload
+//      The blob is the consolidated `sandbox_state` blob (the same payload
 //      Playgama / GamePix mirror), and `meta` is the same SaveMeta the
 //      CrazyGames merge resolver uses — kept here even though we don't
 //      run the merge today, so a future cross-device merge has the data.

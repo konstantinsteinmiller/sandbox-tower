@@ -665,10 +665,11 @@ const infoEntry = computed(() => {
   margin-inline: auto
   gap: clamp(0.12rem, 0.8vw, 0.28rem)
   padding: clamp(0.12rem, 0.7vw, 0.28rem)
-  border: 2px solid #0f1a30
+  // The toy box: pool-blue plastic, sunshine rim, gloss along the top.
+  border: 2px solid var(--ui-rim)
   border-radius: clamp(0.45rem, 2.2vw, 0.8rem)
-  background-image: linear-gradient(to bottom, rgba(38, 56, 96, 0.92), rgba(18, 30, 56, 0.92))
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45)
+  background-image: linear-gradient(to bottom, var(--ui-panel-top-a), var(--ui-panel-bot-a))
+  box-shadow: 0 0 0 1.5px var(--ui-line), inset 0 2px 0 var(--ui-gloss), 0 6px 14px rgba(0, 0, 0, 0.28)
   overflow-x: auto
   overflow-y: hidden
   overscroll-behavior-x: contain
@@ -742,9 +743,11 @@ const infoEntry = computed(() => {
     transform: translateY(-4px)
     animation: none
 
+    // The picked-up toy: the sunshine rim, ringed in white so it never reads
+    // as the gold of a reinforced card.
     .build-tray__body
-      border-color: #7fe0ff
-      box-shadow: 0 0 0 2px rgba(127, 224, 255, 0.55), 0 0 14px rgba(127, 224, 255, 0.6)
+      border-color: var(--ui-rim)
+      box-shadow: 0 0 0 2px #fff, 0 0 14px rgba(255, 214, 90, 0.75)
 
     .build-tray__body::after
       animation: none
@@ -867,7 +870,7 @@ const infoEntry = computed(() => {
   height: 100%
   transform: translateY(3px)
   border-radius: clamp(0.4rem, 2vw, 0.65rem)
-  background-color: #0d1830
+  background-color: var(--ui-line)
   pointer-events: none
 
 .build-tray__body
@@ -876,9 +879,11 @@ const infoEntry = computed(() => {
   align-items: center
   justify-content: center
   padding: clamp(0.04rem, 0.3vw, 0.1rem)
-  border: 2px solid #24345a
+  // A sunk toy-box slot: a deeper pool-blue well, lit from the top edge.
+  border: 2px solid var(--ui-line)
   border-radius: clamp(0.3rem, 1.5vw, 0.5rem)
-  background-color: rgba(10, 18, 36, 0.85)
+  background-color: var(--ui-well-deep)
+  background-image: linear-gradient(to bottom, var(--ui-well), var(--ui-well-deep))
   transition: border-color 110ms ease-out, box-shadow 110ms ease-out, filter 110ms ease-out
 
 // The unaffordable wash. Light, so the art stays legible THROUGH it — a veil
@@ -948,7 +953,7 @@ const infoEntry = computed(() => {
 
 @keyframes tray-flip-gold
   0%, 49.9%
-    border-color: #24345a
+    border-color: var(--ui-line)
     box-shadow: none
   0%
     rotate: y 0deg
@@ -1044,10 +1049,11 @@ const infoEntry = computed(() => {
   width: clamp(0.95rem, 3.8vw, 1.2rem)
   height: clamp(0.95rem, 3.8vw, 1.2rem)
   padding: 0.12rem
-  border: 2px solid #0f1a30
+  // Toy-orange: the secondary candy plastic, clear of the blue tray.
+  border: 2px solid var(--ui-line)
   border-radius: 999px
-  background-image: linear-gradient(to bottom, #6fd3ff, #2f8fe0)
-  color: #04203a
+  background-image: linear-gradient(to bottom, var(--btn-orange-from), var(--btn-orange-to))
+  color: var(--ui-ink)
   cursor: pointer
   touch-action: manipulation
   -webkit-tap-highlight-color: transparent
@@ -1057,8 +1063,8 @@ const infoEntry = computed(() => {
     transform: scale(0.88)
 
   &.is-cooling
-    background-image: linear-gradient(to bottom, #4a5a7d, #2b3654)
-    color: #c8d6f2
+    background-image: linear-gradient(to bottom, var(--ui-well), var(--ui-well-deep))
+    color: var(--ui-text-soft)
     cursor: not-allowed
 
   svg
@@ -1098,7 +1104,7 @@ const infoEntry = computed(() => {
   padding-inline: 0.15em
   border: 1px solid rgba(0, 0, 0, 0.6)
   border-radius: 999px
-  background-color: #b8332c
+  background-color: var(--btn-red-to)
   color: #fff
   font-weight: 900
   font-size: 0.6rem
@@ -1140,7 +1146,7 @@ const infoEntry = computed(() => {
   display: inline-flex
   align-items: center
   gap: 0.15em
-  color: #dbe6ff
+  color: var(--ui-text-soft)
   font-weight: 900
   font-size: clamp(0.5rem, 2.2vw, 0.7rem)
   text-shadow: 1px 1px 0 #000
@@ -1171,10 +1177,13 @@ const infoEntry = computed(() => {
   height: 0.5em
   border-radius: 999px
 
+  // Sand and grey-blue pebbles, matching IconWood / IconStone.
   &.is-wood
-    background-color: #a9682f
+    background-color: #e3c07e
+    box-shadow: inset 0 0 0 1px #8d673a
   &.is-stone
-    background-color: #8b939d
+    background-color: #8594a6
+    box-shadow: inset 0 0 0 1px #34404e
   &.is-gold
     background-color: #ffd93c
 
@@ -1221,10 +1230,10 @@ const infoEntry = computed(() => {
   width: max-content
   max-width: min(88vw, 17rem)
   padding: clamp(0.35rem, 1.8vw, 0.6rem) clamp(0.5rem, 2.4vw, 0.85rem)
-  border: 2px solid #7fe0ff
+  border: 2px solid var(--ui-rim)
   border-radius: clamp(0.5rem, 2.4vw, 0.9rem)
-  background-image: linear-gradient(to bottom, rgba(28, 44, 82, 0.98), rgba(14, 24, 46, 0.98))
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55)
+  background-image: linear-gradient(to bottom, var(--ui-panel-top), var(--ui-panel-bot))
+  box-shadow: 0 0 0 1.5px var(--ui-line), inset 0 2px 0 var(--ui-gloss), 0 8px 18px rgba(0, 0, 0, 0.35)
   pointer-events: none
   text-align: left
 
@@ -1242,7 +1251,7 @@ const infoEntry = computed(() => {
   text-shadow: 2px 2px 0 #000
 
 .build-tray__info-size
-  color: #9fb6de
+  color: var(--ui-text-soft)
   font-weight: 900
   font-size: clamp(0.55rem, 2.4vw, 0.72rem)
 
@@ -1269,13 +1278,13 @@ const infoEntry = computed(() => {
   font-weight: 900
 
 .build-tray__part-name
-  color: #dbe6ff
+  color: var(--ui-text)
   flex: 1
 
 .build-tray__part-desc
   flex-basis: 100%
   margin-left: 1.9em
-  color: #93a6c8
+  color: var(--ui-text-soft)
   font-weight: 700
   line-height: 1.2
   font-size: 0.92em
@@ -1288,7 +1297,7 @@ const infoEntry = computed(() => {
 
 .build-tray__part-hp,
 .build-tray__part-dmg
-  color: #9fb6de
+  color: var(--ui-text-soft)
 
   // Above the block's printed base — a gable, or the reinforced hand. Gold
   // plus the arrow, so it survives a washed-out phone screen and colour
@@ -1311,10 +1320,10 @@ const infoEntry = computed(() => {
   gap: 0.15rem 0.6rem
   margin-top: 0.15rem
   padding-top: 0.2rem
-  border-top: 1px solid rgba(255, 255, 255, 0.14)
+  border-top: 1px solid rgba(255, 255, 255, 0.22)
 
 .build-tray__roof-note
-  color: #ff9d9d
+  color: #ffb4a8
   font-size: clamp(0.5rem, 2.2vw, 0.68rem)
   line-height: 1.2
 

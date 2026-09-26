@@ -152,7 +152,7 @@ export const setI18nLocale = async (
  * build no portal contract applies, so the browser guess is the best default
  * available.
  *
- * `tower_state.ts_user_language` has already been populated from the cloud by
+ * `sandbox_state.ts_user_language` has already been populated from the cloud by
  * `SaveManager.init()` before `main.ts` calls us. Nothing here touches
  * sessionStorage (CG QA: NO locally-saved data).
  */

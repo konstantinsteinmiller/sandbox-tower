@@ -27,7 +27,7 @@ const loadGate = async (opts: {
   // Seed the wallet through the persisted blob rather than by adding coins:
   // `addCoins(0)` is a deliberate no-op, so a zero-balance case would inherit
   // whatever another test file left in this worker's storage.
-  localStorage.setItem('tower_state', JSON.stringify({ ts_coins: opts.wallet ?? 1000 }))
+  localStorage.setItem('sandbox_state', JSON.stringify({ ts_coins: opts.wallet ?? 1000 }))
   vi.doMock('@/use/useUser', () => ({
     isCrazyWeb: opts.crazy ?? false,
     isGameDistribution: false,

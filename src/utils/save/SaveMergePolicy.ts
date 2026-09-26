@@ -9,7 +9,7 @@
 // the player's actual keys. The blob lets the next hydrate score local vs.
 // remote and pick a winner deterministically without prompting.
 //
-// Score formula (Tower Siege):
+// Score formula (Sandbox Tower):
 //   bestWave         × 500
 // + totalTechLevels  × 150
 // + runsPlayed       ×  10
@@ -117,7 +117,7 @@ const safeJson = <T>(v: string | null, fallback: T): T => {
  * Compute a fresh meta blob from the current localStorage snapshot.
  * Pure — no side effects.
  */
-/** Pull a sub-field out of the consolidated `tower_state` blob if present.
+/** Pull a sub-field out of the consolidated `sandbox_state` blob if present.
  *  Falls through to a top-level read for back-compat with any pre-migration
  *  snapshot that still has individual keys (e.g. the score formula was just
  *  invoked between BlobStorage construction and the first migration write). */
@@ -244,7 +244,7 @@ export const applyBonusCoins = (read: SnapshotReader, bonus: number): string => 
   return String(current + Math.max(0, bonus))
 }
 
-/** Bonus-coin path: read the sub-field from tower_state if it exists. */
+/** Bonus-coin path: read the sub-field from sandbox_state if it exists. */
 export const readCoinTotal = (read: SnapshotReader): number => {
   return safeInt(readField(read, COINS_KEY), 0)
 }
@@ -261,7 +261,7 @@ export const readCoinTotal = (read: SnapshotReader): number => {
  * misleading picture of what the game stores.
  *
  * Single-blob model: every persisted gameplay value lives inside the
- * `tower_state` localStorage entry (see `useTowerState.ts`). The cloud
+ * `sandbox_state` localStorage entry (see `useTowerState.ts`). The cloud
  * therefore mirrors exactly TWO keys — the state blob and the meta blob.
  *
  * Individual `ts_*` field keys are also accepted as payload so any stray

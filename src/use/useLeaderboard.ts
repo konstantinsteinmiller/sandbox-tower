@@ -232,7 +232,7 @@ let fetched = false
  * save, against Poki's 1 MB ceiling — to protect a device that has its own copy
  * anyway. It is a per-device cache, so it lives per-device.
  */
-const BOARD_CACHE_KEY = 'tower_board_cache'
+const BOARD_CACHE_KEY = 'sandbox_board_cache'
 
 const readBoardCache = (): Board | null => {
   try {

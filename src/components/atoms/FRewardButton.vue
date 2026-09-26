@@ -175,8 +175,9 @@ const disabled = computed(() =>
   width: 100%
   min-height: 2.75rem
   padding: clamp(0.4rem, 1.8vw, 0.7rem) clamp(0.7rem, 3.4vw, 1.35rem)
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: clamp(0.6rem, 2.6vw, 1.1rem)
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
 
 .f-reward-button__movie
   flex: 0 0 auto
@@ -244,19 +245,19 @@ const disabled = computed(() =>
 
 .tone-gold
   .f-reward-button__shadow
-    background-color: #1a2b4b
+    background-color: var(--btn-yellow-drop)
   .f-reward-button__body
-    background-image: linear-gradient(to bottom, #ffcd00, #f7a000)
+    background-image: linear-gradient(to bottom, var(--btn-yellow-from), var(--btn-yellow-to))
 
 .tone-green
   .f-reward-button__shadow
-    background-color: #0e5c2c
+    background-color: var(--btn-green-drop)
   .f-reward-button__body
-    background-image: linear-gradient(to bottom, #67e08a, #1f9d4d)
+    background-image: linear-gradient(to bottom, var(--btn-green-from), var(--btn-green-to))
 
 .tone-blue
   .f-reward-button__shadow
-    background-color: #102e7a
+    background-color: var(--btn-blue-drop)
   .f-reward-button__body
-    background-image: linear-gradient(to bottom, #50aaff, #2266ff)
+    background-image: linear-gradient(to bottom, var(--btn-blue-from), var(--btn-blue-to))
 </style>

@@ -86,8 +86,10 @@ defineExpose({ coinEl })
   gap: 0.5rem
   min-height: 2.75rem
   padding: calc(0.25rem + env(safe-area-inset-top, 0px)) 0.5rem 0.25rem
-  background-image: linear-gradient(to bottom, rgba(14, 22, 44, 0.94), rgba(14, 22, 44, 0.7))
-  border-bottom: 2px solid #0f1a30
+  // Pool-blue plastic strip with the sunshine rim along its bottom edge.
+  background-image: linear-gradient(to bottom, var(--ui-panel-top-a), var(--ui-panel-bot-a))
+  border-bottom: 2px solid var(--ui-rim)
+  box-shadow: 0 1.5px 0 var(--ui-line), inset 0 -2px 0 var(--ui-gloss-soft)
   pointer-events: auto
 
 .strip__left,
@@ -104,7 +106,7 @@ defineExpose({ coinEl })
   white-space: nowrap
 
 .strip__label
-  color: #9fb6de
+  color: var(--ui-text-soft)
   font-size: 0.6rem
   font-weight: 900
   text-transform: uppercase
@@ -121,11 +123,11 @@ defineExpose({ coinEl })
     color: #ffd93c
 
   &.is-enemies
-    color: #ff9d9d
+    color: #ffb3a8
     font-size: 0.9rem
 
 .strip__sep
-  color: #5a6d94
+  color: var(--ui-text-dim)
   font-size: 0.8rem
 
 .strip__res

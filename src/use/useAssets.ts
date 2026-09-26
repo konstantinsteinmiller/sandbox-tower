@@ -3,7 +3,7 @@ import { artOverridesEnabled, preloadArtOverrides } from '@/game/art'
 import { criticalArtWants, preloadRemainingArt } from '@/game/artPreload'
 import { prependBaseUrl } from '@/utils/function'
 
-// Tower Siege draws all gameplay art programmatically (Canvas 2D) and uses
+// Sandbox Tower draws all gameplay art programmatically (Canvas 2D) and uses
 // inline SVG for HUD icons, so the preloader only has to decode the splash
 // logo. SFX decode on first play (see `useSound.ts`) and are warmed on an idle
 // slot after first paint, followed by the background-music track; the splash
@@ -238,8 +238,6 @@ const CRITICAL_IMAGE_SRCS: ReadonlyArray<string> = [
 // before the player can reach them — without holding the splash open for a
 // round trip the opening frame does not need.
 const DEFERRED_IMAGE_SRCS: ReadonlyArray<string> = [
-  // Result-screen ribbon: only reachable once a siege ends.
-  '/images/bg/parchment-ribbon_553x188.webp',
   // Coin sprite for the reward burst, and the rewarded-ad film icon.
   '/images/props/coin_128x128.webp',
   '/images/icons/movie_128x96.webp'
@@ -265,7 +263,7 @@ const decodeImage = (src: string): Promise<void> => {
 // ─── Off-hot-path background warm-up ───────────────────────────────────────
 // Runs ONCE, after the splash has hidden (hot path done + first paint).
 //
-// Tower Siege draws every block, enemy and background layer procedurally, so
+// Sandbox Tower draws every block, enemy and background layer procedurally, so
 // there is no gameplay art to decode here — the only deferred work is the SFX
 // buffer decode. Doing it on an idle slot means the first explosion of a
 // session doesn't pay a decode cost mid-frame, without delaying first paint.
@@ -298,7 +296,7 @@ const runBackgroundWarmup = (): void => {
 export default () => {
   const preloadAssets = async (): Promise<void> => {
     // ── HOT PATH ──
-    // With drop-in art OFF, Tower Siege has no gameplay bitmaps at all: blocks,
+    // With drop-in art OFF, Sandbox Tower has no gameplay bitmaps at all: blocks,
     // enemies, projectiles and the whole background are drawn from code, so the
     // "loading" phase is effectively just the JS parse — which is exactly the
     // fast-start behaviour portals grade on. That path is unchanged.

@@ -440,7 +440,7 @@ const drawCursor = (ctx: CanvasRenderingContext2D, pulse: number): void => {
   ctx.lineTo(s * 0.7, s * 0.62)
   ctx.closePath()
   ctx.fillStyle = '#ffffff'
-  ctx.strokeStyle = '#0f1a30'
+  ctx.strokeStyle = '#173a66' // --ui-line
   ctx.lineWidth = Math.max(1.5, cell * 0.035)
   ctx.lineJoin = 'round'
   ctx.fill()
@@ -712,14 +712,15 @@ const paint = (now: number): void => {
   const band = cell * GROUND_BAND
   if (!paintMeadowBand(ctx, 0, groundY, W, band, originX)) {
     const meadow = ctx.createLinearGradient(0, groundY, 0, groundY + band)
-    meadow.addColorStop(0, '#63a34a')
-    meadow.addColorStop(0.3, '#4d8a38')
-    meadow.addColorStop(0.72, '#3a6c2a')
-    meadow.addColorStop(1, '#2c5220')
+    // Sandbox sand (sandbox-reskin.md: sand-light → sand-mid → sand-dark).
+    meadow.addColorStop(0, '#f0d69a')
+    meadow.addColorStop(0.3, '#e3c07e')
+    meadow.addColorStop(0.72, '#c9a264')
+    meadow.addColorStop(1, '#b88c4c')
     ctx.fillStyle = meadow
     ctx.fillRect(0, groundY, W, band)
   }
-  ctx.fillStyle = 'rgba(18, 34, 22, 0.5)'
+  ctx.fillStyle = 'rgba(141, 103, 58, 0.55)'
   ctx.fillRect(0, groundY - Math.max(1, cell * 0.03), W, Math.max(1, cell * 0.03))
 
   ctx.save()
@@ -785,7 +786,7 @@ const paint = (now: number): void => {
     ctx.globalAlpha = clamp01(k * 1.6) * sceneAlpha
     ctx.translate(cx(m.x), cy(m.y))
     ctx.rotate(m.rot)
-    ctx.fillStyle = '#8b7a5e'
+    ctx.fillStyle = '#c79a5c' // sand chips
     ctx.fillRect(-m.r * cell, -m.r * cell, m.r * cell * 2, m.r * cell * 2)
     ctx.restore()
   }
@@ -973,7 +974,8 @@ onBeforeUnmount(() => {
   position: fixed
   inset: 0
   z-index: 120
-  background-color: rgba(6, 10, 18, 0.86)
+  // The modal scrim's blue, held dark enough to carry the demo on its own.
+  background-color: rgba(14, 42, 80, 0.86)
   // NO `backdrop-filter`. Chrome drops this element's own background-colour
   // when a backdrop filter is on it and the layer underneath is a large
   // canvas — the scrim vanishes and the card is drawn straight over a live
@@ -1012,10 +1014,11 @@ onBeforeUnmount(() => {
   flex-direction: column
   gap: calc(var(--cell) * 0.09)
   padding: calc(var(--cell) * 0.13)
-  border: 2px solid #0f1a30
+  // The real inspector card's plastic: pool-blue, sunshine rim.
+  border: 2px solid var(--ui-rim)
   border-radius: calc(var(--cell) * 0.2)
-  background-image: linear-gradient(to bottom, rgba(38, 56, 96, 0.96), rgba(18, 30, 56, 0.96))
-  box-shadow: 0 3px 0 #0d1830
+  background-image: linear-gradient(to bottom, var(--ui-panel-top), var(--ui-panel-bot))
+  box-shadow: 0 0 0 1.5px var(--ui-line), inset 0 2px 0 var(--ui-gloss), 0 3px 0 1.5px var(--ui-drop)
   font-size: calc(var(--cell) * 0.24)
   transform-origin: 20% 100%
   opacity: 0
@@ -1043,11 +1046,11 @@ onBeforeUnmount(() => {
 .trap__bar
   height: 0.42em
   border-radius: 999px
-  background-color: rgba(255, 255, 255, 0.22)
+  background-color: rgba(255, 255, 255, 0.3)
 
   &.is-short
     width: 55%
-    background-color: rgba(255, 255, 255, 0.13)
+    background-color: rgba(255, 255, 255, 0.18)
 
 // The real sell button's gradient, rim, radius and weight — recognition is the
 // entire job of this element.
@@ -1059,9 +1062,10 @@ onBeforeUnmount(() => {
   gap: 0.2em 0.4em
   min-height: 1.9em
   padding: 0.2em 0.5em
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 0.5em
-  background-image: linear-gradient(to bottom, #ff8a5a, #c62828)
+  background-image: linear-gradient(to bottom, var(--btn-red-from), var(--btn-red-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
   color: #fff
   font-weight: 900
   text-transform: uppercase

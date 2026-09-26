@@ -174,10 +174,11 @@ const refund = computed(() => {
   gap: 0.25rem
   width: 9.5rem
   padding: 0.35rem 0.45rem 0.45rem
-  border: 2px solid #7fe0ff
+  // Pool-blue plastic card, sunshine rim (theme.sass).
+  border: 2px solid var(--ui-rim)
   border-radius: 0.6rem
-  background-image: linear-gradient(to bottom, rgba(28, 44, 82, 0.98), rgba(14, 24, 46, 0.98))
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55)
+  background-image: linear-gradient(to bottom, var(--ui-panel-top), var(--ui-panel-bot))
+  box-shadow: 0 0 0 1.5px var(--ui-line), 0 8px 18px rgba(30, 50, 80, 0.45), inset 0 2px 0 var(--ui-gloss)
   pointer-events: auto
 
   &.is-merged
@@ -210,8 +211,8 @@ const refund = computed(() => {
   padding: 0
   border: 0
   border-radius: 0.35rem
-  background-color: rgba(255, 255, 255, 0.1)
-  color: #cfe0ff
+  background-color: rgba(255, 255, 255, 0.16)
+  color: #fff
   cursor: pointer
   touch-action: manipulation
   -webkit-tap-highlight-color: transparent
@@ -228,7 +229,7 @@ const refund = computed(() => {
   flex: 1
   height: 0.24rem
   border-radius: 999px
-  background-color: rgba(255, 255, 255, 0.16)
+  background-color: var(--ui-well-a)
 
   &.is-on
     background-color: #ffd93c
@@ -240,7 +241,7 @@ const refund = computed(() => {
   margin: 0
 
   dt
-    color: #9fb6de
+    color: var(--ui-text-soft)
     font-size: 0.58rem
     text-transform: uppercase
     letter-spacing: 0.05em
@@ -256,7 +257,7 @@ const refund = computed(() => {
 
 .card__arrow
   margin: 0 0.25em
-  color: #9fb6de
+  color: var(--ui-text-soft)
 
 // What the rank buys, in the gold every boosted number on the desktop card
 // uses.
@@ -272,8 +273,9 @@ const refund = computed(() => {
   gap: 0.15em 0.35em
   min-height: 2.25rem
   padding: 0.2rem 0.5rem
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 0.5rem
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
   color: #fff
   font-size: 0.72rem
   font-weight: 900
@@ -288,19 +290,19 @@ const refund = computed(() => {
     scale: 0.97
 
 .card__upgrade
-  background-image: linear-gradient(to bottom, #6fe08a, #1f8f4d)
+  background-image: linear-gradient(to bottom, var(--btn-green-from), var(--btn-green-to))
 
   // Short of gold: grey, with the price still legible — it is the answer to
   // "how much more do I need".
   &.is-poor
-    background-image: linear-gradient(to bottom, #4a5a72, #2b3548)
+    background-image: linear-gradient(to bottom, var(--ui-well), var(--ui-well-deep))
 
   &.is-max
-    background-image: linear-gradient(to bottom, #c9a227, #7a5f12)
+    background-image: linear-gradient(to bottom, var(--btn-yellow-from), var(--btn-yellow-drop))
     cursor: default
 
 .card__sell
-  background-image: linear-gradient(to bottom, #ff8a5a, #c62828)
+  background-image: linear-gradient(to bottom, var(--btn-red-from), var(--btn-red-to))
 
 .card__upgrade-icon
   width: 0.85em

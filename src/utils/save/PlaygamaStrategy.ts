@@ -111,7 +111,7 @@ const resolveStorageType = async (storage: BridgeStorage): Promise<StorageType> 
 }
 
 /** Keys that round-trip through the bridge at hydrate time. Everything the
- *  game persists lives in the single `tower_state` blob; `__save_meta__` is the
+ *  game persists lives in the single `sandbox_state` blob; `__save_meta__` is the
  *  merge scorecard beside it. */
 const CLOUD_KEYS = [STATE_KEY, META_KEY] as const
 

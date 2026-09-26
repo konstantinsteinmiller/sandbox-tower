@@ -59,7 +59,7 @@ const useCheats = () => {
 
   const { addCoins } = useTowerEconomy()
 
-  // Dev shortcuts, retargeted to Tower Siege: resource / coin injection, wave
+  // Dev shortcuts, retargeted to Sandbox Tower: resource / coin injection, wave
   // and speed control, and a jump straight to a wave number.
   //
   // The jump does not fake a tower to go with it — see `debugSetWave` — so the

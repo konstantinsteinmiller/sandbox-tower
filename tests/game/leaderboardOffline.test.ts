@@ -21,7 +21,7 @@ import type { BoardSnapshot } from '@/use/leaderboardSnapshot'
  */
 
 const ENDPOINT = 'https://board.example.test'
-const CACHE_KEY = 'tower_board_cache'
+const CACHE_KEY = 'sandbox_board_cache'
 
 const reply = (body: unknown, ok = true): Response =>
   ({ ok, status: ok ? 200 : 500, json: async () => body }) as unknown as Response

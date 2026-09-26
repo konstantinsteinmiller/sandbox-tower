@@ -45,11 +45,11 @@ withDefaults(defineProps<Props>(), { tone: 'red' })
     object-fit: contain
 
 .tone-red
-  background-color: #ef4444
+  background-color: var(--btn-red-to)
 .tone-blue
-  background-color: #102e7a
+  background-color: var(--btn-blue-to)
 .tone-gold
-  background-color: #f7a000
+  background-color: var(--btn-orange-to)
 .tone-green
-  background-color: #1f9d4d
+  background-color: var(--btn-green-to)
 </style>

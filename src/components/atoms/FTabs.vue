@@ -84,7 +84,7 @@ const selectTab = (value: string | number): void => {
   inset: 0
   transform: translateY(3px)
   border-radius: clamp(0.5rem, 2.4vw, 1rem) clamp(0.5rem, 2.4vw, 1rem) 0 0
-  background-color: #0f1a30
+  background-color: var(--ui-line)
 
 .f-tabs__body
   position: relative
@@ -93,18 +93,18 @@ const selectTab = (value: string | number): void => {
   justify-content: center
   min-height: 2.1rem
   padding: clamp(0.2rem, 1vw, 0.4rem) clamp(0.6rem, 3.2vw, 1.35rem)
-  border-inline: 4px solid #0f1a30
-  border-top: 4px solid #0f1a30
+  border-inline: 4px solid var(--ui-line)
+  border-top: 4px solid var(--ui-line)
   border-radius: clamp(0.5rem, 2.4vw, 1rem) clamp(0.5rem, 2.4vw, 1rem) 0 0
-  background-color: #2a4372
-  color: #8fa7d1
+  background-color: var(--ui-well)
+  color: var(--ui-text-dim)
   transition: background-color 140ms ease-out
 
   .f-tabs__tab:hover &
-    background-color: #34538d
+    background-color: var(--ui-panel-hover)
 
   .f-tabs__tab.is-active &
-    background-image: linear-gradient(to bottom, #ffcd00, #f7a000)
+    background-image: linear-gradient(to bottom, var(--btn-orange-from), var(--btn-orange-to))
     color: #fff
     box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.4)
 

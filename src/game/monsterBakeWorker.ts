@@ -28,7 +28,7 @@ import { FRAMES, FRAME_H, PX, SPRITE_S } from '@/game/monsterFrameBox'
  * ── What may be imported here ─────────────────────────────────────────────
  *
  * There is no `document` and no `Image` in a worker. `monsters` reaches only
- * `inkArt`, `monsterKit`, `monstersAir` and `monstersSea`, none of which touch
+ * `inkArt`, `monsterKit`, `bugs/air` and `bugs/sea`, none of which touch
  * either at module scope, and the one place `inkArt` calls
  * `document.createElement` is `grainPattern`, which belongs to the backdrop and
  * is never on a monster's path. Do not import `monsterSprites`, `art` or

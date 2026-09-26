@@ -1,4 +1,4 @@
-# Preview videos and trailers — Tower Siege
+# Preview videos and trailers — Sandbox Tower
 
 Scripted gameplay clips recorded out of the REAL game: the dev server, the real
 renderer, the real simulation, driven to an exact state and stepped frame by
@@ -51,7 +51,7 @@ encodes slower than the page renders and back-pressures the frame loop, so a
 
 ## Two games in one bundle
 
-Tower Siege ships a desktop tower game and a phone Drop & Merge board out of
+Sandbox Tower ships a desktop tower game and a phone Drop & Merge board out of
 the same build, chosen at runtime (`src/use/useMobileFit.ts`). The clips follow
 the same rule, so every clip shows the game that shape of device actually gets:
 

@@ -57,7 +57,7 @@ const bootstrap = async () => {
   // `setVConsoleMounter` so vConsole stays out of the main chunk
   // and off the hot path.
   //
-  // Why this matters: tower-siege's main bundle ballooned by ~250KB
+  // Why this matters: sandbox-tower's main bundle ballooned by ~250KB
   // gzipped when vConsole was statically imported. CrazyGames flagged
   // the regression. Putting the dynamic-import here fixes it without
   // breaking the trigger paths.
@@ -77,7 +77,7 @@ const bootstrap = async () => {
     import.meta.env.VITE_APP_NATIVE === 'true'
     || import.meta.env.VITE_APP_INCLUDE_VCONSOLE === 'true'
   ) {
-    // vConsole removed from this project (was a tower-siege native-build
+    // vConsole removed from this project (was a sandbox-tower native-build
     // dependency). To restore on-device debugging, reintroduce the
     // `vconsole` package and wire it back to `setVConsoleMounter`.
     bootstrapVConsoleFromUrl()
@@ -234,7 +234,7 @@ const bootstrap = async () => {
 
   // CrazyGames cloud-only mode: gameplay state and our save bookkeeping
   // (`__save_*`) live in memory only; `sdk.data` is the sole persistence
-  // backend. CG QA explicitly requires that no `tower_state` / `ts_*` /
+  // backend. CG QA explicitly requires that no `sandbox_state` / `ts_*` /
   // `__save_*` keys appear in raw localStorage — only dev toggles
   // (`fps`, `debug`, `cheat`, `campaign-test`, `full_unlocked`) are
   // exempt. Inline env-literal so Vite tree-shakes the dead branch on
@@ -251,7 +251,7 @@ const bootstrap = async () => {
     // matter the hydrate timing.
   ;(window as any).__saveManager = saveManager
 
-  // Defense-in-depth `tower_state` / `ts_*` / `__save_*` safety remove on
+  // Defense-in-depth `sandbox_state` / `ts_*` / `__save_*` safety remove on
   // CG builds. BlobStorage's `scrubRawForCloudOnly()` already wiped these
   // at construction (it seeded into `state` first, so progress is
   // preserved); this second pass catches anything BlobStorage missed.
@@ -266,7 +266,7 @@ const bootstrap = async () => {
       const stragglers: string[] = []
       for (let i = 0; i < window.localStorage.length; i++) {
         const k = window.localStorage.key(i)
-        if (k && (k === 'tower_state' || k.startsWith('ts_') || k.startsWith('__save_'))) {
+        if (k && (k === 'sandbox_state' || k.startsWith('ts_') || k.startsWith('__save_'))) {
           stragglers.push(k)
         }
       }

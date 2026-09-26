@@ -142,9 +142,10 @@ const handStyle = computed(() => ({
   width: 34px
   height: 34px
   margin: -6px 0 0 -17px
+  // A bucket-moulded Sand Block (sandbox-reskin.md: sand-light → sand-mid).
   border: 3px solid #1a1208
   border-radius: 6px
-  background-image: linear-gradient(to bottom, #c98a4b, #a9682f)
+  background-image: linear-gradient(to bottom, #f6e2ae, #e3c07e)
   // Translucent, and it says so: this is a demonstration of a piece being
   // moved, not a piece that is actually on the board.
   opacity: 0.88
@@ -152,13 +153,13 @@ const handStyle = computed(() => ({
   rotate: -6deg
   pointer-events: none
 
-// Two plank lines. Enough to read as the game's timber at 34px, and cheaper
-// than another SVG for something that is on screen for two seconds.
+// Two mould ridges. Enough to read as the game's sand block at 34px, and
+// cheaper than another SVG for something that is on screen for two seconds.
 .thand__carry-grain
   position: absolute
   inset: 5px 4px
-  border-top: 2px solid rgba(26, 18, 8, 0.45)
-  border-bottom: 2px solid rgba(26, 18, 8, 0.45)
+  border-top: 2px solid rgba(184, 140, 76, 0.7)
+  border-bottom: 2px solid rgba(184, 140, 76, 0.7)
 
 // Picked up and set down, rather than appearing and vanishing: the pop is the
 // half of the lesson that says WHEN the piece left the tray.

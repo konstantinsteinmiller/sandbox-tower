@@ -234,16 +234,18 @@ const spotlightFirst = computed(() =>
   align-items: center
   gap: 0.5rem
   padding: 0.35rem 0.5rem
-  border: 2px solid #24345a
+  // A sunk well in the modal's pool-blue panel.
+  border: 2px solid var(--ui-line)
   border-radius: 0.6rem
-  background-image: linear-gradient(to bottom, rgba(38, 56, 96, 0.95), rgba(18, 30, 56, 0.95))
+  background-image: linear-gradient(to bottom, var(--ui-well), var(--ui-well-deep))
+  box-shadow: inset 0 2px 0 var(--ui-gloss-soft)
 
   &.is-affordable
-    border-color: #ffd54a
+    border-color: var(--ui-rim)
     box-shadow: 0 0 10px rgba(255, 190, 40, 0.35)
 
   &.is-maxed
-    border-color: #57a37c
+    border-color: var(--btn-green-to)
 
   &.is-locked
     opacity: 0.45
@@ -255,7 +257,7 @@ const spotlightFirst = computed(() =>
   flex: 0 0 auto
   width: 2.4rem
   height: 2.4rem
-  color: #cfe4ff
+  color: var(--ui-text-soft)
 
   :deep(svg)
     width: 1.6rem
@@ -275,7 +277,7 @@ const spotlightFirst = computed(() =>
   text-transform: uppercase
 
 .bp__desc
-  color: #9fb6de
+  color: var(--ui-text-soft)
   font-size: 0.65rem
   line-height: 1.2
 
@@ -336,10 +338,10 @@ const spotlightFirst = computed(() =>
   align-items: center
   gap: 0.5rem
   padding: 0.75rem
-  border: 2px solid #7fe0ff
+  border: 2px solid var(--ui-rim)
   border-radius: 0.8rem
-  background-image: linear-gradient(to bottom, rgba(28, 44, 82, 0.98), rgba(14, 24, 46, 0.98))
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55)
+  background-image: linear-gradient(to bottom, var(--ui-panel-top), var(--ui-panel-bot))
+  box-shadow: 0 0 0 1.5px var(--ui-line), 0 8px 18px rgba(30, 50, 80, 0.45), inset 0 2px 0 var(--ui-gloss)
 
 .bp__intro-text
   margin: 0

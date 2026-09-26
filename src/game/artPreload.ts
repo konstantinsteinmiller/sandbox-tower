@@ -64,7 +64,7 @@ const EARLY_WAVE = 6
  */
 export const resumeWave = (): number => {
   try {
-    const raw = globalThis.localStorage?.getItem('tower_state')
+    const raw = globalThis.localStorage?.getItem('sandbox_state')
     if (!raw) return 1
     const blob = JSON.parse(raw) as Record<string, unknown>
     const run = blob?.ts_run as { wave?: unknown } | undefined

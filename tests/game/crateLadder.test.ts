@@ -10,7 +10,7 @@ import { BLOCK_DEFS } from '@/game/blocks'
 const loadGame = async (levels: Record<string, number> = {}) => {
   vi.resetModules()
   localStorage.clear()
-  localStorage.setItem('tower_state', JSON.stringify({
+  localStorage.setItem('sandbox_state', JSON.stringify({
     ts_tech: { levels }, ts_coins: 5000
   }))
   return import('@/use/useTowerGame')

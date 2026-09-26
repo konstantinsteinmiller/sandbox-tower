@@ -77,7 +77,7 @@ watch(hasBonusToShow, (on) => {
     //- Bonus banner — green / celebratory
     div.pointer-events-auto.rounded-lg.shadow-lg.text-white.text-sm.flex.items-center.gap-3.cursor-pointer(
       v-if="showBonus"
-      class="bg-emerald-700/95 px-3 py-2 mb-2"
+      class="bg-[var(--btn-green-drop)] border-2 border-[var(--ui-rim)] px-3 py-2 mb-2"
       @click="onDismissBonus"
     )
       span.text-xl 🎉
@@ -89,7 +89,7 @@ watch(hasBonusToShow, (on) => {
     //- Offline banner — amber / informational
     div.pointer-events-auto.rounded-lg.shadow-lg.text-white.text-sm.flex.items-center.gap-3(
       v-else-if="showOffline"
-      class="bg-amber-700/95 px-3 py-2"
+      class="bg-[var(--btn-orange-drop)] border-2 border-[var(--ui-rim)] px-3 py-2"
     )
       span.text-xl ☁️
       div.flex-1

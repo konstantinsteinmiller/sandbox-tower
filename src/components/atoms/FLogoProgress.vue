@@ -14,16 +14,28 @@
     )
       div(class="relative flex flex-col items-center")
         div(:style="sizeStyle")
+          //- The logo is drawn in code (`logoArt.ts`) on a DPR-sized canvas
+          //- once the game font is ready; until then the preloaded bitmap —
+          //- rendered from the same drawing — stands in, so there is never an
+          //- empty frame or a fallback-font logo.
           img(
+            v-show="!logoDrawn"
             :src="logoSrc"
-            alt="tower-siege"
+            :alt="t('gameName')"
             class="w-full h-full object-contain"
             draggable="false"
+          )
+          canvas(
+            v-show="logoDrawn"
+            ref="logoCanvas"
+            role="img"
+            :aria-label="t('gameName')"
+            class="block w-full h-full"
           )
 
         //- Loading Text
         div.absolute.-bottom-8(class="mt-0 flex flex-col items-center gap-1")
-          span(class="percentage-text text-shadow text-amber-500") {{ Math.round(progress) }}%
+          span(class="percentage-text text-shadow text-white") {{ Math.round(progress) }}%
 
         Transition(name="hint-fade")
           div.stuck-hint.mt-4(v-if="showStuckHint") {{ t('loading.tooLong') }}
@@ -36,6 +48,7 @@ import useAssets from '@/use/useAssets'
 import { prependBaseUrl } from '@/utils/function'
 import { stopLoading } from '@/use/useCrazyGames'
 import { armFirstLoadInterstitial, notifySplashGone } from '@/use/useFirstLoadInterstitial'
+import { drawLogo, ensureLogoFont } from '@/components/atoms/logoArt'
 
 const { t } = useI18n()
 
@@ -102,6 +115,29 @@ const sizeStyle = computed(() => ({
   width: `${centeredSize.value}px`,
   height: `${centeredSize.value}px`
 }))
+
+// ─── Procedural logo ────────────────────────────────────────────────────────
+const logoCanvas = ref<HTMLCanvasElement | null>(null)
+const logoDrawn = ref(false)
+
+const paintLogo = (): void => {
+  const canvas = logoCanvas.value
+  if (!canvas) return
+  const px = Math.round(centeredSize.value * Math.min(window.devicePixelRatio || 1, 3))
+  if (px <= 0) return
+  canvas.width = px
+  canvas.height = px
+  const g = canvas.getContext('2d')
+  if (!g) return
+  g.clearRect(0, 0, px, px)
+  drawLogo(g, px, px)
+  logoDrawn.value = true
+}
+
+onMounted(() => {
+  void ensureLogoFont().then((ok) => { if (ok && !done.value) paintLogo() })
+})
+watch(centeredSize, () => { if (logoDrawn.value) paintLogo() })
 
 // `immediate: true` fires the handler with the current value the moment
 // the watcher is set up. Without it, an asset loader that already reports
@@ -237,10 +273,10 @@ watch(done, (isDone) => {
   position: fixed
   inset: 0
   z-index: 150
-  // Matches the inline splash in index.html AND the scene's sky, so the
-  // handover from static HTML → Vue splash → canvas is one continuous colour
+  // Matches the inline splash in index.html (sunny sky into sand), so the
+  // handover from static HTML → Vue splash → canvas is one continuous picture
   // with no flash between the three.
-  background: radial-gradient(circle at 50% 38%, #1b2b52 0%, #0a1224 70%)
+  background: radial-gradient(circle at 78% 16%, rgba(255, 244, 196, 0.95) 0 5vmin, rgba(255, 236, 160, 0.35) 9vmin, rgba(255, 236, 160, 0) 22vmin), linear-gradient(180deg, #6fc3f7 0%, #a9dcf9 38%, #d6f0ff 56%, #f6e2ae 70%, #e3c07e 100%)
 
 .splash-fade-leave-active
   transition: opacity 0.4s ease-out
@@ -258,7 +294,8 @@ watch(done, (isDone) => {
   transform: translate(-50%, -50%) scale(0.85)
 
 .stuck-hint
-  color: rgba(255, 200, 0, 0.85)
+  color: #fff
+  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000
   font-size: 0.9rem
   text-align: center
   max-width: 80vw

@@ -194,7 +194,8 @@ onUnmounted(() => {
   inset: 0
   transform: translateY(3px)
   border-radius: clamp(0.5rem, 2.4vw, 0.9rem)
-  background-color: #0d1830
+  background-color: var(--ui-drop)
+  box-shadow: 0 0 0 1.5px var(--ui-line)
 
 .wave-hud__body
   position: relative
@@ -202,9 +203,10 @@ onUnmounted(() => {
   flex-direction: column
   gap: clamp(0.15rem, 0.8vw, 0.3rem)
   padding: clamp(0.25rem, 1.4vw, 0.5rem) clamp(0.45rem, 2.4vw, 0.85rem)
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-rim)
   border-radius: clamp(0.5rem, 2.4vw, 0.9rem)
-  background-image: linear-gradient(to bottom, rgba(38, 56, 96, 0.94), rgba(20, 32, 60, 0.94))
+  background-image: linear-gradient(to bottom, var(--ui-panel-top-a), var(--ui-panel-bot-a))
+  box-shadow: 0 0 0 1.5px var(--ui-line), inset 0 2px 0 var(--ui-gloss)
 
 .wave-hud__row
   display: flex
@@ -213,7 +215,7 @@ onUnmounted(() => {
   white-space: nowrap
 
 .wave-hud__label
-  color: #9fb6de
+  color: var(--ui-text-soft)
   font-weight: 900
   text-transform: uppercase
   letter-spacing: 0.06em
@@ -233,14 +235,14 @@ onUnmounted(() => {
     animation: hud-record 1.4s ease-in-out infinite
 
 .wave-hud__sep
-  color: #5b7096
+  color: var(--ui-text-dim)
 
 .wave-hud__bar
   position: relative
   flex: 1
   height: clamp(0.28rem, 1.2vw, 0.45rem)
   border-radius: 999px
-  background-color: rgba(0, 0, 0, 0.5)
+  background-color: var(--ui-well-a)
   overflow: hidden
 
 .wave-hud__bar-fill
@@ -282,7 +284,7 @@ onUnmounted(() => {
   width: 72%
   height: 72%
   color: #ff4d5e
-  filter: drop-shadow(0 0 1px #0d1830) drop-shadow(0 1px 0 #0d1830)
+  filter: drop-shadow(0 0 1px var(--ui-line)) drop-shadow(0 1px 0 var(--ui-line))
   pointer-events: none
 
   :deep(svg)
@@ -303,7 +305,7 @@ onUnmounted(() => {
   margin-left: clamp(0.2rem, 1vw, 0.35rem)
   border-radius: 3px
   background-image: linear-gradient(to bottom, #1b0505, #3d0c0c)
-  box-shadow: 0 0 0 1.5px #0d1830, 0 0 0 2.5px rgba(255, 220, 196, 0.3), inset 0 1px 2px rgba(0, 0, 0, 0.75)
+  box-shadow: 0 0 0 1.5px var(--ui-line), 0 0 0 2.5px rgba(255, 220, 196, 0.3), inset 0 1px 2px rgba(0, 0, 0, 0.75)
   overflow: hidden
 
 // What the last hit took, in pale gold, before it drains.

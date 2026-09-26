@@ -1,17 +1,17 @@
 import { ref, type Ref } from 'vue'
 
 /**
- * ─── `tower_state` — the single persisted state object ───────────────────────
+ * ─── `sandbox_state` — the single persisted state object ───────────────────────
  *
- * EVERY persisted value Tower Siege touches — meta progression, the resumable
+ * EVERY persisted value Sandbox Tower touches — meta progression, the resumable
  * run snapshot, user settings, retention bookkeeping — lives inside ONE
  * in-memory record (`towerState`), and exactly ONE localStorage key is ever
- * written: `tower_state`.
+ * written: `sandbox_state`.
  *
  * Why one object:
  *   • Non-platform builds → a single localStorage entry, zero pollution.
  *   • Platform builds → `SaveManager` proxies `localStorage.setItem`, so the
- *     cloud payload is literally `{ tower_state, __save_meta__ }`. One object
+ *     cloud payload is literally `{ sandbox_state, __save_meta__ }`. One object
  *     round-trips to CrazyGames `sdk.data` / GamePix / Playgama / Yandex /
  *     Glitch instead of dozens of per-key writes.
  *
@@ -23,7 +23,7 @@ import { ref, type Ref } from 'vue'
  * `pagehide` / tab-hide so a close mid-burst never drops data.
  */
 
-export const STATE_KEY = 'tower_state'
+export const STATE_KEY = 'sandbox_state'
 
 /** Persisted values may be bare strings ("en"), stringified numbers ("120"),
  *  or stringified JSON. JSON.parse round-trips numbers/objects; bare strings
@@ -55,7 +55,7 @@ let persistTimer: ReturnType<typeof setTimeout> | null = null
 let firstDirtyAt = 0
 
 /** Force the debounced blob write to happen NOW — cancels the pending timer and
- *  writes `tower_state` to localStorage synchronously. Called from the
+ *  writes `sandbox_state` to localStorage synchronously. Called from the
  *  page-hide handlers below and (via `useSaveStatus.flushSaveNow`) at hard
  *  checkpoints (wave cleared, run ended, tech purchased) so the cloud push
  *  starts immediately instead of waiting out the debounce. */

@@ -14,9 +14,19 @@ import {
 } from '@/game/monsterSprites'
 import { stripFrame } from '@/game/spriteStrip'
 import {
+  drawSquirtMount, drawSquirtGun, drawBlasterMount, drawDartBlaster, drawMudMortar,
+  drawBalloonLauncher, drawBugZapper, drawIcePop, drawToothpicks, drawPaperFlag,
+  drawMagicShell, drawSandSifter, drawPebbleDigger, drawPiggyBank, drawBucketSpade
+} from '@/game/toyFixtures'
+import {
   blob, fillShape, grain, ink, noise2, shrink, stroke as inkStroke, withHatching,
   type Pt
 } from '@/game/inkArt'
+import {
+  drawFoamDart, drawToothpick, drawWaterBlob, drawPebble, drawMudBall, drawBalloon,
+  drawHoneyBomb, drawEmberCore, dropTrail, drawSplashBlast, drawSplatBlast, drawPuffBlast,
+  dartSmear, BALLOON_RGB
+} from '@/game/fxArt'
 
 /**
  * ─── Drawn scenery ──────────────────────────────────────────────────────────
@@ -110,11 +120,13 @@ const paintedTree = (
  * the depth cue breaks.
  */
 const tileBand = (
-  c: CanvasRenderingContext2D, img: HTMLImageElement,
+  c: CanvasRenderingContext2D, img: HTMLImageElement | HTMLCanvasElement,
   x0: number, y: number, w: number, h: number, offset: number
 ): void => {
-  const scale = h / img.naturalHeight
-  const tw = Math.max(1, img.naturalWidth * scale)
+  const iw = 'naturalWidth' in img ? img.naturalWidth : img.width
+  const ih = 'naturalHeight' in img ? img.naturalHeight : img.height
+  const scale = h / ih
+  const tw = Math.max(1, iw * scale)
 
   // MIRROR every other tile.
   //
@@ -150,14 +162,21 @@ const tileBand = (
   }
 }
 
-const SCENERY_INK = 'rgba(59,42,33,0.55)'
-const SCENERY_INK_SOFT = 'rgba(59,42,33,0.32)'
 import { rotatedShape, SHAPE_BY_ID } from '@/game/shapes'
 import { drawSiegeMachine } from '@/game/siegeArt'
 import { drawShip, type ShipLayer } from '@/game/shipArt'
+import {
+  bodyLook, traceBlockBody, paintBlockMaterial, paintSandDamage, drawBucketRoof
+} from '@/game/sandBlockArt'
 import { drawCavalry, cavalryCycle01, drawCavalryDust } from '@/game/cavalryArt'
 import { ALLY_DEFS } from '@/game/allies'
 import { GRASS_DEPTH, SEA_LEVEL } from '@/game/world'
+import {
+  setBackyardLight, backyardNight, nightOf, stormOf, STORM_SKY, mixCss, cssAlpha,
+  paintSunSprite, paintMoonSprite, paintStars, paintClouds, paintYardFar, paintYardNear,
+  paintBedBack, paintTallFlower, paintFlowerClump, paintFlowerBed, paintSand, paintSandboxFrame,
+  paintMoat, paintFireflies, sandTile
+} from '@/game/backyardArt'
 import type { Ally, Block, Enemy, EnemyDef, Projectile } from '@/game/types'
 import {
   getBlocks, getTowerBlocks, getEnemies, getProjectiles, getAllies, getDebris, nowMs, phase,
@@ -191,11 +210,11 @@ import {
  * from a palette table.
  *
  * Layer order (back → front):
- *   1  sky gradient, tinted by the wave's "time of day"
- *   2  far mountain ridges          (parallax 0.15)
- *   3  forest band                  (parallax 0.34)
- *   4  ground + trampled lane       (parallax 1.0)
- *   5  water strip + mirrored tower reflection
+ *   1  sky gradient + sun/moon/stars, tinted by the time of day
+ *   2  backyard: clouds, houses, trees, hedge, picket fence  (parallax 0.04–0.18)
+ *   3  flower bed                   (parallax 0.26–0.34)
+ *   4  sandbox plank + sand lane    (parallax 1.0)
+ *   5  moat water + mirrored tower reflection
  *   6  ground decals (craters)
  *   7  air enemies behind the tower, then blocks, then ground enemies
  *   8  projectiles + trails
@@ -311,6 +330,10 @@ const drawBlockBody = (
 ): void => {
   const def = blockDef(typeId)
   const p = themedPalette(def.palette)
+  // Sand for the material blocks, a sand plinth wearing the toy's colour for
+  // everything that carries a toy — see `sandBlockArt.ts`.
+  const look = bodyLook(typeId, p)
+  const ramp = look.ramp
   const inset = Math.max(1, size * 0.03)
   const w = size - inset * 2
   const radius = size * 0.1
@@ -319,377 +342,102 @@ const drawBlockBody = (
   ctx.translate(inset, inset)
 
   // ── Body ──
-  roundRect(ctx, 0, 0, w, w, radius)
+  traceBlockBody(ctx, typeId, w, radius)
   const body = ctx.createLinearGradient(0, 0, w * 0.35, w)
-  body.addColorStop(0, p.light)
-  body.addColorStop(0.45, p.mid)
-  body.addColorStop(1, p.dark)
+  body.addColorStop(0, ramp.light)
+  body.addColorStop(0.45, ramp.mid)
+  body.addColorStop(1, ramp.dark)
   ctx.fillStyle = body
   ctx.fill()
 
   // ── Ambient occlusion in the lower-right corner ──
+  // Warm, not black: shadow on sand is brown, and a grey one turns it to mud.
   const ao = ctx.createRadialGradient(w * 0.95, w * 0.95, w * 0.05, w * 0.95, w * 0.95, w * 0.95)
-  ao.addColorStop(0, 'rgba(0,0,0,0.32)')
-  ao.addColorStop(1, 'rgba(0,0,0,0)')
+  ao.addColorStop(0, 'rgba(92,52,18,0.3)')
+  ao.addColorStop(1, 'rgba(92,52,18,0)')
   ctx.fillStyle = ao
-  roundRect(ctx, 0, 0, w, w, radius)
+  traceBlockBody(ctx, typeId, w, radius)
   ctx.fill()
 
   // ── Material detail ──
   ctx.save()
-  roundRect(ctx, 0, 0, w, w, radius)
+  traceBlockBody(ctx, typeId, w, radius)
   ctx.clip()
   drawMaterial(ctx, typeId, p, w)
-  ctx.restore()
 
   // ── Specular sheen ──
-  // A single soft diagonal band across the upper-left face. It is what makes a
-  // flat coloured square read as a solid object with a surface, and it costs one
-  // clipped gradient fill per cached sprite.
-  ctx.save()
-  roundRect(ctx, 0, 0, w, w, radius)
-  ctx.clip()
+  // A single soft diagonal band across the upper-left face. Sand is matte, so
+  // it is fainter than it was on timber — but it is still what makes a flat
+  // square read as a solid with a surface.
   const sheen = ctx.createLinearGradient(0, 0, w * 0.9, w * 0.9)
-  sheen.addColorStop(0, 'rgba(255,255,255,0.22)')
-  sheen.addColorStop(0.34, 'rgba(255,255,255,0.07)')
-  sheen.addColorStop(0.52, 'rgba(255,255,255,0)')
+  sheen.addColorStop(0, 'rgba(255,252,238,0.2)')
+  sheen.addColorStop(0.34, 'rgba(255,252,238,0.05)')
+  sheen.addColorStop(0.52, 'rgba(255,252,238,0)')
   ctx.fillStyle = sheen
   ctx.fillRect(0, 0, w, w)
   // Grounded lower edge: a dark band along the bottom so blocks stack with a
   // visible seam instead of melting into one another.
-  const foot = ctx.createLinearGradient(0, w * 0.78, 0, w)
-  foot.addColorStop(0, 'rgba(0,0,0,0)')
-  foot.addColorStop(1, 'rgba(0,0,0,0.34)')
+  const foot = ctx.createLinearGradient(0, w * 0.8, 0, w)
+  foot.addColorStop(0, 'rgba(80,44,14,0)')
+  foot.addColorStop(1, 'rgba(80,44,14,0.36)')
   ctx.fillStyle = foot
-  ctx.fillRect(0, w * 0.78, w, w * 0.22)
-  ctx.restore()
+  ctx.fillRect(0, w * 0.8, w, w * 0.2)
 
   // ── Top-left bevel highlight ──
-  ctx.strokeStyle = withAlpha('#ffffff', 0.34)
-  ctx.lineWidth = Math.max(1, w * 0.055)
+  // Clipped with the rest: the Gate's battlements would otherwise have it
+  // drawn straight across their gaps.
+  ctx.strokeStyle = 'rgba(255,250,232,0.42)'
+  ctx.lineWidth = Math.max(1, w * 0.05)
   ctx.lineCap = 'round'
   ctx.beginPath()
-  ctx.moveTo(radius * 0.8, w * 0.06)
-  ctx.lineTo(w - radius * 0.8, w * 0.06)
+  ctx.moveTo(radius * 0.8, w * 0.05)
+  ctx.lineTo(w - radius * 0.8, w * 0.05)
+  ctx.moveTo(w * 0.05, radius * 0.8)
+  ctx.lineTo(w * 0.05, w - radius * 0.8)
   ctx.stroke()
-  ctx.beginPath()
-  ctx.moveTo(w * 0.06, radius * 0.8)
-  ctx.lineTo(w * 0.06, w - radius * 0.8)
-  ctx.stroke()
+  ctx.restore()
 
   // ── Outline ──
-  // Two strokes: a dark contact line first, then the palette accent inside it.
-  // The dark pass is what separates the tower from a busy background — without
-  // it the blocks dissolve into the sky at small zooms.
-  roundRect(ctx, 0, 0, w, w, radius)
-  ctx.strokeStyle = 'rgba(12,16,26,0.75)'
+  // Two strokes: a warm ink contact line first, then the rim inside it — the
+  // material's own edge, or the toy's plastic on a plinth. The ink pass is what
+  // separates the castle from a busy background at small zooms.
+  traceBlockBody(ctx, typeId, w, radius)
+  ctx.lineJoin = 'round'
+  ctx.strokeStyle = 'rgba(59,42,33,0.9)'
   ctx.lineWidth = Math.max(1.5, w * 0.075)
   ctx.stroke()
-  roundRect(ctx, 0, 0, w, w, radius)
-  ctx.strokeStyle = withAlpha(p.accent, 0.9)
-  ctx.lineWidth = Math.max(1, w * 0.045)
+  ctx.strokeStyle = withAlpha(look.rim, 0.9)
+  ctx.lineWidth = Math.max(1, w * 0.04 * look.rimK)
   ctx.stroke()
 
-  // ── Damage cracks ──
-  if (stage === 1 || stage === 2) drawCracks(ctx, w, stage)
+  // ── Damage: sand crumbling ──
+  if (stage === 1 || stage === 2) drawCracks(ctx, w, stage, typeId, ramp)
 
   ctx.restore()
 }
 
 /** Per-material surface pattern, drawn clipped to the body shape. */
 const drawMaterial = (ctx: CanvasRenderingContext2D, typeId: string, p: Palette, w: number): void => {
-  switch (typeId) {
-    case 'wood':
-    case 'lumberHut': {
-      // A real packing crate: three sawn boards held between two vertical
-      // frame rails, with visible grain and iron corner brackets. The extra
-      // structure is what separates "crate" from "brown square with lines".
-      const planks = 3
-      const h = w / planks
-
-      for (let i = 0; i < planks; i++) {
-        const y = i * h
-        // Each board gets its own top light / bottom shadow, so the stack has
-        // depth instead of being one flat face with seams drawn on it.
-        const board = ctx.createLinearGradient(0, y, 0, y + h)
-        board.addColorStop(0, withAlpha(p.light, 0.42))
-        board.addColorStop(0.22, 'rgba(0,0,0,0)')
-        board.addColorStop(0.82, 'rgba(0,0,0,0)')
-        board.addColorStop(1, withAlpha(p.dark, 0.55))
-        ctx.fillStyle = board
-        ctx.fillRect(0, y, w, h)
-
-        // Grain: two long, shallow arcs per board.
-        ctx.strokeStyle = withAlpha(p.dark, 0.3)
-        ctx.lineWidth = Math.max(1, w * 0.016)
-        for (let g = 0; g < 2; g++) {
-          const gy = y + h * (0.34 + g * 0.32)
-          ctx.beginPath()
-          ctx.moveTo(w * 0.08, gy)
-          ctx.quadraticCurveTo(w * 0.5, gy + (g % 2 === 0 ? -h * 0.12 : h * 0.12), w * 0.92, gy)
-          ctx.stroke()
-        }
-      }
-      // Board seams.
-      ctx.strokeStyle = withAlpha(p.dark, 0.8)
-      ctx.lineWidth = Math.max(1, w * 0.026)
-      for (let i = 1; i < planks; i++) {
-        ctx.beginPath(); ctx.moveTo(0, i * h); ctx.lineTo(w, i * h); ctx.stroke()
-      }
-
-      // Vertical frame rails down both edges.
-      const rail = ctx.createLinearGradient(0, 0, w * 0.16, 0)
-      rail.addColorStop(0, withAlpha(p.light, 0.5))
-      rail.addColorStop(1, withAlpha(p.dark, 0.3))
-      ctx.fillStyle = rail
-      ctx.fillRect(0, 0, w * 0.14, w)
-      ctx.fillRect(w * 0.86, 0, w * 0.14, w)
-      ctx.strokeStyle = withAlpha(p.dark, 0.6)
-      ctx.lineWidth = Math.max(1, w * 0.022)
-      ctx.beginPath()
-      ctx.moveTo(w * 0.14, 0); ctx.lineTo(w * 0.14, w)
-      ctx.moveTo(w * 0.86, 0); ctx.lineTo(w * 0.86, w)
-      ctx.stroke()
-
-      // Iron corner brackets with rivets.
-      ctx.strokeStyle = withAlpha(p.accent, 0.85)
-      ctx.lineWidth = Math.max(1.2, w * 0.05)
-      ctx.lineCap = 'butt'
-      for (const [sxs, sys] of [[1, 1], [-1, 1], [1, -1], [-1, -1]] as const) {
-        const ox = sxs > 0 ? w * 0.06 : w * 0.94
-        const oy = sys > 0 ? w * 0.06 : w * 0.94
-        ctx.beginPath()
-        ctx.moveTo(ox + sxs * w * 0.2, oy)
-        ctx.lineTo(ox, oy)
-        ctx.lineTo(ox, oy + sys * w * 0.2)
-        ctx.stroke()
-      }
-      ctx.fillStyle = withAlpha(p.accent2, 0.75)
-      for (const [nx, ny] of [[0.11, 0.11], [0.89, 0.11], [0.11, 0.89], [0.89, 0.89]] as const) {
-        ctx.beginPath(); ctx.arc(nx * w, ny * w, w * 0.035, 0, Math.PI * 2); ctx.fill()
-      }
-      break
-    }
-    case 'brace': {
-      // Boards behind, then a cross of squared timbers bolted over them. The
-      // two layers are what make this read as REINFORCED wood rather than as
-      // plain wood with a decal on it.
-      ctx.strokeStyle = withAlpha(p.dark, 0.5)
-      ctx.lineWidth = Math.max(1, w * 0.022)
-      for (const yy of [0.3, 0.7]) {
-        ctx.beginPath(); ctx.moveTo(0, w * yy); ctx.lineTo(w, w * yy); ctx.stroke()
-      }
-
-      ctx.lineCap = 'butt'
-      for (const [ax, ay, bx, by] of [[0.14, 0.14, 0.86, 0.86], [0.86, 0.14, 0.14, 0.86]] as const) {
-        // Drop shadow first, then the timber, then its lit upper face.
-        ctx.strokeStyle = 'rgba(0,0,0,0.35)'
-        ctx.lineWidth = w * 0.19
-        ctx.beginPath()
-        ctx.moveTo(w * ax, w * ay + w * 0.03); ctx.lineTo(w * bx, w * by + w * 0.03)
-        ctx.stroke()
-
-        ctx.strokeStyle = p.mid
-        ctx.lineWidth = w * 0.17
-        ctx.beginPath()
-        ctx.moveTo(w * ax, w * ay); ctx.lineTo(w * bx, w * by)
-        ctx.stroke()
-
-        ctx.strokeStyle = withAlpha(p.light, 0.7)
-        ctx.lineWidth = w * 0.045
-        ctx.beginPath()
-        ctx.moveTo(w * ax, w * ay - w * 0.055); ctx.lineTo(w * bx, w * by - w * 0.055)
-        ctx.stroke()
-      }
-
-      // Bolt at the crossing plus one at each anchor point.
-      ctx.fillStyle = withAlpha(p.accent2, 0.85)
-      for (const [bx, by] of [[0.5, 0.5], [0.16, 0.16], [0.84, 0.16], [0.16, 0.84], [0.84, 0.84]] as const) {
-        ctx.beginPath(); ctx.arc(bx * w, by * w, w * 0.045, 0, Math.PI * 2); ctx.fill()
-        ctx.strokeStyle = withAlpha('#000', 0.4)
-        ctx.lineWidth = Math.max(1, w * 0.014)
-        ctx.stroke()
-      }
-      break
-    }
-    case 'stone':
-    case 'stonepit':
-    case 'obelisk': {
-      // Running-bond masonry. Each stone is drawn as its own rounded block with
-      // a lit top edge and a shadowed base, then the mortar joints are cut in
-      // over the top — a grid of lines alone reads as wallpaper, not as rock.
-      const rows = 3
-      const h = w / rows
-      const inset = w * 0.012
-
-      for (let r = 0; r < rows; r++) {
-        const y = r * h
-        // Alternate rows are offset by half a stone, and the row edges run off
-        // the block so the bond continues into its neighbours.
-        const off = r % 2 === 0 ? 0 : -w * 0.25
-        for (let k = -1; k <= 2; k++) {
-          const x = off + k * (w * 0.5)
-          if (x > w || x + w * 0.5 < 0) continue
-          const shade = 0.86 + ((r * 3 + k * 7) % 5) * 0.06
-          ctx.fillStyle = mixHex(p.dark, p.light, shade - 0.42)
-          roundRect(ctx, x + inset, y + inset, w * 0.5 - inset * 2, h - inset * 2, w * 0.03)
-          ctx.fill()
-          // Lit chamfer on top, shadow underneath.
-          ctx.strokeStyle = withAlpha('#ffffff', 0.2)
-          ctx.lineWidth = Math.max(1, w * 0.018)
-          ctx.beginPath()
-          ctx.moveTo(x + w * 0.06, y + inset + ctx.lineWidth)
-          ctx.lineTo(x + w * 0.44, y + inset + ctx.lineWidth)
-          ctx.stroke()
-          ctx.strokeStyle = withAlpha('#000', 0.3)
-          ctx.beginPath()
-          ctx.moveTo(x + w * 0.06, y + h - inset - ctx.lineWidth)
-          ctx.lineTo(x + w * 0.44, y + h - inset - ctx.lineWidth)
-          ctx.stroke()
-        }
-      }
-
-      // Chipped highlights and granite speckle.
-      ctx.fillStyle = withAlpha(p.light, 0.28)
-      for (let i = 0; i < 9; i++) {
-        const sx = ((i * 97) % 100) / 100 * w
-        const sy = ((i * 61) % 100) / 100 * w
-        ctx.beginPath(); ctx.arc(sx, sy, w * 0.018, 0, Math.PI * 2); ctx.fill()
-      }
-      // A little moss in the lower joints — the cue that this is old stonework.
-      ctx.fillStyle = 'rgba(96,140,66,0.28)'
-      for (const [mx, my] of [[0.1, 0.94], [0.52, 0.66], [0.86, 0.92]] as const) {
-        ctx.beginPath(); ctx.ellipse(mx * w, my * w, w * 0.09, w * 0.035, 0, 0, Math.PI * 2); ctx.fill()
-      }
-      break
-    }
-    case 'gate': {
-      // An arched, banded door — the thing everything else exists to protect.
-      ctx.fillStyle = withAlpha(p.dark, 0.85)
-      ctx.beginPath()
-      ctx.moveTo(w * 0.22, w)
-      ctx.lineTo(w * 0.22, w * 0.42)
-      ctx.arc(w * 0.5, w * 0.42, w * 0.28, Math.PI, 0)
-      ctx.lineTo(w * 0.78, w)
-      ctx.closePath()
-      ctx.fill()
-      ctx.strokeStyle = p.accent
-      ctx.lineWidth = w * 0.05
-      ctx.stroke()
-      // Iron bands.
-      ctx.strokeStyle = withAlpha(p.accent, 0.85)
-      ctx.lineWidth = w * 0.055
-      for (const yy of [0.55, 0.78]) {
-        ctx.beginPath(); ctx.moveTo(w * 0.22, w * yy); ctx.lineTo(w * 0.78, w * yy); ctx.stroke()
-      }
-      // Warm light spilling from within — the tower is inhabited.
-      const glow = ctx.createRadialGradient(w * 0.5, w * 0.62, 0, w * 0.5, w * 0.62, w * 0.3)
-      glow.addColorStop(0, withAlpha(p.accent2, 0.5))
-      glow.addColorStop(1, withAlpha(p.accent2, 0))
-      ctx.fillStyle = glow
-      ctx.fillRect(0, 0, w, w)
-      break
-    }
-    case 'spikes': {
-      // Rough-cut palisade timbers behind the spikes, bound with two iron straps.
-      // Vertical grain here contrasts with the horizontal planks of a wood crate,
-      // so the two never get confused mid-build.
-      ctx.strokeStyle = withAlpha(p.dark, 0.7)
-      ctx.lineWidth = Math.max(1, w * 0.03)
-      for (const xx of [0.22, 0.4, 0.6, 0.78]) {
-        ctx.beginPath(); ctx.moveTo(w * xx, w * 0.06); ctx.lineTo(w * xx, w); ctx.stroke()
-      }
-      ctx.fillStyle = withAlpha(p.accent, 0.85)
-      for (const yy of [0.32, 0.74]) {
-        ctx.fillRect(0, w * yy, w, w * 0.09)
-        ctx.fillStyle = withAlpha('#ffffff', 0.18)
-        ctx.fillRect(0, w * yy, w, w * 0.022)
-        ctx.fillStyle = withAlpha(p.accent, 0.85)
-      }
-      // Strap rivets.
-      ctx.fillStyle = withAlpha(p.accent2, 0.75)
-      for (const [rx, ry] of [[0.16, 0.365], [0.84, 0.365], [0.16, 0.785], [0.84, 0.785]] as const) {
-        ctx.beginPath(); ctx.arc(rx * w, ry * w, w * 0.032, 0, Math.PI * 2); ctx.fill()
-      }
-      break
-    }
-    case 'bombard': {
-      // A stone emplacement with a sunken firing pit: the mouth of the weapon is
-      // part of the BLOCK, so the barrel that sticks out of it reads as mounted
-      // rather than balanced on top.
-      ctx.fillStyle = withAlpha(p.dark, 0.55)
-      ctx.beginPath()
-      ctx.ellipse(w * 0.5, w * 0.42, w * 0.3, w * 0.15, 0, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.strokeStyle = withAlpha(p.accent, 0.8)
-      ctx.lineWidth = Math.max(1, w * 0.035)
-      ctx.stroke()
-      // Sandbag courses along the bottom.
-      ctx.fillStyle = withAlpha(p.light, 0.32)
-      for (let i = 0; i < 4; i++) {
-        ctx.beginPath()
-        ctx.ellipse(w * (0.16 + i * 0.23), w * 0.8, w * 0.13, w * 0.075, 0, 0, Math.PI * 2)
-        ctx.fill()
-      }
-      ctx.strokeStyle = withAlpha(p.dark, 0.5)
-      ctx.lineWidth = Math.max(1, w * 0.022)
-      for (let i = 0; i < 4; i++) {
-        ctx.beginPath()
-        ctx.ellipse(w * (0.16 + i * 0.23), w * 0.8, w * 0.13, w * 0.075, 0, 0, Math.PI * 2)
-        ctx.stroke()
-      }
-      break
-    }
-    default: {
-      // Weapon / utility platform: a recessed metal plate the fixture bolts to.
-      ctx.fillStyle = withAlpha(p.dark, 0.45)
-      roundRect(ctx, w * 0.16, w * 0.5, w * 0.68, w * 0.36, w * 0.06)
-      ctx.fill()
-      ctx.strokeStyle = withAlpha(p.accent, 0.6)
-      ctx.lineWidth = Math.max(1, w * 0.03)
-      ctx.stroke()
-      // Rivets.
-      ctx.fillStyle = withAlpha(p.accent2, 0.5)
-      for (const [rx, ry] of [[0.24, 0.58], [0.76, 0.58], [0.24, 0.79], [0.76, 0.79]] as const) {
-        ctx.beginPath(); ctx.arc(rx * w, ry * w, w * 0.03, 0, Math.PI * 2); ctx.fill()
-      }
-    }
-  }
+  paintBlockMaterial(ctx, typeId, p, w)
 }
 
-/** Deterministic crack overlay — same block always cracks the same way, so the
- *  damage read is stable rather than shimmering between frames. */
-const drawCracks = (ctx: CanvasRenderingContext2D, w: number, stage: 1 | 2): void => {
-  const seeds = stage === 1
-    ? [[0.18, 0.1, 0.42, 0.46, 0.3, 0.72]]
-    : [[0.18, 0.1, 0.42, 0.46, 0.3, 0.72], [0.82, 0.2, 0.58, 0.5, 0.72, 0.9], [0.05, 0.62, 0.34, 0.68, 0.2, 0.95]]
-  ctx.lineCap = 'round'
-  for (const s of seeds) {
-    // Draw twice: a light "chipped edge" behind a dark fissure reads as depth.
-    ctx.strokeStyle = 'rgba(255,255,255,0.16)'
-    ctx.lineWidth = Math.max(1, w * 0.05)
-    ctx.beginPath()
-    ctx.moveTo(s[0]! * w, s[1]! * w)
-    ctx.lineTo(s[2]! * w, s[3]! * w)
-    ctx.lineTo(s[4]! * w, s[5]! * w)
-    ctx.stroke()
-    ctx.strokeStyle = 'rgba(0,0,0,0.55)'
-    ctx.lineWidth = Math.max(1, w * 0.028)
-    ctx.beginPath()
-    ctx.moveTo(s[0]! * w, s[1]! * w)
-    ctx.lineTo(s[2]! * w, s[3]! * w)
-    ctx.lineTo(s[4]! * w, s[5]! * w)
-    ctx.stroke()
-  }
+/** Deterministic sand crumbling — same block always crumbles the same way, so
+ *  the damage read is stable rather than shimmering between frames. Stage 2
+ *  knocks real chunks out of the sprite, so it reads in silhouette too. */
+const drawCracks = (
+  ctx: CanvasRenderingContext2D, w: number, stage: 1 | 2,
+  typeId: string, ramp: { light: string; mid: string; dark: string }
+): void => {
+  paintSandDamage(ctx, typeId, ramp, w, stage)
 }
 
 /**
- * The gable cap on a roofed block.
+ * The roof cap on a roofed block: an upside-down red toy bucket.
  *
  * It has to be readable at a glance from across the tower, because "can I build
  * on this?" is a question the player asks constantly — so it is drawn OUTSIDE
- * the cell (overhanging the top edge) in a saturated tile red that no block
- * material uses. Cheap to draw, impossible to miss.
+ * the cell (overhanging the top edge) in a saturated toy red that no block
+ * material uses. One blit, impossible to miss.
  */
 const drawRoof = (ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number): void => {
   const halfW = size * 0.62
@@ -713,40 +461,9 @@ const drawRoof = (ctx: CanvasRenderingContext2D, cx: number, cy: number, size: n
     return
   }
 
-  ctx.save()
-  // Eaves shadow, so the roof reads as sitting ON the block rather than in it.
-  ctx.fillStyle = 'rgba(0,0,0,0.28)'
-  ctx.beginPath()
-  ctx.moveTo(cx - halfW, baseY + size * 0.06)
-  ctx.lineTo(cx + halfW, baseY + size * 0.06)
-  ctx.lineTo(cx + halfW * 0.86, baseY + size * 0.13)
-  ctx.lineTo(cx - halfW * 0.86, baseY + size * 0.13)
-  ctx.closePath()
-  ctx.fill()
-
-  const g = ctx.createLinearGradient(cx - halfW, baseY - peak, cx + halfW, baseY)
-  g.addColorStop(0, '#e0574d')
-  g.addColorStop(0.5, '#b8332c')
-  g.addColorStop(1, '#7d1f1a')
-  ctx.fillStyle = g
-  ctx.beginPath()
-  ctx.moveTo(cx - halfW, baseY + size * 0.06)
-  ctx.lineTo(cx, baseY - peak)
-  ctx.lineTo(cx + halfW, baseY + size * 0.06)
-  ctx.closePath()
-  ctx.fill()
-  ctx.strokeStyle = 'rgba(20,10,8,0.9)'
-  ctx.lineWidth = Math.max(1, size * 0.045)
-  ctx.stroke()
-
-  // Ridge highlight.
-  ctx.strokeStyle = 'rgba(255,255,255,0.3)'
-  ctx.lineWidth = Math.max(1, size * 0.03)
-  ctx.beginPath()
-  ctx.moveTo(cx - halfW * 0.7, baseY - peak * 0.12)
-  ctx.lineTo(cx, baseY - peak * 0.9)
-  ctx.stroke()
-  ctx.restore()
+  // The upside-down red toy bucket — a turret cap with a castle-mould top.
+  // Same overhang and height as the gable it replaced, baked per size.
+  drawBucketRoof(ctx, cx, cy, size)
 }
 
 const roundRect = (ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void => {
@@ -775,187 +492,38 @@ const drawFixture = (
   const def = blockDef(b.typeId)
   const p = themedPalette(def.palette)
   const recoil = b.recoil * s * 0.12
+  // The weld depth, for the toy's stickers and extra parts (see toyFixtures).
+  const tier = tierOf(b.tier)
+  // A gun with a grip and a top face flips across its own axis once it points
+  // back over the tower, so it never hangs upside-down (as `shipArt` does).
+  const flip = Math.cos(b.aim) < 0
 
   ctx.save()
   ctx.translate(cx, cy)
 
   switch (b.typeId) {
     case 'cannon': {
-      // Carriage first, in BLOCK space — it does not rotate with the gun.
-      if (layer !== 'weapon') {
-      ctx.save()
-      ctx.fillStyle = withAlpha('#3a2a1a', 0.95)
-      roundRect(ctx, -s * 0.26, s * 0.04, s * 0.52, s * 0.16, s * 0.04)
-      ctx.fill()
-      ctx.strokeStyle = withAlpha('#000', 0.5)
-      ctx.lineWidth = Math.max(1, s * 0.02)
-      ctx.stroke()
-      // Wheels.
-      for (const wx of [-0.15, 0.15]) {
-        ctx.fillStyle = '#2b1f14'
-        ctx.beginPath(); ctx.arc(wx * s, s * 0.2, s * 0.1, 0, Math.PI * 2); ctx.fill()
-        ctx.strokeStyle = withAlpha(p.accent, 0.75)
-        ctx.lineWidth = Math.max(1, s * 0.022)
-        ctx.stroke()
-        ctx.beginPath(); ctx.arc(wx * s, s * 0.2, s * 0.032, 0, Math.PI * 2)
-        ctx.fillStyle = p.accent; ctx.fill()
-      }
-      ctx.restore()
-      }
+      // Squirt Gun. The swivel stand first, in BLOCK space — it does not
+      // rotate with the gun.
+      if (layer !== 'weapon') drawSquirtMount(ctx, s)
 
       ctx.rotate(-b.aim)
       ctx.translate(-recoil, 0)
-
-      // Cascabel and breech: the fat rear end that tells you which way it shoots.
-      ctx.fillStyle = p.dark
-      ctx.beginPath(); ctx.arc(-s * 0.12, 0, s * 0.075, 0, Math.PI * 2); ctx.fill()
-
-      // Barrel — a proper tapered tube with a lit top edge.
-      const g = ctx.createLinearGradient(0, -s * 0.19, 0, s * 0.19)
-      g.addColorStop(0, '#ffffff')
-      g.addColorStop(0.16, p.light)
-      g.addColorStop(0.55, p.mid)
-      g.addColorStop(1, p.dark)
-      ctx.fillStyle = g
-      ctx.beginPath()
-      ctx.moveTo(-s * 0.08, -s * 0.18)
-      ctx.lineTo(s * 0.34, -s * 0.13)
-      ctx.lineTo(s * 0.52, -s * 0.145)
-      ctx.lineTo(s * 0.52, s * 0.145)
-      ctx.lineTo(s * 0.34, s * 0.13)
-      ctx.lineTo(-s * 0.08, s * 0.18)
-      ctx.closePath()
-      ctx.fill()
-      ctx.strokeStyle = withAlpha('#000', 0.6)
-      ctx.lineWidth = Math.max(1, s * 0.022)
-      ctx.stroke()
-
-      // Reinforcing rings along the tube.
-      ctx.strokeStyle = withAlpha(p.accent, 0.9)
-      ctx.lineWidth = Math.max(1, s * 0.035)
-      for (const bx of [0.02, 0.2]) {
-        ctx.beginPath()
-        ctx.moveTo(s * bx, -s * 0.17)
-        ctx.lineTo(s * bx, s * 0.17)
-        ctx.stroke()
-      }
-
-      // Muzzle swell and the dark bore inside it.
-      ctx.fillStyle = p.accent
-      roundRect(ctx, s * 0.46, -s * 0.165, s * 0.09, s * 0.33, s * 0.03)
-      ctx.fill()
-      ctx.fillStyle = '#0b0a08'
-      ctx.beginPath()
-      ctx.ellipse(s * 0.54, 0, s * 0.028, s * 0.1, 0, 0, Math.PI * 2)
-      ctx.fill()
-
-      // Trunnion pin at the pivot, so the gun visibly hangs off its carriage.
-      ctx.fillStyle = p.accent2
-      ctx.beginPath(); ctx.arc(0, s * 0.04, s * 0.05, 0, Math.PI * 2); ctx.fill()
-
-      // Residual heat glow in the barrel right after firing.
-      if (b.recoil > 0.15) {
-        const heat = ctx.createRadialGradient(s * 0.54, 0, 0, s * 0.54, 0, s * 0.2 * b.recoil)
-        heat.addColorStop(0, `rgba(255,180,60,${0.5 * b.recoil})`)
-        heat.addColorStop(1, 'rgba(255,120,20,0)')
-        ctx.fillStyle = heat
-        ctx.beginPath(); ctx.arc(s * 0.54, 0, s * 0.2 * b.recoil, 0, Math.PI * 2); ctx.fill()
-      }
+      if (flip) ctx.scale(1, -1)
+      // The world's horizontal in the gun's frame, so the tank water lies level.
+      drawSquirtGun(ctx, s, b.recoil, tier, Math.cos(b.aim), flip ? -Math.sin(b.aim) : Math.sin(b.aim))
       break
     }
     case 'archer': {
-      // Merlons: a crenellated parapet the bow sits behind, in block space.
-      if (layer !== 'weapon') {
-      ctx.save()
-      ctx.fillStyle = withAlpha(p.dark, 0.9)
-      for (const mx of [-0.32, -0.06, 0.2]) {
-        roundRect(ctx, mx * s, s * 0.06, s * 0.18, s * 0.16, s * 0.03)
-        ctx.fill()
-      }
-      ctx.restore()
-      }
+      // Dart Blaster. Its tripod stands in block space, like the old parapet.
+      if (layer !== 'weapon') drawBlasterMount(ctx, s)
 
       ctx.rotate(-b.aim)
       ctx.translate(-recoil * 0.6, 0)
-
-      // `draw` runs 1 → 0 as the shot leaves: the string snaps forward rather
-      // than the whole bow sliding, which is what makes a bow read as a bow.
-      const draw = Math.min(1, b.recoil * 2.2)
-      const limb = s * 0.34
-      const tipA = -1.32
-      const tipB = 1.32
-
-      // Bow limbs: two mirrored recurves meeting at a wrapped grip.
-      ctx.lineCap = 'round'
-      ctx.strokeStyle = withAlpha('#000', 0.45)
-      ctx.lineWidth = Math.max(2, s * 0.085)
-      ctx.beginPath()
-      ctx.arc(s * 0.06, 0, limb, tipA, tipB)
-      ctx.stroke()
-      const wood = ctx.createLinearGradient(s * 0.06, -limb, s * 0.06, limb)
-      wood.addColorStop(0, p.light)
-      wood.addColorStop(0.5, p.accent2)
-      wood.addColorStop(1, p.mid)
-      ctx.strokeStyle = wood
-      ctx.lineWidth = Math.max(1.4, s * 0.055)
-      ctx.beginPath()
-      ctx.arc(s * 0.06, 0, limb, tipA, tipB)
-      ctx.stroke()
-
-      // Recurved tips flicking the other way.
-      ctx.lineWidth = Math.max(1.2, s * 0.04)
-      for (const a of [tipA, tipB]) {
-        const tx = s * 0.06 + Math.cos(a) * limb
-        const ty = Math.sin(a) * limb
-        ctx.beginPath()
-        ctx.moveTo(tx, ty)
-        ctx.quadraticCurveTo(tx + s * 0.06, ty * 1.12, tx - s * 0.02, ty * 1.24)
-        ctx.stroke()
-      }
-
-      // Leather grip.
-      ctx.strokeStyle = '#4a3018'
-      ctx.lineWidth = Math.max(1.6, s * 0.07)
-      ctx.beginPath()
-      ctx.moveTo(s * 0.06 - limb * 0.02, -s * 0.06)
-      ctx.lineTo(s * 0.06 - limb * 0.02, s * 0.06)
-      ctx.stroke()
-
-      // String, pulled back to the nock point.
-      const nock = s * 0.06 - limb * (0.1 + draw * 0.62)
-      ctx.strokeStyle = withAlpha('#ffffff', 0.85)
-      ctx.lineWidth = Math.max(1, s * 0.02)
-      ctx.beginPath()
-      ctx.moveTo(s * 0.06 + Math.cos(tipA) * limb, Math.sin(tipA) * limb)
-      ctx.lineTo(nock, 0)
-      ctx.lineTo(s * 0.06 + Math.cos(tipB) * limb, Math.sin(tipB) * limb)
-      ctx.stroke()
-
-      // Nocked arrow — only while the string is actually drawn.
-      if (draw > 0.08) {
-        ctx.strokeStyle = '#e8dcc0'
-        ctx.lineWidth = Math.max(1, s * 0.026)
-        ctx.beginPath()
-        ctx.moveTo(nock, 0)
-        ctx.lineTo(nock + s * 0.42, 0)
-        ctx.stroke()
-        ctx.fillStyle = '#d8dee6'
-        ctx.beginPath()
-        ctx.moveTo(nock + s * 0.42, 0)
-        ctx.lineTo(nock + s * 0.34, -s * 0.05)
-        ctx.lineTo(nock + s * 0.34, s * 0.05)
-        ctx.closePath()
-        ctx.fill()
-        // Fletching.
-        ctx.fillStyle = withAlpha(p.accent, 0.9)
-        ctx.beginPath()
-        ctx.moveTo(nock + s * 0.03, 0)
-        ctx.lineTo(nock - s * 0.05, -s * 0.06)
-        ctx.lineTo(nock + s * 0.09, 0)
-        ctx.lineTo(nock - s * 0.05, s * 0.06)
-        ctx.closePath()
-        ctx.fill()
-      }
+      if (flip) ctx.scale(1, -1)
+      // Loaded at rest; the dart is gone and the slide racked while `recoil`
+      // is still up, which is what reads as "it just fired".
+      drawDartBlaster(ctx, s, b.recoil, tier)
       break
     }
     case 'mortar': {
@@ -964,144 +532,49 @@ const drawFixture = (
       // angle serves the drawing, the recoil and the muzzle flash. (Built
       // pointing "up" and mirrored by negating the angle, a right-hand column
       // aimed its mouth down into its own carriage.)
-      ctx.rotate(-lobAngle(b.c, MORTAR_ELEV))
+      // Mud Mortar: a toy sand bucket for a tube, a mud ball in its mouth.
+      // Flipped across its own axis on the left flank so the handle hangs
+      // down and the lit side stays up.
+      const lob = lobAngle(b.c, MORTAR_ELEV)
+      ctx.rotate(-lob)
       ctx.translate(-recoil, 0)
-      const g = ctx.createLinearGradient(0, -s * 0.16, 0, s * 0.16)
-      g.addColorStop(0, p.light); g.addColorStop(0.5, p.mid); g.addColorStop(1, p.dark)
-      ctx.fillStyle = g
-      ctx.beginPath()
-      ctx.moveTo(0, -s * 0.13)
-      ctx.lineTo(s * 0.42, -s * 0.2)
-      ctx.lineTo(s * 0.42, s * 0.2)
-      ctx.lineTo(0, s * 0.13)
-      ctx.closePath()
-      ctx.fill()
-      ctx.strokeStyle = withAlpha('#000', 0.5); ctx.lineWidth = Math.max(1, s * 0.02); ctx.stroke()
-      // Reinforcing band, so the tube has a waist to recoil against.
-      ctx.strokeStyle = withAlpha(p.accent, 0.85)
-      ctx.lineWidth = Math.max(1, s * 0.035)
-      ctx.beginPath(); ctx.moveTo(s * 0.16, -s * 0.17); ctx.lineTo(s * 0.16, s * 0.17); ctx.stroke()
-      // Bore.
-      ctx.fillStyle = withAlpha('#000', 0.55)
-      ctx.beginPath(); ctx.ellipse(s * 0.42, 0, s * 0.06, s * 0.2, 0, 0, Math.PI * 2); ctx.fill()
+      if (Math.cos(lob) < 0) ctx.scale(1, -1)
+      drawMudMortar(ctx, s, b.recoil, tier)
       break
     }
     case 'tesla': {
-      // Coil with orbiting charge; the idle arc telegraphs "this one chains".
+      // Bug Zapper: a glowing grid lantern; the pulse telegraphs "this one
+      // chains", and the arcs leave from the hook on its roof.
       const pulse = 0.5 + 0.5 * Math.sin(t / 150)
-      ctx.fillStyle = p.dark
-      ctx.fillRect(-s * 0.05, -s * 0.34, s * 0.1, s * 0.34)
-      for (let i = 0; i < 3; i++) {
-        ctx.strokeStyle = withAlpha(p.accent, 0.55 + i * 0.12)
-        ctx.lineWidth = Math.max(1, s * 0.03)
-        ctx.beginPath()
-        ctx.ellipse(0, -s * 0.1 - i * s * 0.08, s * 0.16 - i * s * 0.03, s * 0.05, 0, 0, Math.PI * 2)
-        ctx.stroke()
-      }
-      const glow = ctx.createRadialGradient(0, -s * 0.38, 0, 0, -s * 0.38, s * 0.2 * (0.7 + pulse * 0.5))
-      glow.addColorStop(0, withAlpha(p.accent2, 0.95))
-      glow.addColorStop(0.4, withAlpha(p.accent, 0.6))
-      glow.addColorStop(1, withAlpha(p.accent, 0))
-      ctx.fillStyle = glow
-      ctx.beginPath(); ctx.arc(0, -s * 0.38, s * 0.22, 0, Math.PI * 2); ctx.fill()
+      drawBugZapper(ctx, s, pulse, tier, p)
       break
     }
     case 'frost': {
+      // Ice Pop: a giant ice pop on its stick; the old crystals are its
+      // frost glints now, breathing on the same clock.
       const pulse = 0.5 + 0.5 * Math.sin(t / 320)
-      ctx.fillStyle = withAlpha(p.accent, 0.9)
-      for (const [ox, oy, sc] of [[0, -0.34, 1], [-0.13, -0.22, 0.7], [0.13, -0.24, 0.62]] as const) {
-        ctx.beginPath()
-        ctx.moveTo(ox * s, (oy - 0.1 * sc) * s)
-        ctx.lineTo((ox + 0.07 * sc) * s, oy * s)
-        ctx.lineTo(ox * s, (oy + 0.12 * sc) * s)
-        ctx.lineTo((ox - 0.07 * sc) * s, oy * s)
-        ctx.closePath()
-        ctx.fill()
-      }
-      const glow = ctx.createRadialGradient(0, -s * 0.28, 0, 0, -s * 0.28, s * 0.3)
-      glow.addColorStop(0, withAlpha(p.accent2, 0.4 + pulse * 0.25))
-      glow.addColorStop(1, withAlpha(p.accent2, 0))
-      ctx.fillStyle = glow
-      ctx.beginPath(); ctx.arc(0, -s * 0.28, s * 0.3, 0, Math.PI * 2); ctx.fill()
+      drawIcePop(ctx, s, pulse, tier)
       break
     }
     case 'spikes': {
-      // Iron spikes on all four faces. They point OUT of the block on every side
-      // because the thorns rule fires no matter which face gets hit, and art
-      // that only spikes the top would lie about that.
+      // Toothpicks on all four faces. They point OUT of the block on every
+      // side because the thorns rule fires no matter which face gets hit, and
+      // art that only spiked the top would lie about that.
       const glint = 0.55 + 0.45 * Math.sin(t / 420 + b.c * 1.7)
-      for (const [ang, count] of [[0, 3], [Math.PI, 3], [-Math.PI / 2, 4], [Math.PI / 2, 4]] as const) {
-        ctx.save()
-        ctx.rotate(ang)
-        for (let i = 0; i < count; i++) {
-          const off = (i - (count - 1) / 2) * s * 0.19
-          const len = s * (0.2 + (i % 2) * 0.05)
-          const grad = ctx.createLinearGradient(s * 0.4, off, s * 0.4 + len, off)
-          grad.addColorStop(0, p.dark)
-          grad.addColorStop(0.5, p.light)
-          grad.addColorStop(1, '#ffffff')
-          ctx.fillStyle = grad
-          ctx.beginPath()
-          ctx.moveTo(s * 0.38, off - s * 0.055)
-          ctx.lineTo(s * 0.4 + len, off)
-          ctx.lineTo(s * 0.38, off + s * 0.055)
-          ctx.closePath()
-          ctx.fill()
-          ctx.strokeStyle = withAlpha('#000', 0.45)
-          ctx.lineWidth = Math.max(1, s * 0.014)
-          ctx.stroke()
-        }
-        ctx.restore()
-      }
-      // Tip glints, so the wall looks sharp rather than merely bumpy.
-      ctx.fillStyle = `rgba(255,255,255,${0.35 * glint})`
-      for (const [gx, gy] of [[0.6, -0.19], [0.6, 0.19], [-0.6, 0], [0, -0.6], [0, 0.6]] as const) {
-        ctx.beginPath(); ctx.arc(gx * s, gy * s, s * 0.028, 0, Math.PI * 2); ctx.fill()
-      }
+      drawToothpicks(ctx, s, glint)
       break
     }
     case 'bombard': {
       // Squat wide-mouthed barrel on a steep fixed elevation. Unlike the mortar
       // it recoils straight DOWN into its pit, which is the visual difference
       // between "lobs far" and "drops it just over the wall".
-      ctx.rotate(-lobAngle(b.c, BOMBARD_ELEV))
+      // Balloon Launcher: a cardboard launch tube on a plastic pivot, a water
+      // balloon sitting in its mouth.
+      const lob = lobAngle(b.c, BOMBARD_ELEV)
+      ctx.rotate(-lob)
       ctx.translate(-recoil * 1.4, 0)
-
-      // Trunnion cheeks.
-      ctx.fillStyle = p.dark
-      ctx.beginPath(); ctx.arc(0, 0, s * 0.16, 0, Math.PI * 2); ctx.fill()
-
-      const g = ctx.createLinearGradient(0, -s * 0.22, 0, s * 0.22)
-      g.addColorStop(0, p.light); g.addColorStop(0.58, p.mid); g.addColorStop(1, p.dark)
-      ctx.fillStyle = g
-      ctx.beginPath()
-      ctx.moveTo(-s * 0.04, -s * 0.15)
-      ctx.lineTo(s * 0.3, -s * 0.23)
-      ctx.lineTo(s * 0.3, s * 0.23)
-      ctx.lineTo(-s * 0.04, s * 0.15)
-      ctx.closePath()
-      ctx.fill()
-      ctx.strokeStyle = withAlpha('#000', 0.55); ctx.lineWidth = Math.max(1, s * 0.025); ctx.stroke()
-
-      // Reinforcing bands.
-      ctx.strokeStyle = withAlpha(p.accent, 0.9)
-      ctx.lineWidth = Math.max(1, s * 0.04)
-      for (const xx of [0.08, 0.2]) {
-        const halfH = 0.17 + xx * 0.2
-        ctx.beginPath()
-        ctx.moveTo(s * xx, -s * halfH)
-        ctx.lineTo(s * xx, s * halfH)
-        ctx.stroke()
-      }
-      // Flared muzzle + bore shadow.
-      ctx.fillStyle = p.accent
-      ctx.beginPath()
-      ctx.ellipse(s * 0.3, 0, s * 0.07, s * 0.25, 0, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.fillStyle = '#0d0b09'
-      ctx.beginPath()
-      ctx.ellipse(s * 0.3, 0, s * 0.045, s * 0.17, 0, 0, Math.PI * 2)
-      ctx.fill()
+      if (Math.cos(lob) < 0) ctx.scale(1, -1)
+      drawBalloonLauncher(ctx, s, b.recoil, tier, b.c < 0)
       break
     }
     // ── Buffs ──
@@ -1124,138 +597,45 @@ const drawFixture = (
       // inside the cell, which is what caps it at 0.09 rather than 0.14.
       // Held mid-curve rather than flat: a banner with no bend in it reads
       // as a painted plank, and stillness is not supposed to cost the cloth.
+      // Paper Flag: a paper swallowtail on a toothpick mast, in the banner's
+      // heraldic plum and gold, held mid-ripple.
       const sway = 0.05
-      ctx.save()
-      // Staff, from just under the cell's ceiling to just above its floor.
-      ctx.fillStyle = '#3a2a18'
-      ctx.fillRect(-s * 0.035, -s * 0.42, s * 0.07, s * 0.78)
-      ctx.fillStyle = p.accent
-      ctx.beginPath(); ctx.arc(0, -s * 0.44, s * 0.045, 0, Math.PI * 2); ctx.fill()
-      // Pennant, hanging from the staff and breathing on its own phase so a
-      // row of them never flaps in lockstep.
-      ctx.translate(s * 0.03, -s * 0.37)
-      ctx.beginPath()
-      ctx.moveTo(0, 0)
-      ctx.quadraticCurveTo(s * (0.18 + sway * 0.3), s * 0.05, s * (0.31 + sway), s * 0.14)
-      ctx.lineTo(s * (0.25 + sway), s * 0.26)
-      ctx.quadraticCurveTo(s * (0.15 + sway * 0.3), s * 0.27, 0, s * 0.34)
-      ctx.closePath()
-      const g = ctx.createLinearGradient(0, 0, s * 0.31, s * 0.26)
-      g.addColorStop(0, p.light)
-      g.addColorStop(1, p.mid)
-      ctx.fillStyle = g
-      ctx.fill()
-      ctx.strokeStyle = withAlpha('#000', 0.45)
-      ctx.lineWidth = Math.max(1, s * 0.02)
-      ctx.stroke()
-      ctx.restore()
+      drawPaperFlag(ctx, s, sway * 0.4)
       break
     }
     case 'obelisk': {
-      const glow = 0.8
-      ctx.save()
-      // A standing stone, tapered, with a lit seam up its face. Its apex is
-      // inside the cell for the same reason the banner's finial is — see there.
-      ctx.beginPath()
-      ctx.moveTo(0, -s * 0.46)
-      ctx.lineTo(s * 0.15, -s * 0.14)
-      ctx.lineTo(s * 0.11, s * 0.3)
-      ctx.lineTo(-s * 0.11, s * 0.3)
-      ctx.lineTo(-s * 0.15, -s * 0.14)
-      ctx.closePath()
-      const g = ctx.createLinearGradient(-s * 0.15, 0, s * 0.15, 0)
-      g.addColorStop(0, p.dark)
-      g.addColorStop(0.45, p.light)
-      g.addColorStop(1, p.mid)
-      ctx.fillStyle = g
-      ctx.fill()
-      ctx.strokeStyle = withAlpha('#000', 0.5)
-      ctx.lineWidth = Math.max(1, s * 0.022)
-      ctx.stroke()
-      ctx.strokeStyle = withAlpha(p.accent, glow)
-      ctx.lineWidth = Math.max(1, s * 0.035)
-      ctx.beginPath()
-      ctx.moveTo(0, -s * 0.36)
-      ctx.lineTo(0, s * 0.2)
-      ctx.stroke()
-      ctx.restore()
+      // Magic Seashell: a glowing scallop in its aura (the obelisk's stronger
+      // aura). Its crown stays inside the cell for the banner's reason.
+      drawMagicShell(ctx, s, p)
       break
     }
 
     // ── Early economy ──
+    //
+    // STILL. The support blocks stopped animating: nine fixture types each
+    // re-baking a sprite every 50 ms, per lane, bought motion nobody watches
+    // on a block that is not shooting — and it doubled the art, because a
+    // moving part cannot be one painted still. So the wheel, the digger and
+    // the coin are each drawn at one telling pose.
     case 'lumberHut': {
-      ctx.fillStyle = p.dark
-      ctx.beginPath()
-      ctx.moveTo(0, -s * 0.42); ctx.lineTo(s * 0.32, -s * 0.1); ctx.lineTo(-s * 0.32, -s * 0.1)
-      ctx.closePath(); ctx.fill()
-      ctx.fillStyle = withAlpha(p.accent, 0.9)
-      ctx.fillRect(-s * 0.08, -s * 0.06, s * 0.16, s * 0.2)
-      // A curl of smoke, so it reads as working rather than as a shed.
-      ctx.strokeStyle = withAlpha('#d8d2c4', 0.4)
-      ctx.lineWidth = Math.max(1, s * 0.03)
-      ctx.beginPath()
-      for (let i = 0; i <= 6; i++) {
-        const k = i / 6
-        const y = -s * 0.44 - k * s * 0.3
-        // Shaped by k alone, so the smoke still curls but never moves.
-        const x = s * 0.16 + Math.sin(k * 3) * s * 0.05
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
-      }
-      ctx.stroke()
+      // Sand Sifter: a toy sand wheel, sand pouring through it.
+      drawSandSifter(ctx, s)
       break
     }
     case 'stonepit': {
-      // STILL. The support blocks stopped animating: nine fixture types each
-      // re-baking a sprite every 50 ms, per lane, bought motion nobody watches
-      // on a block that is not shooting — and it doubled the art, because a
-      // moving part cannot be one painted still.
-      ctx.fillStyle = p.light
-      for (const [x, y, r] of [[-0.16, 0.02, 0.12], [0.14, -0.06, 0.15], [0.02, 0.16, 0.1]] as const) {
-        ctx.beginPath(); ctx.arc(x * s, y * s, r * s, 0, Math.PI * 2); ctx.fill()
-      }
-      // Pick, held raised over the heap.
-      ctx.save()
-      ctx.translate(-s * 0.02, -s * 0.24)
-      ctx.rotate(-0.4)
-      ctx.fillStyle = '#3a2a18'
-      ctx.fillRect(-s * 0.025, 0, s * 0.05, s * 0.3)
-      ctx.fillStyle = p.accent
-      ctx.beginPath()
-      ctx.moveTo(-s * 0.2, 0); ctx.quadraticCurveTo(0, -s * 0.12, s * 0.2, 0)
-      ctx.quadraticCurveTo(0, -s * 0.04, -s * 0.2, 0)
-      ctx.closePath(); ctx.fill()
-      ctx.restore()
+      // Pebble Digger: a toy digger, its scoop full over a pebble heap.
+      drawPebbleDigger(ctx, s)
       break
     }
     case 'coffer': {
-      // Held ajar, so the coins inside still read.
-      const lid = s * 0.06
-      ctx.fillStyle = p.dark
-      ctx.fillRect(-s * 0.26, -s * 0.06, s * 0.52, s * 0.3)
-      ctx.strokeStyle = withAlpha('#000', 0.45)
-      ctx.lineWidth = Math.max(1, s * 0.02)
-      ctx.strokeRect(-s * 0.26, -s * 0.06, s * 0.52, s * 0.3)
-      // The lid lifts, and gold shows in the gap.
-      ctx.fillStyle = withAlpha(p.accent2, 0.9)
-      ctx.fillRect(-s * 0.2, -s * 0.09 - lid, s * 0.4, s * 0.05)
-      ctx.fillStyle = p.mid
-      ctx.beginPath()
-      ctx.moveTo(-s * 0.26, -s * 0.08 - lid)
-      ctx.quadraticCurveTo(0, -s * 0.28 - lid, s * 0.26, -s * 0.08 - lid)
-      ctx.closePath()
-      ctx.fill()
-      ctx.strokeStyle = withAlpha('#000', 0.45); ctx.stroke()
-      ctx.fillStyle = p.accent
-      ctx.beginPath(); ctx.arc(0, s * 0.09, s * 0.05, 0, Math.PI * 2); ctx.fill()
+      // Piggy Bank: a gold coin dropping into the slot.
+      drawPiggyBank(ctx, s)
       break
     }
 
     case 'repair': {
-      const pulse = 0.8
-      ctx.fillStyle = withAlpha(p.accent, pulse)
-      const arm = s * 0.09
-      ctx.fillRect(-arm / 2, -s * 0.4, arm, s * 0.34)
-      ctx.fillRect(-s * 0.17, -s * 0.28, s * 0.34, arm)
+      // Bucket & Spade: the old wrench is the spade.
+      drawBucketSpade(ctx, s)
       break
     }
   }
@@ -1299,8 +679,8 @@ const TAU = Math.PI * 2
  * Which part of a block's fixture to draw.
  *
  * `weapon` is everything past `ctx.rotate(-b.aim)` — the part that tracks a
- * target — and leaves out what it is bolted to: the cannon's carriage, the
- * archer's parapet. Only those two have such a part, and only the art bench
+ * target — and leaves out what it is bolted to: the squirt gun's swivel stand,
+ * the dart blaster's tripod. Only those two have such a part, and only the art bench
  * ever asks for this: a painted gun has to be authored WITHOUT its carriage,
  * or the wheels swing through the air every time the block turns.
  *
@@ -1431,9 +811,10 @@ type FixtureSprite = { cv: HTMLCanvasElement; c2d: CanvasRenderingContext2D; box
 const fixtureCache = new Map<string, FixtureSprite>()
 let fixtureDpr = 0
 
-/** Stand-in Block carrying only the five fields `drawFixture` reads. Reused
- *  rather than reallocated: painting is synchronous, so one is always enough. */
-const fixtureProxy = { typeId: '', aim: 0, recoil: 0, uid: 0, c: 0 } as unknown as Block
+/** Stand-in Block carrying only the six fields `drawFixture` reads. Reused
+ *  rather than reallocated: painting is synchronous, so one is always enough.
+ *  `tier` is already in the sprite key; the toy reads it for its stickers. */
+const fixtureProxy = { typeId: '', aim: 0, recoil: 0, uid: 0, c: 0, tier: 1 } as unknown as Block
 
 /**
  * Paint one block's fixture at `cx, cy`, cached sprite or live drawing.
@@ -1513,12 +894,13 @@ const getFixtureSprite = (b: Block, s: number, t: number): FixtureSprite | null 
   // Paint from the QUANTISED state, never from `b` directly: two blocks sharing
   // a key must agree about what the cached image shows, and whichever of them
   // happened to paint it does not get to decide.
-  const px = fixtureProxy as unknown as { typeId: string; aim: number; recoil: number; uid: number; c: number }
+  const px = fixtureProxy as unknown as { typeId: string; aim: number; recoil: number; uid: number; c: number; tier: number }
   px.typeId = type
   px.aim = aimed ? (aimQ / FIXTURE_AIM_STEPS) * TAU : b.aim
   px.recoil = recQ / 3
   px.uid = lane
   px.c = lobbed ? (side ? -1 : 1) : lane
+  px.tier = tier
 
   const g = e.c2d
   g.clearRect(0, 0, e.box, e.box)
@@ -1729,10 +1111,12 @@ const paintTieredFixture = (
       tierFixtureId(type, tier))
   } else {
     paintOneGun(a, gun, e.box, type, aimed, side, scale, clock, 0, 0, 1, 'all')
-    // The tier's colour washed over the metal, lightly: enough that the gun
-    // itself is "the blue one", not so much that it stops being iron.
+    // The tier's colour washed over the toy, lightly: enough that the gun
+    // itself is "the blue one", not so much that the candy plastic greys out.
+    // The toy carries the tier colour itself now too — a racing stripe and a
+    // star sticker from tier 2 (see `toyFixtures`) — so the wash can be light.
     a.globalCompositeOperation = 'source-atop'
-    a.fillStyle = `rgba(${r},${gr},${bl},${tier >= 3 ? 0.2 : 0.14})`
+    a.fillStyle = `rgba(${r},${gr},${bl},${tier >= 3 ? 0.1 : 0.07})`
     a.fillRect(0, 0, e.box, e.box)
     a.globalCompositeOperation = 'source-over'
   }
@@ -1797,19 +1181,21 @@ const paintTieredFixture = (
  * gun.
  *
  * Authored the way every fixture sheet is: aim zero, no recoil, clock zero.
- * `tier` is kept for the bench's call sites; the outline does not change with
- * it.
+ * The outline does not change with `tier`; the toy's tier stickers and extra
+ * parts (a bigger tank, a dart drum) are drawn inside it, so the painter sees
+ * what "forged heavier" means for a plastic toy.
  */
 export const paintTierFixture = (
   ctx: CanvasRenderingContext2D, typeId: string,
-  cx: number, cy: number, s: number, _tier: number
+  cx: number, cy: number, s: number, tier: number
 ): void => {
-  const px = fixtureProxy as unknown as { typeId: string; aim: number; recoil: number; uid: number; c: number }
+  const px = fixtureProxy as unknown as { typeId: string; aim: number; recoil: number; uid: number; c: number; tier: number }
   px.typeId = typeId
   px.aim = 0
   px.recoil = 0
   px.uid = 0
   px.c = 0
+  px.tier = tier
   const aimed = AIMED_FIXTURES.has(typeId)
   const box = s * FIXTURE_BOX
   ctx.save()
@@ -2616,8 +2002,8 @@ const drawSeaSurface = (
   const zoom = getZoom()
   const foam = 0.3 + surfaced * 0.7
   ctx.save()
-  ctx.globalAlpha = 0.5
-  ctx.strokeStyle = '#dff4ff'
+  ctx.globalAlpha = 0.6
+  ctx.strokeStyle = '#ffffff'
   ctx.lineWidth = Math.max(1, zoom * 0.03)
   ctx.beginPath()
   ctx.ellipse(0, waterY, s * (0.35 + foam * 0.55), s * 0.13, 0, 0, Math.PI * 2)
@@ -2634,16 +2020,25 @@ const drawSeaSurface = (
     ctx.lineTo(-spread * 1.6, waterY + spread * 0.28)
     ctx.stroke()
   }
-  // Dorsal fin cutting the surface while submerged — the classic tell.
+  // A water bug's back breaking the surface while submerged, trailing a few
+  // bubbles — the pool's version of the dorsal fin, and the same tell.
   if (surfaced < 0.5) {
-    ctx.globalAlpha = 0.55
+    ctx.globalAlpha = 0.6
     ctx.fillStyle = withAlpha(p.dark, 0.9)
     ctx.beginPath()
-    ctx.moveTo(-s * 0.16, waterY)
-    ctx.lineTo(s * 0.02, waterY - s * 0.22)
-    ctx.lineTo(s * 0.18, waterY)
+    ctx.ellipse(s * 0.02, waterY, s * 0.2, s * 0.1, 0, Math.PI, Math.PI * 2)
     ctx.closePath()
     ctx.fill()
+    ctx.strokeStyle = '#ffffff'
+    ctx.lineWidth = Math.max(1, zoom * 0.016)
+    const bt = nowMs() / 900
+    for (let i = 0; i < 3; i++) {
+      const u = (bt + i / 3) % 1
+      ctx.globalAlpha = 0.75 * (1 - u)
+      ctx.beginPath()
+      ctx.arc(-s * (0.12 + i * 0.13), waterY - s * (0.03 + u * 0.24), s * (0.03 + i * 0.012), 0, Math.PI * 2)
+      ctx.stroke()
+    }
   }
   ctx.restore()
   ctx.globalAlpha = 1
@@ -2659,7 +2054,7 @@ const CAN_FILTER = typeof CanvasRenderingContext2D !== 'undefined' &&
  *
  * Same two presentations as the procedural fish — a dimmed silhouette below the
  * waterline, the full drawing above it — but the body is now one of the cast in
- * `monstersSea.ts` rather than a generic gradient fish, and the strip carries
+ * `bugs/sea.ts` rather than a generic gradient fish, and the strip carries
  * its own swim cycle.
  *
  * The rear-up is a ROTATION of the whole sprite rather than a second baked
@@ -2761,7 +2156,8 @@ const drawEnemyProp = (
       ctx.moveTo(0, 0)
       ctx.lineTo(Math.cos(spin) * s * 0.24, Math.sin(spin) * s * 0.24)
       ctx.stroke()
-      ctx.fillStyle = '#6b6b6b'
+      // Sandbox Tower: a spider's web ball on its thread, not a sling stone.
+      ctx.fillStyle = '#f4f4ee'
       ctx.beginPath()
       ctx.arc(Math.cos(spin) * s * 0.24, Math.sin(spin) * s * 0.24, s * 0.05, 0, Math.PI * 2)
       ctx.fill()
@@ -2828,9 +2224,9 @@ const drawEnemyProp = (
       // The payload itself, swinging slightly as it flies.
       const sway = Math.sin(e.phase * 2.2) * s * 0.02
       if (fire) {
-        // Molotov: a bottle with a lit rag.
-        ctx.fillStyle = '#6fbf5a'
-        roundRect(ctx, -s * 0.05 + sway, s * 0.17, s * 0.1, s * 0.15, s * 0.03)
+        // Sandbox Tower: a firefly's glowing ember (a coal), lit from within.
+        ctx.fillStyle = '#7a220c'
+        roundRect(ctx, -s * 0.05 + sway, s * 0.17, s * 0.1, s * 0.12, s * 0.05)
         ctx.fill()
         const flick = 0.6 + 0.4 * Math.sin(t / 70)
         const g = ctx.createRadialGradient(sway, s * 0.15, 0, sway, s * 0.15, s * 0.11 * flick)
@@ -2840,16 +2236,18 @@ const drawEnemyProp = (
         ctx.fillStyle = g
         ctx.beginPath(); ctx.arc(sway, s * 0.15, s * 0.12 * flick, 0, Math.PI * 2); ctx.fill()
       } else {
-        ctx.fillStyle = '#2f3238'
+        // Sandbox Tower: a honey bomb — a golden drop with a drip hanging off.
+        ctx.fillStyle = '#f5a51d'
         ctx.beginPath()
-        ctx.ellipse(sway, s * 0.24, s * 0.08, s * 0.11, 0, 0, Math.PI * 2)
+        ctx.ellipse(sway, s * 0.24, s * 0.09, s * 0.09, 0, 0, Math.PI * 2)
         ctx.fill()
-        ctx.fillStyle = p.accent2
+        ctx.fillStyle = '#c5700a'
         ctx.beginPath()
-        ctx.moveTo(sway - s * 0.06, s * 0.34)
-        ctx.lineTo(sway, s * 0.28)
-        ctx.lineTo(sway + s * 0.06, s * 0.34)
-        ctx.closePath()
+        ctx.ellipse(sway + s * 0.02, s * 0.35, s * 0.025, s * 0.04, 0, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.fillStyle = '#ffdb66'
+        ctx.beginPath()
+        ctx.arc(sway - s * 0.03, s * 0.21, s * 0.025, 0, Math.PI * 2)
         ctx.fill()
       }
 
@@ -2925,10 +2323,11 @@ const drawHpBar = (
 
 // ─── Background ─────────────────────────────────────────────────────────────
 //
-// Sky / mountains / forest are cached into an offscreen canvas keyed by the
-// camera state, and only re-rendered once the camera has drifted enough that
-// the parallax would visibly lag. Everything is generated from a deterministic
-// hash so the horizon is stable across frames and sessions.
+// The backyard (clouds, houses, trees, hedge, fence, flower bed, sand, moat —
+// drawn by `src/game/backyardArt.ts`) is cached into an offscreen canvas keyed
+// by the camera state, and only re-rendered once the camera has drifted enough
+// that the parallax would visibly lag. Everything is generated from a
+// deterministic hash so the horizon is stable across frames and sessions.
 
 let bgCanvas: HTMLCanvasElement | null = null
 let bgCtx: CanvasRenderingContext2D | null = null
@@ -2978,13 +2377,15 @@ export const dayPhase = (): number =>
  * alive rather than painted.
  */
 const SKY_KEYS: Array<[number, string, string, string]> = [
-  [0.00, '#2f3a6e', '#8a6f92', '#e0956a'], // sunrise
-  [0.14, '#6db4e6', '#b6dcef', '#ecdcc4'], // morning
-  [0.28, '#78c0ea', '#bfe2f4', '#e9d6c0'], // midday
-  [0.42, '#4a5a90', '#95739e', '#e8965f'], // sunset
-  [0.55, '#1d2652', '#3c4780', '#6d5c8e'], // dusk
-  [0.78, '#111830', '#26315a', '#454578'], // midnight
-  [1.00, '#2f3a6e', '#8a6f92', '#e0956a']  // back to sunrise
+  [0.00, '#6a8fd0', '#f3b9c4', '#ffd79c'], // sunrise: pink and peach
+  [0.10, '#5fb4ee', '#b8e2fa', '#fdf0cf'], // summer morning
+  [0.25, '#5fbcf5', '#9fd8f8', '#d6f0ff'], // noon
+  [0.36, '#62ade8', '#bfe0f0', '#ffe2a6'], // golden afternoon
+  [0.45, '#6b78c8', '#f2a28e', '#ffc266'], // sunset
+  [0.55, '#434a9a', '#8a68b0', '#e9909a'], // dusk
+  [0.75, '#27306e', '#3d4a92', '#5d5aa2'], // warm summer night — blue-violet, never black
+  [0.92, '#34407e', '#5b5a9e', '#8f76a8'], // before dawn
+  [1.00, '#6a8fd0', '#f3b9c4', '#ffd79c']  // back to sunrise
 ]
 
 /** Sky gradient right now, blended between keyframes. */
@@ -2999,9 +2400,17 @@ const skyFor = (w: number): [string, string, string] => {
     mixHex(a[1], b[1], k), mixHex(a[2], b[2], k), mixHex(a[3], b[3], k)
   ]
   // A boss night still turns the sky over — the escalation the old tiers were
-  // reaching for, kept as an EVENT rather than as a permanent step.
-  if (isBossWave(w) && t > 0.5) {
-    return [mixHex(blend[0], '#2a0e18', 0.7), mixHex(blend[1], '#5a1a24', 0.7), mixHex(blend[2], '#a33a30', 0.7)]
+  // reaching for, kept as an EVENT rather than as a permanent step. In the
+  // backyard it is a storm rolling in at sunset: purple overhead, a burning
+  // orange horizon, eased in and out rather than cut to. (`mixCss`, not
+  // `mixHex`: the blend is already rgb(), which `mixHex` cannot parse.)
+  const s = isBossWave(w) ? stormOf(t) : 0
+  if (s > 0) {
+    return [
+      mixCss(blend[0], STORM_SKY[0], s * 0.85),
+      mixCss(blend[1], STORM_SKY[1], s * 0.85),
+      mixCss(blend[2], STORM_SKY[2], s * 0.85)
+    ]
   }
   return blend
 }
@@ -3047,71 +2456,10 @@ const celestialSprite = (isNight: boolean, r: number, tier: number): HTMLCanvasE
   const x = reach
   const y = reach
 
-  const core = isNight ? '#f4f1ff' : '#fffdf0'
-  const body = isNight ? '#d9dcf0' : '#ffe27a'
-  const glow = isNight ? '210,220,255' : '255,214,120'
-
-  // 1 · Tight halo that gives the disc a definite edge to sit inside.
-  const halo = c.createRadialGradient(x, y, r * 0.85, x, y, r * 3.1)
-  halo.addColorStop(0, `rgba(${glow},0.5)`)
-  halo.addColorStop(1, `rgba(${glow},0)`)
-  c.fillStyle = halo
-  c.beginPath()
-  c.arc(x, y, r * 3.1, 0, Math.PI * 2)
-  c.fill()
-
-  // 2 · Ray fan. Uneven lengths from the hash so it never looks like a clock
-  //     face; skipped at night, where a moon has no rays.
-  if (!isNight) {
-    c.save()
-    c.translate(x, y)
-    c.globalCompositeOperation = 'lighter'
-    for (let i = 0; i < 12; i++) {
-      const a = (i / 12) * Math.PI * 2 + tier * 0.21
-      const len = r * (1.9 + hash(i * 13.7 + tier) * 2.4)
-      const halfW = r * 0.12
-      const ray = c.createLinearGradient(0, 0, Math.cos(a) * len, Math.sin(a) * len)
-      ray.addColorStop(0, `rgba(${glow},0.4)`)
-      ray.addColorStop(1, `rgba(${glow},0)`)
-      c.fillStyle = ray
-      c.beginPath()
-      c.moveTo(Math.cos(a + 0.5) * halfW, Math.sin(a + 0.5) * halfW)
-      c.lineTo(Math.cos(a) * len, Math.sin(a) * len)
-      c.lineTo(Math.cos(a - 0.5) * halfW, Math.sin(a - 0.5) * halfW)
-      c.closePath()
-      c.fill()
-    }
-    c.restore()
-  }
-
-  // 3 · The disc itself, hot in the middle and cooling towards the limb.
-  const disc = c.createRadialGradient(x - r * 0.25, y - r * 0.3, r * 0.05, x, y, r)
-  disc.addColorStop(0, core)
-  disc.addColorStop(0.55, body)
-  disc.addColorStop(1, isNight ? '#aab0cc' : '#ffb43c')
-  c.fillStyle = disc
-  c.beginPath()
-  c.arc(x, y, r, 0, Math.PI * 2)
-  c.fill()
-
-  // 4 · Surface detail. Craters for a moon, a faint bright limb for a sun.
-  if (isNight) {
-    c.fillStyle = 'rgba(120,128,164,0.35)'
-    for (let i = 0; i < 5; i++) {
-      const a = hash(i * 9.1) * Math.PI * 2
-      const d = hash(i * 4.4) * r * 0.62
-      const cr = r * (0.09 + hash(i * 6.6) * 0.14)
-      c.beginPath()
-      c.arc(x + Math.cos(a) * d, y + Math.sin(a) * d, cr, 0, Math.PI * 2)
-      c.fill()
-    }
-  } else {
-    c.strokeStyle = 'rgba(255,255,255,0.55)'
-    c.lineWidth = Math.max(1, r * 0.06)
-    c.beginPath()
-    c.arc(x, y, r * 0.97, Math.PI * 0.9, Math.PI * 1.9)
-    c.stroke()
-  }
+  // The friendly sun (rays, inked disc, a sleepy smile) or the soft moon
+  // (cream disc, lavender crescent, closed eyes) — see `backyardArt.ts`.
+  if (isNight) paintMoonSprite(c, x, y, r)
+  else paintSunSprite(c, x, y, r, tier)
 
   // Only a handful of variants ever exist (two bodies x a few sizes), but a
   // resize sweep could mint one per pixel width if this were unbounded.
@@ -3144,8 +2492,10 @@ const drawCelestial = (
   const base = Math.max(groundY, h * 0.55) + r * 0.55
   const y = base - (base - h * 0.1) * Math.sin(Math.PI * t)
 
-  const glow = isNight ? '210,220,255' : '255,214,120'
-  const bloomTint = tier === 4 ? '255,150,120' : glow
+  const glow = isNight ? '214,212,255' : '255,226,140'
+  // Tier 4 and a boss storm both burn orange: the stormy sunset, never red.
+  const stormy = isBossWave(waveNo) && stormOf(dayPhase()) > 0.3
+  const bloomTint = tier === 4 || stormy ? '255,158,92' : glow
 
   // The one pass that has to follow the body: a wide wash of light across the
   // whole sky, which is what makes a low sun feel like it is IN the scene
@@ -3188,39 +2538,8 @@ const drawConifer = (
     paintedTree(c, painted, x, baseY, hgt)
     return
   }
-  const halfW = hgt * (0.24 + hash(seed * 1.7) * 0.08)
-
-  c.fillStyle = '#3b2a1c'
-  c.fillRect(x - hgt * 0.028, baseY - hgt * 0.24, hgt * 0.056, hgt * 0.24)
-
-  const tiers = 4
-  for (let i = 0; i < tiers; i++) {
-    const f = i / tiers
-    const tierBase = baseY - hgt * (0.14 + f * 0.72)
-    const tierTop = tierBase - hgt * 0.34
-    const spread = halfW * (1 - f * 0.62)
-    // Darker at the base, lighter towards the crown: cheap aerial perspective
-    // that keeps the tiers from merging into one blob.
-    c.fillStyle = `rgb(${26 + i * 7}, ${58 + i * 11}, ${40 + i * 7})`
-    c.beginPath()
-    c.moveTo(x, tierTop)
-    c.lineTo(x + spread, tierBase)
-    c.lineTo(x + spread * 0.42, tierBase)
-    c.lineTo(x, tierBase - hgt * 0.05)
-    c.lineTo(x - spread * 0.42, tierBase)
-    c.lineTo(x - spread, tierBase)
-    c.closePath()
-    c.fill()
-
-    // Sun side.
-    c.fillStyle = 'rgba(150,205,120,0.22)'
-    c.beginPath()
-    c.moveTo(x, tierTop)
-    c.lineTo(x + spread, tierBase)
-    c.lineTo(x + spread * 0.35, tierBase)
-    c.closePath()
-    c.fill()
-  }
+  // The flower bed's tall flower: a sunflower, now and then a hollyhock.
+  paintTallFlower(c, x, baseY, hgt, seed)
 }
 
 /**
@@ -3242,40 +2561,8 @@ const drawBroadleaf = (
     paintedTree(c, painted, x, baseY, hgt)
     return
   }
-  const trunkH = hgt * 0.42
-  const trunkW = Math.max(1, hgt * 0.07)
-
-  c.strokeStyle = '#4a3520'
-  c.lineWidth = trunkW
-  c.lineCap = 'round'
-  c.beginPath()
-  c.moveTo(x, baseY)
-  c.lineTo(x, baseY - trunkH)
-  c.moveTo(x, baseY - trunkH * 0.62)
-  c.lineTo(x - hgt * 0.11, baseY - trunkH * 0.95)
-  c.moveTo(x, baseY - trunkH * 0.72)
-  c.lineTo(x + hgt * 0.12, baseY - trunkH * 1.02)
-  c.stroke()
-
-  const lobes: Array<[number, number, number]> = [
-    [-hgt * 0.16, -trunkH - hgt * 0.14, hgt * 0.23],
-    [hgt * 0.15, -trunkH - hgt * 0.18, hgt * 0.25],
-    [(hash(seed * 8.3) - 0.5) * hgt * 0.12, -trunkH - hgt * 0.34, hgt * 0.22]
-  ]
-
-  c.fillStyle = '#24503a'
-  for (const [dx, dy, rr] of lobes) {
-    c.beginPath()
-    c.arc(x + dx, baseY + dy, rr, 0, Math.PI * 2)
-    c.fill()
-  }
-  // Highlight pass on the sun side of each lobe.
-  c.fillStyle = 'rgba(126,190,104,0.34)'
-  for (const [dx, dy, rr] of lobes) {
-    c.beginPath()
-    c.arc(x + dx + rr * 0.26, baseY + dy - rr * 0.28, rr * 0.62, 0, Math.PI * 2)
-    c.fill()
-  }
+  // The flower bed's clump: tulips, daisies, dandelions or clover.
+  paintFlowerClump(c, x, baseY, hgt, seed)
 }
 
 /**
@@ -3286,7 +2573,8 @@ const drawBroadleaf = (
  * line, water — stays in the cached layer that goes on top of this.
  */
 const drawSky = (c: CanvasRenderingContext2D, w: number, h: number): void => {
-  const [top, mid, low] = skyFor(wave.value)
+  const wv = wave.value
+  const [top, mid, low] = skyFor(wv)
   const groundY = worldToScreenY(0)
 
   const sky = c.createLinearGradient(0, 0, 0, Math.max(groundY, h * 0.7))
@@ -3296,11 +2584,16 @@ const drawSky = (c: CanvasRenderingContext2D, w: number, h: number): void => {
   c.fillStyle = sky
   c.fillRect(0, 0, w, Math.max(0, groundY))
 
+  // Summer-night stars: a few dozen rects in three twinkle groups, and nothing
+  // at all by day or under a boss storm's clouds.
+  const phase = dayPhase()
+  const storm = isBossWave(wv) ? stormOf(phase) : 0
+  paintStars(c, w, groundY, nightOf(phase) * (1 - storm), performance.now())
+
   // Both bodies, half a cycle apart, so dusk actually shows the sun going down
   // on one side while the moon comes up on the other.
-  const phase = dayPhase()
-  drawCelestial(c, w, h, groundY, wave.value, true, (phase + 0.5) % 1)
-  drawCelestial(c, w, h, groundY, wave.value, false, phase)
+  drawCelestial(c, w, h, groundY, wv, true, (phase + 0.5) % 1)
+  drawCelestial(c, w, h, groundY, wv, false, phase)
 }
 
 const renderBackground = (w: number, h: number, dpr: number): void => {
@@ -3343,128 +2636,66 @@ const renderBackground = (w: number, h: number, dpr: number): void => {
   // it belongs in the cache with everything else and the frame stops paying
   // for two whole-viewport gradient fills it cannot tell apart.
   if (fxBakedSky) drawSky(c, w, h)
-  const [, mid] = skyFor(wave.value)
+  const wv = wave.value
+  const ph = dayPhase()
+  const [, mid, low] = skyFor(wv)
+  const horizon = mixCss(mid, low, 0.5)
+  // One light for the whole re-bake. Every scenery colour below is tinted by
+  // it — golden hour, summer night, a boss-wave storm — and pulled toward the
+  // horizon colour for distance (see `backyardArt.ts`). Set here, once, so the
+  // tint costs a memo lookup per colour rather than anything per frame.
+  setBackyardLight(ph, horizon, isBossWave(wv) ? stormOf(ph) : 0)
   const groundY = worldToScreenY(0)
 
-  // ── Mountain ridges (two ranges, different parallax + tone) ──
+  // ── Clouds, then the yard beyond the sandbox (was: two mountain ranges) ──
   //
-  // The ridge is sampled on a fixed step, but the LAST sample is pinned to the
-  // right edge. Without that pin the loop stops a partial step short and the
-  // closing `lineTo(w + 10, h)` cuts a diagonal straight down to the ground —
-  // which reads on screen as the mountains "falling off" the right side.
+  // Far: house fronts, roof lines and garden trees, pale with distance. Near:
+  // big leafy trees behind a hedge, a washing line, and the white picket
+  // fence. Both are generated along an infinite world at their own parallax,
+  // so a painted replacement still has to tile (see `tileBand`).
+  paintClouds(c, w, h, groundY, rect.l * zoom * 0.04)
   for (const [idx, cfg] of [
-    { par: 0.1, amp: 0.16, base: 0.62, lo: '#5a7099', hi: '#8fa6c8', snow: 0.62 },
-    { par: 0.18, amp: 0.22, base: 0.78, lo: '#2b3a5e', hi: '#4f6690', snow: 0.74 }
+    { par: 0.1, amp: 0.16, base: 0.62 },
+    { par: 0.18, amp: 0.22, base: 0.78 }
   ].entries()) {
     const yBase = groundY - h * (1 - cfg.base) * 0.62
-    const step = Math.max(18, w / 48)
-    const left = -10
-    const right = w + 10
 
-    // A painted range replaces the whole generated ridge — body, lit faces and
-    // snow caps together, since a painter puts all three in the one image.
+    // A painted band replaces the whole generated layer.
     //
-    // Tiled rather than stretched: these ridges run across an infinite world,
-    // so the art has to repeat, and it has to slide at this range's own
-    // parallax or the two ranges stop reading as different distances.
+    // Tiled rather than stretched: these layers run across an infinite world,
+    // so the art has to repeat, and it has to slide at this layer's own
+    // parallax or the two stop reading as different distances.
     const range = bgSprite(idx === 0 ? 'mountains-far' : 'mountains-near')
     if (range?.naturalWidth) {
       const bandH = h * cfg.amp + (groundY - yBase) + h * cfg.amp * 0.2
       const bandY = yBase - h * cfg.amp
-      tileBand(c, range, left, bandY, right - left, bandH, rect.l * zoom * cfg.par)
+      tileBand(c, range, -10, bandY, w + 20, bandH, rect.l * zoom * cfg.par)
       continue
     }
-
-    /** Ridge height at a screen x, in pixels above `yBase`. */
-    const ridgeAt = (sx: number): number => {
-      const wx = (sx + rect.l * zoom * cfg.par) / 90
-      const n = hash(Math.floor(wx) + idx * 71) * 0.6
-        + hash(Math.floor(wx * 2.3) + idx * 131) * 0.3
-        + hash(Math.floor(wx * 5.1) + idx * 17) * 0.1
-      return n * h * cfg.amp
-    }
-
-    // Sample once, reuse for the body fill, the lit faces and the snow caps.
-    const pts: Array<[number, number]> = []
-    for (let sx = left; sx < right; sx += step) pts.push([sx, yBase - ridgeAt(sx)])
-    pts.push([right, yBase - ridgeAt(right)])
-
-    const rock = c.createLinearGradient(0, yBase - h * cfg.amp, 0, groundY)
-    rock.addColorStop(0, cfg.hi)
-    rock.addColorStop(0.55, cfg.lo)
-    rock.addColorStop(1, cfg.lo)
-    c.fillStyle = rock
-    c.beginPath()
-    c.moveTo(left, h)
-    for (const [px, py] of pts) c.lineTo(px, py)
-    c.lineTo(right, h)
-    c.closePath()
-    c.fill()
-
-    // Sunward faces: a light stroke down the right-hand slope of each peak,
-    // which is what turns a flat silhouette into something with volume.
-    c.strokeStyle = idx === 0 ? 'rgba(214,232,255,0.32)' : 'rgba(150,180,225,0.28)'
-    c.lineWidth = Math.max(1, h * 0.0022)
-    c.beginPath()
-    for (let i = 1; i < pts.length; i++) {
-      const [ax, ay] = pts[i - 1]!
-      const [bx, by] = pts[i]!
-      if (by > ay) continue // only descending (right-facing) slopes catch light
-      c.moveTo(ax, ay)
-      c.lineTo(bx, by)
-    }
-    c.stroke()
-
-    // A DRAWN ridge line. `inkStroke` tapers and wobbles the way a nib does, so
-    // the skyline reads as a pen contour rather than as the top edge of a
-    // filled polygon. The nearer range gets the heavier line — that difference
-    // alone does most of the work of separating the two.
-    inkStroke(c, pts,
-      Math.max(1.1, h * (idx === 0 ? 0.0022 : 0.0034)),
-      Math.max(0.6, h * 0.0012),
-      idx === 0 ? SCENERY_INK_SOFT : SCENERY_INK, 40 + idx * 13)
-
-    // Snow caps on the tallest peaks only.
-    const capLimit = yBase - h * cfg.amp * cfg.snow
-    c.fillStyle = 'rgba(238,246,255,0.9)'
-    for (let i = 1; i < pts.length - 1; i++) {
-      const [px, py] = pts[i]!
-      if (py > capLimit) continue
-      const [lx, ly] = pts[i - 1]!
-      const [rx, ry] = pts[i + 1]!
-      const drop = Math.min(h * 0.02, (Math.min(ly, ry) - py) * 0.85)
-      if (drop <= 0.5) continue
-      c.beginPath()
-      c.moveTo(px, py)
-      c.lineTo(px - (px - lx) * (drop / Math.max(1, ly - py)) * 0.9, py + drop)
-      c.lineTo(px + (rx - px) * (drop / Math.max(1, ry - py)) * 0.9, py + drop)
-      c.closePath()
-      c.fill()
+    if (idx === 0) {
+      paintYardFar(c, w, h, groundY, rect.l * zoom * cfg.par)
+      // Aerial haze between the far yard and the near one. Ramps in from
+      // nothing, so it has no top edge to read as a band.
+      const hzTop = groundY - h * 0.42
+      const haze = c.createLinearGradient(0, hzTop, 0, groundY)
+      haze.addColorStop(0, cssAlpha(horizon, 0))
+      haze.addColorStop(1, cssAlpha(horizon, 0.3))
+      c.fillStyle = haze
+      c.fillRect(0, hzTop, w, groundY - hzTop)
+    } else {
+      paintYardNear(c, w, h, groundY, rect.l * zoom * cfg.par)
     }
   }
 
-  // ── Forest ──
+  // ── The flower bed (was: the forest band) ──
   //
-  // Two bands: a hazy far tree line that reads as distance, and a nearer band
-  // of individually-drawn trees with trunks, tiered canopies and a lit side.
-  // The old version was a row of flat triangles, which is exactly what made the
-  // horizon look like placeholder art.
-  // Standing ON the ground, not hovering above it.
-  //
-  // The far line used to sit 3% of the frame height clear of the ground so it
-  // read as "further back" — which works for a flat silhouette and fails
-  // completely for a painted tree with a visible trunk, because a trunk that
-  // stops in mid-air is simply a floating tree. Distance is carried by scale,
-  // parallax and haze instead, all of which are already doing it.
+  // Standing ON the ground, not hovering above it — a trunk (or a stem) that
+  // stops in mid-air is simply a floating plant. Distance is carried by scale,
+  // parallax and haze instead.
   const farBase = groundY
-  const farStep = Math.max(5, w / 150)
-  // A painted far line, when there is painted art to draw it with.
-  //
-  // The sawtooth polygon below is a silhouette of triangles, and standing it
-  // behind hand-painted trees put two different drawings of "forest" in the
-  // same frame — the flat one reads as placeholder the moment the painted one
-  // arrives next to it. Same bitmap, smaller and hazed back, so the tree line
-  // recedes by ATMOSPHERE rather than by being a cruder shape.
+  // A painted far line, when there is painted art to draw it with: the same
+  // bitmap, smaller and hazed back, so the line recedes by ATMOSPHERE rather
+  // than by being a cruder shape.
   const farTree = bgSprite('conifer')
   if (farTree?.naturalWidth) {
     const step = Math.max(9, w / 90)
@@ -3478,252 +2709,54 @@ const renderBackground = (w: number, h: number, dpr: number): void => {
       paintedTree(c, farTree, sx + jitter, farBase, hgt)
     }
     c.restore()
-    // No wash band over the tree line either — same reason. The far trees are
-    // already smaller and drawn at 72% alpha, which is the whole depth cue.
-
   } else {
-
-  const farPts: Pt[] = []
-  for (let sx = -10; sx <= w + 10; sx += farStep) {
-    const wx = (sx + rect.l * zoom * 0.26) / 14
-    const hgt = (0.35 + hash(Math.floor(wx) * 5.3) * 0.65) * h * 0.05
-    farPts.push([sx, farBase - hgt])
-    farPts.push([sx + farStep * 0.5, farBase - hgt * 0.55])
-  }
-  c.fillStyle = 'rgba(30,58,46,0.72)'
-  c.beginPath()
-  c.moveTo(-10, farBase)
-  for (const [px, py] of farPts) c.lineTo(px, py)
-  c.lineTo(w + 10, farBase)
-  c.closePath()
-  c.fill()
-  // The far tree line gets a contour too, but a soft one: it is distance, and
-  // a hard pen line at the back of the scene pulls it forward.
-  inkStroke(c, farPts, Math.max(0.8, h * 0.0016), Math.max(0.5, h * 0.0009),
-    SCENERY_INK_SOFT, 77)
+    // The bed's leafy mass and tall grass, behind the flowers.
+    paintBedBack(c, w, h, farBase, rect.l * zoom * 0.26)
   }
 
-  // The near band sits slightly ABOVE the ground line and is smaller than the
-  // units that walk in front of it. Matching their scale made the enemy lane
-  // look like it ran *through* the forest rather than in front of it.
-  const nearBase = groundY
-  const nearStep = Math.max(11, w / 52)
-  for (let sx = -nearStep; sx <= w + nearStep; sx += nearStep) {
-    const wx = (sx + rect.l * zoom * 0.34) / 26
-    const seed = Math.floor(wx)
-    const jitter = (hash(seed * 2.1) - 0.5) * nearStep * 0.8
-    const x = sx + jitter
-    const scale = 0.62 + hash(seed * 7.7) * 0.62
-    const hgt = h * 0.046 * scale
-    // Two species so the tree line has rhythm instead of a repeating sawtooth.
-    if (hash(seed * 3.3) > 0.42) drawConifer(c, x, nearBase, hgt, seed)
-    else drawBroadleaf(c, x, nearBase, hgt, seed)
-  }
-
-  // Aerial haze over the whole scenery band. A wash of sky colour is what makes
-  // distance read as distance; without it the background competes with the
-  // tower for attention no matter how well the trees are drawn.
+  // The flowers themselves, a little smaller than the units that walk in
+  // front of them so the lane reads as running along the bed, not through it.
   //
-  // Baked at the CACHE's sky colour and refreshed whenever that drifts far
-  // enough to notice (see the key below). Following it per frame would mean
-  // re-rendering the ridges and every tree with it, for a wash that runs at 8
-  // to 30 percent alpha.
-  //
-  // SKIPPED once the scenery is painted. The wash exists to push generated
-  // ridges back and to knit a flat tree line into a flat sky; over hand-painted
-  // art it is a flat translucent rectangle laid across a watercolour, and it
-  // reads as exactly that — a gradient overlay, the most artificial thing left
-  // on the screen. A painter puts the distance INTO the picture, which is what
-  // `mountains-far` already does by being pale.
-  if (!bgSprite('mountains-far')?.naturalWidth) {
-    const haze = c.createLinearGradient(0, groundY - h * 0.3, 0, groundY)
-    haze.addColorStop(0, withAlpha(mid, 0.3))
-    haze.addColorStop(1, withAlpha(mid, 0.08))
-    c.fillStyle = haze
-    c.fillRect(0, groundY - h * 0.3, w, h * 0.3)
-  }
-
-  // Contact shadow along the far edge of the field, so the tree line has
-  // something to stand on and the units in front of it read as nearer.
-  if (!bgSprite('grass')?.naturalWidth) {
-    const rim = c.createLinearGradient(0, groundY - h * 0.012, 0, groundY + h * 0.022)
-    rim.addColorStop(0, 'rgba(18,34,22,0)')
-    rim.addColorStop(0.45, 'rgba(18,34,22,0.42)')
-    rim.addColorStop(1, 'rgba(18,34,22,0)')
-    c.fillStyle = rim
-    c.fillRect(0, groundY - h * 0.012, w, h * 0.034)
+  // World-anchored (slot k is always the same plant), so panning slides the
+  // bed rather than reshuffling it; drawn as ONE batch of paths per colour.
+  // Painted plants, when there are any, go through the per-plant path.
+  const nearScroll = rect.l * zoom * 0.34
+  if (bgSprite('conifer')?.naturalWidth || bgSprite('broadleaf')?.naturalWidth) {
+    paintFlowerBed(c, w, h, groundY, nearScroll, (x, baseY, hgt, seed, tall) => {
+      if (tall) drawConifer(c, x, baseY, hgt, seed)
+      else drawBroadleaf(c, x, baseY, hgt, seed)
+    })
+  } else {
+    paintFlowerBed(c, w, h, groundY, nearScroll)
   }
 
   // ── Ground ──
-  // A narrow strip of land the tower stands on, then the shoreline, then open
-  // water filling the rest of the frame. The lake is the reference silhouette:
-  // every screenshot of this genre has the tower mirrored in the water beneath
-  // it, and it also gives the sea creatures somewhere to legibly come FROM.
+  // A narrow strip of sand the castle stands on, the sandbox's far plank edge
+  // along the horizon behind it, then the wet bank and the moat filling the
+  // rest of the frame. The moat is the reference silhouette: the tower is
+  // mirrored in it, and the water bugs legibly come FROM it.
   if (groundY < h) {
     const seaY = worldToScreenY(SEA_LEVEL)
     const landH = Math.max(2, seaY - groundY)
 
-    // The approach lane is a MEADOW, not a dirt road: a green field the enemies
-    // cross, with individually drawn tufts. Grass reads as somewhere worth
-    // defending; a brown strip reads as a placeholder.
-    // A painted meadow replaces the gradient AND everything drawn on it — the
-    // tonal patches, the tufts, the pebbles. A painter puts all of that in the
-    // strip, and leaving the procedural marks on top would double them.
+    // A painted strip replaces the drawn sand AND everything on it — patches,
+    // ripples, grain, pebbles, toys. Drawing those on top would double them.
     const meadow = bgSprite('grass')
-    const paintedGround = !!meadow?.naturalWidth
-    if (paintedGround) {
-      tileBand(c, meadow!, 0, groundY, w, landH, rect.l * zoom)
-    } else {
-      const gr = c.createLinearGradient(0, groundY, 0, seaY)
-      gr.addColorStop(0, '#63a34a')
-      gr.addColorStop(0.3, '#4d8a38')
-      gr.addColorStop(0.72, '#3a6c2a')
-      gr.addColorStop(1, '#2c5220')
-      c.fillStyle = gr
-      c.fillRect(0, groundY, w, landH)
-    }
+    if (meadow?.naturalWidth) tileBand(c, meadow, 0, groundY, w, landH, rect.l * zoom)
+    else paintSand(c, w, groundY, seaY, zoom, rect.l * zoom)
 
-    // The horizon, drawn. A hard fill edge between the tree line and the field
-    // is the single most "vector" line on the screen, because it is perfectly
-    // straight for the whole width.
-    {
-      const horizon: Pt[] = []
-      for (let sx = -10; sx <= w + 10; sx += Math.max(11, w / 60)) {
-        const n = hash(Math.floor((sx + rect.l * zoom) / 13) + 3)
-        horizon.push([sx, groundY + (n - 0.5) * Math.max(1.2, zoom * 0.035)])
-      }
-      inkStroke(c, horizon, Math.max(1, zoom * 0.03), Math.max(0.6, zoom * 0.014),
-        SCENERY_INK, 63)
-    }
-
-    // Everything below belongs to the DRAWN meadow: tonal patches, tufts and
-    // pebbles. A painted strip already contains all of it, and drawing these on
-    // top would give the field two sets of grass.
-    if (!paintedGround) {
-      // Broad soft patches so the field has tonal variation before any blade is
-      // drawn — flat green is what makes a lawn look like a rectangle.
-      for (let i = 0; i < 14; i++) {
-        const px = ((hash(i * 3.1) * 1.6 - 0.3) * w + rect.l * zoom * 0.5) % (w + 200) - 100
-        const py = groundY + hash(i * 5.7) * landH
-        const pr = landH * (0.25 + hash(i * 9.2) * 0.5)
-        const patch = c.createRadialGradient(px, py, 0, px, py, pr)
-        patch.addColorStop(0, hash(i * 11.3) > 0.5 ? 'rgba(126,186,86,0.22)' : 'rgba(38,84,34,0.2)')
-        patch.addColorStop(1, 'rgba(0,0,0,0)')
-        c.fillStyle = patch
-        c.beginPath()
-        c.arc(px, py, pr, 0, Math.PI * 2)
-        c.fill()
-      }
-
-      // Grass tufts. Density is capped by the visible width rather than the zoom
-      // so a wide desktop frame never explodes the loop count, and each tuft is
-      // three blades fanned from one root — one blade per stroke reads as hair.
-      const tuftStep = Math.max(7, Math.min(zoom * 0.3, w / 90))
-      const bladeH = Math.max(2, Math.min(landH * 0.55, zoom * 0.16))
-      c.lineWidth = Math.max(1, zoom * 0.016)
-      c.lineCap = 'round'
-      for (let sx = -tuftStep; sx <= w + tuftStep; sx += tuftStep) {
-        const seed = Math.floor((sx + rect.l * zoom) / 9)
-        const gx = sx + (hash(seed * 2.7) - 0.5) * tuftStep
-        // Tufts nearer the bottom of the strip are nearer the camera: taller,
-        // lighter, and drawn last so they overlap the ones behind them.
-        const depth = hash(seed * 6.1)
-        const gy = groundY + landH * (0.08 + depth * 0.82)
-        const th = bladeH * (0.55 + depth * 0.9)
-        c.strokeStyle = depth > 0.55
-          ? 'rgba(150,214,104,0.75)'
-          : 'rgba(96,158,74,0.62)'
-        c.beginPath()
-        for (let b = -1; b <= 1; b++) {
-          const lean = b * th * 0.42 + (hash(seed * 4.3 + b) - 0.5) * th * 0.3
-          c.moveTo(gx, gy)
-          c.quadraticCurveTo(gx + lean * 0.4, gy - th * 0.62, gx + lean, gy - th)
-        }
-        c.stroke()
-      }
-
-      // A few small stones and flower dots to break the green up.
-      for (let i = 0; i < 18; i++) {
-        const sxr = ((hash(i * 7.9) * 1.4 - 0.2) * w + rect.l * zoom * 0.5) % (w + 120) - 60
-        const syr = groundY + landH * (0.2 + hash(i * 12.7) * 0.7)
-        const rr = Math.max(0.6, zoom * 0.012 * (0.6 + hash(i * 2.2)))
-        c.fillStyle = hash(i * 15.1) > 0.62
-          ? 'rgba(226,232,150,0.8)'
-          : 'rgba(120,120,110,0.42)'
-        c.beginPath()
-        c.arc(sxr, syr, rr, 0, Math.PI * 2)
-        c.fill()
-      }
-    }
+    // The horizon, drawn: the sandbox's far plank rather than a hard fill edge
+    // — a perfectly straight edge across the whole width is the most "vector"
+    // line a screen can have.
+    paintSandboxFrame(c, w, groundY, zoom, rect.l * zoom)
 
     // ── Water ──
     if (seaY < h) {
       const lake = bgSprite('water')
-      if (lake?.naturalWidth) {
-        // The lake is still, so it does not scroll with the camera — a moving
-        // water texture under a mirrored tower reads as the tower sliding.
-        tileBand(c, lake, 0, seaY, w, h - seaY, 0)
-      } else {
-        const water = c.createLinearGradient(0, seaY, 0, h)
-        water.addColorStop(0, '#3f8fb8')
-        water.addColorStop(0.18, '#2f6f9e')
-        water.addColorStop(1, '#123a63')
-        c.fillStyle = water
-        c.fillRect(0, seaY, w, h - seaY)
-      }
-
-      // Wet sand where land meets water. Drawn as a soft band with a scalloped
-      // upper edge rather than a straight gradient — a perfectly level sand
-      // line across the whole frame is the giveaway that this is a rectangle.
-      const bandTop = seaY - zoom * 0.13
-      const shore = c.createLinearGradient(0, bandTop, 0, seaY + zoom * 0.12)
-      shore.addColorStop(0, 'rgba(134,120,84,0)')
-      shore.addColorStop(0.45, 'rgba(158,142,102,0.5)')
-      shore.addColorStop(1, 'rgba(96,146,176,0)')
-      const shorePts: Pt[] = []
-      for (let sx = -10; sx <= w + 10; sx += Math.max(9, w / 70)) {
-        const n = hash(Math.floor((sx + rect.l * zoom) / 11))
-        shorePts.push([sx, bandTop + n * zoom * 0.07])
-      }
-      c.fillStyle = shore
-      c.beginPath()
-      c.moveTo(-10, seaY + zoom * 0.12)
-      for (const [px, py] of shorePts) c.lineTo(px, py)
-      c.lineTo(w + 10, seaY + zoom * 0.12)
-      c.closePath()
-      c.fill()
-      // A pen line along the water's edge. The scalloped gradient alone reads
-      // as an airbrushed transition; the contour is what makes it a drawn coast.
-      inkStroke(c, shorePts, Math.max(1, zoom * 0.028), Math.max(0.6, zoom * 0.014),
-        SCENERY_INK_SOFT, 91)
-
-      // Foam line breaking on the sand.
-      c.strokeStyle = 'rgba(236,250,255,0.42)'
-      c.lineWidth = Math.max(1, zoom * 0.02)
-      c.beginPath()
-      for (let sx = -10; sx <= w + 10; sx += Math.max(9, w / 70)) {
-        const n = hash(Math.floor((sx + rect.l * zoom) / 11) + 5)
-        const fy = seaY + zoom * 0.02 + n * zoom * 0.03
-        if (sx <= -10) c.moveTo(sx, fy)
-        else c.lineTo(sx, fy)
-      }
-      c.stroke()
-
-      // Ripple bands — a few horizontal highlights whose spacing widens with
-      // depth, which is what sells "receding surface" rather than "blue block".
-      c.strokeStyle = 'rgba(210,240,255,0.16)'
-      c.lineWidth = Math.max(1, zoom * 0.018)
-      const depth = h - seaY
-      for (let i = 1; i < 9; i++) {
-        const f = i / 9
-        const ry = seaY + depth * f * f
-        if (ry > h) break
-        const offset = Math.sin(i * 1.7 + rect.l * 0.4) * zoom * 0.4
-        c.beginPath()
-        c.moveTo(-10 + offset, ry)
-        c.lineTo(w + 10 + offset, ry)
-        c.stroke()
-      }
+      // The painted water is still, so it does not scroll with the camera — a
+      // moving water texture under a mirrored tower reads as the tower sliding.
+      if (lake?.naturalWidth) tileBand(c, lake, 0, seaY, w, h - seaY, 0)
+      paintMoat(c, w, h, seaY, zoom, rect.l * zoom, !!lake?.naturalWidth)
     }
   }
 
@@ -3774,23 +2807,28 @@ const emitGore = (
   /** Away from the hit, or both ways when the direction is unknown. */
   const side = (): number => (dir === 0 ? (Math.random() < 0.5 ? -1 : 1) : dir)
 
+  // Sandbox Tower: every bug is a BUG. Nothing bleeds — a hit sheds goo, and
+  // a hard one flicks off a little leg. The kinds still differ in what comes
+  // with the goo (shell chips, sparks, a ghostly nothing), so the "right
+  // substance" rule above still holds.
   switch (gore) {
     case 'bone':
+      // Armoured bugs: dark chitin chips, a little goo behind them.
       for (let i = 0; i < n; i++) {
         emit({
           x, y, vx: side() * (0.6 + Math.random() * 2.6), vy: -0.4 - Math.random() * 2.2,
-          life: 420, size: 0.055 + Math.random() * 0.05, color: [232, 220, 192],
+          life: 420, size: 0.055 + Math.random() * 0.05, color: i % 2 ? GORE_CHITIN : GORE_CHITIN_LIT,
           gravity: 11, drag: 1.2, shape: 1, rot: Math.random() * 6.28, vrot: (Math.random() - 0.5) * 14
         })
       }
-      emit({ x, y, life: 240, size: 0.2, color: [206, 194, 170], alpha: 0.45, drag: 2 })
+      emit({ x, y, vx: side() * 1.2, vy: -0.6, life: 420, size: 0.1, color: GORE_GOO, gravity: 9, drag: 1 })
       break
 
     case 'ooze':
       for (let i = 0; i < n; i++) {
         emit({
           x, y, vx: side() * (0.5 + Math.random() * 2), vy: -0.3 - Math.random() * 1.6,
-          life: 560, size: 0.08 + Math.random() * 0.07, color: [126, 206, 92],
+          life: 560, size: 0.08 + Math.random() * 0.07, color: i % 3 === 0 ? GORE_GOO_LIT : GORE_GOO,
           gravity: 7, drag: 0.8
         })
       }
@@ -3801,7 +2839,7 @@ const emitGore = (
         emit({
           x, y, vx: side() * (0.5 + Math.random() * 2), vy: -0.4 - Math.random() * 1.8,
           life: 500, size: 0.06 + Math.random() * 0.05,
-          color: i % 3 === 0 ? [110, 154, 66] : [186, 132, 54], gravity: 9, drag: 1
+          color: i % 3 === 0 ? GORE_GOO_DARK : GORE_GOO, gravity: 9, drag: 1
         })
       }
       break
@@ -3834,21 +2872,22 @@ const emitGore = (
           gravity: 10, drag: 3
         })
       }
+      // Toy-junk contraptions: popsicle-stick splinters and tin flakes.
       for (let i = 0; i < Math.round(n * 0.5); i++) {
         emit({
           x, y, vx: side() * (0.6 + Math.random() * 1.8), vy: -0.4 - Math.random() * 1.6,
-          life: 420, size: 0.06, color: [128, 132, 140], gravity: 12, drag: 1.2, shape: 1,
+          life: 420, size: 0.06, color: i % 2 ? [226, 190, 128] : [172, 180, 190], gravity: 12, drag: 1.2, shape: 1,
           rot: Math.random() * 6.28, vrot: (Math.random() - 0.5) * 12
         })
       }
       break
 
     default:
-      // Blood.
+      // Bug goo (every kind with no substance of its own — 'blood' included).
       for (let i = 0; i < n; i++) {
         emit({
           x, y, vx: side() * (0.7 + Math.random() * 2.8), vy: -0.5 - Math.random() * 2.4,
-          life: 400, size: 0.05 + Math.random() * 0.055, color: [172, 34, 42],
+          life: 400, size: 0.05 + Math.random() * 0.055, color: i % 3 === 2 ? GORE_GOO_DARK : GORE_GOO,
           gravity: 12, drag: 1.1
         })
       }
@@ -3857,10 +2896,32 @@ const emitGore = (
       for (let i = 0; i < Math.round(n * 0.6); i++) {
         emit({
           x, y, vx: side() * (0.3 + Math.random() * 1.4), vy: -0.3 - Math.random() * 1.2,
-          life: 300, size: 0.09, color: [138, 26, 34], alpha: 0.4, drag: 2.4
+          life: 300, size: 0.09, color: GORE_GOO_LIT, alpha: 0.4, drag: 2.4
         })
       }
   }
+  // A hard hit knocks a little leg loose — the "it's a bug" tell. At most one,
+  // so a chip-damage tick never becomes a shower of limbs.
+  if (gore !== 'spectral' && gore !== 'ember' && amount >= 12 && Math.random() < 0.5 * density) {
+    emitLeg(x, y, side())
+  }
+}
+
+/** Bug goo, green-yellow (sandbox-reskin.md: `#b7d63f` / `#6f9a22`). */
+const GORE_GOO: [number, number, number] = [183, 214, 63]
+const GORE_GOO_DARK: [number, number, number] = [111, 154, 34]
+const GORE_GOO_LIT: [number, number, number] = [214, 236, 120]
+/** Dark beetle shell. */
+const GORE_CHITIN: [number, number, number] = [58, 44, 40]
+const GORE_CHITIN_LIT: [number, number, number] = [104, 84, 70]
+
+/** One little bug leg: a dark ink streak tumbling off along its own fall. */
+const emitLeg = (x: number, y: number, side: number): void => {
+  emit({
+    x, y, vx: side * (1 + Math.random() * 2.2), vy: 1 + Math.random() * 1.8,
+    life: 520, size: 0.09 + Math.random() * 0.04, color: [59, 42, 33],
+    gravity: 12, drag: 0.8, shape: 2
+  })
 }
 
 /**
@@ -3886,8 +2947,8 @@ const waterImpact = (x: number, depth: number, power: number, density: number): 
       x: x + (Math.random() - 0.5) * 0.3 * power, y: SEA_LEVEL,
       vx: Math.cos(a) * sp * 0.5, vy: -Math.sin(a) * sp,
       life: 380 + Math.random() * 320, size: (0.07 + Math.random() * 0.1) * power,
-      color: i % 4 === 0 ? [255, 255, 255] : [178, 224, 240],
-      alpha: 0.8, gravity: 12, drag: 1.1, shape: 2
+      color: i % 3 === 0 ? [255, 255, 255] : [127, 224, 236],
+      alpha: 0.9, gravity: 12, drag: 1.1, shape: 2
     })
   }
   // The column itself: a couple of soft lobes so the spray has a body and not
@@ -3897,7 +2958,7 @@ const waterImpact = (x: number, depth: number, power: number, density: number): 
       x: x + (Math.random() - 0.5) * 0.2, y: SEA_LEVEL + i * 0.12 * power,
       vx: (Math.random() - 0.5) * 0.7, vy: (2.2 - i * 0.5) * power,
       life: 340 + Math.random() * 220, size: (0.26 + i * 0.06) * power,
-      color: [226, 244, 252], alpha: 0.4, gravity: 9, drag: 1.6, shape: 0
+      color: [214, 248, 252], alpha: 0.5, gravity: 9, drag: 1.6, shape: 0
     })
   }
   // Foam ring spreading on the surface — the tell that says WHERE it landed.
@@ -3905,7 +2966,7 @@ const waterImpact = (x: number, depth: number, power: number, density: number): 
     const dir = i % 2 ? 1 : -1
     emit({
       x, y: SEA_LEVEL, vx: dir * (1.4 + Math.random() * 1.8) * power, vy: 0.15,
-      life: 420, size: 0.1 * power, color: [236, 250, 255], alpha: 0.55, drag: 3.4
+      life: 420, size: 0.1 * power, color: [245, 254, 255], alpha: 0.7, drag: 3.4
     })
   }
   // Bubbles rising back out of the hole the round punched.
@@ -3915,8 +2976,252 @@ const waterImpact = (x: number, depth: number, power: number, density: number): 
         x: x + (Math.random() - 0.5) * 0.4, y: depth,
         vx: (Math.random() - 0.5) * 0.3, vy: 0.9 + Math.random() * 0.7,
         life: 620, size: 0.06 + Math.random() * 0.05,
-        color: [214, 240, 250], alpha: 0.45, drag: 0.9
+        color: [200, 244, 250], alpha: 0.5, drag: 0.9
       })
+    }
+  }
+}
+
+// ─── Sandbox Tower: what each round is made of ──────────────────────────────
+//
+// The sim knows four heavy round kinds; the reskin draws seven things. A mortar
+// and a balloon launcher both fire `shell`, and the player's squirt gun and an
+// ant catapult both fire `ball` — so what a round LOOKS like is decided here,
+// on the renderer's side, from the round itself (who fired it, and whether it
+// is hostile). Ids, kinds and the event stream are untouched.
+
+type RoundLook =
+  | 'dart' | 'toothpick' | 'water' | 'pebble' | 'clod' | 'mud' | 'balloon'
+  | 'honey' | 'ember' | 'ice'
+
+const lookOfRound = (p: Projectile): RoundLook => {
+  switch (p.kind) {
+    case 'bolt': return 'dart'
+    case 'quarrel': return 'toothpick'
+    case 'ball': return p.hostile ? (p.uid % 3 === 0 ? 'clod' : 'pebble') : 'water'
+    case 'shell': return getTowerBlocks().get(p.sourceUid)?.typeId === 'bombard' ? 'balloon' : 'mud'
+    case 'bomb': return 'honey'
+    case 'fire': return 'ember'
+    case 'frost': return 'ice'
+    default: return 'dart'
+  }
+}
+
+/**
+ * The last place each round in flight was DRAWN, and what it was drawn as.
+ *
+ * A detonation event carries the round's kind but not its source, and by the
+ * time the renderer drains it the round is gone. The round's last drawn
+ * position was one frame earlier and within a fraction of a cell of the hit,
+ * so the nearest recent sighting of the same kind is the round that went off —
+ * which is how a balloon pops into a splash and a mud ball lands as mud.
+ * A miss (a hidden tab, say) falls back to the kind's commoner look.
+ */
+interface SeenRound { kind: string; look: RoundLook; hue: number; x: number; y: number; at: number }
+const seenRounds = new Map<number, SeenRound>()
+
+/** Returned for the kinds whose look is never ambiguous — nothing to remember. */
+const PLAIN_ROUND: SeenRound = { kind: '', look: 'dart', hue: 0, x: 0, y: 0, at: 0 }
+
+const sightRound = (p: Projectile): SeenRound => {
+  if (p.kind !== 'ball' && p.kind !== 'shell') {
+    PLAIN_ROUND.kind = p.kind
+    PLAIN_ROUND.look = lookOfRound(p)
+    PLAIN_ROUND.hue = p.uid % 4
+    return PLAIN_ROUND
+  }
+  const now = performance.now()
+  let s = seenRounds.get(p.uid)
+  if (!s || s.kind !== p.kind || now - s.at > 1500) {
+    if (seenRounds.size > 96) {
+      for (const [id, o] of seenRounds) if (now - o.at > 2500) seenRounds.delete(id)
+    }
+    s = { kind: p.kind, look: lookOfRound(p), hue: p.uid % 4, x: p.x, y: p.y, at: now }
+    seenRounds.set(p.uid, s)
+  }
+  s.x = p.x
+  s.y = p.y
+  s.at = now
+  return s
+}
+
+const roundThatHit = (kind: string | undefined, x: number, y: number): SeenRound | null => {
+  if (!kind) return null
+  const now = performance.now()
+  let best: SeenRound | null = null
+  let bestId = -1
+  let bestD = 2.25
+  for (const [id, s] of seenRounds) {
+    // Generous on age: a slow device can go a good fraction of a second
+    // between drawn frames, and distance + kind already pin the round down.
+    if (s.kind !== kind || now - s.at > 2000) continue
+    const d = (s.x - x) * (s.x - x) + (s.y - y) * (s.y - y)
+    if (d < bestD) { bestD = d; best = s; bestId = id }
+  }
+  if (bestId >= 0) seenRounds.delete(bestId)
+  return best
+}
+
+/**
+ * The blast look for a detonation: the round's own when it was seen, else the
+ * kind's commoner one. A detonation with no round at all is either a dying
+ * block (`quiet`: a sand puff) or a bombardier beetle going pop.
+ */
+const blastLookOf = (kindOf: string | undefined, seen: SeenRound | null, quiet?: boolean): string => {
+  if (seen) {
+    return seen.look === 'pebble' || seen.look === 'clod' || seen.look === 'toothpick' ? 'sand'
+      : seen.look === 'dart' ? 'bolt' : seen.look === 'ice' ? 'frost' : seen.look === 'ember' ? 'fire'
+        : seen.look
+  }
+  switch (kindOf) {
+    case undefined: return quiet ? 'sand' : 'pop'
+    case 'ball': return 'water'
+    case 'shell': return 'mud'
+    case 'bomb': return 'honey'
+    case 'quarrel': return 'sand'
+    case 'fire': return 'fire'
+    default: return kindOf
+  }
+}
+
+// Sand, as particles (sandbox-reskin.md world palette).
+const SAND_LIGHT: [number, number, number] = [246, 226, 174]
+const SAND_MID: [number, number, number] = [227, 192, 126]
+const SAND_DARK: [number, number, number] = [184, 140, 76]
+/** A sand-dust puff — what used to be grey dust and soot. */
+const SAND_DUST: [number, number, number] = [236, 214, 166]
+const WATER_WHITE: [number, number, number] = [255, 255, 255]
+const WATER_LIGHT: [number, number, number] = [127, 224, 236]
+const WATER_MID: [number, number, number] = [52, 179, 209]
+const WATER_MIST: [number, number, number] = [222, 248, 252]
+const MUD_RGB: [number, number, number][] = [[122, 86, 48], [88, 58, 30], [166, 124, 76]]
+const HONEY_RGB: [number, number, number][] = [[245, 165, 29], [255, 219, 102], [197, 112, 10]]
+
+/** Block palettes that are moulded sand, and the one that is a pebble wall. */
+const SAND_BLOCKS = new Set(['gate', 'wood', 'brace', 'spikes'])
+const PEBBLE_BLOCKS = new Set(['stone'])
+/** Blast looks that kick a skirt of sand off the ground. */
+const GRITTY = new Set(['mud', 'sand', 'pop'])
+
+/**
+ * The particle half of a splash detonation, per look. Same budget the old
+ * fireball spent (26 embers + 12 smoke at full density), spent on the right
+ * substance: water throws drops and mist, mud throws gobs, honey throws slow
+ * golden gobs, sand throws grains and a dust cloud, and a bombardier beetle
+ * pops in yellow-orange and leaves a green stink hanging.
+ */
+const burstMatter = (look: string, x: number, y: number, r: number, density: number, hue: number): void => {
+  const n = Math.round(26 * density)
+  const m = Math.round(12 * density)
+  const rnd = Math.random
+  switch (look) {
+    case 'water':
+    case 'balloon': {
+      for (let i = 0; i < n; i++) {
+        const a = Math.PI / 2 + (rnd() - 0.5) * 2.8
+        const sp = (1.5 + rnd() * 6) * r * 0.5
+        emit({
+          x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp + 0.8,
+          life: 420 + rnd() * 320, size: 0.1 + rnd() * 0.13,
+          color: i % 3 === 0 ? WATER_WHITE : i % 3 === 1 ? WATER_LIGHT : WATER_MID,
+          alpha: 0.95, gravity: 11, drag: 1.2, shape: i % 4 === 0 ? 2 : 0
+        })
+      }
+      for (let i = 0; i < Math.round(m * 0.5); i++) {
+        emit({
+          x, y, vx: (rnd() - 0.5) * 2 * r, vy: 0.4 + rnd() * 1.2,
+          life: 700 + rnd() * 300, size: 0.45 * r, color: WATER_MIST,
+          alpha: 0.4, gravity: -0.4, drag: 1.6, shape: 3
+        })
+      }
+      if (look === 'balloon') {
+        // Shreds of the balloon's own rubber.
+        const rub = BALLOON_RGB[hue % 4]!
+        for (let i = 0; i < Math.round(6 * density); i++) {
+          const a = rnd() * Math.PI * 2
+          const sp = 2 + rnd() * 3.5
+          emit({
+            x, y, vx: Math.cos(a) * sp, vy: Math.abs(Math.sin(a)) * sp + 1,
+            life: 620 + rnd() * 300, size: 0.12 + rnd() * 0.1, color: rub,
+            gravity: 9, drag: 1.4, shape: 1, rot: rnd() * 6.28, vrot: (rnd() - 0.5) * 16
+          })
+        }
+      }
+      break
+    }
+    case 'mud':
+    case 'honey': {
+      const honey = look === 'honey'
+      const pal = honey ? HONEY_RGB : MUD_RGB
+      for (let i = 0; i < Math.round(n * 0.75); i++) {
+        const a = Math.PI / 2 + (rnd() - 0.5) * 3.2
+        const sp = (1.2 + rnd() * 5) * r * 0.5
+        emit({
+          x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp + 0.9,
+          life: 480 + rnd() * 360, size: 0.1 + rnd() * 0.14, color: pal[i % 3]!,
+          gravity: honey ? 9 : 14, drag: honey ? 1.8 : 0.9
+        })
+      }
+      for (let i = 0; i < Math.round(m * 0.5); i++) {
+        emit({
+          x, y, vx: (rnd() - 0.5) * 2.4 * r, vy: 0.5 + rnd() * 1.4,
+          life: 800 + rnd() * 400, size: 0.45 * r, color: honey ? [255, 228, 150] : SAND_DUST,
+          alpha: 0.4, gravity: -0.9, drag: 1.4, shape: 3
+        })
+      }
+      break
+    }
+    case 'pop': {
+      // Bombardier beetle: a comic yellow-orange pop and a stink that hangs.
+      emit({ x, y, life: 130, size: r * 0.5 * BLAST_SCALE, color: [255, 246, 200], alpha: 0.5, additive: true })
+      for (let i = 0; i < Math.round(n * 0.65); i++) {
+        const a = rnd() * Math.PI * 2
+        const sp = (1 + rnd() * 5) * r * 0.5
+        emit({
+          x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp + 1.2,
+          life: 380 + rnd() * 300, size: 0.16 + rnd() * 0.2,
+          color: i % 3 === 0 ? [255, 240, 170] : i % 3 === 1 ? [255, 206, 72] : [255, 146, 48],
+          gravity: 2, drag: 2.4
+        })
+      }
+      // The stink: thin at first so the pop reads yellow-orange, then hanging
+      // on after it as a lazy green cloud.
+      for (let i = 0; i < m; i++) {
+        emit({
+          x: x + (rnd() - 0.5) * r * 0.6, y: y + r * 0.2,
+          vx: (rnd() - 0.5) * 2.2 * r, vy: 0.4 + rnd() * 1.3,
+          life: 1300 + rnd() * 600, size: 0.45 * r,
+          color: i % 2 ? [156, 196, 72] : [124, 164, 56],
+          alpha: 0.32, gravity: -0.7, drag: 1.5, shape: 3
+        })
+      }
+      for (let i = 0; i < Math.round(4 * density); i++) {
+        emit({
+          x, y, vx: (rnd() - 0.5) * 4, vy: 1 + rnd() * 2.4,
+          life: 520, size: 0.08 + rnd() * 0.06, color: GORE_GOO, gravity: 11, drag: 1
+        })
+      }
+      break
+    }
+    default: {
+      // Sand: a pebble, a clod or a toothpick landing, or a block crumbling.
+      for (let i = 0; i < Math.round(n * 0.75); i++) {
+        const a = Math.PI / 2 + (rnd() - 0.5) * 3
+        const sp = (1.2 + rnd() * 5.5) * r * 0.5
+        emit({
+          x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp + 0.6,
+          life: 420 + rnd() * 360, size: 0.06 + rnd() * 0.07,
+          color: i % 3 === 0 ? SAND_LIGHT : i % 3 === 1 ? SAND_MID : SAND_DARK,
+          gravity: 13, drag: 1
+        })
+      }
+      for (let i = 0; i < Math.round(m * 0.8); i++) {
+        emit({
+          x, y, vx: (rnd() - 0.5) * 3 * r, vy: 0.5 + rnd() * 1.8,
+          life: 800 + rnd() * 500, size: 0.5 * r, color: SAND_DUST,
+          alpha: 0.5, gravity: -1, drag: 1.4, shape: 3
+        })
+      }
     }
   }
 }
@@ -3934,7 +3239,7 @@ const consumeFx = (ev: FxEvent): void => {
           x: ev.x + (Math.random() - 0.5) * 0.7, y: ev.y - 0.45,
           vx: Math.cos(a) * 1.6, vy: Math.abs(Math.sin(a)) * 1.4,
           life: 420 + Math.random() * 240, size: 0.14,
-          color: [190, 175, 150], alpha: 0.6, gravity: 3, drag: 2.2, shape: 3
+          color: SAND_DUST, alpha: 0.6, gravity: 3, drag: 2.2, shape: 3
         })
       }
       emit({ x: ev.x, y: ev.y, vx: 0, vy: 0, life: 220, size: 1.1, color: hexToRgb(p.accent2), alpha: 0.5, additive: true })
@@ -3982,26 +3287,37 @@ const consumeFx = (ev: FxEvent): void => {
       break
     }
     case 'blockHit': {
+      // The castle is sand: a knock sheds grains, not splinters.
       for (let i = 0; i < Math.round(4 * density); i++) {
         emit({
           x: ev.x, y: ev.y,
           vx: (Math.random() - 0.5) * 3.2, vy: Math.random() * 2.4,
-          life: 300, size: 0.09, color: [220, 200, 170], alpha: 0.8, gravity: 9, shape: 1,
-          rot: Math.random() * 6.28, vrot: (Math.random() - 0.5) * 9
+          life: 300, size: 0.07 + Math.random() * 0.04, color: i % 2 ? SAND_MID : SAND_DARK,
+          alpha: 0.9, gravity: 9
         })
       }
       break
     }
     case 'shatter': {
       const p = themedPalette(ev.palette)
+      // What a block breaks INTO depends on what it is made of: moulded sand
+      // crumbles into grains and a few clumps, the pebble wall drops round
+      // pebbles, and a toy (every fixture) snaps into plastic chips over the
+      // sand plinth it stood on.
+      const matter = SAND_BLOCKS.has(ev.palette) ? 'sand' : PEBBLE_BLOCKS.has(ev.palette) ? 'pebble' : 'toy'
       for (let i = 0; i < Math.round(18 * density); i++) {
         const a = Math.random() * Math.PI * 2
         const sp = 1.5 + Math.random() * 4.5
+        const grain = matter === 'sand' ? i % 3 !== 0 : matter === 'toy' && i % 3 === 0
         emit({
           x: ev.x, y: ev.y,
           vx: Math.cos(a) * sp, vy: Math.abs(Math.sin(a)) * sp * 1.2,
-          life: 700 + Math.random() * 500, size: 0.13 + Math.random() * 0.12,
-          color: p.debris, gravity: 16, drag: 0.4, shape: 1,
+          life: 700 + Math.random() * 500,
+          size: grain ? 0.07 + Math.random() * 0.06
+            : matter === 'pebble' ? 0.15 + Math.random() * 0.12 : 0.13 + Math.random() * 0.12,
+          color: grain && matter === 'toy' ? SAND_MID : p.debris, gravity: 16, drag: 0.4,
+          // Round pebbles and grains; only clumps and plastic keep the tumbling quad.
+          shape: grain || matter === 'pebble' ? 0 : 1,
           rot: Math.random() * 6.28, vrot: (Math.random() - 0.5) * 14
         })
       }
@@ -4009,7 +3325,7 @@ const consumeFx = (ev: FxEvent): void => {
         emit({
           x: ev.x, y: ev.y,
           vx: (Math.random() - 0.5) * 2, vy: 0.6 + Math.random() * 1.4,
-          life: 800, size: 0.4, color: [180, 170, 155], alpha: 0.4, gravity: -1.2, drag: 1.4, shape: 3
+          life: 800, size: 0.4, color: SAND_DUST, alpha: 0.45, gravity: -1.2, drag: 1.4, shape: 3
         })
       }
       triggerShake('small')
@@ -4025,12 +3341,26 @@ const consumeFx = (ev: FxEvent): void => {
       // a frost shell — a weapon whose entire identity is that it is cold —
       // exploded in fire.
       const cold = ev.kindOf === 'frost'
-      const kindOf = cold ? 'frost' : ev.kindOf === 'ball' ? 'ball' : 'shell'
+      // Sandbox Tower: nothing here is powder. A squirt-gun blob or a balloon
+      // bursts into a splash, a mud ball lands as mud, a honey bomb as honey, a
+      // catapult pebble (or a crumbling block) as a puff of sand, and a
+      // bombardier beetle goes POP. See `blastLookOf`.
+      const seen = cold ? null : roundThatHit(ev.kindOf, ev.x, ev.y)
       const wet = ev.y < SEA_LEVEL
-      spawnBlast(ev.x, ev.y, Math.min(1.3, r * 0.7), kindOf, 0,
-        { life: cold ? 420 : 480, radial: true, dust: !cold && !wet && ev.y < 1.1 })
+      // A boat breaking up on the moat splashes; it does not puff sand.
+      const look = cold ? 'frost' : wet && ev.quiet ? 'water' : blastLookOf(ev.kindOf, seen, ev.quiet)
+      spawnBlast(ev.x, ev.y, Math.min(1.3, r * 0.7), look, 0,
+        { life: cold ? 420 : 480, radial: true, dust: GRITTY.has(look) && !wet && ev.y < 1.1 })
       // A splash round throws a column of water proportional to its blast.
       if (wet) waterImpact(ev.x, ev.y, Math.min(1.6, 0.7 + r * 0.4), density)
+      if (!cold) {
+        burstMatter(look, ev.x, ev.y, r, density, seen?.hue ?? 0)
+        // A damp patch (water, mud, honey) or a scuff (sand) where it landed.
+        if (ev.y < 1.4 && look !== 'pop') emitDecal(ev.x, 0.06, r * 0.9, look === 'sand' ? 0.28 : 0.42)
+        triggerShake(r > 2 ? 'strong' : 'small')
+        if (!ev.quiet) playFx('explosion')
+        break
+      }
       // A soft additive bloom UNDER the drawn fireball. Kept small: it is there
       // to make the drawing glow, not to be the effect.
       emit({
@@ -4108,57 +3438,62 @@ const consumeFx = (ev: FxEvent): void => {
       // Below the shoreline this landed in the lake, so the dirt recipe is
       // wrong twice over: no dust skirt, and a plume of water instead.
       const wet = ev.y < SEA_LEVEL
-      spawnBlast(ev.x, ev.y, BLAST_R[ev.kindOf] ?? 0.45, ev.kindOf, a0, {
+      // What actually landed (see `roundThatHit`): the kind alone cannot tell a
+      // water blob from a catapult pebble, or a mud ball from a balloon.
+      const seen = ev.kindOf === 'ball' || ev.kindOf === 'shell' ? roundThatHit(ev.kindOf, ev.x, ev.y) : null
+      const look = ev.kindOf === 'frost' || ev.kindOf === 'zap' ? ev.kindOf : blastLookOf(ev.kindOf, seen)
+      spawnBlast(ev.x, ev.y, BLAST_R[ev.kindOf] ?? 0.45, look, a0, {
         life: ev.kindOf === 'bolt' ? 260 : 340,
-        // Only the heavy rounds kick up a skirt, and only near the dirt.
-        dust: !wet && ev.y < 0.9 && (ev.kindOf === 'ball' || ev.kindOf === 'shell')
+        // Only the heavy rounds kick up a skirt, and only near the ground.
+        dust: !wet && ev.y < 0.9 && GRITTY.has(look)
       })
       if (wet) waterImpact(ev.x, ev.y, ev.kindOf === 'bolt' ? 0.7 : 1, density)
 
       switch (ev.kindOf) {
         case 'bolt':
-          // Archer: fast, small, and over instantly. A hard white pin-flash and
-          // a tight spark cone — no smoke, nothing that lingers, because an
-          // arrow that leaves a cloud reads as artillery.
-          emit({ x: ev.x, y: ev.y, life: 80, size: 0.18, color: [255, 248, 220], additive: true, alpha: 0.7 })
-          spray(6, 4.2, 1.1, 170, 0.07, [255, 226, 168], { additive: true, drag: 5 })
-          spray(3, 2.2, 2.4, 260, 0.05, [190, 160, 120], { gravity: 7, shape: 1, drag: 2 })
+          // Dart Blaster: fast, small, and over instantly — a foam dart goes
+          // BOINK. A white pin-flash, a tight cone of white impact lines and a
+          // couple of orange foam crumbs; nothing that lingers.
+          emit({ x: ev.x, y: ev.y, life: 80, size: 0.18, color: [255, 250, 236], additive: true, alpha: 0.7 })
+          spray(5, 4.2, 1.1, 170, 0.07, [255, 255, 255], { drag: 5 })
+          spray(3, 2.2, 2.4, 260, 0.05, [255, 150, 56], { gravity: 7, shape: 0, drag: 2 })
           break
 
         case 'ball': {
-          // Cannon: a blunt, dusty concussion. The perpendicular ring is what
-          // sells weight — debris going sideways means something stopped hard.
-          emit({ x: ev.x, y: ev.y, life: 110, size: 0.2, color: [255, 224, 170], additive: true, alpha: 0.32 })
-          ring(6, 3.2, 300, 0.16, [150, 138, 122])
-          spray(8, 4.6, 1.0, 340, 0.11, [186, 168, 146], { gravity: 9, shape: 1, drag: 2 })
-          spray(5, 1.6, 2.0, 520, 0.2, [120, 112, 104], { gravity: -0.8, shape: 0, drag: 1.6 })
+          // Squirt gun: the blob bursts. A ring of drops standing across the
+          // hit sells the stop; the spray carries on along the line of flight.
+          ring(6, 3.2, 300, 0.14, WATER_LIGHT)
+          spray(8, 4.6, 1.0, 340, 0.1, WATER_MID, { gravity: 9, shape: 0, drag: 2 })
+          spray(5, 1.6, 2.0, 520, 0.16, WATER_WHITE, { gravity: 4, shape: 0, drag: 1.6 })
           triggerShake('small')
           break
         }
 
         case 'shell': {
-          // Bombard: the heaviest single round in the tower. Bright core, real
-          // embers, rising smoke, and a scorch left behind.
-          emit({ x: ev.x, y: ev.y, life: 140, size: 0.3, color: [255, 214, 130], additive: true, alpha: 0.4 })
-          emit({ x: ev.x, y: ev.y, life: 220, size: 0.22, color: [255, 140, 50], additive: true, alpha: 0.42 })
-          ring(8, 4.4, 340, 0.2, [255, 176, 90], true)
-          spray(10, 5.4, 1.3, 480, 0.1, [255, 190, 90], { additive: true, drag: 2.4 })
-          spray(7, 2.0, 2.4, 700, 0.26, [104, 96, 90], { gravity: -1.1, shape: 0, drag: 1.4 })
+          // Mud mortar / balloon launcher without a splash radius: the heaviest
+          // single round, landing as a splat of mud or a popped balloon.
+          const balloon = look === 'balloon'
+          ring(8, 4.4, 340, 0.18, balloon ? WATER_LIGHT : MUD_RGB[1]!)
+          spray(10, 5.4, 1.3, 480, 0.12, balloon ? WATER_MID : MUD_RGB[0]!, { gravity: 12, shape: 0, drag: 1.4 })
+          spray(7, 2.0, 2.4, 700, 0.26, balloon ? WATER_MIST : SAND_DUST, { gravity: -1.1, shape: 3, drag: 1.4 })
+          if (balloon) {
+            spray(5, 3, 3, 620, 0.14, BALLOON_RGB[(seen?.hue ?? 0) % 4]!, { gravity: 9, shape: 1, drag: 1.4 })
+          }
           if (q !== 'low') emitDecal(ev.x, ev.y, 0.5, 0.4)
           triggerShake('strong')
           break
         }
 
         case 'zap': {
-          // Tesla: no debris at all. Electricity does not throw chips of the
-          // thing it hits — it flashes, and it forks.
-          emit({ x: ev.x, y: ev.y, life: 90, size: 0.3, color: [235, 250, 255], additive: true, alpha: 0.7 })
+          // Bug zapper: no debris at all. Electricity does not throw chips of
+          // the thing it hits — it flashes, and it forks, blue-violet.
+          emit({ x: ev.x, y: ev.y, life: 90, size: 0.3, color: [244, 240, 255], additive: true, alpha: 0.7 })
           for (let i = 0; i < Math.round(9 * density); i++) {
             const a = Math.random() * Math.PI * 2
             const sp = 5.5 + Math.random() * 4
             emit({
               x: ev.x, y: ev.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
-              life: 130 + Math.random() * 90, size: 0.05, color: [150, 220, 255],
+              life: 130 + Math.random() * 90, size: 0.05, color: [182, 166, 255],
               additive: true, shape: 2, drag: 9
             })
           }
@@ -4181,7 +3516,8 @@ const consumeFx = (ev: FxEvent): void => {
         }
 
         default:
-          spray(7, 3.6, 1.6, 260, 0.1, [255, 210, 140], { additive: true, drag: 3 })
+          // Anything else (a toothpick, a stray): a flick of sand grains.
+          spray(7, 3.6, 1.6, 260, 0.09, SAND_MID, { gravity: 8, shape: 0, drag: 3 })
       }
       playFx(ev.kindOf === 'frost' ? 'frost' : 'impact')
       break
@@ -4207,17 +3543,23 @@ const consumeFx = (ev: FxEvent): void => {
 
       if (q !== 'low') {
         if (rec.style === 'gun' || rec.style === 'lob') {
-          // Burning grains riding the flame out, and — for the heavy guns —
-          // soot falling back around the tube.
+          // What rides out of the mouth: water drops off a squirt gun, mud
+          // flecks off the mud mortar, a puff of air off a spring launcher —
+          // and, for the heavy tubes, a cloud falling back round the mouth
+          // (mist, or sand dust). Same counts the powder grains and soot had.
           const heavy = rec.style === 'lob'
           const grit = rec.grit ?? 1
+          const matter = rec.matter ?? 'water'
           for (let i = 0; i < Math.round((heavy ? 4 : 6) * density * grit); i++) {
             const a = ang + (Math.random() - 0.5) * rec.spread * 1.6
             const sp = (heavy ? 3 : 6) * (0.5 + Math.random()) * grit
             emit({
               x: mx, y: my, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
-              life: 200 + Math.random() * 180, size: 0.07 * grit,
-              color: [255, 214, 140], additive: true, shape: 2, drag: 4.5
+              life: 200 + Math.random() * 180, size: (matter === 'mud' ? 0.09 : 0.07) * grit,
+              color: matter === 'mud' ? MUD_RGB[i % 3]!
+                : matter === 'air' ? [255, 250, 238]
+                  : i % 2 ? WATER_WHITE : WATER_LIGHT,
+              gravity: matter === 'air' ? 0 : 8, shape: i % 2 ? 2 : 0, drag: 4.5
             })
           }
           if (heavy) {
@@ -4225,18 +3567,18 @@ const consumeFx = (ev: FxEvent): void => {
               emit({
                 x: mx, y: my, vx: (Math.random() - 0.5) * 1.6, vy: 0.6 + Math.random() * 1.2,
                 life: 700 + Math.random() * 400, size: 0.26,
-                color: [86, 80, 72], alpha: 0.45, gravity: -1, drag: 1.5, shape: 3
+                color: matter === 'mud' ? SAND_DUST : WATER_MIST, alpha: 0.45, gravity: -1, drag: 1.5, shape: 3
               })
             }
             triggerShake('small')
           }
         } else if (rec.style === 'bow') {
-          // Grit off the rail — the bow throws no light at all.
+          // A puff of air off the dart blaster's barrel — no light at all.
           const grit = rec.grit ?? 1
           for (let i = 0; i < Math.round(3 * density * grit); i++) {
             emit({
               x: mx, y: my, vx: (Math.random() - 0.5) * 1.4, vy: -0.3 - Math.random() * 0.8,
-              life: 320, size: 0.07 * grit, color: [196, 182, 156],
+              life: 320, size: 0.07 * grit, color: [255, 248, 236],
               alpha: 0.7, gravity: 5, drag: 2.6
             })
           }
@@ -4255,7 +3597,7 @@ const consumeFx = (ev: FxEvent): void => {
           emit({
             x: ev.points[i]!, y: ev.points[i + 1]!,
             vx: Math.cos(a) * 4, vy: Math.sin(a) * 4,
-            life: 260, size: 0.09, color: [160, 240, 255], additive: true, shape: 2, drag: 3.5
+            life: 260, size: 0.09, color: k % 2 ? [196, 182, 255] : [170, 214, 255], additive: true, shape: 2, drag: 3.5
           })
         }
       }
@@ -4279,14 +3621,25 @@ const consumeFx = (ev: FxEvent): void => {
     case 'enemyDie': {
       const p = themedPalette(ev.palette)
       const n = ev.boss ? 40 : 14
-      for (let i = 0; i < Math.round(n * density); i++) {
+      // A bug comes apart as shell bits in its own colour, a splash of goo and
+      // a couple of little legs — the same budget the chunks alone used to take.
+      const all = Math.round(n * density)
+      const legs = Math.max(1, Math.round(all * 0.14))
+      const goo = Math.round(all * 0.22)
+      for (let i = 0; i < all; i++) {
         const a = Math.random() * Math.PI * 2
         const sp = 1.5 + Math.random() * (ev.boss ? 7 : 3.5)
+        if (i < legs) {
+          emitLeg(ev.x, ev.y, Math.cos(a) < 0 ? -1 : 1)
+          continue
+        }
+        const isGoo = i < legs + goo
         emit({
           x: ev.x, y: ev.y,
           vx: Math.cos(a) * sp, vy: Math.abs(Math.sin(a)) * sp,
-          life: 520 + Math.random() * 420, size: 0.11 + Math.random() * 0.1,
-          color: p.debris, gravity: 13, drag: 0.7, shape: 1,
+          life: 520 + Math.random() * 420, size: isGoo ? 0.1 + Math.random() * 0.08 : 0.11 + Math.random() * 0.1,
+          color: isGoo ? (i % 2 ? GORE_GOO : GORE_GOO_DARK) : p.debris, gravity: 13, drag: 0.7,
+          shape: isGoo ? 0 : 1,
           rot: Math.random() * 6.28, vrot: (Math.random() - 0.5) * 12
         })
       }
@@ -4338,31 +3691,49 @@ const consumeFx = (ev: FxEvent): void => {
         const G = 12
         const vx = (ev.tx - ev.x) / T
         const vy = (ev.ty - ev.y) / T - 0.5 * G * T
+        // The spitting spider's web ball: a white ball over an ink disc one
+        // size up (drawn first, so it sits underneath as the outline) — white
+        // alone vanishes against a cloud or the picket fence…
         emit({
           x: ev.x, y: ev.y - 0.15, vx, vy, gravity: G,
-          life: T * 1000, size: 0.17, color: [138, 126, 112], shape: 1,
-          rot: Math.random() * 6.28, vrot: 9
+          life: T * 1000, size: 0.27, color: [59, 42, 33], alpha: 0.85
         })
-        // A puff at the throw, and grit where it lands.
-        for (let i = 0; i < Math.round(3 * density); i++) {
+        emit({
+          x: ev.x, y: ev.y - 0.15, vx, vy, gravity: G,
+          life: T * 1000, size: 0.2, color: [250, 250, 246]
+        })
+        // …trailing a thread. Each strand is a thin streak launched on the SAME
+        // parabola a moment earlier in time (position and velocity wound back
+        // by `d`), so the four of them follow the ball exactly and read as one
+        // line spooling out behind it.
+        for (let k = 1; k <= 4; k++) {
+          const d = 0.012 * k
+          emit({
+            x: ev.x - vx * d, y: ev.y - 0.15 - vy * d - 0.5 * G * d * d,
+            vx, vy: vy + G * d, gravity: G,
+            life: (T + d) * 1000, size: 0.07, color: [226, 226, 220], alpha: 0.9, shape: 2
+          })
+        }
+        // A puff at the throw, and wisps of web where it lands.
+        for (let i = 0; i < Math.round(2 * density); i++) {
           emit({
             x: ev.x, y: ev.y, vx: (Math.random() - 0.5) * 1.6, vy: -Math.random() * 1.2,
-            life: 320, size: 0.11, color: [140, 130, 118], alpha: 0.6, drag: 2
+            life: 320, size: 0.11, color: SAND_DUST, alpha: 0.6, drag: 2
           })
         }
         for (let i = 0; i < Math.round(4 * density); i++) {
           emit({
             x: ev.tx, y: ev.ty, vx: (Math.random() - 0.5) * 2.6, vy: -Math.random() * 1.8,
-            life: 300, size: 0.08, color: [196, 180, 158], gravity: 9, drag: 2
+            life: 360, size: 0.08, color: [242, 242, 236], alpha: 0.9, gravity: 4, drag: 3
           })
         }
       } else {
+        // Bitten sand: grains off the block face.
         for (let i = 0; i < Math.round(5 * density); i++) {
           emit({
             x: ev.tx, y: ev.ty,
             vx: (Math.random() - 0.5) * 3, vy: Math.random() * 2,
-            life: 260, size: 0.09, color: [225, 205, 175], gravity: 9, shape: 1,
-            rot: Math.random() * 6.28, vrot: (Math.random() - 0.5) * 8
+            life: 260, size: 0.08, color: i % 2 ? SAND_MID : SAND_LIGHT, gravity: 9
           })
         }
         // The attacker sheds a little of itself on a melee swing too.
@@ -4432,10 +3803,10 @@ const consumeFx = (ev: FxEvent): void => {
           x: px, y: 0.1,
           vx: (Math.random() - 0.5) * 2.2, vy: 1.4 + Math.random() * 2.6,
           life: 620 + Math.random() * 420, size: 0.22 + Math.random() * 0.2,
-          color: [188, 176, 148], alpha: 0.5, gravity: 3.2, drag: 1.9
+          color: i % 3 ? SAND_DUST : SAND_MID, alpha: 0.55, gravity: 3.2, drag: 1.9
         })
       }
-      emitDecal(ev.x, 0.05, ev.radius * 0.85, 0.35)
+      emitDecal(ev.x, 0.05, ev.radius * 0.85, 0.25)
       triggerShake('small')
       playFx('throw')
       break
@@ -4536,7 +3907,7 @@ const consumeFx = (ev: FxEvent): void => {
         emit({
           x: ev.x + (Math.random() - 0.5) * 1.4, y: ev.y - 0.45,
           vx: (Math.random() - 0.5) * 3, vy: 0.4 + Math.random(),
-          life: 620, size: 0.26, color: [186, 178, 162], gravity: -0.4, drag: 2.4
+          life: 620, size: 0.26, color: SAND_DUST, gravity: -0.4, drag: 2.4
         })
       }
       emitDecal(ev.x, Math.max(0, ev.y - 0.5), 0.5 + ev.impact * 0.6, 0.25 + ev.impact * 0.3)
@@ -4547,12 +3918,15 @@ const consumeFx = (ev: FxEvent): void => {
     case 'bombDrop': {
       // A puff at the bomb bay, warm for a molotov and grey for a bomb, so the
       // player can tell WHICH kind is falling before it lands on them.
-      const col: [number, number, number] = ev.fire ? [255, 150, 60] : [150, 150, 158]
+      // Sandbox Tower: sparks off a firefly's ember, golden drips off a
+      // bumblebee's honey bomb (drips FALL — honey does not puff).
       for (let i = 0; i < Math.round(5 * density); i++) {
         emit({
           x: ev.x + (Math.random() - 0.5) * 0.3, y: ev.y - 0.2,
           vx: (Math.random() - 0.5) * 0.8, vy: -0.4 - Math.random(),
-          life: 420, size: 0.14, color: col, gravity: -0.6, drag: 2
+          life: 420, size: ev.fire ? 0.12 : 0.1,
+          color: ev.fire ? (i % 2 ? [255, 150, 60] : [255, 214, 110]) : HONEY_RGB[i % 3]!,
+          gravity: ev.fire ? -0.6 : 5, drag: 2, additive: ev.fire
         })
       }
       playFx('throw')
@@ -4601,7 +3975,7 @@ const consumeFx = (ev: FxEvent): void => {
         emit({
           x: ev.x, y: ev.y, vx: Math.cos(spread) * sp, vy: Math.sin(spread) * sp + 1.2,
           life: 520 + Math.random() * 320, size: 0.24 + Math.random() * 0.16,
-          color: [120, 112, 100], gravity: -1.2, drag: 1.6
+          color: i % 3 ? SAND_DUST : SAND_MID, gravity: -1.2, drag: 1.6
         })
       }
       triggerShake('small')
@@ -4616,7 +3990,7 @@ const consumeFx = (ev: FxEvent): void => {
           x: ev.x, y: ev.y + Math.random() * 0.4,
           vx: ev.dir * (1.5 + Math.random() * 4), vy: Math.random() * 2.4,
           life: 620 + Math.random() * 320, size: 0.2 + Math.random() * 0.18,
-          color: [196, 182, 150], gravity: 2.4, drag: 1.9
+          color: i % 3 ? SAND_DUST : SAND_MID, gravity: 2.4, drag: 1.9
         })
       }
       emitText({
@@ -4660,7 +4034,7 @@ const consumeFx = (ev: FxEvent): void => {
         emit({
           x: ev.x, y: ev.y + Math.random() * 0.5,
           vx: (Math.random() - 0.5) * 1.6, vy: 1 + Math.random() * 1.6,
-          life: 560, size: 0.2, color: [196, 182, 150], gravity: -0.6, drag: 2.2
+          life: 560, size: 0.2, color: SAND_DUST, gravity: -0.6, drag: 2.2
         })
       }
       break
@@ -4698,26 +4072,9 @@ const consumeFx = (ev: FxEvent): void => {
 const drawArrowShape = (
   ctx: CanvasRenderingContext2D, u: number, seed: number, rich: boolean
 ): void => {
-  // Shaft — swelling toward the head, the way a nib leaves a line.
-  inkStroke(ctx, [[-u * 1.7, 0], [u * 0.4, 0], [u * 1.5, 0]], u * 0.16, u * 0.34, '#c39a5e', seed)
-  inkStroke(ctx, [[-u * 1.7, u * 0.1], [u * 1.5, u * 0.1]], u * 0.07, u * 0.13, '#6d4a24', seed + 3)
-
-  // Head: two flat tones and a hard inked edge.
-  const head: Pt[] = [[u * 2.5, 0], [u * 1.35, -u * 0.5], [u * 1.6, 0], [u * 1.35, u * 0.5]]
-  fillShape(ctx, head, '#8e9aa8')
-  fillShape(ctx, [[u * 2.4, -u * 0.04], [u * 1.4, -u * 0.42], [u * 1.62, -u * 0.05]], '#e8eef6')
-  if (rich) ink(ctx, head, { width: u * 0.14, color: '#171c22', breakUp: 0.3, seed: seed + 7 })
-
-  // Fletching.
-  ctx.fillStyle = '#2f7d5a'
-  for (const f of [-1, 1]) {
-    ctx.beginPath()
-    ctx.moveTo(-u * 1.75, 0)
-    ctx.lineTo(-u * 1.1, f * u * 0.55)
-    ctx.lineTo(-u * 0.55, f * u * 0.12)
-    ctx.closePath()
-    ctx.fill()
-  }
+  // Sandbox Tower: the arrow is a FOAM DART (orange foam, blue suction cup,
+  // little fins) — same footprint, same origin. See `fxArt.drawFoamDart`.
+  drawFoamDart(ctx, u, seed, rich)
 }
 
 /**
@@ -4736,32 +4093,10 @@ const drawArrowShape = (
 const drawQuarrelShape = (
   ctx: CanvasRenderingContext2D, u: number, seed: number, rich: boolean
 ): void => {
-  // Shaft: two-thirds the arrow's reach and half again its weight.
-  inkStroke(ctx, [[-u * 1.1, 0], [u * 0.3, 0], [u * 1.0, 0]], u * 0.26, u * 0.44, '#7a5a34', seed)
-  inkStroke(ctx, [[-u * 1.1, u * 0.14], [u * 1.0, u * 0.14]], u * 0.1, u * 0.16, '#402a13', seed + 3)
-
-  // A binding of cord where the head is socketed on — the detail that says
-  // "assembled by a crew" rather than "grown on a shaft".
-  fillShape(ctx, [
-    [u * 0.78, -u * 0.3], [u * 1.02, -u * 0.3], [u * 1.02, u * 0.3], [u * 0.78, u * 0.3]
-  ], '#caa26a')
-
-  // Head: a squat four-sided bodkin, dark iron with one lit facet.
-  const head: Pt[] = [[u * 2.0, 0], [u * 1.0, -u * 0.42], [u * 1.15, 0], [u * 1.0, u * 0.42]]
-  fillShape(ctx, head, '#5d6672')
-  fillShape(ctx, [[u * 1.92, -u * 0.03], [u * 1.05, -u * 0.34], [u * 1.18, -u * 0.04]], '#aab6c4')
-  if (rich) ink(ctx, head, { width: u * 0.16, color: '#12161b', breakUp: 0.28, seed: seed + 7 })
-
-  // Vanes: cut leather, straight-edged and swept back hard.
-  ctx.fillStyle = '#8c3b2c'
-  for (const f of [-1, 1]) {
-    ctx.beginPath()
-    ctx.moveTo(-u * 1.15, 0)
-    ctx.lineTo(-u * 0.72, f * u * 0.48)
-    ctx.lineTo(-u * 0.34, f * u * 0.16)
-    ctx.closePath()
-    ctx.fill()
-  }
+  // Sandbox Tower: the rubber-band crossbow's bolt is a party TOOTHPICK —
+  // thin pale wood, sharp both ends, a red cellophane frill at the tail. Still
+  // set against the dart on purpose. See `fxArt.drawToothpick`.
+  drawToothpick(ctx, u, seed, rich)
 }
 
 /**
@@ -4859,8 +4194,7 @@ const drawArrowVolley = (ctx: CanvasRenderingContext2D, v: ArrowVolley): void =>
       // The smear, behind the nock and along the shaft. Tapered from nothing so
       // it reads as speed rather than as a stick glued to the tail.
       const streak = a.vy * 0.05 * zoom
-      inkStroke(ctx, [[-u * 1.7 - streak, 0], [-u * 1.7, 0]],
-        u * 0.02, u * 0.2, 'rgba(232,220,190,0.5)', a.seed + 11)
+      dartSmear(ctx, u, streak, a.seed + 11)
       drawArrowShape(ctx, u, a.seed, rich)
       ctx.restore()
       continue
@@ -4871,16 +4205,17 @@ const drawArrowVolley = (ctx: CanvasRenderingContext2D, v: ArrowVolley): void =>
     const held = t - since
     if (held > a.stick) continue
     const fade = 1 - Math.max(0, held - a.stick * 0.6) / (a.stick * 0.4)
-    const wob = Math.exp(-held / 90) * 0.07 * Math.sin(held / 22)
+    // A foam dart on a suction cup does not sink in — it sticks and BOINGS, a
+    // springier, longer wobble than a buried arrowhead's.
+    const wob = Math.exp(-held / 160) * 0.16 * Math.sin(held / 26)
     const la = ang + wob
     const hx = worldToScreenX(a.x)
     const hy = worldToScreenY(a.yEnd)
 
     ctx.save()
     ctx.globalAlpha = Math.max(0, Math.min(1, fade))
-    // Anchored by the HEAD, pushed a touch past the surface so it reads as
-    // buried in the thing it hit rather than balanced on top of it.
-    const bury = u * 2.2
+    // Anchored by the cup's face, flush on the surface it stuck to.
+    const bury = u * 2.36
     ctx.translate(hx - Math.cos(la) * bury, hy - Math.sin(la) * bury)
     ctx.rotate(la)
     drawArrowShape(ctx, u, a.seed, rich)
@@ -4981,8 +4316,10 @@ const drawLightning = (ctx: CanvasRenderingContext2D, bolt: Bolt): void => {
     path.push([x2, y2])
 
     const seed = seg * 7 + 3
-    if (rich) inkStroke(ctx, path, zoom * 0.15 * w, zoom * 0.07 * w, '#12283a', seed)
-    inkStroke(ctx, path, zoom * 0.1 * w, zoom * 0.042 * w, '#6fd8ff', seed + 1)
+    // Sandbox Tower: a bug zapper's arc — blue-violet body under a deep indigo
+    // edge, white core. Still electric; just the zapper's colour.
+    if (rich) inkStroke(ctx, path, zoom * 0.15 * w, zoom * 0.07 * w, '#1f1650', seed)
+    inkStroke(ctx, path, zoom * 0.1 * w, zoom * 0.042 * w, '#9c8cff', seed + 1)
     inkStroke(ctx, path, zoom * 0.042 * w, zoom * 0.016 * w, '#ffffff', seed + 2)
 
     // Forks. Two hairs peeling off mid-run, thinning to nothing — the bolt
@@ -5000,7 +4337,7 @@ const drawLightning = (ctx: CanvasRenderingContext2D, bolt: Bolt): void => {
         [from[0] + (dx * 0.9 - dy * side * 0.8) * len, from[1] + (dy * 0.9 + dx * side * 0.8) * len],
         [from[0] + (dx * 1.9 - dy * side * 0.5) * len, from[1] + (dy * 1.9 + dx * side * 1.3) * len]
       ]
-      inkStroke(ctx, hair, zoom * 0.05 * w, zoom * 0.004, '#a8f0ff', seed + 5 + k)
+      inkStroke(ctx, hair, zoom * 0.05 * w, zoom * 0.004, k ? '#cbbfff' : '#a8dcff', seed + 5 + k)
     }
   }
   ctx.globalAlpha = 1
@@ -5029,6 +4366,14 @@ interface BlastPalette {
   deep: string
   ink: string
   smoke: string
+  /**
+   * How the hit is DRAWN. `burst` (the default) is the fireball-and-smoke
+   * recipe; the sandbox's wet and gritty rounds have their own shapes — a
+   * water `splash`, a mud or honey `splat` (`drippy` for honey), a sand `puff`.
+   * See `fxArt.ts`.
+   */
+  style?: 'burst' | 'splash' | 'splat' | 'puff'
+  drippy?: boolean
 }
 
 interface Blast {
@@ -5051,10 +4396,23 @@ interface Blast {
 }
 
 const BLAST_PALETTES: Record<string, BlastPalette> = {
-  bolt: { core: '#fffbe8', mid: '#ffd977', deep: '#e08a2a', ink: '#3a2410', smoke: '#8a7a68' },
-  ball: { core: '#fff3d2', mid: '#ffb44a', deep: '#c85a1e', ink: '#33190f', smoke: '#7d7166' },
-  shell: { core: '#fffdf2', mid: '#ffc24a', deep: '#d4441f', ink: '#2e150e', smoke: '#6e655e' },
-  zap: { core: '#ffffff', mid: '#c8f2ff', deep: '#3f9fdc', ink: '#12283a', smoke: '#7f97a8' },
+  // Sandbox Tower. A foam dart landing: a white BOINK with an orange rim and a
+  // pale puff — no fire anywhere in it.
+  bolt: { core: '#ffffff', mid: '#fff3d8', deep: '#ff8a2b', ink: '#5a3312', smoke: '#f7efe0' },
+  // Squirt-gun water, a popped balloon (same water), mud, honey, sand.
+  water: { core: '#ffffff', mid: '#8fe6f0', deep: '#2aa5cf', ink: '#0d3b57', smoke: '#e2f7fb', style: 'splash' },
+  balloon: { core: '#ffffff', mid: '#8fe6f0', deep: '#2aa5cf', ink: '#0d3b57', smoke: '#e2f7fb', style: 'splash' },
+  mud: { core: '#d0a468', mid: '#9a7143', deep: '#6a4722', ink: '#2b1a0c', smoke: '#d9bf8f', style: 'splat' },
+  honey: { core: '#fff1a8', mid: '#ffc23a', deep: '#d98a10', ink: '#5a2e05', smoke: '#ffe08a', style: 'splat', drippy: true },
+  sand: { core: '#fff8e2', mid: '#f3dfab', deep: '#d6b474', ink: '#8d673a', smoke: '#ecd9ac', style: 'puff' },
+  // A bombardier beetle going pop: a yellow-orange puff whose smoke is a
+  // green stink cloud.
+  pop: { core: '#fffbe0', mid: '#ffd23f', deep: '#ff8a2b', ink: '#5a2a08', smoke: '#9fc24e' },
+  // The old powder palettes, kept for any caller that still names a kind.
+  ball: { core: '#ffffff', mid: '#8fe6f0', deep: '#2aa5cf', ink: '#0d3b57', smoke: '#e2f7fb', style: 'splash' },
+  shell: { core: '#c79a5c', mid: '#8d673a', deep: '#5e3f1e', ink: '#2b1a0c', smoke: '#d9bf8f', style: 'splat' },
+  // The bug zapper: blue-violet.
+  zap: { core: '#ffffff', mid: '#ddd4ff', deep: '#6f55f0', ink: '#1d1446', smoke: '#a79ed6' },
   // Stepped hard, on purpose: a cold blast built from three near-whites reads
   // as a smudge of steam rather than as ice breaking.
   frost: { core: '#ffffff', mid: '#b7ecff', deep: '#3f9fd8', ink: '#123244', smoke: '#93b6c4' },
@@ -5124,10 +4482,23 @@ const drawBlast = (ctx: CanvasRenderingContext2D, b: Blast): void => {
   ctx.save()
   ctx.translate(worldToScreenX(b.x), worldToScreenY(b.y))
 
+  // ── Sandbox Tower: wet and gritty hits ──
+  // A splash, a splat or a sand puff replaces the ring, shards, fireball and
+  // smoke below outright; only the ground skirt is shared.
+  const style = b.pal.style ?? 'burst'
+  const burst = style === 'burst'
+  if (!burst) {
+    const rich = quality.value !== 'low'
+    ctx.globalAlpha = 1
+    if (style === 'splash') drawSplashBlast(ctx, u, R, seed, b.seed, b.pal, rich)
+    else if (style === 'splat') drawSplatBlast(ctx, u, R, seed, b.seed, b.pal, rich, b.pal.drippy ?? false)
+    else drawPuffBlast(ctx, u, R, b.seed, b.pal, rich)
+  }
+
   // ── Shock ring ──
   // Wide, broken, and gone before the smoke arrives.
   const ringA = 1 - u * 1.7
-  if (ringA > 0.03) {
+  if (burst && ringA > 0.03) {
     const rr = R * (0.55 + blastEase(u * 2.2) * 1.2)
     ctx.globalAlpha = ringA * 0.85
     ink(ctx, blob(0, 0, rr, rr * 0.8, seed + 3, 0.16, 2.4, 34), {
@@ -5142,7 +4513,7 @@ const drawBlast = (ctx: CanvasRenderingContext2D, b: Blast): void => {
   // The only hard edges in the whole effect: the fireball and the smoke are all
   // curves, so the sharpness that says "impact" has to come from somewhere.
   const shardA = 1 - u * 2.2
-  if (shardA > 0.03) {
+  if (burst && shardA > 0.03) {
     ctx.globalAlpha = shardA
     ctx.fillStyle = b.pal.mid
     const n = 5
@@ -5167,7 +4538,7 @@ const drawBlast = (ctx: CanvasRenderingContext2D, b: Blast): void => {
   // Three flat tones and an inked contour. The moment a gradient goes in here
   // it stops matching the monsters, which is the whole point of drawing it.
   const bodyA = u < 0.5 ? 1 : Math.max(0, 1 - (u - 0.5) / 0.38)
-  if (bodyA > 0.03) {
+  if (burst && bodyA > 0.03) {
     const br = R * (0.5 + blastEase(u * 1.9) * 0.62)
     const body = blob(0, 0, br, br * 0.9, seed, 0.24, 2.7, 40)
     ctx.globalAlpha = bodyA
@@ -5191,9 +4562,10 @@ const drawBlast = (ctx: CanvasRenderingContext2D, b: Blast): void => {
         const px = side * spread
         const pr = R * (0.42 + u * 0.5)
         const puff = blob(px, ground - pr * 0.35, pr * 1.15, pr * 0.62, b.seed + side * 3, 0.22, 2.3, 22)
-        fillShape(ctx, puff, '#93887a')
-        fillShape(ctx, shrink(puff, 0.6, px - pr * 0.4, ground - pr * 0.7), '#c4b8a4')
-        ink(ctx, puff, { width: pr * 0.14, color: '#4a3f33', breakUp: 0.55, seed: b.seed + side })
+        // Sand, kicked sideways off the sandbox floor.
+        fillShape(ctx, puff, '#d6b474')
+        fillShape(ctx, shrink(puff, 0.6, px - pr * 0.4, ground - pr * 0.7), '#f3dfab')
+        ink(ctx, puff, { width: pr * 0.14, color: '#8d673a', breakUp: 0.55, seed: b.seed + side })
       }
     }
   }
@@ -5203,7 +4575,7 @@ const drawBlast = (ctx: CanvasRenderingContext2D, b: Blast): void => {
   // cloud reads as drawn shapes rather than as a soft mass. Seeded off the
   // blast rather than the hold, so it DRIFTS while the fireball pops.
   const smokeA = Math.min(1, Math.max(0, (u - 0.22) / 0.22)) * Math.max(0, 1 - Math.max(0, u - 0.6) / 0.4) * 0.7
-  if (smokeA > 0.04 && quality.value !== 'low') {
+  if (burst && smokeA > 0.04 && quality.value !== 'low') {
     const n = quality.value === 'high' ? 4 : 3
     ctx.globalAlpha = smokeA
     const lit = mixHex(b.pal.smoke, '#ffffff', 0.34)
@@ -5253,9 +4625,19 @@ const FLASH_PALETTES: Record<string, FlashPalette> = {
   powder: { core: '#fffdf0', mid: '#ffce67', deep: '#e0651c', ink: '#2a1408', smoke: '#7d7267' },
   // A heavy charge under a short tube: redder, and mostly smoke.
   heavy: { core: '#fff7dc', mid: '#ffb246', deep: '#c2451c', ink: '#231208', smoke: '#615950' },
-  arc: { core: '#ffffff', mid: '#cdf3ff', deep: '#3f9fdc', ink: '#10202e', smoke: '#8098aa' },
+  // Sandbox Tower: the bug zapper's crack, blue-violet.
+  arc: { core: '#ffffff', mid: '#ddd4ff', deep: '#7058f0', ink: '#1d1446', smoke: '#a79ed6' },
   rime: { core: '#ffffff', mid: '#e2f8ff', deep: '#5cbde2', ink: '#123244', smoke: '#9dbecc' },
-  dust: { core: '#fdf4e0', mid: '#e3d2b0', deep: '#a08a6a', ink: '#3a2a18', smoke: '#8f8069' }
+  dust: { core: '#fdf4e0', mid: '#e3d2b0', deep: '#a08a6a', ink: '#3a2a18', smoke: '#8f8069' },
+  // Sandbox Tower. A squirt gun's jet: the flame fan's tongues, in water, read
+  // as a spray; its "smoke" is mist.
+  water: { core: '#ffffff', mid: '#aef3f9', deep: '#3bb8df', ink: '#0d3b57', smoke: '#e4f8fc' },
+  // The mud mortar's splurt, and the sand dust it coughs.
+  mud: { core: '#c79a5c', mid: '#8d673a', deep: '#5e3f1e', ink: '#2b1a0c', smoke: '#e3cb98' },
+  // A spring or air launcher (balloons, dart harpoons): a white "thwump".
+  puff: { core: '#ffffff', mid: '#fffaf0', deep: '#e6d6bf', ink: '#8a6a4a', smoke: '#f6f1e8' },
+  // The dart blaster's release: a white flick with an orange wake.
+  foam: { core: '#ffffff', mid: '#ffb46b', deep: '#ff8a2b', ink: '#3b2a21', smoke: '#f3ead8' }
 }
 
 interface FlashRecipe {
@@ -5292,6 +4674,8 @@ interface FlashRecipe {
    * pieces than the tower's siege guns, and the standard burst buried them.
    */
   grit?: number
+  /** What rides out of the mouth as particles (`consumeFx` 'muzzle'). */
+  matter?: 'water' | 'mud' | 'air'
 }
 
 /**
@@ -5304,10 +4688,13 @@ interface FlashRecipe {
 const lobAngle = (c: number, elev: number): number => (c < 0 ? Math.PI - elev : elev)
 
 const MUZZLE_RECIPES: Record<string, FlashRecipe> = {
-  cannon: { style: 'gun', pal: FLASH_PALETTES.powder!, reach: 0.56, len: 0.95, spread: 0.6, life: 260 },
-  mortar: { style: 'lob', pal: FLASH_PALETTES.heavy!, reach: 0.46, len: 0.8, spread: 0.52, life: 460, elev: MORTAR_ELEV },
-  bombard: { style: 'lob', pal: FLASH_PALETTES.heavy!, reach: 0.34, len: 0.66, spread: 0.66, life: 400, elev: BOMBARD_ELEV },
-  archer: { style: 'bow', pal: FLASH_PALETTES.dust!, reach: 0.26, len: 0.46, spread: 0.9, life: 180 },
+  // Sandbox Tower: squirt gun (water jet), mud mortar (mud splurt), balloon
+  // launcher (an air thwump), dart blaster (a white flick). Geometry, reach
+  // and timing are the old guns' own.
+  cannon: { style: 'gun', pal: FLASH_PALETTES.water!, reach: 0.56, len: 0.95, spread: 0.6, life: 260, matter: 'water' },
+  mortar: { style: 'lob', pal: FLASH_PALETTES.mud!, reach: 0.46, len: 0.8, spread: 0.52, life: 460, elev: MORTAR_ELEV, matter: 'mud' },
+  bombard: { style: 'lob', pal: FLASH_PALETTES.puff!, reach: 0.34, len: 0.66, spread: 0.66, life: 400, elev: BOMBARD_ELEV, matter: 'water' },
+  archer: { style: 'bow', pal: FLASH_PALETTES.foam!, reach: 0.26, len: 0.46, spread: 0.9, life: 180 },
   tesla: { style: 'coil', pal: FLASH_PALETTES.arc!, reach: 0.38, len: 0.44, spread: 1.5, life: 200, up: true },
   // The frost fixture is a cluster of crystals sitting ON TOP of its block, so
   // the vapour has to leave from up there — along the aim, but lifted.
@@ -5324,19 +4711,21 @@ const MUZZLE_RECIPES: Record<string, FlashRecipe> = {
   //
   // `ox`/`oy` put the origin on the foredeck mount, matching where `shipArt`
   // actually bolts each weapon down.
+  // Sandbox Tower: the paper boat and the rubber duck spring their darts (an
+  // air puff); the toy pirate ship's cork cannon squirts.
   skiff: {
-    style: 'gun', pal: FLASH_PALETTES.dust!,
-    ox: 0.22, oy: -0.17, reach: 0.3, len: 0.3, spread: 0.62, life: 150, grit: 0.45
+    style: 'gun', pal: FLASH_PALETTES.puff!,
+    ox: 0.22, oy: -0.17, reach: 0.3, len: 0.3, spread: 0.62, life: 150, grit: 0.45, matter: 'air'
   },
   longship: {
-    style: 'gun', pal: FLASH_PALETTES.powder!,
-    ox: 0.34, oy: -0.09, reach: 0.38, len: 0.38, spread: 0.58, life: 180, grit: 0.55
+    style: 'gun', pal: FLASH_PALETTES.puff!,
+    ox: 0.34, oy: -0.09, reach: 0.38, len: 0.38, spread: 0.58, life: 180, grit: 0.55, matter: 'air'
   },
   // The capital ship, and the only one that burns real powder — so it gets the
   // longest flame of the three and still only half the land cannon's.
   galley: {
-    style: 'gun', pal: FLASH_PALETTES.heavy!,
-    ox: 0.3, oy: -0.13, reach: 0.34, len: 0.48, spread: 0.55, life: 230, grit: 0.6
+    style: 'gun', pal: FLASH_PALETTES.water!,
+    ox: 0.3, oy: -0.13, reach: 0.34, len: 0.48, spread: 0.55, life: 230, grit: 0.6, matter: 'water'
   }
 }
 
@@ -5623,29 +5012,9 @@ const drawMuzzle = (ctx: CanvasRenderingContext2D, m: Muzzle): void => {
   ctx.globalAlpha = 1
 }
 
-/**
- * A drawn round object: wobbled contour, three flat tones, inked.
- *
- * Every lump of matter in flight is built from this, so a cannonball, a shell
- * and a dropped bomb are recognisably the same material under the same light —
- * which is precisely what a stack of radial gradients could not give them.
- */
-const celOrb = (
-  ctx: CanvasRenderingContext2D,
-  cx: number, cy: number, rx: number, ry: number,
-  pal: { deep: string; mid: string; lit: string; line: string },
-  seed: number, inked: boolean
-): Pt[] => {
-  const body = blob(cx, cy, rx, ry, seed, 0.11, 2.6, inked ? 20 : 12)
-  fillShape(ctx, body, pal.deep)
-  fillShape(ctx, shrink(body, 0.8, cx - rx * 0.2, cy - ry * 0.24), pal.mid)
-  fillShape(ctx, shrink(body, 0.34, cx - rx * 0.44, cy - ry * 0.48), pal.lit)
-  if (inked) ink(ctx, body, { width: Math.max(1, rx * 0.34), color: pal.line, breakUp: 0.34, seed: seed + 2 })
-  return body
-}
-
-/** Iron, as it reads on every round the tower and the enemy throw. */
-const IRON = { deep: '#0f1114', mid: '#333a42', lit: '#6e7783', line: '#07080a' }
+// Sandbox Tower: the rounds' bodies (water blob, pebble, mud ball, balloon,
+// honey bomb, ember) are drawn by `src/game/fxArt.ts` — the same three flat
+// cel tones under ink that `celOrb` gave the old iron, lit in screen space.
 
 /**
  * How long a painted round is drawn, in world units per unit of zoom.
@@ -5675,33 +5044,37 @@ const drawProjectile = (ctx: CanvasRenderingContext2D, p: Projectile): void => {
   // Deterministic per-round seed: the wobble has to stay put frame to frame,
   // or a cannonball boils on its way across the sky.
   const seed = (p.uid % 97) * 3.7
+  // Sandbox Tower: what this round is drawn AS (a water blob or a pebble, a
+  // mud ball or a balloon…), remembered per round so its detonation can be
+  // drawn in the same substance. See `sightRound`.
+  const seen = sightRound(p)
+  const look = seen.look
 
   // ── Trail ──
   // Two characters, because a trail is half of what identifies a shot at speed.
-  // Anything with mass leaves DRAWN powder smoke — inked lobes that expand and
-  // thin with age — and the small fast rounds leave a tapered ink whisk. A
-  // cannonball wearing the archer's hard bright line is most of why the two
-  // weapons used to look alike in flight.
+  // Anything with mass leaves a trail of its own MATTER — drops of water, mud
+  // flecks, sand grains, honey — and the small fast rounds leave a tapered ink
+  // whisk. (The powder smoke that used to follow the cannonball is gone: none
+  // of the sandbox's rounds burn.)
   const n = p.trail.length / 2
   if (n >= 3) {
-    if (p.kind === 'ball' || p.kind === 'shell' || p.kind === 'bomb') {
-      const smoke = themedPalette('smoke')
-      const step = q === 'low' ? 3 : 2
-      for (let i = 0; i < n - 1; i += step) {
-        // 1 at the oldest sample, 0 at the round itself.
-        const age = 1 - i / (n - 1)
-        const pr = zoom * 0.075 * (0.5 + age * 1.15)
-        if (pr < 1.5) continue
-        ctx.globalAlpha = 0.4 * (1 - age * 0.82)
-        const px = worldToScreenX(p.trail[i * 2]!)
-        const py = worldToScreenY(p.trail[i * 2 + 1]!)
-        const puff = blob(px, py, pr, pr * 0.88, seed + i * 4.1, 0.2, 2.4, rich ? 16 : 10)
-        fillShape(ctx, puff, smoke.mid)
-        fillShape(ctx, shrink(puff, 0.6, px - pr * 0.3, py - pr * 0.34), smoke.light)
-        if (rich && age < 0.45) {
-          ink(ctx, puff, { width: pr * 0.2, color: smoke.dark, breakUp: 0.55, seed: seed + i })
-        }
+    const matter = look === 'water' ? ['#bff4ff', '#ffffff']
+      : look === 'mud' ? ['#7a5630', '#ad8250']
+        : look === 'pebble' ? ['#ecd9ac', null]
+          : look === 'clod' ? ['#d6b474', '#f6e2ae']
+            : look === 'honey' ? ['#f5a51d', '#ffdb66']
+              : null
+    if (matter) {
+      dropTrail(ctx, p.trail, worldToScreenX, worldToScreenY, zoom * (look === 'water' ? 0.045 : 0.035),
+        matter[0]!, matter[1] ?? null, look === 'honey' || look === 'mud' ? zoom * 0.12 : 0, q === 'low' ? 3 : 2)
+    } else if (look === 'balloon') {
+      // A balloon leaks nothing: a faint white speed whisk is all it leaves.
+      const path: Pt[] = []
+      for (let i = 0; i < p.trail.length; i += 2) {
+        path.push([worldToScreenX(p.trail[i]!), worldToScreenY(p.trail[i + 1]!)])
       }
+      ctx.globalAlpha = 0.45
+      inkStroke(ctx, path, zoom * 0.004, zoom * 0.06, '#ffffff', seed + 5)
       ctx.globalAlpha = 1
     } else {
       // A whisk: nocked thin at the tail, swelling toward the round. Drawn as
@@ -5712,10 +5085,13 @@ const drawProjectile = (ctx: CanvasRenderingContext2D, p: Projectile): void => {
         path.push([worldToScreenX(p.trail[i]!), worldToScreenY(p.trail[i + 1]!)])
       }
       const cold = p.kind === 'frost'
+      // Warm behind an ember, white-and-orange behind a foam dart or a
+      // toothpick, icy behind a frost shard.
+      const warm = look === 'ember'
       ctx.globalAlpha = cold ? 0.5 : 0.42
-      inkStroke(ctx, path, zoom * 0.005, zoom * (cold ? 0.1 : 0.07), cold ? '#9fe9ff' : '#ffd79a', seed + 5)
+      inkStroke(ctx, path, zoom * 0.005, zoom * (cold ? 0.1 : 0.07), cold ? '#9fe9ff' : warm ? '#ffd79a' : '#ffcf9e', seed + 5)
       ctx.globalAlpha = cold ? 0.9 : 0.75
-      inkStroke(ctx, path, zoom * 0.002, zoom * (cold ? 0.045 : 0.03), cold ? '#eafcff' : '#fff3d4', seed + 9)
+      inkStroke(ctx, path, zoom * 0.002, zoom * (cold ? 0.045 : 0.03), cold ? '#eafcff' : warm ? '#fff3d4' : '#ffffff', seed + 9)
       ctx.globalAlpha = 1
     }
   }
@@ -5766,100 +5142,48 @@ const drawProjectile = (ctx: CanvasRenderingContext2D, p: Projectile): void => {
     }
 
     case 'ball': {
-      // Cannonball: a solid iron round shot, deliberately circular and NOT
-      // aligned to its velocity. Roundness is the entire silhouette cue for a
-      // cannon — elongate it and it reads as a second, fatter arrow.
+      // Sandbox Tower. The player's squirt gun throws a WATER BLOB — a droplet
+      // with its tail streaming back along the flight; an ant catapult throws a
+      // grey PEBBLE (or, every third throw, a crumbling sand clod), tumbling.
+      // Both keep the cannonball's size and its round silhouette.
       const r = zoom * 0.11
-      if (r < 1.5) { ctx.fillStyle = IRON.mid; ctx.fillRect(x - 1, y - 1, 2, 2); break }
-
-      // Muzzle heat still clinging to the shot, drawn as a crescent on the
-      // TRAILING limb rather than sprayed as a glow: a hot edge says the ball
-      // just left a barrel, a halo says the ball is a light source.
-      const back = Math.atan2(p.vy, p.vx) + Math.PI
-      ctx.globalAlpha = 0.55
-      fillShape(ctx, blob(x + Math.cos(back) * r * 0.5, y - Math.sin(back) * r * 0.5, r * 0.72, r * 0.66, seed + 11, 0.2, 2.4, 12), '#e0621c')
-      ctx.globalAlpha = 1
-
-      celOrb(ctx, x, y, r, r * 0.98, IRON, seed, rich)
-      // A specular pip: one dot is all it takes to stop a filled shape reading
-      // as a flat disc.
-      fillShape(ctx, blob(x - r * 0.4, y - r * 0.44, r * 0.24, r * 0.2, seed + 4, 0.25, 2, 10), '#ffffff')
+      if (r < 1.5) { ctx.fillStyle = look === 'water' ? '#3cbde2' : '#9aa3ad'; ctx.fillRect(x - 1, y - 1, 2, 2); break }
+      if (look === 'water') {
+        drawWaterBlob(ctx, x, y, r, Math.atan2(-p.vy, p.vx), seed, rich, p.life)
+      } else {
+        drawPebble(ctx, x, y, r, p.life / 160, seed, rich, look === 'clod')
+      }
       break
     }
 
     case 'shell': {
-      // The mortar's round: a finned iron shell that points along its arc, with
-      // a fuse still burning at the tail. The fuse is the tell that this one is
-      // going to detonate rather than simply land.
-      const ang = Math.atan2(-p.vy, p.vx)
+      // The mud mortar's MUD BALL, flicking drips behind it — or, off the
+      // balloon launcher, a WATER BALLOON in one of four toy colours, knot
+      // trailing, squashing as it flies. Sized to the finned shell they replace.
       const u = zoom * 0.1
-      if (u < 1.5) { ctx.fillStyle = IRON.mid; ctx.fillRect(x - 1, y - 1, 2, 2); break }
-      ctx.save()
-      ctx.translate(x, y)
-      ctx.rotate(ang)
-
-      // Fins first, so the body sits over their roots.
-      ctx.fillStyle = IRON.mid
-      for (const f of [-1, 1]) {
-        ctx.beginPath()
-        ctx.moveTo(-u * 0.5, f * u * 0.25)
-        ctx.lineTo(-u * 1.5, f * u * 0.95)
-        ctx.lineTo(-u * 0.6, f * u * 0.2)
-        ctx.closePath()
-        ctx.fill()
-      }
-
-      celOrb(ctx, 0, 0, u * 1.35, u * 0.72, IRON, seed, rich)
-      // Driving band: the one bright horizontal on an otherwise dark form.
-      ctx.globalAlpha = 0.9
-      fillShape(ctx, [[-u * 0.25, -u * 0.66], [u * 0.1, -u * 0.66], [u * 0.1, u * 0.66], [-u * 0.25, u * 0.66]], '#c98a2a')
-      ctx.globalAlpha = 1
-
-      // Fuse spark — a tiny drawn star, not a glow.
-      const sp = 0.6 + 0.4 * Math.sin(p.life / 40)
-      ctx.fillStyle = '#ffe9b0'
-      ctx.beginPath()
-      for (let i = 0; i < 8; i++) {
-        const a = (i / 8) * Math.PI * 2
-        const rr = u * (i % 2 ? 0.16 : 0.46) * sp
-        const sx = -u * 1.6 + Math.cos(a) * rr
-        const sy = Math.sin(a) * rr
-        if (i === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy)
-      }
-      ctx.closePath()
-      ctx.fill()
-      ctx.restore()
+      if (u < 1.5) { ctx.fillStyle = look === 'balloon' ? '#ff6fae' : '#7a5630'; ctx.fillRect(x - 1, y - 1, 2, 2); break }
+      const ang = Math.atan2(-p.vy, p.vx)
+      if (look === 'balloon') drawBalloon(ctx, x, y, u * 1.08, ang, seen.hue, seed, rich, p.life)
+      else drawMudBall(ctx, x, y, u * 1.02, ang, seed, rich)
       break
     }
 
     case 'bomb': {
-      // Enemy ordnance: the same iron, but nose-down along its own velocity.
-      // The rotation is what sells the fall, and it is the player's cue to
-      // look up.
-      const ang = Math.atan2(-p.vy, p.vx)
+      // A bumblebee's HONEY BOMB: a golden drop with honey hanging off its
+      // belly. The drips hang straight down whatever it is doing — the
+      // player's cue to look up.
       const u = zoom * 0.1
-      if (u < 1.5) { ctx.fillStyle = IRON.mid; ctx.fillRect(x - 1, y - 1, 2, 2); break }
-      ctx.save()
-      ctx.translate(x, y)
-      ctx.rotate(ang)
-      ctx.fillStyle = '#8f98a4'
-      for (const f of [-1, 1]) {
-        ctx.beginPath()
-        ctx.moveTo(-u * 0.6, f * u * 0.2)
-        ctx.lineTo(-u * 1.6, f * u * 0.9)
-        ctx.lineTo(-u * 1.45, f * u * 0.15)
-        ctx.closePath()
-        ctx.fill()
-      }
-      celOrb(ctx, 0, 0, u * 1.25, u * 0.7, IRON, seed, rich)
-      ctx.restore()
+      if (u < 1.5) { ctx.fillStyle = '#f5a51d'; ctx.fillRect(x - 1, y - 1, 2, 2); break }
+      drawHoneyBomb(ctx, x, y, u * 0.98, seed, rich, p.life)
       break
     }
 
     case 'fire': {
-      // Molotov: a tumbling bottle wrapped in its own flame. The flame is the
-      // same fan the guns fire, pointed at the sky and re-cut every 90 ms, so
-      // burning fuel looks the same wherever it appears in the game.
+      // A firefly's GLOWING EMBER (and the catapult's late pitch shot): a
+      // tumbling coal under its own small flame. The flame is the same fan the
+      // guns used to fire, pointed at the sky and re-cut every 90 ms, so
+      // burning looks the same wherever it appears — the blocks it lights
+      // still burn the old way.
       const u = zoom * 0.1
       const spin = (p.life / 90) % (Math.PI * 2)
       const fire = themedPalette('fire')
@@ -5867,29 +5191,17 @@ const drawProjectile = (ctx: CanvasRenderingContext2D, p: Projectile): void => {
 
       ctx.save()
       ctx.translate(x, y)
-      // Flame climbs, whichever way the bottle is tumbling.
-      const fan = flameFan(u * 3.1, u * 0.9, 0.95, 3, hold * 4.3 + seed, rich ? 18 : 12)
+      // Flame climbs, whichever way the ember is tumbling.
+      const fan = flameFan(u * 2.5, u * 0.7, 0.9, 3, hold * 4.3 + seed, rich ? 18 : 12)
       ctx.rotate(-Math.PI / 2)
       fillShape(ctx, fan, fire.dark)
       fillShape(ctx, shrink(fan, 0.72), fire.mid)
       fillShape(ctx, shrink(fan, 0.4), fire.light)
       fillShape(ctx, shrink(fan, 0.18), fire.accent)
-      if (rich) ink(ctx, fan, { width: u * 0.3, color: '#3a1206', breakUp: 0.5, seed: seed + 6 })
+      if (rich) ink(ctx, fan, { width: u * 0.26, color: '#3a1206', breakUp: 0.5, seed: seed + 6 })
       ctx.restore()
 
-      ctx.save()
-      ctx.translate(x, y)
-      ctx.rotate(spin)
-      const glass: Pt[] = [
-        [-u * 0.42, u * 0.85], [-u * 0.5, -u * 0.2], [-u * 0.2, -u * 0.75],
-        [u * 0.2, -u * 0.75], [u * 0.5, -u * 0.2], [u * 0.42, u * 0.85]
-      ]
-      fillShape(ctx, glass, '#3f7a34')
-      fillShape(ctx, shrink(glass, 0.5, -u * 0.25, 0), '#7fc063')
-      if (rich) ink(ctx, glass, { width: u * 0.22, color: '#14260f', breakUp: 0.3, seed: seed + 1 })
-      ctx.fillStyle = '#e8dcc0'
-      ctx.fillRect(-u * 0.18, -u * 1.15, u * 0.36, u * 0.45)
-      ctx.restore()
+      drawEmberCore(ctx, x, y + u * 0.15, u * 0.62, spin, seed, rich)
       break
     }
 
@@ -6776,11 +6088,16 @@ const tierPlate = (tier: number, size: number): PlateSprite => {
   fill.addColorStop(0, ts.plateTop)
   fill.addColorStop(1, ts.plateBottom)
   c.fillStyle = fill
-  roundRect(c, pad, pad, q * 0.32, q * 0.24, q * 0.06)
+  // A moulded plastic badge rather than a stamped iron one: rounder corners, a
+  // glossy top half, and the warm ink keyline every toy in the sandbox wears —
+  // so a green plate on sand and a blue one on the sky still have an edge.
+  roundRect(c, pad, pad, q * 0.32, q * 0.24, q * 0.09)
   c.fill()
-  // A dark keyline, so a green plate on grass and a blue one on a winter sky
-  // still have an edge.
-  c.strokeStyle = 'rgba(10,14,24,0.85)'
+  c.fillStyle = 'rgba(255,255,255,0.38)'
+  roundRect(c, pad + q * 0.03, pad + q * 0.022, q * 0.26, q * 0.085, q * 0.04)
+  c.fill()
+  roundRect(c, pad, pad, q * 0.32, q * 0.24, q * 0.09)
+  c.strokeStyle = 'rgba(59,42,33,0.92)'
   c.lineWidth = Math.max(1, q * 0.03)
   c.stroke()
   c.font = `900 ${Math.round(q * 0.24)}px sans-serif`
@@ -6856,6 +6173,11 @@ const drawTierTwinkle = (
   ctx.lineTo(x - r, y)
   ctx.lineTo(x - w, y - w)
   ctx.closePath()
+  ctx.fill()
+  // A white-hot core: the glint off shiny plastic, not a star on a shield.
+  ctx.fillStyle = '#ffffff'
+  ctx.beginPath()
+  ctx.arc(x, y, w * 0.9, 0, Math.PI * 2)
   ctx.fill()
   ctx.restore()
 }
@@ -7541,6 +6863,9 @@ export const drawScene = (
   if (!fxBakedSky) drawSky(ctx, w, h)
   renderBackground(w, h, dpr)
   if (bgCanvas) ctx.drawImage(bgCanvas, 0, 0, w, h)
+  // Summer-night fireflies over the flower bed: a dozen small blits of one
+  // baked glow, nothing by day, and never on the baked-sky (phone) profile.
+  if (!fxBakedSky) paintFireflies(ctx, w, h, worldToScreenY(0), t)
 
   const zoom = getZoom()
   const rect = viewRect()
@@ -7561,8 +6886,10 @@ export const drawScene = (
     const x = worldToScreenX(d.x)
     const y = worldToScreenY(d.y)
     const g = ctx.createRadialGradient(x, y, 0, x, y, d.r * zoom)
-    g.addColorStop(0, `rgba(24,18,12,${a})`)
-    g.addColorStop(1, 'rgba(24,18,12,0)')
+    // Sandbox Tower: a damp, scuffed patch of wet sand (`#8d673a`-ish), not a
+    // black scorch — nothing in the sandbox burns a crater.
+    g.addColorStop(0, `rgba(112,78,40,${a})`)
+    g.addColorStop(1, 'rgba(112,78,40,0)')
     ctx.fillStyle = g
     ctx.beginPath(); ctx.ellipse(x, y, d.r * zoom, d.r * zoom * 0.34, 0, 0, Math.PI * 2); ctx.fill()
   }
@@ -7977,13 +7304,16 @@ export const paintWorldBlock = (
 }
 
 /**
- * The battlefield's meadow, for a test scene.
+ * The battlefield's ground strip — the sand — for a test scene.
  *
- * Returns FALSE when there is no painted strip — art overrides off, or the
- * bitmap still decoding — so the caller keeps its own drawn ground rather than
- * getting a blank band. That is the whole contract: a scene that assumed the
- * painting was there rendered its tower standing on nothing for the first
- * second of every load.
+ * The painted strip when there is one; otherwise the drawn sand, baked once
+ * per band height into a tile (`sandTile`), so a demo that repaints every
+ * frame pays one mirrored blit rather than the sand's gradients.
+ *
+ * Returns FALSE only when neither exists (no 2D canvas at all), so the caller
+ * keeps its own drawn ground rather than getting a blank band. That is the
+ * whole contract: a scene that assumed the painting was there rendered its
+ * tower standing on nothing for the first second of every load.
  *
  * Goes through `tileBand`, not a plain `drawImage` loop, so a bench scene gets
  * the same mirrored repeat the battlefield does — the seam the mirroring exists
@@ -7995,8 +7325,13 @@ export const paintMeadowBand = (
   x: number, y: number, w: number, h: number, offset = 0
 ): boolean => {
   const meadow = bgSprite('grass')
-  if (!meadow?.naturalWidth) return false
-  tileBand(ctx, meadow, x, y, w, h, offset)
+  if (meadow?.naturalWidth) {
+    tileBand(ctx, meadow, x, y, w, h, offset)
+    return true
+  }
+  const sand = sandTile(h)
+  if (!sand) return false
+  tileBand(ctx, sand, x, y, w, h, offset)
   return true
 }
 
@@ -8094,6 +7429,13 @@ export const gunSpanForTier = (tier: number): number =>
  */
 export const fixtureSpanForCellTier = (tier: number): number =>
   tier <= 1 ? 1 : tier === 2 ? 1.2 : tier === 3 ? 1.28 : 1.34
+
+/** The roof cap a roofed block wears, centred on the cell at (cx, cy). */
+export const paintRoof = (
+  ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number
+): void => {
+  drawRoof(ctx, cx, cy, size)
+}
 
 /** The riveted steel plate that says how deep a weld goes. */
 export const paintTierPlate = (

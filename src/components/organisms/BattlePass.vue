@@ -150,20 +150,20 @@ const onClaim = (stage: number, sourceEl: HTMLElement) => {
     grid-template-columns: repeat(10, minmax(0, 1fr))
 
 .bp-card
-  background: rgba(0, 0, 0, 0.4)
-  border-color: rgba(255, 255, 255, 0.15)
+  background: var(--ui-well)
+  border-color: rgba(255, 255, 255, 0.2)
   cursor: not-allowed
   transition: all 0.2s ease
 
   &.is-claimed
-    background: rgba(80, 170, 80, 0.4)
-    border-color: rgba(120, 220, 120, 0.6)
+    background: rgba(67, 182, 73, 0.55)
+    border-color: rgba(127, 220, 94, 0.8)
     opacity: 0.6
 
   &.is-unlocked
-    background: linear-gradient(180deg, #ffcd00, #f7a000)
+    background: linear-gradient(180deg, var(--btn-yellow-from), var(--btn-yellow-to))
     border-color: #fff7d6
-    box-shadow: 0 0 8px rgba(255, 200, 0, 0.5)
+    box-shadow: 0 0 8px rgba(255, 200, 0, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.4)
     cursor: pointer
 
   &.is-locked

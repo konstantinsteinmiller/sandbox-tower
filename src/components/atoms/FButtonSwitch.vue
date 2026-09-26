@@ -29,16 +29,16 @@ const onClick = (value: T) => {
 <template lang="pug">
   div.button-switch.relative.inline-block
     //- 3D drop-shadow base
-    div.absolute.inset-0.translate-y-1.rounded-xl(class="bg-[#1a2b4b]")
+    div.absolute.inset-0.translate-y-1.rounded-xl(class="bg-[var(--ui-drop)]")
     //- Pill body
     div.relative.flex.rounded-xl.border-2.overflow-hidden.shadow-lg(
-      class="bg-gradient-to-b from-[#0f1a30] to-[#1a2b4b] border-[#0f1a30]"
+      class="bg-gradient-to-b from-[var(--ui-well-deep)] to-[var(--ui-well)] border-[var(--ui-line)]"
     )
       div.relative.button-wrap(v-for="option in options" :key="option.value")
         button.relative.cursor-pointer.transition-all.font-black.game-text.leading-none(
           class="px-3 py-1.5 text-xs sm:text-sm active:scale-95"
           :class="modelValue === option.value \
-            ? 'bg-gradient-to-b from-[#ffcd00] to-[#f7a000] text-white shadow-inner' \
+            ? 'bg-gradient-to-b from-[var(--btn-yellow-from)] to-[var(--btn-yellow-to)] text-white shadow-inner' \
             : 'text-white/60 hover:text-white'"
           @click="onClick(option.value)"
         )

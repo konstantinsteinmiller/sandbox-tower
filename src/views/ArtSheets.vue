@@ -27,7 +27,7 @@ import { prependBaseUrl } from '@/utils/function'
 /**
  * `/art-sheets` — the contact-sheet bench.
  *
- * Tower Siege has no art folder. Every block, enemy and engine is a few hundred
+ * Sandbox Tower has no art folder. Every block, enemy and engine is a few hundred
  * canvas operations, which is exactly what you want in a bundle and exactly
  * what you cannot hand to somebody who paints. This screen bakes the whole cast
  * onto the lattice described in `artSheet.ts` and writes the sheets into

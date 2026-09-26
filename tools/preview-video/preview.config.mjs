@@ -1,5 +1,5 @@
 /**
- * ─── Tower Siege preview-video configuration ────────────────────────────────
+ * ─── Sandbox Tower preview-video configuration ────────────────────────────────
  *
  *   pnpm preview:video                       # every format (14 clips, ~40 min)
  *   pnpm preview:video --formats crazygames  # one deliverable
@@ -14,7 +14,7 @@
  *
  * ── TWO GAMES IN ONE BUNDLE ──
  *
- * Tower Siege ships a desktop tower game and a phone Drop & Merge board out of
+ * Sandbox Tower ships a desktop tower game and a phone Drop & Merge board out of
  * the same build (`src/use/useMobileFit.ts`), and which one a device gets is
  * decided at runtime. The clips follow the same rule, so every clip shows the
  * game that shape of device actually plays:
@@ -34,7 +34,7 @@ export default {
   // The <title> the port-ownership check expects. A stale dev server from
   // another project answers on this port perfectly happily, and you find out by
   // watching thirty seconds of somebody else's game.
-  title: 'Tower Siege',
+  title: 'Sandbox Tower',
 
   // The dev server, NOT a build: the scenarios drive the live simulation
   // through `import('/src/use/useTowerGame.ts')` (a built bundle has no such
@@ -175,7 +175,7 @@ export default {
    */
   async onPageReady(ctx) {
     await ctx.page.route(
-      (url) => /tower-siege-leaderboard|workers\.dev/.test(url.href),
+      (url) => /sandbox-tower-leaderboard|workers\.dev/.test(url.href),
       (route) => route.abort()
     )
   }

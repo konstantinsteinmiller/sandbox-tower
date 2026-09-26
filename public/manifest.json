@@ -1,7 +1,7 @@
 {
-  "name": "Tower Siege",
-  "short_name": "Tower Siege",
-  "description": "Build a tower of cannons and crates, survive endless waves of siege, and rebuild it taller every run.",
+  "name": "Sandbox Tower",
+  "short_name": "Sandbox Tower",
+  "description": "Build a sandcastle of toy blasters, squash endless waves of garden bugs, and rebuild it taller every run.",
   "display": "standalone",
   "display_override": [
     "fullscreen",
@@ -10,8 +10,8 @@
   "orientation": "any",
   "start_url": "./",
   "scope": "./",
-  "theme_color": "#0a1224",
-  "background_color": "#0a1224",
+  "theme_color": "#6fc3f7",
+  "background_color": "#f6e2ae",
   "icons": [
     {
       "src": "images/logo/logo_192x192.png",

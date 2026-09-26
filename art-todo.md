@@ -1,6 +1,13 @@
-# Tower Siege — Art Manifest
+# Sandbox Tower — Art Manifest
 
-Tower Siege ships with **zero gameplay bitmaps**. Every block, enemy,
+> **Note:** this manifest's block/enemy path list below still reflects the old
+> `tower-siege` naming (paths like `public/images/blocks/wood.webp`, not the
+> reskinned ids' final look). It will be regenerated against the reskinned
+> cast during the `art-generation-pipeline` step — treat the paths as
+> structurally correct (they key on the unchanged block/enemy ids) but the
+> descriptive text as pre-reskin.
+
+Sandbox Tower ships with **zero gameplay bitmaps**. Every block, enemy,
 projectile and background layer is drawn procedurally in `src/use/useTowerArt.ts`
 from the palettes in `src/game/art.ts`. That is a deliberate choice, not a
 placeholder state: it keeps the download tiny and keeps the art crisp at any DPR

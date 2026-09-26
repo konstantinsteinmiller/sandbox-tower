@@ -59,10 +59,10 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
       class="group relative w-full inline-block cursor-pointer select-none transition-all duration-75 active:scale-[0.98] hover:scale-[1.02] touch-manipulation focus:outline-none"
     )
       //- 3D Shadow
-      span(class="absolute inset-0 translate-y-[4px] rounded-2xl bg-[#1a2b4b]")
+      span(class="absolute inset-0 translate-y-[4px] rounded-2xl bg-[var(--btn-yellow-drop)]")
 
       //- Main Button Body
-      span.f-select__body(class="relative flex items-center justify-between rounded-2xl border-[3px] border-[#0f1a30] bg-gradient-to-b from-[#ffcd00] to-[#f7a000]")
+      span.f-select__body(class="relative flex items-center justify-between rounded-2xl border-[3px] border-[var(--ui-line)] bg-gradient-to-b from-[var(--btn-yellow-from)] to-[var(--btn-yellow-to)]")
         //- Inner Top Shine
         span(class="absolute inset-x-0 top-0 h-1/2 rounded-t-xl bg-white/25")
 
@@ -81,7 +81,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
     transition(name="pop")
       div(
         v-if="isOpen"
-        class="absolute z-1 left-0 right-0 mt-3 rounded-2xl border-[3px] border-[#0f1a30] bg-[#1a2b4b] shadow-2xl overflow-hidden"
+        class="absolute z-1 left-0 right-0 mt-3 rounded-2xl border-[3px] border-[var(--ui-line)] bg-[var(--ui-panel)] shadow-2xl overflow-hidden"
       )
         //- Scrollable Area
         div(
@@ -93,7 +93,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
             :key="option.value"
             @click="selectOption(option.value)"
             class="group/item relative mb-1 last:mb-0 cursor-pointer p-3 rounded-xl transition-all duration-75 active:scale-[0.97]"
-            :class="modelValue === option.value ? 'bg-[#50aaff]' : 'hover:bg-[#2266ff]'"
+            :class="modelValue === option.value ? 'bg-[var(--btn-orange-to)]' : 'hover:bg-[var(--ui-panel-hover)]'"
           )
             //- Option Shine (only for selected/hover)
             span(class="absolute inset-x-0 top-0 h-1/2 rounded-t-xl bg-white/10")
@@ -128,17 +128,17 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
     width: 12px
 
   &::-webkit-scrollbar-track
-    background: #0a1425
+    background: var(--ui-well-deep)
     border-radius: 10px
     margin: 8px
 
   &::-webkit-scrollbar-thumb
-    background: #50aaff
-    border: 3px solid #0f1a30
+    background: var(--btn-orange-from)
+    border: 3px solid var(--ui-line)
     border-radius: 10px
 
     &:hover
-      background: #2266ff
+      background: var(--btn-orange-to)
 
 /* Transition Animations */
 .pop-enter-active, .pop-leave-active

@@ -48,8 +48,8 @@ export const version: string = APP_VERSION
 
 // ─── Persisted settings ────────────────────────────────────────────────────
 //
-// Tower Siege persists FIVE user settings — difficulty, sound volume, music
-// volume, locale, music track — as fields inside the single `tower_state`
+// Sandbox Tower persists FIVE user settings — difficulty, sound volume, music
+// volume, locale, music track — as fields inside the single `sandbox_state`
 // blob (keys catalogued in `src/keys.ts`), never as their own localStorage
 // entries. On a platform build the blob goes through the patched
 // `SaveManager.setItem` and is mirrored to the SDK cloud store automatically.

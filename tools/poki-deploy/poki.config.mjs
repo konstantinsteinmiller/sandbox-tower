@@ -6,15 +6,18 @@
 
 export default {
   team: 'hyperg8',
-  gameName: 'Tower Siege',
+  gameName: 'Sandbox Tower',
 
-  /** OPTIONAL. Left out on purpose for the first run: the pipeline resolves the
-   *  game by `gameName` on `https://app.poki.dev/<team>` and prints the id it
-   *  found, which then gets pasted here to skip the lookup next time. */
-  gameId: 'e0ae9b25-1aea-4325-9ae5-db6b361cbc99',
+  /** OPTIONAL. Left blank on purpose during the reskin: the old value here was
+   *  tower-siege's Poki game id, and reusing it would push this game's build
+   *  onto the OLD game's P4D entry. The pipeline resolves the game by
+   *  `gameName` on `https://app.poki.dev/<team>` and prints the id it found
+   *  once Sandbox Tower has its own P4D entry, which then gets pasted here to
+   *  skip the lookup next time. */
+  gameId: undefined,
 
   /** The project's OWN build script, always. `build:poki` ends with the
-   *  `cd dist && tar -a -cf ../tower-siege-poki.zip *` idiom every portal
+   *  `cd dist && tar -a -cf ../sandbox-tower-poki.zip *` idiom every portal
    *  script in this repo ends with — which from Git Bash is GNU tar and writes
    *  a TAR named `.zip`. That tail is harmless here: whatever it drops lands
    *  inside `dist`, `repack` excludes `.zip` from the archive it builds, and
@@ -22,7 +25,7 @@ export default {
    *  always this pipeline's archive. */
   build: 'pnpm build:poki',
   dist: 'dist',
-  zip: 'dist/tower-siege-poki.zip',
+  zip: 'dist/sandbox-tower-poki.zip',
 
   repack: true,
   /** `dist` may carry sibling `-original` backups from the image compressor
@@ -32,7 +35,7 @@ export default {
 
   /** What the version is called in P4D. The number is the only thread tying a
    *  live build back to a commit. */
-  versionName: (version) => `Tower Siege ${version}`,
+  versionName: (version) => `Sandbox Tower ${version}`,
 
   /** Extra hosts the gates and the runtime sweep should accept.
    *
@@ -72,7 +75,7 @@ export default {
 
   /** Expressions evaluated INSIDE the game's iframe during the QA pass. */
   hooks: {
-    /** Everything this game persists lives in ONE blob (`tower_state`, see
+    /** Everything this game persists lives in ONE blob (`sandbox_state`, see
      *  `useTowerState`), so a save that survives a reload is the whole
      *  contract. Key names plus value lengths rather than values: the blob
      *  carries a run snapshot whose timestamps move on every boot, and

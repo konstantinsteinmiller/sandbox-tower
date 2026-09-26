@@ -24,7 +24,7 @@ import type { Block } from '@/game/types'
 const loadGame = async (levels: Record<string, number> = {}) => {
   vi.resetModules()
   localStorage.clear()
-  localStorage.setItem('tower_state', JSON.stringify({ ts_tech: { levels } }))
+  localStorage.setItem('sandbox_state', JSON.stringify({ ts_tech: { levels } }))
   const g = await import('@/use/useTowerGame')
   g.startRun()
   g.wood.value = 99999
@@ -489,11 +489,11 @@ describe('settling merges outside placement', () => {
     // The state layer batches writes, so the blob is not in storage yet.
     const { flushSaveNow } = await import('@/use/useSaveStatus')
     await flushSaveNow()
-    const snapshot = localStorage.getItem('tower_state')!
+    const snapshot = localStorage.getItem('sandbox_state')!
 
     // Same save, on the build that merges.
     vi.resetModules()
-    localStorage.setItem('tower_state', snapshot)
+    localStorage.setItem('sandbox_state', snapshot)
     const g = await import('@/use/useTowerGame')
 
     expect(g.resumeRun()).toBe(true)
@@ -543,7 +543,7 @@ describe('selling tech ranks', () => {
   const loadProgress = async (levels: Record<string, number>, coins = 5000) => {
     vi.resetModules()
     localStorage.clear()
-    localStorage.setItem('tower_state', JSON.stringify({
+    localStorage.setItem('sandbox_state', JSON.stringify({
       ts_tech: { levels }, ts_coins: coins
     }))
     const mod = await import('@/use/useTowerProgress')

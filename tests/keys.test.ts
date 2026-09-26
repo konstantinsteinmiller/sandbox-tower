@@ -25,7 +25,7 @@ describe('SAVE_KEYS values are stable', () => {
 
 describe('the persisted surface is exactly one state blob plus the meta blob', () => {
   it('accepts the state blob and the meta blob', () => {
-    expect(STATE_KEY).toBe('tower_state')
+    expect(STATE_KEY).toBe('sandbox_state')
     expect(isPayloadKey(STATE_KEY)).toBe(true)
     expect(isPayloadKey(META_KEY)).toBe(true)
   })

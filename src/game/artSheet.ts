@@ -11,7 +11,7 @@ import type { ProjectileKind } from '@/game/types'
 /**
  * ─── Art sheet manifest ─────────────────────────────────────────────────────
  *
- * Tower Siege draws everything procedurally, which is wonderful for payload and
+ * Sandbox Tower draws everything procedurally, which is wonderful for payload and
  * useless for one specific job: handing the art to somebody — or something —
  * that paints. There is no folder of PNGs to send. This module describes a set
  * of CONTACT SHEETS that bake the whole cast onto a strict pixel lattice, so
@@ -179,13 +179,13 @@ const SIEGE_ART: Record<string, string> = {
 }
 
 const ROUND_ART: Record<string, string> = {
-  bolt: 'an archer’s arrow in flight, pale ash shaft, feather fletching, a bright leaf-shaped steel broadhead, pointing right',
-  quarrel: 'a siege ballista’s quarrel: SHORT and heavy, a thick dark oiled timber shaft, a cord binding at the socket, stiff cut-leather vanes and a squat blunt four-sided iron bodkin head. It must not be mistakable for the archer’s arrow, pointing right',
-  ball: 'a solid iron cannonball',
-  shell: 'a finned iron mortar shell with a lit fuse, pointing along its arc',
-  bomb: 'a finned iron aerial bomb falling nose-down',
-  fire: 'a lit molotov bottle tumbling, rag burning',
-  frost: 'a shard of magical ice'
+  bolt: 'a toy foam dart in flight: a fat orange foam shaft, a blue rubber suction cup on the front, two little blue fins at the tail, pointing right',
+  quarrel: 'a party toothpick fired by an ant-built rubber-band crossbow: thin pale wood, sharp at both ends, a red cellophane frill round the tail. It must not be mistakable for the foam dart, pointing right',
+  ball: 'a squirt-gun water blob: a turquoise droplet with a white glint, tail streaming back (the ant catapult throws the same-sized round as a grey pebble or a sand clod)',
+  shell: 'a lumpy wet mud ball flicking two drips (the balloon launcher fires the same-sized round as a water balloon in pink, blue, green or yellow, knot trailing)',
+  bomb: 'a bumblebee’s honey bomb: a golden honey drop with drips hanging off its belly',
+  fire: 'a firefly’s glowing ember: a tumbling coal under its own small flame',
+  frost: 'an ice-pop shard of blue ice'
 }
 
 export interface SheetCell {
@@ -527,13 +527,13 @@ const siegeCells = (): SheetCell[] =>
 // it is an invitation for an image model to fill the hole with something the
 // game does not have. It is recorded in the README instead.
 const ROUNDS: { round: ProjectileKind; label: string; slot: boolean; note: string }[] = [
-  { round: 'bolt', label: 'arrow', slot: true, note: 'The most-fired round in the game — the archer post and both bolt-throwing ships.' },
-  { round: 'quarrel', label: 'quarrel', slot: true, note: 'The siege ballista’s round, and the one shot the player has to see coming and answer.' },
-  { round: 'ball', label: 'ball', slot: true, note: 'Cannonball.' },
-  { round: 'shell', label: 'shell', slot: true, note: 'Mortar shell — finned, fuse lit, points along its arc.' },
-  { round: 'bomb', label: 'bomb', slot: true, note: 'Enemy ordnance, nose-down along its fall.' },
-  { round: 'fire', label: 'fire', slot: true, note: 'Molotov, tumbling.' },
-  { round: 'frost', label: 'frost', slot: false, note: 'The frost round is a live particle emitter; this is only its core shard.' }
+  { round: 'bolt', label: 'foam dart', slot: true, note: 'The most-fired round in the game — the dart blaster, the paper boat and the rubber duck.' },
+  { round: 'quarrel', label: 'toothpick', slot: true, note: 'The rubber-band crossbow’s round, and the one shot the player has to see coming and answer.' },
+  { round: 'ball', label: 'water blob', slot: true, note: 'Squirt-gun water blob (hostile: catapult pebble / sand clod).' },
+  { round: 'shell', label: 'mud ball', slot: true, note: 'Mud-mortar mud ball (balloon launcher: water balloon, knot trailing).' },
+  { round: 'bomb', label: 'honey bomb', slot: true, note: 'Bumblebee honey bomb — drips hang straight down.' },
+  { round: 'fire', label: 'ember', slot: true, note: 'Firefly ember, tumbling under its own flame.' },
+  { round: 'frost', label: 'ice shard', slot: false, note: 'The frost round is a live particle emitter; this is only its core shard.' }
 ]
 
 /**

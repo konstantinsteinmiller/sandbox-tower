@@ -42,7 +42,7 @@ npx wrangler whoami
 ## 3. Create the database
 
 ```powershell
-npx wrangler d1 create tower-siege-leaderboard
+npx wrangler d1 create sandbox-tower-leaderboard
 ```
 
 It prints a block like this:
@@ -50,7 +50,7 @@ It prints a block like this:
 ```toml
 [[d1_databases]]
 binding = "DB"
-database_name = "tower-siege-leaderboard"
+database_name = "sandbox-tower-leaderboard"
 database_id = "0f2c9a51-....-............"
 ```
 
@@ -73,7 +73,7 @@ answer `y`. You should see two `CREATE TABLE` statements and one `CREATE INDEX`
 execute.
 
 Verify from the dashboard if you like: **Storage & Databases → D1 →
-tower-siege-leaderboard → Tables** should now list `scores` and `board_cache`.
+sandbox-tower-leaderboard → Tables** should now list `scores` and `board_cache`.
 
 ## 5. Deploy
 
@@ -85,8 +85,8 @@ On a brand-new account this asks you to register a `workers.dev` subdomain
 first — pick anything, it becomes part of the URL. When it finishes it prints:
 
 ```
-Published tower-siege-leaderboard
-  https://tower-siege-leaderboard.<your-subdomain>.workers.dev
+Published sandbox-tower-leaderboard
+  https://sandbox-tower-leaderboard.<your-subdomain>.workers.dev
 ```
 
 **That URL is what the game needs.** Keep it.
@@ -95,12 +95,12 @@ Published tower-siege-leaderboard
 
 ```powershell
 # The board — empty at this point, which is the correct answer.
-Invoke-RestMethod https://tower-siege-leaderboard.<your-subdomain>.workers.dev/top
+Invoke-RestMethod https://sandbox-tower-leaderboard.<your-subdomain>.workers.dev/top
 
 # Post a fake score and get a rank back.
 $body = @{ id = 'testplayer01'; name = 'Tester'; score = 137; wave = 21 } | ConvertTo-Json
 Invoke-RestMethod -Method Post -ContentType 'application/json' -Body $body `
-  https://tower-siege-leaderboard.<your-subdomain>.workers.dev/score
+  https://sandbox-tower-leaderboard.<your-subdomain>.workers.dev/score
 ```
 
 The first returns `entries: {}` / `total: 0`. The second returns
@@ -112,7 +112,7 @@ Sanity-check the guards while you are here — both should be **rejected**:
 # 422: a score no run could produce at that wave.
 $bad = @{ id = 'testplayer01'; name = 'Cheat'; score = 999999999; wave = 3 } | ConvertTo-Json
 Invoke-RestMethod -Method Post -ContentType 'application/json' -Body $bad `
-  https://tower-siege-leaderboard.<your-subdomain>.workers.dev/score
+  https://sandbox-tower-leaderboard.<your-subdomain>.workers.dev/score
 
 # 429: two writes for the same id inside the 3 s cooldown.
 ```
@@ -120,10 +120,10 @@ Invoke-RestMethod -Method Post -ContentType 'application/json' -Body $bad `
 Delete the test row when you are done:
 
 ```powershell
-npx wrangler d1 execute tower-siege-leaderboard --remote `
+npx wrangler d1 execute sandbox-tower-leaderboard --remote `
   --command "DELETE FROM scores WHERE id = 'testplayer01'"
 # The cached blob still holds the old table until the next write rebuilds it:
-npx wrangler d1 execute tower-siege-leaderboard --remote `
+npx wrangler d1 execute sandbox-tower-leaderboard --remote `
   --command "DELETE FROM board_cache"
 ```
 
@@ -132,7 +132,7 @@ npx wrangler d1 execute tower-siege-leaderboard --remote `
 In the repo root, edit `.env`:
 
 ```
-VITE_LEADERBOARD_URL=https://tower-siege-leaderboard.<your-subdomain>.workers.dev
+VITE_LEADERBOARD_URL=https://sandbox-tower-leaderboard.<your-subdomain>.workers.dev
 ```
 
 Leave `VITE_LEADERBOARD_SECRET` empty for now (see "Signed submissions" below).
@@ -230,11 +230,11 @@ Then `npm run deploy` again.
 ## Watching it in production
 
 * **Live logs:** `npx wrangler tail` (from `worker/`), or the dashboard under
-  **Workers & Pages → tower-siege-leaderboard → Logs**.
+  **Workers & Pages → sandbox-tower-leaderboard → Logs**.
 * **Quota use:** same page, **Metrics**. The numbers to watch are requests/day
   (100k) and D1 rows written/day (100k). Reads are effectively free under this
   design — see the table in `README.md`.
-* **The data:** **Storage & Databases → D1 → tower-siege-leaderboard → Console**
+* **The data:** **Storage & Databases → D1 → sandbox-tower-leaderboard → Console**
   lets you run SQL straight from the browser, e.g.
   `SELECT * FROM scores ORDER BY score DESC LIMIT 20;`
 
@@ -248,9 +248,9 @@ duplicates from another player's rows.
 
 ```powershell
 cd worker
-npx wrangler d1 execute tower-siege-leaderboard --remote --command "DELETE FROM scores"
+npx wrangler d1 execute sandbox-tower-leaderboard --remote --command "DELETE FROM scores"
 # The materialised top-N is a separate row and does not clear itself.
-npx wrangler d1 execute tower-siege-leaderboard --remote --command "DELETE FROM board_cache"
+npx wrangler d1 execute sandbox-tower-leaderboard --remote --command "DELETE FROM board_cache"
 ```
 
 If you would rather keep the highest score per name, and you accept that every
@@ -311,7 +311,7 @@ through. If you do create a named board in a portal console, set
    no id, so its players are keyed on tier 2/3 and merely labelled with it.
 2. **The uuid in the save blob** (`ts_player_id`) — rides the cloud save, so it
    follows the player between devices.
-3. **The uuid in its own localStorage key** (`towersiege_uid`) — deliberately
+3. **The uuid in its own localStorage key** (`sandboxtower_uid`) — deliberately
    outside the `ts_`-prefixed blob that `SaveMergePolicy` syncs, so a cloud
    hydrate arriving with an older blob cannot replace it. This is the tier that
    stops duplicate rows.
@@ -333,7 +333,7 @@ wins forever:
 | 3 | `ts_anon_name` | generated: `Watcher333915` — a random word and six random digits |
 
 The generated name is minted once and cached in both the save blob and a
-standalone `towersiege_name` key, so replacing the blob (a cloud hydrate) does
+standalone `sandboxtower_name` key, so replacing the blob (a cloud hydrate) does
 not rename the player. Nothing posts as `Anon`; a board of identical
 placeholders tells a player nothing, not even which row is theirs.
 

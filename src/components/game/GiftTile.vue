@@ -696,8 +696,9 @@ defineExpose({ arm, disarm, placeAt, armed })
   border: none
   // Square where it meets the tile's inner corners.
   border-radius: 0 0 8px 8px
-  background: rgba(8, 14, 28, 0.88)
-  color: #dbe6ff
+  // --ui-drop at 0.9: the tray's own pool-blue, a shade under the tile.
+  background: rgba(18, 52, 99, 0.9)
+  color: var(--ui-text-soft)
   text-transform: none
   letter-spacing: 0
 
@@ -718,10 +719,13 @@ defineExpose({ arm, disarm, placeAt, armed })
   height: 0.5em
   border-radius: 999px
 
+  // Sand and grey-blue pebbles, matching IconWood / IconStone (as in BuildTray).
   &.is-wood
-    background-color: #a9682f
+    background-color: #e3c07e
+    box-shadow: inset 0 0 0 1px #8d673a
   &.is-stone
-    background-color: #8b939d
+    background-color: #8594a6
+    box-shadow: inset 0 0 0 1px #34404e
   &.is-gold
     background-color: #ffd93c
 
@@ -749,7 +753,7 @@ defineExpose({ arm, disarm, placeAt, armed })
   height: 18px
   padding: 0 4px
   border-radius: 999px
-  background: #d8321e
+  background: var(--btn-red-to)
   color: #fff
   font-size: 11px
   font-weight: 900

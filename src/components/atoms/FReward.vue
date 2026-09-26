@@ -3,7 +3,7 @@
     //- Ensure classes with special characters are in parentheses
     div.fixed.inset-0.flex.flex-col.items-center.justify-center.backdrop-blur-md.touch-none.cursor-pointer(
       v-if="modelValue"
-      class="bg-black/60"
+      class="bg-[var(--ui-scrim)]"
       :class="[isAdShowing ? 'z-0' : 'z-[100]', isCompact ? 'p-2' : 'p-4']"
       :style="{\
         paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))',\
@@ -13,10 +13,11 @@
       }"
       @click="handleOverlayClick"
     )
-      //- Parchment-ribbon header. Bitmap background scales to fit the
-      //- responsive wrap; the slot content (or a fallback "Rewards"
-      //- label) renders on top of the ribbon, centred horizontally and
-      //- biased above the bottom curl so the tails stay visible.
+      //- Ribbon header: a toy-plastic banner drawn in CSS (no bitmap) — a
+      //- red plastic band with the sunshine rim over two notched tails. The
+      //- slot content (or a fallback "Rewards" label) renders on top of the
+      //- band, centred on it. A painted slim banner still replaces it when
+      //- the art layer has one.
       div.ribbon-wrap.relative.mb-10.shrink-0(
         v-if="$slots.ribbon"
         :class="{ 'is-compact': isCompact, 'is-desktop': !isCompact && !isMobilePortrait }"
@@ -25,6 +26,9 @@
           :class="{ 'is-slim': slimRibbon }"
           :style="slimRibbon ? { backgroundImage: `url('${slimRibbon}')` } : undefined"
         )
+          span.ribbon-shape(v-if="!slimRibbon" aria-hidden="true")
+            i.ribbon-shape__tails
+            i.ribbon-shape__band
           div.ribbon-content
             slot(name="ribbon")
               span.text-white.font-black.uppercase.italic.game-text {{ t('rewards') }}
@@ -188,7 +192,7 @@ onUnmounted(() => {
   // body, which is what keeps the top reachable — see the template note.
   margin-block: auto
 
-// ─── Parchment ribbon ────────────────────────────────────────────────────────
+// ─── Ribbon ─────────────────────────────────────────────────────────────────
 
 .ribbon-wrap
   position: relative
@@ -209,15 +213,15 @@ onUnmounted(() => {
       width: 70vw
       max-width: 360px
 
-// Parchment ribbon bitmap (553×188 source). The aspect ratio is built
-// into the wrap's `aspect-ratio` so the image scales without distorting
-// the curled tails. We use `background-image` rather than an `<img>`
-// so the slot content can layer cleanly on top without z-index gymnastics.
+// The banner box keeps the old bitmap's 553×188 proportions, so every width
+// below (tuned by portal QA) still produces the same height and nothing on the
+// result screen moves. The ribbon itself is drawn in CSS (`.ribbon-shape`).
+// `background-*` stays for the painted slim banner, which arrives as an inline
+// `background-image`.
 .ribbon-banner
   position: relative
   aspect-ratio: 553 / 188
   width: 100%
-  background-image: url('/images/bg/parchment-ribbon_553x188.webp')
   background-repeat: no-repeat
   background-position: center
   background-size: contain
@@ -238,10 +242,10 @@ onUnmounted(() => {
 
 .ribbon-content
   position: relative
-  // The ribbon art's flat parchment panel sits ABOVE the bottom curl,
-  // so the content lifts ~14% of the banner height to land visually
-  // centred on that panel.
-  margin-top: -14%
+  z-index: 1
+  // The band sits in the upper part of the box (the tails hang below it),
+  // so the content lifts a little to land centred on the band.
+  margin-top: -6%
   display: flex
   align-items: center
   justify-content: center
@@ -249,6 +253,42 @@ onUnmounted(() => {
   // Leave generous horizontal room on each side so wider labels don't
   // crash into the tail folds.
   padding: 0 18%
+
+// ─── The CSS ribbon ─────────────────────────────────────────────────────────
+//
+// One outlined silhouette: the parent's four 1.5px drop-shadows trace the ink
+// line around the band AND the clipped tails together (a filter on the clipped
+// element itself would be clipped away with it).
+.ribbon-shape
+  position: absolute
+  inset: 0
+  pointer-events: none
+  filter: drop-shadow(1.5px 0 0 var(--ui-line)) drop-shadow(-1.5px 0 0 var(--ui-line)) drop-shadow(0 1.5px 0 var(--ui-line)) drop-shadow(0 -1.5px 0 var(--ui-line))
+
+  i
+    position: absolute
+    display: block
+
+// The two tails: one bar with a V-notch at each end, its middle hidden behind
+// the band. The dark stripes just inside the band's ends are the folds.
+.ribbon-shape__tails
+  left: 0
+  right: 0
+  top: 36%
+  bottom: 8%
+  clip-path: polygon(0 0, 100% 0, 93% 50%, 100% 100%, 0 100%, 7% 50%)
+  background-image: linear-gradient(to right, #c23a30 0%, #d8473b 11%, #7e1d16 13.5%, #8c2219 16%, #8c2219 84%, #7e1d16 86.5%, #d8473b 89%, #c23a30 100%)
+
+// The band: red toy plastic, sunshine rim, gloss along the top.
+.ribbon-shape__band
+  left: 12%
+  right: 12%
+  top: 12%
+  bottom: 30%
+  border: clamp(2px, 0.8vw, 4px) solid var(--ui-rim)
+  border-radius: clamp(5px, 1.6vw, 12px)
+  background-image: linear-gradient(to bottom, var(--btn-red-from), var(--btn-red-to) 70%, #c93a2f)
+  box-shadow: inset 0 clamp(2px, 0.7vw, 5px) 0 rgba(255, 255, 255, 0.3), inset 0 calc(-1 * clamp(2px, 0.6vw, 4px)) 0 rgba(120, 20, 12, 0.25)
 
 // Landscape phone: 30% smaller than the compact treatment above (62vw/340px
 // → 43vw/238px). The banner is decoration and the short axis is the scarce

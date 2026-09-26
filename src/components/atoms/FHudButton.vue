@@ -100,9 +100,11 @@ defineEmits(['click'])
   justify-content: center
   width: 100%
   height: 100%
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: clamp(0.45rem, 2vw, 0.7rem)
   color: #fff
+  // Candy-plastic gloss along the top edge.
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
 
   // The glyph fills a consistent fraction of the chip regardless of chip size,
   // so a row of mixed icons reads as one set.
@@ -125,27 +127,27 @@ defineEmits(['click'])
 
 .tone-gold
   .f-hud-button__shadow
-    background-color: #7a5a12
+    background-color: var(--btn-yellow-drop)
   .f-hud-button__body
-    background-image: linear-gradient(to bottom, #ffcd00, #f7a000)
+    background-image: linear-gradient(to bottom, var(--btn-yellow-from), var(--btn-yellow-to))
 
 .tone-blue
   .f-hud-button__shadow
-    background-color: #102e7a
+    background-color: var(--btn-blue-drop)
   .f-hud-button__body
-    background-image: linear-gradient(to bottom, #50aaff, #2266ff)
+    background-image: linear-gradient(to bottom, var(--btn-blue-from), var(--btn-blue-to))
 
 .tone-green
   .f-hud-button__shadow
-    background-color: #0e5c2c
+    background-color: var(--btn-green-drop)
   .f-hud-button__body
-    background-image: linear-gradient(to bottom, #67e08a, #1f9d4d)
+    background-image: linear-gradient(to bottom, var(--btn-green-from), var(--btn-green-to))
 
 .tone-slate
   .f-hud-button__shadow
-    background-color: #151d31
+    background-color: var(--btn-plain-drop)
   .f-hud-button__body
-    background-image: linear-gradient(to bottom, #4a5878, #2d3855)
+    background-image: linear-gradient(to bottom, var(--btn-plain-from), var(--btn-plain-to))
 
 .is-attention
   animation: hud-pulse 1.6s ease-in-out infinite

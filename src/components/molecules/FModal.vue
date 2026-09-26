@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import FTabs, { type TabOption } from '@/components/atoms/FTabs.vue'
 import useSounds from '@/use/useSound'
 import { acquireModalOpen } from '@/use/useModalState'
@@ -18,6 +19,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits(['update:modelValue', 'update:activeTab'])
+const { t } = useI18n()
 
 // Root is a <Teleport>, so class/style passed by parents can't auto-inherit and
 // Vue warns about extraneous attrs. Opt out and forward $attrs explicitly.
@@ -137,7 +139,7 @@ const handleTabChange = (val: string | number): void => emit('update:activeTab',
               button.f-modal__close(
                 v-if="isClosable"
                 type="button"
-                aria-label="Close"
+                :aria-label="t('close')"
                 @click="close"
               )
                 span.f-modal__close-shadow(aria-hidden="true")
@@ -168,7 +170,7 @@ const handleTabChange = (val: string | number): void => emit('update:activeTab',
 .f-modal__backdrop
   position: absolute
   inset: 0
-  background-color: rgba(0, 0, 0, 0.7)
+  background-color: var(--ui-scrim)
   backdrop-filter: blur(4px)
 
 .f-modal__container
@@ -199,7 +201,7 @@ const handleTabChange = (val: string | number): void => emit('update:activeTab',
   inset: 0
   transform: translateY(4px)
   border-radius: clamp(0.6rem, 2.6vw, 1rem)
-  background-color: #1a2b4b
+  background-color: var(--btn-orange-drop)
 
 .f-modal__ribbon-body
   position: relative
@@ -208,9 +210,12 @@ const handleTabChange = (val: string | number): void => emit('update:activeTab',
   justify-content: center
   min-height: 2.25rem
   padding: clamp(0.3rem, 1.4vw, 0.6rem) clamp(1.1rem, 6vw, 2.75rem)
-  border: 4px solid #0f1a30
+  border: 4px solid var(--ui-line)
   border-radius: clamp(0.6rem, 2.6vw, 1rem)
-  background-image: linear-gradient(to bottom, #ffcd00, #f7a000)
+  // Toy-orange plastic ribbon over the pool-blue frame: a yellow one sat on
+  // the frame's yellow rim and the two ran together.
+  background-image: linear-gradient(to bottom, var(--btn-orange-from), var(--btn-orange-to))
+  box-shadow: inset 0 3px 0 var(--ui-gloss)
 
 .f-modal__ribbon-text
   color: #fff
@@ -236,7 +241,8 @@ const handleTabChange = (val: string | number): void => emit('update:activeTab',
   inset: 0
   transform: translateY(8px)
   border-radius: clamp(1rem, 5vw, 2.5rem)
-  background-color: #0c1626
+  background-color: var(--ui-drop)
+  box-shadow: 0 0 0 3px var(--ui-line)
 
 .f-modal__frame
   position: relative
@@ -244,9 +250,13 @@ const handleTabChange = (val: string | number): void => emit('update:activeTab',
   flex: 1 1 auto
   flex-direction: column
   min-height: 0
-  border: 5px solid #0f1a30
+  // Pool-blue plastic with the sunshine rim; the outer line is a box-shadow so
+  // the rim keeps the old border's width and nothing inside moves.
+  border: 5px solid var(--ui-rim)
   border-radius: clamp(0.9rem, 4.4vw, 2rem)
-  background-color: #1a2b4b
+  background-color: var(--ui-panel)
+  background-image: linear-gradient(to bottom, var(--ui-panel-top), var(--ui-panel-bot))
+  box-shadow: 0 0 0 3px var(--ui-line), inset 0 4px 0 var(--ui-gloss)
 
 .f-modal__content
   flex: 1 1 auto
@@ -300,7 +310,7 @@ const handleTabChange = (val: string | number): void => emit('update:activeTab',
   inset: 0
   transform: translateY(3px)
   border-radius: clamp(0.4rem, 1.8vw, 0.65rem)
-  background-color: #6b1212
+  background-color: var(--btn-red-drop)
 
 .f-modal__close-body
   position: relative
@@ -309,9 +319,10 @@ const handleTabChange = (val: string | number): void => emit('update:activeTab',
   justify-content: center
   width: 100%
   height: 100%
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: clamp(0.4rem, 1.8vw, 0.65rem)
-  background-color: #ff3e3e
+  background-image: linear-gradient(to bottom, var(--btn-red-from), var(--btn-red-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
   color: #fff
 
   svg

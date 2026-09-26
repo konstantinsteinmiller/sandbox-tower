@@ -351,8 +351,9 @@ const drawRung = (
   // A plate behind each rung. The card floats over a live battlefield, and dark
   // block art on a dark tower is where a picture stops being a picture.
   ctx.save()
-  ctx.fillStyle = 'rgba(12, 20, 34, 0.55)'
-  ctx.strokeStyle = 'rgba(255, 214, 80, 0.22)'
+  // Pool-blue plastic well (--ui-drop) with a soft sunshine rim (theme.sass).
+  ctx.fillStyle = 'rgba(18, 52, 99, 0.62)'
+  ctx.strokeStyle = 'rgba(255, 214, 90, 0.45)'
   ctx.lineWidth = 1
   roundRect(ctx, x, y, w, h, cell * 0.3)
   ctx.fill()
@@ -599,7 +600,8 @@ onBeforeUnmount(() => {
   flex-direction: column
   align-items: center
   justify-content: center
-  background-color: rgba(6, 10, 20, 0.82)
+  // The modal scrim's blue, held dark enough to carry the card on its own.
+  background-color: rgba(14, 42, 80, 0.84)
   // NO `backdrop-filter`. Chrome drops this element's own background-colour
   // when a backdrop filter is on it and the layer underneath is a large
   // canvas — the scrim vanishes and the card is drawn straight over a live

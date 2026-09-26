@@ -24,35 +24,34 @@ onMounted(() => {
 </script>
 
 <template lang="pug">
-  //- ── Wood ──
+  //- ── Sand (resource id `wood`) ──
   //-
-  //- A stacked cord seen end-on: two logs under one, with growth rings and
-  //- bark. A single log read as a brown pill at this size; the stack and the
-  //- rings are what make it unmistakably timber.
+  //- A heap of sand with a toy spade stuck in it. The heap alone read as a tan
+  //- blob at HUD size; the blue spade handle is the tell that makes it the
+  //- sandbox's sand, and gives it a silhouette no other resource shares
+  //- (pebbles are round, gold is an ingot).
   //-
   //- Sized by the caller (e.g. `class="w-4 h-4"`), like every other icon here.
   img(v-if="painted" :src="painted" alt="" aria-hidden="true" class="res-icon-img")
   svg(v-else viewBox="0 0 24 24" aria-hidden="true")
-    //- Back log, a tone down so the pile has depth.
-    g
-      rect(x="4" y="13.4" width="12" height="7.2" rx="1" fill="#8a5a2b")
-      ellipse(cx="16" cy="17" rx="3.1" ry="3.6" fill="#a9682f" stroke="#5e3a17" stroke-width="1")
-      ellipse(cx="16" cy="17" rx="1.7" ry="2" fill="none" stroke="#7a4a20" stroke-width="0.9")
-      ellipse(cx="16" cy="17" rx="0.5" ry="0.7" fill="#7a4a20")
-    //- Second log of the bottom course, tucked left.
-    g
-      rect(x="2" y="13.8" width="7" height="6.6" rx="1" fill="#7d5127")
-      ellipse(cx="9" cy="17.1" rx="2.7" ry="3.2" fill="#9a5f2b" stroke="#5e3a17" stroke-width="0.9")
-      ellipse(cx="9" cy="17.1" rx="1.4" ry="1.7" fill="none" stroke="#6e4219" stroke-width="0.8")
-    //- Top log, lit: the brightest thing in the glyph.
-    g
-      rect(x="5.5" y="5.6" width="11" height="7" rx="1" fill="#c2853f")
-      path(d="M5.5 6.6 h11" stroke="#e2ab63" stroke-width="1.1" stroke-linecap="round")
-      path(d="M6.4 11.4 h9.5" stroke="#8a5a2b" stroke-width="0.9" stroke-linecap="round")
-      ellipse(cx="16.5" cy="9.1" rx="3.3" ry="3.8" fill="#d99a53" stroke="#5e3a17" stroke-width="1.1")
-      ellipse(cx="16.5" cy="9.1" rx="2" ry="2.4" fill="none" stroke="#a06a2c" stroke-width="1")
-      ellipse(cx="16.5" cy="9.1" rx="0.9" ry="1.1" fill="none" stroke="#a06a2c" stroke-width="0.9")
-      ellipse(cx="16.5" cy="9.1" rx="0.35" ry="0.45" fill="#8a5a2b")
+    //- The spade, drawn first so the heap buries its blade.
+    g(transform="rotate(30 17.5 8)")
+      rect(x="16.55" y="1.2" width="1.9" height="8.4" rx="0.95" fill="#2f7de1" stroke="#173a66" stroke-width="0.9")
+      rect(x="14.8" y="0.3" width="5.4" height="2.1" rx="1.05" fill="#5fb2ff" stroke="#173a66" stroke-width="0.9")
+      path(d="M14.8 9 H20.2 L19.8 13.2 Q17.5 14.9 15.2 13.2 Z" fill="#ffc93c" stroke="#8a5a12" stroke-width="0.9" stroke-linejoin="round")
+    //- The heap: lit face left, shadow right (light from the upper left).
+    path(d="M1.3 21.2 C1.9 14.6 5.6 8 11.6 7.7 C17.9 7.6 21.9 14.4 22.7 21.2 Z" fill="#e3c07e" stroke="#6e4d2a" stroke-width="1.3" stroke-linejoin="round")
+    path(d="M3.1 20.2 C3.8 15.2 6.6 9.9 11 9.1 C9.1 11.8 8 15.7 7.9 20.2 Z" fill="#f6e2ae")
+    path(d="M16.2 20.2 C16 15.6 15 11.9 13.4 9.3 C17.6 10.5 20.4 15.1 20.9 20.2 Z" fill="#c79a5c")
+    path(d="M5 16.4 Q12 14.8 19.4 16.2" fill="none" stroke="#c79a5c" stroke-width="0.7" stroke-linecap="round" opacity="0.7")
+    //- Grain speckle.
+    circle(cx="10.4" cy="12.6" r="0.6" fill="#b88c4c")
+    circle(cx="12.8" cy="18.4" r="0.65" fill="#b88c4c")
+    circle(cx="9.6" cy="17.6" r="0.5" fill="#9c7440")
+    circle(cx="5.8" cy="18.4" r="0.6" fill="#fff4d6")
+    circle(cx="18" cy="18" r="0.6" fill="#9c7440")
+    circle(cx="12.6" cy="11" r="0.5" fill="#fff4d6")
+    circle(cx="14.4" cy="14.2" r="0.5" fill="#b88c4c")
 </template>
 
 <style scoped lang="sass">

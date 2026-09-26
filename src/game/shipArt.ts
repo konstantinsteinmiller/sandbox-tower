@@ -1,42 +1,53 @@
 import {
-  rough, hard, fillShape, ink, stroke, tones, noise2, trace,
+  rough, hard, fillShape, ink, stroke, tones, noise2, trace, blob,
   type Pt, type CelTones
 } from '@/game/inkArt'
 import { INK, LINE, paint } from '@/game/monsterKit'
 import { mixHex, spriteFor, type Palette } from '@/game/art'
 
 /**
- * ─── Ships ──────────────────────────────────────────────────────────────────
+ * ─── Ships: bath toys on the paddling pool ──────────────────────────────────
  *
- * The harbour's three hulls, drawn from the same vocabulary as the siege
- * engines — one key light, the kit's three line weights, its ink colour, cel
- * tone cuts, and the same timber/iron/rope materials. A fleet that was lit
- * differently from the machines it shoots at would read as a different game
- * however good it looked on its own.
+ * The harbour's three hulls are the toys a kid would float in the moat:
  *
- * What ships get that the engines do not is WATER. Three things sell it, and
+ *   * skiff    → a folded Paper Boat, notebook paper, a toothpick spear;
+ *   * longship → a Rubber Duck with a dart harpoon strapped to its back;
+ *   * galley   → a plastic Toy Pirate Ship with two cork cannons.
+ *
+ * Drawn from the same vocabulary as everything else — one key light, the
+ * kit's three line weights, its ink colour and its cel tone cuts — so the
+ * fleet reads as part of the same sandbox as the castle above it.
+ *
+ * What ships get that the blocks do not is WATER. Three things sell it, and
  * all three are cheap:
  *
- *   * The hull is cut off at the waterline by a clip, so it sits IN the lake
+ *   * The hull is cut off at the waterline by a clip, so it sits IN the pool
  *     rather than on top of it. A boat drawn whole always looks beached.
  *   * Everything above the line rolls and heaves on its own slow clock, with
- *     the mast leaning further than the deck because it is further from the
- *     pivot. Two ships never roll in step.
+ *     the tall parts leaning further because they are further from the pivot.
+ *     Two ships never roll in step.
  *   * A bow wave and a wake, drawn as flat light shapes ON the water rather
- *     than as foam sprites, because the lake itself is flat colour.
+ *     than as foam sprites, because the pool itself is flat colour.
  *
  * Convention, shared with the block renderer that calls this: origin at the
  * CELL centre, which for the water row lands exactly on the waterline; `S` is
- * the cell size; authored FACING +X, and the caller mirrors nothing — a moored
- * ship keeps its bow pointing out to the lake it is guarding.
+ * the cell size; authored FACING +X, and the caller mirrors nothing. The deck
+ * weapons are bolted down exactly where the muzzle recipes in `useTowerArt`
+ * expect them (`ox`/`oy`), so a shot still leaves the gun that fired it.
  */
 
-/** Cold iron for fittings, shared with the siege engines. */
-const IRON = tones('#5a626d', 1.25)
-/** Bright steel for edges and heads. */
-const STEEL = tones('#8e97a3', 1.3)
-/** Hemp: rigging, lashings, the anchor line. */
-const ROPE = tones('#b39a6b', 1.0)
+/** Toy-blue plastic: the duck's harpoon launcher and saddle. */
+const TOY_BLUE = tones('#2f7de1', 1.1)
+/** Toy-orange foam: every dart in the sandbox. */
+const FOAM = tones('#ff8a2b', 1.0)
+/** A pale toothpick / popsicle-stick wood. */
+const STICK = tones('#efd5a0', 0.9)
+/** Black plastic for the pirate ship's cannons. */
+const GUNMETAL = tones('#3d414b', 1.2)
+/** Cork. */
+const CORK = tones('#c99a62', 1.0)
+/** An even ink weight, for round toy shapes the kit's swelling pen muddies. */
+const EVEN = (_t: number, na: number): number => 0.8 + 0.2 * Math.sin(na)
 
 export interface ShipParts {
   timber: CelTones
@@ -50,10 +61,19 @@ export const shipParts = (p: Palette): ShipParts => ({
   timber: tones(p.mid, 1.12),
   // Mixed DOWN from the mid tone: `tones()` rotates its shadows toward violet,
   // which turns a near-black brown into a purple slab.
-  timberDark: tones(mixHex(p.mid, p.dark, 0.6), 0.9),
+  timberDark: tones(mixHexHex(p.mid, p.dark, 0.6), 0.9),
   accent: p.accent,
   accent2: p.accent2
 })
+
+/**
+ * `mixHex` for `tones()`: it hands back `rgb()`, which `tones` cannot parse —
+ * the base survived but every shadow it derived came out black.
+ */
+const mixHexHex = (a: string, b: string, t: number): string => {
+  const m = mixHex(a, b, t).match(/\d+/g)!
+  return '#' + m.slice(0, 3).map((v) => Number(v).toString(16).padStart(2, '0')).join('')
+}
 
 /** An authored hard-edged part: corners kept, then a hand-drawn wobble. */
 const slab = (pts: Pt[], amount: number, seed: number): Pt[] =>
@@ -64,21 +84,15 @@ const slab = (pts: Pt[], amount: number, seed: number): Pt[] =>
  *
  * `Block.aim` is a WORLD angle — `atan2(target.y − by, …)` with +y pointing up
  * — while the canvas has +y pointing down. Every turret in the game therefore
- * rotates by `−aim`, and the ships were rotating by `+aim`: their guns tracked
- * a mirror image of the target and elevated when they should have depressed.
- *
- * The extra vertical mirror is what a land turret gets away with skipping.
- * A bare barrel can hang upside-down at the far end of its traverse and nobody
- * notices; a gun with a carriage, cap-squares and a bright top chamfer plainly
- * cannot. Flipping across the gun's own axis once it points astern keeps its
- * top face up through the whole arc.
+ * rotates by `−aim`. Flipping across the gun's own axis once it points astern
+ * keeps its top face up through the whole arc.
  */
 const aimTransform = (ctx: CanvasRenderingContext2D, aim: number): void => {
   ctx.rotate(-aim)
   if (Math.cos(aim) < 0) ctx.scale(1, -1)
 }
 
-/** Planked timber with the grain running along it. */
+/** A straight part between two points, `th` thick — a stick, a mast, a post. */
 const plank = (
   ctx: CanvasRenderingContext2D, S: number,
   a: Pt, b: Pt, th: number, t: CelTones, seed: number
@@ -95,143 +109,53 @@ const plank = (
   paint(ctx, S, shape, t, seed, { line: LINE.fine, amp: 0.05, breakUp: 0.2 })
 }
 
-/** Rope, drawn with its lay so it reads as cordage rather than as wire. */
-const rope = (
-  ctx: CanvasRenderingContext2D, pts: Pt[], w: number, seed: number
+/** A flat, crisp-edged facet: paper and plastic, not flesh. */
+const facet = (
+  ctx: CanvasRenderingContext2D, pts: Pt[], color: string, S: number, seed: number, line: number = LINE.fine
 ): void => {
-  stroke(ctx, pts, w * 1.5, w * 1.5, INK, seed)
-  stroke(ctx, pts, w, w, ROPE.base, seed)
-  for (let i = 0; i < pts.length - 1; i++) {
-    const a = pts[i]!
-    const b = pts[i + 1]!
-    for (let k = 0; k < 3; k++) {
-      const t0 = k / 3
-      const t1 = (k + 0.55) / 3
-      stroke(ctx, [
-        [a[0] + (b[0] - a[0]) * t0, a[1] + (b[1] - a[1]) * t0],
-        [a[0] + (b[0] - a[0]) * t1, a[1] + (b[1] - a[1]) * t1]
-      ], w * 0.34, w * 0.34, ROPE.deep!, seed + i * 5 + k)
-    }
-  }
+  const shape = hard(pts, 0.06)
+  fillShape(ctx, shape, color)
+  ink(ctx, shape, { width: line * S, color: INK, seed, breakUp: 0.2 })
 }
 
 /**
- * A shield hung on the gunwale.
+ * Water furniture: bow wave, wake and the shadow the hull casts into the pool.
  *
- * Historically how a longship's crew stowed them, and mechanically the single
- * best readability trick available here: a row of round livery-coloured discs
- * along the sheer line says "this is a warship, and it is the player's" at a
- * size where no amount of hull detail resolves.
- */
-const gunwaleShields = (
-  ctx: CanvasRenderingContext2D, S: number,
-  from: number, to: number, y: number, n: number, accent: string, seed: number
-): void => {
-  for (let i = 0; i < n; i++) {
-    const k = n === 1 ? 0.5 : i / (n - 1)
-    const x = (from + (to - from) * k) * S
-    const r = 0.055 * S
-    const disc = rough([
-      [x - r, y * S], [x, y * S - r], [x + r, y * S], [x, y * S + r]
-    ], r * 0.12, seed + i)
-    paint(ctx, S, disc, tones(i % 2 ? accent : '#d8d2c4', 1.1), seed + i,
-      { line: LINE.hair, amp: 0.06 })
-    fillShape(ctx, [
-      [x - r * 0.22, y * S], [x, y * S - r * 0.22],
-      [x + r * 0.22, y * S], [x, y * S + r * 0.22]
-    ], IRON.base)
-  }
-}
-
-/**
- * Mast, yard and a bellied sail.
- *
- * The sail is drawn as a curve rather than a rectangle: canvas under wind has
- * a belly, and a flat sail is the single loudest "this is a cardboard cutout"
- * signal a boat can send. `furl` runs 0 (full) to 1 (brailed up to the yard).
- */
-const sail = (
-  ctx: CanvasRenderingContext2D, S: number,
-  x: number, deckY: number, h: number, w: number,
-  accent: string, roll: number, t: number, seed: number
-): void => {
-  const belly = 0.14 + Math.sin(t / 900 + seed) * 0.05
-  const topY = deckY - h
-
-  // Mast, leaning with the roll.
-  plank(ctx, S, [x, deckY * S], [x + roll * 0.5, topY * S], 0.05 * S, IRON, seed)
-  // Yard across it.
-  plank(ctx, S,
-    [x - w * 0.55 * S + roll * 0.4, (topY + 0.06) * S],
-    [x + w * 0.55 * S + roll * 0.4, (topY + 0.06) * S],
-    0.036 * S, IRON, seed + 1)
-
-  // Canvas: two arcs meeting at the clews, bellied downwind.
-  const sailShape: Pt[] = []
-  const yl = x - w * 0.5 * S + roll * 0.4
-  const yr = x + w * 0.5 * S + roll * 0.4
-  const bot = (topY + h * 0.72) * S
-  for (let i = 0; i <= 10; i++) {
-    const k = i / 10
-    sailShape.push([yl + (yr - yl) * k, (topY + 0.07) * S + Math.sin(k * Math.PI) * belly * 0.3 * S])
-  }
-  for (let i = 10; i >= 0; i--) {
-    const k = i / 10
-    sailShape.push([yl + (yr - yl) * k + roll * 0.3, bot + Math.sin(k * Math.PI) * belly * S])
-  }
-  paint(ctx, S, sailShape, tones(accent, 1.05), seed + 2,
-    { line: LINE.mid, amp: 0.1, breakUp: 0.3 })
-  // One bold stripe: heraldry at a size where a device would be mud.
-  ctx.save()
-  ctx.beginPath(); trace(ctx, sailShape); ctx.clip()
-  stroke(ctx, [
-    [x - w * 0.1 * S, (topY + 0.05) * S], [x - w * 0.1 * S + roll * 0.3, bot + 0.02 * S]
-  ], 0.07 * S, 0.07 * S, 'rgba(255,255,255,0.45)', seed + 3)
-  ctx.restore()
-
-  // Stays fore and aft.
-  rope(ctx, [[x + roll * 0.5, topY * S], [x + w * 0.62 * S, (deckY - 0.02) * S]], 0.014 * S, seed + 4)
-  rope(ctx, [[x + roll * 0.5, topY * S], [x - w * 0.62 * S, (deckY - 0.02) * S]], 0.014 * S, seed + 5)
-}
-
-/**
- * Water furniture: bow wave, wake and the shadow the hull casts into the lake.
- *
- * Drawn as flat light shapes rather than particles, because the lake itself is
- * flat colour — a soft foam sprite would be the only soft thing on screen.
+ * Drawn as flat light shapes rather than particles, because the water itself
+ * is flat colour — a soft foam sprite would be the only soft thing on screen.
  */
 const waterLine = (
   ctx: CanvasRenderingContext2D, S: number, halfW: number, t: number, seed: number
 ): void => {
   // The hull's shadow under the surface, so it reads as displacing water.
   ctx.save()
-  ctx.globalAlpha = 0.22
+  ctx.globalAlpha = 0.2
   fillShape(ctx, [
     [-halfW * 0.95 * S, 0.02 * S], [halfW * 0.95 * S, 0.02 * S],
     [halfW * 0.7 * S, 0.16 * S], [-halfW * 0.7 * S, 0.16 * S]
-  ], '#0d2a3d')
+  ], '#0f5a78')
   ctx.restore()
 
   // Bow wave and wake, breathing on their own clock.
   const swell = 0.5 + 0.5 * Math.sin(t / 620 + seed)
   ctx.save()
-  ctx.globalAlpha = 0.5
+  ctx.globalAlpha = 0.55
   fillShape(ctx, [
     [halfW * 0.86 * S, 0.02 * S],
     [(halfW * 1.16 + swell * 0.06) * S, -0.03 * S],
     [(halfW * 1.24 + swell * 0.08) * S, 0.03 * S],
     [halfW * 0.9 * S, 0.06 * S]
-  ], '#dff1ff')
+  ], '#f2fdff')
   for (let i = 0; i < 3; i++) {
     const d = halfW + 0.16 + i * 0.22
-    const a = 0.34 - i * 0.09
+    const a = 0.36 - i * 0.09
     ctx.globalAlpha = a
     fillShape(ctx, [
       [-d * S, (0.0 + i * 0.03) * S],
       [(-d - 0.2 - swell * 0.05) * S, (0.01 + i * 0.03) * S],
       [(-d - 0.2 - swell * 0.05) * S, (0.045 + i * 0.03) * S],
       [-d * S, (0.05 + i * 0.03) * S]
-    ], '#cfe9ff')
+    ], '#e4fbff')
   }
   ctx.restore()
 }
@@ -239,47 +163,67 @@ const waterLine = (
 // ─── The hulls ──────────────────────────────────────────────────────────────
 
 /**
- * Skiff — the cheap picket boat.
+ * Paper Boat — the cheap picket boat.
  *
- * One crewman, one swivel bolt-thrower, a scrap of sail. It has to read as
- * SMALL, because it is what the player buys first and what everything else in
- * the harbour is measured against.
+ * A boat folded from a page of a school notebook: ruled blue lines, a red
+ * margin, the tall centre fold, and a toothpick wedged in as a spear. It has
+ * to read as SMALL and FLIMSY, because it is what the player buys first and
+ * what everything else in the harbour is measured against.
  */
 const drawSkiff = (
   ctx: CanvasRenderingContext2D, S: number, m: ShipParts,
   roll: number, aim: number, t: number, layer: ShipLayer
 ): void => {
   const deck = -0.1
-  if (layer === 'fixtures') { skiffGun(ctx, S, m, aim, deck); return }
+  if (layer === 'fixtures') { skiffGun(ctx, S, aim, deck); return }
+  const paper = m.timber
+  const lean = roll * 0.35
 
-  // Hull: a shallow clinker-built boat with a raked stem.
-  const hull = slab([
-    [-0.42 * S, deck * S], [0.44 * S, (deck - 0.04) * S],
-    [0.5 * S, 0.06 * S], [0.3 * S, 0.2 * S],
-    [-0.3 * S, 0.2 * S], [-0.44 * S, 0.06 * S]
-  ], 0.012 * S, 500)
-  paint(ctx, S, hull, m.timber, 501, { line: LINE.major, amp: 0.06 })
+  // The centre fold, behind the hull's front flap: a lit half and a half in
+  // the fold's shadow.
+  const apex: Pt = [-0.06 * S + lean, (deck - 0.46) * S]
+  facet(ctx, [[-0.3 * S, (deck + 0.02) * S], apex, [-0.06 * S, (deck + 0.02) * S]], paper.lit!, S, 501)
+  facet(ctx, [apex, [0.18 * S, (deck + 0.02) * S], [-0.06 * S, (deck + 0.02) * S]], paper.shade, S, 502)
+  // Ruled lines carry on up the fold.
   ctx.save()
-  ctx.beginPath(); trace(ctx, hull); ctx.clip()
-  // Overlapping strakes — the planking that makes a clinker hull a hull.
+  ctx.beginPath()
+  trace(ctx, hard([[-0.3 * S, (deck + 0.02) * S], apex, [0.18 * S, (deck + 0.02) * S]], 0.06))
+  ctx.clip()
   for (let i = 0; i < 3; i++) {
-    const y = (deck + 0.06 + i * 0.055) * S
-    stroke(ctx, [[-0.46 * S, y], [0.5 * S, y - 0.012 * S]],
-      0.016 * S, 0.013 * S, m.timber.deep!, 502 + i)
+    const y = (deck - 0.08 - i * 0.1) * S
+    stroke(ctx, [[-0.4 * S, y], [0.3 * S, y]], 0.012 * S, 0.012 * S, 'rgba(90,155,230,0.55)', 503 + i)
   }
   ctx.restore()
-  // Gunwale rail along the sheer.
-  stroke(ctx, [[-0.42 * S, deck * S], [0.46 * S, (deck - 0.04) * S]],
-    0.03 * S, 0.026 * S, m.timberDark.base, 505)
 
-  // A stubby mast with a scrap of sail, well aft.
-  sail(ctx, S, -0.16 * S, deck, 0.44, 0.3, m.accent, roll, t, 506)
+  // Hull: the front flap, wide at the brim and pinched at the keel, its two
+  // ends folded up into points.
+  const hull: Pt[] = [
+    [-0.48 * S, (deck - 0.07) * S], [-0.36 * S, (deck + 0.01) * S], [0.4 * S, (deck - 0.02) * S],
+    [0.52 * S, (deck - 0.11) * S], [0.34 * S, 0.2 * S], [-0.3 * S, 0.2 * S]
+  ]
+  facet(ctx, hull, paper.base, S, 505, LINE.mid)
+  ctx.save()
+  ctx.beginPath(); trace(ctx, hard(hull, 0.06)); ctx.clip()
+  for (let i = 0; i < 3; i++) {
+    const y = (deck + 0.08 + i * 0.07) * S
+    stroke(ctx, [[-0.5 * S, y], [0.54 * S, y - 0.01 * S]], 0.012 * S, 0.012 * S, 'rgba(90,155,230,0.6)', 506 + i)
+  }
+  // The red margin, and the diagonal creases where the flap was folded.
+  stroke(ctx, [[-0.2 * S, (deck - 0.02) * S], [-0.17 * S, 0.22 * S]], 0.014 * S, 0.014 * S, withA(m.accent2, 0.7), 509)
+  stroke(ctx, [[-0.36 * S, (deck + 0.01) * S], [-0.26 * S, 0.2 * S]], 0.012 * S, 0.01 * S, 'rgba(90,110,140,0.45)', 510)
+  stroke(ctx, [[0.4 * S, (deck - 0.02) * S], [0.3 * S, 0.2 * S]], 0.012 * S, 0.01 * S, 'rgba(90,110,140,0.45)', 511)
+  // The flap's folded brim, a double layer of paper along the top.
+  fillShape(ctx, [
+    [-0.5 * S, (deck - 0.08) * S], [0.54 * S, (deck - 0.12) * S],
+    [0.5 * S, (deck - 0.04) * S], [-0.46 * S, deck * S]
+  ], 'rgba(120,140,170,0.22)')
+  ctx.restore()
 
-  if (layer !== 'hull') skiffGun(ctx, S, m, aim, deck)
+  if (layer !== 'hull') skiffGun(ctx, S, aim, deck)
 }
 
 /**
- * The skiff’s swivel bolt-thrower.
+ * The paper boat's toothpick spear, wedged into a pink eraser.
  *
  * Split out because it AIMS. Everything else about a hull holds still
  * enough to be a bitmap; a weapon that tracks its target cannot be, so it
@@ -287,250 +231,298 @@ const drawSkiff = (
  * the same bargain a block strikes with its fixture.
  */
 const skiffGun = (
-  ctx: CanvasRenderingContext2D, S: number, m: ShipParts,
-  aim: number, deck: number
+  ctx: CanvasRenderingContext2D, S: number, aim: number, deck: number
 ): void => {
   ctx.save()
   ctx.translate(0.22 * S, (deck - 0.02) * S)
-  plank(ctx, S, [0, 0], [0, -0.12 * S], 0.05 * S, m.timberDark, 510)
+  // The eraser it is stuck in.
+  paint(ctx, S, slab([
+    [-0.05 * S, 0], [0.05 * S, 0], [0.045 * S, -0.12 * S], [-0.045 * S, -0.12 * S]
+  ], 0.004 * S, 512), tones('#ff9bb8', 1.0), 512, { line: LINE.fine, amp: 0.05 })
   ctx.translate(0, -0.13 * S)
   aimTransform(ctx, aim)
-  plank(ctx, S, [-0.1 * S, 0], [0.22 * S, 0], 0.05 * S, IRON, 511)
-  fillShape(ctx, [
-    [0.3 * S, 0], [0.2 * S, -0.045 * S], [0.2 * S, 0.045 * S]
-  ], STEEL.lit!)
-  // Prod arms across it.
-  stroke(ctx, [[0.06 * S, -0.11 * S], [0.1 * S, 0], [0.06 * S, 0.11 * S]],
-    0.026 * S, 0.026 * S, m.timberDark.base, 512)
+  // The toothpick itself, pointed at the business end.
+  const pick: Pt[] = hard([
+    [-0.12 * S, -0.018 * S], [0.22 * S, -0.018 * S], [0.33 * S, 0],
+    [0.22 * S, 0.018 * S], [-0.12 * S, 0.018 * S], [-0.16 * S, 0]
+  ], 0.08)
+  fillShape(ctx, pick, STICK.base)
+  ink(ctx, pick, { width: LINE.hair * S, color: INK, seed: 513, breakUp: 0.1 })
+  // A rubber band lashing it down.
+  stroke(ctx, [[0.02 * S, -0.04 * S], [0.02 * S, 0.04 * S]], 0.024 * S, 0.024 * S, '#c2453b', 514)
   ctx.restore()
 }
 
 
 /**
- * Longship — the workhorse.
+ * Rubber Duck — the workhorse.
  *
- * A carved stem-post, a row of shields on the sheer, oars out, and a heavy
- * harpoon on the foredeck. This is the silhouette the harbour is remembered by.
+ * A fat yellow bath duck with a toy dart harpoon strapped to its back. It
+ * faces the shore it guards (−X), so the harpoon rides on its back over the
+ * tail, where the old longship bolted its thrower down.
  */
 const drawLongship = (
   ctx: CanvasRenderingContext2D, S: number, m: ShipParts,
   roll: number, aim: number, t: number, layer: ShipLayer
 ): void => {
   const deck = -0.14
-  if (layer === 'fixtures') { longshipGun(ctx, S, m, aim, deck); return }
+  if (layer === 'fixtures') { longshipGun(ctx, S, aim, deck); return }
+  const duck = m.timber
 
-  // Oars, drawn first so the hull covers where they enter the water.
-  const stroke_ = Math.sin(t / 520) * 0.06
-  for (let i = 0; i < 4; i++) {
-    const ox = (-0.32 + i * 0.19) * S
-    stroke(ctx, [
-      [ox, (deck + 0.04) * S],
-      [ox - 0.18 * S, (0.16 + stroke_) * S]
-    ], 0.026 * S, 0.02 * S, m.timberDark.shade, 520 + i)
-  }
+  // Body: a plump breast on the left, a perky tail on the right.
+  const body: Pt[] = [
+    [-0.46 * S, -0.1 * S], [-0.56 * S, 0.02 * S], [-0.52 * S, 0.16 * S], [-0.38 * S, 0.26 * S],
+    [0.3 * S, 0.26 * S], [0.5 * S, 0.14 * S], [0.58 * S, -0.04 * S], [0.62 * S, -0.3 * S],
+    [0.5 * S, -0.26 * S], [0.36 * S, -0.16 * S], [0.08 * S, -0.17 * S], [-0.2 * S, -0.16 * S]
+  ]
+  paint(ctx, S, rough(body, 0.008 * S, 530), duck, 531, { line: LINE.major, amp: 0.06 })
+  // The wing, tucked along the flank.
+  const wing: Pt[] = [
+    [-0.02 * S, -0.06 * S], [0.2 * S, -0.1 * S], [0.4 * S, -0.04 * S], [0.34 * S, 0.02 * S],
+    [0.38 * S, 0.06 * S], [0.26 * S, 0.1 * S], [0.06 * S, 0.08 * S]
+  ]
+  paint(ctx, S, wing, tones(mixHexHex(m.timber.base, m.accent, 0.35), 0.8), 533,
+    { line: false, amp: 0.06, deep: false })
+  ink(ctx, wing, { width: LINE.hair * S, color: INK, seed: 532, breakUp: 0.1, weight: EVEN })
 
-  const hull = slab([
-    [-0.52 * S, (deck - 0.02) * S], [0.52 * S, (deck - 0.06) * S],
-    [0.56 * S, 0.06 * S], [0.34 * S, 0.24 * S],
-    [-0.34 * S, 0.24 * S], [-0.56 * S, 0.06 * S]
-  ], 0.012 * S, 530)
-  paint(ctx, S, hull, m.timber, 531, { line: LINE.major, amp: 0.06 })
+  // Head, bobbing on its own clock about the neck. Moves, never reshapes.
+  const bob = layer === 'hull' ? 0 : Math.sin(t / 760 + 1.3) * 0.06
   ctx.save()
-  ctx.beginPath(); trace(ctx, hull); ctx.clip()
-  for (let i = 0; i < 4; i++) {
-    const y = (deck + 0.05 + i * 0.055) * S
-    stroke(ctx, [[-0.58 * S, y], [0.58 * S, y - 0.014 * S]],
-      0.016 * S, 0.013 * S, m.timber.deep!, 532 + i)
-  }
+  ctx.translate(-0.3 * S + roll * 0.4, -0.16 * S)
+  ctx.rotate(bob)
+  const head = blob(0, -0.2 * S, 0.17 * S, 0.16 * S, 534, 0.03)
+  // Inked by hand at an even weight: the kit's pen swells 6x on an underside,
+  // and under a round head that swell reads as a beard.
+  paint(ctx, S, head, duck, 535, { line: false, amp: 0.08, deep: false })
+  ink(ctx, head, { width: LINE.mid * S, color: INK, seed: 536, breakUp: 0.15, weight: EVEN })
+  // Beak, and the line of its smile.
+  const beak: Pt[] = [
+    [-0.13 * S, -0.22 * S], [-0.3 * S, -0.2 * S], [-0.33 * S, -0.15 * S],
+    [-0.24 * S, -0.1 * S], [-0.12 * S, -0.12 * S]
+  ]
+  paint(ctx, S, rough(beak, 0.004 * S, 536), tones(m.accent, 1.1), 537, { line: LINE.mid, amp: 0.05, deep: false })
+  stroke(ctx, [[-0.3 * S, -0.16 * S], [-0.2 * S, -0.155 * S], [-0.13 * S, -0.165 * S]], 0.012 * S, 0.008 * S, INK, 538)
+  // A big, friendly eye.
+  fillShape(ctx, blob(-0.06 * S, -0.26 * S, 0.042 * S, 0.05 * S, 539, 0.04), '#1b1310')
+  fillShape(ctx, blob(-0.074 * S, -0.28 * S, 0.016 * S, 0.016 * S, 540, 0.1), 'rgba(255,255,255,0.95)')
+  // Cheek blush.
+  ctx.save()
+  ctx.globalAlpha = 0.35
+  fillShape(ctx, blob(0.02 * S, -0.16 * S, 0.045 * S, 0.03 * S, 541, 0.05), '#ff7a3c')
   ctx.restore()
-  stroke(ctx, [[-0.52 * S, (deck - 0.02) * S], [0.52 * S, (deck - 0.06) * S]],
-    0.034 * S, 0.03 * S, m.timberDark.base, 536)
+  ctx.restore()
 
-  // Carved stem-post curling over the bow — the one flourish this hull gets.
-  const stem: Pt[] = []
-  for (let i = 0; i <= 12; i++) {
-    const k = i / 12
-    const a = -0.5 + k * 2.6
-    stem.push([
-      (0.52 + Math.cos(a) * 0.12 * (1 - k * 0.4)) * S,
-      (deck - 0.04 - k * 0.3) * S + Math.sin(a) * 0.05 * S
-    ])
-  }
-  stroke(ctx, stem, 0.05 * S, 0.02 * S, m.timberDark.base, 538)
+  // The harpoon's saddle, strapped across the back.
+  paint(ctx, S, slab([
+    [0.24 * S, (deck - 0.02) * S], [0.44 * S, (deck - 0.05) * S],
+    [0.46 * S, (deck + 0.05) * S], [0.24 * S, (deck + 0.07) * S]
+  ], 0.004 * S, 542), TOY_BLUE, 543, { line: LINE.fine, amp: 0.05, deep: false })
 
-  gunwaleShields(ctx, S, -0.4, 0.36, deck - 0.02, 5, m.accent, 540)
-  sail(ctx, S, -0.04 * S, deck, 0.6, 0.44, m.accent, roll, t, 545)
-
-  if (layer !== 'hull') longshipGun(ctx, S, m, aim, deck)
+  if (layer !== 'hull') longshipGun(ctx, S, aim, deck)
 }
 
 /**
- * The longship’s harpoon thrower.
+ * The duck's dart harpoon: a toy-blue launcher tube with a foam dart loaded.
  *
- * Split out because it AIMS. Everything else about a hull holds still
- * enough to be a bitmap; a weapon that tracks its target cannot be, so it
- * is the one layer that carries on being drawn live over painted art —
- * the same bargain a block strikes with its fixture.
+ * Split out because it AIMS — the one layer that carries on being drawn live
+ * over a painted hull.
  */
 const longshipGun = (
-  ctx: CanvasRenderingContext2D, S: number, m: ShipParts,
-  aim: number, deck: number
+  ctx: CanvasRenderingContext2D, S: number, aim: number, deck: number
 ): void => {
   ctx.save()
   ctx.translate(0.34 * S, (deck - 0.04) * S)
-  plank(ctx, S, [0, 0], [0, -0.14 * S], 0.06 * S, m.timberDark, 550)
+  plank(ctx, S, [0, 0], [0, -0.14 * S], 0.06 * S, TOY_BLUE, 550)
   ctx.translate(0, -0.15 * S)
   aimTransform(ctx, aim)
-  plank(ctx, S, [-0.12 * S, 0], [0.26 * S, 0], 0.055 * S, IRON, 551)
+  // The dart sticking out of the muzzle: orange foam, blue suction cup.
+  plank(ctx, S, [0.12 * S, 0], [0.3 * S, 0], 0.045 * S, FOAM, 553)
+  paint(ctx, S, slab([
+    [0.29 * S, -0.026 * S], [0.36 * S, -0.05 * S], [0.39 * S, -0.05 * S],
+    [0.39 * S, 0.05 * S], [0.36 * S, 0.05 * S], [0.29 * S, 0.026 * S]
+  ], 0.003 * S, 554), TOY_BLUE, 555, { line: LINE.fine, amp: 0.04, deep: false })
+  // The launcher tube.
+  paint(ctx, S, slab([
+    [-0.12 * S, -0.045 * S], [0.16 * S, -0.04 * S], [0.16 * S, 0.04 * S], [-0.12 * S, 0.045 * S]
+  ], 0.004 * S, 551), TOY_BLUE, 552, { line: LINE.mid, amp: 0.04 })
+  // A yellow band round the muzzle — the toy's trim.
   fillShape(ctx, [
-    [0.38 * S, 0], [0.24 * S, -0.055 * S], [0.24 * S, 0.055 * S]
-  ], STEEL.lit!)
-  stroke(ctx, [[0.04 * S, -0.14 * S], [0.11 * S, 0], [0.04 * S, 0.14 * S]],
-    0.03 * S, 0.03 * S, m.timberDark.base, 552)
+    [0.1 * S, -0.043 * S], [0.14 * S, -0.042 * S], [0.14 * S, 0.042 * S], [0.1 * S, 0.043 * S]
+  ], '#ffc93c')
   ctx.restore()
 }
 
 
 /**
- * War galley — the capital ship.
+ * Toy Pirate Ship — the capital ship.
  *
- * A bronze ram at the waterline, an armoured bulwark, a fighting castle aft and
- * a heavy bombard amidships. It is the biggest thing the player can put on the
- * water and it is drawn to be worth what it costs.
+ * Brown moulded plastic with gold trim, a stern castle with battlements, a
+ * striped sail, a little skull flag snapping at the masthead and two cork
+ * cannons on deck. It is the biggest thing the player can put on the water
+ * and it is drawn to be worth what it costs.
  */
 const drawGalley = (
   ctx: CanvasRenderingContext2D, S: number, m: ShipParts,
   roll: number, aim: number, t: number, layer: ShipLayer
 ): void => {
   const deck = -0.16
-  if (layer === 'fixtures') { galleyBattery(ctx, S, m, aim, deck); return }
-
-  const oarBeat = Math.sin(t / 420) * 0.07
-  for (let i = 0; i < 5; i++) {
-    const ox = (-0.4 + i * 0.16) * S
-    stroke(ctx, [
-      [ox, (deck + 0.06) * S],
-      [ox - 0.2 * S, (0.17 + oarBeat) * S]
-    ], 0.028 * S, 0.022 * S, m.timberDark.shade, 560 + i)
-  }
+  if (layer === 'fixtures') { galleyBattery(ctx, S, aim, deck); return }
 
   const hull = slab([
     [-0.56 * S, (deck - 0.02) * S], [0.5 * S, (deck - 0.04) * S],
     [0.62 * S, 0.04 * S], [0.36 * S, 0.26 * S],
     [-0.36 * S, 0.26 * S], [-0.6 * S, 0.04 * S]
-  ], 0.012 * S, 570)
+  ], 0.01 * S, 570)
   paint(ctx, S, hull, m.timber, 571, { line: LINE.major, amp: 0.05 })
   ctx.save()
   ctx.beginPath(); trace(ctx, hull); ctx.clip()
-  for (let i = 0; i < 4; i++) {
-    const y = (deck + 0.06 + i * 0.06) * S
+  // Moulded plank lines, and a gold stripe along the sheer.
+  for (let i = 0; i < 3; i++) {
+    const y = (deck + 0.1 + i * 0.07) * S
     stroke(ctx, [[-0.62 * S, y], [0.64 * S, y - 0.014 * S]],
-      0.017 * S, 0.014 * S, m.timber.deep!, 572 + i)
+      0.014 * S, 0.012 * S, m.timber.deep!, 572 + i)
+  }
+  stroke(ctx, [[-0.62 * S, (deck + 0.035) * S], [0.64 * S, (deck + 0.015) * S]],
+    0.04 * S, 0.034 * S, m.accent, 575)
+  ctx.restore()
+  // Gun ports: black portholes ringed in gold.
+  for (const px of [-0.38, -0.12, 0.14, 0.38]) {
+    fillShape(ctx, blob(px * S, (deck + 0.13) * S, 0.042 * S, 0.042 * S, 576 + px * 10, 0.03), m.accent)
+    fillShape(ctx, blob(px * S, (deck + 0.13) * S, 0.026 * S, 0.026 * S, 577 + px * 10, 0.03), '#1d1512')
+  }
+
+  // Gold figurehead at the bow — where the galley once carried its ram.
+  const bow = slab([
+    [0.5 * S, 0.0 * S], [0.74 * S, -0.02 * S],
+    [0.78 * S, 0.06 * S], [0.5 * S, 0.11 * S]
+  ], 0.006 * S, 578)
+  paint(ctx, S, bow, tones(m.accent, 1.2), 579, { line: LINE.mid, amp: 0.05 })
+
+  // Stern castle, with plastic battlements.
+  const castle = slab([
+    [-0.56 * S, (deck - 0.3) * S], [-0.24 * S, (deck - 0.3) * S],
+    [-0.24 * S, (deck + 0.0) * S], [-0.56 * S, (deck + 0.0) * S]
+  ], 0.008 * S, 584)
+  paint(ctx, S, castle, m.timberDark, 585, { line: LINE.mid, amp: 0.05 })
+  for (const mx of [-0.56, -0.44, -0.32]) {
+    paint(ctx, S, slab([
+      [mx * S, (deck - 0.38) * S], [(mx + 0.08) * S, (deck - 0.38) * S],
+      [(mx + 0.08) * S, (deck - 0.29) * S], [mx * S, (deck - 0.29) * S]
+    ], 0.005 * S, 586), m.timberDark, 587, { line: LINE.hair, amp: 0.04, deep: false })
+  }
+  // A stern window, lit.
+  fillShape(ctx, blob(-0.4 * S, (deck - 0.15) * S, 0.05 * S, 0.06 * S, 588, 0.04), '#ffd86b')
+
+  // Mast, a striped sail, and the skull flag.
+  const mx = 0.02 * S
+  const top = deck - 0.72
+  const lean = roll * 0.5
+  plank(ctx, S, [mx, deck * S], [mx + lean, top * S], 0.05 * S, m.timberDark, 590)
+  const belly = 0.1 + Math.sin(t / 900 + 3) * 0.04
+  const yl = mx - 0.24 * S + lean * 0.8
+  const yr = mx + 0.26 * S + lean * 0.8
+  const st = (top + 0.1) * S
+  const sb = (top + 0.5) * S
+  const sailShape: Pt[] = []
+  for (let i = 0; i <= 8; i++) {
+    const k = i / 8
+    sailShape.push([yl + (yr - yl) * k, st + Math.sin(k * Math.PI) * belly * 0.3 * S])
+  }
+  for (let i = 8; i >= 0; i--) {
+    const k = i / 8
+    sailShape.push([yl + (yr - yl) * k + roll * 0.2, sb + Math.sin(k * Math.PI) * belly * S])
+  }
+  paint(ctx, S, sailShape, tones('#fff4dc', 1.0), 591, { line: LINE.mid, amp: 0.1, breakUp: 0.3 })
+  ctx.save()
+  ctx.beginPath(); trace(ctx, sailShape); ctx.clip()
+  for (const k of [0.3, 0.62]) {
+    const y = st + (sb - st) * k + belly * 0.5 * S
+    stroke(ctx, [[yl - 0.02 * S, y], [yr + 0.02 * S, y]], 0.07 * S, 0.07 * S, withA(m.accent2, 0.85), 592)
   }
   ctx.restore()
+  // Yard across the head of the sail.
+  plank(ctx, S, [yl - 0.03 * S, st], [yr + 0.03 * S, st], 0.034 * S, m.timberDark, 593)
 
-  // Bronze ram at the waterline — the detail that says "capital ship".
-  const ram = slab([
-    [0.5 * S, 0.0 * S], [0.78 * S, 0.03 * S],
-    [0.76 * S, 0.11 * S], [0.5 * S, 0.12 * S]
-  ], 0.008 * S, 576)
-  paint(ctx, S, ram, tones('#a9772e', 1.25), 577, { line: LINE.mid, amp: 0.05 })
+  // The flag snaps on its own clock — the one thing up here that never rests.
+  const flap = layer === 'hull' ? 0 : Math.sin(t / 260 + 1.1) * 0.025
+  const fx = mx + lean
+  const fy = top * S
+  const flag: Pt[] = [
+    [fx, fy], [fx + 0.1 * S, fy - (0.01 + flap) * S], [fx + 0.2 * S, fy + (0.005 - flap) * S],
+    [fx + 0.19 * S, fy + (0.1 + flap * 0.5) * S], [fx + 0.1 * S, fy + (0.09 + flap) * S], [fx, fy + 0.1 * S]
+  ]
+  paint(ctx, S, flag, tones('#26211f', 1.0), 594, { line: LINE.fine, amp: 0.04, deep: false, lit: false })
+  fillShape(ctx, blob(fx + 0.09 * S, fy + 0.045 * S, 0.028 * S, 0.026 * S, 595, 0.06), '#f6efe0')
 
-  // Armoured bulwark along the sheer, with a shield row above it.
-  const wall = slab([
-    [-0.5 * S, (deck - 0.12) * S], [0.44 * S, (deck - 0.14) * S],
-    [0.44 * S, (deck + 0.02) * S], [-0.5 * S, (deck + 0.02) * S]
-  ], 0.008 * S, 578)
-  paint(ctx, S, wall, m.timberDark, 579, { line: LINE.mid, amp: 0.05 })
-  gunwaleShields(ctx, S, -0.42, 0.36, deck - 0.06, 6, m.accent, 580)
-
-  // Fighting castle aft, with a pennant.
-  const castle = slab([
-    [-0.56 * S, (deck - 0.34) * S], [-0.24 * S, (deck - 0.34) * S],
-    [-0.24 * S, (deck - 0.04) * S], [-0.56 * S, (deck - 0.04) * S]
-  ], 0.01 * S, 584)
-  paint(ctx, S, castle, m.timber, 585, { line: LINE.mid, amp: 0.05 })
-  for (const mx of [-0.55, -0.43, -0.31]) {
-    paint(ctx, S, slab([
-      [mx * S, (deck - 0.42) * S], [(mx + 0.08) * S, (deck - 0.42) * S],
-      [(mx + 0.08) * S, (deck - 0.33) * S], [mx * S, (deck - 0.33) * S]
-    ], 0.006 * S, 586), m.timberDark, 587, { line: LINE.hair, amp: 0.04 })
-  }
-
-  sail(ctx, S, 0.02 * S, deck - 0.02, 0.7, 0.5, m.accent, roll, t, 590)
-
-  if (layer !== 'hull') galleyBattery(ctx, S, m, aim, deck)
+  if (layer !== 'hull') galleyBattery(ctx, S, aim, deck)
 }
 
 /**
- * The galley’s broadside — two bombards, fore and aft of the mast.
+ * The pirate ship's broadside — two cork cannons, fore and aft of the mast.
  *
  * TWO because the galley is the capital ship and the top of the harbour tree,
- * and a single gun made it read as a longship with a nicer hull. Both track
- * the same target, because they are crewed by the same order.
+ * and a single gun made it read as a duck with a nicer hull. Both track the
+ * same target.
  *
  * Split out because it AIMS, and so is the one layer that carries on being
  * drawn live over a painted hull.
  */
 const galleyBattery = (
-  ctx: CanvasRenderingContext2D, S: number, m: ShipParts,
-  aim: number, deck: number
+  ctx: CanvasRenderingContext2D, S: number, aim: number, deck: number
 ): void => {
-  const bombard = (x: number, scale: number, seed: number): void => {
+  const cannon = (x: number, scale: number, seed: number): void => {
     ctx.save()
     ctx.translate(x * S, (deck - 0.06) * S)
-    plank(ctx, S, [-0.09 * S * scale, 0], [0.09 * S * scale, 0], 0.07 * S, m.timberDark, seed)
+    // A red plastic carriage.
+    plank(ctx, S, [-0.09 * S * scale, 0], [0.09 * S * scale, 0], 0.07 * S, tones('#d8453a', 1.0), seed)
     ctx.translate(0, -0.07 * S)
     aimTransform(ctx, aim)
     ctx.scale(scale, scale)
     paint(ctx, S, slab([
-      [-0.1 * S, -0.055 * S], [0.28 * S, -0.045 * S],
-      [0.28 * S, 0.045 * S], [-0.1 * S, 0.055 * S]
-    ], 0.006 * S, seed + 1), IRON, seed + 2, { line: LINE.mid, amp: 0.04 })
-    // Reinforcing rings, and a dark muzzle bore.
-    for (const k of [0.02, 0.16]) {
-      paint(ctx, S, slab([
-        [k * S, -0.062 * S], [(k + 0.03) * S, -0.062 * S],
-        [(k + 0.03) * S, 0.062 * S], [k * S, 0.062 * S]
-      ], 0.004 * S, seed + 3), STEEL, seed + 4, { line: LINE.hair, amp: 0.03 })
-    }
+      [-0.1 * S, -0.058 * S], [0.26 * S, -0.045 * S],
+      [0.26 * S, 0.045 * S], [-0.1 * S, 0.058 * S]
+    ], 0.006 * S, seed + 1), GUNMETAL, seed + 2, { line: LINE.mid, amp: 0.04 })
+    // A gold band, and the cork jammed in the muzzle.
     fillShape(ctx, [
-      [0.28 * S, -0.05 * S], [0.32 * S, -0.05 * S],
-      [0.32 * S, 0.05 * S], [0.28 * S, 0.05 * S]
-    ], '#0c1016')
+      [0.02 * S, -0.056 * S], [0.06 * S, -0.054 * S], [0.06 * S, 0.054 * S], [0.02 * S, 0.056 * S]
+    ], '#ffc93c')
+    paint(ctx, S, slab([
+      [0.25 * S, -0.04 * S], [0.33 * S, -0.048 * S], [0.33 * S, 0.048 * S], [0.25 * S, 0.04 * S]
+    ], 0.003 * S, seed + 3), CORK, seed + 4, { line: LINE.fine, amp: 0.04, deep: false })
     ctx.restore()
   }
 
   // The aft gun is drawn a little smaller: it sits further from the viewer on
   // the far side of the mast, and matching them exactly reads as a decal.
-  bombard(-0.18, 0.86, 592)
-  bombard(0.3, 1, 596)
+  cannon(-0.18, 0.86, 596)
+  cannon(0.3, 1, 600)
 }
 
-/**
- * Draw one moored ship.
- *
- * `aim` is the deck weapon's angle in radians; `t` the render clock. Everything
- * above the waterline rolls, and the hull is clipped at it.
- */
+/** `rgba()` from a hex colour — local, so this module needs nothing else. */
+const withA = (hex: string, a: number): string => {
+  const n = parseInt(hex.slice(1), 16)
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`
+}
+
 /**
  * How far below its cell centre a hull is drawn, in cells.
  *
  * The water row's centre lands exactly on `SEA_LEVEL`, which is the SHORELINE
- * — and in this side-on projection the lake reads as the band below the grass,
+ * — and in this side-on projection the pool reads as the band below the sand,
  * not as the line where they meet. A boat drawn on that line looks beached
- * against the bank behind it. Dropping it clear of the grass strip is what puts
- * it visibly on open water.
+ * against the bank behind it. Dropping it clear of the shore strip is what
+ * puts it visibly on open water.
  */
 export const SHIP_DRAFT = 0.42
 
 /**
  * Which half of a ship to draw.
  *
- * `hull` is everything that holds still — planking, sail, oars, castle — and
- * is what a painted bitmap replaces. `fixtures` is the deck weapon, which
- * aims at whatever the ship is shooting at and so can never be baked. The
- * ships are blocks in every way that matters: a base, with a gun on top.
+ * `hull` is everything that holds still — the paper, the duck, the pirate
+ * ship's hull and sail — and is what a painted bitmap replaces. `fixtures` is
+ * the deck weapon, which aims at whatever the ship is shooting at and so can
+ * never be baked. The ships are blocks in every way that matters: a base, with
+ * a gun on top.
  */
 export type ShipLayer = 'all' | 'hull' | 'fixtures'
 
@@ -549,21 +541,23 @@ export const SHIP_CLIP = { x: -1.2, y: -1.6, w: 2.4, h: 1.82 } as const
  * The rectangle a PAINTED hull occupies, in the same units.
  *
  * Not the clip band, which is sized for the wake — three trailing bands that
- * reach well over a boat-length to either side. Handing a painter that box
- * put the skiff in the bottom third of an otherwise empty frame and spent
- * three quarters of the resolution on background.
- *
- * These numbers are measured off the three drawn hulls rather than chosen:
- * the widest (the galley, ram to stern) runs -0.61..+0.79 and the tallest
- * masthead reaches -0.90, so the box is those with a little air. Its bottom
- * IS the clip, which is what makes the waterline the frame's own bottom edge
- * — nothing to describe, nothing to line up by eye.
+ * reach well over a boat-length to either side. These numbers are measured
+ * off the three drawn hulls rather than chosen: the widest (the pirate ship,
+ * figurehead to stern) runs -0.61..+0.79 and the tallest masthead reaches
+ * -0.90, so the box is those with a little air. Its bottom IS the clip, which
+ * is what makes the waterline the frame's own bottom edge.
  */
 export const SHIP_ART = { x: -0.7, y: -1.0, w: 1.6, h: 1.22 } as const
 
 /** Hulls with a painted bitmap to look for. */
 const SHIP_HULLS = new Set(['skiff', 'longship', 'galley'])
 
+/**
+ * Draw one moored ship.
+ *
+ * `aim` is the deck weapon's angle in radians; `t` the render clock. Everything
+ * above the waterline rolls, and the hull is clipped at it.
+ */
 export const drawShip = (
   ctx: CanvasRenderingContext2D, id: string, S: number, p: Palette,
   opts: { aim: number; t: number; seed: number; layer?: ShipLayer }
@@ -583,14 +577,18 @@ export const drawShip = (
   ctx.translate(0, SHIP_DRAFT * S)
 
   // The wake belongs to the water, not to the ship: it stays live, and it is
-  // never part of what a painter is asked for.
+  // never part of what a painter is asked for. The duck swims the other way
+  // round, so its bow wave is at its breast and its wake trails the tail.
   if (layer !== 'hull') {
+    ctx.save()
+    if (id === 'longship') ctx.scale(-1, 1)
     waterLine(ctx, S, id === 'skiff' ? 0.5 : id === 'longship' ? 0.58 : 0.62, t, phase)
+    ctx.restore()
   }
 
   ctx.save()
   // Clip away everything below the waterline: the origin of the water row IS
-  // the surface, so a boat drawn whole always looks beached on the lake.
+  // the surface, so a boat drawn whole always looks beached on the pool.
   ctx.beginPath()
   ctx.rect(SHIP_CLIP.x * S, SHIP_CLIP.y * S, SHIP_CLIP.w * S, SHIP_CLIP.h * S)
   ctx.clip()
@@ -624,5 +622,4 @@ export const drawShip = (
   ctx.restore()
   ctx.restore()
   void noise2
-  void ink
 }

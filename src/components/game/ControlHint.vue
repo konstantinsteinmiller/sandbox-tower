@@ -169,9 +169,11 @@ const text = computed(() => {
   min-height: 1.75rem
   max-width: min(90vw, 26rem)
   padding: clamp(0.22rem, 1.2vw, 0.45rem) clamp(0.55rem, 3vw, 1rem)
-  border: 2px solid rgba(255, 255, 255, 0.18)
+  // A pool-blue plastic pill with a soft sunshine rim.
+  border: 2px solid var(--ui-rim-soft)
   border-radius: 999px
-  background-color: rgba(8, 14, 28, 0.72)
+  background-color: rgba(31, 90, 160, 0.82)
+  box-shadow: 0 0 0 1.5px var(--ui-line)
   backdrop-filter: blur(3px)
   pointer-events: none
   animation: hint-breathe 2.4s ease-in-out infinite

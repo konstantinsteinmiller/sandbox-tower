@@ -10,7 +10,7 @@ import { bestWave } from '@/use/useTowerProgress'
 // Lifetime milestones that turn incidental play into goals. Each grants a
 // one-time coin payout scaled to how hard it is to reach — small for the early
 // rungs, fat for the grindy capstones. State lives inside the single
-// `tower_state` blob under `ACHIEVEMENTS_KEY`:
+// `sandbox_state` blob under `ACHIEVEMENTS_KEY`:
 //   { claimed: string[], stats: { waves, kills, coins, blocks, bestHeight, runs } }
 //
 // Lifetime stats accumulate on every finished run via `recordRun`; the

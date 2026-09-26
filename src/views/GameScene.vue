@@ -4358,7 +4358,8 @@ onUnmounted(() => {
   height: 100vh
   height: 100dvh
   overflow: hidden
-  background-color: #0a1224
+  // Sunny sky behind the canvas (matches index.sass / the splash).
+  background-color: #8fd0f5
 
 .scene__canvas
   position: absolute
@@ -4447,10 +4448,12 @@ onUnmounted(() => {
   min-width: 2.5rem
   min-height: 2.5rem
   padding: 0
-  border: 2px solid rgba(255, 255, 255, 0.25)
+  // Pool-blue plastic, sunshine rim (theme.sass).
+  border: 2px solid var(--ui-rim)
   border-radius: 999px
-  background-color: rgba(8, 14, 28, 0.72)
-  color: #cfe4ff
+  background-image: linear-gradient(to bottom, var(--ui-panel-top-a), var(--ui-panel-bot-a))
+  box-shadow: 0 0 0 1.5px var(--ui-line), inset 0 2px 0 var(--ui-gloss)
+  color: #fff
   cursor: pointer
   pointer-events: auto
   -webkit-tap-highlight-color: transparent
@@ -4591,9 +4594,10 @@ onUnmounted(() => {
   width: clamp(1.75rem, 8vw, 2.3rem)
   height: clamp(1.75rem, 8vw, 2.3rem)
   padding: 0
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 0.5rem
-  background-image: linear-gradient(to bottom, #7fa8c8, #3d6a92)
+  background-image: linear-gradient(to bottom, var(--btn-plain-from), var(--btn-plain-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
   color: #fff
   cursor: pointer
   touch-action: manipulation
@@ -4617,8 +4621,8 @@ onUnmounted(() => {
   min-width: 0.95em
   padding: 0 0.18em
   border-radius: 0.25rem
-  background-color: rgba(10, 18, 34, 0.92)
-  color: #cfe4ff
+  background-color: var(--ui-line)
+  color: #fff
   font-size: clamp(0.42rem, 1.9vw, 0.58rem)
   font-weight: 900
   line-height: 1.35
@@ -4679,9 +4683,9 @@ onUnmounted(() => {
   max-width: 22rem
   margin: 0 auto 0.15rem
   padding: 0.2rem 0.6rem
-  border: 2px solid #ff6a5c
+  border: 2px solid var(--ui-line)
   border-radius: 0.5rem
-  background-color: rgba(122, 25, 20, 0.92)
+  background-color: rgba(229, 72, 59, 0.94)
   color: #fff
   font-weight: 900
   font-size: clamp(0.5rem, 2.2vw, 0.7rem)
@@ -4702,9 +4706,10 @@ onUnmounted(() => {
   // Tap-target floor; the control must never shrink below a thumb.
   min-height: 2.25rem
   padding: clamp(0.2rem, 1.2vw, 0.4rem) clamp(0.4rem, 2.4vw, 0.8rem)
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: clamp(0.5rem, 2.4vw, 0.9rem)
-  background-image: linear-gradient(to bottom, #ff9d55, #e0632a)
+  background-image: linear-gradient(to bottom, var(--btn-orange-from), var(--btn-orange-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
   color: #fff
   cursor: pointer
   touch-action: manipulation
@@ -4722,7 +4727,7 @@ onUnmounted(() => {
   // that is the tray's "this costs you nothing" colour, and a pulse rather than
   // a hard blink — the player is reading a battlefield behind it.
   &.is-free
-    background-image: linear-gradient(to bottom, #67e08a, #1f9d4d)
+    background-image: linear-gradient(to bottom, var(--btn-green-from), var(--btn-green-to))
     animation: scene-cavalry-call 900ms ease-in-out infinite
 
     // Respect the OS setting: a control that strobes is a real accessibility
@@ -4886,9 +4891,11 @@ onUnmounted(() => {
 
 .scene__warning
   padding: 0.1em 0.5em
-  border: 2px solid #0f1a30
+  // Deep plastic-navy pill: dark enough that the lane colours read on it
+  // against a bright sky.
+  border: 2px solid var(--ui-line)
   border-radius: 999px
-  background-color: rgba(10, 16, 30, 0.82)
+  background-color: rgba(23, 58, 102, 0.9)
   font-weight: 900
   text-transform: uppercase
   font-size: clamp(0.5rem, 2.2vw, 0.66rem)
@@ -4897,25 +4904,25 @@ onUnmounted(() => {
   animation: scene-warn 1.8s ease-in-out infinite
 
   &.is-air
-    color: #9ad8ff
-    border-color: #2b5a80
+    color: #a8e0ff
+    border-color: #5fb2ff
   &.is-sea
-    color: #7fe0d0
-    border-color: #226055
+    color: #8ff0e0
+    border-color: #34b3d1
   &.is-bombers
-    color: #ffb46a
-    border-color: #7a4418
+    color: #ffc07a
+    border-color: #ff8a2b
   &.is-siege
-    color: #ff9a92
-    border-color: #7d2b24
+    color: #ffaaa2
+    border-color: #e5483b
   //- The one chip that is not "brace" but "buy something". It carries a reach
   //- figure and a locale can make that a sentence, so it is the only chip
   //- allowed to wrap rather than run off a 320 px screen.
   &.is-outOfReach
     max-width: min(16rem, 72vw)
     color: #fff
-    background-color: rgba(122, 25, 20, 0.92)
-    border-color: #ff6a5c
+    background-color: rgba(229, 72, 59, 0.94)
+    border-color: var(--ui-line)
     white-space: normal
     text-align: right
     animation: scene-warn 900ms ease-in-out infinite
@@ -4923,7 +4930,7 @@ onUnmounted(() => {
   //- this one reports a standing state the player chose and can undo.
   &.is-hoard
     color: #ffd93c
-    border-color: #7a5c10
+    border-color: var(--ui-rim)
     animation: none
 
 @keyframes scene-warn
@@ -4936,9 +4943,9 @@ onUnmounted(() => {
   align-self: flex-end
   max-width: 12rem
   padding: 0.2rem 0.5rem
-  border: 2px solid #7a5a00
+  border: 2px solid var(--ui-rim)
   border-radius: 0.5rem
-  background-color: rgba(24, 18, 4, 0.88)
+  background-color: rgba(23, 58, 102, 0.9)
   color: #ffe08a
   font-weight: 900
   font-size: clamp(0.5rem, 2.2vw, 0.68rem)
@@ -4965,10 +4972,11 @@ onUnmounted(() => {
   height: clamp(2.5rem, 11vw, 3.4rem)
   padding: 0
   overflow: hidden
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: clamp(0.45rem, 2vw, 0.7rem)
-  background-image: linear-gradient(to bottom, #4a5a72, #2b3548)
-  color: #8fa3bd
+  background-image: linear-gradient(to bottom, var(--ui-well), var(--ui-well-deep))
+  box-shadow: inset 0 2px 0 var(--ui-gloss-soft)
+  color: var(--ui-text-dim)
   cursor: pointer
   touch-action: manipulation
   -webkit-tap-highlight-color: transparent
@@ -4981,7 +4989,8 @@ onUnmounted(() => {
   // Ready: it lights up. This is the only state where pressing it does
   // anything, so it is the only state that looks like a live control.
   &.is-ready
-    background-image: linear-gradient(to bottom, #ffcd00, #f7a000)
+    background-image: linear-gradient(to bottom, var(--btn-yellow-from), var(--btn-yellow-to))
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4)
     color: #3a2b00
 
   // Armed: the next tap on the field is the shot. Pulsed, because the player is
@@ -5057,9 +5066,9 @@ onUnmounted(() => {
   // was aimed at the button underneath it is worse than not showing it at all.
   pointer-events: none
   padding: 0.15em 0.5em
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 0.5rem
-  background-image: linear-gradient(to bottom, #ffcd00, #f7a000)
+  background-image: linear-gradient(to bottom, var(--btn-yellow-from), var(--btn-yellow-to))
   color: #fff
   font-weight: 900
   text-transform: uppercase
@@ -5189,8 +5198,8 @@ onUnmounted(() => {
 .result__record
   padding: 0.1em 0.55em
   border-radius: 999px
-  border: 2px solid rgba(255, 217, 60, 0.75)
-  background: rgba(60, 40, 0, 0.45)
+  border: 2px solid var(--ui-rim)
+  background: rgba(23, 58, 102, 0.55)
   color: #ffd93c
   font-weight: 900
   text-transform: uppercase
@@ -5228,8 +5237,8 @@ onUnmounted(() => {
   width: 100%
   padding: clamp(0.3rem, 1.6vw, 0.55rem) clamp(0.5rem, 3vw, 1rem)
   border-radius: 0.75rem
-  background: rgba(8, 14, 28, 0.5)
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.08)
+  background: var(--ui-well-a)
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.12)
 
 .result__stat
   display: flex
@@ -5242,11 +5251,11 @@ onUnmounted(() => {
   min-width: 0
 
   & + &
-    border-left: 2px solid rgba(255, 255, 255, 0.1)
+    border-left: 2px solid rgba(255, 255, 255, 0.18)
     padding-left: clamp(0.4rem, 2.5vw, 0.9rem)
 
 .result__stat-label
-  color: rgba(214, 228, 255, 0.72)
+  color: var(--ui-text-soft)
   font-weight: 800
   text-transform: uppercase
   letter-spacing: 0.04em
@@ -5264,7 +5273,7 @@ onUnmounted(() => {
   white-space: nowrap
 
 .result__stat-note
-  color: rgba(214, 228, 255, 0.6)
+  color: var(--ui-text-dim)
   font-weight: 700
   font-size: clamp(0.5rem, 2.3vw, 0.7rem)
   white-space: nowrap
@@ -5350,10 +5359,10 @@ onUnmounted(() => {
   min-width: 1.85em
   height: 1.85em
   padding: 0 0.3em
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 999px
   background-image: linear-gradient(to bottom, #fff3b0, #ffc83d)
-  box-shadow: 0 2px 0 #0f1a30
+  box-shadow: 0 2px 0 var(--ui-line)
   color: #3a2400
   font-size: 0.62em
   font-weight: 900

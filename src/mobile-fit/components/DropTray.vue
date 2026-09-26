@@ -223,10 +223,11 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
   gap: 0.1rem
   min-width: 3.5rem
   padding: 0.2rem 0.25rem
-  border: 2px solid #24345a
+  // A pool-blue plastic toy-box slot (theme.sass).
+  border: 2px solid var(--ui-line)
   border-radius: 0.6rem
-  background-image: linear-gradient(to bottom, rgba(38, 56, 96, 0.95), rgba(18, 30, 56, 0.95))
-  box-shadow: 0 4px 0 #0d1830, 0 6px 14px rgba(0, 0, 0, 0.45)
+  background-image: linear-gradient(to bottom, var(--ui-panel-top-a), var(--ui-panel-bot-a))
+  box-shadow: 0 4px 0 var(--ui-drop), 0 6px 12px rgba(40, 60, 90, 0.35), inset 0 2px 0 var(--ui-gloss)
   cursor: pointer
   touch-action: none
   -webkit-tap-highlight-color: transparent
@@ -246,8 +247,8 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
     filter: grayscale(0.62)
 
   &.is-selected
-    border-color: #7fe0ff
-    box-shadow: 0 0 0 2px rgba(127, 224, 255, 0.55), 0 0 14px rgba(127, 224, 255, 0.6)
+    border-color: #fff
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 14px rgba(255, 255, 255, 0.75), inset 0 2px 0 var(--ui-gloss)
     transform: translateY(-4px)
 
   // Turning gold is a card flip, one tile after another — the reinforced
@@ -283,8 +284,8 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
 
 @keyframes tray-flip-gold
   0%, 49.9%
-    border-color: #24345a
-    box-shadow: 0 4px 0 #0d1830, 0 6px 14px rgba(0, 0, 0, 0.45)
+    border-color: var(--ui-line)
+    box-shadow: 0 4px 0 var(--ui-drop), 0 6px 12px rgba(40, 60, 90, 0.35), inset 0 2px 0 var(--ui-gloss)
   0%
     rotate: y 0deg
   50%
@@ -391,9 +392,9 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
   left: 50%
   translate: -50% -42%
   padding: 0 0.3em
-  border: 1px solid rgba(0, 0, 0, 0.7)
+  border: 1px solid var(--ui-line)
   border-radius: 999px
-  background-image: linear-gradient(to bottom, #ffd54a, #e0951c)
+  background-image: linear-gradient(to bottom, var(--btn-yellow-from), var(--btn-yellow-to))
   color: #2a1a02
   font-weight: 900
   font-size: 0.52rem
@@ -438,7 +439,7 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
   display: inline-flex
   align-items: center
   gap: 0.15em
-  color: #dbe6ff
+  color: #fff
   font-weight: 900
   font-size: 0.68rem
   text-shadow: 1px 1px 0 #000
@@ -452,8 +453,10 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
   height: 0.5em
   border-radius: 999px
 
+  // Sand (resource id `wood`) and gold.
   &.is-wood
-    background-color: #a9682f
+    background-color: #e3c07e
+    box-shadow: inset 0 0 0 1px #8d673a
   &.is-gold
     background-color: #ffd93c
 
@@ -469,10 +472,11 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
   width: 2.75rem
   height: 1.6rem
   padding: 0.2rem
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 999px
-  background-image: linear-gradient(to bottom, #6fd3ff, #2f8fe0)
-  color: #04203a
+  background-image: linear-gradient(to bottom, var(--btn-orange-from), var(--btn-orange-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
+  color: #fff
   font-size: 0.7rem
   font-weight: 900
   cursor: pointer
@@ -484,8 +488,8 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
     height: 1rem
 
   &.is-cooling
-    background-image: linear-gradient(to bottom, #4a5a7d, #2b3654)
-    color: #c8d6f2
+    background-image: linear-gradient(to bottom, var(--ui-well), var(--ui-well-deep))
+    color: var(--ui-text-dim)
     cursor: not-allowed
 
 // ─── Volley ─────────────────────────────────────────────────────────────────
@@ -500,19 +504,20 @@ const cooling = (slot: number): number => props.rerollSeconds[slot] ?? 0
   width: 3.4rem
   height: 4.3rem
   margin-bottom: 1.8rem
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 0.6rem
-  background-image: linear-gradient(to bottom, #4a5a7d, #2b3654)
-  color: #cfe4ff
+  background-image: linear-gradient(to bottom, var(--btn-plain-from), var(--btn-plain-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
+  color: var(--ui-text-soft)
   overflow: hidden
   cursor: pointer
   touch-action: manipulation
   -webkit-tap-highlight-color: transparent
 
   &.is-ready
-    background-image: linear-gradient(to bottom, #ffd54a, #e0951c)
+    background-image: linear-gradient(to bottom, var(--btn-yellow-from), var(--btn-yellow-to))
     color: #2a1a02
-    box-shadow: 0 0 12px rgba(255, 190, 40, 0.5)
+    box-shadow: 0 0 12px rgba(255, 190, 40, 0.5), inset 0 2px 0 var(--ui-gloss)
 
 .tray__volley-icon
   position: relative

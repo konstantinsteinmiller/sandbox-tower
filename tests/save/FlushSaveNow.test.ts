@@ -4,18 +4,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 // regression) ──────────────────────────────────────────────────────────────
 //
 // On the CrazyGames cloud-only build, a cleared wave writes the new best wave into
-// `tower_state`, but the push to `sdk.data` only fires after the persist (~200ms)
+// `sandbox_state`, but the push to `sdk.data` only fires after the persist (~200ms)
 // + strategy-flush (~250ms) debounces, and the async cloud write then takes
 // time to land. A player who clears a wave and reloads a moment later beat that
 // pipeline → the reload restored the OLD wave.
 //
 // `flushSaveNow()` (called at every hard checkpoint) forces the whole pipeline to
-// drain synchronously-as-possible: write `tower_state` now → SaveManager proxy →
+// drain synchronously-as-possible: write `sandbox_state` now → SaveManager proxy →
 // strategy dirty → `manager.flush()` → backend. This test proves a checkpoint write
 // reaches the (fake) backend right after `flushSaveNow()` WITHOUT advancing any
 // timers — i.e. it does not wait for either debounce.
 
-const STATE_KEY = 'tower_state'
+const STATE_KEY = 'sandbox_state'
 
 const makeFakeData = (seed: Record<string, string> = {}) => {
   const store = new Map<string, string>(Object.entries(seed))
@@ -54,7 +54,7 @@ describe('flushSaveNow — immediate flush on a hard checkpoint', () => {
     const { setState } = await import('@/use/useTowerState')
     const { flushSaveNow } = await import('@/use/useSaveStatus')
 
-    // A cleared wave writes the new best into tower_state (still sitting on the
+    // A cleared wave writes the new best into sandbox_state (still sitting on the
     // debounce timers — nothing has reached the cloud yet).
     setState('ts_best_wave', 2)
     expect(data.store.get(STATE_KEY)).toBeUndefined()

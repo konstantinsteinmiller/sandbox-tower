@@ -17,9 +17,9 @@ const props = withDefaults(defineProps<Props>(), {
   min: 0,
   max: 100,
   step: 1,
-  colorFrom: '#ffcd00', // Brawl Yellow
-  colorTo: '#f7a000',
-  trackColor: '#1a2b4b' // Dark Blue depth
+  colorFrom: 'var(--btn-yellow-from)', // Sunshine yellow (theme.sass)
+  colorTo: 'var(--btn-yellow-to)',
+  trackColor: 'var(--ui-well-deep)' // Pool-blue well
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -42,7 +42,7 @@ const updateValue = (event: Event) => {
     div.f-slider__row(class="relative flex items-center")
       //- Custom Track Background (The 3D "Well")
       div(
-        class="f-slider__track absolute inset-0 my-auto rounded-full border-[3px] border-[#0f1a30] overflow-hidden bg-[#0a1425]"
+        class="f-slider__track absolute inset-0 my-auto rounded-full border-[3px] border-[var(--ui-line)] overflow-hidden bg-[var(--ui-well-deep)]"
       )
         //- Progress Fill
         div(
@@ -72,9 +72,9 @@ const updateValue = (event: Event) => {
         :style="{ left: `calc(${progress}% - var(--fsl-thumb) / 2)` }"
       )
         //- The "3D Shadow" of the thumb
-        span(class="absolute inset-0 translate-y-[3px] bg-[#102e7a] rounded-xl border-[3px] border-[#0f1a30]")
+        span(class="absolute inset-0 translate-y-[3px] bg-[var(--btn-orange-drop)] rounded-xl border-[3px] border-[var(--ui-line)]")
         //- The Main Thumb Body
-        span(class="relative block inset-0 w-full h-full bg-[#50aaff] rounded-xl border-[3px] border-[#0f1a30] overflow-hidden")
+        span(class="relative block inset-0 w-full h-full bg-[var(--btn-orange-to)] rounded-xl border-[3px] border-[var(--ui-line)] overflow-hidden")
           //- Thumb Shine
           span(class="absolute inset-x-0 top-0 h-1/2 bg-white/30")
           //- Little Detail (Vertical Line)

@@ -609,9 +609,10 @@ const spotlightFirst = computed(() =>
   gap: 0.3em
   min-height: 2rem
   padding: 0.25rem 0.6rem
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 0.55rem
-  background-image: linear-gradient(to bottom, #ff8a5a, #c62828)
+  background-image: linear-gradient(to bottom, var(--btn-red-from), var(--btn-red-to))
+  box-shadow: inset 0 2px 0 var(--ui-gloss)
   color: #fff
   font-weight: 900
   text-transform: uppercase
@@ -625,7 +626,7 @@ const spotlightFirst = computed(() =>
     scale: 0.97
 
   &.is-disabled
-    background-image: linear-gradient(to bottom, #4a5a72, #2b3548)
+    background-image: linear-gradient(to bottom, var(--ui-well), var(--ui-well-deep))
     cursor: not-allowed
     opacity: 0.85
 
@@ -657,9 +658,10 @@ const spotlightFirst = computed(() =>
   align-items: center
   gap: 0.3em
   padding: 0.12rem 0.5rem 0.12rem 0.35rem
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 999px
-  background-color: rgba(10, 16, 30, 0.7)
+  background-color: var(--ui-well-deep)
+  box-shadow: inset 0 2px 0 var(--ui-gloss-soft)
   color: #ffe066
   font-weight: 900
   font-variant-numeric: tabular-nums
@@ -683,7 +685,7 @@ const spotlightFirst = computed(() =>
   display: flex
   align-items: flex-end
   justify-content: center
-  background-color: rgba(6, 10, 20, 0.74)
+  background-color: rgba(14, 42, 80, 0.72)
   border-radius: 0.6rem
   cursor: pointer
 
@@ -691,7 +693,7 @@ const spotlightFirst = computed(() =>
   position: absolute
   border: 3px solid #ffd93c
   border-radius: 0.6rem
-  box-shadow: 0 0 0 9999px rgba(6, 10, 20, 0.55), 0 0 1.2rem rgba(255, 217, 60, 0.55)
+  box-shadow: 0 0 0 9999px rgba(14, 42, 80, 0.5), 0 0 1.2rem rgba(255, 217, 60, 0.55)
   pointer-events: none
   animation: tech-intro-pulse 1.5s ease-in-out infinite
 
@@ -720,10 +722,10 @@ const spotlightFirst = computed(() =>
   margin: 0 0.5rem 0.6rem
   max-width: 26rem
   padding: 0.6rem 0.7rem
-  border: 3px solid #0f1a30
+  border: 3px solid var(--ui-rim)
   border-radius: 0.7rem
-  background-image: linear-gradient(to bottom, #2b3a5c, #1a2540)
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.45)
+  background-image: linear-gradient(to bottom, var(--ui-panel-top), var(--ui-panel-bot))
+  box-shadow: 0 0 0 2px var(--ui-line), 0 4px 0 2px var(--ui-drop), inset 0 2px 0 var(--ui-gloss)
 
   // Beat two points at the wallet in the top-right, so the card gets out of
   // the way and sits high-left instead of under the thing it is describing.
@@ -733,7 +735,7 @@ const spotlightFirst = computed(() =>
 
 .tech-intro__text
   margin: 0
-  color: #eaf2ff
+  color: #fff
   font-weight: 800
   line-height: 1.32
   font-size: clamp(0.75rem, 3.2vw, 0.95rem)
@@ -754,16 +756,17 @@ const spotlightFirst = computed(() =>
   width: 0.45rem
   height: 0.45rem
   border-radius: 999px
-  background-color: rgba(234, 242, 255, 0.3)
+  background-color: rgba(255, 255, 255, 0.35)
 
   &.is-on
     background-color: #ffd93c
 
 .tech-intro__go
   padding: 0.22rem 0.8rem
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 0.5rem
-  background-image: linear-gradient(to bottom, #ffd93c, #e0a81c)
+  background-image: linear-gradient(to bottom, var(--btn-yellow-from), var(--btn-yellow-to))
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.45)
   color: #2a1c02
   font-weight: 900
   text-transform: uppercase
@@ -791,11 +794,12 @@ const spotlightFirst = computed(() =>
   min-height: 11rem
   height: clamp(11rem, 42vh, 22rem)
   overflow: hidden
-  border: 2px solid #24345a
+  border: 2px solid var(--ui-line)
   border-radius: clamp(0.5rem, 2.4vw, 0.9rem)
-  // A starfield-ish backdrop, matching the reference's "tech constellation"
-  // feel. One line: indented Sass has no multi-line property values.
-  background: radial-gradient(circle at 30% 20%, rgba(90, 130, 220, 0.16), transparent 55%), radial-gradient(circle at 75% 70%, rgba(160, 90, 220, 0.14), transparent 55%), #0a1024
+  // A deep pool-blue well with two soft light pools — the pool floor under
+  // sunlit water. One line: indented Sass has no multi-line property values.
+  background: radial-gradient(circle at 30% 20%, rgba(127, 224, 236, 0.2), transparent 55%), radial-gradient(circle at 75% 70%, rgba(255, 255, 255, 0.1), transparent 55%), var(--ui-well-deep)
+  box-shadow: inset 0 3px 8px rgba(8, 30, 60, 0.45)
   cursor: grab
   touch-action: none
 
@@ -819,9 +823,9 @@ const spotlightFirst = computed(() =>
     stroke-linecap: round
 
     &.is-active
-      stroke: rgba(120, 200, 255, 0.7)
+      stroke: rgba(160, 230, 255, 0.85)
     &.is-dim
-      stroke: rgba(120, 140, 180, 0.22)
+      stroke: rgba(200, 225, 255, 0.24)
 
 .tech__node
   position: absolute
@@ -849,8 +853,9 @@ const spotlightFirst = computed(() =>
   gap: 0.05rem
   width: 100%
   height: 100%
-  border: 3px solid #0f1a30
+  border: 3px solid var(--ui-line)
   border-radius: 0.7rem
+  box-shadow: inset 0 3px 0 var(--ui-gloss)
   color: #fff
 
 .tech__node-glyph
@@ -875,10 +880,10 @@ const spotlightFirst = computed(() =>
   right: -0.5rem
   width: 1.95rem
   height: 1.95rem
-  border: 2px solid #0f1a30
+  border: 2px solid var(--ui-line)
   border-radius: 0.4rem
   overflow: hidden
-  background-color: #0f1a30
+  background-color: var(--ui-well-deep)
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.55)
 
 // The thumbnail is rendered at `NODE_BLOCK_PX` and shown at whatever the badge
@@ -910,23 +915,23 @@ const spotlightFirst = computed(() =>
 
 // ── Node states ─────────────────────────────────────────────────────────────
 .tech__node.is-locked .tech__node-body
-  background-image: linear-gradient(to bottom, #3a4258, #232a3c)
-  color: #7d879e
+  background-image: linear-gradient(to bottom, #5a7ea6, #3d5f88)
+  color: #b9cde3
   opacity: 0.75
 
 .tech__node.is-available .tech__node-body
-  background-image: linear-gradient(to bottom, #50aaff, #2266ff)
+  background-image: linear-gradient(to bottom, var(--btn-blue-from), var(--btn-blue-to))
 
 .tech__node.is-affordable .tech__node-body
-  background-image: linear-gradient(to bottom, #ffcd00, #f7a000)
+  background-image: linear-gradient(to bottom, var(--btn-yellow-from), var(--btn-yellow-to))
   animation: tech-afford 1.5s ease-in-out infinite
 
 .tech__node.is-maxed .tech__node-body
-  background-image: linear-gradient(to bottom, #67e08a, #1f9d4d)
+  background-image: linear-gradient(to bottom, var(--btn-green-from), var(--btn-green-to))
 
 .tech__node.is-selected .tech__node-body
-  border-color: #7fe0ff
-  box-shadow: 0 0 0 3px rgba(127, 224, 255, 0.55)
+  border-color: #fff
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.7), inset 0 3px 0 var(--ui-gloss)
 
 @keyframes tech-afford
   0%, 100%
@@ -944,9 +949,10 @@ const spotlightFirst = computed(() =>
   align-items: flex-start
   gap: clamp(0.4rem, 2vw, 0.75rem)
   padding: clamp(0.35rem, 1.8vw, 0.65rem)
-  border: 2px solid #24345a
+  border: 2px solid var(--ui-line)
   border-radius: clamp(0.5rem, 2.4vw, 0.9rem)
-  background-color: rgba(10, 18, 38, 0.7)
+  background-color: var(--ui-well)
+  box-shadow: inset 0 2px 0 var(--ui-gloss-soft)
   text-align: left
 
 .tech__detail-main
@@ -969,10 +975,10 @@ const spotlightFirst = computed(() =>
   display: block
   width: clamp(2.4rem, 11vw, 3.4rem)
   height: clamp(2.4rem, 11vw, 3.4rem)
-  border: 2px solid #24345a
+  border: 2px solid var(--ui-line)
   border-radius: 0.5rem
   overflow: hidden
-  background-color: rgba(6, 12, 26, 0.6)
+  background-color: var(--ui-well-deep)
 
 // Same trick as the node badge — drawn big, shown small, and `!important` to
 // beat BlockTile's inline size.
@@ -995,7 +1001,7 @@ const spotlightFirst = computed(() =>
 
 .tech__detail-rank
   flex: 0 0 auto
-  color: #9fb6de
+  color: var(--ui-text-soft)
   font-weight: 900
   font-size: clamp(0.55rem, 2.4vw, 0.75rem)
 
@@ -1008,7 +1014,7 @@ const spotlightFirst = computed(() =>
 
 .tech__detail-desc
   margin: 0
-  color: #cfdcf5
+  color: var(--ui-text-soft)
   line-height: 1.25
   font-size: clamp(0.6rem, 2.7vw, 0.85rem)
 
@@ -1021,13 +1027,13 @@ const spotlightFirst = computed(() =>
   margin-top: 0.15rem
 
 .tech__detail-status
-  color: #7ce09a
+  color: #8ff08a
   font-weight: 900
   text-transform: uppercase
   font-size: clamp(0.6rem, 2.7vw, 0.82rem)
 
   &.is-locked
-    color: #ff9d9d
+    color: #ffb3a8
     text-transform: none
 
 .tech__buy
