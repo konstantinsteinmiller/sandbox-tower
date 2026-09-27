@@ -119,6 +119,9 @@ beforeEach(() => {
 describe('merged-tier paintings are probed only once listed', () => {
   it('asks for nothing while the list is empty', async () => {
     const { images, painted } = await loadWithArt()
+    // The shipped list fills up as tiers are painted; this is about the gate.
+    ;(painted.PAINTED_TIER_FIXTURES as Set<string>).clear()
+    ;(painted.PAINTED_PROPS as Set<string>).clear()
     for (const type of painted.TIER_ART_WEAPONS) {
       for (const tier of [2, 3, 6]) expect(painted.tierFixtureArt(type, tier)).toBeNull()
     }
@@ -129,6 +132,7 @@ describe('merged-tier paintings are probed only once listed', () => {
 
   it('fetches a listed painting, and reuses tier 3 for every deeper weld', async () => {
     const { images, painted } = await loadWithArt()
+    ;(painted.PAINTED_TIER_FIXTURES as Set<string>).clear()
     ;(painted.PAINTED_TIER_FIXTURES as Set<string>).add('cannon-t3')
     expect(painted.tierFixtureArt('cannon', 5)).toBeNull() // still decoding
     await flush()
@@ -223,7 +227,8 @@ const loadRenderer = async () => {
 
 describe('a painted tier replaces the drawn one', () => {
   it('draws ONE copy of the plain painting at every merged tier when no tier is painted', async () => {
-    const { images, art, gameArt, drawn } = await loadRenderer()
+    const { images, painted, art, gameArt, drawn } = await loadRenderer()
+    ;(painted.PAINTED_TIER_FIXTURES as Set<string>).clear()
     gameArt.spriteFor('fixture', 'cannon')
     await flush()
     const plain = images.bySuffix('images/fixtures/cannon.webp')

@@ -29,6 +29,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE ABOVE EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one stands at the BOTTOM of a tall panel with open magenta above it.
+  That band stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -48,6 +52,13 @@ WHAT IT IS: Black Ant — a cartoon black ant seen from the side: three glossy b
 
 Colours: blue-black slate — body #3e3d58, highlights #5d6588, legs #3a3952, mandibles #4b4a66 — with icy blue-white shine streaks. This one is inked in near-black (#15101a).
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -55,6 +66,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -67,6 +82,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -79,17 +100,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -141,6 +161,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE ABOVE EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one stands at the BOTTOM of a tall panel with open magenta above it.
+  That band stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -160,6 +184,13 @@ WHAT IT IS: Spitting Spider — a round, fuzzy cartoon jumping spider in three-q
 
 Colours: head tan #9a7452, abdomen charcoal #4d4852 with an orange #ff8a2b stripe, legs #765945 with pale bands #cfb08a, jaws teal #2cb9a5.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -167,6 +198,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -179,6 +214,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -191,17 +232,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -253,6 +293,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE ABOVE EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one stands at the BOTTOM of a tall panel with open magenta above it.
+  That band stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -272,6 +316,13 @@ WHAT IT IS: Rhino Beetle — a heavy rhino beetle seen from the side, leaning fo
 
 Colours: glossy mahogany — shell and horns #6c2c19, head #7a3520, legs #6c2e1a — with a strong peach shine band on the dome and up the horn; eyes #ffb347.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -279,6 +330,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -291,6 +346,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -303,17 +364,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -365,6 +425,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE ABOVE EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one stands at the BOTTOM of a tall panel with open magenta above it.
+  That band stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -384,6 +448,13 @@ WHAT IT IS: Mosquito — a lanky cartoon mosquito in side profile: a small humpe
 
 Colours: body purple #6d3f86, bands cream #f7eed8, eyes lime #c4ee3a, the needle mauve with a white tip.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -391,6 +462,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -403,6 +478,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -415,17 +496,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -477,6 +557,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE ABOVE EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one stands at the BOTTOM of a tall panel with open magenta above it.
+  That band stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -496,6 +580,13 @@ WHAT IT IS: Roly-Poly — a roly-poly pill bug in three-quarter view: a tall hal
 
 Colours: plates grey #9aa3ad, head #7d8693, legs #b3adb5 (far legs #6e7782); bottle cap red #e5483b with a silver #d1d6dc rim, a yellow #ffc93c ring and a cream star.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -503,6 +594,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -515,6 +610,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -527,17 +628,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -589,6 +689,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE ABOVE EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one stands at the BOTTOM of a tall panel with open magenta above it.
+  That band stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -608,6 +712,13 @@ WHAT IT IS: Housefly — a cartoon housefly: a broad grey hairy thorax with four
 
 Colours: thorax grey #5b6072, abdomen olive-grey #7b7560, face silver #d9d4c4, eyes cherry red #e0362d; the wings clear with a faint warm tint — never pink or magenta.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -615,6 +726,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -627,6 +742,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -639,17 +760,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -701,6 +821,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE ABOVE EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one stands at the BOTTOM of a tall panel with open magenta above it.
+  That band stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -720,6 +844,13 @@ WHAT IT IS: Cockroach — a cartoon cockroach, the lowest and longest shape in t
 
 Colours: glossy chestnut — wing cases #9a4a20, belly #733617, head shield #843f1b, legs #ab6531 (far legs #7c4321) — with a cream shine streak.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -727,6 +858,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -739,6 +874,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -751,17 +892,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -813,6 +953,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE ABOVE EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one stands at the BOTTOM of a tall panel with open magenta above it.
+  That band stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -832,6 +976,13 @@ WHAT IT IS: Bombardier Beetle — a nervous bombardier beetle in three-quarter s
 
 Colours: shell navy #2c3a6e, head and body orange #ff8a2b, legs #f47a22, smoke puffs cream, sweat drop #a9e4ff.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -839,6 +990,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -851,6 +1006,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -863,17 +1024,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -925,6 +1085,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE ABOVE EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one stands at the BOTTOM of a tall panel with open magenta above it.
+  That band stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -946,6 +1110,13 @@ READ THE PANELS: Its eyes are half shut in panel 8 only — a blink. Keep that.
 
 Colours: head #422629, shield #62241f, wing case #8c2a1d, antlers rust-red #a8391f, legs #43292b, palps gold #e8a844, eyes amber #ffb428.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -953,6 +1124,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -965,6 +1140,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -977,17 +1158,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -1039,6 +1219,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE ABOVE EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one stands at the BOTTOM of a tall panel with open magenta above it.
+  That band stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -1058,6 +1242,13 @@ WHAT IT IS: Red Ant — a lean red fire ant, reared up on its four back legs, se
 
 Colours: fire-ant red — body #dd4b2b, abdomen #b93822, legs #cf4a2a, mandibles #a8321c; eyes #ffcf3f; the pebble grey #9aa3ad.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1065,6 +1256,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1077,6 +1272,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1089,17 +1290,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -1151,6 +1351,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE ABOVE EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one stands at the BOTTOM of a tall panel with open magenta above it.
+  That band stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -1170,6 +1374,13 @@ WHAT IT IS: Firefly — a cartoon firefly carrying fire: a dark plum body, dark 
 
 Colours: body plum #40333c, wing-case edges yellow #ffd85c, hood salmon #f26c52, lantern pale lime #eaff8a with its green glow kept tight, ember orange #ff6d1f with a gold core.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1177,6 +1388,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1189,6 +1404,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1201,17 +1422,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -1263,6 +1483,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE ABOVE EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one stands at the BOTTOM of a tall panel with open magenta above it.
+  That band stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -1282,6 +1506,13 @@ WHAT IT IS: Hornet — an angry cartoon hornet in side view: a yellow abdomen an
 
 Colours: abdomen yellow #ffc21f with near-black bands, thorax and helmet rust-brown #8e3a22, eyes red, wings amber-tinted.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1289,6 +1520,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1301,6 +1536,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1313,17 +1554,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -1375,6 +1615,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE ABOVE EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one stands at the BOTTOM of a tall panel with open magenta above it.
+  That band stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -1394,6 +1638,13 @@ WHAT IT IS: Bumblebee — a round, fuzzy cartoon bumblebee — one big golden fu
 
 Colours: body gold #ffc42e with black bands and a cream tail band, honey bomb #ffb319, pollen baskets orange, cheeks soft pink.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1401,6 +1652,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1413,6 +1668,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1425,17 +1686,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -1487,6 +1747,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE AROUND EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one floats in the MIDDLE of a tall panel with open magenta above and
+  below it. That space stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -1506,6 +1770,13 @@ WHAT IT IS: Water Tiger — a water tiger — a diving-beetle larva — swimming
 
 Colours: body ochre #d6b24c, saddles #735424, belly cream, jaws #8e4a22, eyes lime #b8e04a.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1513,6 +1784,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1525,6 +1800,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1537,17 +1818,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -1598,6 +1878,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE AROUND EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one floats in the MIDDLE of a tall panel with open magenta above and
+  below it. That space stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -1617,6 +1901,13 @@ WHAT IT IS: Diving Beetle — a diving beetle swimming side-on: a rigid glossy o
 
 Colours: shell olive #40602c with a yellow #ffc93c rim and a pale-green catch-light, oar legs amber, fringes cream.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1624,6 +1915,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1636,6 +1931,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1648,17 +1949,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -1709,6 +2009,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE AROUND EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one floats in the MIDDLE of a tall panel with open magenta above and
+  below it. That space stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -1730,6 +2034,13 @@ READ THE PANELS: The hinged lip is folded under the face in every panel except p
 
 Colours: body moss green #83a13f, the hinged lip khaki #bdbf6c, hooks dark brown #6a3f1c, eye amber #ffc94a.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1737,6 +2048,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1749,6 +2064,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1761,17 +2082,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -1822,6 +2142,10 @@ Repaint a WALK CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME creature at a different moment of one step.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE AROUND EACH CREATURE IS PART OF THE LAYOUT. In the reference
+  every one floats in the MIDDLE of a tall panel with open magenta above and
+  below it. That space stays empty — it is never room for another row.
+  The whole image holds exactly 8 creatures: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -1841,6 +2165,13 @@ WHAT IT IS: Toe-Biter — a toe-biter — a giant water bug — swimming side-on
 
 Colours: body brown #9a5c28, wings pale leather with dark tips, lure pale green #b6ff8c with its glow kept tight, eyes pale yellow.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1848,6 +2179,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1860,6 +2195,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1872,17 +2213,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A creature does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A creature does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -1933,6 +2273,10 @@ Repaint a GALLOP CYCLE. The attached sheet is 4 columns x 2 rows
 bottom row. Every panel is the SAME horse and rider at a different moment of ONE gallop stride.
 
 · 8 panels. Not 12, not 24. Exactly 2 rows of 4 — do not add a row.
+· THE EMPTY SPACE ABOVE EACH RIDER IS PART OF THE LAYOUT. In the reference
+  every one stands at the BOTTOM of a tall panel with open magenta above it.
+  That band stays empty — it is never room for another row.
+  The whole image holds exactly 8 riders: 4 across the top half and 4 across the bottom half. Count them before you finish.
 
 ONE CHARACTER — read this before anything else.
 All 8 panels must show the same individual:
@@ -1954,6 +2298,13 @@ READ THE PANELS: One full gallop: four hoof beats and a brief moment with every 
 
 Colours: the knight, shield, chanfron and chest plate toy-blue around #2f7de1 (shade #1a4f9c); the caparison light blue #6fb0f5; gold trim, mane, tail, plume and pennant around #f2b52c; the horse warm white plastic #f6f1e6 with grey hooves; brown leather tack #9a6238; the lance white with blue candy stripes.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1961,6 +2312,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1973,6 +2328,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1985,17 +2346,16 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 LAYOUT — the grid is a cutting guide, and it is cut blindly.
 Each panel is exactly 1/4 of the width and 1/2 of the height.
-ONE correction to the style note above: "fills the square edge to edge" is for
-building blocks and is WRONG here. A rider does NOT fill its panel — it is
-centred in it, at the size the reference draws it, with clear magenta all round.
+A rider does NOT fill its panel — it is centred in it, at the size the
+reference draws it, with clear magenta all round.
 Never let a limb, tail, weapon or shadow cross into a neighbouring panel.
 Do not add, drop, merge or reorder panels.
 Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or
@@ -2043,8 +2403,15 @@ tool has an aspect-ratio control, set it to match. No labels or watermarks.
 
 ```text
 Repaint ONE contraption, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Rubber-Band Crossbow carriage — The carriage of an ant-built rubber-band crossbow: two green bottle-cap wheels with a printed cream star; a popsicle-stick bed and a trail stick ending in a pink thumbtack; a wide tongue-depressor stock with a groove along it; an upright stick frame; a corrugated-cardboard shield at the front with a torn top, masking tape and a dark slot; three spare toothpicks standing in a green bottle cap; and a pink eraser wedge under the stock. Draw the CARRIAGE ONLY — no crossbow arms, no rubber band, no wind-up key, no winder ant, no loaded toothpick. Those are painted separately in game.
 
@@ -2065,6 +2432,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2077,6 +2448,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2089,8 +2466,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2139,8 +2516,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE contraption, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Spoon Catapult frame — The frame of an ant-built spoon catapult: two yellow bottle-cap wheels; a stacked popsicle-stick frame with legs and a collar tie; a big wad of yellow and orange rubber bands low at the back (the spring); a yellow kitchen sponge with a green scourer on a stick at the front top (the stop); a cotton reel of yellow thread at the tail; two grey pebbles and a sand clod on the deck; and an ant in an acorn-cap helmet holding up a pebble. Draw the FRAME ONLY — no spoon, no string, no pebble in a bowl. The spoon swings separately in game.
 
@@ -2161,6 +2545,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2173,6 +2561,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2185,8 +2579,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2235,8 +2629,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE contraption, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Pencil Trebuchet frame — The frame of an ant-built pencil trebuchet: two red bottle-cap wheels; a popsicle-stick sill; an A-frame of sticks rising to the pivot, with a collar tie and raking braces; green rubber bands lashing the joints; a spool of green thread at the tail; two pebbles and a sand clod on the sill; and an ant in an acorn-cap helmet standing behind the tail holding a pebble. Draw the FRAME ONLY — no pencil beam, no eraser counterweight, no sling, no pushpin. The arm swings separately in game.
 
@@ -2257,6 +2658,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2269,6 +2674,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2281,8 +2692,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2331,8 +2742,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE contraption, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Pencil Ram car — A red die-cast toy car driven by ants: a yellow racing stripe with a thin cream line, dark wheel arches, pale-blue windows with a tiny ant driver peering out, a headlight, a tail light and chrome bumpers at both ends, and two toy-car wheels with black tyres and chrome hubs. A popsicle-stick gantry — two posts and a crossbar — stands over the roof, with a lookout ant on the crossbar and a yellow paper pennant on a toothpick; two orange foam darts are stuck to the car. Draw the CAR AND GANTRY ONLY — no pencil, no rubber bands, no riding ant. The pencil ram swings separately in game.
 
@@ -2353,6 +2771,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2365,6 +2787,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2377,8 +2805,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2427,8 +2855,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE contraption, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Tin-Can Ram — A soup tin lying on its side on a popsicle-stick sled with two dark-grey bottle-cap wheels: pressed bead ridges round the can, bright specular bands along the top and a darker underside, a torn red label with a cream disc and a tomato, and a rolled rim at the back. The open front mouth is turned toward the viewer, dark inside, with its can-opened lid bent up over it like a visor; a commander ant in an acorn-cap helmet pokes out of a jagged hatch on top; three foam darts are stuck uselessly to the tin. Shiny cold TIN — never cardboard or plastic. Draw the TIN AND SLED ONLY — no fork. The fork slides out of the mouth separately in game.
 
@@ -2449,6 +2884,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2461,6 +2900,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2473,8 +2918,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2523,8 +2968,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE contraption, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Juice-Box Tower — A juice box on wheels: an orange carton with a darker side panel at the left, a white top band with a wavy lower edge, a green wave along its foot, a big orange-slice picture with a green leaf, a folded side ear and a white sealed fin along the top, two foam darts stuck in it, and two red sewing-button wheels. Draw the CARTON ONLY — no cardboard ramp, no straw flagpole, no red bottle-cap fighting top, no ant archers. Those are all animated separately in game.
 
@@ -2545,6 +2997,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2557,6 +3013,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2569,8 +3031,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2663,6 +3125,13 @@ toy’s instruction leaflet shows it.
   is nearer the eye than another.
 · Every stick, pencil and spoon keeps the angle the reference draws it at.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 ONE MECHANISM.
 All 8 panels are the same assembly at a different moment of one
 shot. Identical sticks, identical caps, identical rubber bands, identical
@@ -2681,6 +3150,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2693,6 +3166,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2831,6 +3310,13 @@ toy’s instruction leaflet shows it.
   is nearer the eye than another.
 · Every stick, pencil and spoon keeps the angle the reference draws it at.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 ONE MECHANISM.
 All 8 panels are the same assembly at a different moment of one
 shot. Identical sticks, identical caps, identical rubber bands, identical
@@ -2849,6 +3335,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2861,6 +3351,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2999,6 +3495,13 @@ toy’s instruction leaflet shows it.
   is nearer the eye than another.
 · Every stick, pencil and spoon keeps the angle the reference draws it at.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 ONE MECHANISM.
 All 8 panels are the same assembly at a different moment of one
 shot. Identical sticks, identical caps, identical rubber bands, identical
@@ -3017,6 +3520,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3029,6 +3536,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3123,8 +3636,15 @@ grid and cannot be cut. No labels, captions, numbers or watermarks.
 
 ```text
 Repaint ONE ship, in a single landscape image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Paper Boat hull — A folded notebook-paper boat, seen side-on and facing RIGHT: a tall triangular centre fold standing up out of it — lit on its left half, shaded on its right — and a wide flap whose two ends fold up into points and pinch down toward a flat keel; blue ruled lines running across the paper, a red margin line near the left, soft grey creases and a double-thickness brim. No mast, no sail, no oars. Cut off flat at the waterline.
 
@@ -3151,6 +3671,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3163,6 +3687,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3175,8 +3705,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3228,8 +3758,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE ship, in a single landscape image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Rubber Duck hull — A fat yellow rubber bath duck, seen side-on and facing LEFT: a plump breast and a round head at the left, an orange beak with a smile line, a big glossy black eye with a white glint, orange cheek blush, a tucked wing shading toward orange, a perky tail rising at the upper right, and a toy-blue saddle strap across its back. Cut off flat at the waterline.
 
@@ -3256,6 +3793,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3268,6 +3809,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3280,8 +3827,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3333,8 +3880,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE ship, in a single landscape image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Toy Pirate Ship hull — A moulded brown-plastic toy pirate ship, seen side-on and facing RIGHT: a plank-lined hull with a gold stripe along the sheer and four gold-ringed black portholes, a gold wedge figurehead at the bow, a darker stern castle at the left with three little merlons and a lit window, a dark mast carrying a cream sail with two red stripes and a yard across its head, and a black pennant at the masthead with a plain off-white skull shape on it. No oars, no shields. Cut off flat at the waterline.
 
@@ -3361,6 +3915,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3373,6 +3931,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3385,8 +3949,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3438,8 +4002,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Squirt Gun — A chunky toy water pistol pointing RIGHT: a rounded green body with an orange stripe decal along its side, a green grip hanging below the rear with an orange trigger, an orange pump slide with three ribs under the barrel, a yellow nozzle barrel ending in an orange tip with a dark hole, an orange knob on the back end, and on top a pill-shaped water tank about half full of turquoise water, with an orange filler cap and two yellow straps. Paint the tank as SOLID pale icy blue above the water line, not see-through. NOTHING else — no stand, no block, no spray, no drips.
 
@@ -3478,6 +4049,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3490,6 +4065,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3502,8 +4083,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3551,8 +4132,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Dart Blaster — A toy foam-dart blaster pointing RIGHT: a chunky orange body with a hump over the chamber, a blue side panel with two yellow screws, a blue grip with a yellow trigger, a small blue sight fin on top, a blue barrel with two darker rings and an orange muzzle ring, a yellow priming slide on a rod at the back, and a loaded dart just poking out of the muzzle — a stub of orange foam and a fat blue suction cup. NOTHING else — no tripod, no block, no flying darts.
 
@@ -3591,6 +4179,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3603,6 +4195,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3615,8 +4213,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3664,8 +4262,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Mud Mortar — A blue plastic sand bucket used as a mortar tube: flaring toward its mouth, two moulded ridges round it, a thick yellow rolled rim, a yellow U-shaped handle across its side, a mouth full of dark mud with a round mud ball sitting in it and one drip over the rim, and a yellow pivot hub with a blue centre at its base. NOTHING else — no block, no splatter, no flying mud.
 
@@ -3703,6 +4308,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3715,6 +4324,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3727,8 +4342,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3776,8 +4391,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Balloon Launcher — A launch tube made from a kraft-cardboard tube with a rounded bottom end, diagonal spiral seams and two toy-blue bands; an orange plastic collar round its dark mouth; a glossy PINK water balloon sitting in the mouth, bigger than it, with its knot showing; and a yellow pivot disc at its base. NOTHING else — no block, no pit, no splash.
 
@@ -3815,6 +4437,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3827,6 +4453,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3839,8 +4471,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3888,8 +4520,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Bug Zapper — An electric bug-zapper lantern: a dark indigo cage with a pale UV tube glowing cyan inside it, a pale-lavender wire grid across the front with violet corner posts, a violet flared base, a sloped violet roof, and a pale hanging ring on top. NOTHING else — no zap, no spark, no glow around it, no bug, no block: the game pulses its own glow behind the lantern and throws its own spark across the grid.
 
@@ -3927,6 +4566,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3939,6 +4582,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3951,8 +4600,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -4000,8 +4649,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Ice Pop — A giant ice-blue ice pop on a wooden stick: a rounded top with a bite taken out of the right shoulder, two white moulded ridges, a white gloss streak down the left, and one melt drop at the lower right. NOTHING else — no frost glints, no cold glow around it, no block, no puddle, no flying ice: the game twinkles its own glints on it and breathes its own glow behind it.
 
@@ -4039,6 +4695,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -4051,6 +4711,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -4063,8 +4729,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -4112,8 +4778,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Pebble Digger — A yellow toy digger facing LEFT: dark rubber tracks with grey wheels at the right, a yellow cab with a pale-blue window, and a yellow boom and arm with a grey ram reaching up and over to a yellow scoop at the top left with two pebbles in it, above a small heap of grey pebbles at the bottom left. NOTHING else: no block, no ground, no dust.
 
@@ -4151,6 +4824,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -4163,6 +4840,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -4175,8 +4858,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -4224,8 +4907,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Paper Flag — A little paper flag on a wooden toothpick mast, point up: a plum-red paper swallowtail flying to the RIGHT from the top of the mast, with a gold band and a gold star, and a darker fold where it wraps the mast. NOTHING else: no block, no paper frill, no sand.
 
@@ -4263,6 +4953,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -4275,6 +4969,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -4287,8 +4987,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -4336,8 +5036,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Magic Seashell — A pearly-pink scallop shell standing on its hinge: seven scalloped lobes, six radial ribs in a deeper pink, a darker pink hinge piece at the bottom with a pale cyan-white pearl on it, and three small sparkles. A soft pale-cyan aura close behind it. NOTHING else: no block, no sand, no beam of light.
 
@@ -4375,6 +5082,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -4387,6 +5098,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -4399,8 +5116,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -4448,8 +5165,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Sand Sifter — A toy sand wheel: a paddle wheel with yellow spokes, an orange rim, eight orange paddle cups and a blue hub, standing on blue A-frame legs over a small heap of sand, with a green funnel above it heaped with sand and a thin trickle of grains falling into the wheel. NOTHING else: no block, no ground, no sieve.
 
@@ -4487,6 +5211,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -4499,6 +5227,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -4511,8 +5245,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -4560,8 +5294,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Piggy Bank — A soft-pink piggy bank facing RIGHT: a round body, darker far legs and ear, a curly tail at the left, a pale snout with two nostrils, a glossy dot eye, a red cheek blush, a slot on its back, and a gold coin, seen edge-on, hovering just above the slot with two little motion ticks. NOTHING else: no block, no pedestal, no pile of coins.
 
@@ -4599,6 +5340,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -4611,6 +5356,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -4623,8 +5374,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -4672,8 +5423,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Bucket & Spade — A green toy sand bucket with a yellow rim, a yellow arched handle and a white first-aid-cross sticker on its side, with a toy spade — a yellow handle with a T-grip and an orange blade — leaning against its right side. NOTHING else: no block, no sand, no tools.
 
@@ -4711,6 +5469,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -4723,6 +5485,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -4735,8 +5503,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -4784,8 +5552,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Toothpick Wall — A ring of fourteen wooden toothpicks, points out: three poking out to the left, three to the right, four up and four down, each tilted a little by hand, starting well inside the square and reaching well past its edges, in pale wood with a lighter highlight line. The middle is EMPTY — the block goes there. NOTHING else: no block, no ground, no glints — the game twinkles its own at the points.
 
@@ -4823,6 +5598,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -4835,6 +5614,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -4847,8 +5632,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -4896,8 +5681,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Squirt Gun — tier 2 — ONE squirt gun — the plain toy made fancier: a racing stripe in the tier colour along the body under the orange decal, and a star sticker near the front. Otherwise exactly the plain toy — the same parts, the same colours, the same pose. One toy. NOTHING else — no stand, no block, no ammunition flying, no spray or smoke.
 
@@ -4958,6 +5750,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -4970,6 +5766,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -4982,8 +5784,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -5031,8 +5833,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Squirt Gun — tier 3 — ONE squirt gun — the plain toy made fancier: the stripe and the sticker, plus a white pressure gauge with a red needle on the rear of the body and a bigger water tank on top. Otherwise exactly the plain toy — the same parts, the same colours, the same pose. One toy. NOTHING else — no stand, no block, no ammunition flying, no spray or smoke.
 
@@ -5093,6 +5902,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -5105,6 +5918,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -5117,8 +5936,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -5166,8 +5985,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Dart Blaster — tier 2 — ONE dart blaster — the plain toy made fancier: a stripe in the tier colour along the bottom of the body, and a sticker on its side. Otherwise exactly the plain toy — the same parts, the same colours, the same pose. One toy. NOTHING else — no stand, no block, no ammunition flying, no spray or smoke.
 
@@ -5228,6 +6054,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -5240,6 +6070,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -5252,8 +6088,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -5301,8 +6137,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Dart Blaster — tier 3 — ONE dart blaster — the plain toy made fancier: the stripe and the sticker, plus a yellow dart drum with six orange dart ends under the barrel, and the sight fin swapped for a blue scope with a pale lens. Otherwise exactly the plain toy — the same parts, the same colours, the same pose. One toy. NOTHING else — no stand, no block, no ammunition flying, no spray or smoke.
 
@@ -5363,6 +6206,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -5375,6 +6222,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -5387,8 +6240,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -5436,8 +6289,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Balloon Launcher — tier 2 — ONE balloon launcher — the plain toy made fancier: a sticker on the cardboard tube. Otherwise exactly the plain toy — the same parts, the same colours, the same pose. One toy. NOTHING else — no stand, no block, no ammunition flying, no spray or smoke.
 
@@ -5497,6 +6357,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -5509,6 +6373,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -5521,8 +6391,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -5570,8 +6440,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Balloon Launcher — tier 3 — ONE balloon launcher — the plain toy made fancier: the sticker, plus a third blue band on the tube and a bigger water balloon. Otherwise exactly the plain toy — the same parts, the same colours, the same pose. One toy. NOTHING else — no stand, no block, no ammunition flying, no spray or smoke.
 
@@ -5631,6 +6508,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -5643,6 +6524,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -5655,8 +6542,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -5704,8 +6591,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Mud Mortar — tier 2 — ONE mud mortar — the plain toy made fancier: a star sticker on the side of the bucket. Otherwise exactly the plain toy — the same parts, the same colours, the same pose. One toy. NOTHING else — no stand, no block, no ammunition flying, no spray or smoke.
 
@@ -5765,6 +6659,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -5777,6 +6675,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -5789,8 +6693,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -5838,8 +6742,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Mud Mortar — tier 3 — ONE mud mortar — the plain toy made fancier: the sticker, plus a yellow band around the bucket. Otherwise exactly the plain toy — the same parts, the same colours, the same pose. One toy. NOTHING else — no stand, no block, no ammunition flying, no spray or smoke.
 
@@ -5899,6 +6810,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -5911,6 +6826,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -5923,8 +6844,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -5972,8 +6893,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Bug Zapper — tier 2 — ONE bug zapper — the plain toy made fancier: a sticker on the base. Otherwise exactly the plain toy — the same parts, the same colours, the same pose. One toy. NOTHING else — no stand, no block, no ammunition flying, no spray or smoke.
 
@@ -6033,6 +6961,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -6045,6 +6977,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -6057,8 +6995,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -6106,8 +7044,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Bug Zapper — tier 3 — ONE bug zapper — the plain toy made fancier: the sticker, plus twin charge coils on the roof corners — pale rods topped with pale cyan balls. Otherwise exactly the plain toy — the same parts, the same colours, the same pose. One toy. NOTHING else — no stand, no block, no ammunition flying, no spray or smoke.
 
@@ -6167,6 +7112,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -6179,6 +7128,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -6191,8 +7146,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -6240,8 +7195,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Ice Pop — tier 2 — ONE ice pop — the plain toy made fancier: a stripe in the tier colour across the upper pop, and a sticker on the stick. Otherwise exactly the plain toy — the same parts, the same colours, the same pose. One toy. NOTHING else — no stand, no block, no ammunition flying, no spray or smoke.
 
@@ -6301,6 +7263,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -6313,6 +7279,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -6325,8 +7297,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -6374,8 +7346,15 @@ No labels, captions or watermarks.
 
 ```text
 Repaint ONE toy, in a single square image.
-The attached reference is exactly what to paint, at exactly the size and
+The attached reference shows exactly WHAT to paint, at exactly the size and
 position it is drawn at. Match both.
+
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
 
 WHAT IT IS: Ice Pop — tier 3 — ONE ice pop — the plain toy made fancier: the stripe and the sticker, plus a crown of three ice-crystal diamonds above the top. Otherwise exactly the plain toy — the same parts, the same colours, the same pose. One toy. NOTHING else — no stand, no block, no ammunition flying, no spray or smoke.
 
@@ -6435,6 +7414,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -6447,6 +7430,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -6459,8 +7448,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.

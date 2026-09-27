@@ -173,7 +173,7 @@ const latestDownload = () => {
 
 // ─── By queue: Gemini, throttled ────────────────────────────────────────────
 
-const USAGE = join(homedir(), '.art-desk', 'usage.json')
+const USAGE = cfg.gemini.usageFile
 const today = () => new Date().toISOString().slice(0, 10)
 const usage = () => { try { return JSON.parse(readFileSync(USAGE, 'utf-8')) } catch { return {} } }
 const usedToday = () => usage()[today()] ?? 0
@@ -238,8 +238,15 @@ const runQueue = async () => {
       }
       const stem = auto.queue[0]
       const job = jobFor(stem)
-      if (!job?.ref) {
+      // A job needs something to attach: its layout reference, or — for the
+      // scenery, which has none — the finish references its doc names.
+      if (!job?.ref && !job?.styleRefs?.length) {
         log(`✗ skipped — ${job ? 'no reference image; export it first' : 'unknown job'}`, 'err', stem)
+        auto.queue.shift()
+        continue
+      }
+      if (job.styleRefsMissing?.length) {
+        log(`✗ skipped — its finish references are not on disk yet: ${job.styleRefsMissing.join(', ')}`, 'err', stem)
         auto.queue.shift()
         continue
       }
@@ -250,7 +257,8 @@ const runQueue = async () => {
         const g = await driver()
         const t0 = Date.now()
         const got = await g.paint({
-          refFile: join(cfg.sheetsDir, job.ref),
+          refFile: job.ref ? join(cfg.sheetsDir, job.ref) : null,
+          styleFiles: (job.styleRefs ?? []).map((f) => join(ROOT, f)),
           prompt: job.prompt,
           timeoutMs: cfg.gemini.timeoutSeconds * 1000,
           onPhase: (p, quiet) => phase(p, stem, quiet)

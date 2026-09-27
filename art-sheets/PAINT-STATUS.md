@@ -4,141 +4,141 @@ A report, not a contract: it is a picture of `art-sheets/painted/` and the
 slicer's receipt at the moment it was written. Re-run `pnpm art:prompts`
 after painting or slicing anything.
 
-**0 sliced · 0 need a repaint · 0 painted, unreceipted · 122 outstanding** (+ 9 reference-only strips)
+**90 sliced · 0 need a repaint · 0 painted, unreceipted · 0 outstanding** (+ 41 reference-only or not painted on purpose)
 
 | | Sheet | Prompt block in | Reference | State |
 | --- | --- | --- | --- | --- |
-| · | **gate — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-gate-body.png` (rev `af11af1e9994`) | not painted yet |
-| · | **wood — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-wood-body.png` (rev `23cd6fab9128`) | not painted yet |
-| · | **brace — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-brace-body.png` (rev `bfe7a267c106`) | not painted yet |
-| · | **stone — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-stone-body.png` (rev `17f7041d344d`) | not painted yet |
-| · | **archer — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-archer-body.png` (rev `c9d2237ce47c`) | not painted yet |
-| · | **cannon — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-cannon-body.png` (rev `81ead37ee65d`) | not painted yet |
-| · | **mortar — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-mortar-body.png` (rev `233bf0d2f9f5`) | not painted yet |
-| · | **bombard — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-bombard-body.png` (rev `eed6629b215e`) | not painted yet |
-| · | **tesla — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-tesla-body.png` (rev `38747d8c52f6`) | not painted yet |
-| · | **frost — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-frost-body.png` (rev `e3341ceeef1f`) | not painted yet |
-| · | **spikes — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-spikes-body.png` (rev `db5ac344173e`) | not painted yet |
-| · | **repair — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-repair-body.png` (rev `6992f79d031a`) | not painted yet |
-| · | **banner — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-banner-body.png` (rev `f1569227c7a5`) | not painted yet |
-| · | **obelisk — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-obelisk-body.png` (rev `403f3d53b946`) | not painted yet |
-| · | **lumberHut — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-lumberHut-body.png` (rev `342eb452ac70`) | not painted yet |
-| · | **stonepit — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-stonepit-body.png` (rev `99748338a4c2`) | not painted yet |
-| · | **coffer — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-coffer-body.png` (rev `f23d75f1ef96`) | not painted yet |
-| · | **grunt — grumpling · 0.62c** | `PROMPTS-CELLS.md` | `cell-enemy-grunt.png` (rev `4984bb7550f4`) | not painted yet |
-| · | **runner — cinderhound · 0.55c** | `PROMPTS-CELLS.md` | `cell-enemy-runner.png` (rev `7330f0181274`) | not painted yet |
-| · | **slinger — bonecap · 0.6c** | `PROMPTS-CELLS.md` | `cell-enemy-slinger.png` (rev `75cfcae9fce1`) | not painted yet |
-| · | **brute — snaggletusk · 0.85c** | `PROMPTS-CELLS.md` | `cell-enemy-brute.png` (rev `6f9770b01ab1`) | not painted yet |
-| · | **bomber — blorp · 0.66c** | `PROMPTS-CELLS.md` | `cell-enemy-bomber.png` (rev `d33f535666f8`) | not painted yet |
-| · | **bat — nibbler · 0.5c** | `PROMPTS-CELLS.md` | `cell-enemy-bat.png` (rev `a5a0ba1dacac`) | not painted yet |
-| · | **bulwark — marrowknight · 0.78c** | `PROMPTS-CELLS.md` | `cell-enemy-bulwark.png` (rev `f7d1eaf3a46b`) | not painted yet |
-| · | **wyvern — skewer · 0.8c** | `PROMPTS-CELLS.md` | `cell-enemy-wyvern.png` (rev `ae7cff374484`) | not painted yet |
-| · | **bombardier — gloomcrow · 0.82c** | `PROMPTS-CELLS.md` | `cell-enemy-bombardier.png` (rev `0fb8691e2a84`) | not painted yet |
-| · | **firebug — dustmoth · 0.9c** | `PROMPTS-CELLS.md` | `cell-enemy-firebug.png` (rev `7cec5f800479`) | not painted yet |
-| · | **eel — sliverfin · 0.85c** | `PROMPTS-CELLS.md` | `cell-enemy-eel.png` (rev `fb4eaf522cab`) | not painted yet |
-| · | **shark — gnashfin · 1c** | `PROMPTS-CELLS.md` | `cell-enemy-shark.png` (rev `31ebdad16525`) | not painted yet |
-| · | **kraken — brinemaw · 1.25c** | `PROMPTS-CELLS.md` | `cell-enemy-kraken.png` (rev `e1593aa767da`) | not painted yet |
-| · | **seadrake — tidewyrm · 1.4c** | `PROMPTS-CELLS.md` | `cell-enemy-seadrake.png` (rev `719c2ce49dd2`) | not painted yet |
-| · | **golem — thornwick · 1.45c** | `PROMPTS-CELLS.md` | `cell-enemy-golem.png` (rev `b19ad5551add`) | not painted yet |
-| · | **ram — 1.15c** | `PROMPTS-CELLS.md` | `cell-siege-ram.png` (rev `e3846075a6cf`) | not painted yet |
-| · | **ballista — 1.2c** | `PROMPTS-CELLS.md` | `cell-siege-ballista.png` (rev `ef4a3dc42852`) | not painted yet |
-| · | **catapult — 1.45c** | `PROMPTS-CELLS.md` | `cell-siege-catapult.png` (rev `42db4e5a5527`) | not painted yet |
-| · | **siegeTower — 1.05c** | `PROMPTS-CELLS.md` | `cell-siege-siegeTower.png` (rev `59c1240e80a8`) | not painted yet |
-| · | **trebuchet — 1.7c** | `PROMPTS-CELLS.md` | `cell-siege-trebuchet.png` (rev `b63e09ea783b`) | not painted yet |
-| · | **ironRam — 1.35c** | `PROMPTS-CELLS.md` | `cell-siege-ironRam.png` (rev `54261772e2d5`) | not painted yet |
-| · | **foam dart — round** | `PROMPTS-CELLS.md` | `cell-projectile-bolt.png` (rev `2cb7981afb6f`) | not painted yet |
-| · | **toothpick — round** | `PROMPTS-CELLS.md` | `cell-projectile-quarrel.png` (rev `97c83bf8a50a`) | not painted yet |
-| · | **coin — shipped bitmap** | `PROMPTS-CELLS.md` | `cell-ui-coin.png` (rev `84486c03215c`) | not painted yet |
-| · | **logo — splash** | `PROMPTS-CELLS.md` | `cell-ui-logo.png` (rev `2cd1396c296d`) | not painted yet |
+| ✓ | **gate — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-gate-body.png` (rev `af11af1e9994`) | sliced 2026-09-26 from `cell-block-gate-body.jpg` |
+| ✓ | **wood — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-wood-body.png` (rev `23cd6fab9128`) | sliced 2026-09-26 from `cell-block-wood-body.jpg` |
+| ✓ | **brace — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-brace-body.png` (rev `bfe7a267c106`) | sliced 2026-09-26 from `cell-block-brace-body.jpg` |
+| ✓ | **stone — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-stone-body.png` (rev `17f7041d344d`) | sliced 2026-09-26 from `cell-block-stone-body.jpg` |
+| ✓ | **archer — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-archer-body.png` (rev `c9d2237ce47c`) | sliced 2026-09-27 from `cell-block-archer-body.jpg` |
+| ✓ | **cannon — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-cannon-body.png` (rev `81ead37ee65d`) | sliced 2026-09-26 from `cell-block-cannon-body.jpg` |
+| ✓ | **mortar — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-mortar-body.png` (rev `233bf0d2f9f5`) | sliced 2026-09-27 from `cell-block-mortar-body.jpg` |
+| ✓ | **bombard — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-bombard-body.png` (rev `eed6629b215e`) | sliced 2026-09-26 from `cell-block-bombard-body.jpg` |
+| ✓ | **tesla — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-tesla-body.png` (rev `38747d8c52f6`) | sliced 2026-09-26 from `cell-block-tesla-body.jpg` |
+| ✓ | **frost — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-frost-body.png` (rev `e3341ceeef1f`) | sliced 2026-09-26 from `cell-block-frost-body.jpg` |
+| ✓ | **spikes — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-spikes-body.png` (rev `db5ac344173e`) | sliced 2026-09-26 from `cell-block-spikes-body.jpg` |
+| ✓ | **repair — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-repair-body.png` (rev `6992f79d031a`) | sliced 2026-09-26 from `cell-block-repair-body.jpg` |
+| ✓ | **banner — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-banner-body.png` (rev `f1569227c7a5`) | sliced 2026-09-27 from `cell-block-banner-body.jpg` |
+| ✓ | **obelisk — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-obelisk-body.png` (rev `403f3d53b946`) | sliced 2026-09-26 from `cell-block-obelisk-body.jpg` |
+| ✓ | **lumberHut — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-lumberHut-body.png` (rev `342eb452ac70`) | sliced 2026-09-26 from `cell-block-lumberHut-body.jpg` |
+| ✓ | **stonepit — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-stonepit-body.png` (rev `99748338a4c2`) | sliced 2026-09-26 from `cell-block-stonepit-body.jpg` |
+| ✓ | **coffer — body — SLICE THIS** | `PROMPTS-CELLS.md` | `cell-block-coffer-body.png` (rev `f23d75f1ef96`) | sliced 2026-09-26 from `cell-block-coffer-body.jpg` |
+| – | **grunt — grumpling · 0.62c** | `PROMPTS-CELLS.md` | `cell-enemy-grunt.png` (rev `4984bb7550f4`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'grunt' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **runner — cinderhound · 0.55c** | `PROMPTS-CELLS.md` | `cell-enemy-runner.png` (rev `7330f0181274`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'runner' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **slinger — bonecap · 0.6c** | `PROMPTS-CELLS.md` | `cell-enemy-slinger.png` (rev `75cfcae9fce1`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'slinger' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **brute — snaggletusk · 0.85c** | `PROMPTS-CELLS.md` | `cell-enemy-brute.png` (rev `6f9770b01ab1`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'brute' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **bomber — blorp · 0.66c** | `PROMPTS-CELLS.md` | `cell-enemy-bomber.png` (rev `d33f535666f8`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'bomber' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **bat — nibbler · 0.5c** | `PROMPTS-CELLS.md` | `cell-enemy-bat.png` (rev `a5a0ba1dacac`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'bat' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **bulwark — marrowknight · 0.78c** | `PROMPTS-CELLS.md` | `cell-enemy-bulwark.png` (rev `f7d1eaf3a46b`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'bulwark' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **wyvern — skewer · 0.8c** | `PROMPTS-CELLS.md` | `cell-enemy-wyvern.png` (rev `ae7cff374484`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'wyvern' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **bombardier — gloomcrow · 0.82c** | `PROMPTS-CELLS.md` | `cell-enemy-bombardier.png` (rev `0fb8691e2a84`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'bombardier' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **firebug — dustmoth · 0.9c** | `PROMPTS-CELLS.md` | `cell-enemy-firebug.png` (rev `7cec5f800479`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'firebug' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **eel — sliverfin · 0.85c** | `PROMPTS-CELLS.md` | `cell-enemy-eel.png` (rev `fb4eaf522cab`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'eel' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **shark — gnashfin · 1c** | `PROMPTS-CELLS.md` | `cell-enemy-shark.png` (rev `31ebdad16525`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'shark' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **kraken — brinemaw · 1.25c** | `PROMPTS-CELLS.md` | `cell-enemy-kraken.png` (rev `e1593aa767da`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'kraken' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **seadrake — tidewyrm · 1.4c** | `PROMPTS-CELLS.md` | `cell-enemy-seadrake.png` (rev `719c2ce49dd2`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'seadrake' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **golem — thornwick · 1.45c** | `PROMPTS-CELLS.md` | `cell-enemy-golem.png` (rev `b19ad5551add`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'golem' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **ram — 1.15c** | `PROMPTS-CELLS.md` | `cell-siege-ram.png` (rev `e3846075a6cf`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'ram' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **ballista — 1.2c** | `PROMPTS-CELLS.md` | `cell-siege-ballista.png` (rev `ef4a3dc42852`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'ballista' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **catapult — 1.45c** | `PROMPTS-CELLS.md` | `cell-siege-catapult.png` (rev `42db4e5a5527`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'catapult' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **siegeTower — 1.05c** | `PROMPTS-CELLS.md` | `cell-siege-siegeTower.png` (rev `59c1240e80a8`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'siegeTower' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **trebuchet — 1.7c** | `PROMPTS-CELLS.md` | `cell-siege-trebuchet.png` (rev `b63e09ea783b`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'trebuchet' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| – | **ironRam — 1.35c** | `PROMPTS-CELLS.md` | `cell-siege-ironRam.png` (rev `54261772e2d5`) | not painted on purpose — an enemy still — the game draws the walk cycle instead; list 'ironRam' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one |
+| ✓ | **foam dart — round** | `PROMPTS-CELLS.md` | `cell-projectile-bolt.png` (rev `2cb7981afb6f`) | sliced 2026-09-26 from `cell-projectile-bolt.jpg` |
+| ✓ | **toothpick — round** | `PROMPTS-CELLS.md` | `cell-projectile-quarrel.png` (rev `97c83bf8a50a`) | sliced 2026-09-26 from `cell-projectile-quarrel.jpg` |
+| ✓ | **coin — shipped bitmap** | `PROMPTS-CELLS.md` | `cell-ui-coin.png` (rev `84486c03215c`) | sliced 2026-09-27 from `cell-ui-coin.jpg` |
+| – | **logo — splash** | `PROMPTS-CELLS.md` | `cell-ui-logo.png` (rev `2cd1396c296d`) | not painted on purpose — the brand icon — the sandcastle logo is kept as shipped |
 | – | **Blocks — assembled, body, glyph — row 0** | `PROMPTS-STRIPS.md` | `strip-blocks-r0.png` (rev `dec43dd74bc2`) | reference only — no drop-in target |
-| · | **Blocks — assembled, body, glyph — row 1** | `PROMPTS-STRIPS.md` | `strip-blocks-r1.png` (rev `e692deb4e088`) | not painted yet |
+| – | **Blocks — assembled, body, glyph — row 1** | `PROMPTS-STRIPS.md` | `strip-blocks-r1.png` (rev `e692deb4e088`) | not painted on purpose — every target here is painted as a single cell (cell-*) — painting this strip would overwrite them |
 | – | **Blocks — assembled, body, glyph — row 2** | `PROMPTS-STRIPS.md` | `strip-blocks-r2.png` (rev `1aab7210b74b`) | reference only — no drop-in target |
 | – | **Blocks — assembled, body, glyph — row 3** | `PROMPTS-STRIPS.md` | `strip-blocks-r3.png` (rev `46eee035ec3d`) | reference only — no drop-in target |
-| · | **Blocks — assembled, body, glyph — row 4** | `PROMPTS-STRIPS.md` | `strip-blocks-r4.png` (rev `ad0db2f32455`) | not painted yet |
+| – | **Blocks — assembled, body, glyph — row 4** | `PROMPTS-STRIPS.md` | `strip-blocks-r4.png` (rev `ad0db2f32455`) | not painted on purpose — every target here is painted as a single cell (cell-*) — painting this strip would overwrite them |
 | – | **Blocks — assembled, body, glyph — row 5** | `PROMPTS-STRIPS.md` | `strip-blocks-r5.png` (rev `1bbda5d4b785`) | reference only — no drop-in target |
 | – | **Blocks — assembled, body, glyph — row 6** | `PROMPTS-STRIPS.md` | `strip-blocks-r6.png` (rev `248be4147d59`) | reference only — no drop-in target |
-| · | **Blocks — assembled, body, glyph — row 7** | `PROMPTS-STRIPS.md` | `strip-blocks-r7.png` (rev `239ff8a0132a`) | not painted yet |
+| – | **Blocks — assembled, body, glyph — row 7** | `PROMPTS-STRIPS.md` | `strip-blocks-r7.png` (rev `239ff8a0132a`) | not painted on purpose — every target here is painted as a single cell (cell-*) — painting this strip would overwrite them |
 | – | **Blocks — assembled, body, glyph — row 8** | `PROMPTS-STRIPS.md` | `strip-blocks-r8.png` (rev `785d0962cc74`) | reference only — no drop-in target |
 | – | **Merged blocks — tier I / II / III — row 0** | `PROMPTS-STRIPS.md` | `strip-merged-r0.png` (rev `aa7919a7cb68`) | reference only — no drop-in target |
 | – | **Merged blocks — tier I / II / III — row 1** | `PROMPTS-STRIPS.md` | `strip-merged-r1.png` (rev `920ec9ccb453`) | reference only — no drop-in target |
 | – | **Merged blocks — tier I / II / III — row 2** | `PROMPTS-STRIPS.md` | `strip-merged-r2.png` (rev `3c2008d69a0c`) | reference only — no drop-in target |
-| · | **Bugs — ground, air and water — row 0** | `PROMPTS-STRIPS.md` | `strip-enemies-r0.png` (rev `937f6b007f7d`) | not painted yet |
-| · | **Bugs — ground, air and water — row 1** | `PROMPTS-STRIPS.md` | `strip-enemies-r1.png` (rev `ecc826c106e3`) | not painted yet |
-| · | **Bugs — ground, air and water — row 2** | `PROMPTS-STRIPS.md` | `strip-enemies-r2.png` (rev `3e40a9dc8a91`) | not painted yet |
-| · | **Ant contraptions (siege engines) — row 0** | `PROMPTS-STRIPS.md` | `strip-siege-r0.png` (rev `dd9529bca36b`) | not painted yet |
-| · | **Ant contraptions (siege engines) — row 1** | `PROMPTS-STRIPS.md` | `strip-siege-r1.png` (rev `b7586ed4c21d`) | not painted yet |
-| · | **Toy Knight and projectiles — row 0** | `PROMPTS-STRIPS.md` | `strip-allies-r0.png` (rev `5114cddc25f3`) | not painted yet |
-| · | **Flowers, sky bodies and shipped UI — row 0** | `PROMPTS-STRIPS.md` | `strip-props-r0.png` (rev `5b710dd64917`) | not painted yet |
-| · | **sun** | `PROMPTS-SCENERY.md` | `bg-sun.png` — *prompt only, no reference* | not painted yet |
-| · | **moon** | `PROMPTS-SCENERY.md` | `bg-moon.png` — *prompt only, no reference* | not painted yet |
-| · | **conifer** | `PROMPTS-SCENERY.md` | `bg-conifer.png` — *prompt only, no reference* | not painted yet |
-| · | **broadleaf** | `PROMPTS-SCENERY.md` | `bg-broadleaf.png` — *prompt only, no reference* | not painted yet |
-| · | **mountains-far** | `PROMPTS-SCENERY.md` | `bg-mountains-far.png` — *prompt only, no reference* | not painted yet |
-| · | **mountains-near** | `PROMPTS-SCENERY.md` | `bg-mountains-near.png` — *prompt only, no reference* | not painted yet |
-| · | **grass** | `PROMPTS-SCENERY.md` | `bg-grass.png` — *prompt only, no reference* | not painted yet |
-| · | **water** | `PROMPTS-SCENERY.md` | `bg-water.png` — *prompt only, no reference* | not painted yet |
-| · | **roof** | `PROMPTS-SCENERY.md` | `bg-roof.png` — *prompt only, no reference* | not painted yet |
-| · | **icon-wood** | `PROMPTS-SCENERY.md` | `icon-wood.png` — *prompt only, no reference* | not painted yet |
-| · | **icon-stone** | `PROMPTS-SCENERY.md` | `icon-stone.png` — *prompt only, no reference* | not painted yet |
-| · | **icon-gold** | `PROMPTS-SCENERY.md` | `icon-gold.png` — *prompt only, no reference* | not painted yet |
-| · | **ribbon** | `PROMPTS-SCENERY.md` | `bg-ribbon.png` — *prompt only, no reference* | not painted yet |
-| · | **icon-chest** | `PROMPTS-SCENERY.md` | `icon-chest.png` — *prompt only, no reference* | not painted yet |
-| · | **prop-chest-wing** | `PROMPTS-SCENERY.md` | `prop-chest-wing.png` — *prompt only, no reference* | not painted yet |
-| · | **grumpling — Black Ant** | `PROMPTS-WALKS.md` | `walk-grumpling.png` (rev `7ef8de0deec0`) | not painted yet |
-| · | **bonecap — Spitting Spider** | `PROMPTS-WALKS.md` | `walk-bonecap.png` (rev `d45ee96d14e2`) | not painted yet |
-| · | **snaggletusk — Rhino Beetle** | `PROMPTS-WALKS.md` | `walk-snaggletusk.png` (rev `86d847f84022`) | not painted yet |
-| · | **wispling — Mosquito** | `PROMPTS-WALKS.md` | `walk-wispling.png` (rev `ea3e8a6f9e64`) | not painted yet |
-| · | **marrowknight — Roly-Poly** | `PROMPTS-WALKS.md` | `walk-marrowknight.png` (rev `9cd81b411358`) | not painted yet |
-| · | **nibbler — Housefly** | `PROMPTS-WALKS.md` | `walk-nibbler.png` (rev `11ffbbf3afbb`) | not painted yet |
-| · | **cinderhound — Cockroach** | `PROMPTS-WALKS.md` | `walk-cinderhound.png` (rev `62befdb9fe35`) | not painted yet |
-| · | **blorp — Bombardier Beetle** | `PROMPTS-WALKS.md` | `walk-blorp.png` (rev `513a5c160840`) | not painted yet |
-| · | **thornwick — Stag Beetle** | `PROMPTS-WALKS.md` | `walk-thornwick.png` (rev `517f9f2f41ff`) | not painted yet |
-| · | **rattlejack — Red Ant** | `PROMPTS-WALKS.md` | `walk-rattlejack.png` (rev `28a8d32dfccf`) | not painted yet |
-| · | **dustmoth — Firefly** | `PROMPTS-WALKS.md` | `walk-dustmoth.png` (rev `249d5d1716fd`) | not painted yet |
-| · | **skewer — Hornet** | `PROMPTS-WALKS.md` | `walk-skewer.png` (rev `350e0a540d17`) | not painted yet |
-| · | **gloomcrow — Bumblebee** | `PROMPTS-WALKS.md` | `walk-gloomcrow.png` (rev `aafb338423ec`) | not painted yet |
-| · | **sliverfin — Water Tiger** | `PROMPTS-WALKS.md` | `walk-sliverfin.png` (rev `6efbed05bcd0`) | not painted yet |
-| · | **gnashfin — Diving Beetle** | `PROMPTS-WALKS.md` | `walk-gnashfin.png` (rev `b54fd2a95428`) | not painted yet |
-| · | **tidewyrm — Dragonfly Nymph** | `PROMPTS-WALKS.md` | `walk-tidewyrm.png` (rev `2161e4fb1d5d`) | not painted yet |
-| · | **brinemaw — Toe-Biter** | `PROMPTS-WALKS.md` | `walk-brinemaw.png` (rev `c5cd37285df6`) | not painted yet |
-| · | **cavalry — Toy Knight** | `PROMPTS-WALKS.md` | `walk-cavalry.png` (rev `26f16d17f9a5`) | not painted yet |
-| · | **ballista — Rubber-Band Crossbow carriage** | `PROMPTS-WALKS.md` | `siege-ballista.png` (rev `fdd2535762dc`) | not painted yet |
-| · | **catapult — Spoon Catapult frame** | `PROMPTS-WALKS.md` | `siege-catapult.png` (rev `a154ccc0b11e`) | not painted yet |
-| · | **trebuchet — Pencil Trebuchet frame** | `PROMPTS-WALKS.md` | `siege-trebuchet.png` (rev `8002329d5ad6`) | not painted yet |
-| · | **ram — Pencil Ram car** | `PROMPTS-WALKS.md` | `siege-ram.png` (rev `43caddf6263e`) | not painted yet |
-| · | **ironRam — Tin-Can Ram** | `PROMPTS-WALKS.md` | `siege-ironRam.png` (rev `55aad3ba6375`) | not painted yet |
-| · | **siegeTower — Juice-Box Tower** | `PROMPTS-WALKS.md` | `siege-siegeTower.png` (rev `9e52158a6bb9`) | not painted yet |
-| · | **ballista — Rubber-Band Crossbow arm** | `PROMPTS-WALKS.md` | `arm-ballista.png` (rev `f3d7297f4850`) | not painted yet |
-| · | **catapult — Spoon Catapult arm** | `PROMPTS-WALKS.md` | `arm-catapult.png` (rev `99e021bd84aa`) | not painted yet |
-| · | **trebuchet — Pencil Trebuchet arm** | `PROMPTS-WALKS.md` | `arm-trebuchet.png` (rev `9e3497cfe3d1`) | not painted yet |
-| · | **skiff — Paper Boat hull** | `PROMPTS-WALKS.md` | `hull-skiff.png` (rev `765491068e70`) | not painted yet |
-| · | **longship — Rubber Duck hull** | `PROMPTS-WALKS.md` | `hull-longship.png` (rev `fe309bd4475c`) | not painted yet |
-| · | **galley — Toy Pirate Ship hull** | `PROMPTS-WALKS.md` | `hull-galley.png` (rev `42fa1868c5ce`) | not painted yet |
-| · | **cannon — Squirt Gun** | `PROMPTS-WALKS.md` | `fixture-cannon.png` (rev `dc21ee22f10c`) | not painted yet |
-| · | **archer — Dart Blaster** | `PROMPTS-WALKS.md` | `fixture-archer.png` (rev `afa3d44c233d`) | not painted yet |
-| · | **mortar — Mud Mortar** | `PROMPTS-WALKS.md` | `fixture-mortar.png` (rev `019bef4ee487`) | not painted yet |
-| · | **bombard — Balloon Launcher** | `PROMPTS-WALKS.md` | `fixture-bombard.png` (rev `ed3b197defad`) | not painted yet |
-| · | **tesla — Bug Zapper** | `PROMPTS-WALKS.md` | `fixture-tesla.png` (rev `68f46c772160`) | not painted yet |
-| · | **frost — Ice Pop** | `PROMPTS-WALKS.md` | `fixture-frost.png` (rev `2c16cc5d99e1`) | not painted yet |
-| · | **stonepit — Pebble Digger** | `PROMPTS-WALKS.md` | `fixture-stonepit.png` (rev `0378ac87aff3`) | not painted yet |
-| · | **banner — Paper Flag** | `PROMPTS-WALKS.md` | `fixture-banner.png` (rev `f78c29c4825a`) | not painted yet |
-| · | **obelisk — Magic Seashell** | `PROMPTS-WALKS.md` | `fixture-obelisk.png` (rev `5057ac168aff`) | not painted yet |
-| · | **lumberHut — Sand Sifter** | `PROMPTS-WALKS.md` | `fixture-lumberHut.png` (rev `c121de4e090a`) | not painted yet |
-| · | **coffer — Piggy Bank** | `PROMPTS-WALKS.md` | `fixture-coffer.png` (rev `67ae058c7bd0`) | not painted yet |
-| · | **repair — Bucket & Spade** | `PROMPTS-WALKS.md` | `fixture-repair.png` (rev `4fe09d1833cc`) | not painted yet |
-| · | **spikes — Toothpick Wall** | `PROMPTS-WALKS.md` | `fixture-spikes.png` (rev `9c9d32f7a62d`) | not painted yet |
-| · | **cannon-t2 — Squirt Gun — tier 2** | `PROMPTS-WALKS.md` | `fixture-cannon-t2.png` (rev `f27592b3edc6`) | not painted yet |
-| · | **cannon-t3 — Squirt Gun — tier 3** | `PROMPTS-WALKS.md` | `fixture-cannon-t3.png` (rev `7e88eea678c3`) | not painted yet |
-| · | **archer-t2 — Dart Blaster — tier 2** | `PROMPTS-WALKS.md` | `fixture-archer-t2.png` (rev `2d0d6e03c59e`) | not painted yet |
-| · | **archer-t3 — Dart Blaster — tier 3** | `PROMPTS-WALKS.md` | `fixture-archer-t3.png` (rev `e8e670844da3`) | not painted yet |
-| · | **bombard-t2 — Balloon Launcher — tier 2** | `PROMPTS-WALKS.md` | `fixture-bombard-t2.png` (rev `35abbdae1a2f`) | not painted yet |
-| · | **bombard-t3 — Balloon Launcher — tier 3** | `PROMPTS-WALKS.md` | `fixture-bombard-t3.png` (rev `2e81b9b10e98`) | not painted yet |
-| · | **mortar-t2 — Mud Mortar — tier 2** | `PROMPTS-WALKS.md` | `fixture-mortar-t2.png` (rev `1c2f41832847`) | not painted yet |
-| · | **mortar-t3 — Mud Mortar — tier 3** | `PROMPTS-WALKS.md` | `fixture-mortar-t3.png` (rev `dcc984dae33e`) | not painted yet |
-| · | **tesla-t2 — Bug Zapper — tier 2** | `PROMPTS-WALKS.md` | `fixture-tesla-t2.png` (rev `d9b1100d45ed`) | not painted yet |
-| · | **tesla-t3 — Bug Zapper — tier 3** | `PROMPTS-WALKS.md` | `fixture-tesla-t3.png` (rev `b2349aa007e5`) | not painted yet |
-| · | **frost-t2 — Ice Pop — tier 2** | `PROMPTS-WALKS.md` | `fixture-frost-t2.png` (rev `51ffb198b808`) | not painted yet |
-| · | **frost-t3 — Ice Pop — tier 3** | `PROMPTS-WALKS.md` | `fixture-frost-t3.png` (rev `d0f5ddb40384`) | not painted yet |
+| – | **Bugs — ground, air and water — row 0** | `PROMPTS-STRIPS.md` | `strip-enemies-r0.png` (rev `937f6b007f7d`) | not painted on purpose — every target here is painted as a single cell (cell-*) — painting this strip would overwrite them |
+| – | **Bugs — ground, air and water — row 1** | `PROMPTS-STRIPS.md` | `strip-enemies-r1.png` (rev `ecc826c106e3`) | not painted on purpose — every target here is painted as a single cell (cell-*) — painting this strip would overwrite them |
+| – | **Bugs — ground, air and water — row 2** | `PROMPTS-STRIPS.md` | `strip-enemies-r2.png` (rev `3e40a9dc8a91`) | not painted on purpose — every target here is painted as a single cell (cell-*) — painting this strip would overwrite them |
+| – | **Ant contraptions (siege engines) — row 0** | `PROMPTS-STRIPS.md` | `strip-siege-r0.png` (rev `dd9529bca36b`) | not painted on purpose — every target here is painted as a single cell (cell-*) — painting this strip would overwrite them |
+| – | **Ant contraptions (siege engines) — row 1** | `PROMPTS-STRIPS.md` | `strip-siege-r1.png` (rev `b7586ed4c21d`) | not painted on purpose — every target here is painted as a single cell (cell-*) — painting this strip would overwrite them |
+| – | **Toy Knight and projectiles — row 0** | `PROMPTS-STRIPS.md` | `strip-allies-r0.png` (rev `5114cddc25f3`) | not painted on purpose — every target here is painted as a single cell (cell-*) — painting this strip would overwrite them |
+| – | **Flowers, sky bodies and shipped UI — row 0** | `PROMPTS-STRIPS.md` | `strip-props-r0.png` (rev `5b710dd64917`) | not painted on purpose — every target here is painted as a single cell (cell-*) — painting this strip would overwrite them |
+| ✓ | **sun** | `PROMPTS-SCENERY.md` | `bg-sun.png` — *prompt only, no reference* | sliced 2026-09-27 from `bg-sun.jpg` |
+| ✓ | **moon** | `PROMPTS-SCENERY.md` | `bg-moon.png` — *prompt only, no reference* | sliced 2026-09-27 from `bg-moon.jpg` |
+| ✓ | **conifer** | `PROMPTS-SCENERY.md` | `bg-conifer.png` — *prompt only, no reference* | sliced 2026-09-27 from `bg-conifer.jpg` |
+| ✓ | **broadleaf** | `PROMPTS-SCENERY.md` | `bg-broadleaf.png` — *prompt only, no reference* | sliced 2026-09-27 from `bg-broadleaf.jpg` |
+| ✓ | **mountains-far** | `PROMPTS-SCENERY.md` | `bg-mountains-far.png` — *prompt only, no reference* | sliced 2026-09-27 from `bg-mountains-far.jpg` |
+| ✓ | **mountains-near** | `PROMPTS-SCENERY.md` | `bg-mountains-near.png` — *prompt only, no reference* | sliced 2026-09-27 from `bg-mountains-near.jpg` |
+| ✓ | **grass** | `PROMPTS-SCENERY.md` | `bg-grass.png` — *prompt only, no reference* | sliced 2026-09-26 from `bg-grass.jpg` |
+| ✓ | **water** | `PROMPTS-SCENERY.md` | `bg-water.png` — *prompt only, no reference* | sliced 2026-09-27 from `bg-water.jpg` |
+| ✓ | **roof** | `PROMPTS-SCENERY.md` | `bg-roof.png` — *prompt only, no reference* | sliced 2026-09-27 from `bg-roof.jpg` |
+| ✓ | **icon-wood** | `PROMPTS-SCENERY.md` | `icon-wood.png` — *prompt only, no reference* | sliced 2026-09-27 from `icon-wood.jpg` |
+| ✓ | **icon-stone** | `PROMPTS-SCENERY.md` | `icon-stone.png` — *prompt only, no reference* | sliced 2026-09-27 from `icon-stone.jpg` |
+| ✓ | **icon-gold** | `PROMPTS-SCENERY.md` | `icon-gold.png` — *prompt only, no reference* | sliced 2026-09-27 from `icon-gold.jpg` |
+| ✓ | **ribbon** | `PROMPTS-SCENERY.md` | `bg-ribbon.png` — *prompt only, no reference* | sliced 2026-09-27 from `bg-ribbon.jpg` |
+| ✓ | **icon-chest** | `PROMPTS-SCENERY.md` | `icon-chest.png` — *prompt only, no reference* | sliced 2026-09-27 from `icon-chest.jpg` |
+| ✓ | **prop-chest-wing** | `PROMPTS-SCENERY.md` | `prop-chest-wing.png` — *prompt only, no reference* | sliced 2026-09-27 from `prop-chest-wing.jpg` |
+| ✓ | **grumpling — Black Ant** | `PROMPTS-WALKS.md` | `walk-grumpling.png` (rev `7ef8de0deec0`) | sliced 2026-09-27 from `walk-grumpling.jpg` |
+| ✓ | **bonecap — Spitting Spider** | `PROMPTS-WALKS.md` | `walk-bonecap.png` (rev `d45ee96d14e2`) | sliced 2026-09-27 from `walk-bonecap.jpg` |
+| ✓ | **snaggletusk — Rhino Beetle** | `PROMPTS-WALKS.md` | `walk-snaggletusk.png` (rev `86d847f84022`) | sliced 2026-09-27 from `walk-snaggletusk.jpg` |
+| ✓ | **wispling — Mosquito** | `PROMPTS-WALKS.md` | `walk-wispling.png` (rev `ea3e8a6f9e64`) | sliced 2026-09-27 from `walk-wispling.jpg` |
+| ✓ | **marrowknight — Roly-Poly** | `PROMPTS-WALKS.md` | `walk-marrowknight.png` (rev `9cd81b411358`) | sliced 2026-09-27 from `walk-marrowknight.jpg` |
+| ✓ | **nibbler — Housefly** | `PROMPTS-WALKS.md` | `walk-nibbler.png` (rev `11ffbbf3afbb`) | sliced 2026-09-27 from `walk-nibbler.jpg` |
+| ✓ | **cinderhound — Cockroach** | `PROMPTS-WALKS.md` | `walk-cinderhound.png` (rev `62befdb9fe35`) | sliced 2026-09-27 from `walk-cinderhound.jpg` |
+| ✓ | **blorp — Bombardier Beetle** | `PROMPTS-WALKS.md` | `walk-blorp.png` (rev `513a5c160840`) | sliced 2026-09-27 from `walk-blorp.jpg` |
+| ✓ | **thornwick — Stag Beetle** | `PROMPTS-WALKS.md` | `walk-thornwick.png` (rev `517f9f2f41ff`) | sliced 2026-09-27 from `walk-thornwick.jpg` |
+| ✓ | **rattlejack — Red Ant** | `PROMPTS-WALKS.md` | `walk-rattlejack.png` (rev `28a8d32dfccf`) | sliced 2026-09-27 from `walk-rattlejack.jpg` |
+| ✓ | **dustmoth — Firefly** | `PROMPTS-WALKS.md` | `walk-dustmoth.png` (rev `249d5d1716fd`) | sliced 2026-09-27 from `walk-dustmoth.jpg` |
+| ✓ | **skewer — Hornet** | `PROMPTS-WALKS.md` | `walk-skewer.png` (rev `350e0a540d17`) | sliced 2026-09-27 from `walk-skewer.jpg` |
+| ✓ | **gloomcrow — Bumblebee** | `PROMPTS-WALKS.md` | `walk-gloomcrow.png` (rev `aafb338423ec`) | sliced 2026-09-27 from `walk-gloomcrow.jpg` |
+| ✓ | **sliverfin — Water Tiger** | `PROMPTS-WALKS.md` | `walk-sliverfin.png` (rev `6efbed05bcd0`) | sliced 2026-09-27 from `walk-sliverfin.jpg` |
+| ✓ | **gnashfin — Diving Beetle** | `PROMPTS-WALKS.md` | `walk-gnashfin.png` (rev `b54fd2a95428`) | sliced 2026-09-27 from `walk-gnashfin.jpg` |
+| ✓ | **tidewyrm — Dragonfly Nymph** | `PROMPTS-WALKS.md` | `walk-tidewyrm.png` (rev `2161e4fb1d5d`) | sliced 2026-09-27 from `walk-tidewyrm.jpg` |
+| ✓ | **brinemaw — Toe-Biter** | `PROMPTS-WALKS.md` | `walk-brinemaw.png` (rev `c5cd37285df6`) | sliced 2026-09-27 from `walk-brinemaw.jpg` |
+| ✓ | **cavalry — Toy Knight** | `PROMPTS-WALKS.md` | `walk-cavalry.png` (rev `26f16d17f9a5`) | sliced 2026-09-27 from `walk-cavalry.jpg` |
+| ✓ | **ballista — Rubber-Band Crossbow carriage** | `PROMPTS-WALKS.md` | `siege-ballista.png` (rev `fdd2535762dc`) | sliced 2026-09-27 from `siege-ballista.jpg` |
+| ✓ | **catapult — Spoon Catapult frame** | `PROMPTS-WALKS.md` | `siege-catapult.png` (rev `a154ccc0b11e`) | sliced 2026-09-27 from `siege-catapult.jpg` |
+| ✓ | **trebuchet — Pencil Trebuchet frame** | `PROMPTS-WALKS.md` | `siege-trebuchet.png` (rev `8002329d5ad6`) | sliced 2026-09-27 from `siege-trebuchet.jpg` |
+| ✓ | **ram — Pencil Ram car** | `PROMPTS-WALKS.md` | `siege-ram.png` (rev `43caddf6263e`) | sliced 2026-09-27 from `siege-ram.jpg` |
+| ✓ | **ironRam — Tin-Can Ram** | `PROMPTS-WALKS.md` | `siege-ironRam.png` (rev `55aad3ba6375`) | sliced 2026-09-27 from `siege-ironRam.jpg` |
+| ✓ | **siegeTower — Juice-Box Tower** | `PROMPTS-WALKS.md` | `siege-siegeTower.png` (rev `9e52158a6bb9`) | sliced 2026-09-27 from `siege-siegeTower.jpg` |
+| ✓ | **ballista — Rubber-Band Crossbow arm** | `PROMPTS-WALKS.md` | `arm-ballista.png` (rev `f3d7297f4850`) | sliced 2026-09-27 from `arm-ballista.jpg` |
+| ✓ | **catapult — Spoon Catapult arm** | `PROMPTS-WALKS.md` | `arm-catapult.png` (rev `99e021bd84aa`) | sliced 2026-09-27 from `arm-catapult.jpg` |
+| ✓ | **trebuchet — Pencil Trebuchet arm** | `PROMPTS-WALKS.md` | `arm-trebuchet.png` (rev `9e3497cfe3d1`) | sliced 2026-09-27 from `arm-trebuchet.jpg` |
+| ✓ | **skiff — Paper Boat hull** | `PROMPTS-WALKS.md` | `hull-skiff.png` (rev `765491068e70`) | sliced 2026-09-27 from `hull-skiff.jpg` |
+| ✓ | **longship — Rubber Duck hull** | `PROMPTS-WALKS.md` | `hull-longship.png` (rev `fe309bd4475c`) | sliced 2026-09-26 from `hull-longship.jpg` |
+| ✓ | **galley — Toy Pirate Ship hull** | `PROMPTS-WALKS.md` | `hull-galley.png` (rev `42fa1868c5ce`) | sliced 2026-09-27 from `hull-galley.jpg` |
+| ✓ | **cannon — Squirt Gun** | `PROMPTS-WALKS.md` | `fixture-cannon.png` (rev `dc21ee22f10c`) | sliced 2026-09-26 from `fixture-cannon.jpg` |
+| ✓ | **archer — Dart Blaster** | `PROMPTS-WALKS.md` | `fixture-archer.png` (rev `afa3d44c233d`) | sliced 2026-09-27 from `fixture-archer.jpg` |
+| ✓ | **mortar — Mud Mortar** | `PROMPTS-WALKS.md` | `fixture-mortar.png` (rev `019bef4ee487`) | sliced 2026-09-27 from `fixture-mortar.jpg` |
+| ✓ | **bombard — Balloon Launcher** | `PROMPTS-WALKS.md` | `fixture-bombard.png` (rev `ed3b197defad`) | sliced 2026-09-27 from `fixture-bombard.jpg` |
+| ✓ | **tesla — Bug Zapper** | `PROMPTS-WALKS.md` | `fixture-tesla.png` (rev `68f46c772160`) | sliced 2026-09-27 from `fixture-tesla.jpg` |
+| ✓ | **frost — Ice Pop** | `PROMPTS-WALKS.md` | `fixture-frost.png` (rev `2c16cc5d99e1`) | sliced 2026-09-27 from `fixture-frost.jpg` |
+| ✓ | **stonepit — Pebble Digger** | `PROMPTS-WALKS.md` | `fixture-stonepit.png` (rev `0378ac87aff3`) | sliced 2026-09-27 from `fixture-stonepit.jpg` |
+| ✓ | **banner — Paper Flag** | `PROMPTS-WALKS.md` | `fixture-banner.png` (rev `f78c29c4825a`) | sliced 2026-09-27 from `fixture-banner.jpg` |
+| ✓ | **obelisk — Magic Seashell** | `PROMPTS-WALKS.md` | `fixture-obelisk.png` (rev `5057ac168aff`) | sliced 2026-09-27 from `fixture-obelisk.jpg` |
+| ✓ | **lumberHut — Sand Sifter** | `PROMPTS-WALKS.md` | `fixture-lumberHut.png` (rev `c121de4e090a`) | sliced 2026-09-27 from `fixture-lumberHut.jpg` |
+| ✓ | **coffer — Piggy Bank** | `PROMPTS-WALKS.md` | `fixture-coffer.png` (rev `67ae058c7bd0`) | sliced 2026-09-26 from `fixture-coffer.jpg` |
+| ✓ | **repair — Bucket & Spade** | `PROMPTS-WALKS.md` | `fixture-repair.png` (rev `4fe09d1833cc`) | sliced 2026-09-27 from `fixture-repair.jpg` |
+| ✓ | **spikes — Toothpick Wall** | `PROMPTS-WALKS.md` | `fixture-spikes.png` (rev `9c9d32f7a62d`) | sliced 2026-09-27 from `fixture-spikes.jpg` |
+| ✓ | **cannon-t2 — Squirt Gun — tier 2** | `PROMPTS-WALKS.md` | `fixture-cannon-t2.png` (rev `f27592b3edc6`) | sliced 2026-09-26 from `fixture-cannon-t2.jpg` |
+| ✓ | **cannon-t3 — Squirt Gun — tier 3** | `PROMPTS-WALKS.md` | `fixture-cannon-t3.png` (rev `7e88eea678c3`) | sliced 2026-09-27 from `fixture-cannon-t3.jpg` |
+| ✓ | **archer-t2 — Dart Blaster — tier 2** | `PROMPTS-WALKS.md` | `fixture-archer-t2.png` (rev `2d0d6e03c59e`) | sliced 2026-09-27 from `fixture-archer-t2.jpg` |
+| ✓ | **archer-t3 — Dart Blaster — tier 3** | `PROMPTS-WALKS.md` | `fixture-archer-t3.png` (rev `e8e670844da3`) | sliced 2026-09-27 from `fixture-archer-t3.jpg` |
+| ✓ | **bombard-t2 — Balloon Launcher — tier 2** | `PROMPTS-WALKS.md` | `fixture-bombard-t2.png` (rev `35abbdae1a2f`) | sliced 2026-09-27 from `fixture-bombard-t2.jpg` |
+| ✓ | **bombard-t3 — Balloon Launcher — tier 3** | `PROMPTS-WALKS.md` | `fixture-bombard-t3.png` (rev `2e81b9b10e98`) | sliced 2026-09-27 from `fixture-bombard-t3.jpg` |
+| ✓ | **mortar-t2 — Mud Mortar — tier 2** | `PROMPTS-WALKS.md` | `fixture-mortar-t2.png` (rev `1c2f41832847`) | sliced 2026-09-27 from `fixture-mortar-t2.jpg` |
+| ✓ | **mortar-t3 — Mud Mortar — tier 3** | `PROMPTS-WALKS.md` | `fixture-mortar-t3.png` (rev `dcc984dae33e`) | sliced 2026-09-27 from `fixture-mortar-t3.jpg` |
+| ✓ | **tesla-t2 — Bug Zapper — tier 2** | `PROMPTS-WALKS.md` | `fixture-tesla-t2.png` (rev `d9b1100d45ed`) | sliced 2026-09-27 from `fixture-tesla-t2.jpg` |
+| ✓ | **tesla-t3 — Bug Zapper — tier 3** | `PROMPTS-WALKS.md` | `fixture-tesla-t3.png` (rev `b2349aa007e5`) | sliced 2026-09-27 from `fixture-tesla-t3.jpg` |
+| ✓ | **frost-t2 — Ice Pop — tier 2** | `PROMPTS-WALKS.md` | `fixture-frost-t2.png` (rev `51ffb198b808`) | sliced 2026-09-27 from `fixture-frost-t2.jpg` |
+| ✓ | **frost-t3 — Ice Pop — tier 3** | `PROMPTS-WALKS.md` | `fixture-frost-t3.png` (rev `d0f5ddb40384`) | sliced 2026-09-27 from `fixture-frost-t3.jpg` |
 
 ## What the marks mean
 
@@ -151,5 +151,7 @@ after painting or slicing anything.
   run `pnpm slice-sheets --dry` and read what it says it would write.
 * **·** nothing painted for this one yet — attach the reference and paste its
   block from the prompt file named above (or find it in `pnpm art:desk`).
-* **–** a reference-only strip: a style test with no drop-in target, so
-  there is nothing to slice it into.
+* **–** never painted: a reference-only strip (a style test with no drop-in
+  target), or a sheet not painted ON PURPOSE — an enemy still the game never
+  asks for, the brand icon, a strip whose targets are painted as single
+  cells. The reason is in the State column and in `not-painted.json`.

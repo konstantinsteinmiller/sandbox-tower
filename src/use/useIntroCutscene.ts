@@ -9,7 +9,7 @@ import {
   clearCameoCast, spawnCameoCast, spawnCameoRiders, buildClockHeld, phase, wave,
   WATER_ROW, type CameoPlacement
 } from '@/use/useTowerGame'
-import { setDecorShips } from '@/use/useTowerArt'
+import { SIEGE_ARM_STRIPS, setDecorShips } from '@/use/useTowerArt'
 import { pushFx } from '@/use/useTowerVfx'
 import { blockDef } from '@/game/blocks'
 import type { Ally, Block } from '@/game/types'
@@ -168,7 +168,7 @@ const prefersReducedMotion = (): boolean => {
 
 // ─── Art ────────────────────────────────────────────────────────────────────
 
-const introArtWants = (types: readonly string[]): ArtWant[] => {
+export const introArtWants = (types: readonly string[]): ArtWant[] => {
   const wants: ArtWant[] = []
   for (const id of types) {
     const def = ENEMY_DEFS[id]
@@ -177,8 +177,10 @@ const introArtWants = (types: readonly string[]): ArtWant[] => {
       wants.push(['siege', id])
       // The throwing engines carry their arm as a separate layer, keyed to
       // their own reload. Without it the chassis is painted and the arm is
-      // drawn, which is the one combination that reads as broken.
-      wants.push(['siegeArm', id])
+      // drawn, which is the one combination that reads as broken. ONLY the
+      // throwing engines: the ram, iron ram and tower have no arm sheet, and
+      // asking for one is a 404 a portal's QA console reports as a broken build.
+      if (SIEGE_ARM_STRIPS.has(id)) wants.push(['siegeArm', id])
       continue
     }
     const monster = def.monster

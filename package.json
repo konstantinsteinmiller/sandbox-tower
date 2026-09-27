@@ -33,6 +33,7 @@
     "art:status": "node --import ./tools/ts-resolve.mjs tools/art-status.mjs",
     "art:export": "node tools/export-sheets.mjs",
     "art:desk": "node tools/art-desk/server.mjs",
+    "art:promotion": "node --import ./tools/ts-resolve.mjs tools/art-promotion.mjs",
     "art:measure": "python tools/measure-art.py",
     "compress-folder": "node scripts/compress-images.mjs",
     "compress-bench": "node scripts/image-compress-bench.mjs",

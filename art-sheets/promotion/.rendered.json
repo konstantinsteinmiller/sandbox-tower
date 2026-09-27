@@ -1,0 +1,216 @@
+{
+  "files": {
+    "cover-1920x1080.jpg": {
+      "stamp": "8e3901eb90cf:1920x1080:jpg",
+      "packed": true
+    },
+    "cover-1920x1080.webp": {
+      "stamp": "8e3901eb90cf:1920x1080:webp",
+      "packed": true
+    },
+    "cover-800x800.jpg": {
+      "stamp": "380e13d23af5:800x800:jpg",
+      "packed": true
+    },
+    "cover-800x800.webp": {
+      "stamp": "380e13d23af5:800x800:webp",
+      "packed": true
+    },
+    "cover-628x628.jpg": {
+      "stamp": "380e13d23af5:628x628:jpg",
+      "packed": true
+    },
+    "cover-628x628.webp": {
+      "stamp": "380e13d23af5:628x628:webp",
+      "packed": true
+    },
+    "cover-600x600.jpg": {
+      "stamp": "380e13d23af5:600x600:jpg",
+      "packed": true
+    },
+    "cover-600x600.webp": {
+      "stamp": "380e13d23af5:600x600:webp",
+      "packed": true
+    },
+    "cover-512x512.jpg": {
+      "stamp": "380e13d23af5:512x512:jpg",
+      "packed": true
+    },
+    "cover-512x512.webp": {
+      "stamp": "380e13d23af5:512x512:webp",
+      "packed": true
+    },
+    "logo_512x512.png": {
+      "stamp": "b54323b04e0e:512:png",
+      "packed": true
+    },
+    "logo_256x256.webp": {
+      "stamp": "e946458adb1c:256:webp",
+      "packed": true
+    },
+    "logo_192x192.png": {
+      "stamp": "1c0a2e73251b:192:png",
+      "packed": true
+    },
+    "favicon.ico": {
+      "stamp": "b54323b04e0e:128:ico",
+      "packed": true
+    },
+    "cover-1080x1920.jpg": {
+      "stamp": "b22ad7014875:1080x1920:jpg",
+      "packed": true
+    },
+    "cover-1080x1920.webp": {
+      "stamp": "b22ad7014875:1080x1920:webp",
+      "packed": true
+    },
+    "cover-800x1200.jpg": {
+      "stamp": "c3a451d57352:800x1200:jpg",
+      "packed": true
+    },
+    "cover-800x1200.webp": {
+      "stamp": "c3a451d57352:800x1200:webp",
+      "packed": true
+    },
+    "cover-512x384.jpg": {
+      "stamp": "81d4e6b367e7:512x384:jpg",
+      "packed": true
+    },
+    "cover-512x384.webp": {
+      "stamp": "81d4e6b367e7:512x384:webp",
+      "packed": true
+    },
+    "cover-512x340.jpg": {
+      "stamp": "c5d765ef057a:512x340:jpg",
+      "packed": true
+    },
+    "cover-512x340.webp": {
+      "stamp": "c5d765ef057a:512x340:webp",
+      "packed": true
+    },
+    "wordmark.png": {
+      "stamp": "0ac7be5e8909:keyed",
+      "packed": true
+    },
+    "cover-logo-1920x1080.jpg": {
+      "stamp": "8e3901eb90cf:0ac7be5e8909:0.23,0.84,0.36:1920x1080:jpg",
+      "packed": true
+    },
+    "cover-logo-1920x1080.webp": {
+      "stamp": "8e3901eb90cf:0ac7be5e8909:0.23,0.84,0.36:1920x1080:webp",
+      "packed": true
+    },
+    "cover-logo-1080x1920.jpg": {
+      "stamp": "b22ad7014875:0ac7be5e8909:0.5,0.11,0.84:1080x1920:jpg",
+      "packed": true
+    },
+    "cover-logo-1080x1920.webp": {
+      "stamp": "b22ad7014875:0ac7be5e8909:0.5,0.11,0.84:1080x1920:webp",
+      "packed": true
+    },
+    "cover-logo-800x1200.jpg": {
+      "stamp": "c3a451d57352:0ac7be5e8909:0.6,0.095,0.58:800x1200:jpg",
+      "packed": true
+    },
+    "cover-logo-800x1200.webp": {
+      "stamp": "c3a451d57352:0ac7be5e8909:0.6,0.095,0.58:800x1200:webp",
+      "packed": true
+    },
+    "cover-logo-800x800.jpg": {
+      "stamp": "380e13d23af5:0ac7be5e8909:0.5,0.86,0.62:800x800:jpg",
+      "packed": true
+    },
+    "cover-logo-800x800.webp": {
+      "stamp": "380e13d23af5:0ac7be5e8909:0.5,0.86,0.62:800x800:webp",
+      "packed": true
+    },
+    "cover-logo-628x628.jpg": {
+      "stamp": "380e13d23af5:0ac7be5e8909:0.5,0.86,0.62:628x628:jpg",
+      "packed": true
+    },
+    "cover-logo-628x628.webp": {
+      "stamp": "380e13d23af5:0ac7be5e8909:0.5,0.86,0.62:628x628:webp",
+      "packed": true
+    },
+    "cover-logo-600x600.jpg": {
+      "stamp": "380e13d23af5:0ac7be5e8909:0.5,0.86,0.62:600x600:jpg",
+      "packed": true
+    },
+    "cover-logo-600x600.webp": {
+      "stamp": "380e13d23af5:0ac7be5e8909:0.5,0.86,0.62:600x600:webp",
+      "packed": true
+    },
+    "cover-logo-512x512.jpg": {
+      "stamp": "380e13d23af5:0ac7be5e8909:0.5,0.86,0.62:512x512:jpg",
+      "packed": true
+    },
+    "cover-logo-512x512.webp": {
+      "stamp": "380e13d23af5:0ac7be5e8909:0.5,0.86,0.62:512x512:webp",
+      "packed": true
+    },
+    "cover-logo-512x384.jpg": {
+      "stamp": "81d4e6b367e7:0ac7be5e8909:0.26,0.85,0.42:512x384:jpg",
+      "packed": true
+    },
+    "cover-logo-512x384.webp": {
+      "stamp": "81d4e6b367e7:0ac7be5e8909:0.26,0.85,0.42:512x384:webp",
+      "packed": true
+    },
+    "cover-logo-512x340.jpg": {
+      "stamp": "c5d765ef057a:0ac7be5e8909:0.24,0.85,0.4:512x340:jpg",
+      "packed": true
+    },
+    "cover-logo-512x340.webp": {
+      "stamp": "c5d765ef057a:0ac7be5e8909:0.24,0.85,0.4:512x340:webp",
+      "packed": true
+    },
+    "gamemonetize/cover-logo-1280x720.jpg": {
+      "stamp": "8e3901eb90cf:0ac7be5e8909:0.23,0.84,0.36:1280x720:jpg",
+      "packed": true
+    },
+    "gamemonetize/cover-logo-1280x720.webp": {
+      "stamp": "8e3901eb90cf:0ac7be5e8909:0.23,0.84,0.36:1280x720:webp",
+      "packed": true
+    },
+    "gamemonetize/cover-logo-1280x550.jpg": {
+      "stamp": "8e3901eb90cf:0ac7be5e8909:0.2,0.8,0.3:1280x550:jpg",
+      "packed": true
+    },
+    "gamemonetize/cover-logo-1280x550.webp": {
+      "stamp": "8e3901eb90cf:0ac7be5e8909:0.2,0.8,0.3:1280x550:webp",
+      "packed": true
+    },
+    "gamemonetize/cover-logo-512x512.jpg": {
+      "stamp": "380e13d23af5:0ac7be5e8909:0.5,0.86,0.62:512x512:jpg",
+      "packed": true
+    },
+    "gamemonetize/cover-logo-512x512.webp": {
+      "stamp": "380e13d23af5:0ac7be5e8909:0.5,0.86,0.62:512x512:webp",
+      "packed": true
+    },
+    "gamemonetize/cover-logo-512x384.jpg": {
+      "stamp": "81d4e6b367e7:0ac7be5e8909:0.26,0.85,0.42:512x384:jpg",
+      "packed": true
+    },
+    "gamemonetize/cover-logo-512x384.webp": {
+      "stamp": "81d4e6b367e7:0ac7be5e8909:0.26,0.85,0.42:512x384:webp",
+      "packed": true
+    },
+    "gamemonetize/cover-logo-512x340.jpg": {
+      "stamp": "c5d765ef057a:0ac7be5e8909:0.24,0.85,0.4:512x340:jpg",
+      "packed": true
+    },
+    "gamemonetize/cover-logo-512x340.webp": {
+      "stamp": "c5d765ef057a:0ac7be5e8909:0.24,0.85,0.4:512x340:webp",
+      "packed": true
+    },
+    "gamemonetize/cover-logo-200x120.jpg": {
+      "stamp": "8e3901eb90cf:0ac7be5e8909:0.28,0.78,0.52:200x120:jpg",
+      "packed": true
+    },
+    "gamemonetize/cover-logo-200x120.webp": {
+      "stamp": "8e3901eb90cf:0ac7be5e8909:0.28,0.78,0.52:200x120:webp",
+      "packed": true
+    }
+  }
+}

@@ -100,9 +100,28 @@ const promptOnly = new Set(manifest.SCENERY.map((a) => a.file))
 // "outstanding" — the Art Desk marks them the same way and never queues them.
 const referenceOnly = new Set(manifest.ALL_STRIPS.filter((s) => !s.cells.some((c) => c.target)).map((s) => s.file))
 
+// Sheets with a target that are deliberately never painted, and why — the
+// manifest's rule (`notPaintedOnPurpose`), written out for the Art Desk, which
+// runs as plain Node and cannot read the TypeScript. Same "–" mark as a
+// reference-only strip: never outstanding, never queued.
+const notPainted = manifest.notPaintedOnPurpose()
+const notPaintedFile = join(OUT, 'not-painted.json')
+const notPaintedJson = `${JSON.stringify(Object.fromEntries(Object.entries(notPainted).sort()), null, 2)}\n`
+if ((existsSync(notPaintedFile) ? readFileSync(notPaintedFile, 'utf-8') : null) !== notPaintedJson) {
+  stale++
+  if (CHECK) console.error('  ! not-painted.json is out of date — run pnpm art:prompts')
+  else {
+    writeFileSync(notPaintedFile, notPaintedJson, 'utf-8')
+    console.log(`  ✓ not-painted.json  ${Object.keys(notPainted).length} sheets not painted on purpose`)
+  }
+} else {
+  console.log('  = not-painted.json  unchanged')
+}
+
 const stateOf = (stem) => {
   const rev = revOf(join(OUT, `${stem}.png`))
   if (referenceOnly.has(stem)) return { mark: '–', state: 'reference only — no drop-in target', painting: null, rev }
+  if (notPainted[stem]) return { mark: '–', state: `not painted on purpose — ${notPainted[stem]}`, painting: null, rev }
   const names = [stem, ...(aliasesOf.get(stem) ?? [])].map((s) => s.toLowerCase())
   const painting = paintings.find((f) => names.includes(stemOf(f)))
   if (!painting) {
@@ -163,7 +182,7 @@ const status = [
   'after painting or slicing anything.',
   '',
   `**${tally['✓']} sliced · ${tally['!']} need a repaint · ${tally['?']} painted, unreceipted · ${tally['·']} outstanding**`
-    + (tally['–'] ? ` (+ ${tally['–']} reference-only strips)` : ''),
+    + (tally['–'] ? ` (+ ${tally['–']} reference-only or not painted on purpose)` : ''),
   '',
   '| | Sheet | Prompt block in | Reference | State |',
   '| --- | --- | --- | --- | --- |',
@@ -180,8 +199,10 @@ const status = [
   '  run `pnpm slice-sheets --dry` and read what it says it would write.',
   '* **·** nothing painted for this one yet — attach the reference and paste its',
   '  block from the prompt file named above (or find it in `pnpm art:desk`).',
-  '* **–** a reference-only strip: a style test with no drop-in target, so',
-  '  there is nothing to slice it into.',
+  '* **–** never painted: a reference-only strip (a style test with no drop-in',
+  '  target), or a sheet not painted ON PURPOSE — an enemy still the game never',
+  '  asks for, the brand icon, a strip whose targets are painted as single',
+  '  cells. The reason is in the State column and in `not-painted.json`.',
   ''
 ].join('\n')
 

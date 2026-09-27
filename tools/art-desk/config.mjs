@@ -41,15 +41,20 @@ const DEFAULTS = {
     // Extra Chrome switches for that window, e.g. ["--window-position=2000,0"].
     chromeArgs: [],
     // Between two generations: gapSeconds plus up to jitterSeconds at random.
-    gapSeconds: 90,
-    jitterSeconds: 60,
-    // Generations per calendar day across ALL projects (counted in
-    // ~/.art-desk/usage.json) — a ceiling under the account's own quota.
-    dailyCap: 40,
-    timeoutSeconds: 420,
+    gapSeconds: 5,
+    jitterSeconds: 5,
+    // Generations per calendar day across ALL projects on this profile — a
+    // ceiling under the account's own quota.
+    dailyCap: 1000,
+    // Where that count is kept. The default profile keeps the shared
+    // ~/.art-desk/usage.json; a profile of its own is a Google account of its
+    // own, so it counts in <profileDir>/art-desk-usage.json instead, and one
+    // account's day never spends another's cap.
+    usageFile: null,
+    timeoutSeconds: 120,
     // Re-rolls when a return comes back unusable (no image, or the slicer
     // refuses its grid). Each one is another generation off the quota.
-    retries: 1,
+    retries: 2,
     // Stop the queue after this many failures in a row.
     maxConsecutiveFailures: 3
   }
@@ -67,6 +72,13 @@ export const loadConfig = (root) => {
   }
   const c = { ...DEFAULTS, ...user, gemini: { ...DEFAULTS.gemini, ...(user.gemini ?? {}) } }
   const abs = (p) => (p ? resolve(root, p) : p)
+  const home = (p) => resolve(p.replace(/^~(?=$|[\\/])/, homedir()))
+  const profileDir = home(c.gemini.profileDir)
+  const usageFile = c.gemini.usageFile
+    ? home(c.gemini.usageFile)
+    : profileDir === home(DEFAULTS.gemini.profileDir)
+      ? join(homedir(), '.art-desk', 'usage.json')
+      : join(profileDir, 'art-desk-usage.json')
   return {
     ...c,
     root,
@@ -79,6 +91,6 @@ export const loadConfig = (root) => {
     outDir: abs(c.outDir),
     compressRoot: abs(c.compressRoot),
     watchDir: c.watchDir ? resolve(c.watchDir.replace(/^~(?=$|[\\/])/, homedir())) : null,
-    gemini: { ...c.gemini, profileDir: resolve(c.gemini.profileDir.replace(/^~(?=$|[\\/])/, homedir())) }
+    gemini: { ...c.gemini, profileDir, usageFile }
   }
 }

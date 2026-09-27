@@ -1,0 +1,6 @@
+{
+  "port": 5179,
+  "gemini": {
+    "profileDir": "~/.art-desk/profiles/sandbox-tower"
+  }
+}

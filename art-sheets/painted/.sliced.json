@@ -1,0 +1,545 @@
+{
+  "note": "written by tools/slice-sheets.mjs — the reference revision each painting was cut against",
+  "files": {
+    "walk-grumpling.jpg": {
+      "sheet": "grumpling",
+      "rev": "7ef8de0deec0",
+      "painting": "58808b4290fd",
+      "at": "2026-09-27T01:35:02.105Z"
+    },
+    "fixture-cannon.jpg": {
+      "sheet": "cannon",
+      "rev": "dc21ee22f10c",
+      "painting": "eaf9834dda5a",
+      "at": "2026-09-26T21:29:37.286Z"
+    },
+    "hull-longship.jpg": {
+      "sheet": "longship",
+      "rev": "fe309bd4475c",
+      "painting": "9d3c9f943bd4",
+      "at": "2026-09-26T21:30:13.531Z"
+    },
+    "siege-catapult.jpg": {
+      "sheet": "catapult",
+      "rev": "a154ccc0b11e",
+      "painting": "71a736ce6669",
+      "at": "2026-09-27T01:35:16.173Z"
+    },
+    "fixture-coffer.jpg": {
+      "sheet": "coffer",
+      "rev": "67ae058c7bd0",
+      "painting": "a4497523cfa8",
+      "at": "2026-09-26T21:31:23.274Z"
+    },
+    "cell-block-cannon-body.jpg": {
+      "sheet": "block/cannon/body",
+      "rev": "81ead37ee65d",
+      "painting": "49e0afdcf67b",
+      "at": "2026-09-26T23:05:07.184Z"
+    },
+    "cell-block-wood-body.jpg": {
+      "sheet": "block/wood/body",
+      "rev": "23cd6fab9128",
+      "painting": "be5e5f96a25c",
+      "at": "2026-09-26T23:05:04.701Z"
+    },
+    "cell-block-gate-body.jpg": {
+      "sheet": "block/gate/body",
+      "rev": "af11af1e9994",
+      "painting": "eb8e07cb6a47",
+      "at": "2026-09-26T23:05:55.808Z"
+    },
+    "cell-block-coffer-body.jpg": {
+      "sheet": "block/coffer/body",
+      "rev": "f23d75f1ef96",
+      "painting": "a808cbc5377c",
+      "at": "2026-09-26T23:05:05.910Z"
+    },
+    "arm-catapult.jpg": {
+      "sheet": "catapult",
+      "rev": "99e021bd84aa",
+      "painting": "840699cc011c",
+      "at": "2026-09-27T01:31:51.787Z"
+    },
+    "fixture-cannon-t2.jpg": {
+      "sheet": "cannon-t2",
+      "rev": "f27592b3edc6",
+      "painting": "78ea8046f83d",
+      "at": "2026-09-26T22:16:19.087Z"
+    },
+    "cell-block-brace-body.jpg": {
+      "sheet": "block/brace/body",
+      "rev": "bfe7a267c106",
+      "painting": "e62f0577d7a5",
+      "at": "2026-09-26T22:17:09.063Z"
+    },
+    "cell-block-stone-body.jpg": {
+      "sheet": "block/stone/body",
+      "rev": "17f7041d344d",
+      "painting": "a19a3a55dd2c",
+      "at": "2026-09-26T23:05:08.567Z"
+    },
+    "bg-grass.jpg": {
+      "sheet": "grass",
+      "rev": null,
+      "painting": "40383ba73f7e",
+      "at": "2026-09-26T22:28:42.727Z"
+    },
+    "cell-block-bombard-body.jpg": {
+      "sheet": "block/bombard/body",
+      "rev": "eed6629b215e",
+      "painting": "3f474239c971",
+      "at": "2026-09-26T22:31:06.543Z"
+    },
+    "cell-block-tesla-body.jpg": {
+      "sheet": "block/tesla/body",
+      "rev": "38747d8c52f6",
+      "painting": "12822accc255",
+      "at": "2026-09-26T22:31:44.740Z"
+    },
+    "cell-block-frost-body.jpg": {
+      "sheet": "block/frost/body",
+      "rev": "e3341ceeef1f",
+      "painting": "2245fa3e763a",
+      "at": "2026-09-26T23:05:57.226Z"
+    },
+    "cell-block-spikes-body.jpg": {
+      "sheet": "block/spikes/body",
+      "rev": "db5ac344173e",
+      "painting": "dbdf401180e5",
+      "at": "2026-09-26T22:32:50.608Z"
+    },
+    "cell-block-repair-body.jpg": {
+      "sheet": "block/repair/body",
+      "rev": "6992f79d031a",
+      "painting": "a94fb1a35c1f",
+      "at": "2026-09-26T22:33:32.950Z"
+    },
+    "cell-block-obelisk-body.jpg": {
+      "sheet": "block/obelisk/body",
+      "rev": "403f3d53b946",
+      "painting": "740ce34668b2",
+      "at": "2026-09-26T23:05:03.207Z"
+    },
+    "cell-block-lumberHut-body.jpg": {
+      "sheet": "block/lumberHut/body",
+      "rev": "342eb452ac70",
+      "painting": "aeb886b9c3de",
+      "at": "2026-09-26T22:35:18.010Z"
+    },
+    "cell-block-stonepit-body.jpg": {
+      "sheet": "block/stonepit/body",
+      "rev": "99748338a4c2",
+      "painting": "c3042b26499e",
+      "at": "2026-09-26T22:35:51.590Z"
+    },
+    "cell-projectile-bolt.jpg": {
+      "sheet": "projectile/bolt",
+      "rev": "2cb7981afb6f",
+      "painting": "47763251f5c1",
+      "at": "2026-09-26T22:36:22.313Z"
+    },
+    "cell-projectile-quarrel.jpg": {
+      "sheet": "projectile/quarrel",
+      "rev": "97c83bf8a50a",
+      "painting": "c67dc9ca5e26",
+      "at": "2026-09-26T22:36:56.251Z"
+    },
+    "walk-bonecap.jpg": {
+      "sheet": "bonecap",
+      "rev": "d45ee96d14e2",
+      "painting": "7c7ea8f88830",
+      "at": "2026-09-27T01:34:52.853Z"
+    },
+    "walk-wispling.jpg": {
+      "sheet": "wispling",
+      "rev": "ea3e8a6f9e64",
+      "painting": "eed1c86962ef",
+      "at": "2026-09-27T01:35:13.783Z"
+    },
+    "walk-marrowknight.jpg": {
+      "sheet": "marrowknight",
+      "rev": "9cd81b411358",
+      "painting": "a3903a992443",
+      "at": "2026-09-27T01:35:03.480Z"
+    },
+    "walk-cinderhound.jpg": {
+      "sheet": "cinderhound",
+      "rev": "62befdb9fe35",
+      "painting": "6753e99ea96a",
+      "at": "2026-09-27T01:34:56.883Z"
+    },
+    "walk-blorp.jpg": {
+      "sheet": "blorp",
+      "rev": "513a5c160840",
+      "painting": "daa22d6e8fb8",
+      "at": "2026-09-27T01:34:51.422Z"
+    },
+    "walk-rattlejack.jpg": {
+      "sheet": "rattlejack",
+      "rev": "28a8d32dfccf",
+      "painting": "cab47a1ee80d",
+      "at": "2026-09-27T01:35:06.113Z"
+    },
+    "walk-dustmoth.jpg": {
+      "sheet": "dustmoth",
+      "rev": "249d5d1716fd",
+      "painting": "b80a8efe8635",
+      "at": "2026-09-27T01:34:58.244Z"
+    },
+    "walk-gloomcrow.jpg": {
+      "sheet": "gloomcrow",
+      "rev": "aafb338423ec",
+      "painting": "b2833f503ddb",
+      "at": "2026-09-27T01:34:59.509Z"
+    },
+    "walk-gnashfin.jpg": {
+      "sheet": "gnashfin",
+      "rev": "b54fd2a95428",
+      "painting": "8e96f75a9d4c",
+      "at": "2026-09-27T01:35:00.845Z"
+    },
+    "walk-tidewyrm.jpg": {
+      "sheet": "tidewyrm",
+      "rev": "2161e4fb1d5d",
+      "painting": "003b5e589a64",
+      "at": "2026-09-27T01:35:12.512Z"
+    },
+    "walk-brinemaw.jpg": {
+      "sheet": "brinemaw",
+      "rev": "c5cd37285df6",
+      "painting": "0700dd1efc8b",
+      "at": "2026-09-27T01:34:54.198Z"
+    },
+    "walk-cavalry.jpg": {
+      "sheet": "cavalry",
+      "rev": "26f16d17f9a5",
+      "painting": "7e020a9e97f8",
+      "at": "2026-09-27T01:34:55.565Z"
+    },
+    "siege-ballista.jpg": {
+      "sheet": "ballista",
+      "rev": "fdd2535762dc",
+      "painting": "b85d7425e891",
+      "at": "2026-09-27T01:35:14.903Z"
+    },
+    "siege-trebuchet.jpg": {
+      "sheet": "trebuchet",
+      "rev": "8002329d5ad6",
+      "painting": "5bda9a4689c9",
+      "at": "2026-09-27T01:35:20.827Z"
+    },
+    "siege-ram.jpg": {
+      "sheet": "ram",
+      "rev": "43caddf6263e",
+      "painting": "a9ccf6eeb939",
+      "at": "2026-09-27T01:35:18.489Z"
+    },
+    "siege-ironRam.jpg": {
+      "sheet": "ironRam",
+      "rev": "55aad3ba6375",
+      "painting": "89058e2f359e",
+      "at": "2026-09-27T01:35:17.319Z"
+    },
+    "siege-siegeTower.jpg": {
+      "sheet": "siegeTower",
+      "rev": "9e52158a6bb9",
+      "painting": "1b736e376b2b",
+      "at": "2026-09-27T01:35:19.633Z"
+    },
+    "arm-ballista.jpg": {
+      "sheet": "ballista",
+      "rev": "f3d7297f4850",
+      "painting": "ec242d4162f0",
+      "at": "2026-09-27T00:43:50.393Z"
+    },
+    "arm-trebuchet.jpg": {
+      "sheet": "trebuchet",
+      "rev": "9e3497cfe3d1",
+      "painting": "26bda5cec8e3",
+      "at": "2026-09-27T00:44:40.499Z"
+    },
+    "hull-skiff.jpg": {
+      "sheet": "skiff",
+      "rev": "765491068e70",
+      "painting": "692935db6e6a",
+      "at": "2026-09-27T00:45:32.187Z"
+    },
+    "hull-galley.jpg": {
+      "sheet": "galley",
+      "rev": "42fa1868c5ce",
+      "painting": "fc999fe9b191",
+      "at": "2026-09-27T00:46:27.753Z"
+    },
+    "fixture-archer.jpg": {
+      "sheet": "archer",
+      "rev": "afa3d44c233d",
+      "painting": "d8d7a76d42d2",
+      "at": "2026-09-27T00:47:13.351Z"
+    },
+    "fixture-mortar.jpg": {
+      "sheet": "mortar",
+      "rev": "019bef4ee487",
+      "painting": "c1b015212a22",
+      "at": "2026-09-27T00:48:01.505Z"
+    },
+    "fixture-bombard.jpg": {
+      "sheet": "bombard",
+      "rev": "ed3b197defad",
+      "painting": "8454bb295abc",
+      "at": "2026-09-27T00:48:49.707Z"
+    },
+    "fixture-tesla.jpg": {
+      "sheet": "tesla",
+      "rev": "68f46c772160",
+      "painting": "9676c1f04e7f",
+      "at": "2026-09-27T00:49:43.260Z"
+    },
+    "fixture-frost.jpg": {
+      "sheet": "frost",
+      "rev": "2c16cc5d99e1",
+      "painting": "8362325fea39",
+      "at": "2026-09-27T00:50:29.640Z"
+    },
+    "fixture-stonepit.jpg": {
+      "sheet": "stonepit",
+      "rev": "0378ac87aff3",
+      "painting": "863c9c77ca8a",
+      "at": "2026-09-27T00:51:14.234Z"
+    },
+    "fixture-lumberHut.jpg": {
+      "sheet": "lumberHut",
+      "rev": "c121de4e090a",
+      "painting": "307057ca1d19",
+      "at": "2026-09-27T00:54:32.580Z"
+    },
+    "fixture-repair.jpg": {
+      "sheet": "repair",
+      "rev": "4fe09d1833cc",
+      "painting": "4a4350090546",
+      "at": "2026-09-27T00:55:21.106Z"
+    },
+    "fixture-spikes.jpg": {
+      "sheet": "spikes",
+      "rev": "9c9d32f7a62d",
+      "painting": "63efc8810905",
+      "at": "2026-09-27T00:56:13.172Z"
+    },
+    "fixture-cannon-t3.jpg": {
+      "sheet": "cannon-t3",
+      "rev": "7e88eea678c3",
+      "painting": "047e7f117b7c",
+      "at": "2026-09-27T00:57:04.101Z"
+    },
+    "fixture-archer-t2.jpg": {
+      "sheet": "archer-t2",
+      "rev": "2d0d6e03c59e",
+      "painting": "bc239b42cd2c",
+      "at": "2026-09-27T00:57:58.508Z"
+    },
+    "fixture-archer-t3.jpg": {
+      "sheet": "archer-t3",
+      "rev": "e8e670844da3",
+      "painting": "316a849a0310",
+      "at": "2026-09-27T00:58:51.391Z"
+    },
+    "fixture-bombard-t2.jpg": {
+      "sheet": "bombard-t2",
+      "rev": "35abbdae1a2f",
+      "painting": "66baeac880a4",
+      "at": "2026-09-27T00:59:39.928Z"
+    },
+    "fixture-bombard-t3.jpg": {
+      "sheet": "bombard-t3",
+      "rev": "2e81b9b10e98",
+      "painting": "1e2fa46d84d3",
+      "at": "2026-09-27T01:00:30.235Z"
+    },
+    "fixture-mortar-t2.jpg": {
+      "sheet": "mortar-t2",
+      "rev": "1c2f41832847",
+      "painting": "7dcb1bd7de2e",
+      "at": "2026-09-27T01:01:24.554Z"
+    },
+    "fixture-mortar-t3.jpg": {
+      "sheet": "mortar-t3",
+      "rev": "dcc984dae33e",
+      "painting": "74ebb2919c6f",
+      "at": "2026-09-27T01:02:21.079Z"
+    },
+    "fixture-tesla-t2.jpg": {
+      "sheet": "tesla-t2",
+      "rev": "d9b1100d45ed",
+      "painting": "00fde3a8e5da",
+      "at": "2026-09-27T01:03:07.033Z"
+    },
+    "fixture-tesla-t3.jpg": {
+      "sheet": "tesla-t3",
+      "rev": "b2349aa007e5",
+      "painting": "cd285a9d7143",
+      "at": "2026-09-27T01:04:01.246Z"
+    },
+    "fixture-frost-t2.jpg": {
+      "sheet": "frost-t2",
+      "rev": "51ffb198b808",
+      "painting": "4ee3d1460636",
+      "at": "2026-09-27T01:04:54.585Z"
+    },
+    "fixture-frost-t3.jpg": {
+      "sheet": "frost-t3",
+      "rev": "d0f5ddb40384",
+      "painting": "8fc71cbbceae",
+      "at": "2026-09-27T01:08:18.385Z"
+    },
+    "bg-mountains-far.jpg": {
+      "sheet": "mountains-far",
+      "rev": null,
+      "painting": "40e71669f3a7",
+      "at": "2026-09-27T01:09:53.328Z"
+    },
+    "bg-conifer.jpg": {
+      "sheet": "conifer",
+      "rev": null,
+      "painting": "899c27240148",
+      "at": "2026-09-27T01:11:38.126Z"
+    },
+    "bg-broadleaf.jpg": {
+      "sheet": "broadleaf",
+      "rev": null,
+      "painting": "7fd46800373d",
+      "at": "2026-09-27T01:12:25.764Z"
+    },
+    "bg-sun.jpg": {
+      "sheet": "sun",
+      "rev": null,
+      "painting": "cbe18a7cf722",
+      "at": "2026-09-27T01:13:15.360Z"
+    },
+    "bg-moon.jpg": {
+      "sheet": "moon",
+      "rev": null,
+      "painting": "40c3bbf22d22",
+      "at": "2026-09-27T01:14:00.184Z"
+    },
+    "bg-roof.jpg": {
+      "sheet": "roof",
+      "rev": null,
+      "painting": "9f8bca516b40",
+      "at": "2026-09-27T01:14:47.518Z"
+    },
+    "bg-ribbon.jpg": {
+      "sheet": "ribbon",
+      "rev": null,
+      "painting": "3447aa403927",
+      "at": "2026-09-27T01:15:38.458Z"
+    },
+    "icon-wood.jpg": {
+      "sheet": "icon-wood",
+      "rev": null,
+      "painting": "21b7c5bda361",
+      "at": "2026-09-27T01:16:29.022Z"
+    },
+    "icon-stone.jpg": {
+      "sheet": "icon-stone",
+      "rev": null,
+      "painting": "e683e7e5b7d5",
+      "at": "2026-09-27T01:17:15.865Z"
+    },
+    "icon-chest.jpg": {
+      "sheet": "icon-chest",
+      "rev": null,
+      "painting": "4582f0abd9ef",
+      "at": "2026-09-27T01:18:56.607Z"
+    },
+    "prop-chest-wing.jpg": {
+      "sheet": "prop-chest-wing",
+      "rev": null,
+      "painting": "4be3836627f2",
+      "at": "2026-09-27T01:19:47.666Z"
+    },
+    "cell-block-archer-body.jpg": {
+      "sheet": "block/archer/body",
+      "rev": "c9d2237ce47c",
+      "painting": "2a29d467e691",
+      "at": "2026-09-27T01:20:40.838Z"
+    },
+    "cell-block-mortar-body.jpg": {
+      "sheet": "block/mortar/body",
+      "rev": "233bf0d2f9f5",
+      "painting": "7ff88a160992",
+      "at": "2026-09-27T01:21:36.878Z"
+    },
+    "cell-block-banner-body.jpg": {
+      "sheet": "block/banner/body",
+      "rev": "f1569227c7a5",
+      "painting": "999109520f49",
+      "at": "2026-09-27T01:22:28.359Z"
+    },
+    "walk-snaggletusk.jpg": {
+      "sheet": "snaggletusk",
+      "rev": "86d847f84022",
+      "painting": "ee266fb7024e",
+      "at": "2026-09-27T01:35:09.900Z"
+    },
+    "walk-nibbler.jpg": {
+      "sheet": "nibbler",
+      "rev": "11ffbbf3afbb",
+      "painting": "ab76e0099a0b",
+      "at": "2026-09-27T01:37:08.032Z"
+    },
+    "walk-skewer.jpg": {
+      "sheet": "skewer",
+      "rev": "350e0a540d17",
+      "painting": "f43dc54ab110",
+      "at": "2026-09-27T01:38:01.754Z"
+    },
+    "walk-thornwick.jpg": {
+      "sheet": "thornwick",
+      "rev": "517f9f2f41ff",
+      "painting": "d888a1c07d6c",
+      "at": "2026-09-27T01:39:39.985Z"
+    },
+    "fixture-obelisk.jpg": {
+      "sheet": "obelisk",
+      "rev": "5057ac168aff",
+      "painting": "e4411283c7bd",
+      "at": "2026-09-27T01:41:30.067Z"
+    },
+    "fixture-banner.jpg": {
+      "sheet": "banner",
+      "rev": "f78c29c4825a",
+      "painting": "1bd7f717ee07",
+      "at": "2026-09-27T01:42:19.683Z"
+    },
+    "walk-sliverfin.jpg": {
+      "sheet": "sliverfin",
+      "rev": "6efbed05bcd0",
+      "painting": "22f1f117b21d",
+      "at": "2026-09-27T01:43:13.643Z"
+    },
+    "bg-mountains-near.jpg": {
+      "sheet": "mountains-near",
+      "rev": null,
+      "painting": "994dd6bf0821",
+      "at": "2026-09-27T01:46:51.279Z"
+    },
+    "bg-water.jpg": {
+      "sheet": "water",
+      "rev": null,
+      "painting": "b0f871f08c51",
+      "at": "2026-09-27T01:47:43.368Z"
+    },
+    "icon-gold.jpg": {
+      "sheet": "icon-gold",
+      "rev": null,
+      "painting": "c5527b43720c",
+      "at": "2026-09-27T01:48:38.090Z"
+    },
+    "cell-ui-coin.jpg": {
+      "sheet": "ui/coin",
+      "rev": "84486c03215c",
+      "painting": "fd7b87a0090b",
+      "at": "2026-09-27T16:33:21.209Z"
+    }
+  }
+}

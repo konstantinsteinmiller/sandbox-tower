@@ -40,7 +40,7 @@ import { spawn } from 'node:child_process'
 import { closeSync, existsSync, mkdirSync, mkdtempSync, openSync, readFileSync, readlinkSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
-import { basename, join } from 'node:path'
+import { basename, extname, join } from 'node:path'
 import { imageSize } from './jobs.mjs'
 
 const CHROME_CANDIDATES = [
@@ -61,6 +61,10 @@ const SEL = {
   // Turning while the file uploads. Gemini holds the send button until it
   // stops — and for a signed-out session it never does.
   attachmentBusy: 'uploader-file-preview mat-spinner, uploader-file-preview [role="progressbar"], .gem-attachment-loading-container',
+  // A FAILED upload: a red error icon where the thumbnail was, and no spinner,
+  // so the busy check above passes — and the send button then never enables.
+  attachmentError: '.gem-attachment-loading-error',
+  attachmentClose: '.gem-attachment-close-button button',
   send: '.send-button button, button.send-button',
   userTurn: 'user-query',
   dialog: 'mat-dialog-container',
@@ -72,6 +76,9 @@ const SEL = {
   responseDone: 'message-actions',
   image: 'generated-image img, single-image img, .generated-image img',
   download: 'download-generated-image-button button, button[data-test-id*="download"], button[aria-label*="ownload" i], button[aria-label*="erunterladen" i]',
+  // The model picker's label ("Flash", "Pro", …). When the account's allowance
+  // is spent the app falls back to "Flash-Lite", which takes no uploads.
+  model: '.logo-pill-label-container .picker-secondary-text',
   signIn: 'a[href*="accounts.google.com/ServiceLogin"], a[href*="accounts.google.com/v3/signin"], a[href*="accounts.google.com/signin"]',
   account: 'a[href*="accounts.google.com/SignOutOptions"], a[aria-label*="Google Account" i], a[aria-label*="Google-Konto" i]'
 }
@@ -257,7 +264,7 @@ export class Gemini {
    * BROWSER · SIGNED_OUT · CONSENT · QUOTA · NO_IMAGE · TIMEOUT, and `err.counted` when
    * the attempt used up a generation.
    */
-  async paint({ refFile, prompt, timeoutMs = 420_000, onPhase = () => {} }) {
+  async paint({ refFile, styleFiles = [], prompt, timeoutMs = 420_000, onPhase = () => {} }) {
     try {
       const page = await this.page()
       onPhase('opening a new chat')
@@ -272,9 +279,20 @@ export class Gemini {
       if ((await this.signedIn(page)) === false) {
         throw fail('SIGNED_OUT', 'the Gemini window is signed out — press "Sign in", sign in to Google in the window that opens, close it, then start again')
       }
+      // Spent allowance, seen from the outside: the picker drops to a Lite
+      // model that accepts neither a paste nor a drop, so without this the
+      // stop reads "could not attach the reference" — a browser fault — and
+      // a resumer waiting on the limit gives up instead of waiting.
+      const model = (await page.locator(SEL.model).first().textContent({ timeout: 3000 }).catch(() => '')).trim()
+      if (/lite/i.test(model)) {
+        throw fail('QUOTA', `Gemini has fallen back to ${model}: the account's image limit is spent, and generation resumes when the limit resets`)
+      }
 
-      onPhase('attaching the reference')
-      await this.attach(page, refFile)
+      // Finish references first, the layout reference LAST: the model takes
+      // its shape and grid from the last image it was given.
+      const files = [...styleFiles, refFile].filter(Boolean)
+      onPhase(files.length > 1 ? `attaching ${files.length} images` : 'attaching the reference')
+      for (const f of files) await this.attach(page, f)
 
       onPhase('pasting the prompt')
       await this.type(page, prompt)
@@ -312,15 +330,44 @@ export class Gemini {
     }
   }
 
-  async attach(page, refFile) {
+  /**
+   * Attach, and re-attach when Gemini's upload fails. A failed upload leaves a
+   * chip with an error icon that nothing else notices: the send button stays
+   * disabled and the queue stops on a click timeout 30 s later, one
+   * generation short, over what was a one-off hiccup (seen on sandbox-tower's
+   * third job — the same file uploaded fine on the retry).
+   */
+  async attach(page, refFile, tries = 3) {
+    const failed = page.locator(SEL.attachment, { has: page.locator(SEL.attachmentError) })
+    for (let t = 1; t <= tries; t++) {
+      await this.attachOnce(page, refFile)
+      await sleep(600)
+      if (!(await failed.count())) return
+      this.log(`Gemini failed to upload the reference (try ${t} of ${tries}) — removing it and attaching again`, 'err')
+      while (await failed.count()) {
+        const n = await page.locator(SEL.attachment).count()
+        await failed.first().locator(SEL.attachmentClose).click()
+        await page.waitForFunction(([s, n]) => document.querySelectorAll(s).length < n, [SEL.attachment, n], { timeout: 5000 })
+      }
+      await sleep(1500 * t)
+    }
+    throw fail('BROWSER', `Gemini failed to upload the reference ${tries} times in a row — its attachment chip shows an error. Try again in a few minutes.`)
+  }
+
+  async attachOnce(page, refFile) {
     const b64 = readFileSync(refFile).toString('base64')
     const name = basename(refFile)
+    // Finish references are shipped WebPs; a wrong MIME is an upload Gemini rejects.
+    const mime = { '.webp': 'image/webp', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg' }[extname(refFile).toLowerCase()] ?? 'image/png'
     const already = () => page.locator(SEL.attachment).count()
+    // Count, not presence: with several images the first chip is already there,
+    // so "a chip exists" would call every later attach landed before it was.
+    const before = await already()
     for (const how of ['paste', 'drop']) {
-      await page.evaluate(({ b64, name, how, s }) => {
+      await page.evaluate(({ b64, name, mime, how, s }) => {
         const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))
         const dt = new DataTransfer()
-        dt.items.add(new File([bytes], name, { type: 'image/png' }))
+        dt.items.add(new File([bytes], name, { type: mime }))
         const ed = document.querySelector(s.editor)
         ed.focus()
         if (how === 'paste') {
@@ -331,9 +378,9 @@ export class Gemini {
             zone.dispatchEvent(new DragEvent(type, { dataTransfer: dt, bubbles: true, cancelable: true }))
           }
         }
-      }, { b64, name, how, s: SEL })
+      }, { b64, name, mime, how, s: SEL })
       await this.acceptNotice(page)
-      const landed = await page.waitForFunction((s) => !!document.querySelector(s.attachment), SEL, { timeout: 10_000 })
+      const landed = await page.waitForFunction(([s, n]) => document.querySelectorAll(s).length > n, [SEL.attachment, before], { timeout: 10_000 })
         .then(() => true, () => false)
       if (!landed) continue
       await page.waitForFunction((s) => [...document.querySelectorAll(s.attachmentImg)].some((i) => i.complete && i.naturalWidth > 0), SEL, { timeout: 30_000 })
@@ -344,7 +391,7 @@ export class Gemini {
       if (!uploaded) {
         throw fail('BROWSER', 'the reference never finished uploading — the spinner on the attachment kept turning for 90 s. Is the Gemini window signed in?')
       }
-      if ((await already()) > 1) this.log(`${await already()} attachments landed — the reference is attached more than once, which is harmless`, 'err')
+      if ((await already()) > before + 1) this.log(`${await already() - before} copies of ${name} landed — attached more than once, which is harmless`, 'err')
       return
     }
     throw fail('BROWSER', 'could not attach the reference — Gemini accepted neither a paste nor a drop')
@@ -451,7 +498,8 @@ export class Gemini {
       await ((await img.count()) ? img : turn.locator('img').last()).hover()
       const btn = turn.locator(SEL.download).first()
       await btn.waitFor({ state: 'visible', timeout: 6000 })
-      const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 120_000 }), btn.click()])
+      // A working button answers in 2–3 s; one that has not in 45 never will.
+      const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 45_000 }), btn.click()])
       const dir = mkdtempSync(join(tmpdir(), 'art-desk-'))
       try {
         const f = join(dir, dl.suggestedFilename() || 'gemini.png')
@@ -464,17 +512,40 @@ export class Gemini {
     } catch (e) {
       this.log(`the download button did not work (${String(e.message).split('\n')[0]}) — taking the image off the page`, 'err')
     }
-    const viaContext = await this.context.request.get(res.image.src).then((r) => (r.ok() ? r.body() : null), () => null)
-    if (viaContext && imageSize(viaContext)) return viaContext
-    const b64 = await page.evaluate(async (src) => {
-      const r = await fetch(src, { credentials: 'include' })
-      const b = new Uint8Array(await r.arrayBuffer())
-      let s = ''
-      for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode(...b.subarray(i, i + 0x8000))
-      return btoa(s)
-    }, res.image.src).catch(() => null)
-    const viaPage = b64 ? Buffer.from(b64, 'base64') : null
-    if (viaPage && imageSize(viaPage)) return viaPage
+    // The src recorded when the image first appeared is a blob: Gemini swaps
+    // for the loaded image and revokes — so read the one on screen NOW first.
+    const img = turn.locator(SEL.image).first()
+    const srcNow = await img.getAttribute('src').catch(() => null)
+    for (const src of [...new Set([srcNow, res.image.src].filter(Boolean))]) {
+      const viaContext = src.startsWith('blob:') ? null
+        : await this.context.request.get(src).then((r) => (r.ok() ? r.body() : null), () => null)
+      if (viaContext && imageSize(viaContext)) return viaContext
+      const b64 = await page.evaluate(async (src) => {
+        const r = await fetch(src, { credentials: 'include' })
+        const b = new Uint8Array(await r.arrayBuffer())
+        let s = ''
+        for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode(...b.subarray(i, i + 0x8000))
+        return btoa(s)
+      }, src).catch(() => null)
+      const viaPage = b64 ? Buffer.from(b64, 'base64') : null
+      if (viaPage && imageSize(viaPage)) return viaPage
+    }
+    // Last resort: the decoded pixels themselves. A blob: image is same-origin,
+    // so the canvas is not tainted. It may be the on-screen size rather than
+    // the original — the slicer normalises size, and a sheet beats a stopped queue.
+    const png = await img.evaluate((el) => {
+      if (!el.complete || !el.naturalWidth) return null
+      const c = document.createElement('canvas')
+      c.width = el.naturalWidth
+      c.height = el.naturalHeight
+      c.getContext('2d').drawImage(el, 0, 0)
+      return c.toDataURL('image/png').split(',')[1]
+    }).catch(() => null)
+    const viaCanvas = png ? Buffer.from(png, 'base64') : null
+    if (viaCanvas && imageSize(viaCanvas)) {
+      this.log(`took the on-screen image instead (${imageSize(viaCanvas).w}x${imageSize(viaCanvas).h})`, 'err')
+      return viaCanvas
+    }
     throw fail('BROWSER', 'the image is on screen but could not be downloaded', { counted: true })
   }
 }

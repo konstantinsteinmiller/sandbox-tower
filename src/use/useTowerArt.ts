@@ -1462,7 +1462,7 @@ const SIEGE_BOX = SIEGE_ART_BOX
  * loop keyed to the reload. The ram, the iron ram and the tower move their parts
  * on a wall clock and against `engaged`, which is not a cycle a strip can hold.
  */
-const SIEGE_ARM_STRIPS = new Set(['ballista', 'catapult', 'trebuchet'])
+export const SIEGE_ARM_STRIPS: ReadonlySet<string> = new Set(['ballista', 'catapult', 'trebuchet'])
 
 /**
  * Where a painted arm sits when the engine is only rolling.

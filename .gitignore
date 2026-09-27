@@ -84,3 +84,10 @@ __screenshots__/
 # a lossless 1080p 30 s master runs to ~140 MB.
 /preview-videos/
 poki-qa-report.json
+
+# art:promotion — the compressor keeps the uncompressed originals here
+/src/assets/promotion-backup/
+# compress-images — uncompressed originals of public/images, kept for re-compression
+/public-backup/
+# art:promotion — cover masters it replaced, kept locally for comparison
+/art-sheets/promotion/painted/replaced/

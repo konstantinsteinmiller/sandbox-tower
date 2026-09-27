@@ -43,6 +43,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -50,6 +57,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -62,6 +73,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -74,32 +91,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Castle Gate — the block BODY, which is the file that ships: a sandcastle gatehouse block of bright dry sand — two shallow square notches cut down into its top edge leave three little merlons that stop exactly AT the top edge; a raised packed-sand arch with pressed joints frames a dark doorway glowing with warm golden light, a popsicle-stick door standing ajar against the right jamb, and a coral-pink scallop shell set over the arch — the thing the whole game protects. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #eccb8c, shadows #b3803f, highlights #fff1cc, accent details #ffb42e.
+WHAT IT IS: Castle Gate — the block BODY, which is the file that ships: a sandcastle gatehouse block of bright dry sand — two shallow square notches cut down into its top edge leave three little merlons that stop exactly AT the top edge; a raised packed-sand arch with pressed joints frames a doorway FILLED with warm golden lamplight — bright pale yellow at its heart, deepening to orange up under the arch, like a lit window at dusk, never a dark opening — a popsicle-stick door standing ajar against the right jamb, and a coral-pink scallop shell set over the arch — the thing the whole game protects. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #eccb8c, shadows #b3803f, highlights #fff1cc, accent details #ffb42e. The RIM round the whole block is #ffb42e — a heavy gilt edge, nearly twice as wide as any other block’s.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -108,7 +136,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -142,6 +170,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -149,6 +184,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -161,6 +200,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -173,32 +218,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Sand Block — the block BODY, which is the file that ships: a bucket-moulded cube of dry pale sand: a lighter packed band along the top, three wavy horizontal mould ridges, dark and light grain speckle, and one tiny white shell crumb. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e3c07e, shadows #b88c4c, highlights #f6e2ae, accent details #9c7038.
+WHAT IT IS: Sand Block — the block BODY, which is the file that ships: a bucket-moulded cube of dry pale sand: a lighter packed band along the top, three wavy horizontal mould ridges, dark and light grain speckle, and one tiny white shell crumb. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e3c07e, shadows #b88c4c, highlights #f6e2ae, accent details #9c7038. The RIM round the whole block is #9c7038.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -207,7 +263,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -241,6 +297,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -248,6 +311,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -260,6 +327,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -272,32 +345,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Packed Sand — the block BODY, which is the file that ships: a cube of darker, wetter packed sand with a few damp blotches, and a big X pressed deep into its face from corner to corner — crumbs along the lips of the groove, a couple of wet glints at the upper left, and no frame around the X. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #c79a5c, shadows #8d673a, highlights #dcb57c, accent details #6e4c26.
+WHAT IT IS: Packed Sand — the block BODY, which is the file that ships: a cube of darker, wetter packed sand with a few damp blotches, and a big X pressed deep into its face from corner to corner — crumbs along the lips of the groove, a couple of wet glints at the upper left, and no frame around the X. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #c79a5c, shadows #8d673a, highlights #dcb57c, accent details #6e4c26. The RIM round the whole block is #6e4c26.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -306,7 +390,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -340,6 +424,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -347,6 +438,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -359,6 +454,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -371,32 +472,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Pebble Wall — the block BODY, which is the file that ships: a cube of damp sand grout faced edge to edge with smooth grey-blue pebbles — about ten big ovals and five small ones in slightly different blue-greys, each with a white glint at its upper left — visibly heavier than sand. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8f9aa6, shadows #5f6975, highlights #c9d0d6, accent details #454d57.
+WHAT IT IS: Pebble Wall — the block BODY, which is the file that ships: a cube of damp sand grout faced edge to edge with smooth grey-blue pebbles — about ten big ovals and five small ones in slightly different blue-greys, each with a white glint at its upper left — visibly heavier than sand. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8f9aa6, shadows #5f6975, highlights #c9d0d6, accent details #454d57. The RIM round the whole block is #454d57.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -405,7 +517,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -439,6 +551,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -446,6 +565,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -458,6 +581,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -470,32 +599,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Dart Blaster — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy ORANGE toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws an orange-and-blue toy foam-dart blaster live ON TOP of this body, so paint NO orange-and-blue toy foam-dart blaster here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8a2b, its lower half #c75416, studs and gloss #ffb56e. Keep that band bright and saturated.
+WHAT IT IS: Dart Blaster — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy ORANGE toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws an orange-and-blue toy foam-dart blaster live ON TOP of this body, so paint NO orange-and-blue toy foam-dart blaster here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8a2b, its lower half #c75416, studs and gloss #ffb56e. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #ff8a2b.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -504,7 +644,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -538,6 +678,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -545,6 +692,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -557,6 +708,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -569,32 +726,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Squirt Gun — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy GREEN toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a chunky green toy water pistol with a water tank on top live ON TOP of this body, so paint NO chunky green toy water pistol with a water tank on top here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #43b649, its lower half #23833b, studs and gloss #86dc6e. Keep that band bright and saturated.
+WHAT IT IS: Squirt Gun — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy GREEN toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a chunky green toy water pistol with a water tank on top live ON TOP of this body, so paint NO chunky green toy water pistol with a water tank on top here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #43b649, its lower half #23833b, studs and gloss #86dc6e. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #43b649.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -603,7 +771,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -637,6 +805,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -644,6 +819,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -656,6 +835,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -668,32 +853,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Mud Mortar — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy PURPLE toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a blue toy bucket tube lobbing a mud ball live ON TOP of this body, so paint NO blue toy bucket tube lobbing a mud ball here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #8a5cd8, its lower half #5b36a8, studs and gloss #b894f0. Keep that band bright and saturated.
+WHAT IT IS: Mud Mortar — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy PURPLE toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a blue toy bucket tube lobbing a mud ball live ON TOP of this body, so paint NO blue toy bucket tube lobbing a mud ball here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #8a5cd8, its lower half #5b36a8, studs and gloss #b895f0. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #8a5cd8.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -702,7 +898,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -736,6 +932,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -743,6 +946,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -755,6 +962,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -767,32 +980,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Balloon Launcher — the block BODY, which is the file that ships: a square sand plinth with a sunken firing pit in the middle of its face — a dark oval crater ringed in glossy TEAL plastic with a white glint — and three little sand mounds along the bottom edge. No plastic band on this one. The game draws a cardboard launch tube with a water balloon live ON TOP of this body, so paint NO cardboard launch tube with a water balloon here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the pit ring teal plastic around #1fb5a8 (shade #138a80); the crater dark brown #6e4a24.
+WHAT IT IS: Balloon Launcher — the block BODY, which is the file that ships: a square sand plinth with a sunken firing pit in the middle of its face — a dark oval crater ringed in glossy TEAL plastic with a white glint — and three little sand mounds along the bottom edge. No plastic band on this one. The game draws a cardboard launch tube with a water balloon live ON TOP of this body, so paint NO cardboard launch tube with a water balloon here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the pit ring teal plastic around #1fb5a8 (shade #138a80); the crater dark brown #6e4a24. The RIM round the whole block is #1fb5a8.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -801,7 +1025,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -835,6 +1059,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -842,6 +1073,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -854,6 +1089,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -866,32 +1107,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Bug Zapper — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy INDIGO toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a glowing blue-violet bug-zapper lantern live ON TOP of this body, so paint NO glowing blue-violet bug-zapper lantern here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #4d52d6, its lower half #2b2f8f, studs and gloss #8189f2. Keep that band bright and saturated.
+WHAT IT IS: Bug Zapper — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy INDIGO toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a glowing blue-violet bug-zapper lantern live ON TOP of this body, so paint NO glowing blue-violet bug-zapper lantern here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #4d52d6, its lower half #2b2f8f, studs and gloss #8189f2. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #4d52d6.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -900,7 +1152,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -934,6 +1186,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -941,6 +1200,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -953,6 +1216,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -965,32 +1234,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Ice Pop — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SKY-BLUE toy plastic running across its lower third, with a white gloss streak and two round studs, with icy white rime dripping in a wavy line over its top edge. The game draws a giant blue ice pop on a wooden stick live ON TOP of this body, so paint NO giant blue ice pop on a wooden stick here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #5cc4ea, its lower half #2382b5, studs and gloss #aaeaff. Keep that band bright and saturated.
+WHAT IT IS: Ice Pop — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SKY-BLUE toy plastic running across its lower third, with a white gloss streak and two round studs, with icy white rime dripping in a wavy line over its top edge. The game draws a giant blue ice pop on a wooden stick live ON TOP of this body, so paint NO giant blue ice pop on a wooden stick here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #5cc4ea, its lower half #2382b5, studs and gloss #aaeaff. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #5cc4ea.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -999,7 +1279,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -1033,6 +1313,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1040,6 +1327,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1052,6 +1343,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1064,32 +1361,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Toothpick Wall — the block BODY, which is the file that ships: a cube of golden sand with one mould ridge and grain speckle, and six short pale wooden toothpick stubs pushed into its face in two rows of three, angled upward. The game draws long wooden toothpicks bristling out of all four sides live ON TOP of this body, so paint NO long wooden toothpicks bristling out of all four sides here. Keep the face above the bottom edge plain: whatever is painted there ends up buried under the toy. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #d8ae6a, shadows #a57539, highlights #f2d9a0, accent details #7d5a2e.
+WHAT IT IS: Toothpick Wall — the block BODY, which is the file that ships: a cube of golden sand with one mould ridge and grain speckle, and six short pale wooden toothpick stubs pushed into its face in two rows of three, angled upward. The game draws long wooden toothpicks bristling out of all four sides live ON TOP of this body, so paint NO long wooden toothpicks bristling out of all four sides here. Keep the face above the bottom edge plain: whatever is painted there ends up buried under the toy. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #d8ae6a, shadows #a57539, highlights #f2d9a0, accent details #7d5a2e. The RIM round the whole block is #7d5a2e.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -1098,7 +1406,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -1132,6 +1440,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1139,6 +1454,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1151,6 +1470,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1163,32 +1488,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Bucket & Spade — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy BLUE toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a green toy bucket with a spade live ON TOP of this body, so paint NO green toy bucket with a spade here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #2f7de1, its lower half #1d5fb5, studs and gloss #72acf2. Keep that band bright and saturated.
+WHAT IT IS: Bucket & Spade — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy BLUE toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a green toy bucket with a spade live ON TOP of this body, so paint NO green toy bucket with a spade here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #2f7de1, its lower half #1d5fb5, studs and gloss #72acf2. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #2f7de1.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -1197,7 +1533,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -1231,6 +1567,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1238,6 +1581,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1250,6 +1597,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1262,32 +1615,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Paper Flag — the block BODY, which is the file that ships: a square sand plinth with a paper party frill across its lower third — light rose paper cut with pinking-shear teeth, a deep plum-rose stripe along it dotted with six gold dots. The game draws a paper swallowtail flag on a toothpick live ON TOP of this body, so paint NO paper swallowtail flag on a toothpick here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the paper frill light rose #e685c6 with a deep plum-rose #b8479a stripe and gold #ffd35c dots.
+WHAT IT IS: Paper Flag — the block BODY, which is the file that ships: a square sand plinth with a paper party frill across its lower third — light rose paper cut with pinking-shear teeth, a deep plum-rose stripe along it dotted with six gold dots. The game draws a paper swallowtail flag on a toothpick live ON TOP of this body, so paint NO paper swallowtail flag on a toothpick here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the paper frill light rose #e685c6 with a deep plum-rose #b8479a stripe and gold #ffd35c dots. The RIM round the whole block is #b8479a.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -1296,7 +1660,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -1330,6 +1694,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1337,6 +1708,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1349,6 +1724,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1361,32 +1742,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Magic Seashell — the block BODY, which is the file that ships: a square pearly plinth — pale lilac mother-of-pearl rather than sand — with two soft sheen bands, one lilac and one pale cyan, and a scatter of little white four-point glitter stars. The game draws a glowing pink scallop shell live ON TOP of this body, so paint NO glowing pink scallop shell here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: pearly lilac — body around #e8cde4, shadows #ae88b6, highlights #fbeefa; sheen bands #b99ae6 and #9be8ff; glitter #e6fbff.
+WHAT IT IS: Magic Seashell — the block BODY, which is the file that ships: a square pearly plinth — pale lilac mother-of-pearl rather than sand — with two soft sheen bands, one lilac and one pale cyan, and a scatter of little white four-point glitter stars. The game draws a glowing pink scallop shell live ON TOP of this body, so paint NO glowing pink scallop shell here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: pearly lilac — body around #e8cde4, shadows #ae88b6, highlights #fbeefa; sheen bands #b99ae6 and #9be8ff; glitter #e6fbff. The RIM round the whole block is #b99ae6.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -1395,7 +1787,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -1429,6 +1821,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1436,6 +1835,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1448,6 +1851,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1460,32 +1869,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Sand Sifter — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy LIME-GREEN toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a toy sand wheel under a funnel of sand live ON TOP of this body, so paint NO toy sand wheel under a funnel of sand here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #94cc3a, its lower half #5c961d, studs and gloss #c8ee82. Keep that band bright and saturated.
+WHAT IT IS: Sand Sifter — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy LIME-GREEN toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a toy sand wheel under a funnel of sand live ON TOP of this body, so paint NO toy sand wheel under a funnel of sand here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #94cc3a, its lower half #5c961d, studs and gloss #c8ee82. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #94cc3a.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -1494,7 +1914,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -1528,6 +1948,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1535,6 +1962,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1547,6 +1978,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1559,32 +1996,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Pebble Digger — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SUNSHINE-YELLOW toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a yellow toy digger scooping pebbles live ON TOP of this body, so paint NO yellow toy digger scooping pebbles here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ffc21f, its lower half #c98a00, studs and gloss #ffe07a. Keep that band bright and saturated.
+WHAT IT IS: Pebble Digger — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SUNSHINE-YELLOW toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a yellow toy digger scooping pebbles live ON TOP of this body, so paint NO yellow toy digger scooping pebbles here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ffc21f, its lower half #c98a00, studs and gloss #ffe07a. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #ffc21f.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -1593,7 +2041,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -1627,6 +2075,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1634,6 +2089,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1646,6 +2105,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1658,32 +2123,43 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: Piggy Bank — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy BUBBLE-GUM PINK toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a pink piggy bank live ON TOP of this body, so paint NO pink piggy bank here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8fbf, its lower half #d05a8e, studs and gloss #ffc3dc. Keep that band bright and saturated.
+WHAT IT IS: Piggy Bank — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy BUBBLE-GUM PINK toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a pink piggy bank live ON TOP of this body, so paint NO pink piggy bank here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ffabbf, its lower half #d05a8e, studs and gloss #ffc8dc. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #ffabbf.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 OUTPUT — read this twice, it is where every previous attempt failed:
 · ONE image, exactly SQUARE (1:1), 512 x 512 pixels or larger.
@@ -1692,7 +2168,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
   before-and-after pair. A single sprite, alone, filling the frame.
-· No frame, border, card, label, caption, arrow, annotation or drop shadow.
+· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.
 ```
 
 ---
@@ -1726,6 +2202,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1733,6 +2216,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1745,6 +2232,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1757,8 +2250,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -1773,7 +2266,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -1808,6 +2301,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1815,6 +2315,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1827,6 +2331,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1839,8 +2349,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -1855,7 +2365,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -1890,6 +2400,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1897,6 +2414,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1909,6 +2430,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1921,8 +2448,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -1937,7 +2464,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -1972,6 +2499,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1979,6 +2513,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1991,6 +2529,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2003,8 +2547,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2019,7 +2563,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -2054,6 +2598,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -2061,6 +2612,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2073,6 +2628,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2085,8 +2646,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2101,7 +2662,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -2136,6 +2697,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -2143,6 +2711,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2155,6 +2727,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2167,8 +2745,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2183,7 +2761,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -2218,6 +2796,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -2225,6 +2810,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2237,6 +2826,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2249,8 +2844,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2265,7 +2860,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -2300,6 +2895,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -2307,6 +2909,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2319,6 +2925,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2331,8 +2943,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2347,7 +2959,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -2382,6 +2994,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -2389,6 +3008,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2401,6 +3024,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2413,8 +3042,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2429,7 +3058,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -2464,6 +3093,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -2471,6 +3107,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2483,6 +3123,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2495,8 +3141,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2511,7 +3157,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -2546,6 +3192,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -2553,6 +3206,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2565,6 +3222,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2577,8 +3240,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2593,7 +3256,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -2628,6 +3291,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -2635,6 +3305,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2647,6 +3321,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2659,8 +3339,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2675,7 +3355,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -2710,6 +3390,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -2717,6 +3404,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2729,6 +3420,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2741,8 +3438,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2757,7 +3454,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -2792,6 +3489,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -2799,6 +3503,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2811,6 +3519,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2823,8 +3537,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2839,7 +3553,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -2874,6 +3588,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -2881,6 +3602,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2893,6 +3618,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2905,8 +3636,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -2921,7 +3652,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -2956,6 +3687,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -2963,6 +3701,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -2975,6 +3717,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -2987,8 +3735,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3003,7 +3751,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -3038,6 +3786,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -3045,6 +3800,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3057,6 +3816,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3069,8 +3834,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3085,7 +3850,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -3120,6 +3885,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -3127,6 +3899,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3139,6 +3915,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3151,8 +3933,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3167,7 +3949,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -3202,6 +3984,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -3209,6 +3998,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3221,6 +4014,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3233,8 +4032,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3249,7 +4048,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -3284,6 +4083,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -3291,6 +4097,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3303,6 +4113,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3315,8 +4131,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3331,7 +4147,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -3366,6 +4182,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -3373,6 +4196,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3385,6 +4212,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3397,8 +4230,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3413,7 +4246,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -3448,6 +4281,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -3455,6 +4295,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3467,6 +4311,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3479,8 +4329,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3495,7 +4345,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -3530,6 +4380,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -3537,6 +4394,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3549,6 +4410,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3561,8 +4428,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3577,7 +4444,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -3612,6 +4479,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -3619,6 +4493,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3631,6 +4509,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3643,13 +4527,13 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: UI art: the coin. Keep it clean, flat and high-contrast — it is interface, not scenery — and do not restyle any lettering.
+WHAT IT IS: UI art: the coin, the game's everyday currency, shown small in the HUD (about 24–32 px) next to a number. A chunky round gold coin with a thick raised rim and a plump raised five-point star in the middle, facing us square on — the same design as the reference, repainted in the game's own hand: the warm dark-brown ink contour round the rim and the star, cel colour in warm golds (#ffd23f, shadows #d99a1c, highlights #fff3b0), one glossy highlight on the upper left, a faint moulded-plastic toy look. Bold silhouette, star readable at thumbnail size, no fine texture, no lettering, no sparkle rays around it.
 
 Centre the object in the frame with a little clear space around it, and do not crop any part of it.
 
@@ -3659,7 +4543,7 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```
 
@@ -3694,6 +4578,13 @@ Fill every pixel that is not the object itself with solid, flat, pure magenta
   warmer is safer (#ff9aa8, #ffa99e). A stronger pink comes back half
   see-through and greyed, because the key takes it for background.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -3701,6 +4592,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -3713,6 +4608,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -3725,8 +4626,8 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO frames, borders, cards, vignettes, matting or paper background behind
+  the drawing. Nothing but flat magenta behind it, right up to its outline.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
@@ -3741,6 +4642,6 @@ OUTPUT — read this twice, it is where every previous attempt failed:
   have twice come back at 1024x559, which is the tool default overriding
   this line — the setting wins, so change the setting.
 · ONE object. Not two, not a comparison, not variants side by side, not a
-  before-and-after pair. A single sprite, alone, filling the frame.
+  before-and-after pair. A single sprite, alone.
 · No frame, border, card, label, caption, arrow, annotation or drop shadow.
 ```

@@ -32,9 +32,14 @@ export const parsePromptDoc = (text, doc) => {
   const lines = text.split(/\r?\n/)
   const jobs = []
   let heading = null
+  let attach = []
   for (let i = 0; i < lines.length; i++) {
     const h = /^##\s+(.+?)\s*$/.exec(lines[i])
-    if (h) { heading = h[1]; continue }
+    if (h) { heading = h[1]; attach = []; continue }
+    // Finish references, named under the heading and outside the fence:
+    // `Attach, in this order: \`public/…\`, \`public/…\`` — project-relative.
+    const a = heading && /^Attach, in this order:\s*(.+)$/.exec(lines[i])
+    if (a) { attach = [...a[1].matchAll(/`([^`]+)`/g)].map((x) => x[1]); continue }
     const open = /^(`{3,})text\s*$/.exec(lines[i])
     if (!open) continue
     const fence = open[1]
@@ -47,7 +52,7 @@ export const parsePromptDoc = (text, doc) => {
     const m = heading && /^(.*?)\s*\(([^()]*?\.png)(?:\s*→\s*([^()]*?))?\)\s*$/.exec(heading)
     heading = null
     if (!m) continue
-    jobs.push({ title: m[1].trim(), refName: m[2].trim(), target: m[3]?.trim() || null, prompt: body.join('\n'), doc })
+    jobs.push({ title: m[1].trim(), refName: m[2].trim(), target: m[3]?.trim() || null, prompt: body.join('\n'), doc, styleRefs: attach })
   }
   return jobs
 }
@@ -130,6 +135,7 @@ export const scanJobs = (cfg) => {
   const index = readJson(cfg.indexFile, null)
   const byStem = indexByStem(index)
   const receipt = readJson(join(cfg.paintedDir, '.sliced.json'), {}).files ?? {}
+  const notPainted = readJson(join(cfg.sheetsDir, 'not-painted.json'), {})
   const listImages = (dir) => (existsSync(dir) ? readdirSync(dir).filter((f) => IMAGE_EXT.test(f)) : [])
   const paintings = listImages(cfg.paintedDir)
   const parked = listImages(join(cfg.paintedDir, 'stale'))
@@ -164,7 +170,13 @@ export const scanJobs = (cfg) => {
       // A receipt line belongs to the painting it was written for; the same
       // name with different bytes is a re-roll nobody has sliced yet.
       if (seenBy?.painting && seenBy.painting !== paintingInfo?.rev) seenBy = null
-      if (!cells.length) {
+      if (notPainted[stem]) {
+        // The manifest says this one is never painted (`notPaintedOnPurpose`,
+        // written out by `pnpm art:prompts`): an enemy still the game does not
+        // ask for, the brand icon, a strip whose targets the singles own. It is
+        // not "to paint", and the queue must never spend a generation on it.
+        ;[mark, state] = ['–', `not painted on purpose — ${notPainted[stem]}`]
+      } else if (!cells.length) {
         // A reference-only sheet (tower-siege's assembled/glyph strips, the
         // merged sheet): the slicer has nowhere to put it, so it is never
         // "to paint" and never queued — a generation spent here writes nothing
@@ -196,6 +208,10 @@ export const scanJobs = (cfg) => {
         doc: j.doc,
         kind: stem.includes('-') ? stem.slice(0, stem.indexOf('-')) : 'other',
         prompt: j.prompt,
+        // Finish references, attached BEFORE the layout reference (if any):
+        // the model takes its shape from the last image it was given.
+        styleRefs: j.styleRefs ?? [],
+        styleRefsMissing: (j.styleRefs ?? []).filter((f) => !existsSync(join(cfg.root, f))),
         ref: refRel,
         key: keyRel,
         refSize: ref?.size ?? null,

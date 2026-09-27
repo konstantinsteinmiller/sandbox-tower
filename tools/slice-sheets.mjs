@@ -178,6 +178,9 @@ const walkEdge = (sheet, cell, sy) =>
 // treating what arrived as one cycle. Only honoured when it matches what the
 // detector actually measured, so it cannot be used to force a bad cut.
 const FRAMES_OVERRIDE = num('--frames', null)
+// A requested walk-grid cut at least this much background is a clean cut with
+// a limb tip across it, not a cut through a body (see the grid check).
+const LIMB_CUT = 0.95
 const NO_CHROMA = flag('--no-chroma')
 const NO_TRIM = flag('--no-trim')
 const NO_AUTO_BG = flag('--no-auto-bg')
@@ -789,13 +792,27 @@ try {
 
           const colsN = fit(W, H, (x, y) => y * W + x);
           const rowsN = fit(H, W, (y, x) => y * W + x);
+          // How clean each REQUESTED cut is, for the case where a limb tip
+          // crosses one: the grid detector then reads a coarser grid that
+          // divides the requested one, and the Node side decides.
+          const cutsAt = (n, m, at, k) => Array.from({ length: k - 1 }, (_, i) => {
+            const at0 = Math.round((n * (i + 1)) / k);
+            let bestLine = 0;
+            for (let o = -2; o <= 2; o++) {
+              const a = at0 + o;
+              if (a >= 0 && a < n) bestLine = Math.max(bestLine, bgLine(a, m, at));
+            }
+            return bestLine;
+          });
+          const colCuts = cutsAt(W, H, (x, y) => y * W + x, ${sheet.cols});
+          const rowCuts = cutsAt(H, W, (y, x) => y * W + x, ${sheet.rows});
           // The commonest colour on the outer ring IS the ground the painter
           // used, whatever they were asked for. Reported so a background that
           // is merely magenta-ish can be named rather than guessed at.
           const top = refs[0] ?? [0, 0, 0];
           const hex = '#' + top.map((v) => v.toString(16).padStart(2, '0')).join('');
           const isMagenta = top[1] < 70 && top[0] > 190 && top[2] > 190;
-          return JSON.stringify({ cols: colsN, rows: rowsN, W, H, hex, isMagenta });
+          return JSON.stringify({ cols: colsN, rows: rowsN, W, H, hex, isMagenta, colCuts, rowCuts });
         })()`,
         returnByValue: true
       })
@@ -808,6 +825,19 @@ try {
           + ` ${wantCols}x${wantRows}. Check the result before shipping it.`)
       } else if (got.cols === wantCols && got.rows === wantRows) {
         console.log(`  · grid reads ${got.cols}x${got.rows}, as asked`)
+      } else if (wantCols % got.cols === 0 && wantRows % got.rows === 0
+        && [...got.colCuts, ...got.rowCuts].every((f) => f >= LIMB_CUT)) {
+        // A COARSER grid that divides the requested one, with every requested
+        // cut still nearly all background: a limb tip crosses a panel line,
+        // which is what the reference itself does for a wide creature (the
+        // spitting spider's legs reach 98.3% — the bar is 98.5%). Three good
+        // 4x2 returns were refused as "2x2" before this. A grid that GREW, or
+        // a cut through a body, still fails below.
+        const worst = [...got.colCuts.map((f, i) => [f, `column cut ${i + 1}/${wantCols}`]),
+          ...got.rowCuts.map((f, i) => [f, `row cut ${i + 1}/${wantRows}`])].sort((a, b) => a[0] - b[0])[0]
+        console.warn(`  ! grid reads ${got.cols}x${got.rows}, but every ${wantCols}x${wantRows} cut is clear`
+          + ` to within a limb (worst: ${worst[1]}, ${(100 * (1 - worst[0])).toFixed(1)}% of the line crosses it)`
+          + ` — cutting ${wantCols}x${wantRows}, as asked. Check that frame's edge.`)
       } else if (FRAMES_OVERRIDE && FRAMES_OVERRIDE === got.cols * got.rows) {
         console.warn(`  ! grid reads ${got.cols}x${got.rows} = ${got.cols * got.rows} panels,`
           + ` not ${wantCols}x${wantRows} — taking it as a ${FRAMES_OVERRIDE}-frame cycle.`)
@@ -961,6 +991,12 @@ try {
         const FIT_REF = ${JSON.stringify(NO_FIT ? null : (sheet.fit ?? null))};
         const FIT_TIGHT = ${sheet.tight ? 'true' : 'false'};
         const ANCHOR_REF = ${JSON.stringify(sheet.anchor ?? 'feet')};
+        // A cycle whose rows must share one box — a walk, a gallop, a rolling
+        // chassis — is normalised ROW BY ROW. A swinging arm is not: its rows
+        // are different moments of the swing and legitimately reach further.
+        const COLS = ${Number(sheet.cols) || 1};
+        const PER_ROW = ${JSON.stringify(sheet.kind === 'walk' && (sheet.rows ?? 1) > 1
+          && !String(sheet.target ?? '').startsWith('images/siege-arms/'))};
         const out = [];
         // Walk-cycle panels, held back so they can be composed into one strip.
         const strip = [];
@@ -1308,6 +1344,63 @@ try {
             }
           }
 
+          // ── A block's white corner nicks ──
+          //
+          // A rounded block's four corner nicks, and the Castle Gate's two
+          // notches, are background. Gemini paints them white about one time in
+          // six although the prompt asks for magenta: 3 of 17 sandbox bodies
+          // came back with the two BOTTOM corners pure #ffffff and the top two
+          // magenta, and the game drew them as white squares round the castle.
+          //
+          // White there is never artwork, because a block's dark ink rim runs
+          // along every edge. So flood it away from the frame through NEUTRAL
+          // near-white only: every channel >= 232 and a spread <= 24. The rim
+          // walls the flood in, and the sand's cream (#fbeecb, spread 48) is
+          // not neutral. One ring outward then takes the anti-aliased pale
+          // fringe the flood leaves against the ink.
+          let whiteKeyed = 0;
+          if (p.isBlock) {
+            const W = p.sw, H = p.sh, N = W * H;
+            const neutral = (k, lo, spread) => {
+              const i = k * 4;
+              if (d[i + 3] < 8) return false;
+              const mn = Math.min(d[i], d[i + 1], d[i + 2]), mx = Math.max(d[i], d[i + 1], d[i + 2]);
+              return mn >= lo && mx - mn <= spread;
+            };
+            // The flood also walks through what the key ALREADY cleared. A
+            // return usually has a thin magenta line along its very edge; once
+            // keyed, that line is transparent, and a flood that only walks on
+            // white never gets past it to the white corner behind it — the
+            // first version of this reported thousands of pixels keyed and
+            // left every bottom corner white.
+            const clear = (k) => d[k * 4 + 3] < 8;
+            const seen = new Uint8Array(N);
+            const st = [];
+            const seed = (k) => { if (!seen[k] && (clear(k) || neutral(k, 232, 24))) { seen[k] = 1; st.push(k) } };
+            for (let x = 0; x < W; x++) { seed(x); seed((H - 1) * W + x) }
+            for (let y = 0; y < H; y++) { seed(y * W); seed(y * W + W - 1) }
+            const gone = [];
+            while (st.length) {
+              const k = st.pop();
+              if (!clear(k)) { d[k * 4 + 3] = 0; gone.push(k); whiteKeyed++ }
+              const x = k % W, y = (k / W) | 0;
+              for (const nk of [x > 0 ? k - 1 : -1, x < W - 1 ? k + 1 : -1, y > 0 ? k - W : -1, y < H - 1 ? k + W : -1]) {
+                if (nk < 0 || seen[nk]) continue;
+                if (clear(nk) || neutral(nk, 232, 24)) { seen[nk] = 1; st.push(nk) }
+              }
+            }
+            for (const k of gone) {
+              const x = k % W, y = (k / W) | 0;
+              for (const nk of [x > 0 ? k - 1 : -1, x < W - 1 ? k + 1 : -1, y > 0 ? k - W : -1, y < H - 1 ? k + W : -1]) {
+                if (nk >= 0 && !seen[nk] && neutral(nk, 185, 30)) { seen[nk] = 1; d[nk * 4 + 3] = 0; whiteKeyed++ }
+              }
+            }
+            // d is a COPY of the cell's pixels: the key and the flood above
+            // each write theirs back, and so must this, or the count is
+            // reported and the canvas that gets encoded keeps its white.
+            if (whiteKeyed) cc.putImageData(id, 0, 0);
+          }
+
           let x0 = p.sw, y0 = p.sh, x1 = -1, y1 = -1, opaque = 0;
           // A SECOND box at a high alpha floor, for the fit measurement only.
           // The reference is measured the same way: a soft shadow belongs to
@@ -1452,6 +1545,7 @@ try {
             })(),
             edges,
             trimmed,
+            whiteKeyed,
             w: dst.width, h: dst.height,
             coverage: opaque / (p.sw * p.sh),
             dataUrl: dst.toDataURL('image/webp', q)
@@ -1479,15 +1573,24 @@ try {
             // double size. On its own that looks fine; against the arm, which is
             // drawn live from the geometry, it is plainly a different machine.
             //
-            // ONE correction for the whole strip, never per frame. Fitting each
-            // frame to its own content is exactly what makes a cycle jitter, so
-            // the union across all frames is measured, a single scale and offset
-            // fall out of it, and every frame gets identical treatment.
+            // ONE correction per ROW, never per frame. Fitting each frame to its
+            // own content is exactly what makes a cycle jitter, so the union
+            // across a row's frames is measured, a single scale and offset fall
+            // out of it, and every frame in the row gets identical treatment.
+            //
+            // Per row, not per strip, because a model paints a two-row sheet as
+            // two pictures. Eight of eighteen walks in one batch came back with
+            // the bottom row lower, or larger, than the top one: one correction
+            // for the union then shrank the creature to 68-75% (the union was
+            // taller than either row) and shipped a 17-22% bob between frame 4
+            // and frame 5. Every row of a walk is the same creature on the same
+            // ground line in the reference, so every row is fitted to the same
+            // reference box — which cancels the offset and keeps the motion.
             const FIT = FIT_REF;
             let fitNote = null;
-            if (FIT && FIT.h > 0) {
+            const normalise = (group, tol = 1) => {
               let bx0 = 1, by0 = 1, bx1 = 0, by1 = 0;
-              for (const f of solid) {
+              for (const f of group) {
                 if (f.box.x0 < bx0) bx0 = f.box.x0;
                 if (f.box.y0 < by0) by0 = f.box.y0;
                 if (f.box.x1 > bx1) bx1 = f.box.x1;
@@ -1538,10 +1641,10 @@ try {
               const fromY = FIT_TIGHT ? gotMidY : byFeet ? gotBottom : gotMidY;
               const toY = FIT_TIGHT ? 0.5 : byFeet ? FIT.bottom : 0.5;
               const toX = FIT_TIGHT ? 0.5 : FIT.cx;
-              if (k > floor && k < 4 && (Math.abs(k - 1) > 0.04
-                  || Math.abs(fromY - toY) > 0.02
-                  || Math.abs(gotCx - toX) > 0.02)) {
-                for (const f of solid) {
+              if (k > floor && k < 4 && (Math.abs(k - 1) > 0.04 * tol
+                  || Math.abs(fromY - toY) > 0.02 * tol
+                  || Math.abs(gotCx - toX) > 0.02 * tol)) {
+                for (const f of group) {
                   const to = document.createElement('canvas');
                   to.width = fw; to.height = fh;
                   const g2 = to.getContext('2d');
@@ -1551,7 +1654,38 @@ try {
                   g2.drawImage(f.cv, 0, 0);
                   f.cv = to;
                 }
-                fitNote = { k: +k.toFixed(3), dy: +(FIT.bottom - gotBottom).toFixed(3) };
+                return { k: +k.toFixed(3), dy: +(FIT.bottom - gotBottom).toFixed(3) };
+              }
+              return null;
+            };
+            if (FIT && FIT.h > 0) {
+              if (PER_ROW) {
+                const rows = new Map();
+                for (const f of solid) {
+                  const r = Math.floor(f.frame / COLS);
+                  if (!rows.has(r)) rows.set(r, []);
+                  rows.get(r).push(f);
+                }
+                // A quarter of the whole-strip tolerance: two rows each within
+                // 4% of the reference can still be 8% apart from EACH OTHER,
+                // and that difference is the pulse at the row break (the Toy
+                // Knight's second row came back that much bigger and lower).
+                const notes = [...rows.keys()].sort((a2, b2) => a2 - b2)
+                  .map((r) => ({ row: r + 1, ...(normalise(rows.get(r), 0.25) ?? { k: 1, dy: 0 }) }));
+                if (notes.some((n) => n.k !== 1 || n.dy !== 0)) fitNote = { rows: notes };
+              } else {
+                fitNote = normalise(solid);
+              }
+              // The checks below read the frames as SHIPPED: measured on the
+              // raw panels they would keep reporting the offset just removed.
+              for (const f of solid) {
+                const w2 = f.cv.width, h2 = f.cv.height;
+                const px = f.cv.getContext('2d').getImageData(0, 0, w2, h2).data;
+                let mx0 = w2, mx1 = -1, my1 = -1;
+                for (let y = 0; y < h2; y++)
+                  for (let x = 0; x < w2; x++)
+                    if (px[(y * w2 + x) * 4 + 3] > 8) { if (x < mx0) mx0 = x; if (x > mx1) mx1 = x; if (y > my1) my1 = y; }
+                if (mx1 >= 0) { f.foot = (my1 + 1) / h2; f.midX = ((mx0 + mx1) / 2) / w2; }
               }
             }
             const cv = document.createElement('canvas');
@@ -1645,7 +1779,16 @@ try {
       // panel. None of that is visible in the file — it is visible in the game,
       // as a limp.
       if (r.frames !== undefined) {
-        if (r.fitNote) {
+        if (r.fitNote?.rows) {
+          console.log('    · normalised onto the reference row by row: '
+            + r.fitNote.rows.map((n) => `row ${n.row} scaled to ${(n.k * 100).toFixed(0)}%`
+              + ` and moved ${(n.dy * 100).toFixed(0)}%`).join('; ') + ' of a panel.')
+          const ks = r.fitNote.rows.map((n) => n.k)
+          if (Math.max(...ks) / Math.min(...ks) > 1.1) {
+            console.warn('    ! the rows came back at different sizes — each was fitted to'
+              + ' the reference, so they match now. Check the frames either side of the row break.')
+          }
+        } else if (r.fitNote) {
           console.log(`    · normalised onto the reference: scaled to`
             + ` ${(r.fitNote.k * 100).toFixed(0)}% and`
             + ` moved ${(r.fitNote.dy * 100).toFixed(0)}% of a panel vertically.`)
@@ -1702,6 +1845,7 @@ try {
       const shown = `${r.target}  ${r.w}x${r.h}  ${(bytes.length / 1024).toFixed(1)}kB`
         + (r.trimmed ? '  (trimmed to fill)' : '')
         + (r.keyed ? `  (keyed ${(100 * r.keyed / r.srcArea).toFixed(0)}% bg)` : '')
+        + (r.whiteKeyed ? `  (white corners keyed: ${r.whiteKeyed} px)` : '')
       if (DRY) {
         console.log(`  → ${r.id.padEnd(26)} ${shown}`)
       } else {

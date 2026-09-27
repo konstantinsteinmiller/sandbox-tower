@@ -18,6 +18,13 @@ and prompt in one go, and files, slices and compresses the return.
 ```text
 Repaint this strip of 8 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -25,6 +32,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -37,6 +48,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -49,40 +66,51 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 WHAT EACH SQUARE IS, left to right:
-1. Castle Gate: a sandcastle gatehouse block of bright dry sand — two shallow square notches cut down into its top edge leave three little merlons that stop exactly AT the top edge; a raised packed-sand arch with pressed joints frames a dark doorway glowing with warm golden light, a popsicle-stick door standing ajar against the right jamb, and a coral-pink scallop shell set over the arch — the thing the whole game protects. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #eccb8c, shadows #b3803f, highlights #fff1cc, accent details #ffb42e.
-2. Sand Block: a bucket-moulded cube of dry pale sand: a lighter packed band along the top, three wavy horizontal mould ridges, dark and light grain speckle, and one tiny white shell crumb. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e3c07e, shadows #b88c4c, highlights #f6e2ae, accent details #9c7038.
-3. Packed Sand: a cube of darker, wetter packed sand with a few damp blotches, and a big X pressed deep into its face from corner to corner — crumbs along the lips of the groove, a couple of wet glints at the upper left, and no frame around the X. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #c79a5c, shadows #8d673a, highlights #dcb57c, accent details #6e4c26.
-4. Pebble Wall: a cube of damp sand grout faced edge to edge with smooth grey-blue pebbles — about ten big ovals and five small ones in slightly different blue-greys, each with a white glint at its upper left — visibly heavier than sand. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8f9aa6, shadows #5f6975, highlights #c9d0d6, accent details #454d57.
-5. Dart Blaster: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy ORANGE toy plastic running across its lower third, with a white gloss streak and two round studs, WITH an orange-and-blue toy foam-dart blaster mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8a2b, its lower half #c75416, studs and gloss #ffb56e. Keep that band bright and saturated.
-6. Squirt Gun: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy GREEN toy plastic running across its lower third, with a white gloss streak and two round studs, WITH a chunky green toy water pistol with a water tank on top mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #43b649, its lower half #23833b, studs and gloss #86dc6e. Keep that band bright and saturated.
-7. Mud Mortar: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy PURPLE toy plastic running across its lower third, with a white gloss streak and two round studs, WITH a blue toy bucket tube lobbing a mud ball mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #8a5cd8, its lower half #5b36a8, studs and gloss #b894f0. Keep that band bright and saturated.
-8. Balloon Launcher: a square sand plinth with a sunken firing pit in the middle of its face — a dark oval crater ringed in glossy TEAL plastic with a white glint — and three little sand mounds along the bottom edge. No plastic band on this one, WITH a cardboard launch tube with a water balloon mounted on it. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the pit ring teal plastic around #1fb5a8 (shade #138a80); the crater dark brown #6e4a24.
+1. Castle Gate: a sandcastle gatehouse block of bright dry sand — two shallow square notches cut down into its top edge leave three little merlons that stop exactly AT the top edge; a raised packed-sand arch with pressed joints frames a doorway FILLED with warm golden lamplight — bright pale yellow at its heart, deepening to orange up under the arch, like a lit window at dusk, never a dark opening — a popsicle-stick door standing ajar against the right jamb, and a coral-pink scallop shell set over the arch — the thing the whole game protects. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #eccb8c, shadows #b3803f, highlights #fff1cc, accent details #ffb42e. The RIM round the whole block is #ffb42e — a heavy gilt edge, nearly twice as wide as any other block’s.
+2. Sand Block: a bucket-moulded cube of dry pale sand: a lighter packed band along the top, three wavy horizontal mould ridges, dark and light grain speckle, and one tiny white shell crumb. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e3c07e, shadows #b88c4c, highlights #f6e2ae, accent details #9c7038. The RIM round the whole block is #9c7038.
+3. Packed Sand: a cube of darker, wetter packed sand with a few damp blotches, and a big X pressed deep into its face from corner to corner — crumbs along the lips of the groove, a couple of wet glints at the upper left, and no frame around the X. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #c79a5c, shadows #8d673a, highlights #dcb57c, accent details #6e4c26. The RIM round the whole block is #6e4c26.
+4. Pebble Wall: a cube of damp sand grout faced edge to edge with smooth grey-blue pebbles — about ten big ovals and five small ones in slightly different blue-greys, each with a white glint at its upper left — visibly heavier than sand. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8f9aa6, shadows #5f6975, highlights #c9d0d6, accent details #454d57. The RIM round the whole block is #454d57.
+5. Dart Blaster: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy ORANGE toy plastic running across its lower third, with a white gloss streak and two round studs, WITH an orange-and-blue toy foam-dart blaster mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8a2b, its lower half #c75416, studs and gloss #ffb56e. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #ff8a2b.
+6. Squirt Gun: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy GREEN toy plastic running across its lower third, with a white gloss streak and two round studs, WITH a chunky green toy water pistol with a water tank on top mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #43b649, its lower half #23833b, studs and gloss #86dc6e. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #43b649.
+7. Mud Mortar: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy PURPLE toy plastic running across its lower third, with a white gloss streak and two round studs, WITH a blue toy bucket tube lobbing a mud ball mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #8a5cd8, its lower half #5b36a8, studs and gloss #b895f0. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #8a5cd8.
+8. Balloon Launcher: a square sand plinth with a sunken firing pit in the middle of its face — a dark oval crater ringed in glossy TEAL plastic with a white glint — and three little sand mounds along the bottom edge. No plastic band on this one, WITH a cardboard launch tube with a water balloon mounted on it. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the pit ring teal plastic around #1fb5a8 (shade #138a80); the crater dark brown #6e4a24. The RIM round the whole block is #1fb5a8.
 
 BACKGROUND: fill every part of the image that is not an object with solid
 pure magenta #FF00FF, edge to edge. Do NOT leave it transparent and do NOT
@@ -101,6 +129,13 @@ OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 8 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -108,6 +143,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -120,6 +159,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -132,42 +177,53 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 CRITICAL: this row is the BASE of each block with its toy REMOVED. No blasters, water pistols, tubes, zappers, ice pops, spades, flags, shells or piggy banks anywhere in this row. The game draws those on top at runtime — paint one in and the block ends up with two.
 
 WHAT EACH SQUARE IS, left to right:
-1. Castle Gate — the block BODY, which is the file that ships: a sandcastle gatehouse block of bright dry sand — two shallow square notches cut down into its top edge leave three little merlons that stop exactly AT the top edge; a raised packed-sand arch with pressed joints frames a dark doorway glowing with warm golden light, a popsicle-stick door standing ajar against the right jamb, and a coral-pink scallop shell set over the arch — the thing the whole game protects. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #eccb8c, shadows #b3803f, highlights #fff1cc, accent details #ffb42e.
-2. Sand Block — the block BODY, which is the file that ships: a bucket-moulded cube of dry pale sand: a lighter packed band along the top, three wavy horizontal mould ridges, dark and light grain speckle, and one tiny white shell crumb. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e3c07e, shadows #b88c4c, highlights #f6e2ae, accent details #9c7038.
-3. Packed Sand — the block BODY, which is the file that ships: a cube of darker, wetter packed sand with a few damp blotches, and a big X pressed deep into its face from corner to corner — crumbs along the lips of the groove, a couple of wet glints at the upper left, and no frame around the X. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #c79a5c, shadows #8d673a, highlights #dcb57c, accent details #6e4c26.
-4. Pebble Wall — the block BODY, which is the file that ships: a cube of damp sand grout faced edge to edge with smooth grey-blue pebbles — about ten big ovals and five small ones in slightly different blue-greys, each with a white glint at its upper left — visibly heavier than sand. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8f9aa6, shadows #5f6975, highlights #c9d0d6, accent details #454d57.
-5. Dart Blaster — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy ORANGE toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws an orange-and-blue toy foam-dart blaster live ON TOP of this body, so paint NO orange-and-blue toy foam-dart blaster here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8a2b, its lower half #c75416, studs and gloss #ffb56e. Keep that band bright and saturated.
-6. Squirt Gun — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy GREEN toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a chunky green toy water pistol with a water tank on top live ON TOP of this body, so paint NO chunky green toy water pistol with a water tank on top here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #43b649, its lower half #23833b, studs and gloss #86dc6e. Keep that band bright and saturated.
-7. Mud Mortar — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy PURPLE toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a blue toy bucket tube lobbing a mud ball live ON TOP of this body, so paint NO blue toy bucket tube lobbing a mud ball here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #8a5cd8, its lower half #5b36a8, studs and gloss #b894f0. Keep that band bright and saturated.
-8. Balloon Launcher — the block BODY, which is the file that ships: a square sand plinth with a sunken firing pit in the middle of its face — a dark oval crater ringed in glossy TEAL plastic with a white glint — and three little sand mounds along the bottom edge. No plastic band on this one. The game draws a cardboard launch tube with a water balloon live ON TOP of this body, so paint NO cardboard launch tube with a water balloon here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the pit ring teal plastic around #1fb5a8 (shade #138a80); the crater dark brown #6e4a24.
+1. Castle Gate — the block BODY, which is the file that ships: a sandcastle gatehouse block of bright dry sand — two shallow square notches cut down into its top edge leave three little merlons that stop exactly AT the top edge; a raised packed-sand arch with pressed joints frames a doorway FILLED with warm golden lamplight — bright pale yellow at its heart, deepening to orange up under the arch, like a lit window at dusk, never a dark opening — a popsicle-stick door standing ajar against the right jamb, and a coral-pink scallop shell set over the arch — the thing the whole game protects. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #eccb8c, shadows #b3803f, highlights #fff1cc, accent details #ffb42e. The RIM round the whole block is #ffb42e — a heavy gilt edge, nearly twice as wide as any other block’s.
+2. Sand Block — the block BODY, which is the file that ships: a bucket-moulded cube of dry pale sand: a lighter packed band along the top, three wavy horizontal mould ridges, dark and light grain speckle, and one tiny white shell crumb. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e3c07e, shadows #b88c4c, highlights #f6e2ae, accent details #9c7038. The RIM round the whole block is #9c7038.
+3. Packed Sand — the block BODY, which is the file that ships: a cube of darker, wetter packed sand with a few damp blotches, and a big X pressed deep into its face from corner to corner — crumbs along the lips of the groove, a couple of wet glints at the upper left, and no frame around the X. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #c79a5c, shadows #8d673a, highlights #dcb57c, accent details #6e4c26. The RIM round the whole block is #6e4c26.
+4. Pebble Wall — the block BODY, which is the file that ships: a cube of damp sand grout faced edge to edge with smooth grey-blue pebbles — about ten big ovals and five small ones in slightly different blue-greys, each with a white glint at its upper left — visibly heavier than sand. Nothing is drawn on top of this one, so it is the whole block. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8f9aa6, shadows #5f6975, highlights #c9d0d6, accent details #454d57. The RIM round the whole block is #454d57.
+5. Dart Blaster — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy ORANGE toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws an orange-and-blue toy foam-dart blaster live ON TOP of this body, so paint NO orange-and-blue toy foam-dart blaster here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8a2b, its lower half #c75416, studs and gloss #ffb56e. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #ff8a2b.
+6. Squirt Gun — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy GREEN toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a chunky green toy water pistol with a water tank on top live ON TOP of this body, so paint NO chunky green toy water pistol with a water tank on top here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #43b649, its lower half #23833b, studs and gloss #86dc6e. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #43b649.
+7. Mud Mortar — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy PURPLE toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a blue toy bucket tube lobbing a mud ball live ON TOP of this body, so paint NO blue toy bucket tube lobbing a mud ball here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #8a5cd8, its lower half #5b36a8, studs and gloss #b895f0. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #8a5cd8.
+8. Balloon Launcher — the block BODY, which is the file that ships: a square sand plinth with a sunken firing pit in the middle of its face — a dark oval crater ringed in glossy TEAL plastic with a white glint — and three little sand mounds along the bottom edge. No plastic band on this one. The game draws a cardboard launch tube with a water balloon live ON TOP of this body, so paint NO cardboard launch tube with a water balloon here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the pit ring teal plastic around #1fb5a8 (shade #138a80); the crater dark brown #6e4a24. The RIM round the whole block is #1fb5a8.
 
 BACKGROUND: fill every part of the image that is not an object with solid
 pure magenta #FF00FF, edge to edge. Do NOT leave it transparent and do NOT
@@ -186,6 +242,13 @@ OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 8 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -193,6 +256,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -205,6 +272,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -226,14 +299,14 @@ AVOID — these are the ways this goes wrong:
 These are UI ICONS, not scenery: one bold flat pictogram per square on a dark round plate, readable at thumbnail size. Do not turn them into little paintings.
 
 WHAT EACH SQUARE IS, left to right:
-1. Build-tray ICON for the Castle Gate: a gatehouse with three merlons and a round arched doorway — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #eccb8c, shadows #b3803f, highlights #fff1cc, accent details #ffb42e.
-2. Build-tray ICON for the Sand Block: a bucket-moulded sand block in three bands — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e3c07e, shadows #b88c4c, highlights #f6e2ae, accent details #9c7038.
-3. Build-tray ICON for the Packed Sand: a solid square with a thick X cut through it — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #c79a5c, shadows #8d673a, highlights #dcb57c, accent details #6e4c26.
-4. Build-tray ICON for the Pebble Wall: a cluster of seven oval pebbles — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8f9aa6, shadows #5f6975, highlights #c9d0d6, accent details #454d57.
-5. Build-tray ICON for the Dart Blaster: a foam dart flying up and to the right — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8a2b, its lower half #c75416, studs and gloss #ffb56e. Keep that band bright and saturated.
-6. Build-tray ICON for the Squirt Gun: a squirt gun with a dome tank and a water drop — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #43b649, its lower half #23833b, studs and gloss #86dc6e. Keep that band bright and saturated.
-7. Build-tray ICON for the Mud Mortar: a tilted bucket tube with a mud ball flying out — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #8a5cd8, its lower half #5b36a8, studs and gloss #b894f0. Keep that band bright and saturated.
-8. Build-tray ICON for the Balloon Launcher: a knotted water balloon with a wiggly string — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the pit ring teal plastic around #1fb5a8 (shade #138a80); the crater dark brown #6e4a24.
+1. Build-tray ICON for the Castle Gate: a gatehouse with three merlons and a round arched doorway — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #eccb8c, shadows #b3803f, highlights #fff1cc, accent details #ffb42e. The RIM round the whole block is #ffb42e — a heavy gilt edge, nearly twice as wide as any other block’s.
+2. Build-tray ICON for the Sand Block: a bucket-moulded sand block in three bands — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e3c07e, shadows #b88c4c, highlights #f6e2ae, accent details #9c7038. The RIM round the whole block is #9c7038.
+3. Build-tray ICON for the Packed Sand: a solid square with a thick X cut through it — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #c79a5c, shadows #8d673a, highlights #dcb57c, accent details #6e4c26. The RIM round the whole block is #6e4c26.
+4. Build-tray ICON for the Pebble Wall: a cluster of seven oval pebbles — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8f9aa6, shadows #5f6975, highlights #c9d0d6, accent details #454d57. The RIM round the whole block is #454d57.
+5. Build-tray ICON for the Dart Blaster: a foam dart flying up and to the right — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8a2b, its lower half #c75416, studs and gloss #ffb56e. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #ff8a2b.
+6. Build-tray ICON for the Squirt Gun: a squirt gun with a dome tank and a water drop — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #43b649, its lower half #23833b, studs and gloss #86dc6e. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #43b649.
+7. Build-tray ICON for the Mud Mortar: a tilted bucket tube with a mud ball flying out — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #8a5cd8, its lower half #5b36a8, studs and gloss #b895f0. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #8a5cd8.
+8. Build-tray ICON for the Balloon Launcher: a knotted water balloon with a wiggly string — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the pit ring teal plastic around #1fb5a8 (shade #138a80); the crater dark brown #6e4a24. The RIM round the whole block is #1fb5a8.
 
 BACKGROUND: fill every part of the image that is not an object with solid
 pure magenta #FF00FF, edge to edge. Do NOT leave it transparent and do NOT
@@ -252,6 +325,13 @@ OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 8 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -259,6 +339,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -271,6 +355,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -283,40 +373,51 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 WHAT EACH SQUARE IS, left to right:
-1. Bug Zapper: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy INDIGO toy plastic running across its lower third, with a white gloss streak and two round studs, WITH a glowing blue-violet bug-zapper lantern mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #4d52d6, its lower half #2b2f8f, studs and gloss #8189f2. Keep that band bright and saturated.
-2. Ice Pop: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SKY-BLUE toy plastic running across its lower third, with a white gloss streak and two round studs, with icy white rime dripping in a wavy line over its top edge, WITH a giant blue ice pop on a wooden stick mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #5cc4ea, its lower half #2382b5, studs and gloss #aaeaff. Keep that band bright and saturated.
-3. Toothpick Wall: a cube of golden sand with one mould ridge and grain speckle, and six short pale wooden toothpick stubs pushed into its face in two rows of three, angled upward, WITH long wooden toothpicks bristling out of all four sides mounted on it. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #d8ae6a, shadows #a57539, highlights #f2d9a0, accent details #7d5a2e.
-4. Bucket & Spade: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy BLUE toy plastic running across its lower third, with a white gloss streak and two round studs, WITH a green toy bucket with a spade mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #2f7de1, its lower half #1d5fb5, studs and gloss #72acf2. Keep that band bright and saturated.
-5. Paper Flag: a square sand plinth with a paper party frill across its lower third — light rose paper cut with pinking-shear teeth, a deep plum-rose stripe along it dotted with six gold dots, WITH a paper swallowtail flag on a toothpick mounted on it. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the paper frill light rose #e685c6 with a deep plum-rose #b8479a stripe and gold #ffd35c dots.
-6. Magic Seashell: a square pearly plinth — pale lilac mother-of-pearl rather than sand — with two soft sheen bands, one lilac and one pale cyan, and a scatter of little white four-point glitter stars, WITH a glowing pink scallop shell mounted on it. Colours: pearly lilac — body around #e8cde4, shadows #ae88b6, highlights #fbeefa; sheen bands #b99ae6 and #9be8ff; glitter #e6fbff.
-7. Sand Sifter: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy LIME-GREEN toy plastic running across its lower third, with a white gloss streak and two round studs, WITH a toy sand wheel under a funnel of sand mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #94cc3a, its lower half #5c961d, studs and gloss #c8ee82. Keep that band bright and saturated.
-8. Pebble Digger: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SUNSHINE-YELLOW toy plastic running across its lower third, with a white gloss streak and two round studs, WITH a yellow toy digger scooping pebbles mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ffc21f, its lower half #c98a00, studs and gloss #ffe07a. Keep that band bright and saturated.
+1. Bug Zapper: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy INDIGO toy plastic running across its lower third, with a white gloss streak and two round studs, WITH a glowing blue-violet bug-zapper lantern mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #4d52d6, its lower half #2b2f8f, studs and gloss #8189f2. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #4d52d6.
+2. Ice Pop: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SKY-BLUE toy plastic running across its lower third, with a white gloss streak and two round studs, with icy white rime dripping in a wavy line over its top edge, WITH a giant blue ice pop on a wooden stick mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #5cc4ea, its lower half #2382b5, studs and gloss #aaeaff. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #5cc4ea.
+3. Toothpick Wall: a cube of golden sand with one mould ridge and grain speckle, and six short pale wooden toothpick stubs pushed into its face in two rows of three, angled upward, WITH long wooden toothpicks bristling out of all four sides mounted on it. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #d8ae6a, shadows #a57539, highlights #f2d9a0, accent details #7d5a2e. The RIM round the whole block is #7d5a2e.
+4. Bucket & Spade: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy BLUE toy plastic running across its lower third, with a white gloss streak and two round studs, WITH a green toy bucket with a spade mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #2f7de1, its lower half #1d5fb5, studs and gloss #72acf2. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #2f7de1.
+5. Paper Flag: a square sand plinth with a paper party frill across its lower third — light rose paper cut with pinking-shear teeth, a deep plum-rose stripe along it dotted with six gold dots, WITH a paper swallowtail flag on a toothpick mounted on it. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the paper frill light rose #e685c6 with a deep plum-rose #b8479a stripe and gold #ffd35c dots. The RIM round the whole block is #b8479a.
+6. Magic Seashell: a square pearly plinth — pale lilac mother-of-pearl rather than sand — with two soft sheen bands, one lilac and one pale cyan, and a scatter of little white four-point glitter stars, WITH a glowing pink scallop shell mounted on it. Colours: pearly lilac — body around #e8cde4, shadows #ae88b6, highlights #fbeefa; sheen bands #b99ae6 and #9be8ff; glitter #e6fbff. The RIM round the whole block is #b99ae6.
+7. Sand Sifter: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy LIME-GREEN toy plastic running across its lower third, with a white gloss streak and two round studs, WITH a toy sand wheel under a funnel of sand mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #94cc3a, its lower half #5c961d, studs and gloss #c8ee82. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #94cc3a.
+8. Pebble Digger: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SUNSHINE-YELLOW toy plastic running across its lower third, with a white gloss streak and two round studs, WITH a yellow toy digger scooping pebbles mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ffc21f, its lower half #c98a00, studs and gloss #ffe07a. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #ffc21f.
 
 BACKGROUND: fill every part of the image that is not an object with solid
 pure magenta #FF00FF, edge to edge. Do NOT leave it transparent and do NOT
@@ -335,6 +436,13 @@ OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 8 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -342,6 +450,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -354,6 +466,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -366,42 +484,53 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 CRITICAL: this row is the BASE of each block with its toy REMOVED. No blasters, water pistols, tubes, zappers, ice pops, spades, flags, shells or piggy banks anywhere in this row. The game draws those on top at runtime — paint one in and the block ends up with two.
 
 WHAT EACH SQUARE IS, left to right:
-1. Bug Zapper — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy INDIGO toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a glowing blue-violet bug-zapper lantern live ON TOP of this body, so paint NO glowing blue-violet bug-zapper lantern here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #4d52d6, its lower half #2b2f8f, studs and gloss #8189f2. Keep that band bright and saturated.
-2. Ice Pop — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SKY-BLUE toy plastic running across its lower third, with a white gloss streak and two round studs, with icy white rime dripping in a wavy line over its top edge. The game draws a giant blue ice pop on a wooden stick live ON TOP of this body, so paint NO giant blue ice pop on a wooden stick here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #5cc4ea, its lower half #2382b5, studs and gloss #aaeaff. Keep that band bright and saturated.
-3. Toothpick Wall — the block BODY, which is the file that ships: a cube of golden sand with one mould ridge and grain speckle, and six short pale wooden toothpick stubs pushed into its face in two rows of three, angled upward. The game draws long wooden toothpicks bristling out of all four sides live ON TOP of this body, so paint NO long wooden toothpicks bristling out of all four sides here. Keep the face above the bottom edge plain: whatever is painted there ends up buried under the toy. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #d8ae6a, shadows #a57539, highlights #f2d9a0, accent details #7d5a2e.
-4. Bucket & Spade — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy BLUE toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a green toy bucket with a spade live ON TOP of this body, so paint NO green toy bucket with a spade here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #2f7de1, its lower half #1d5fb5, studs and gloss #72acf2. Keep that band bright and saturated.
-5. Paper Flag — the block BODY, which is the file that ships: a square sand plinth with a paper party frill across its lower third — light rose paper cut with pinking-shear teeth, a deep plum-rose stripe along it dotted with six gold dots. The game draws a paper swallowtail flag on a toothpick live ON TOP of this body, so paint NO paper swallowtail flag on a toothpick here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the paper frill light rose #e685c6 with a deep plum-rose #b8479a stripe and gold #ffd35c dots.
-6. Magic Seashell — the block BODY, which is the file that ships: a square pearly plinth — pale lilac mother-of-pearl rather than sand — with two soft sheen bands, one lilac and one pale cyan, and a scatter of little white four-point glitter stars. The game draws a glowing pink scallop shell live ON TOP of this body, so paint NO glowing pink scallop shell here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: pearly lilac — body around #e8cde4, shadows #ae88b6, highlights #fbeefa; sheen bands #b99ae6 and #9be8ff; glitter #e6fbff.
-7. Sand Sifter — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy LIME-GREEN toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a toy sand wheel under a funnel of sand live ON TOP of this body, so paint NO toy sand wheel under a funnel of sand here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #94cc3a, its lower half #5c961d, studs and gloss #c8ee82. Keep that band bright and saturated.
-8. Pebble Digger — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SUNSHINE-YELLOW toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a yellow toy digger scooping pebbles live ON TOP of this body, so paint NO yellow toy digger scooping pebbles here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ffc21f, its lower half #c98a00, studs and gloss #ffe07a. Keep that band bright and saturated.
+1. Bug Zapper — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy INDIGO toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a glowing blue-violet bug-zapper lantern live ON TOP of this body, so paint NO glowing blue-violet bug-zapper lantern here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #4d52d6, its lower half #2b2f8f, studs and gloss #8189f2. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #4d52d6.
+2. Ice Pop — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SKY-BLUE toy plastic running across its lower third, with a white gloss streak and two round studs, with icy white rime dripping in a wavy line over its top edge. The game draws a giant blue ice pop on a wooden stick live ON TOP of this body, so paint NO giant blue ice pop on a wooden stick here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #5cc4ea, its lower half #2382b5, studs and gloss #aaeaff. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #5cc4ea.
+3. Toothpick Wall — the block BODY, which is the file that ships: a cube of golden sand with one mould ridge and grain speckle, and six short pale wooden toothpick stubs pushed into its face in two rows of three, angled upward. The game draws long wooden toothpicks bristling out of all four sides live ON TOP of this body, so paint NO long wooden toothpicks bristling out of all four sides here. Keep the face above the bottom edge plain: whatever is painted there ends up buried under the toy. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #d8ae6a, shadows #a57539, highlights #f2d9a0, accent details #7d5a2e. The RIM round the whole block is #7d5a2e.
+4. Bucket & Spade — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy BLUE toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a green toy bucket with a spade live ON TOP of this body, so paint NO green toy bucket with a spade here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #2f7de1, its lower half #1d5fb5, studs and gloss #72acf2. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #2f7de1.
+5. Paper Flag — the block BODY, which is the file that ships: a square sand plinth with a paper party frill across its lower third — light rose paper cut with pinking-shear teeth, a deep plum-rose stripe along it dotted with six gold dots. The game draws a paper swallowtail flag on a toothpick live ON TOP of this body, so paint NO paper swallowtail flag on a toothpick here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the paper frill light rose #e685c6 with a deep plum-rose #b8479a stripe and gold #ffd35c dots. The RIM round the whole block is #b8479a.
+6. Magic Seashell — the block BODY, which is the file that ships: a square pearly plinth — pale lilac mother-of-pearl rather than sand — with two soft sheen bands, one lilac and one pale cyan, and a scatter of little white four-point glitter stars. The game draws a glowing pink scallop shell live ON TOP of this body, so paint NO glowing pink scallop shell here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: pearly lilac — body around #e8cde4, shadows #ae88b6, highlights #fbeefa; sheen bands #b99ae6 and #9be8ff; glitter #e6fbff. The RIM round the whole block is #b99ae6.
+7. Sand Sifter — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy LIME-GREEN toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a toy sand wheel under a funnel of sand live ON TOP of this body, so paint NO toy sand wheel under a funnel of sand here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #94cc3a, its lower half #5c961d, studs and gloss #c8ee82. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #94cc3a.
+8. Pebble Digger — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SUNSHINE-YELLOW toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a yellow toy digger scooping pebbles live ON TOP of this body, so paint NO yellow toy digger scooping pebbles here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ffc21f, its lower half #c98a00, studs and gloss #ffe07a. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #ffc21f.
 
 BACKGROUND: fill every part of the image that is not an object with solid
 pure magenta #FF00FF, edge to edge. Do NOT leave it transparent and do NOT
@@ -420,6 +549,13 @@ OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 8 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -427,6 +563,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -439,6 +579,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -460,14 +606,14 @@ AVOID — these are the ways this goes wrong:
 These are UI ICONS, not scenery: one bold flat pictogram per square on a dark round plate, readable at thumbnail size. Do not turn them into little paintings.
 
 WHAT EACH SQUARE IS, left to right:
-1. Build-tray ICON for the Bug Zapper: a bug-zapper lantern with a hanging ring and a lightning bolt — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #4d52d6, its lower half #2b2f8f, studs and gloss #8189f2. Keep that band bright and saturated.
-2. Build-tray ICON for the Ice Pop: an ice pop with a bite out of the top — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #5cc4ea, its lower half #2382b5, studs and gloss #aaeaff. Keep that band bright and saturated.
-3. Build-tray ICON for the Toothpick Wall: a small square with toothpicks splayed out on all four sides, like a hedgehog — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #d8ae6a, shadows #a57539, highlights #f2d9a0, accent details #7d5a2e.
-4. Build-tray ICON for the Bucket & Spade: a bucket with an arched handle and a spade beside it — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #2f7de1, its lower half #1d5fb5, studs and gloss #72acf2. Keep that band bright and saturated.
-5. Build-tray ICON for the Paper Flag: a swallowtail flag on a toothpick planted in a sand mound — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the paper frill light rose #e685c6 with a deep plum-rose #b8479a stripe and gold #ffd35c dots.
-6. Build-tray ICON for the Magic Seashell: a ribbed scallop shell on a small base, with a sparkle — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: pearly lilac — body around #e8cde4, shadows #ae88b6, highlights #fbeefa; sheen bands #b99ae6 and #9be8ff; glitter #e6fbff.
-7. Build-tray ICON for the Sand Sifter: a sieve with falling grains over a sand heap — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #94cc3a, its lower half #5c961d, studs and gloss #c8ee82. Keep that band bright and saturated.
-8. Build-tray ICON for the Pebble Digger: a toy digger with tracks, a cab and a scoop holding a pebble — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ffc21f, its lower half #c98a00, studs and gloss #ffe07a. Keep that band bright and saturated.
+1. Build-tray ICON for the Bug Zapper: a bug-zapper lantern with a hanging ring and a lightning bolt — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #4d52d6, its lower half #2b2f8f, studs and gloss #8189f2. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #4d52d6.
+2. Build-tray ICON for the Ice Pop: an ice pop with a bite out of the top — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #5cc4ea, its lower half #2382b5, studs and gloss #aaeaff. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #5cc4ea.
+3. Build-tray ICON for the Toothpick Wall: a small square with toothpicks splayed out on all four sides, like a hedgehog — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #d8ae6a, shadows #a57539, highlights #f2d9a0, accent details #7d5a2e. The RIM round the whole block is #7d5a2e.
+4. Build-tray ICON for the Bucket & Spade: a bucket with an arched handle and a spade beside it — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #2f7de1, its lower half #1d5fb5, studs and gloss #72acf2. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #2f7de1.
+5. Build-tray ICON for the Paper Flag: a swallowtail flag on a toothpick planted in a sand mound — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the paper frill light rose #e685c6 with a deep plum-rose #b8479a stripe and gold #ffd35c dots. The RIM round the whole block is #b8479a.
+6. Build-tray ICON for the Magic Seashell: a ribbed scallop shell on a small base, with a sparkle — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: pearly lilac — body around #e8cde4, shadows #ae88b6, highlights #fbeefa; sheen bands #b99ae6 and #9be8ff; glitter #e6fbff. The RIM round the whole block is #b99ae6.
+7. Build-tray ICON for the Sand Sifter: a sieve with falling grains over a sand heap — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #94cc3a, its lower half #5c961d, studs and gloss #c8ee82. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #94cc3a.
+8. Build-tray ICON for the Pebble Digger: a toy digger with tracks, a cab and a scoop holding a pebble — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ffc21f, its lower half #c98a00, studs and gloss #ffe07a. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #ffc21f.
 
 BACKGROUND: fill every part of the image that is not an object with solid
 pure magenta #FF00FF, edge to edge. Do NOT leave it transparent and do NOT
@@ -486,6 +632,13 @@ OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 8 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -493,6 +646,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -505,6 +662,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -517,36 +680,47 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 WHAT EACH SQUARE IS, left to right:
-1. Piggy Bank: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy BUBBLE-GUM PINK toy plastic running across its lower third, with a white gloss streak and two round studs, WITH a pink piggy bank mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8fbf, its lower half #d05a8e, studs and gloss #ffc3dc. Keep that band bright and saturated.
-2. Paper Boat: a folded notebook-paper boat, blue ruled lines and a red margin line on the paper, WITH a toothpick spear stuck in a pink eraser mounted on it. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e4ecf5, shadows #8ea3ba, highlights #ffffff, accent details #5a9be6.
-3. Rubber Duck: a fat yellow rubber bath duck with an orange beak and a blue saddle strap, facing left, WITH a toy dart launcher on its back mounted on it. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #ffc93c, shadows #d99400, highlights #ffe78f, accent details #ff8a2b.
-4. Toy Pirate Ship: a brown moulded-plastic toy pirate ship with gold trim, portholes and a red-striped sail, WITH two cork cannons mounted on it. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8c4d2b, shadows #4f2a18, highlights #bd7a45, accent details #ffc93c.
+1. Piggy Bank: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy BUBBLE-GUM PINK toy plastic running across its lower third, with a white gloss streak and two round studs, WITH a pink piggy bank mounted on it. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ffabbf, its lower half #d05a8e, studs and gloss #ffc8dc. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #ffabbf.
+2. Paper Boat: a folded notebook-paper boat, blue ruled lines and a red margin line on the paper, WITH a toothpick spear stuck in a pink eraser mounted on it. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e4ecf5, shadows #8ea3ba, highlights #ffffff, accent details #5a9be6. The RIM round the whole block is #e4ecf5.
+3. Rubber Duck: a fat yellow rubber bath duck with an orange beak and a blue saddle strap, facing left, WITH a toy dart launcher on its back mounted on it. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #ffc93c, shadows #d99400, highlights #ffe78f, accent details #ff8a2b. The RIM round the whole block is #ffc93c.
+4. Toy Pirate Ship: a brown moulded-plastic toy pirate ship with gold trim, portholes and a red-striped sail, WITH two cork cannons mounted on it. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8c4d2b, shadows #4f2a18, highlights #bd7a45, accent details #ffc93c. The RIM round the whole block is #8c4d2b.
 
 BACKGROUND: fill every part of the image that is not an object with solid
 pure magenta #FF00FF, edge to edge. Do NOT leave it transparent and do NOT
@@ -565,6 +739,13 @@ OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 8 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -572,6 +753,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -584,6 +769,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -596,38 +787,49 @@ AVOID — these are the ways this goes wrong:
   gore. Cartoon bugs only.
 · NO uniform-weight black vector outlines (clip-art) — the ink is warm
   brown and hand-varied.
-· NO frames, borders, cards, vignettes, matting or paper background inside a
-  square. The object itself fills the square edge to edge, corner to corner.
+· NO cards, vignettes, matting or paper background. The block itself fills the
+  square, and its coloured rim is part of the block, not a frame around it.
 · Do not invent content for a square that is blank. Leave it blank.
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
 THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:
-· A square block that FILLS the frame edge to edge and corner to corner. The
-  material must TOUCH all four edges of the image — no margin, no gap, not
-  even a few pixels. A block that stops short shows a seam on every side once
-  it is stacked. Let the artwork BLEED off all four edges rather than leave a
-  border: the frame is a crop of a wall, not a portrait of an object.
-· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners
-  leave four visible holes wherever four blocks meet.
+· A square block that FILLS the frame. Its outer ink line runs along all four
+  edges of the image — no margin, no gap, not even a few pixels. A block that
+  stops short shows a seam in the middle of every wall it is stacked into.
+· ROUNDED corners, rounded exactly as the reference rounds them: the radius is
+  about a tenth of the side. Only the four little corner nicks outside that
+  rounding show the background — solid magenta, all four of them, never white.
+· THE RIM — keep it. A band in the block’s own rim colour (given below) runs
+  all the way round the block just inside its outer edge, following the
+  rounded corners. It is about 4% of the side wide, with the dark brown ink
+  line along both sides of it. The rim is how a player tells one block from
+  another at a glance, so it is part of the block and NOT a frame around a
+  picture: never drop it, never thin it to a hairline, and never paint it in
+  any colour but its own.
 · FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these
   directly on top of and beside each other to build a tower.
-· Nothing may stick out past the square: no sandcastle turrets, battlements or
-  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded
-  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle
-  wall, not a little sandcastle. Anything above the top edge leaves the next
-  block floating in mid-air.
+· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped
+  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It
+  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything
+  above the top edge leaves the next block floating in mid-air. The only
+  shape cut INTO the square is one the reference itself cuts — the Castle
+  Gate’s two battlement notches — and those stay exactly as drawn, with the
+  rim following them. A notch is EMPTY: it is background, solid magenta
+  right down to the rim, like the corner nicks — never white, cream or sky.
+  (The first gate came back with white notches, which the game would show
+  as two white squares on top of the castle.)
 · Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a
   wall. It is a face seen straight on, not an object standing in space.
-· No margin, no drop shadow, no ground beneath it, no background around it.
+· No drop shadow, no ground beneath it, no background around it.
 
 CRITICAL: this row is the BASE of each block with its toy REMOVED. No blasters, water pistols, tubes, zappers, ice pops, spades, flags, shells or piggy banks anywhere in this row. The game draws those on top at runtime — paint one in and the block ends up with two.
 
 WHAT EACH SQUARE IS, left to right:
-1. Piggy Bank — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy BUBBLE-GUM PINK toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a pink piggy bank live ON TOP of this body, so paint NO pink piggy bank here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8fbf, its lower half #d05a8e, studs and gloss #ffc3dc. Keep that band bright and saturated.
-2. Reference only — the Paper Boat hull has its own sheet. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e4ecf5, shadows #8ea3ba, highlights #ffffff, accent details #5a9be6.
-3. Reference only — the Rubber Duck hull has its own sheet. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #ffc93c, shadows #d99400, highlights #ffe78f, accent details #ff8a2b.
-4. Reference only — the Toy Pirate Ship hull has its own sheet. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8c4d2b, shadows #4f2a18, highlights #bd7a45, accent details #ffc93c.
+1. Piggy Bank — the block BODY, which is the file that ships: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy BUBBLE-GUM PINK toy plastic running across its lower third, with a white gloss streak and two round studs. The game draws a pink piggy bank live ON TOP of this body, so paint NO pink piggy bank here. Keep the face above the plastic band plain: whatever is painted there ends up buried under the toy. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ffabbf, its lower half #d05a8e, studs and gloss #ffc8dc. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #ffabbf.
+2. Reference only — the Paper Boat hull has its own sheet. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e4ecf5, shadows #8ea3ba, highlights #ffffff, accent details #5a9be6. The RIM round the whole block is #e4ecf5.
+3. Reference only — the Rubber Duck hull has its own sheet. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #ffc93c, shadows #d99400, highlights #ffe78f, accent details #ff8a2b. The RIM round the whole block is #ffc93c.
+4. Reference only — the Toy Pirate Ship hull has its own sheet. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8c4d2b, shadows #4f2a18, highlights #bd7a45, accent details #ffc93c. The RIM round the whole block is #8c4d2b.
 
 BACKGROUND: fill every part of the image that is not an object with solid
 pure magenta #FF00FF, edge to edge. Do NOT leave it transparent and do NOT
@@ -646,6 +848,13 @@ OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 8 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -653,6 +862,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -665,6 +878,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -686,10 +905,10 @@ AVOID — these are the ways this goes wrong:
 These are UI ICONS, not scenery: one bold flat pictogram per square on a dark round plate, readable at thumbnail size. Do not turn them into little paintings.
 
 WHAT EACH SQUARE IS, left to right:
-1. Build-tray ICON for the Piggy Bank: a piggy bank with a coin above its slot — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8fbf, its lower half #d05a8e, studs and gloss #ffc3dc. Keep that band bright and saturated.
-2. Build-tray ICON for the Paper Boat: a paper boat with a toothpick spear angled up and to the right — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e4ecf5, shadows #8ea3ba, highlights #ffffff, accent details #5a9be6.
-3. Build-tray ICON for the Rubber Duck: a duck with a harpoon angled up and to the right — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #ffc93c, shadows #d99400, highlights #ffe78f, accent details #ff8a2b.
-4. Build-tray ICON for the Toy Pirate Ship: a hull with a stern castle, a mast and a sail — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8c4d2b, shadows #4f2a18, highlights #bd7a45, accent details #ffc93c.
+1. Build-tray ICON for the Piggy Bank: a piggy bank with a coin above its slot — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ffabbf, its lower half #d05a8e, studs and gloss #ffc8dc. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #ffabbf.
+2. Build-tray ICON for the Paper Boat: a paper boat with a toothpick spear angled up and to the right — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e4ecf5, shadows #8ea3ba, highlights #ffffff, accent details #5a9be6. The RIM round the whole block is #e4ecf5.
+3. Build-tray ICON for the Rubber Duck: a duck with a harpoon angled up and to the right — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #ffc93c, shadows #d99400, highlights #ffe78f, accent details #ff8a2b. The RIM round the whole block is #ffc93c.
+4. Build-tray ICON for the Toy Pirate Ship: a hull with a stern castle, a mast and a sail — a bold, flat, near-white pictogram on a dark round plate over the block's body. Not a miniature painting. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8c4d2b, shadows #4f2a18, highlights #bd7a45, accent details #ffc93c. The RIM round the whole block is #8c4d2b.
 
 BACKGROUND: fill every part of the image that is not an object with solid
 pure magenta #FF00FF, edge to edge. Do NOT leave it transparent and do NOT
@@ -708,6 +927,13 @@ OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 9 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -715,6 +941,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -727,6 +957,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -746,15 +982,15 @@ AVOID — these are the ways this goes wrong:
   restyle, not a redesign.
 
 WHAT EACH SQUARE IS, left to right:
-1. Dart Blaster: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy ORANGE toy plastic running across its lower third, with a white gloss streak and two round studs, with an orange-and-blue toy foam-dart blaster. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8a2b, its lower half #c75416, studs and gloss #ffb56e. Keep that band bright and saturated.
-2. Squirt Gun: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy GREEN toy plastic running across its lower third, with a white gloss streak and two round studs, with a chunky green toy water pistol with a water tank on top. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #43b649, its lower half #23833b, studs and gloss #86dc6e. Keep that band bright and saturated.
-3. Mud Mortar: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy PURPLE toy plastic running across its lower third, with a white gloss streak and two round studs, with a blue toy bucket tube lobbing a mud ball. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #8a5cd8, its lower half #5b36a8, studs and gloss #b894f0. Keep that band bright and saturated.
-4. Balloon Launcher: a square sand plinth with a sunken firing pit in the middle of its face — a dark oval crater ringed in glossy TEAL plastic with a white glint — and three little sand mounds along the bottom edge. No plastic band on this one, with a cardboard launch tube with a water balloon. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the pit ring teal plastic around #1fb5a8 (shade #138a80); the crater dark brown #6e4a24.
-5. Bug Zapper: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy INDIGO toy plastic running across its lower third, with a white gloss streak and two round studs, with a glowing blue-violet bug-zapper lantern. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #4d52d6, its lower half #2b2f8f, studs and gloss #8189f2. Keep that band bright and saturated.
-6. Ice Pop: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SKY-BLUE toy plastic running across its lower third, with a white gloss streak and two round studs, with icy white rime dripping in a wavy line over its top edge, with a giant blue ice pop on a wooden stick. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #5cc4ea, its lower half #2382b5, studs and gloss #aaeaff. Keep that band bright and saturated.
-7. Paper Boat: a folded notebook-paper boat, blue ruled lines and a red margin line on the paper, with a toothpick spear stuck in a pink eraser. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e4ecf5, shadows #8ea3ba, highlights #ffffff, accent details #5a9be6.
-8. Rubber Duck: a fat yellow rubber bath duck with an orange beak and a blue saddle strap, facing left, with a toy dart launcher on its back. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #ffc93c, shadows #d99400, highlights #ffe78f, accent details #ff8a2b.
-9. Toy Pirate Ship: a brown moulded-plastic toy pirate ship with gold trim, portholes and a red-striped sail, with two cork cannons. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8c4d2b, shadows #4f2a18, highlights #bd7a45, accent details #ffc93c.
+1. Dart Blaster: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy ORANGE toy plastic running across its lower third, with a white gloss streak and two round studs, with an orange-and-blue toy foam-dart blaster. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8a2b, its lower half #c75416, studs and gloss #ffb56e. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #ff8a2b.
+2. Squirt Gun: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy GREEN toy plastic running across its lower third, with a white gloss streak and two round studs, with a chunky green toy water pistol with a water tank on top. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #43b649, its lower half #23833b, studs and gloss #86dc6e. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #43b649.
+3. Mud Mortar: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy PURPLE toy plastic running across its lower third, with a white gloss streak and two round studs, with a blue toy bucket tube lobbing a mud ball. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #8a5cd8, its lower half #5b36a8, studs and gloss #b895f0. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #8a5cd8.
+4. Balloon Launcher: a square sand plinth with a sunken firing pit in the middle of its face — a dark oval crater ringed in glossy TEAL plastic with a white glint — and three little sand mounds along the bottom edge. No plastic band on this one, with a cardboard launch tube with a water balloon. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the pit ring teal plastic around #1fb5a8 (shade #138a80); the crater dark brown #6e4a24. The RIM round the whole block is #1fb5a8.
+5. Bug Zapper: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy INDIGO toy plastic running across its lower third, with a white gloss streak and two round studs, with a glowing blue-violet bug-zapper lantern. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #4d52d6, its lower half #2b2f8f, studs and gloss #8189f2. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #4d52d6.
+6. Ice Pop: a square sand plinth: pale packed sand with a lighter packed cap band across the top, one faint horizontal mould ridge and fine grain speckle, and a strip of glossy SKY-BLUE toy plastic running across its lower third, with a white gloss streak and two round studs, with icy white rime dripping in a wavy line over its top edge, with a giant blue ice pop on a wooden stick. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #5cc4ea, its lower half #2382b5, studs and gloss #aaeaff. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #5cc4ea.
+7. Paper Boat: a folded notebook-paper boat, blue ruled lines and a red margin line on the paper, with a toothpick spear stuck in a pink eraser. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e4ecf5, shadows #8ea3ba, highlights #ffffff, accent details #5a9be6. The RIM round the whole block is #e4ecf5.
+8. Rubber Duck: a fat yellow rubber bath duck with an orange beak and a blue saddle strap, facing left, with a toy dart launcher on its back. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #ffc93c, shadows #d99400, highlights #ffe78f, accent details #ff8a2b. The RIM round the whole block is #ffc93c.
+9. Toy Pirate Ship: a brown moulded-plastic toy pirate ship with gold trim, portholes and a red-striped sail, with two cork cannons. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8c4d2b, shadows #4f2a18, highlights #bd7a45, accent details #ffc93c. The RIM round the whole block is #8c4d2b.
 
 BACKGROUND: fill every part of the image that is not an object with solid
 pure magenta #FF00FF, edge to edge. Do NOT leave it transparent and do NOT
@@ -773,6 +1009,13 @@ OUTPUT: exactly 2304 x 256 pixels — 9 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 9 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -780,6 +1023,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -792,6 +1039,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -811,15 +1064,15 @@ AVOID — these are the ways this goes wrong:
   restyle, not a redesign.
 
 WHAT EACH SQUARE IS, left to right:
-1. Dart Blaster merged to tier II: the same orange-and-blue toy foam-dart blaster, made fancier — a stripe in the tier colour along the bottom of the body, and a sticker on its side. ONE toy, never a pair. Keep the small rounded plastic rank badge reading II crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8a2b, its lower half #c75416, studs and gloss #ffb56e. Keep that band bright and saturated.
-2. Squirt Gun merged to tier II: the same chunky green toy water pistol with a water tank on top, made fancier — a racing stripe in the tier colour along the body under the orange decal, and a star sticker near the front. ONE toy, never a pair. Keep the small rounded plastic rank badge reading II crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #43b649, its lower half #23833b, studs and gloss #86dc6e. Keep that band bright and saturated.
-3. Mud Mortar merged to tier II: the same blue toy bucket tube lobbing a mud ball, made fancier — a star sticker on the side of the bucket. ONE toy, never a pair. Keep the small rounded plastic rank badge reading II crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #8a5cd8, its lower half #5b36a8, studs and gloss #b894f0. Keep that band bright and saturated.
-4. Balloon Launcher merged to tier II: the same cardboard launch tube with a water balloon, made fancier — a sticker on the cardboard tube. ONE toy, never a pair. Keep the small rounded plastic rank badge reading II crisp in the top-right corner. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the pit ring teal plastic around #1fb5a8 (shade #138a80); the crater dark brown #6e4a24.
-5. Bug Zapper merged to tier II: the same glowing blue-violet bug-zapper lantern, made fancier — a sticker on the base. ONE toy, never a pair. Keep the small rounded plastic rank badge reading II crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #4d52d6, its lower half #2b2f8f, studs and gloss #8189f2. Keep that band bright and saturated.
-6. Ice Pop merged to tier II: the same giant blue ice pop on a wooden stick, made fancier — a stripe in the tier colour across the upper pop, and a sticker on the stick. ONE toy, never a pair. Keep the small rounded plastic rank badge reading II crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #5cc4ea, its lower half #2382b5, studs and gloss #aaeaff. Keep that band bright and saturated.
-7. Paper Boat merged to tier II: the same boat, grown bigger. Keep the small rounded plastic rank badge reading II crisp. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e4ecf5, shadows #8ea3ba, highlights #ffffff, accent details #5a9be6.
-8. Rubber Duck merged to tier II: the same boat, grown bigger. Keep the small rounded plastic rank badge reading II crisp. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #ffc93c, shadows #d99400, highlights #ffe78f, accent details #ff8a2b.
-9. Toy Pirate Ship merged to tier II: the same boat, grown bigger. Keep the small rounded plastic rank badge reading II crisp. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8c4d2b, shadows #4f2a18, highlights #bd7a45, accent details #ffc93c.
+1. Dart Blaster merged to tier II: the same orange-and-blue toy foam-dart blaster, made fancier — a stripe in the tier colour along the bottom of the body, and a sticker on its side. ONE toy, never a pair. Keep the small rounded plastic rank badge reading II crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8a2b, its lower half #c75416, studs and gloss #ffb56e. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #ff8a2b.
+2. Squirt Gun merged to tier II: the same chunky green toy water pistol with a water tank on top, made fancier — a racing stripe in the tier colour along the body under the orange decal, and a star sticker near the front. ONE toy, never a pair. Keep the small rounded plastic rank badge reading II crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #43b649, its lower half #23833b, studs and gloss #86dc6e. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #43b649.
+3. Mud Mortar merged to tier II: the same blue toy bucket tube lobbing a mud ball, made fancier — a star sticker on the side of the bucket. ONE toy, never a pair. Keep the small rounded plastic rank badge reading II crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #8a5cd8, its lower half #5b36a8, studs and gloss #b895f0. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #8a5cd8.
+4. Balloon Launcher merged to tier II: the same cardboard launch tube with a water balloon, made fancier — a sticker on the cardboard tube. ONE toy, never a pair. Keep the small rounded plastic rank badge reading II crisp in the top-right corner. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the pit ring teal plastic around #1fb5a8 (shade #138a80); the crater dark brown #6e4a24. The RIM round the whole block is #1fb5a8.
+5. Bug Zapper merged to tier II: the same glowing blue-violet bug-zapper lantern, made fancier — a sticker on the base. ONE toy, never a pair. Keep the small rounded plastic rank badge reading II crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #4d52d6, its lower half #2b2f8f, studs and gloss #8189f2. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #4d52d6.
+6. Ice Pop merged to tier II: the same giant blue ice pop on a wooden stick, made fancier — a stripe in the tier colour across the upper pop, and a sticker on the stick. ONE toy, never a pair. Keep the small rounded plastic rank badge reading II crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #5cc4ea, its lower half #2382b5, studs and gloss #aaeaff. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #5cc4ea.
+7. Paper Boat merged to tier II: the same boat, grown bigger. Keep the small rounded plastic rank badge reading II crisp. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e4ecf5, shadows #8ea3ba, highlights #ffffff, accent details #5a9be6. The RIM round the whole block is #e4ecf5.
+8. Rubber Duck merged to tier II: the same boat, grown bigger. Keep the small rounded plastic rank badge reading II crisp. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #ffc93c, shadows #d99400, highlights #ffe78f, accent details #ff8a2b. The RIM round the whole block is #ffc93c.
+9. Toy Pirate Ship merged to tier II: the same boat, grown bigger. Keep the small rounded plastic rank badge reading II crisp. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8c4d2b, shadows #4f2a18, highlights #bd7a45, accent details #ffc93c. The RIM round the whole block is #8c4d2b.
 
 BACKGROUND: fill every part of the image that is not an object with solid
 pure magenta #FF00FF, edge to edge. Do NOT leave it transparent and do NOT
@@ -838,6 +1091,13 @@ OUTPUT: exactly 2304 x 256 pixels — 9 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 9 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -845,6 +1105,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -857,6 +1121,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -876,15 +1146,15 @@ AVOID — these are the ways this goes wrong:
   restyle, not a redesign.
 
 WHAT EACH SQUARE IS, left to right:
-1. Dart Blaster merged to tier III: the same orange-and-blue toy foam-dart blaster, made fancier — the stripe and the sticker, plus a yellow dart drum with six orange dart ends under the barrel, and the sight fin swapped for a blue scope with a pale lens. ONE toy, never a pair. Keep the small rounded plastic rank badge reading III crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8a2b, its lower half #c75416, studs and gloss #ffb56e. Keep that band bright and saturated.
-2. Squirt Gun merged to tier III: the same chunky green toy water pistol with a water tank on top, made fancier — the stripe and the sticker, plus a white pressure gauge with a red needle on the rear of the body and a bigger water tank on top. ONE toy, never a pair. Keep the small rounded plastic rank badge reading III crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #43b649, its lower half #23833b, studs and gloss #86dc6e. Keep that band bright and saturated.
-3. Mud Mortar merged to tier III: the same blue toy bucket tube lobbing a mud ball, made fancier — the sticker, plus a yellow band around the bucket. ONE toy, never a pair. Keep the small rounded plastic rank badge reading III crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #8a5cd8, its lower half #5b36a8, studs and gloss #b894f0. Keep that band bright and saturated.
-4. Balloon Launcher merged to tier III: the same cardboard launch tube with a water balloon, made fancier — the sticker, plus a third blue band on the tube and a bigger water balloon. ONE toy, never a pair. Keep the small rounded plastic rank badge reading III crisp in the top-right corner. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the pit ring teal plastic around #1fb5a8 (shade #138a80); the crater dark brown #6e4a24.
-5. Bug Zapper merged to tier III: the same glowing blue-violet bug-zapper lantern, made fancier — the sticker, plus twin charge coils on the roof corners — pale rods topped with pale cyan balls. ONE toy, never a pair. Keep the small rounded plastic rank badge reading III crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #4d52d6, its lower half #2b2f8f, studs and gloss #8189f2. Keep that band bright and saturated.
-6. Ice Pop merged to tier III: the same giant blue ice pop on a wooden stick, made fancier — the stripe and the sticker, plus a crown of three ice-crystal diamonds above the top. ONE toy, never a pair. Keep the small rounded plastic rank badge reading III crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #5cc4ea, its lower half #2382b5, studs and gloss #aaeaff. Keep that band bright and saturated.
-7. Paper Boat merged to tier III: the same boat, grown bigger. Keep the small rounded plastic rank badge reading III crisp. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e4ecf5, shadows #8ea3ba, highlights #ffffff, accent details #5a9be6.
-8. Rubber Duck merged to tier III: the same boat, grown bigger. Keep the small rounded plastic rank badge reading III crisp. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #ffc93c, shadows #d99400, highlights #ffe78f, accent details #ff8a2b.
-9. Toy Pirate Ship merged to tier III: the same boat, grown bigger. Keep the small rounded plastic rank badge reading III crisp. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8c4d2b, shadows #4f2a18, highlights #bd7a45, accent details #ffc93c.
+1. Dart Blaster merged to tier III: the same orange-and-blue toy foam-dart blaster, made fancier — the stripe and the sticker, plus a yellow dart drum with six orange dart ends under the barrel, and the sight fin swapped for a blue scope with a pale lens. ONE toy, never a pair. Keep the small rounded plastic rank badge reading III crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #ff8a2b, its lower half #c75416, studs and gloss #ffb56e. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #ff8a2b.
+2. Squirt Gun merged to tier III: the same chunky green toy water pistol with a water tank on top, made fancier — the stripe and the sticker, plus a white pressure gauge with a red needle on the rear of the body and a bigger water tank on top. ONE toy, never a pair. Keep the small rounded plastic rank badge reading III crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #43b649, its lower half #23833b, studs and gloss #86dc6e. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #43b649.
+3. Mud Mortar merged to tier III: the same blue toy bucket tube lobbing a mud ball, made fancier — the sticker, plus a yellow band around the bucket. ONE toy, never a pair. Keep the small rounded plastic rank badge reading III crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #8a5cd8, its lower half #5b36a8, studs and gloss #b895f0. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #8a5cd8.
+4. Balloon Launcher merged to tier III: the same cardboard launch tube with a water balloon, made fancier — the sticker, plus a third blue band on the tube and a bigger water balloon. ONE toy, never a pair. Keep the small rounded plastic rank badge reading III crisp in the top-right corner. Colours: the plinth pale sand (around #f3dca8, shadows #ab7c42); the pit ring teal plastic around #1fb5a8 (shade #138a80); the crater dark brown #6e4a24. The RIM round the whole block is #1fb5a8.
+5. Bug Zapper merged to tier III: the same glowing blue-violet bug-zapper lantern, made fancier — the sticker, plus twin charge coils on the roof corners — pale rods topped with pale cyan balls. ONE toy, never a pair. Keep the small rounded plastic rank badge reading III crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #4d52d6, its lower half #2b2f8f, studs and gloss #8189f2. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #4d52d6.
+6. Ice Pop merged to tier III: the same giant blue ice pop on a wooden stick, made fancier — the stripe and the sticker, plus a crown of three ice-crystal diamonds above the top. ONE toy, never a pair. Keep the small rounded plastic rank badge reading III crisp in the top-right corner. Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb); the plastic BAND only is the toy colour — around #5cc4ea, its lower half #2382b5, studs and gloss #aaeaff. Keep that band bright and saturated. The plinth is the SAME pale sand as every other toy block in the game: do not tint the sand towards the band colour, and do not fade the band towards the sand. The RIM round the whole block is #5cc4ea.
+7. Paper Boat merged to tier III: the same boat, grown bigger. Keep the small rounded plastic rank badge reading III crisp. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #e4ecf5, shadows #8ea3ba, highlights #ffffff, accent details #5a9be6. The RIM round the whole block is #e4ecf5.
+8. Rubber Duck merged to tier III: the same boat, grown bigger. Keep the small rounded plastic rank badge reading III crisp. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #ffc93c, shadows #d99400, highlights #ffe78f, accent details #ff8a2b. The RIM round the whole block is #ffc93c.
+9. Toy Pirate Ship merged to tier III: the same boat, grown bigger. Keep the small rounded plastic rank badge reading III crisp. Colour identity (keep these hues, bright and sunny — never greyed, muddy or dusty): body around #8c4d2b, shadows #4f2a18, highlights #bd7a45, accent details #ffc93c. The RIM round the whole block is #8c4d2b.
 
 BACKGROUND: fill every part of the image that is not an object with solid
 pure magenta #FF00FF, edge to edge. Do NOT leave it transparent and do NOT
@@ -903,6 +1173,13 @@ OUTPUT: exactly 2304 x 256 pixels — 9 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 6 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -910,6 +1187,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -922,6 +1203,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -965,6 +1252,13 @@ OUTPUT: exactly 1536 x 256 pixels — 6 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 6 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -972,6 +1266,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -984,6 +1282,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1027,6 +1331,13 @@ OUTPUT: exactly 1536 x 256 pixels — 6 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 6 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1034,6 +1345,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1046,6 +1361,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1088,6 +1409,13 @@ OUTPUT: exactly 1536 x 256 pixels — 6 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 3 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1095,6 +1423,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1107,6 +1439,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1147,6 +1485,13 @@ OUTPUT: exactly 768 x 256 pixels — 3 squares of 256 x 256 in a single row. Eve
 ```text
 Repaint this strip of 3 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1154,6 +1499,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1166,6 +1515,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1206,6 +1561,13 @@ OUTPUT: exactly 768 x 256 pixels — 3 squares of 256 x 256 in a single row. Eve
 ```text
 Repaint this strip of 8 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1213,6 +1575,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1225,6 +1591,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1270,6 +1642,13 @@ OUTPUT: exactly 2048 x 256 pixels — 8 squares of 256 x 256 in a single row. Ev
 ```text
 Repaint this strip of 6 square game sprites.
 
+THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting
+that does not exist yet. FOLLOW its shape, its pose, its size and place in the
+frame, and its colours — and take nothing else from it: not its line weight,
+its flat fills, its hard-edged shading or its finish. A return that looks like
+the same drawing neatly traced is unusable, because the game already draws
+exactly that. Paint it.
+
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
 a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon
@@ -1277,6 +1656,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1289,6 +1672,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1312,7 +1701,7 @@ WHAT EACH SQUARE IS, left to right:
 2. A low clump of garden flowers for the same bed — tulip cups in red, yellow and pink among broad leaves, with a daisy or two. Must not read as the tall flower at distance.
 3. The sun, drawn like a child’s drawing of one: a yellow disc with an orange edge, twelve round-tipped rays, and a happy face — closed smiling eyes, a smile and rosy cheeks.
 4. The moon: a cream disc with a soft lavender crescent of shade on its right, three soft craters and a sleeping face with pink cheeks. No rays.
-5. UI art: the coin. Keep it clean, flat and high-contrast — it is interface, not scenery — and do not restyle any lettering.
+5. UI art: the coin, the game's everyday currency, shown small in the HUD (about 24–32 px) next to a number. A chunky round gold coin with a thick raised rim and a plump raised five-point star in the middle, facing us square on — the same design as the reference, repainted in the game's own hand: the warm dark-brown ink contour round the rim and the star, cel colour in warm golds (#ffd23f, shadows #d99a1c, highlights #fff3b0), one glossy highlight on the upper left, a faint moulded-plastic toy look. Bold silhouette, star readable at thumbnail size, no fine texture, no lettering, no sparkle rays around it.
 6. UI art: the logo. Keep it clean, flat and high-contrast — it is interface, not scenery — and do not restyle any lettering.
 
 BACKGROUND: fill every part of the image that is not an object with solid

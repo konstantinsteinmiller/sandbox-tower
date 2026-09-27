@@ -44,11 +44,13 @@ export const tierFixtureId = (type: string, tier: number): string =>
 /**
  * Tier paintings that are on disk, as `tierFixtureId` spells them.
  *
- * EMPTY until the first one is painted. Adding an id here is the whole of
- * adopting a painting — it lands in `public/images/fixtures/<id>.webp` through
+ * Adding an id here is the whole of adopting a painting — it lands in `public/images/fixtures/<id>.webp` through
  * `pnpm slice-sheets`, and the test above fails until it is listed.
  */
-export const PAINTED_TIER_FIXTURES: ReadonlySet<string> = new Set<string>([])
+export const PAINTED_TIER_FIXTURES: ReadonlySet<string> = new Set<string>([
+  'archer-t2', 'archer-t3', 'bombard-t2', 'bombard-t3', 'cannon-t2', 'cannon-t3',
+  'frost-t2', 'frost-t3', 'mortar-t2', 'mortar-t3', 'tesla-t2', 'tesla-t3'
+])
 
 /**
  * The painting for a weapon's merged tier, when there is one and it has
@@ -66,8 +68,8 @@ export const tierFixtureArt = (type: string, tier: number): HTMLImageElement | n
 /** The flying chest's wing — `public/images/props/chest-wing.webp`. */
 export const CHEST_WING_ID = 'chest-wing'
 
-/** Prop paintings that are on disk. Empty until painted; same test. */
-export const PAINTED_PROPS: ReadonlySet<string> = new Set<string>([])
+/** Prop paintings that are on disk; the same test holds this list to the folder. */
+export const PAINTED_PROPS: ReadonlySet<string> = new Set<string>([CHEST_WING_ID])
 
 /** A painted prop, when there is one and it has decoded — or null. */
 export const propArt = (id: string): HTMLImageElement | null =>

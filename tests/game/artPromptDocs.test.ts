@@ -1,7 +1,9 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
-  ALL_STRIPS, SCENERY, SINGLES, WALKS,
-  promptDocs, promptFor, promptForCell, promptForScenery, promptForWalk
+  ALL_STRIPS, SCENERY, SCENERY_STYLE_REFS, SINGLES, WALKS,
+  notPaintedOnPurpose, promptDocs, promptFor, promptForCell, promptForScenery, promptForWalk
 } from '@/game/artSheet'
 import { parsePromptDoc } from '../../tools/art-desk/jobs.mjs'
 
@@ -64,5 +66,82 @@ describe('the prompt documents the Art Desk automates', () => {
       expect(fences.filter((l) => l.endsWith('text'))).toHaveLength(headings)
       expect(fences).toHaveLength(headings * 2)
     }
+  })
+})
+
+/**
+ * Sandbox Tower's blocks are rounded squares wearing a rim in their own colour,
+ * and the rim is how a block type reads at a glance. Tower Siege's inherited
+ * rule demanded square corners and no borders; the first painted body obeyed
+ * it over its own reference and came back rimless.
+ */
+describe('block body prompts', () => {
+  const bodies = SINGLES.filter((s) => /^block\/.+\/body$/.test(s.id) && s.cell.target)
+  // |r−255| + g + |b−255| — the slicer's soft key unmixes anything under 210.
+  const fromMagenta = (hex: string): number => {
+    const n = parseInt(hex.slice(1), 16)
+    return 255 - (n >> 16) + ((n >> 8) & 255) + 255 - (n & 255)
+  }
+
+  it('covers every block body that ships', () => {
+    expect(bodies.length).toBe(17)
+  })
+
+  for (const s of bodies) {
+    it(`${s.id} keeps its rim, its rounded corners, and a colour the key leaves alone`, () => {
+      const text = promptForCell(s)
+      const rim = /The RIM round the whole block is (#[0-9a-f]{6})/.exec(text)
+      expect(rim, 'names its rim colour').not.toBeNull()
+      expect(fromMagenta(rim![1]!)).toBeGreaterThanOrEqual(230)
+      expect(text).toContain('ROUNDED corners')
+      // The inherited rule's wording — not "corner to corner" alone, which the
+      // Packed Sand blurb rightly uses for the X across its face.
+      expect(text).not.toMatch(/SQUARE corners|edge to edge, corner to corner|No frame, border/)
+      for (const hex of text.match(/#[0-9a-f]{6}/gi) ?? []) {
+        if (hex.toLowerCase() === '#ff00ff') continue
+        expect(fromMagenta(hex), `${hex} is inside the key`).toBeGreaterThanOrEqual(210)
+      }
+    })
+  }
+})
+
+/**
+ * The scenery has no reference render, so the desk attaches finished block
+ * paintings instead — named on an `Attach, in this order:` line OUTSIDE the
+ * fence, which the model never sees and the desk parses into `styleRefs`.
+ */
+describe('finish references', () => {
+  it('ride along on every scenery prompt, in order, and nowhere else', () => {
+    for (const [name] of CASES) {
+      const want = name === 'PROMPTS-SCENERY.md' ? [...SCENERY_STYLE_REFS] : []
+      for (const job of parse(name) as (ParsedJob & { styleRefs: string[] })[]) {
+        expect(job.styleRefs, `${name} → ${job.title}`).toEqual(want)
+        expect(job.prompt).not.toContain('Attach, in this order')
+      }
+    }
+  })
+
+  it('are told they show HOW to paint, never WHAT', () => {
+    for (const a of SCENERY) expect(promptForScenery(a)).toContain('They show HOW to paint, never WHAT')
+  })
+})
+
+/**
+ * The Art Desk and PAINT-STATUS.md skip what the manifest says is never
+ * painted. The rule must never swallow art the game actually draws.
+ */
+describe('sheets not painted on purpose', () => {
+  it('never lists a block, toy, bug walk, contraption, boat or scenery sheet', () => {
+    const skipped = notPaintedOnPurpose()
+    for (const s of SINGLES) {
+      if (/^images\/(blocks|fixtures|props|rounds|icons)\//.test(s.cell.target ?? '')) expect(skipped[s.file], s.file).toBeUndefined()
+    }
+    for (const w of WALKS) expect(skipped[w.file], w.file).toBeUndefined()
+    for (const a of SCENERY) expect(skipped[a.file], a.file).toBeUndefined()
+  })
+
+  it('is written out for the desk exactly as the manifest says', () => {
+    const onDisk = JSON.parse(readFileSync(resolve(__dirname, '../../art-sheets/not-painted.json'), 'utf8'))
+    expect(onDisk).toEqual(notPaintedOnPurpose())
   })
 })

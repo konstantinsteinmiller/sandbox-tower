@@ -3,8 +3,8 @@
 Generated from `src/game/artSheet.ts` — do not hand-edit. Run `pnpm art:prompts`
 (or export from the `/art-sheets` bench) after changing the manifest.
 
-These are NOT on the 128 lattice and have no reference image. Attach one
-of your finished BLOCK bitmaps as a style reference alongside the prompt,
+These are NOT on the 128 lattice and have no reference image. Attach the
+finished BLOCK paintings named under each heading as style references,
 so the landscape is painted by the same hand as the tower standing on it.
 
 Drop results in `art-sheets/painted/`, named after the file in each
@@ -18,8 +18,17 @@ and prompt in one go, and files, slices and compresses the return.
 
 ## sun  (bg-sun.png → images/bg/sun.webp)
 
+Attach, in this order: `public/images/blocks/wood.webp`, `public/images/blocks/cannon.webp`
+
 ```text
 Paint one background element for a sunny backyard tower-defence game: a kid’s sandcastle in a sandbox, defended with toys against garden bugs.
+
+THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two
+blocks from this same game. Paint this in exactly their hand: the same warm
+brown ink and its weight, the same colour, the same texture in the fills.
+They show HOW to paint, never WHAT: no sand cube, plastic band, stud or
+anything else from them may appear in this picture, and nothing about their
+square shape applies to it.
 
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
@@ -28,6 +37,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -40,6 +53,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -94,8 +113,17 @@ control, set it to match. No labels, captions or watermarks.
 
 ## moon  (bg-moon.png → images/bg/moon.webp)
 
+Attach, in this order: `public/images/blocks/wood.webp`, `public/images/blocks/cannon.webp`
+
 ```text
 Paint one background element for a sunny backyard tower-defence game: a kid’s sandcastle in a sandbox, defended with toys against garden bugs.
+
+THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two
+blocks from this same game. Paint this in exactly their hand: the same warm
+brown ink and its weight, the same colour, the same texture in the fills.
+They show HOW to paint, never WHAT: no sand cube, plastic band, stud or
+anything else from them may appear in this picture, and nothing about their
+square shape applies to it.
 
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
@@ -104,6 +132,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -116,6 +148,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -170,8 +208,17 @@ control, set it to match. No labels, captions or watermarks.
 
 ## conifer  (bg-conifer.png → images/bg/conifer.webp)
 
+Attach, in this order: `public/images/blocks/wood.webp`, `public/images/blocks/cannon.webp`
+
 ```text
 Paint one background element for a sunny backyard tower-defence game: a kid’s sandcastle in a sandbox, defended with toys against garden bugs.
+
+THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two
+blocks from this same game. Paint this in exactly their hand: the same warm
+brown ink and its weight, the same colour, the same texture in the fills.
+They show HOW to paint, never WHAT: no sand cube, plastic band, stud or
+anything else from them may appear in this picture, and nothing about their
+square shape applies to it.
 
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
@@ -180,6 +227,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -192,6 +243,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -246,8 +303,17 @@ control, set it to match. No labels, captions or watermarks.
 
 ## broadleaf  (bg-broadleaf.png → images/bg/broadleaf.webp)
 
+Attach, in this order: `public/images/blocks/wood.webp`, `public/images/blocks/cannon.webp`
+
 ```text
 Paint one background element for a sunny backyard tower-defence game: a kid’s sandcastle in a sandbox, defended with toys against garden bugs.
+
+THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two
+blocks from this same game. Paint this in exactly their hand: the same warm
+brown ink and its weight, the same colour, the same texture in the fills.
+They show HOW to paint, never WHAT: no sand cube, plastic band, stud or
+anything else from them may appear in this picture, and nothing about their
+square shape applies to it.
 
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
@@ -256,6 +322,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -268,6 +338,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -322,8 +398,17 @@ control, set it to match. No labels, captions or watermarks.
 
 ## mountains-far  (bg-mountains-far.png → images/bg/mountains-far.webp)
 
+Attach, in this order: `public/images/blocks/wood.webp`, `public/images/blocks/cannon.webp`
+
 ```text
 Paint one background element for a sunny backyard tower-defence game: a kid’s sandcastle in a sandbox, defended with toys against garden bugs.
+
+THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two
+blocks from this same game. Paint this in exactly their hand: the same warm
+brown ink and its weight, the same colour, the same texture in the fills.
+They show HOW to paint, never WHAT: no sand cube, plastic band, stud or
+anything else from them may appear in this picture, and nothing about their
+square shape applies to it.
 
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
@@ -332,6 +417,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -344,6 +433,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -386,8 +481,17 @@ control, set it to match. No labels, captions or watermarks.
 
 ## mountains-near  (bg-mountains-near.png → images/bg/mountains-near.webp)
 
+Attach, in this order: `public/images/blocks/wood.webp`, `public/images/blocks/cannon.webp`
+
 ```text
 Paint one background element for a sunny backyard tower-defence game: a kid’s sandcastle in a sandbox, defended with toys against garden bugs.
+
+THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two
+blocks from this same game. Paint this in exactly their hand: the same warm
+brown ink and its weight, the same colour, the same texture in the fills.
+They show HOW to paint, never WHAT: no sand cube, plastic band, stud or
+anything else from them may appear in this picture, and nothing about their
+square shape applies to it.
 
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
@@ -396,6 +500,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -408,6 +516,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -426,7 +540,7 @@ AVOID — these are the ways this goes wrong:
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: The NEAR layer of the backyard: big round leafy garden trees standing behind a neatly clipped green hedge; in one or two places a washing line strung between two poles with toy-coloured T-shirts, towels and socks pegged on it; and a white wooden PICKET FENCE running right across the front along the bottom of the band — pointed pickets, two rails, a capped post every eighth picket — filling roughly the bottom third. Solid magenta sky above the treetops and poles, opaque artwork below. Richer and closer than the far layer, but still background: it sits behind the tower and must not compete with it. No writing anywhere — the game mirrors every other copy.
+WHAT IT IS: The NEAR layer of the backyard: big round leafy garden trees standing behind a neatly clipped green hedge; in one or two places a washing line strung between two poles with toy-coloured T-shirts, towels and socks pegged on it; and a white wooden PICKET FENCE running right across the front along the bottom of the band — pointed pickets, two rails, a capped post every eighth picket — filling roughly the bottom third. Solid magenta sky above the treetops and poles, opaque artwork below. EVERY treetop stops well short of the top edge: the top fifth of the image is empty magenta sky from side to side, with no leaf, branch or pole reaching into it — a tree that touches the top edge is cut off flat along the top of the band in the game. Richer and closer than the far layer, but still background: it sits behind the tower and must not compete with it. No writing anywhere — the game mirrors every other copy.
 
 BACKGROUND — read this before anything else.
 Everything ABOVE the ridge line is sky, and it must be solid, flat, pure
@@ -450,8 +564,17 @@ control, set it to match. No labels, captions or watermarks.
 
 ## grass  (bg-grass.png → images/bg/grass.webp)
 
+Attach, in this order: `public/images/blocks/wood.webp`, `public/images/blocks/cannon.webp`
+
 ```text
 Paint one background element for a sunny backyard tower-defence game: a kid’s sandcastle in a sandbox, defended with toys against garden bugs.
+
+THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two
+blocks from this same game. Paint this in exactly their hand: the same warm
+brown ink and its weight, the same colour, the same texture in the fills.
+They show HOW to paint, never WHAT: no sand cube, plastic band, stud or
+anything else from them may appear in this picture, and nothing about their
+square shape applies to it.
 
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
@@ -460,6 +583,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -472,6 +599,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -508,8 +641,17 @@ control, set it to match. No labels, captions or watermarks.
 
 ## water  (bg-water.png → images/bg/water.webp)
 
+Attach, in this order: `public/images/blocks/wood.webp`, `public/images/blocks/cannon.webp`
+
 ```text
 Paint one background element for a sunny backyard tower-defence game: a kid’s sandcastle in a sandbox, defended with toys against garden bugs.
+
+THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two
+blocks from this same game. Paint this in exactly their hand: the same warm
+brown ink and its weight, the same colour, the same texture in the fills.
+They show HOW to paint, never WHAT: no sand cube, plastic band, stud or
+anything else from them may appear in this picture, and nothing about their
+square shape applies to it.
 
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
@@ -518,6 +660,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -530,6 +676,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -548,7 +700,7 @@ AVOID — these are the ways this goes wrong:
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: The paddling-pool moat in front of the sandcastle: clear, bright, shallow-looking water, pale minty aqua at the top edge deepening to turquoise and then to a strong pool blue at the bottom (around #b7e6cf → #34b3d1 → #1f86b0), with a few soft horizontal ripple bands. Fully opaque. The game draws the wet-sand bank, the waterline, the glints and a mirrored reflection of the tower on top of this, so keep the surface quiet — no strong highlights, no foam, no objects, nothing floating.
+WHAT IT IS: The paddling-pool moat in front of the sandcastle: clear, bright, shallow-looking water, pale minty aqua at the top edge deepening to turquoise and then to a strong pool blue at the bottom (around #b7e6cf → #34b3d1 → #1f86b0), with a few soft horizontal ripple bands. Fully opaque. The game draws the wet-sand bank, the waterline, the glints and a mirrored reflection of the tower on top of this, so keep the surface quiet — no strong highlights, no foam, no objects, nothing floating. It is a CROP of a larger surface, not a picture of a pool: no outline, rim, edge line, border or rounded corner anywhere — the water runs straight off all four edges, and one bank line along the top is the game’s job. (The first return came back as a rounded pool with an ink rim, which draws a dark seam every time the band repeats.)
 
 BACKGROUND: none. This band is FULLY OPAQUE from its top edge to its bottom
 edge and from side to side. No transparency, no checkerboard, no magenta.
@@ -566,8 +718,17 @@ control, set it to match. No labels, captions or watermarks.
 
 ## roof  (bg-roof.png → images/bg/roof.webp)
 
+Attach, in this order: `public/images/blocks/wood.webp`, `public/images/blocks/cannon.webp`
+
 ```text
 Paint one background element for a sunny backyard tower-defence game: a kid’s sandcastle in a sandbox, defended with toys against garden bugs.
+
+THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two
+blocks from this same game. Paint this in exactly their hand: the same warm
+brown ink and its weight, the same colour, the same texture in the fills.
+They show HOW to paint, never WHAT: no sand cube, plastic band, stud or
+anything else from them may appear in this picture, and nothing about their
+square shape applies to it.
 
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
@@ -576,6 +737,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -588,6 +753,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -648,8 +819,17 @@ control, set it to match. No labels, captions or watermarks.
 
 ## icon-wood  (icon-wood.png → images/icons/wood.webp)
 
+Attach, in this order: `public/images/blocks/wood.webp`, `public/images/blocks/cannon.webp`
+
 ```text
 Paint one background element for a sunny backyard tower-defence game: a kid’s sandcastle in a sandbox, defended with toys against garden bugs.
+
+THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two
+blocks from this same game. Paint this in exactly their hand: the same warm
+brown ink and its weight, the same colour, the same texture in the fills.
+They show HOW to paint, never WHAT: no sand cube, plastic band, stud or
+anything else from them may appear in this picture, and nothing about their
+square shape applies to it.
 
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
@@ -658,6 +838,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -670,6 +854,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -724,8 +914,17 @@ control, set it to match. No labels, captions or watermarks.
 
 ## icon-stone  (icon-stone.png → images/icons/stone.webp)
 
+Attach, in this order: `public/images/blocks/wood.webp`, `public/images/blocks/cannon.webp`
+
 ```text
 Paint one background element for a sunny backyard tower-defence game: a kid’s sandcastle in a sandbox, defended with toys against garden bugs.
+
+THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two
+blocks from this same game. Paint this in exactly their hand: the same warm
+brown ink and its weight, the same colour, the same texture in the fills.
+They show HOW to paint, never WHAT: no sand cube, plastic band, stud or
+anything else from them may appear in this picture, and nothing about their
+square shape applies to it.
 
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
@@ -734,6 +933,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -746,6 +949,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -800,8 +1009,17 @@ control, set it to match. No labels, captions or watermarks.
 
 ## icon-gold  (icon-gold.png → images/icons/gold.webp)
 
+Attach, in this order: `public/images/blocks/wood.webp`, `public/images/blocks/cannon.webp`
+
 ```text
 Paint one background element for a sunny backyard tower-defence game: a kid’s sandcastle in a sandbox, defended with toys against garden bugs.
+
+THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two
+blocks from this same game. Paint this in exactly their hand: the same warm
+brown ink and its weight, the same colour, the same texture in the fills.
+They show HOW to paint, never WHAT: no sand cube, plastic band, stud or
+anything else from them may appear in this picture, and nothing about their
+square shape applies to it.
 
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
@@ -810,6 +1028,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -822,6 +1044,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -840,7 +1068,7 @@ AVOID — these are the ways this goes wrong:
 · Keep each object the same subject and silhouette it already has. This is a
   restyle, not a redesign.
 
-WHAT IT IS: The GOLD resource icon: a shiny gold ingot with two small gold nuggets tucked behind it — buried treasure dug out of the sandbox — in warm, bright gold with a strong highlight. Read at about 26 px in the HUD bar — bold shape, strong silhouette, no fine detail. It is the premium resource, so it should be the brightest and most eye-catching of the three. NOT a coin: coins are a different currency with their own icon.
+WHAT IT IS: The GOLD resource icon: a shiny gold INGOT — a single trapezoid bar of metal — with two small gold nuggets tucked behind it, in warm, bright gold with a strong highlight. Read at about 26 px in the HUD bar — bold shape, strong silhouette, no fine detail. It is the premium resource, so it should be the brightest and most eye-catching of the three. NOT a coin: coins are a different currency with their own icon. NOT a sandcastle, a sand pile or a block either — the first return was a little sandcastle, which is another icon’s job.
 
 BACKGROUND — read this before anything else. It matters more than the style.
 Fill every pixel that is not the object itself with solid, flat, pure magenta
@@ -876,8 +1104,17 @@ control, set it to match. No labels, captions or watermarks.
 
 ## ribbon  (bg-ribbon.png → images/bg/ribbon.webp)
 
+Attach, in this order: `public/images/blocks/wood.webp`, `public/images/blocks/cannon.webp`
+
 ```text
 Paint one background element for a sunny backyard tower-defence game: a kid’s sandcastle in a sandbox, defended with toys against garden bugs.
+
+THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two
+blocks from this same game. Paint this in exactly their hand: the same warm
+brown ink and its weight, the same colour, the same texture in the fills.
+They show HOW to paint, never WHAT: no sand cube, plastic band, stud or
+anything else from them may appear in this picture, and nothing about their
+square shape applies to it.
 
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
@@ -886,6 +1123,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -898,6 +1139,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -958,8 +1205,17 @@ control, set it to match. No labels, captions or watermarks.
 
 ## icon-chest  (icon-chest.png → images/icons/chest.webp)
 
+Attach, in this order: `public/images/blocks/wood.webp`, `public/images/blocks/cannon.webp`
+
 ```text
 Paint one background element for a sunny backyard tower-defence game: a kid’s sandcastle in a sandbox, defended with toys against garden bugs.
+
+THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two
+blocks from this same game. Paint this in exactly their hand: the same warm
+brown ink and its weight, the same colour, the same texture in the fills.
+They show HOW to paint, never WHAT: no sand cube, plastic band, stud or
+anything else from them may appear in this picture, and nothing about their
+square shape applies to it.
 
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
@@ -968,6 +1224,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -980,6 +1240,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no
@@ -1034,8 +1300,17 @@ control, set it to match. No labels, captions or watermarks.
 
 ## prop-chest-wing  (prop-chest-wing.png → images/props/chest-wing.webp)
 
+Attach, in this order: `public/images/blocks/wood.webp`, `public/images/blocks/cannon.webp`
+
 ```text
 Paint ONE game sprite — a single wing — for a sunny backyard tower-defence game. Attach `images/icons/chest.webp` with this prompt: the wing belongs to that chest and has to look painted by the same hand.
+
+THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two
+blocks from this same game. Paint this in exactly their hand: the same warm
+brown ink and its weight, the same colour, the same texture in the fills.
+They show HOW to paint, never WHAT: no sand cube, plastic band, stud or
+anything else from them may appear in this picture, and nothing about their
+square shape applies to it.
 
 STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page
 from a children’s picture book or a hand-painted board game. The world is
@@ -1044,6 +1319,10 @@ garden bugs attacking it. Match this in every square:
 · INK FIRST. Visible hand-drawn contour lines in dark warm brown (around
   #3b2a21, never pure black), with the line weight varying like a real brush
   pen — heavier on the outer silhouette, lighter inside. It should look drawn.
+  At its heaviest the outer contour is about 2% of the shorter side of the
+  picture: the weight of a brush pen, not of a technical pen. Hold the finished
+  picture at thumbnail size — if the outline has thinned to a hairline there,
+  it is several times too thin.
 · FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow
   tone, one small highlight, with the light from the UPPER LEFT. A little
   hand-painted texture in the fills, like gouache or marker on paper.
@@ -1056,6 +1335,12 @@ garden bugs attacking it. Match this in every square:
   eyes and a mischievous look. Toys look loved and a little worn.
 · Chunky, readable shapes — silhouette first, detail second. Charming,
   slightly naive handmade craft, never slick.
+· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look
+  above is easiest to picture on a bug, so on a sand block, a pebble, a toy
+  or a flower it is easy to read "flat colour" as the whole brief and hand
+  back a clip-art icon. A sand block or a squirt gun is painted to exactly
+  the same standard as a bug: the same ink, the same light, the same texture
+  in the fills and the same glint on anything glossy.
 
 AVOID — these are the ways this goes wrong:
 · NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no

@@ -1,0 +1,39 @@
+{
+  "files": {
+    "cover-16x9.jpg": {
+      "plate": "4468358f610f",
+      "painting": "8e3901eb90cf",
+      "at": "2026-09-27T13:54:57.084Z"
+    },
+    "cover-1x1.jpg": {
+      "plate": "a1d505b5c729",
+      "painting": "380e13d23af5",
+      "at": "2026-09-27T14:03:29.312Z"
+    },
+    "cover-2x3.jpg": {
+      "plate": "3a458d3f8ed2",
+      "painting": "c3a451d57352",
+      "at": "2026-09-27T14:05:38.138Z"
+    },
+    "cover-4x3.jpg": {
+      "plate": "d70ce0eb8517",
+      "painting": "81d4e6b367e7",
+      "at": "2026-09-27T14:06:24.755Z"
+    },
+    "cover-3x2.jpg": {
+      "plate": "fb5682b12a25",
+      "painting": "c5d765ef057a",
+      "at": "2026-09-27T14:07:09.864Z"
+    },
+    "cover-9x16.jpg": {
+      "plate": "9ec60ae91153",
+      "painting": "b22ad7014875",
+      "at": "2026-09-27T14:09:06.654Z"
+    },
+    "wordmark.jpg": {
+      "plate": "8cd671203bb4",
+      "painting": "0ac7be5e8909",
+      "at": "2026-09-27T14:44:56.358Z"
+    }
+  }
+}

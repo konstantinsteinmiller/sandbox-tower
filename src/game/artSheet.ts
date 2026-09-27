@@ -1,10 +1,11 @@
 import { BLOCK_DEFS, blockDef, canMergeType, isShip } from '@/game/blocks'
 import { PALETTES, blockArtBase } from '@/game/art'
+import { bodyLook } from '@/game/sandBlockArt'
 import { ENEMY_DEFS } from '@/game/enemies'
 import { MONSTERS } from '@/game/monsters'
 import { tierStyle } from '@/game/tierStyle'
 import {
-  TIER_ART_WEAPONS, tierFixtureId, CHEST_WING_BOX
+  TIER_ART_WEAPONS, tierFixtureId, CHEST_WING_BOX, PAINTED_ENEMY_STILLS
 } from '@/game/paintedArt'
 import type { ProjectileKind } from '@/game/types'
 
@@ -138,7 +139,7 @@ const plinth = (band: string): string =>
 const BLOCK_ART: Record<string, BlockArt> = {
   gate: {
     name: 'Castle Gate',
-    body: 'a sandcastle gatehouse block of bright dry sand — two shallow square notches cut down into its top edge leave three little merlons that stop exactly AT the top edge; a raised packed-sand arch with pressed joints frames a dark doorway glowing with warm golden light, a popsicle-stick door standing ajar against the right jamb, and a coral-pink scallop shell set over the arch — the thing the whole game protects',
+    body: 'a sandcastle gatehouse block of bright dry sand — two shallow square notches cut down into its top edge leave three little merlons that stop exactly AT the top edge; a raised packed-sand arch with pressed joints frames a doorway FILLED with warm golden lamplight — bright pale yellow at its heart, deepening to orange up under the arch, like a lit window at dusk, never a dark opening — a popsicle-stick door standing ajar against the right jamb, and a coral-pink scallop shell set over the arch — the thing the whole game protects',
     glyph: 'a gatehouse with three merlons and a round arched doorway'
   },
   wood: {
@@ -258,12 +259,49 @@ const BLOCK_ART: Record<string, BlockArt> = {
  */
 const blockColours = (id: string, palette: string): string => {
   const art = BLOCK_ART[id]
-  if (art?.colours) return art.colours
   const p = PALETTES[palette]
-  if (!art?.toy || !p) return paletteLine(palette)
-  return 'Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb);'
-    + ` the plastic BAND only is the toy colour — around ${p.mid}, its lower half ${p.dark},`
-    + ` studs and gloss ${p.light}. Keep that band bright and saturated.`
+  const body = art?.colours ? art.colours
+    : !art?.toy || !p ? paletteLine(palette)
+      : 'Colours: the plinth is pale sand (around #f3dca8, shadows #ab7c42, highlights #fbeecb);'
+        + ` the plastic BAND only is the toy colour — around ${keySafe(p.mid)}, its lower half ${keySafe(p.dark)},`
+        + ` studs and gloss ${keySafe(p.light)}. Keep that band bright and saturated.`
+        // The Piggy Bank's first return tinted its whole plinth pink and
+        // washed the band out: a toy plinth read as its band's colour.
+        + ' The plinth is the SAME pale sand as every other toy block in the game:'
+        + ' do not tint the sand towards the band colour, and do not fade the band'
+        + ' towards the sand.'
+  return body + (p ? rimColour(id, p) : '')
+}
+
+/**
+ * A colour the slicer's key will leave alone.
+ *
+ * The slicer unmixes anything within 210 of magenta, measured as
+ * |r−255| + g + |b−255| (`slice-sheets.mjs`, the soft-edge unmix), and the
+ * piggy bank's own plastic, #ff8fbf, sits at 207 — so asking for it by name
+ * asks for a band that comes back half see-through, and contradicts the
+ * background rule's "nothing pinker than #ffa8c8". Raising green is the
+ * shortest way out: it moves a pink towards salmon and white, never towards
+ * another hue. The margin covers JPEG chroma and a painter's darker shade.
+ */
+export const keySafe = (hex: string, min = 235): string => {
+  const n = parseInt(hex.slice(1), 16)
+  const r = n >> 16, g = (n >> 8) & 255, b = n & 255
+  const dist = 255 - r + g + 255 - b
+  if (dist >= min) return hex
+  const g2 = Math.min(255, g + min - dist)
+  return `#${((r << 16) | (g2 << 8) | b).toString(16).padStart(6, '0')}`
+}
+
+/**
+ * The rim's colour, from the same `bodyLook` the renderer strokes it with
+ * (`drawBlockBody`), so the painting and the drawing cannot disagree about
+ * which block wears which edge.
+ */
+const rimColour = (id: string, p: (typeof PALETTES)[string]): string => {
+  const { rim, rimK } = bodyLook(id, p)
+  return ` The RIM round the whole block is ${keySafe(rim)}`
+    + (rimK > 1 ? ' — a heavy gilt edge, nearly twice as wide as any other block’s.' : '.')
 }
 
 /**
@@ -278,26 +316,45 @@ const blockColours = (id: string, palette: string): string => {
  *
  * The weapon mount therefore belongs ON THE FACE of a cube, like a bracket
  * bolted to a wall — never as the block's outline.
+ *
+ * Tower Siege's version of this rule also demanded SQUARE corners and "no
+ * frames or borders". Sandbox Tower's blocks are rounded squares wearing a rim
+ * in their own colour (`drawBlockBody`: a 7.5% ink stroke with a 4% rim over
+ * it, corner radius a tenth of the side), and the rim is how a player tells a
+ * block type at a glance on the tower and in the tray. The first painted body
+ * obeyed the inherited rule over its own reference and came back square and
+ * rimless — so the rule now describes the rim instead of forbidding it.
  */
 export const BLOCK_RULE = [
   'THIS IS A STACKABLE BUILDING BLOCK — the single most important rule here:',
-  '· A square block that FILLS the frame edge to edge and corner to corner. The',
-  '  material must TOUCH all four edges of the image — no margin, no gap, not',
-  '  even a few pixels. A block that stops short shows a seam on every side once',
-  '  it is stacked. Let the artwork BLEED off all four edges rather than leave a',
-  '  border: the frame is a crop of a wall, not a portrait of an object.',
-  '· SQUARE corners. Not rounded, not chamfered, not softened. Rounded corners',
-  '  leave four visible holes wherever four blocks meet.',
+  '· A square block that FILLS the frame. Its outer ink line runs along all four',
+  '  edges of the image — no margin, no gap, not even a few pixels. A block that',
+  '  stops short shows a seam in the middle of every wall it is stacked into.',
+  '· ROUNDED corners, rounded exactly as the reference rounds them: the radius is',
+  '  about a tenth of the side. Only the four little corner nicks outside that',
+  '  rounding show the background — solid magenta, all four of them, never white.',
+  '· THE RIM — keep it. A band in the block’s own rim colour (given below) runs',
+  '  all the way round the block just inside its outer edge, following the',
+  '  rounded corners. It is about 4% of the side wide, with the dark brown ink',
+  '  line along both sides of it. The rim is how a player tells one block from',
+  '  another at a glance, so it is part of the block and NOT a frame around a',
+  '  picture: never drop it, never thin it to a hairline, and never paint it in',
+  '  any colour but its own.',
   '· FLAT top, FLAT bottom, FLAT left and right sides. The player stacks these',
   '  directly on top of and beside each other to build a tower.',
-  '· Nothing may stick out past the square: no sandcastle turrets, battlements or',
-  '  crenellations, no bucket-shaped tops, no wheels, no peaked roof, no rounded',
-  '  shoulders, no legs, no protruding parts. It is ONE cube cut from a sandcastle',
-  '  wall, not a little sandcastle. Anything above the top edge leaves the next',
-  '  block floating in mid-air.',
+  '· Nothing may stick out past the square: no sandcastle turrets, bucket-shaped',
+  '  tops, wheels, peaked roof, rounded shoulders, legs or protruding parts. It',
+  '  is ONE cube cut from a sandcastle wall, not a little sandcastle. Anything',
+  '  above the top edge leaves the next block floating in mid-air. The only',
+  '  shape cut INTO the square is one the reference itself cuts — the Castle',
+  '  Gate’s two battlement notches — and those stay exactly as drawn, with the',
+  '  rim following them. A notch is EMPTY: it is background, solid magenta',
+  '  right down to the rim, like the corner nicks — never white, cream or sky.',
+  '  (The first gate came back with white notches, which the game would show',
+  '  as two white squares on top of the castle.)',
   '· Detail belongs ON THE FRONT FACE of the cube, like fittings bolted to a',
   '  wall. It is a face seen straight on, not an object standing in space.',
-  '· No margin, no drop shadow, no ground beneath it, no background around it.'
+  '· No drop shadow, no ground beneath it, no background around it.'
 ].join('\n')
 
 /**
@@ -976,15 +1033,24 @@ const propCells = (): SheetCell[] => {
     art: { kind: 'celestial', night: true, tier: 1 }
   })
 
+  // The coin is the template's glossy vector star-coin, the one bitmap in the
+  // HUD with no brown ink, so it is repainted INTO the house style; the logo
+  // is the brand and keeps its own look.
   const shipped = [
-    { id: 'coin', src: 'images/props/coin_128x128.webp', sub: 'shipped bitmap' },
-    { id: 'logo', src: 'images/logo/logo_256x256.webp', sub: 'splash' }
+    {
+      id: 'coin', src: 'images/props/coin_128x128.webp', sub: 'shipped bitmap',
+      blurb: 'UI art: the coin, the game\'s everyday currency, shown small in the HUD (about 24–32 px) next to a number. A chunky round gold coin with a thick raised rim and a plump raised five-point star in the middle, facing us square on — the same design as the reference, repainted in the game\'s own hand: the warm dark-brown ink contour round the rim and the star, cel colour in warm golds (#ffd23f, shadows #d99a1c, highlights #fff3b0), one glossy highlight on the upper left, a faint moulded-plastic toy look. Bold silhouette, star readable at thumbnail size, no fine texture, no lettering, no sparkle rays around it.'
+    },
+    {
+      id: 'logo', src: 'images/logo/logo_256x256.webp', sub: 'splash',
+      blurb: 'UI art: the logo. Keep it clean, flat and high-contrast — it is interface, not scenery — and do not restyle any lettering.'
+    }
   ]
   shipped.forEach((s, k) => {
     const i = 4 + k
     cells.push({
       id: `ui/${s.id}`,
-      blurb: `UI art: the ${s.id}. Keep it clean, flat and high-contrast — it is interface, not scenery — and do not restyle any lettering.`,
+      blurb: s.blurb,
       col: i % 6, row: Math.floor(i / 6), cw: 1, ch: 1,
       label: s.id, sub: s.sub,
       target: s.src,
@@ -1122,7 +1188,7 @@ export const ALL_STRIPS: StripSpec[] = SHEETS.flatMap(stripsOf)
  * borders, which turns a wall into a wall of museum labels; and it filled a
  * cell that was deliberately empty.
  */
-const STYLE_HEAD = [
+export const STYLE_HEAD = [
   'STYLE — a sunny, hand-drawn cartoon of a backyard summer day, like a page',
   'from a children’s picture book or a hand-painted board game. The world is',
   'a kid’s sandcastle in a sandbox, toy weapons stuck into it, and cartoon',
@@ -1130,6 +1196,10 @@ const STYLE_HEAD = [
   '· INK FIRST. Visible hand-drawn contour lines in dark warm brown (around',
   '  #3b2a21, never pure black), with the line weight varying like a real brush',
   '  pen — heavier on the outer silhouette, lighter inside. It should look drawn.',
+  '  At its heaviest the outer contour is about 2% of the shorter side of the',
+  '  picture: the weight of a brush pen, not of a technical pen. Hold the finished',
+  '  picture at thumbnail size — if the outline has thinned to a hairline there,',
+  '  it is several times too thin.',
   '· FLAT CEL-STYLE COLOUR inside the lines: one base tone, one soft shadow',
   '  tone, one small highlight, with the light from the UPPER LEFT. A little',
   '  hand-painted texture in the fills, like gouache or marker on paper.',
@@ -1142,6 +1212,12 @@ const STYLE_HEAD = [
   '  eyes and a mischievous look. Toys look loved and a little worn.',
   '· Chunky, readable shapes — silhouette first, detail second. Charming,',
   '  slightly naive handmade craft, never slick.',
+  '· AN OBJECT WITH NO FACE IS NOT AN EXCEPTION TO ANY OF THIS. Much of the look',
+  '  above is easiest to picture on a bug, so on a sand block, a pebble, a toy',
+  '  or a flower it is easy to read "flat colour" as the whole brief and hand',
+  '  back a clip-art icon. A sand block or a squirt gun is painted to exactly',
+  '  the same standard as a bug: the same ink, the same light, the same texture',
+  '  in the fills and the same glint on anything glossy.',
   '',
   'AVOID — these are the ways this goes wrong:',
   '· NO airbrushed or 3D-rendered mobile-game look: no smooth CG gradients, no',
@@ -1170,6 +1246,20 @@ export const STYLE = [
 ].join('\n')
 
 /**
+ * The same block for a BLOCK body.
+ *
+ * `STYLE`'s "no frames or borders … corner to corner" is exactly what threw
+ * away the first painted block's rim and rounded its corners square. A block
+ * has one edge and it is its own, so that is the only thing this bullet says.
+ */
+export const STYLE_BLOCK = [
+  ...STYLE_HEAD,
+  '· NO cards, vignettes, matting or paper background. The block itself fills the',
+  '  square, and its coloured rim is part of the block, not a frame around it.',
+  ...STYLE_TAIL
+].join('\n')
+
+/**
  * The same block for artwork that must NOT fill its frame.
  *
  * One bullet differs, and it is the one the panelled prompts then had to argue
@@ -1185,6 +1275,25 @@ export const STYLE_PART = [
   '· NO frames, borders, cards, vignettes, matting or paper background behind',
   '  the drawing. Nothing but flat magenta behind it, right up to its outline.',
   ...STYLE_TAIL
+].join('\n')
+
+/**
+ * What to take from the reference, and what to leave on it.
+ *
+ * The references are the game's own procedural drawings, and Sandbox Tower's
+ * are already inked in brown — close enough to the target style that a model
+ * can hand back a neat trace of them and call it a repaint. That return is
+ * unusable: the game already draws it, and a cover painted from the cast would
+ * break style against it. Every builder that ships a reference carries this
+ * one copy, so no builder is the weak one that tells its batch least.
+ */
+export const REFERENCE_IS_A_STAND_IN = [
+  'THE ATTACHED REFERENCE IS A FLAT COMPUTER DRAWING standing in for a painting',
+  'that does not exist yet. FOLLOW its shape, its pose, its size and place in the',
+  'frame, and its colours — and take nothing else from it: not its line weight,',
+  'its flat fills, its hard-edged shading or its finish. A return that looks like',
+  'the same drawing neatly traced is unusable, because the game already draws',
+  'exactly that. Paint it.'
 ].join('\n')
 
 /**
@@ -1261,7 +1370,9 @@ export const promptFor = (s: StripSpec): string => {
     '',
     `Repaint this strip of ${s.cols} square game sprites.`,
     '',
-    STYLE,
+    REFERENCE_IS_A_STAND_IN,
+    '',
+    blocks ? STYLE_BLOCK : STYLE,
     blocks + noGun + icons,
     `WHAT EACH SQUARE IS, left to right:`,
     list,
@@ -1321,11 +1432,50 @@ export const SINGLES: SingleSpec[] = SHEETS.flatMap((s) =>
     cell: c
   })))
 
+/**
+ * Sheets that have a drop-in target and are NOT painted, on purpose — by file
+ * stem, with the reason. Without this every one of them reads as "to paint" on
+ * the Art Desk and "outstanding" in PAINT-STATUS.md, which after the full
+ * pass was 33 jobs that must never be queued:
+ *
+ * · an enemy STILL — a painted still replaces a type's walk cycle, and the game
+ *   only asks for one listed in `PAINTED_ENEMY_STILLS` (empty on purpose);
+ * · the brand icon — the sandcastle logo is the brand, kept as shipped;
+ * · a STRIP whose every target is already painted by a single cell — painting
+ *   the strip too would overwrite the approved single.
+ *
+ * `pnpm art:prompts` writes this out as `art-sheets/not-painted.json`, which is
+ * how the desk (plain Node, no TypeScript) reads it.
+ */
+export const notPaintedOnPurpose = (): Record<string, string> => {
+  const out: Record<string, string> = {}
+  for (const s of SINGLES) {
+    const t = s.cell.target ?? ''
+    const still = /^images\/enemies\/([^/]+)\.webp$/.exec(t)
+    if (still && !PAINTED_ENEMY_STILLS.has(still[1]!)) {
+      out[s.file] = `an enemy still — the game draws the walk cycle instead; list '${still[1]}' in PAINTED_ENEMY_STILLS (paintedArt.ts) to want one`
+    } else if (t.startsWith('images/logo/')) {
+      out[s.file] = 'the brand icon — the sandcastle logo is kept as shipped'
+    }
+  }
+  const singleTargets = new Set(SINGLES.map((s) => s.cell.target))
+  for (const strip of ALL_STRIPS) {
+    const targets = strip.cells.map((c) => c.target).filter(Boolean)
+    if (targets.length && targets.every((t) => singleTargets.has(t))) {
+      out[strip.file] = 'every target here is painted as a single cell (cell-*) — painting this strip would overwrite them'
+    }
+  }
+  return out
+}
+
 /** A ready-to-paste prompt for one object. No grid clause — there is no grid. */
 export const promptForCell = (s: SingleSpec): string => {
   const c = s.cell
   const cols = c.colours ?? paletteLine(c.palette)
-  const fill = c.id.startsWith('block/') && c.sub !== 'tray icon'
+  // A block body fills its square; everything else — a bug, a round, the coin,
+  // the logo — is centred with air round it, so it must not be told to fill.
+  const block = c.id.startsWith('block/') && c.sub !== 'tray icon'
+  const fill = block
     ? BLOCK_RULE
     : 'Centre the object in the frame with a little clear space around it, and '
       + 'do not crop any part of it.'
@@ -1337,7 +1487,9 @@ export const promptForCell = (s: SingleSpec): string => {
     '',
     BACKGROUND_RULE,
     '',
-    STYLE,
+    REFERENCE_IS_A_STAND_IN,
+    '',
+    block ? STYLE_BLOCK : STYLE_PART,
     '',
     `WHAT IT IS: ${c.blurb}${cols ? ` ${cols}` : ''}`,
     '',
@@ -1350,8 +1502,10 @@ export const promptForCell = (s: SingleSpec): string => {
     '  have twice come back at 1024x559, which is the tool default overriding',
     '  this line — the setting wins, so change the setting.',
     '· ONE object. Not two, not a comparison, not variants side by side, not a',
-    '  before-and-after pair. A single sprite, alone, filling the frame.',
-    '· No frame, border, card, label, caption, arrow, annotation or drop shadow.'
+    `  before-and-after pair. A single sprite, alone${block ? ', filling the frame' : ''}.`,
+    block
+      ? '· No card, label, caption, arrow, annotation or drop shadow. The block’s own rim is its only edge.'
+      : '· No frame, border, card, label, caption, arrow, annotation or drop shadow.'
   ].join('\n')
 }
 
@@ -1467,7 +1621,7 @@ export const SCENERY: SceneryAsset[] = [
     // Still called `mountains-near`: the NEAR layer of the backyard.
     id: 'mountains-near', file: 'bg-mountains-near', target: 'images/bg/mountains-near.webp',
     w: 1536, h: 512, tileable: true, bg: 'magenta-sky',
-    blurb: 'The NEAR layer of the backyard: big round leafy garden trees standing behind a neatly clipped green hedge; in one or two places a washing line strung between two poles with toy-coloured T-shirts, towels and socks pegged on it; and a white wooden PICKET FENCE running right across the front along the bottom of the band — pointed pickets, two rails, a capped post every eighth picket — filling roughly the bottom third. Solid magenta sky above the treetops and poles, opaque artwork below. Richer and closer than the far layer, but still background: it sits behind the tower and must not compete with it. No writing anywhere — the game mirrors every other copy.'
+    blurb: 'The NEAR layer of the backyard: big round leafy garden trees standing behind a neatly clipped green hedge; in one or two places a washing line strung between two poles with toy-coloured T-shirts, towels and socks pegged on it; and a white wooden PICKET FENCE running right across the front along the bottom of the band — pointed pickets, two rails, a capped post every eighth picket — filling roughly the bottom third. Solid magenta sky above the treetops and poles, opaque artwork below. EVERY treetop stops well short of the top edge: the top fifth of the image is empty magenta sky from side to side, with no leaf, branch or pole reaching into it — a tree that touches the top edge is cut off flat along the top of the band in the game. Richer and closer than the far layer, but still background: it sits behind the tower and must not compete with it. No writing anywhere — the game mirrors every other copy.'
   },
   {
     // 8:1 rather than 4:1. The ground strip renders only about half a cell
@@ -1483,7 +1637,7 @@ export const SCENERY: SceneryAsset[] = [
   {
     id: 'water', file: 'bg-water', target: 'images/bg/water.webp',
     w: 1024, h: 512, tileable: true, bg: 'opaque',
-    blurb: 'The paddling-pool moat in front of the sandcastle: clear, bright, shallow-looking water, pale minty aqua at the top edge deepening to turquoise and then to a strong pool blue at the bottom (around #b7e6cf → #34b3d1 → #1f86b0), with a few soft horizontal ripple bands. Fully opaque. The game draws the wet-sand bank, the waterline, the glints and a mirrored reflection of the tower on top of this, so keep the surface quiet — no strong highlights, no foam, no objects, nothing floating.'
+    blurb: 'The paddling-pool moat in front of the sandcastle: clear, bright, shallow-looking water, pale minty aqua at the top edge deepening to turquoise and then to a strong pool blue at the bottom (around #b7e6cf → #34b3d1 → #1f86b0), with a few soft horizontal ripple bands. Fully opaque. The game draws the wet-sand bank, the waterline, the glints and a mirrored reflection of the tower on top of this, so keep the surface quiet — no strong highlights, no foam, no objects, nothing floating. It is a CROP of a larger surface, not a picture of a pool: no outline, rim, edge line, border or rounded corner anywhere — the water runs straight off all four edges, and one bank line along the top is the game’s job. (The first return came back as a rounded pool with an ink rim, which draws a dark seam every time the band repeats.)'
   },
   {
     // The cap that says "nothing can be built on this block": an upside-down
@@ -1511,7 +1665,7 @@ export const SCENERY: SceneryAsset[] = [
   {
     id: 'icon-gold', file: 'icon-gold', target: 'images/icons/gold.webp',
     w: 512, h: 512, tileable: false, bg: 'magenta',
-    blurb: 'The GOLD resource icon: a shiny gold ingot with two small gold nuggets tucked behind it — buried treasure dug out of the sandbox — in warm, bright gold with a strong highlight. Read at about 26 px in the HUD bar — bold shape, strong silhouette, no fine detail. It is the premium resource, so it should be the brightest and most eye-catching of the three. NOT a coin: coins are a different currency with their own icon.'
+    blurb: 'The GOLD resource icon: a shiny gold INGOT — a single trapezoid bar of metal — with two small gold nuggets tucked behind it, in warm, bright gold with a strong highlight. Read at about 26 px in the HUD bar — bold shape, strong silhouette, no fine detail. It is the premium resource, so it should be the brightest and most eye-catching of the three. NOT a coin: coins are a different currency with their own icon. NOT a sandcastle, a sand pile or a block either — the first return was a little sandcastle, which is another icon’s job.'
   },
   {
     // The result screen's title band, and the reason it is here rather than
@@ -2405,8 +2559,10 @@ export const promptForWalk = (w: WalkSpec): string => {
       `# ${w.id} — ${w.name}  (${w.file}.png → ${w.target})`,
       '',
       `Repaint ONE ${subject}, in a single ${w.w === w.h ? 'square' : 'landscape'} image.`,
-      'The attached reference is exactly what to paint, at exactly the size and',
+      'The attached reference shows exactly WHAT to paint, at exactly the size and',
       'position it is drawn at. Match both.',
+      '',
+      REFERENCE_IS_A_STAND_IN,
       '',
       `WHAT IT IS: ${w.name} — ${w.tagline}`,
       ...tierLines(w),
@@ -2482,7 +2638,9 @@ export const promptForWalk = (w: WalkSpec): string => {
             'and the ants standing on it, stays.']
           : []),
       '',
-      STYLE,
+      // Not `STYLE`: its "fills the square edge to edge" is the exact thing the
+      // next paragraph forbids, and a retraction three lines on loses to it.
+      STYLE_PART,
       '',
       'SIZE AND PLACEMENT — this is the part that goes wrong.',
       'Do not enlarge it to fill the frame. The reference leaves air around the',
@@ -2592,6 +2750,8 @@ export const promptForWalk = (w: WalkSpec): string => {
       '  is nearer the eye than another.',
       '· Every stick, pencil and spoon keeps the angle the reference draws it at.',
       '',
+      REFERENCE_IS_A_STAND_IN,
+      '',
       'ONE MECHANISM.',
       `All ${w.frames} panels are the same assembly at a different moment of one`,
       'shot. Identical sticks, identical caps, identical rubber bands, identical',
@@ -2679,6 +2839,20 @@ export const promptForWalk = (w: WalkSpec): string => {
     '',
     `· ${w.frames} panels. Not ${w.frames + 4}, not ${w.frames * 3}.`
     + ` Exactly ${w.rows} rows of ${w.cols} — do not add a row.`,
+    // The Rhino Beetle is a low, wide creature standing at the foot of a tall
+    // panel — 44% of its height — and three returns in a row filled the empty
+    // band above it with two more rows: 16 beetles, 4x4. "Do not add a row"
+    // was already there; what it lacked was saying the empty space is WANTED.
+    ...(w.anchor === 'centre'
+      ? [`· THE EMPTY SPACE AROUND EACH ${IT.toUpperCase()} IS PART OF THE LAYOUT. In the reference`,
+        '  every one floats in the MIDDLE of a tall panel with open magenta above and',
+        '  below it. That space stays empty — it is never room for another row.']
+      : [`· THE EMPTY SPACE ABOVE EACH ${IT.toUpperCase()} IS PART OF THE LAYOUT. In the reference`,
+        '  every one stands at the BOTTOM of a tall panel with open magenta above it.',
+        '  That band stays empty — it is never room for another row.']),
+    w.rows === 2
+      ? `  The whole image holds exactly ${w.frames} ${ITS}: ${w.cols} across the top half and ${w.cols} across the bottom half. Count them before you finish.`
+      : `  The whole image holds exactly ${w.frames} ${ITS}, in ${w.rows} rows of ${w.cols}. Count them before you finish.`,
     '',
     `ONE ${machine ? 'MACHINE' : 'CHARACTER'} — read this before anything else.`,
     `All ${w.frames} panels must show the same ${machine ? 'machine' : 'individual'}:`,
@@ -2719,13 +2893,16 @@ export const promptForWalk = (w: WalkSpec): string => {
         'machine ends up with two. Anything the reference DOES show stays.']
       : []),
     '',
-    STYLE,
+    REFERENCE_IS_A_STAND_IN,
+    '',
+    // `STYLE_PART`, not `STYLE` plus a correction: the arm sheet was told both
+    // "fills the square" and its retraction, and what came back was the fill.
+    STYLE_PART,
     '',
     'LAYOUT — the grid is a cutting guide, and it is cut blindly.',
     `Each panel is exactly 1/${w.cols} of the width and 1/${w.rows} of the height.`,
-    'ONE correction to the style note above: "fills the square edge to edge" is for',
-    `building blocks and is WRONG here. A ${IT} does NOT fill its panel — it is`,
-    'centred in it, at the size the reference draws it, with clear magenta all round.',
+    `A ${IT} does NOT fill its panel — it is centred in it, at the size the`,
+    'reference draws it, with clear magenta all round.',
     'Never let a limb, tail, weapon or shadow cross into a neighbouring panel.',
     'Do not add, drop, merge or reorder panels.',
     'Do NOT draw the panel edges. No boxes, borders, gutters, guides, rules or',
@@ -2759,6 +2936,13 @@ export const promptForScenery = (a: SceneryAsset): string => [
   `# ${a.id}  (${a.file}.png → ${a.target})`,
   '',
   a.lead ?? 'Paint one background element for a sunny backyard tower-defence game: a kid’s sandcastle in a sandbox, defended with toys against garden bugs.',
+  '',
+  'THE ATTACHED IMAGES ARE FINISH REFERENCES ONLY — finished paintings of two',
+  'blocks from this same game. Paint this in exactly their hand: the same warm',
+  'brown ink and its weight, the same colour, the same texture in the fills.',
+  'They show HOW to paint, never WHAT: no sand cube, plastic band, stud or',
+  'anything else from them may appear in this picture, and nothing about their',
+  'square shape applies to it.',
   '',
   // A placed asset takes the style block that never says "fill the frame":
   // a model that reads it enlarges the drawing until the placement is gone,
@@ -2822,15 +3006,33 @@ const fenceFor = (body: string): string => {
 }
 
 /** A builder's `# Title\n\n<prompt>` → a `## Title` heading over a fenced `text` block. */
-export const promptBlock = (text: string): string => {
+export const promptBlock = (text: string, attach: readonly string[] = []): string => {
   const cut = text.indexOf('\n')
   const heading = (cut < 0 ? text : text.slice(0, cut)).replace(/^#+\s*/, '')
   const body = (cut < 0 ? '' : text.slice(cut + 1)).replace(/^\n+/, '')
   const fence = fenceFor(body)
-  return [`## ${heading}`, '', `${fence}text`, body, fence].join('\n')
+  return [
+    `## ${heading}`, '',
+    // Outside the fence: it is the operator's line (and the Art Desk's), not
+    // the model's. `tools/art-desk/jobs.mjs` parses it into `styleRefs`.
+    ...(attach.length ? [`Attach, in this order: ${attach.map((f) => `\`${f}\``).join(', ')}`, ''] : []),
+    `${fence}text`, body, fence
+  ].join('\n')
 }
 
-const promptDoc = (title: string, intro: string[], prompts: string[]): string => [
+/**
+ * Finish references for the scenery, which has no reference render of its own.
+ *
+ * Approved paintings of the two most FACELESS blocks — bare bucket-moulded
+ * sand, and a toy plinth's plastic band — so the landscape is painted by the
+ * same hand as the tower standing on it. Faceless on purpose: a reference is
+ * read as a subject whenever it offers one (the art pipeline's summon portal
+ * came back with a heart from a portrait attached beside it), and the Castle
+ * Gate would offer an arch to paint into every sky.
+ */
+export const SCENERY_STYLE_REFS = ['public/images/blocks/wood.webp', 'public/images/blocks/cannon.webp'] as const
+
+const promptDoc = (title: string, intro: string[], prompts: string[], attach: readonly string[] = []): string => [
   `# ${title}`,
   '',
   'Generated from `src/game/artSheet.ts` — do not hand-edit. Run `pnpm art:prompts`',
@@ -2844,7 +3046,7 @@ const promptDoc = (title: string, intro: string[], prompts: string[]): string =>
   '`public/`. `pnpm art:desk` finds any block by sprite name, copies reference',
   'and prompt in one go, and files, slices and compresses the return.',
   '',
-  prompts.map(promptBlock).join('\n\n---\n\n'),
+  prompts.map((p) => promptBlock(p, attach)).join('\n\n---\n\n'),
   ''
 ].join('\n')
 
@@ -2866,13 +3068,13 @@ export const promptDocs = (): Record<string, string> => ({
   // The landscape has no reference render: a mountain range is a repeating
   // band, not a lattice cell, so these go out as prompts alone.
   'PROMPTS-SCENERY.md': promptDoc('Scenery prompts — the landscape', [
-    'These are NOT on the 128 lattice and have no reference image. Attach one',
-    'of your finished BLOCK bitmaps as a style reference alongside the prompt,',
+    'These are NOT on the 128 lattice and have no reference image. Attach the',
+    'finished BLOCK paintings named under each heading as style references,',
     'so the landscape is painted by the same hand as the tower standing on it.',
     '',
     'Drop results in `art-sheets/painted/`, named after the file in each',
     'heading (e.g. `bg-mountains-far.png`), then run `pnpm slice-sheets`.'
-  ], SCENERY.map((a) => promptForScenery(a))),
+  ], SCENERY.map((a) => promptForScenery(a)), SCENERY_STYLE_REFS),
 
   // One sheet per monster design: the walk cycle the battlefield actually
   // plays, which a single still cannot replace without freezing the unit.
